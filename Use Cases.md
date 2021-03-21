@@ -24,7 +24,7 @@
 [Owner and manager](#Owner-and-manager)
 
 -   [enter store](#enter-store)
--   [4.1. **no_name**](#41-__no_name__)
+-   [4.1. **no_name**](#41-no_name)
 -   [4.2. Add new product](#42-Add-new-product)
 -   [4.2. Remove product](#42-Remove-product)
 -   [4.2. Change product quantity](#42-Change-product-quantity)
@@ -44,8 +44,8 @@
 
 [System manager](#System-manager)
 
--   [6.4. Get store purchase history (system manager)](<#64-Get-store-purchase-history-(system-manager)>)
--   [6.4. Get user purchase history (system manager)](<#64-Get-user-purchase-history-(system-manager)>)
+-   [6.4. Get store purchase history (system manager)](#64-Get-store-purchase-history-system-manager)
+-   [6.4. Get user purchase history (system manager)](#64-Get-user-purchase-history-system-manager)
 
 ## Guest
 
