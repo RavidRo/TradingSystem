@@ -64,8 +64,8 @@
 5. <ins>System</ins>: Else, register \_username as member and generate success message.
 
 **Tests**:  
-<ins>_happy path_</ins>: The user enters username that is not exist in the system and other user details. The system registers the user to the system.  
-<ins>_sad path_</ins>: The user enters a username that is already exist in the system. The system generates an error message.
+<ins>_Happy Path_</ins>: The user enters username that is not exist in the system and other user details. The system registers the user to the system.  
+<ins>_Sad Path_</ins>: The user enters a username that is already exist in the system. The system generates an error message.
 
 ### 2.4. Login
 
@@ -81,24 +81,27 @@
 4. <ins>System</ins>: If \_username is a member and the other \_user_details match, log the user in.
 5. <ins>System</ins>: Else, generate error message and return to action 2.
 
-**Tests**:  
-<ins>_happy path_</ins>: the user logs in with correct username and match details. The system logs the user in.  
-<ins>_sad path_</ins>: the user enters user name that exist in the system but the other user details (password for example does not match to the username)
+**Tests**:
+
+-   <ins>_Happy Path_</ins>: The user logs in with correct username and match details. The system logs the user in.
+-   <ins>_Sad Path_</ins>: The user enters user name that exist in the system but the other user details (password for example does not match to the username)
 
 ### 2.5. Getting store information
 
 **Actors**: User  
 **Parameters**: None  
 **Pre-conditions**: None.  
-**Pos-tconditions**: None.  
+**Post-conditions**: None.  
 **Actions**:
 
 1. <ins>User</ins>: chooses to get all stores information.
 2. <ins>System</ins>: searches the information in database.
 3. <ins>System</ins>: shows the information.
 
-happy path: all the stores are shown as expected.  
-sad path: the user tries to search stores when there are no stores in the system.
+**Tests**:
+
+-   <ins>_Happy Path_</ins>: All the stores are shown as expected.
+-   <ins>_Sad Path_</ins>: The user tries to search stores when there are no stores in the system.
 
 ### 2.6. Product search with filter
 
@@ -119,8 +122,10 @@ sad path: the user tries to search stores when there are no stores in the system
 9. <ins>System</ins>: if there are results from search shows the results.
 10. Else, generate message “there are no results”
 
-happy path: the user searches a product with a product name which exists in the system and gets the results.  
-sad path: the user wrongs in one letter in the product name that he desire to search and gets the message “there are no results.
+**Tests**:
+
+-   <ins>_Happy Path_</ins>: The user searches a product with a product name which exists in the system and gets the results.
+-   <ins>_Sad Path_</ins>: The user wrongs in one letter in the product name that he desire to search and gets the message “there are no results.
 
 ### 2.6. Filter search results
 
@@ -138,8 +143,10 @@ sad path: the user wrongs in one letter in the product name that he desire to se
 6. <ins>Optional</ins>: User: enters \_optional_parameters.
 7. <ins>System</ins>: filters the search results.
 
-happy path: the user filter by store rank (above average).  
-sad path: the user filter by price range and enters negative prices
+**Tests**:
+
+-   <ins>_Happy Path_</ins>: The user filter by store rank (above average).
+-   <ins>_Sad Path_</ins>: The user filter by price range and enters negative prices
 
 ### 2.7. Save products in shopping bag
 
@@ -154,8 +161,10 @@ sad path: the user filter by price range and enters negative prices
 3. <ins>System</ins>: Else, add \_product to the bag.
 4. <ins>System</ins>: if User is logged in, save \_product to the database.
 
-happy path: the user chooses to save to the bag a product that already exists there and the shopping bag updates accordingly.  
-sad path: the user though he saved the product, but he didn’t.
+**Tests**:
+
+-   <ins>_Happy Path_</ins>: The user chooses to save to the bag a product that already exists there and the shopping bag updates accordingly.
+-   <ins>_Sad Path_</ins>: The user though he saved the product, but he didn’t.
 
 ### 2.8 Visit cart
 
@@ -182,8 +191,10 @@ sad path: the user though he saved the product, but he didn’t.
 4. <ins>User</ins>: chooses to delete \_to_delete_product
 5. <ins>System</ins>: deletes \_to_delete_product from the cart.
 
-happy-user chooses to delete a product that exists in the cart and the system asks for the action from the user. The user accepts the action and the product is deleted from the cart.  
-sad-user accidentally chooses to delete a product from the cart. The product exists in the cart. When the system asks the user for the action, the user cancels the deletion.
+**Tests**:
+
+-   <ins>_Happy Path_</ins>: User chooses to delete a product that exists in the cart and the system asks for the action from the user. The user accepts the action and the product is deleted from the cart.
+-   <ins>_Sad Path_</ins>: User accidentally chooses to delete a product from the cart. The product exists in the cart. When the system asks the user for the action, the user cancels the deletion.
 
 ### 2.8. Change amount of product in cart
 
@@ -201,8 +212,10 @@ sad-user accidentally chooses to delete a product from the cart. The product exi
 6. <ins>User</ins>: enters \_amount
 7. <ins>System</ins>: updates \_to_change_product's amount to \_amount.
 
-happy-user chooses to change product’s amount in the cart. Right now the product exists in the cart and has 5 copies of it. after the system queries the user for the action and the amount , the user changes the product’s quantity from 5 to 7 and the cart updates successfully.  
-sad-user accidently chooses to change a product’s A amount in the cart. instead of to change product’s B amount in the cart. after the system queries the user for the action , the user cancels it.
+**Tests**:
+
+-   <ins>_Happy Path_</ins>: User chooses to change product’s amount in the cart. Right now the product exists in the cart and has 5 copies of it. after the system queries the user for the action and the amount , the user changes the product’s quantity from 5 to 7 and the cart updates successfully.
+-   <ins>_Sad Path_</ins>: User accidentally chooses to change a product’s A amount in the cart. instead of to change product’s B amount in the cart. after the system queries the user for the action , the user cancels it.
 
 ### 2.9. Purchase products
 
@@ -237,6 +250,13 @@ sad-user accidently chooses to change a product’s A amount in the cart. instea
 15. <ins>System</ins>: removes all the products from user’s shopping cart.
     Timer timeout : generate error message
 
+**Tests**:
+
+-   <ins>_Happy Path_</ins>: User chooses to purchase products in her cart, the system applies discounts . The user enters payment information correctly, the purchase was done and the system updates the products in the stores and the cart.
+-   <ins>_Sad Path_</ins>: User chooses to purchase products in her cart, the system applies discounts . When the system asks for payment information, the user enters her details but the cashing system declines the process and generates an error message.
+-   <ins>_Sad Path_</ins>: User chooses to purchase products in her cart, the system applies discounts . When the system asks for payment information, user inserts all needed but then she goes and disappears for 15 minutes so the system gets into timeout and generates an error message.
+-   <ins>_Sad Path_</ins>: User chooses to purchase products in her cart, the system applies discounts . When the system asks for payment information, user inserts all needed and then the system turns to supplement system that rejects the process and generates an error message.
+
 ## Member
 
 ### 3.1. Logout
@@ -249,6 +269,11 @@ sad-user accidently chooses to change a product’s A amount in the cart. instea
 
 1. <ins>Member</ins>: chooses to log out.
 2. <ins>System</ins>: logs the user out.
+
+**Tests**:
+
+-   <ins>_Happy Path_</ins>: User wishes to logout from the system . the user chooses to logout from the system and the action succeeded.
+-   <ins>_Sad Path_</ins>: User accidentally chooses to logout from the system and the action succeeded.
 
 ### 3.2. Open a store
 
@@ -264,6 +289,11 @@ sad-user accidently chooses to change a product’s A amount in the cart. instea
 4. <ins>System</ins>: creates a new store with Member as the owner and Store_information as the store information.
 5. <ins>System</ins>: adds the new store’s reference to the member
 
+**Tests**:
+
+-   <ins>_Happy Path_</ins>: Member wants to open a store. enters the right information and the store is created.
+-   <ins>_Sad Path_</ins>: User wants to open a store. when the system asks for store information, the user accidentally enters letter in Greek.
+
 ### 3.7. Get personal purchase history
 
 **Actors**: Member  
@@ -275,6 +305,11 @@ sad-user accidently chooses to change a product’s A amount in the cart. instea
 1. <ins>Member</ins>: chooses to get personal purchase history.
 1. <ins>System</ins>: gets the purchase history from the database.
 1. <ins>System</ins>: shows the purchase history.
+
+**Tests**:
+
+-   <ins>_Happy Path_</ins>: Member chooses to see her personal purchase history and the system retrieves the data from the DB and shows it to her.
+-   <ins>_Sad Path_</ins>: Member chooses to see her personal purchase history by mistake (did not mean to) and the system retrieves the data from the DB and shows it to her.
 
 ## Owner and manager
 
@@ -313,6 +348,11 @@ sad-user accidently chooses to change a product’s A amount in the cart. instea
         1. else, generate an error message
 1. Else, generate an error message
 
+**Tests**:
+
+-   <ins>_Happy Path_</ins>: The owner the store chooses to add to the store product in 20 pieces. The owner inserts the correct amount, the system asks for approval, the user approves and information and the process succeeds.
+-   <ins>_Sad Path_</ins>: The owner of the store chooses to add to the store a product in 20 pieces. When the system requests for product’s amount the owner accidently enters 10 pieces. When the system requests for approval the owner
+
 ### 4.2. Remove product
 
 **Actors**: Store personnel, enter store  
@@ -331,6 +371,11 @@ sad-user accidently chooses to change a product’s A amount in the cart. instea
         1. else, generate error message
 1. else, generate an error message
 
+**Tests**:
+
+-   <ins>_Happy Path_</ins>: The owner of a store wants to remove a product from his store. The owner enters the correct product identifier and the system removes the item from the store.
+-   <ins>_Sad Path_</ins>: The owner of a store wants to remove a product and enters wrong identifier, the system generates an error message.
+
 ### 4.2. Change product quantity
 
 **Actors**: Store personnel, enter store  
@@ -346,6 +391,11 @@ sad-user accidently chooses to change a product’s A amount in the cart. instea
     1. <ins>Store personnel</ins>: enters product_identifier and \_quantity.
     1. <ins>System</ins>: the product’s quantity is updated in \_store.
     1. <ins>System</ins>: else, genetate error message and abort.
+
+**Tests**:
+
+-   <ins>_Happy Path_</ins>: The user is a manager of a store and has the responsibility “change product quantity”. He updates the quantity of a product and the action succeeded.
+-   <ins>_Sad Path_</ins>: A manager of a store which has the responsibility “change product quantity”, wants to update the amount of a product. After the system queries the user for the product id and quantity, the manager accidently typed a bigger amount which will lead to mistakes.
 
 ### 4.2. Edit product details
 
@@ -365,6 +415,11 @@ sad-user accidently chooses to change a product’s A amount in the cart. instea
             1. the product’s information is updated in \_store.
         1. Else, dicline process
 
+**Tests**:
+
+-   <ins>_Happy Path_</ins>: One of the managers of the store wants to update a product’s details. He enters all the correct information and the product updates in the system.
+-   <ins>_Sad Path_</ins>: One of the managers a store wants to update product’s details. After the system queries the user for the product information makes a typing mistake. Therefore, the updated information for the product is incorrect.
+
 ### 4.2. Get purchase types and policies
 
 **Actors**: Store personnel, enter store  
@@ -380,6 +435,11 @@ sad-user accidently chooses to change a product’s A amount in the cart. instea
     1. <ins>System</ins>: shows the information.
     1. <ins>System</ins>: else, generate error message and abort.
 
+**Tests**:
+
+-   <ins>_Happy Path_</ins>: The owner chooses to see the purchase types and policies of the store.
+-   <ins>_Sad Path_</ins>: The owner chooses to see the purchase types and policies of the store by mistake.
+
 ### 4.2. Get discount types and policies
 
 **Actors**: Store personnel, enter store  
@@ -394,6 +454,11 @@ sad-user accidently chooses to change a product’s A amount in the cart. instea
     1. <ins>System</ins>: searches the information.
     1. <ins>System</ins>: shows the information.
     1. <ins>System</ins>: else, generate error message and abort.
+
+**Tests**:
+
+-   <ins>_Happy Path_</ins>: The owner chooses to see the discount types and policies of the store.
+-   <ins>_Sad Path_</ins>: The owner chooses to see the discount types and policies of the store by mistake.
 
 ### 4.2. Edit purchase types
 
@@ -414,6 +479,11 @@ sad-user accidently chooses to change a product’s A amount in the cart. instea
     1. <ins>System</ins>: updates the purchase types of the store to \_types.
     1. <ins>System</ins>: else, generate error message and abort.
 
+**Tests**:
+
+-   <ins>_Happy Path_</ins>: The user chooses to edit a store’s buying types and adds new purchase type. The system updates accordingly.
+-   <ins>_Sad Path_</ins>: The user chooses to edit a store’s buying types but he accidently instead of deleting some purchase type he deletes another one.
+
 ### 4.2. Edit discount types
 
 **Actors**: Store personnel, enter store  
@@ -433,6 +503,11 @@ sad-user accidently chooses to change a product’s A amount in the cart. instea
     1. <ins>System</ins>: updates the purchase types of the store to \_types.
     1. <ins>System</ins>: else, generate error message and abort.
 
+**Tests**:
+
+-   <ins>_Happy Path_</ins>: The user chooses to edit a store’s discount types and entersnew discount type and it updated successfully.
+-   <ins>_Sad Path_</ins>: The user chooses to edit a store’s discount types and accidently deleted a discount type that he didn’t want to
+
 ### 4.2. Edit purchase policy
 
 **Actors**: Store personnel, enter store  
@@ -448,6 +523,11 @@ sad-user accidently chooses to change a product’s A amount in the cart. instea
     1. <ins>Store personnel</ins>: enters \_policy.
     1. <ins>System</ins>: updates the purchase policy of the store to \_policies.
     1. <ins>System</ins>: else, generate error message and abort.
+
+**Tests**:
+
+-   <ins>_Happy Path_</ins>: A store owner chooses to edit the policy and enters a valid policy.
+-   <ins>_Sad Path_</ins>: A guest tries to edit policy and the system generates error message.
 
 ### 4.2. Edit discount policy
 
@@ -465,6 +545,11 @@ sad-user accidently chooses to change a product’s A amount in the cart. instea
     1. <ins>System</ins>: updates the discount policy of the store to \_policies.
     1. <ins>System</ins>: else, generate error message and abort.
 
+**Tests**:
+
+-   <ins>_Happy Path_</ins>: A store owner chooses to edit the discount and enters a valid policy.
+-   <ins>_Sad Path_</ins>: A guest tries to edit discount and the system generates error message.
+
 ### 4.3. Appoint new store owner
 
 **Actors**: Store owner, enter store  
@@ -478,6 +563,11 @@ sad-user accidently chooses to change a product’s A amount in the cart. instea
 1. <ins>System</ins>: asks for the new owner information.
 1. <ins>Store owner</ins>: enters new_owner.
 1. <ins>System</ins>: adds the new owner to the store.
+
+**Tests**:
+
+-   <ins>_Happy Path_</ins>: The user chooses to appoint a new store owner and enters the owner identifier and the store identifier. The store owners are updated accordingly.
+-   <ins>_Sad Path_</ins>: The user chooses to appoint a new store owner but types a wrong owner identifier, so the system will generate an error message and no new owner will be added.
 
 ### 4.5. Appoint new store manager
 
@@ -494,6 +584,11 @@ sad-user accidently chooses to change a product’s A amount in the cart. instea
 1. <ins>System</ins>: adds new_manager to the store.
 1. <ins>System</ins>: assign the default responsibilities to new_manager.
 
+**Tests**:
+
+-   <ins>_Happy Path_</ins>: The user chooses to appoint a new store manager and enters the manager’s identifier and the store’s identifier. The store managers are updated accordingly.
+-   <ins>_Sad Path_</ins>: The user chooses to appoint a new store manager but types a wrong manager identifier, so the system will generate an error message and no new maanger will be added.
+
 ### 4.6. Edit manager’s responsibilities
 
 **Actors**: Store owner, enter store  
@@ -507,6 +602,12 @@ sad-user accidently chooses to change a product’s A amount in the cart. instea
 1. <ins>System</ins>: asks for the manager identifier and updated responsibilities.
 1. <ins>Store owner</ins>: enters \_manager and \_responsibilities.
 1. <ins>System</ins>: updates \_manager’s responsibilities.
+
+**Tests**:
+
+-   <ins>_Happy Path_</ins>: The user chooses to change a manager’s responsibilities and to add for him another responsibility. The system updates accordingly.
+
+-   <ins>_Sad Path_</ins>: The user chooses to change a manager’s responsibilities and accidently clicks another responsibility than ment and then re-do the action.
 
 ### 4.7. Dismiss an owner
 
@@ -524,6 +625,12 @@ sad-user accidently chooses to change a product’s A amount in the cart. instea
         1. removes all the users that were appointed by him and their subtrees of responsibilities.
     1. else, generate an error message.
 
+**Tests**:
+
+-   <ins>_Happy Path_</ins>: The user chooses to dismiss a manager and enters his correct details and the system dismisses him and all of his sub tree.
+
+-   <ins>_Sad Path_</ins>: The user chooses to dismiss a manager and accidently enters incorrect details. The system generated an error message
+
 ### 4.9. Get store personnel information
 
 **Actors**: Store personnel, enter store  
@@ -538,6 +645,12 @@ sad-user accidently chooses to change a product’s A amount in the cart. instea
     1. <ins>System</ins>: searches for the personnel information for the store.
     1. <ins>System</ins>: shows the information.
 
+**Tests**:
+
+-   <ins>_Happy Path_</ins>: The user is logged in, the entered store exists, and the user is one of the store personnel. Therefore, the system returns the store’s information.
+
+-   <ins>_Sad Path_</ins>: The user is not a store personnel and the system returns an error message.
+
 ### 4.11. Get store purchase history
 
 **Actors**: Store personnel, enter store  
@@ -551,6 +664,11 @@ sad-user accidently chooses to change a product’s A amount in the cart. instea
 1. <ins>System</ins>: if Store personnel is an owner of this store or a manager with permission to access this information:
     1. <ins>System</ins>: searches for the store’s purchase history.
     1. <ins></ins>: shows the purchase history.
+
+**Tests**:
+
+-   <ins>_Happy Path_</ins>: The user chooses to get a store purchase history and enters a store identifier that exists in the system. The system returns the store purchase history.
+-   <ins>_Sad Path_</ins>: The user chooses to get a store purchase history and enters a store identifier. The user does not have permissions to view the purchase history at the requested store and the system returns an error message “You do not have permission to view the purchase history for the given store”.
 
 ## System manager
 
@@ -568,6 +686,11 @@ sad-user accidently chooses to change a product’s A amount in the cart. instea
 1. <ins>System</ins>: searches for the information in the database.
 1. <ins>System</ins>: shows the information.
 
+**Tests**:
+
+-   <ins>_Happy Path_</ins>: The user chooses to get a store purchase history and enters a store id as the store identifier. The system returns the store purchase history.
+-   <ins>_Sad Path_</ins>: The user chooses to get a store purchase history and a nonexistent store id as the store identifier. The requested store does not exist, and the system returns an error message “{the given identifier} store does not exist”.
+
 ### 6.4. Get user purchase history (system manager)
 
 **Actors**: System manager  
@@ -581,3 +704,8 @@ sad-user accidently chooses to change a product’s A amount in the cart. instea
 1. <ins>Store owner</ins>: enters \_user.
 1. <ins>System</ins>: searches for the information in the database.
 1. <ins>System</ins>: shows the information.
+
+**Tests**:
+
+-   <ins>_Happy Path_</ins>: The user chooses to get a user purchase history and enters a username as the user identifier. The system returns the user purchase history.
+-   <ins>_Sad Path_</ins>: The user chooses to get a user purchase history and enters an incorrect username as the store identifier. The requested user does not exist and the system returns an error message “{incorrect username} is not a user in the system”.
