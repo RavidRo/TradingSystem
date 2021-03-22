@@ -177,6 +177,9 @@
 1. <ins>User</ins>: chooses to visit cart.
 2. <ins>System</ins>: shows the user's cart.
 
+-   <ins>_Happy Path_</ins>: User chooses to visit his cart and the system shows him all of his cart details.
+-   <ins>_Sad Path_</ins>: User chooses to visit hist cart but there is no items in his cart.
+
 ### 2.8. Delete product from cart
 
 **Actors**: User, Visit cart  
