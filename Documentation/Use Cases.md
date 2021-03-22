@@ -24,11 +24,10 @@
 [Owner and manager](#Owner-and-manager)
 
 -   [enter store](#enter-store)
--   [4.1. **no_name**](#41-no_name)
--   [4.2. Add new product](#42-Add-new-product)
--   [4.2. Remove product](#42-Remove-product)
--   [4.2. Change product quantity](#42-Change-product-quantity)
--   [4.2. Edit product details](#42-Edit-product-details)
+-   [4.1. Add new product](#41-Add-new-product)
+-   [4.1. Remove product](#41-Remove-product)
+-   [4.1. Change product quantity](#41-Change-product-quantity)
+-   [4.1. Edit product details](#41-Edit-product-details)
 -   [4.2. Get purchase types and policies](#42-Get-purchase-types-and-policies)
 -   [4.2. Get discount types and policies](#42-Get-discount-types-and-policies)
 -   [4.2. Edit purchase types](#42-Edit-purchase-types)
@@ -329,9 +328,7 @@
 1. <ins>Store owner</ins>: enters \_store.
 1. <ins>System</ins>: shows \_store’s data and possible actions.
 
-### 4.1. **no_name**
-
-### 4.2. Add new product
+### 4.1. Add new product
 
 **Actors**: Store personnel, enter store  
 **Parameters**: \_product_information, \_quantity, \_store  
@@ -356,7 +353,7 @@
 -   <ins>_Happy Path_</ins>: The owner the store chooses to add to the store product in 20 pieces. The owner inserts the correct amount, the system asks for approval, the user approves and information and the process succeeds.
 -   <ins>_Sad Path_</ins>: The owner of the store chooses to add to the store a product in 20 pieces. When the system requests for product’s amount the owner accidently enters 10 pieces. When the system requests for approval the owner
 
-### 4.2. Remove product
+### 4.1. Remove product
 
 **Actors**: Store personnel, enter store  
 **Parameters**: \_product_identifier, \_store  
@@ -379,7 +376,7 @@
 -   <ins>_Happy Path_</ins>: The owner of a store wants to remove a product from his store. The owner enters the correct product identifier and the system removes the item from the store.
 -   <ins>_Sad Path_</ins>: The owner of a store wants to remove a product and enters wrong identifier, the system generates an error message.
 
-### 4.2. Change product quantity
+### 4.1. Change product quantity
 
 **Actors**: Store personnel, enter store  
 **Parameters**: \_product_identifier, \_quantity, \_store  
@@ -400,7 +397,7 @@
 -   <ins>_Happy Path_</ins>: The user is a manager of a store and has the responsibility “change product quantity”. He updates the quantity of a product and the action succeeded.
 -   <ins>_Sad Path_</ins>: A manager of a store which has the responsibility “change product quantity”, wants to update the amount of a product. After the system queries the user for the product id and quantity, the manager accidently typed a bigger amount which will lead to mistakes.
 
-### 4.2. Edit product details
+### 4.1. Edit product details
 
 **Actors**: Store personnel, enter store  
 **Parameters**: \_product_information, \_store  
