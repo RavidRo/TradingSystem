@@ -1,3 +1,3 @@
-# Stam
-Hey ho ho ho :)
-Fix
+# Class Diagram
+
+![class diagram](ClassDiagram.drawio.svg)
