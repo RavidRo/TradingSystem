@@ -1,6 +1,6 @@
-"""this class if the gateway from the client to the domain server layer
-all the api calls and data asked from the server goes here
-this class is responsible for calling the right methods in the login classes"""
+"""This class is the gateway from the client to the domain server layer.
+All the api calls and data asked from the server goes here.
+This class is responsible for calling the right methods in the login classes."""
 
 from flask import Flask,request
 from werkzeug.security import generate_password_hash, check_password_hash
