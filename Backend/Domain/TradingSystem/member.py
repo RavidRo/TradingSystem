@@ -1,4 +1,5 @@
-import UserState
+from Backend.Domain.TradingSystem.user_state import UserState
+from Backend.Domain.TradingSystem.responibility import Responsibility
 
 class Member(UserState):
 

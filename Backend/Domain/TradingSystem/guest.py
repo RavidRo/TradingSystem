@@ -1,5 +1,5 @@
-import UserState
-import Authentication
+from Backend.Domain.TradingSystem.user_state import UserState
+from Backend.Domain.Authentication.authentication import Authentication
 
 class Guest(UserState):
 

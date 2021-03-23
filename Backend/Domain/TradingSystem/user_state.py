@@ -1,5 +1,4 @@
 from abc import ABC, abstractmethod
-import User
 
 class UserState(ABC):
 
