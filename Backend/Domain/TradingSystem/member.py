@@ -1,14 +1,11 @@
 from Backend.Domain.TradingSystem.user_state import UserState
-from Backend.Domain.TradingSystem.responibility import Responsibility
+from Backend.Domain.TradingSystem.responsibility import Responsibility
+
 
 class Member(UserState):
 
-    def __init__(self, user):
-        super().__init__(user)
-        self.responsibilities = dict()
-
-    def __init__(self, user, responsibilities): # for DB initialization
-        super().__init__(user)
+    def __init__(self, responsibilities=dict()):  # for DB initialization
+        super().__init__()
         self.responsibilities = responsibilities
 
     def login(self, username, password):
@@ -17,12 +14,14 @@ class Member(UserState):
     def register(self, username, password):
         raise RuntimeError("Members cannot re-register")
 
-    def open_store(self, store_id, store_parameters): # TODO: Change the parameters according to actual store's data
+    def open_store(self, store_id, store_parameters):  # TODO: Change the parameters according to actual store's data
         if self.responsibilities.has_key(store_id):
             raise RuntimeError("Store cannot be re-opened")
-        self.responsibilities[store_id] = Responsibility(store_id, store_parameters) # TODO: change call according to actual store parameters
+        self.responsibilities[store_id] = Responsibility(store_id,
+                                                         store_parameters)  # TODO: change call according to actual store parameters
 
-    def add_new_product(self, store_id, product_information, quantity): # TODO: Change the parameters according to actual product's data
+    def add_new_product(self, store_id, product_information,
+                        quantity):  # TODO: Change the parameters according to actual product's data
         if not self.responsibilities.has_key(store_id):
             raise RuntimeError(f"this member do not own/manage store {store_id}")
         self.responsibilities[store_id].add_new_product(product_information, quantity)
@@ -37,7 +36,8 @@ class Member(UserState):
             raise RuntimeError(f"this member do not own/manage store {store_id}")
         self.responsibilities[store_id].change_product_quantity(product_id, quantity)
 
-    def edit_product_details(self, store_id, product_id, new_details): # TODO: Change the parameters according to actual product's data
+    def edit_product_details(self, store_id, product_id,
+                             new_details):  # TODO: Change the parameters according to actual product's data
         if not self.responsibilities.has_key(store_id):
             raise RuntimeError(f"this member do not own/manage store {store_id}")
         self.responsibilities[store_id].edit_product_details(product_id, new_details)
@@ -52,7 +52,8 @@ class Member(UserState):
             raise RuntimeError(f"this member do not own/manage store {store_id}")
         self.responsibilities[store_id].appoint_new_store_manager(new_manager_id)
 
-    def edit_managers_responsibilities(self, store_id, manager_id, responsibilities): # TODO: Change the parameters according to responsibilities representation
+    def edit_managers_responsibilities(self, store_id, manager_id,
+                                       responsibilities):  # TODO: Change the parameters according to responsibilities representation
         if not self.responsibilities.has_key(store_id):
             raise RuntimeError(f"this member do not own/manage store {store_id}")
         self.responsibilities[store_id].edit_managers_responsibilities(manager_id, responsibilities)

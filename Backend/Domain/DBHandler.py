@@ -22,14 +22,17 @@ class DBHandler(object):
             self.users_db = users.users()
 
 
-    def is_username_exists(self,username):
+    def is_username_exists(self, username):
         return self.users_db.is_username_exists(username=username)
 
-    def is_password_match(self,given_password,username):
-         return self.users_db.is_password_match(given_password=given_password,username=username)
+    def is_password_match(self, given_password, username):
+         return self.users_db.is_password_match(given_password=given_password, username=username)
 
-    def add_user_to_db(self,username,password):
-        self.users_db.add_user_to_db(username=username,password=password)
+    def add_user_to_db(self, username, password, cookie):
+        self.users_db.add_user_to_db(username=username, password=password, cookie=cookie)
+
+    def get_cookie(self, username):
+        return self.users_db.get_cookie(username=username)
 
 
 

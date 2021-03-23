@@ -2,8 +2,8 @@ from abc import ABC, abstractmethod
 
 class UserState(ABC):
 
-    def __init__(self, user):
-        self.user = user
+    def __init__(self):
+        pass
 
     @abstractmethod
     def login(self, username, password):

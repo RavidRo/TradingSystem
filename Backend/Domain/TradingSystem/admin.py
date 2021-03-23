@@ -1,14 +1,11 @@
 from Backend.Domain.TradingSystem.member import Member
 from Backend.Domain.TradingSystem.trading_system_manager import TradingSystemManager
 
+
 class Admin(Member):
 
-    def __init__(self, user):
-        super().__init__(user)
-        self.tranding_system_manager = TradingSystemManager.get_instance()
-
-    def __init__(self, user, responsibilities):
-        super().__init__(user, responsibilities)
+    def __init__(self, responsibilities=dict()):
+        super().__init__(responsibilities)
         self.tranding_system_manager = TradingSystemManager.get_instance()
 
     def get_any_store_purchase_history(self, store_id):

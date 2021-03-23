@@ -3,16 +3,12 @@ from Backend.Domain.Authentication.authentication import Authentication
 
 class Guest(UserState):
 
-    def __init__(self, user):
-        super().__init__(user)
+    def __init__(self):
+        super().__init__()
         self.authentication = Authentication.get_instance()
 
     def login(self, username, password):
-        # Assumption: User holds the function change_state and the different states of the user.
-        # TODO: ask Sunshine about the return value type
         msg = self.authentication.login(username, password)
-        if msg == "succeeded":
-            self.user.change_state(user.member_state)
         # TODO: need to induce if an admin was logged in - ask Sunshine
         return msg
 

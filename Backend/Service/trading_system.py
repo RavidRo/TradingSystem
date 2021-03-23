@@ -1,6 +1,6 @@
 """ this class is responsible to communicate with the trading system manager"""
 
-from Backend.Domain.TradingSystem import TradingSystemManager
+from Backend.Domain.TradingSystem import trading_system_manager
 
 class TradingSystem(object):
 
@@ -19,14 +19,14 @@ class TradingSystem(object):
             raise Exception("This class is a singleton!")
         else:
             TradingSystem.__instance = self
-            self.trading_system_manager = TradingSystemManager.TradingSystemManager()
+            self.trading_system_manager = trading_system_manager.TradingSystemManager()
 
 
-    def register(self,username,password):
-        return self.trading_system_manager.register(username=username,password=password)
+    def register(self, cookie, username, password):
+        return self.trading_system_manager.register(cookie=cookie, username=username,password=password)
 
-    def login(self,username, password):
-        return self.trading_system_manager.login(username=username, password=password)
+    def login(self, cookie, username, password):
+        return self.trading_system_manager.login(cookie=cookie, username=username,password=password)
 
 
 
