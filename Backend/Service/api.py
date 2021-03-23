@@ -12,7 +12,8 @@ system = TradingSystem.getInstance()
 
 @app.route('/', methods=['GET'])
 def main_page():
-    return 'Hello, World!'
+    cookie = system.enter_system()
+    return '''<h1>Cookie is: {}</h1>'''.format(cookie)
 
 
 @app.route('/register', methods=['GET'])
@@ -20,7 +21,7 @@ def register():
     cookie = request.args.get('cookie')
     username = request.args.get('username')
     password = request.args.get('password')
-    answer = system.register(cookie=cookie, username=username, password=password)
+    answer = system.register(cookie=int(cookie), username=username, password=password)
     return '''<h1>Answer is: {}</h1>'''.format(answer)
 
 
@@ -29,7 +30,7 @@ def login():
     cookie = request.args.get('cookie')
     username = request.args.get('username')
     password = request.args.get('password')
-    answer = system.login(cookie=cookie, username=username, password=password)
+    answer = system.login(cookie=int(cookie), username=username, password=password)
     return '''<h1>Answer is: {}</h1>'''.format(answer)
 
 

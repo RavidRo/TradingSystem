@@ -4,8 +4,9 @@ from Backend.Domain.TradingSystem.responsibility import Responsibility
 
 class Member(UserState):
 
-    def __init__(self, responsibilities=dict()):  # for DB initialization
+    def __init__(self, username, responsibilities=dict()):  # for DB initialization
         super().__init__()
+        self.username = username
         self.responsibilities = responsibilities
 
     def login(self, username, password):

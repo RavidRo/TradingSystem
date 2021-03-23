@@ -4,17 +4,16 @@ from Backend.Domain.TradingSystem.member import Member
 
 class User(object):
 
-    def __init__(self, username, state=Guest()):
+    def __init__(self, state=Guest()):
         self.current_state = state
-        self.username = username
-        self.member_state = Member(self)
+        self.member_state = Member(self)        # should take the state from DB
 
     def change_state(self, state):
         self.current_state = state
 
     def login(self, username, password):
         msg = self.current_state.login(username, password)
-        if type(msg) == int:
+        if msg == "login succeeded":
             # Assumption: User holds the function change_state and the different states of the user.
             self.change_state(self.member_state)
         return msg

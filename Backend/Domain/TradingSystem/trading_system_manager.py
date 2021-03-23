@@ -22,6 +22,9 @@ class TradingSystemManager(object):
             TradingSystemManager.__instance = self
             self.user_manager = UserManager()
 
+    def enter_system(self):
+        return self.user_manager.enter_system()
+
     def get_any_store_purchase_history(store_id):
         return False
 

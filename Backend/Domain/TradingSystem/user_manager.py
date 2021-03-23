@@ -3,7 +3,6 @@ from Backend.Domain.TradingSystem.member import Member
 
 
 class UserManager(object):
-
     __instance = None
 
     @staticmethod
@@ -20,26 +19,21 @@ class UserManager(object):
         else:
             UserManager.__instance = self
             self.users = dict()
-            self.load_users()
+            self.cookie_generator = 1
 
-    def load_users(self):                        # from DB in later milestones (according to cookie)
-        self.users[1] = User('tali', Member())
-        self.users[2] = User('ravid', Member())
-        self.users[3] = User('sean', Member())
-        self.users[4] = User('inon', Member())
-        self.users[5] = User('omer', Member())
+    def enter_system(self):
+        self.users[self.cookie_generator] = User()
+        self.cookie_generator += 1
+        return self.cookie_generator - 1
 
     def login(self, cookie, username, password):
         if cookie not in self.users:
-            self.users[cookie] = User(username)
+            raise RuntimeError("Connection is not defined")
         msg = self.users[cookie].login(username, password)
         return msg
 
     def register(self, cookie, username, password):
         if cookie not in self.users:
-            self.users[cookie] = User(username)
+            raise RuntimeError("Connection is not defined")
         msg = self.users[cookie].register(username, password)
         return msg
-
-
-
