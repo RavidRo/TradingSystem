@@ -1,6 +1,6 @@
 class Responsibility:
 
-    def __init__(self):
+    def __init__(self, store_id, store_information):
         pass
 
     def add_new_product(store_id, product_information, quantity):

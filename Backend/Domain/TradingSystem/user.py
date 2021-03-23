@@ -1,5 +1,4 @@
-from Backend.Domain.TradingSystem.guest import Guest
-from Backend.Domain.TradingSystem.member import Member
+from Backend.Domain.TradingSystem.user_states import Guest, Member, Admin
 
 
 class User(object):

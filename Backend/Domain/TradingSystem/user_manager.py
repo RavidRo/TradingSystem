@@ -1,5 +1,4 @@
 from Backend.Domain.TradingSystem.user import User
-from Backend.Domain.TradingSystem.member import Member
 
 
 class UserManager(object):

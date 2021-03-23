@@ -9,13 +9,13 @@ class TradingSystem(object):
     @staticmethod
     def getInstance():
         """ Static access method. """
-        if TradingSystem.__instance == None:
+        if TradingSystem.__instance is None:
             TradingSystem()
         return TradingSystem.__instance
 
     def __init__(self):
         """ Virtually private constructor. """
-        if TradingSystem.__instance != None:
+        if TradingSystem.__instance is not None:
             raise Exception("This class is a singleton!")
         else:
             TradingSystem.__instance = self

@@ -6,7 +6,7 @@
 from werkzeug.security import generate_password_hash, check_password_hash
 
 
-class users(object):
+class Users(object):
     """initializing the mockDB and inserting few users"""
 
     def __init__(self):
