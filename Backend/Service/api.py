@@ -3,8 +3,11 @@ all the api calls and data asked from the server goes here
 this class is responsible for calling the right methods in the login classes"""
 
 from flask import Flask,request
-from Backend.Service import trading_system
+from Backend.Service.trading_system import TradingSystem
 app = Flask(__name__)
+
+system = TradingSystem.getInstance()
+
 
 @app.route('/' , methods=['GET'])
 def main_page():
@@ -14,14 +17,14 @@ def main_page():
 def register():
     username = request.args.get('username')
     password = request.args.get('password')
-    answer = trading_system.register(username=username,password=password)
+    answer = system.register(username=username,password=password)
     return '''<h1>Answer is: {}</h1>'''.format(answer)
 
 @app.route('/login', methods=['GET'])
 def login():
     username = request.args.get('username')
     password = request.args.get('password')
-    answer = trading_system.login(username=username, password=password)
+    answer = system.login(username=username, password=password)
     return '''<h1>Answer is: {}</h1>'''.format(answer)
 
 

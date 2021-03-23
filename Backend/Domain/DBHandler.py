@@ -2,17 +2,34 @@
 
 from Backend.DataBase.Users import users
 
-"""initializing mock DB"""
-users = users.users()
 
-def is_username_exists(username):
-    return users.is_username_exists(username=username)
+class DBHandler(object):
+    __instance = None
 
-def is_password_match(given_password,username):
-     return users.is_password_match(given_password=given_password,username=username)
+    @staticmethod
+    def getInstance():
+        """ Static access method. """
+        if DBHandler.__instance == None:
+            DBHandler()
+        return DBHandler.__instance
 
-def add_user_to_db(username,password):
-    users.add_user_to_db(username=username,password=password)
+    def __init__(self):
+        """ Virtually private constructor. """
+        if DBHandler.__instance != None:
+            raise Exception("This class is a singleton!")
+        else:
+            DBHandler.__instance = self
+            self.users_db = users.users()
+
+
+    def is_username_exists(self,username):
+        return self.users_db.is_username_exists(username=username)
+
+    def is_password_match(self,given_password,username):
+         return self.users_db.is_password_match(given_password=given_password,username=username)
+
+    def add_user_to_db(self,username,password):
+        self.users_db.add_user_to_db(username=username,password=password)
 
 
 
