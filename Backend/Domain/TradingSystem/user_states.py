@@ -2,12 +2,14 @@ from abc import ABC, abstractmethod
 from Backend.Domain.Authentication.authentication import Authentication
 from Backend.Domain.TradingSystem.responsibility import Responsibility
 from Backend.Domain.TradingSystem.trading_system_manager import TradingSystemManager
+from Backend.Domain.TradingSystem.shopping_cart import ShoppingCart
+from Backend.Domain.TradingSystem.store import Store
 
 
 class UserState(ABC):
 
     def __init__(self):
-        pass
+        self.cart = ShoppingCart()
 
     @abstractmethod
     def login(self, username, password):
@@ -17,15 +19,22 @@ class UserState(ABC):
     def register(self, username, password):
         pass
 
-    @abstractmethod
-    def open_store(self, store_id, store_parameters):  # TODO: Change the parameters according to actual store's data
-        pass
+    def save_product_in_cart(self, store_id, product_id):   # TODO: talk to sean about quantity in save_product
+        return self.cart.add_product(store_id, product_id)
 
-    # TODO: Check if cart actions should be here (e.g: member's cart needs to be saved)
+    def show_cart(self):
+        return self.cart.show_cart()
+
+    def delete_from_cart(self, store_id, product_id):
+        return self.cart.remove_product(store_id, product_id)   # TODO: talk to sean about quantity in remove_product
+
+    @abstractmethod
+    def open_store(self, store_id, store_parameters):
+        pass
 
     @abstractmethod
     def add_new_product(self, store_id, product_information,
-                        quantity):  # TODO: Change the parameters according to actual product's data
+                        quantity):
         pass
 
     @abstractmethod
@@ -38,7 +47,7 @@ class UserState(ABC):
 
     @abstractmethod
     def edit_product_details(self, store_id, product_id,
-                             new_details):  # TODO: Change the parameters according to actual product's data
+                             new_details):
         pass
 
     @abstractmethod
@@ -51,7 +60,7 @@ class UserState(ABC):
 
     @abstractmethod
     def edit_managers_responsibilities(self, store_id, manager_id,
-                                       responsibilities):  # TODO: Change the parameters according to responsibility's representation
+                                       responsibilities):
         pass
 
     @abstractmethod
@@ -89,16 +98,14 @@ class Guest(UserState):
     def register(self, username, password):
         return self.authentication.register(username, password)
 
-    def open_store(self, store_id, store_parameters):  # TODO: Change the parameters according to actual store's data
+    def open_store(self, store_id, store_parameters):
         raise RuntimeError('A store cannot be opened by a guest')
 
     # In contrary to the requirements, guests can see their RAM history (can be complex because all store's history
     # is saved in DB and we need to ignore if the buyer was a guest).
 
-    # TODO: Check if cart actions should be here (e.g: member's cart needs to be saved)
-
     def add_new_product(self, store_id, product_information,
-                        quantity):  # TODO: Change the parameters according to actual product's data
+                        quantity):
         raise RuntimeError('Guests cannot add products to stores')
 
     def remove_product(self, store_id, product_id):
@@ -108,7 +115,7 @@ class Guest(UserState):
         raise RuntimeError("Guests cannot change store product's quantity")
 
     def edit_product_details(self, store_id, product_id,
-                             new_details):  # TODO: Change the parameters according to actual product's data
+                             new_details):
         raise RuntimeError("Guests cannot edit store product's details")
 
     def appoint_new_store_owner(self, store_id, new_owner_id):
@@ -118,7 +125,7 @@ class Guest(UserState):
         raise RuntimeError("Guests cannot appoint new store managers")
 
     def edit_managers_responsibilities(self, store_id, manager_id,
-                                       responsibilities):  # TODO: Change the parameters according to responsibilities representation
+                                       responsibilities):
         raise RuntimeError("Guests cannot edit a stores manager's responsibilities")
 
     def dismiss_manager(self, store_id, manager_id):
@@ -139,10 +146,13 @@ class Guest(UserState):
 
 class Member(UserState):
 
-    def __init__(self, username, responsibilities=dict()):  # for DB initialization
+    def __init__(self, username, responsibilities=None):  # for DB initialization
         super().__init__()
+        if responsibilities is None:
+            responsibilities = dict()
         self.username = username
         self.responsibilities = responsibilities
+        # get cart data from DB
 
     def login(self, username, password):
         raise RuntimeError("Members cannot re-login")
@@ -150,14 +160,26 @@ class Member(UserState):
     def register(self, username, password):
         raise RuntimeError("Members cannot re-register")
 
-    def open_store(self, store_id, store_parameters):  # TODO: Change the parameters according to actual store's data
+    def delete_from_cart(self, store_id, product_id):
+        response = super().delete_from_cart(store_id, product_id)
+        # update data in DB in later milestones
+        return response
+
+    def save_product_in_cart(self, store_id, product_id):
+        response = super().save_product_in_cart(store_id, product_id)
+        # update data in DB in later milestones
+        return response
+
+    def open_store(self, store_id, store_parameters):
         if store_id in self.responsibilities:
             raise RuntimeError("Store cannot be re-opened")
-        self.responsibilities[store_id] = Responsibility(store_id,
-                                                         store_parameters)  # TODO: change call according to actual store parameters
+        store = Store(store_id, store_parameters)
+        self.responsibilities[store_id] = Responsibility(self,
+                                                         store)
+        return store
 
     def add_new_product(self, store_id, product_information,
-                        quantity):  # TODO: Change the parameters according to actual product's data
+                        quantity):
         if store_id not in self.responsibilities:
             raise RuntimeError(f"this member do not own/manage store {store_id}")
         self.responsibilities[store_id].add_new_product(product_information, quantity)
@@ -173,7 +195,7 @@ class Member(UserState):
         self.responsibilities[store_id].change_product_quantity(product_id, new_quantity)
 
     def edit_product_details(self, store_id, product_id,
-                             new_details):  # TODO: Change the parameters according to actual product's data
+                             new_details):
         if store_id not in self.responsibilities:
             raise RuntimeError(f"this member do not own/manage store {store_id}")
         self.responsibilities[store_id].edit_product_details(product_id, new_details)
@@ -189,7 +211,7 @@ class Member(UserState):
         self.responsibilities[store_id].appoint_new_store_manager(new_manager_id)
 
     def edit_managers_responsibilities(self, store_id, manager_id,
-                                       responsibilities):  # TODO: Change the parameters according to responsibilities representation
+                                       responsibilities):
         if store_id not in self.responsibilities:
             raise RuntimeError(f"this member do not own/manage store {store_id}")
         self.responsibilities[store_id].edit_managers_responsibilities(manager_id, responsibilities)
@@ -218,8 +240,10 @@ class Member(UserState):
 
 class Admin(Member):
 
-    def __init__(self, username, responsibilities=dict()):
+    def __init__(self, username, responsibilities=None):
         super().__init__(username, responsibilities)
+        if responsibilities is None:
+            responsibilities = dict()
         self.trading_system_manager = TradingSystemManager.get_instance()
 
     def get_any_store_purchase_history(self, store_id):
