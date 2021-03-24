@@ -1,5 +1,14 @@
 from Backend.Domain import DBHandler
+from abc import ABC, abstractmethod
 
+
+class IAuthentication(metaclass=ABC):
+    @classmethod
+    def __subclasshook__(cls, subclass):
+        return (hasattr(subclass, 'register') and
+                callable(subclass.register) and
+                hasattr(subclass, 'login') and
+                callable(subclass.login))
 
 class Authentication(object):
     __instance = None
@@ -34,3 +43,4 @@ class Authentication(object):
                 return "password incorrect"
             else:
                 return "login succeeded"
+
