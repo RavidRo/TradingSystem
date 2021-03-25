@@ -150,12 +150,12 @@
 ### 2.7. Save products in shopping bag
 
 **Actors**: User  
-**Parameters**: \_product  
-**Pre-condition**: None.  
-**Post-condition**: \_product is added to the store's bag.  
+**Parameters**: \_product, store_id, quantity   
+**Pre-condition**: quantity > 0.  
+**Post-condition**: \_product is added to the store's bag with the specified quantity.  
 **Actions**:
 
-1. <ins>User</ins>: choose to save \_product
+1. <ins>User</ins>: choose to save \_product with specified quantity.
 2. <ins>System</ins>: if \_product already in the bag, update the amount of \_product in the bag.
 3. <ins>System</ins>: Else, add \_product to the bag.
 4. <ins>System</ins>: if User is logged in, save \_product to the database.
@@ -182,13 +182,13 @@
 ### 2.8. Delete product from cart
 
 **Actors**: User, Visit cart  
-**Parameters**: \_to_delete_product  
+**Parameters**: \_to_delete_product, store_id  
 **Pre-condition**: The cart contains \_to_delete_product.  
 **Post-condition**: The cart doesn't contain \_to_delete_product.  
 **Actions**:
 
 1. <ins>Visit cart</ins>: finished
-2. <ins>User</ins>: chooses \_to_delete_product from the cart.
+2. <ins>User</ins>: chooses \_to_delete_product from store with specified store_id from the cart.
 3. <ins>System</ins>: asks the user for the action
 4. <ins>User</ins>: chooses to delete \_to_delete_product
 5. <ins>System</ins>: deletes \_to_delete_product from the cart.
@@ -201,13 +201,13 @@
 ### 2.8. Change amount of product in cart
 
 **Actors**: User, Visit cart  
-**Parameters**: \_to_change_product, \_amount  
+**Parameters**: \_to_change_product, \_amount, store_id  
 **Pre-condition**: \_amount > 0, to_change_product is in the cart.  
 **Post-condition**: The cart contains \_amount of \_to_change_product.  
 **Actions**:
 
 1. <ins>Visit cart</ins>: finished
-2. <ins>User</ins>: chooses \_to_change_product from the cart.
+2. <ins>User</ins>: chooses \_to_change_product from store with store_id from the cart.
 3. <ins>System</ins>: asks the user for the action
 4. <ins>User</ins>: chooses to change \_to_change_product's amount
 5. <ins>System</ins>: queries user for the new amount.
@@ -222,7 +222,7 @@
 ### 2.9. Purchase products
 
 **Actors**: User, Outside Cashing, Outside Supplyment  
-**Parameters**: \_payment_information  
+**Parameters**: \_payment_information, products_purchase_info  
 **Pre-condition**: None.  
 **Post-condition**: Cart (of immediate products section) is empty.  
 **Actions**:
