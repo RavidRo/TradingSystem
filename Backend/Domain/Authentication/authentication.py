@@ -10,7 +10,7 @@ class IAuthentication(metaclass=ABC):
                 hasattr(subclass, 'login') and
                 callable(subclass.login))
 
-class Authentication(object):
+class Authentication(IAuthentication):
     __instance = None
 
     @staticmethod
