@@ -19,14 +19,23 @@ class UserState(ABC):
     def register(self, username, password):
         pass
 
-    def save_product_in_cart(self, store_id, product_id):   # TODO: talk to sean about quantity in save_product
-        return self.cart.add_product(store_id, product_id)
+    def save_product_in_cart(self, store_id, product_id, quantity):
+        return self.cart.add_product(store_id, product_id, quantity)
 
     def show_cart(self):
         return self.cart.show_cart()
 
     def delete_from_cart(self, store_id, product_id):
-        return self.cart.remove_product(store_id, product_id)   # TODO: talk to sean about quantity in remove_product
+        return self.cart.remove_product(store_id, product_id)
+
+    def change_product_quantity(self, store_id, product_id, new_amount):
+        return self.cart.change_product_qunatity(store_id, product_id, new_amount)
+
+    def buy_cart(self, product_purchase_info):
+        return self.cart.buy_products(product_purchase_info)
+
+    def delete_products_after_purchase(self):
+        return self.cart.delete_pruducts_after_purchase()
 
     @abstractmethod
     def open_store(self, store_id, store_parameters):
@@ -160,13 +169,28 @@ class Member(UserState):
     def register(self, username, password):
         raise RuntimeError("Members cannot re-register")
 
+    def save_product_in_cart(self, store_id, product_id, quantity):
+        response = super().save_product_in_cart(store_id, product_id, quantity)
+        # update data in DB in later milestones
+        return response
+
     def delete_from_cart(self, store_id, product_id):
         response = super().delete_from_cart(store_id, product_id)
         # update data in DB in later milestones
         return response
 
-    def save_product_in_cart(self, store_id, product_id):
-        response = super().save_product_in_cart(store_id, product_id)
+    def change_product_quantity(self, store_id, product_id, new_quantity):
+        response = super().change_product_quantity(store_id, product_id, new_quantity)
+        # update data in DB in later milestones
+        return response
+
+    def buy_cart(self, product_purchase_info):
+        response = super().buy_products()
+        # update data in DB in later milestones
+        return response
+
+    def delete_products_after_purchase(self):
+        response = super().delete_pruducts_after_purchase()
         # update data in DB in later milestones
         return response
 
@@ -242,8 +266,6 @@ class Admin(Member):
 
     def __init__(self, username, responsibilities=None):
         super().__init__(username, responsibilities)
-        if responsibilities is None:
-            responsibilities = dict()
         self.trading_system_manager = TradingSystemManager.get_instance()
 
     def get_any_store_purchase_history(self, store_id):
