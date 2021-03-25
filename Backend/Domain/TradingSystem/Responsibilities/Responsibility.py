@@ -1,6 +1,21 @@
 from ..User import User
 
 import enum
+Permission = enum.Enum(
+	value='Permission',
+	names=[
+		('MANAGE_PRODUCTS',  1),
+		('manager products',  1),
+		('GET_APPOINTMENTS', 2),
+		('get appointments', 2),
+		('APPOINT_MANAGER', 3),
+		('appoint mannager', 3),
+		('REMOVE_MANAGER', 4),
+		('remove manager', 4),
+		('GET_HISTORY', 5),
+		('get history', 5),
+	]
+)
 class Permission(enum.Enum):
 	MANAGE_PRODUCTS = 1
 	GET_APPOINTMENTS = 2
@@ -20,48 +35,48 @@ class Responsibility:
 
 	#4.1
 	# Creating a new product a the store and setting its quantity to 0
-	def create_product(self, name : str, price : float):
+	def create_product(self, name : str, price : float) -> response[None]:
 		raise Exception(Responsibility.ERROR_MESSAGE)
 
 	#4.1
-	def add_products(self, product_id : str, quantity : int):
+	def add_products(self, product_id : str, quantity : int) -> response[None]:
 		raise Exception(Responsibility.ERROR_MESSAGE)
 
 	#4.1
-	def remove_products(self, product_id : str, quantity : int):
+	def remove_products(self, product_id : str, quantity : int) -> response[None]:
 		raise Exception(Responsibility.ERROR_MESSAGE)
 
 	#4.1
-	def set_product_price(self, product_id : str, new_price : float):
+	def set_product_price(self, product_id : str, new_price : float) -> response[None]:
 		raise Exception(Responsibility.ERROR_MESSAGE)
 
 	#4.3
-	def appoint_owner(self, user : User):
+	def appoint_owner(self, user : User) -> response[None]:
 		raise Exception(Responsibility.ERROR_MESSAGE)
 
 	#4.5
-	def appoint_manager(self, user : User):
+	def appoint_manager(self, user : User) -> response[None]:
 		raise Exception(Responsibility.ERROR_MESSAGE)
 
 	#4.6
 	# Returns true if and only if self.user appointed user and user is a manager
-	def add_manager_permission(self, user : User, permission : Permission) -> bool:
+	def add_manager_permission(self, user : User, permission : Permission) -> response[None]:
 		raise Exception(Responsibility.ERROR_MESSAGE)
 
 	#4.6
-	def remove_manager_permission(self, user : User, permission : Permission):
+	def remove_manager_permission(self, user : User, permission : Permission) -> response[None]:
 		raise Exception(Responsibility.ERROR_MESSAGE)
 
 	#4.4, 4.7
-	def remove_appointment(self, user : User):
+	def remove_appointment(self, user : User) -> response[None]:
 		raise Exception(Responsibility.ERROR_MESSAGE)
 
 	#4.9
-	def get_store_appointments(self):
+	def get_store_appointments(self) -> response[Responsibility]:
 		raise Exception(Responsibility.ERROR_MESSAGE)
 
 	#4.11
-	def get_store_purchases_history(self) -> list[PurchaseDetails]: #TODO import Purchase Details
+	def get_store_purchases_history(self) -> response[list[PurchaseDetails]]: #TODO import Purchase Details
 		raise Exception(Responsibility.ERROR_MESSAGE)
 
 	
@@ -79,7 +94,7 @@ class Responsibility:
 		# returns true if any one of the children returns true
 		return any(map(self.appointed.appointed, lambda worker : worker._remove_permission(username, permission)))
 	
-	def _remove_appointment(self, user : User):
+	def _remove_appointment(self, user : User) -> bool:
 		if not self.appointed:
 			# if self.user never appointed anyone
 			return False
