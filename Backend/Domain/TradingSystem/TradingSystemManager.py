@@ -25,7 +25,7 @@ class TradingSystem:
 
 	#2.5
 	def get_products_by_store(store_id : str) -> response[list[ProductData]]:
-		return StoresManager.get_products_by_store()
+		return StoresManager.get_products_by_store(store_id)
 
 	#2.6
 	# kwargs = You can search for a product by additional key words
