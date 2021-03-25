@@ -1,0 +1,53 @@
+from abc import ABC, abstractmethod
+
+class IShoppingBag(metaclass=ABC):
+    # @classmethod
+    # def __subclasshook__(cls, subclass):
+    #     return (hasattr(subclass, 'add_shopping_bag') and
+    #             callable(subclass.load_data_source) and
+    #             hasattr(subclass, 'remove_shopping_bag') and
+    #             callable(subclass.extract_text) and
+    #             hasattr(subclass, 'add_product') and
+    #             callable(subclass.extract_text) and
+    #             hasattr(subclass, 'add_product') and
+    #             callable(subclass.extract_text) and
+    #             hasattr(subclass, 'remove_product') and
+    #             callable(subclass.extract_text) and
+    #             hasattr(subclass, 'show_cart') and
+    #             callable(subclass.extract_text) and
+    #             hasattr(subclass, 'show_bag') and
+    #             callable(subclass.extract_text) and
+    #             hasattr(subclass, 'buy_products') and
+    #             callable(subclass.extract_text) or
+    #             NotImplemented)
+
+    @abstractmethod
+    def add_product(self, product_id: str, quantity: int):
+        """Add a product to the bag with specified quantity"""
+        raise NotImplementedError
+
+    @abstractmethod
+    def remove_product(self, product_id: str):
+        """Remove a product from the bag"""
+        raise NotImplementedError
+
+    @abstractmethod
+    def show_bag(self):
+        """show the bag to the user"""
+        raise NotImplementedError
+
+    @abstractmethod
+    def buy_products(self, products_info, user_info):
+        """buy transaction"""
+        raise NotImplementedError
+
+    @abstractmethod
+    def change_product_qunatity(self, product_id: str, new_amount: int):
+        """ Change product's quantity (add or remove) - new amount overrides the current amount"""
+        raise NotImplementedError
+
+    @abstractmethod
+    def delete_products_after_purchase(self):
+        """delete products which successfully been purchased"""
+        raise NotImplementedError
+
