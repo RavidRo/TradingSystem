@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import TypeVar, Generic
+from typing import TypeVar, Generic, List, Dict
 
 """
 Interface that every object we wish to refer to in Response must implement.
@@ -27,13 +27,44 @@ class PrimitiveParsable(Parsable):
         return self.value
 
 
+T = TypeVar('T', bound=Parsable)
+S = TypeVar('S')
+
+
+"""
+In order to support list return objects, a parsable list wrapper is introduced
+"""
+
+
+class ParsableList(Parsable):
+
+    def __init__(self, values: List[Generic[T]]):
+        self.values = values
+
+    def parse(self):
+        for value in self.values:
+            value.parse()
+
+
+"""
+In order to support map return objects, a parsable map wrapper is introduced (parse only values)
+"""
+
+
+class ParsableMap(Parsable):
+
+    def __init__(self, values: Dict[Generic[S], Generic[T]]):
+        self.values = values
+
+    def parse(self):
+        for value in self.values.values():
+            value.parse()
+
+
 """
 Return object which contains message to print and object to inspect, and success flag.
 *Important* each class which self.object refers to must implement parse()
 """
-
-
-T = TypeVar('T', bound=Parsable)
 
 
 class Response(Generic[T]):
