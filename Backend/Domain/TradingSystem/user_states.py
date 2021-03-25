@@ -5,6 +5,7 @@ from Backend.Domain.TradingSystem.trading_system_manager import TradingSystemMan
 from Backend.Domain.TradingSystem.shopping_cart import ShoppingCart
 from Backend.Domain.TradingSystem.store import Store
 
+# TODO: Change return types to Response
 
 class UserState(ABC):
 
@@ -43,6 +44,10 @@ class UserState(ABC):
         pass
 
     @abstractmethod
+    def get_purchase_history(self):
+        pass
+
+    @abstractmethod
     def add_new_product(self, store_id, product_information,
                         quantity):
         pass
@@ -52,29 +57,32 @@ class UserState(ABC):
         pass
 
     @abstractmethod
-    def change_product_quantity(self, store_id, product_id, new_quantity):
+    def change_product_quantity_in_store(self, store_id, product_id, new_quantity):
         pass
 
     @abstractmethod
-    def edit_product_details(self, store_id, product_id,
-                             new_details):
+    def set_product_price(self, store_id, product_id,
+                          new_price):
         pass
 
     @abstractmethod
-    def appoint_new_store_owner(self, store_id, new_owner_id):
+    def appoint_new_store_owner(self, store_id, new_owner):
         pass
 
     @abstractmethod
-    def appoint_new_store_manager(self, store_id, new_manager_id):
+    def appoint_new_store_manager(self, store_id, new_manager):
         pass
 
     @abstractmethod
-    def edit_managers_responsibilities(self, store_id, manager_id,
-                                       responsibilities):
+    def add_manager_permission(self, store_id, member, permission):
         pass
 
     @abstractmethod
-    def dismiss_manager(self, store_id, manager_id):
+    def remove_manager_permission(self, store_id, member, permission):
+        pass
+
+    @abstractmethod
+    def dismiss_manager(self, store_id, manager):
         pass
 
     @abstractmethod
@@ -113,8 +121,8 @@ class Guest(UserState):
     def open_store(self, store_id, store_parameters):
         raise RuntimeError('A store cannot be opened by a guest')
 
-    # In contrary to the requirements, guests can see their RAM history (can be complex because all store's history
-    # is saved in DB and we need to ignore if the buyer was a guest).
+    def get_purchase_history(self):
+        raise RuntimeError("Guests don't have purchase history")
 
     def add_new_product(self, store_id, product_information,
                         quantity):
@@ -123,24 +131,26 @@ class Guest(UserState):
     def remove_product(self, store_id, product_id):
         raise RuntimeError('Guests cannot remove products from stores')
 
-    def change_product_quantity(self, store_id, product_id, new_quantity):
+    def change_product_quantity_in_store(self, store_id, product_id, new_quantity):
         raise RuntimeError("Guests cannot change store product's quantity")
 
-    def edit_product_details(self, store_id, product_id,
-                             new_details):
+    def set_product_price(self, store_id, product_id,
+                          new_price):
         raise RuntimeError("Guests cannot edit store product's details")
 
-    def appoint_new_store_owner(self, store_id, new_owner_id):
+    def appoint_new_store_owner(self, store_id, new_owner):
         raise RuntimeError("Guests cannot appoint new store owners")
 
-    def appoint_new_store_manager(self, store_id, new_manager_id):
+    def appoint_new_store_manager(self, store_id, new_manager):
         raise RuntimeError("Guests cannot appoint new store managers")
 
-    def edit_managers_responsibilities(self, store_id, manager_id,
-                                       responsibilities):
+    def add_manager_permission(self, store_id, member, permission):
         raise RuntimeError("Guests cannot edit a stores manager's responsibilities")
 
-    def dismiss_manager(self, store_id, manager_id):
+    def remove_manager_permission(self, store_id, member, permission):
+        raise RuntimeError("Guests cannot edit a stores manager's responsibilities")
+
+    def dismiss_manager(self, store_id, manager):
         raise RuntimeError("Guests cannot dismiss managers")
 
     def get_store_personnel_info(self, store_id):
@@ -158,12 +168,13 @@ class Guest(UserState):
 
 class Member(UserState):
 
-    def __init__(self, user, username, responsibilities=None):  # for DB initialization
+    def __init__(self, user, username, responsibilities=None, purchase_details=[]):  # for DB initialization
         super().__init__(user)
         if responsibilities is None:
             responsibilities = dict()
         self.username = username
         self.responsibilities = responsibilities
+        self.purchase_details = purchase_details
         # get cart data from DB
 
     def login(self, username, password):
@@ -187,13 +198,13 @@ class Member(UserState):
         # update data in DB in later milestones
         return response
 
-    def buy_cart(self, product_purchase_info):
-        response = super().buy_products()
+    def buy_cart(self, user, product_purchase_info):
+        response = super().buy_cart(user, product_purchase_info)
         # update data in DB in later milestones
         return response
 
     def delete_products_after_purchase(self):
-        response = super().delete_pruducts_after_purchase()
+        response = super().delete_products_after_purchase()
         # update data in DB in later milestones
         return response
 
@@ -205,58 +216,65 @@ class Member(UserState):
                                                          store)
         return store
 
-    def add_new_product(self, store_id, product_information,
+    def get_purchase_history(self):
+        return self.purchase_details
+
+    def add_new_product(self, store_id, product_id,
                         quantity):
         if store_id not in self.responsibilities:
             raise RuntimeError(f"this member do not own/manage store {store_id}")
-        self.responsibilities[store_id].add_new_product(product_information, quantity)
+        return self.responsibilities[store_id].add_product(product_id, quantity)
 
     def remove_product(self, store_id, product_id):
         if store_id not in self.responsibilities:
             raise RuntimeError(f"this member do not own/manage store {store_id}")
-        self.responsibilities[store_id].remove_product(product_id)
+        return self.responsibilities[store_id].remove_product(product_id)
 
-    def change_product_quantity(self, store_id, product_id, new_quantity):
+    def change_product_quantity_in_store(self, store_id, product_id, new_quantity):
         if store_id not in self.responsibilities:
             raise RuntimeError(f"this member do not own/manage store {store_id}")
-        self.responsibilities[store_id].change_product_quantity(product_id, new_quantity)
+        return self.responsibilities[store_id].change_product_quantity(product_id, new_quantity)
 
-    def edit_product_details(self, store_id, product_id,
-                             new_details):
+    def set_product_price(self, store_id, product_id,
+                          new_price):
         if store_id not in self.responsibilities:
             raise RuntimeError(f"this member do not own/manage store {store_id}")
-        self.responsibilities[store_id].edit_product_details(product_id, new_details)
+        return self.responsibilities[store_id].set_product_price(product_id, new_price)
 
-    def appoint_new_store_owner(self, store_id, new_owner_id):
+    def appoint_new_store_owner(self, store_id, new_owner):
         if store_id not in self.responsibilities:
             raise RuntimeError(f"this member do not own/manage store {store_id}")
-        self.responsibilities[store_id].appoint_new_store_owner(new_owner_id)
+        return self.responsibilities[store_id].appoint_owner(new_owner)
 
-    def appoint_new_store_manager(self, store_id, new_manager_id):
+    def appoint_new_store_manager(self, store_id, new_manager):
         if store_id not in self.responsibilities:
             raise RuntimeError(f"this member do not own/manage store {store_id}")
-        self.responsibilities[store_id].appoint_new_store_manager(new_manager_id)
+        return self.responsibilities[store_id].appoint_manager(new_manager)
 
-    def edit_managers_responsibilities(self, store_id, manager_id,
-                                       responsibilities):
+    def add_manager_permission(self, store_id, member, permission):
         if store_id not in self.responsibilities:
             raise RuntimeError(f"this member do not own/manage store {store_id}")
-        self.responsibilities[store_id].edit_managers_responsibilities(manager_id, responsibilities)
+        return self.responsibilities[store_id].add_manager_permission(member, permission)
 
-    def dismiss_manager(self, store_id, manager_id):
+    def remove_manager_permission(self, store_id, member, permission):
         if store_id not in self.responsibilities:
             raise RuntimeError(f"this member do not own/manage store {store_id}")
-        self.responsibilities[store_id].dismiss_manager(manager_id)
+        return self.responsibilities[store_id].remove_manager_permission(member, permission)
+
+    def dismiss_manager(self, store_id, manager):
+        if store_id not in self.responsibilities:
+            raise RuntimeError(f"this member do not own/manage store {store_id}")
+        return self.responsibilities[store_id].remove_appointment(manager)
 
     def get_store_personnel_info(self, store_id):
         if store_id not in self.responsibilities:
             raise RuntimeError(f"this member do not own/manage store {store_id}")
-        self.responsibilities[store_id].get_store_personnel_info()
+        return self.responsibilities[store_id].get_store_appointments()
 
     def get_store_purchase_history(self, store_id):
         if store_id not in self.responsibilities:
             raise RuntimeError(f"this member do not own/manage store {store_id}")
-        self.responsibilities[store_id].get_store_purchase_history()
+        return self.responsibilities[store_id].get_store_purchases_history()
 
     def get_any_store_purchase_history(self, store_id):
         raise RuntimeError("Members cannot get any store's purchase history")
