@@ -4,7 +4,7 @@ from ..user import user
 
 
 
-class Manager(Owner):
+class Manager(owner):
 
 	def __init__(self, user_state: user_state, store: store) -> None:
 		self.permissions = {
