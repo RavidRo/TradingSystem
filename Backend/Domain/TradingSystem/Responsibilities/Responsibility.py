@@ -1,7 +1,7 @@
-from ..User import User
+from ..user import user
 
 import enum
-Permission = enum.Enum(
+permission = enum.Enum(
 	value='Permission',
 	names=[
 		('MANAGE_PRODUCTS',  1),
@@ -16,78 +16,78 @@ Permission = enum.Enum(
 		('get history', 5),
 	]
 )
-class Permission(enum.Enum):
+class permission(enum.Enum):
 	MANAGE_PRODUCTS = 1
 	GET_APPOINTMENTS = 2
 	APPOINT_MANAGER = 3
 	REMOVE_MANAGER = 4
 	GET_HISTORY = 5
 
-class Responsibility:
+class responsibility:
 	ERROR_MESSAGE = "Responsibility is an interface, function not implemented"
 
 	# TODO import Store and Member
-	def __init__(self, user_state : Member, store : Store) -> None:
+	def __init__(self, user_state : member, store : store) -> None:
 		self.user_state = user_state;
 		user_state.add_responsibility(self)
 		self.store = store;
-		self.appointed : list[Responsibility] = [];
+		self.appointed : list[responsibility] = [];
 
 	#4.1
 	#Creating a new product a the store
 	def add_product(self, product_id : str, name : str, price: float, quantity : int) -> response[None]:
-		raise Exception(Responsibility.ERROR_MESSAGE)
+		raise Exception(responsibility.ERROR_MESSAGE)
 
 	#4.1
 	def remove_product(self, product_id : str) -> response[None]:
-		raise Exception(Responsibility.ERROR_MESSAGE)
+		raise Exception(responsibility.ERROR_MESSAGE)
 
 	#4.1
 	def change_product_quantity(self, product_id : str, quantity : int) -> response[None]:
-		raise Exception(Responsibility.ERROR_MESSAGE)
+		raise Exception(responsibility.ERROR_MESSAGE)
 
 	#4.1
 	def edit_product_details(self, product_id : str, new_name: str, new_price : float) -> response[None]:
-		raise Exception(Responsibility.ERROR_MESSAGE)
+		raise Exception(responsibility.ERROR_MESSAGE)
 
 	#4.3
-	def appoint_owner(self, user : User) -> response[None]:
-		raise Exception(Responsibility.ERROR_MESSAGE)
+	def appoint_owner(self, user : user) -> response[None]:
+		raise Exception(responsibility.ERROR_MESSAGE)
 
 	#4.5
-	def appoint_manager(self, user : User) -> response[None]:
-		raise Exception(Responsibility.ERROR_MESSAGE)
+	def appoint_manager(self, user : user) -> response[None]:
+		raise Exception(responsibility.ERROR_MESSAGE)
 
 	#4.6
 	# Returns true if and only if self.user appointed user and user is a manager
-	def add_manager_permission(self, username : str, permission : Permission) -> response[None]:
-		raise Exception(Responsibility.ERROR_MESSAGE)
+	def add_manager_permission(self, username : str, permission : permission) -> response[None]:
+		raise Exception(responsibility.ERROR_MESSAGE)
 
 	#4.6
-	def remove_manager_permission(self, username : str, permission : Permission) -> response[None]:
-		raise Exception(Responsibility.ERROR_MESSAGE)
+	def remove_manager_permission(self, username : str, permission : permission) -> response[None]:
+		raise Exception(responsibility.ERROR_MESSAGE)
 
 	#4.4, 4.7
 	def remove_appointment(self, username : str) -> response[None]:
-		raise Exception(Responsibility.ERROR_MESSAGE)
+		raise Exception(responsibility.ERROR_MESSAGE)
 
 	#4.9
 	def get_store_appointments(self) -> response[Responsibility]:
-		raise Exception(Responsibility.ERROR_MESSAGE)
+		raise Exception(responsibility.ERROR_MESSAGE)
 
 	#4.11
-	def get_store_purchases_history(self) -> response[list[PurchaseDetails]]: #TODO import Purchase Details
-		raise Exception(Responsibility.ERROR_MESSAGE)
+	def get_store_purchases_history(self) -> response[list[purchase_details]]: #TODO import Purchase Details
+		raise Exception(responsibility.ERROR_MESSAGE)
 
 	
-	def _add_permission(self, username : str, permission : Permission) -> bool:
+	def _add_permission(self, username : str, permission : permission) -> bool:
 		if not self.appointed:
 			# if self.user never appointed anyone
 			return False
 		# returns true if any one of the children returns true
 		return any(map(self.appointed.appointed, lambda worker : worker._add_permission(username, permission)))
 	
-	def _remove_permission(self, username : str, permission : Permission) -> bool:
+	def _remove_permission(self, username : str, permission : permission) -> bool:
 		if not self.appointed:
 			# if self.user never appointed anyone
 			return False

@@ -1,11 +1,11 @@
-from .Responsibility import Permission, Responsibility
-from .Manager import Manager
-from .Owner import Owner
-from ..User import User
+from .responsibility import permission, responsibility
+from .manager import manager
+from .owner import owner
+from ..user import user
 
 
 
-class Founder(Responsibility):
+class founder(responsibility):
 	#4.1
 	#Creating a new product a the store
 	def add_product(self, product_id : str, name : str, price: float, quantity : int) -> response[None]:
@@ -24,12 +24,12 @@ class Founder(Responsibility):
 		return self.store.edit_product_details(self, product_id, new_name, new_price)
 	
 	#4.3
-	def appoint_owner(self, user : User) -> response[None]:
+	def appoint_owner(self, user : user) -> response[None]:
 		if user.isAppointed(self.store.id):
 			return respons(False, msg = f"{user.get_username()} is already appointed to {self.store.get_name()}")	
 		
 		# Success
-		newResponsibility = Owner(user.state, self.store)
+		newResponsibility = owner(user.state, self.store)
 		self.appointed.append(newResponsibility)
 		return response(True)			
 
@@ -39,19 +39,19 @@ class Founder(Responsibility):
 			return respons(False, msg = f"{user.get_username()} is already appointed to {self.store.get_name()}")	
 
 		# Success
-		newResponsibility = Manager(user.state, self.store)
+		newResponsibility = manager(user.state, self.store)
 		self.appointed.append(newResponsibility)
 		return response(True)	
 
 	#4.6
 	# recursively call children function until the child is found and the permission is added
-	def add_manager_permission(self, username : str, permission : Permission) -> response[None]:
+	def add_manager_permission(self, username : str, permission : permission) -> response[None]:
 		if not self._add_permission(username, permission):
 			return response(False, msg = f"{self.user_state.username} never appointed {username} as a manager")
 		return response(True)
 
 	#4.6
-	def remove_manager_permission(self, username : str, permission : Permission) -> response[None]:
+	def remove_manager_permission(self, username : str, permission : permission) -> response[None]:
 		if not self._remove_permission(username, permission):
 			return response(False, msg = f"{self.user_state.username} never appointed {username} as a manager")
 		return response(True)
@@ -63,10 +63,10 @@ class Founder(Responsibility):
 		return response(True)
 
 	#4.9
-	def get_store_appointments(self) -> response[Responsibility]:
+	def get_store_appointments(self) -> response[responsibility]:
 		return self.store.get_responsibilities()
 
 	#4.11
-	def get_store_purchases_history(self) -> response[list[PurchaseDetails]]: #TODO import Purchase Details
+	def get_store_purchases_history(self) -> response[list[purchase_details]]: #TODO import Purchase Details
 		return self.store.get_purchase_history()
 		
