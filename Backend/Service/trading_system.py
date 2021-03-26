@@ -2,7 +2,7 @@
 
 from Backend.Domain.TradingSystem import trading_system_manager
 from Backend.Domain.Payment import PaymentManager
-
+from Backend import response
 
 # TODO: import response object and the interface ItradingSystem
 
