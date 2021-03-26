@@ -1,6 +1,8 @@
 """ this class is responsible to communicate with the trading system manager"""
 
 from Backend.Domain.TradingSystem import trading_system_manager
+from Backend.Domain.Payment import PaymentManager
+
 
 # TODO: import response object and the interface ItradingSystem
 
@@ -21,6 +23,7 @@ class TradingSystem(ITradingSystem):
         else:
             TradingSystem.__instance = self
             self.trading_system_manager = trading_system_manager.TradingSystemManager()
+            self.payment_manager = PaymentManager()
 
     def enter_system(self):
         return self.trading_system_manager.enter_system()
