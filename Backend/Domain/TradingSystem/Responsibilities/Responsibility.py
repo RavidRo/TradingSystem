@@ -34,20 +34,20 @@ class Responsibility:
 		self.appointed : list[Responsibility] = [];
 
 	#4.1
-	# Creating a new product a the store and setting its quantity to 0
-	def create_product(self, name : str, price : float) -> response[None]:
+	#Creating a new product a the store
+	def add_product(self, product_id : str, name : str, price: float, quantity : int) -> response[None]:
 		raise Exception(Responsibility.ERROR_MESSAGE)
 
 	#4.1
-	def add_products(self, product_id : str, quantity : int) -> response[None]:
+	def remove_product(self, product_id : str) -> response[None]:
 		raise Exception(Responsibility.ERROR_MESSAGE)
 
 	#4.1
-	def remove_products(self, product_id : str, quantity : int) -> response[None]:
+	def change_product_quantity(self, product_id : str, quantity : int) -> response[None]:
 		raise Exception(Responsibility.ERROR_MESSAGE)
 
 	#4.1
-	def set_product_price(self, product_id : str, new_price : float) -> response[None]:
+	def edit_product_details(self, product_id : str, new_name: str, new_price : float) -> response[None]:
 		raise Exception(Responsibility.ERROR_MESSAGE)
 
 	#4.3
@@ -60,15 +60,15 @@ class Responsibility:
 
 	#4.6
 	# Returns true if and only if self.user appointed user and user is a manager
-	def add_manager_permission(self, user : User, permission : Permission) -> response[None]:
+	def add_manager_permission(self, username : str, permission : Permission) -> response[None]:
 		raise Exception(Responsibility.ERROR_MESSAGE)
 
 	#4.6
-	def remove_manager_permission(self, user : User, permission : Permission) -> response[None]:
+	def remove_manager_permission(self, username : str, permission : Permission) -> response[None]:
 		raise Exception(Responsibility.ERROR_MESSAGE)
 
 	#4.4, 4.7
-	def remove_appointment(self, user : User) -> response[None]:
+	def remove_appointment(self, username : str) -> response[None]:
 		raise Exception(Responsibility.ERROR_MESSAGE)
 
 	#4.9
@@ -94,16 +94,16 @@ class Responsibility:
 		# returns true if any one of the children returns true
 		return any(map(self.appointed.appointed, lambda worker : worker._remove_permission(username, permission)))
 	
-	def _remove_appointment(self, user : User) -> bool:
+	def _remove_appointment(self, username : str) -> bool:
 		if not self.appointed:
 			# if self.user never appointed anyone
 			return False
 			
 		for appointment in self.appointed:
-			appointment.user_state.username == user.get_username()
+			appointment.user_state.username == username
 			self.appointed.remove(appointment)
 			return True
 
-		return any(map(self.appointed.appointed, lambda worker : worker._remove_appointment(user)))
+		return any(map(self.appointed.appointed, lambda worker : worker._remove_appointment(username)))
 	
 			
