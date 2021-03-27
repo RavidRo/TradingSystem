@@ -1,4 +1,8 @@
-from ..user import user
+from Backend.Domain.TradingSystem.user_states import member
+from Backend.Domain.TradingSystem.user import user
+from Backend.Domain.TradingSystem.purchase_details import purchase_details
+from Backend.Domain.TradingSystem.store import store
+from Backend.response import Response
 
 import enum
 permission = enum.Enum(
@@ -35,48 +39,48 @@ class responsibility:
 
 	#4.1
 	#Creating a new product a the store
-	def add_product(self, product_id : str, name : str, price: float, quantity : int) -> response[None]:
+	def add_product(self, product_id : str, name : str, price: float, quantity : int) -> Response[None]:
 		raise Exception(responsibility.ERROR_MESSAGE)
 
 	#4.1
-	def remove_product(self, product_id : str) -> response[None]:
+	def remove_product(self, product_id : str) -> Response[None]:
 		raise Exception(responsibility.ERROR_MESSAGE)
 
 	#4.1
-	def change_product_quantity(self, product_id : str, quantity : int) -> response[None]:
+	def change_product_quantity(self, product_id : str, quantity : int) -> Response[None]:
 		raise Exception(responsibility.ERROR_MESSAGE)
 
 	#4.1
-	def edit_product_details(self, product_id : str, new_name: str, new_price : float) -> response[None]:
+	def edit_product_details(self, product_id : str, new_name: str, new_price : float) -> Response[None]:
 		raise Exception(responsibility.ERROR_MESSAGE)
 
 	#4.3
-	def appoint_owner(self, user : user) -> response[None]:
+	def appoint_owner(self, user : user) -> Response[None]:
 		raise Exception(responsibility.ERROR_MESSAGE)
 
 	#4.5
-	def appoint_manager(self, user : user) -> response[None]:
+	def appoint_manager(self, user : user) -> Response[None]:
 		raise Exception(responsibility.ERROR_MESSAGE)
 
 	#4.6
 	# Returns true if and only if self.user appointed user and user is a manager
-	def add_manager_permission(self, username : str, permission : permission) -> response[None]:
+	def add_manager_permission(self, username : str, permission : permission) -> Response[None]:
 		raise Exception(responsibility.ERROR_MESSAGE)
 
 	#4.6
-	def remove_manager_permission(self, username : str, permission : permission) -> response[None]:
+	def remove_manager_permission(self, username : str, permission : permission) -> Response[None]:
 		raise Exception(responsibility.ERROR_MESSAGE)
 
 	#4.4, 4.7
-	def remove_appointment(self, username : str) -> response[None]:
+	def remove_appointment(self, username : str) -> Response[None]:
 		raise Exception(responsibility.ERROR_MESSAGE)
 
 	#4.9
-	def get_store_appointments(self) -> response[Responsibility]:
+	def get_store_appointments(self) -> Response[responsibility]:
 		raise Exception(responsibility.ERROR_MESSAGE)
 
 	#4.11
-	def get_store_purchases_history(self) -> response[list[purchase_details]]: #TODO import Purchase Details
+	def get_store_purchases_history(self) -> Response[list[purchase_details]]: #TODO import Purchase Details
 		raise Exception(responsibility.ERROR_MESSAGE)
 
 	
