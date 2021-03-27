@@ -39,7 +39,7 @@ class responsibility:
 
 	#4.1
 	#Creating a new product a the store
-	def add_product(self, product_id : str, name : str, price: float, quantity : int) -> Response[None]:
+	def add_product(self, name : str, price: float, quantity : int) -> Response[None]:
 		raise Exception(responsibility.ERROR_MESSAGE)
 
 	#4.1

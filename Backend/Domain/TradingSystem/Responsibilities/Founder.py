@@ -10,8 +10,8 @@ from Backend.response import Response
 class founder(responsibility):
 	#4.1
 	#Creating a new product a the store
-	def add_product(self, product_id : str, name : str, price: float, quantity : int) -> Response[None]:
-		return self.store.add_product(self, product_id, name, price, quantity)
+	def add_product(self, name : str, price: float, quantity : int) -> Response[None]:
+		return self.store.add_product(self, name, price, quantity)
 
 	#4.1
 	def remove_product(self, product_id : str) -> Response[None]:

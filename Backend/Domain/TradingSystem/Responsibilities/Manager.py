@@ -25,9 +25,9 @@ class Manager(owner):
 
 	#4.1
 	#Creating a new product a the store
-	def add_product(self, product_id : str, name : str, price: float, quantity : int) -> Response[None]:
+	def add_product(self, name : str, price: float, quantity : int) -> Response[None]:
 		if(self.permissions[permission.MANAGE_PRODUCTS]):
-			return super().add_product(product_id, name, price, quantity)
+			return super().add_product(name, price, quantity)
 
 		return self.__create_no_permission_Response(permission.MANAGE_PRODUCTS)
 
