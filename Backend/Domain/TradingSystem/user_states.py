@@ -9,8 +9,6 @@ from Backend.Domain.TradingSystem.purchase_details import PurchaseDetails
 from typing import List
 
 
-# TODO: Change return types to Response
-
 class UserState(ABC):
 
     def __init__(self, user):
@@ -115,8 +113,10 @@ class Guest(UserState):
     def login(self, username, password):
         response = self.authentication.login(username, password)
         if response.success:
-            self.user.change_state(Member(username))  # in later milestones, fetch data from DB
-        # TODO: need to induce if an admin was logged in - ask Sunshine
+            if response.object:
+                self.user.change_state(Admin(self.user, username))  # in later milestones, fetch data from DB
+            else:
+                self.user.change_state(Member(self.user, username))
         return response
 
     def register(self, username, password):
