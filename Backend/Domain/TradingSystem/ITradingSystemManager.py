@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 
-# TODO: import response and data objects
+# TODO: import Response and data objects
 class ITradingSystem(metaclass=ABC):
 
 	#2.1
@@ -11,53 +11,53 @@ class ITradingSystem(metaclass=ABC):
 
 	#2.3
 	@abstractmethod
-	def register(username : str, password : str, cookie : str) -> response[None]:
+	def register(username : str, password : str, cookie : str) -> Response[None]:
 		raise NotImplementedError
 
 	#2.4
 	@abstractmethod
-	def login(username : str, password : str, cookie : str) -> response[None]:
+	def login(username : str, password : str, cookie : str) -> Response[None]:
 		raise NotImplementedError
 
 	#2.5
 	@abstractmethod
-	def get_stores_details() -> response[list[StoreData]]:
+	def get_stores_details() -> Response[list[StoreData]]:
 		raise NotImplementedError
 
 	#2.5
 	@abstractmethod
-	def get_products_by_store(store_id : str) -> response[list[ProductData]]:
+	def get_products_by_store(store_id : str) -> Response[list[ProductData]]:
 		raise NotImplementedError
 
 	#2.6
 	# kwargs = You can search for a product by additional key words
 	@abstractmethod
-	def search_products(product_name="", category=None, min_price=None, max_price=None, **kwargs) -> response[list[ProductData]]:
+	def search_products(product_name="", category=None, min_price=None, max_price=None, **kwargs) -> Response[list[ProductData]]:
 		raise NotImplementedError
 
 	#2.7
 	@abstractmethod
-	def add_to_cart(cookie : str, product_id : str, quantity=1) -> response[None]:
+	def add_to_cart(cookie : str, product_id : str, quantity=1) -> Response[None]:
 		raise NotImplementedError
 
 	#2.8
 	@abstractmethod
-	def get_cart_details(cookie : str) -> response[ShoppingCartData]:
+	def get_cart_details(cookie : str) -> Response[ShoppingCartData]:
 		raise NotImplementedError
 
 	#2.8
 	@abstractmethod
-	def remove_product_from_cart(cookie : str, product_id : str, quantity=1) -> response[None]:
+	def remove_product_from_cart(cookie : str, product_id : str, quantity=1) -> Response[None]:
 		raise NotImplementedError
 
 	#2.9
 	@abstractmethod
-	def purchase_cart(cookie : str) -> response[float]:
+	def purchase_cart(cookie : str) -> Response[float]:
 		raise NotImplementedError
 
 	#2.9
 	@abstractmethod
-	def purchase_completed(cookie : str) -> response[None]:
+	def purchase_completed(cookie : str) -> Response[None]:
 		raise NotImplementedError
 
 	# Member
@@ -65,12 +65,12 @@ class ITradingSystem(metaclass=ABC):
 
 	#3.2
 	@abstractmethod
-	def create_store(cookie : str, name : str) -> response[None]:
+	def create_store(cookie : str, name : str) -> Response[None]:
 		raise NotImplementedError
 
 	#3.7
 	@abstractmethod
-	def ger_purchase_history(cookie : str) -> response[list[PurchaseDetailsData]]:
+	def ger_purchase_history(cookie : str) -> Response[list[PurchaseDetailsData]]:
 		raise NotImplementedError
 
 	# Owner and manager
@@ -79,56 +79,56 @@ class ITradingSystem(metaclass=ABC):
 	#4.1
 	# Creating a new product a the store and setting its quantity to 0
 	@abstractmethod
-	def create_product(cookie : str, store_id : str, name : str, price : float) -> response[None]:
+	def create_product(cookie : str, store_id : str, name : str, price: float, quantity : int) -> Response[None]:
 		raise NotImplementedError
 
 	#4.1
 	@abstractmethod
-	def add_products(cookie : str, store_id : str, product_id : str, quantity : int) -> response[None]:
+	def remove_products(cookie : str, store_id : str, product_id : str) -> Response[None]:
+		raise NotImplementedError
+	
+	#4.1
+	@abstractmethod
+	def change_product_quantity(cookie : str, store_id : str, product_id : str, quantity : int) -> Response[None]:
 		raise NotImplementedError
 
 	#4.1
 	@abstractmethod
-	def remove_products(cookie : str, store_id : str, product_id : str, quantity : int) -> response[None]:
-		raise NotImplementedError
-
-	#4.1
-	@abstractmethod
-	def set_product_price(cookie : str, store_id : str, product_id : str, new_price : float) -> response[None]:
+	def edit_product_details(cookie : str, store_id : str, product_id : str, new_name: str, new_price : float) -> Response[None]:
 		raise NotImplementedError
 
 	#4.3
-	def appoint_owner(cookie : str, store_id : str, username : str) -> response[None]:
+	def appoint_owner(cookie : str, store_id : str, username : str) -> Response[None]:
 		raise NotImplementedError
 
 	#4.5
 	@abstractmethod
-	def appoint_manager(cookie : str, store_id : str, username : str) -> response[None]:
+	def appoint_manager(cookie : str, store_id : str, username : str) -> Response[None]:
 		raise NotImplementedError
 
 	#4.6
 	@abstractmethod
-	def add_manager_permission(cookie : str, store_id : str, username : str, permission_number : int) -> response[None]:
+	def add_manager_permission(cookie : str, store_id : str, username : str, permission_number : int) -> Response[None]:
 		raise NotImplementedError
 
 	#4.6
 	@abstractmethod
-	def remove_manager_permission(cookie : str, store_id : str, username : str, permission_number : int) -> response[None]:
+	def remove_manager_permission(cookie : str, store_id : str, username : str, permission_number : int) -> Response[None]:
 		raise NotImplementedError
 
 	#4.4, 4.7
 	@abstractmethod
-	def remove_appointment(cookie : str, store_id : str, username : str) -> response[None]:
+	def remove_appointment(cookie : str, store_id : str, username : str) -> Response[None]:
 		raise NotImplementedError
 
 	#4.9
 	@abstractmethod
-	def get_store_appointments(cookie : str, store_id : str) -> response[ResponsibilityData]:
+	def get_store_appointments(cookie : str, store_id : str) -> Response[ResponsibilityData]:
 		raise NotImplementedError
 
 	#4.11
 	@abstractmethod
-	def get_store_purchases_history(cookie : str, store_id : str) -> response[list[PurchaseDetailsData]]:
+	def get_store_purchases_history(cookie : str, store_id : str) -> Response[list[PurchaseDetailsData]]:
 		raise NotImplementedError
 
 	#System Manager
@@ -136,5 +136,5 @@ class ITradingSystem(metaclass=ABC):
 
 	#6.4
 	@abstractmethod
-	def get_user_purchase_history(cookie : str, username : str) -> response[list[PurchaseDetailsData]]:
+	def get_user_purchase_history(cookie : str, username : str) -> Response[list[PurchaseDetailsData]]:
 		raise NotImplementedError
