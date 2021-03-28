@@ -8,7 +8,7 @@ from Backend.response import Response, ParsableList
 class IStore(metaclass=ABC):
 
     @abstractmethod
-    def __init__(self, store_info):
+    def __init__(self, store_name: str):
         """Create a new store with it's specified info"""
         raise NotImplementedError
 
