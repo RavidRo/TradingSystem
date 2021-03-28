@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 
 from Backend.Domain.TradingSystem.Interfaces import IPurchaseDetails, IShoppingBag
-from Backend.response import Response
+from Backend.response import Response, PrimitiveParsable
 
 
 class IShoppingCart(metaclass=ABC):
@@ -47,7 +47,7 @@ class IShoppingCart(metaclass=ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def buy_products(self, products_purchase_info, user) -> Response[None]:
+    def buy_products(self, products_purchase_info: dict, user) -> Response[PrimitiveParsable]:
         """buy transaction"""
         raise NotImplementedError
 

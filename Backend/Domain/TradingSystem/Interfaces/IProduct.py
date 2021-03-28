@@ -6,7 +6,7 @@ from Backend.response import Response, ParsableList
 class IProduct(metaclass=ABC):
 
     @abstractmethod
-    def __init__(self, product_name: str, price: float):
+    def __init__(self, product_name: str, price: float, qunatity: int):
         """Create a new store with it's specified info"""
         raise NotImplementedError
 
@@ -17,6 +17,6 @@ class IProduct(metaclass=ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def edit_product_details(self, product_name: str, price: float) -> Response[None]:
+    def edit_product_details(self, product_name: str, price: float):
         """Edit product's details with received product_info"""
         raise NotImplementedError

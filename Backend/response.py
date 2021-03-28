@@ -26,6 +26,8 @@ class PrimitiveParsable(Parsable):
     def parse(self):
         return self.value
 
+    def get_val(self):
+        return self.value
 
 T = TypeVar('T', bound=Parsable)
 S = TypeVar('S')
@@ -82,3 +84,6 @@ class Response(Generic[T]):
 
     def succeeded(self):
         return self.success
+
+    def get_obj(self):
+        return self.object

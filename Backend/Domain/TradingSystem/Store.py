@@ -13,7 +13,7 @@ class Store(IStore):
         """Create a new store with it's specified info"""
         self.id = str(self.id_generator())
         self.name = store_name
-        self.products = []
+        self.products_to_quantities = dict()
         self.responsibility = None
         # These fields will be changed in the future versions
         self.discount_policy = DefaultDiscountPolicy()
@@ -38,29 +38,28 @@ class Store(IStore):
         if self.check_existing_product(product_name):
             return Response(False, msg="This product is already in the store's inventory")
 
-        product = Product(self.id_generator(), product_name, price, quantity)
-        self.products.append(product)
+        product_id = self.id_generator()
+        product = Product(product_id, product_name, price)
+        self.products_to_quantities.update({product_id, (product, quantity)})
         return Response(True, msg="product" + str(product_name) + "successfully added")
 
     def remove_product(self, product_id: str) -> Response[None]:
-        for prod in self.products:
-            if prod.getID() == product_id:
-                self.products.remove(prod)
-                return Response(True, msg="Succesfully removed product " + str(prod.get_name()))
-        return Response(False, msg="The product with id: " + str(product_id) + " is already not in the inventory!")
+        result = self.products_to_quantities.pop(product_id, None)
+        if result is None:
+            return Response(False, msg="The product " + str(result[0].get_name()) + " is already not in the inventory!")
+        return Response(True, msg="Successfully removed product with product id: " + str(product_id))
 
-    def change_product_qunatity(self, product_id: str, quantity: int) -> Response[None]:
-        for prod in self.products:
-            if prod.getID() == product_id:
-                prod.set_qunatity(quantity)
-                return Response(True, msg="Succesfully updated product " + str(prod.get_name()) + "'s quantity")
+    def change_product_quantity(self, product_id: str, quantity: int) -> Response[None]:
+        if product_id in self.products_to_quantities:
+            self.products_to_quantities[product_id][1] = quantity
+            return Response(True, msg="Successfully updated product " +
+                                      str(self.products_to_quantities[product_id][0].get_name()) + "'s quantity")
         return Response(False, msg="The product with id: " + str(product_id) + " isn't in the inventory!")
 
     def edit_product_details(self, product_id: str, product_name: str, price: float) -> Response[None]:
-        for prod in self.products:
-            if prod.getID() == product_id:
-                prod.change_details(product_name, price)
-                return Response(True, msg="Succesfully updated product " + str(prod.get_name()) + "'s details")
+        if product_id in self.products_to_quantities:
+            self.products_to_quantities[product_id][0].edit_product_details(product_name, price)
+            return Response(True, msg="Succesfully updated product " + self.products_to_quantities[product_id][0].get_name() + "'s details")
         return Response(False, msg="The product with id: " + str(product_id) + " isn't in the inventory!")
 
     def get_personnel_info(self) -> Response[Responsibility]:
@@ -84,7 +83,7 @@ class Store(IStore):
         self.responsibility = responsibility
 
     def check_existing_product(self, product_name: str):
-        for prod in self.products:
+        for (prod, quantity) in self.products_to_quantities.values():
             if prod.get_name() == product_name:
                 return True
         return False

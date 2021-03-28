@@ -1,14 +1,28 @@
+import uuid
+
+from Backend.Domain.TradingSystem.Interfaces.IProduct import IProduct
+from Backend.response import Response
 
 
-def get_name(self):
-    return self.name
+class Product(IProduct):
 
-def get_id(self):
-    return self.id
+    def __init__(self, product_name: str, price: float):
+        self.product_name = product_name
+        self.price = price
+        self.id = str(self.id_generator())
 
-def set_qunatity(self,quantity):
-    self.qunatity = quantity
+    def show_product_data(self) -> Response:
+        return Response[self](True, msg="Product's details")
 
-def change_details(self, product_name, price):
-    self.name = product_name
-    self.price = price
+    def edit_product_details(self, product_name: str, price: float):
+        self.product_name = product_name
+        self.price = price
+
+    def get_name(self):
+        return self.name
+
+    def get_id(self):
+        return self.id
+
+    def id_generator(self):
+        return uuid.uuid4()
