@@ -1,5 +1,7 @@
 from abc import ABC, abstractmethod
 
+from Backend.response import Response, ParsableList
+
 
 class IProduct(metaclass=ABC):
 
@@ -9,11 +11,12 @@ class IProduct(metaclass=ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def show_product_data(self):
+    #todo: think how to handle the return type since can't return IProduct
+    def show_product_data(self) -> Response:
         """A query for the product's data"""
         raise NotImplementedError
 
     @abstractmethod
-    def edit_product_details(self, product_info):
+    def edit_product_details(self, product_name: str, price: float) -> Response[None]:
         """Edit product's details with received product_info"""
         raise NotImplementedError
