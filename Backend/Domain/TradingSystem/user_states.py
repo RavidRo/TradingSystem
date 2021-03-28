@@ -42,7 +42,7 @@ class UserState(ABC):
         return self.cart.delete_pruducts_after_purchase()
 
     @abstractmethod
-    def open_store(self, store_id, store_parameters):
+    def open_store(self, store_name):
         return Response(False, msg="Abstract Method")
 
     @abstractmethod
@@ -122,7 +122,7 @@ class Guest(UserState):
     def register(self, username, password):
         return self.authentication.register(username, password)
 
-    def open_store(self, store_id, store_parameters):
+    def open_store(self, store_name):
         return Response(False, msg="A store cannot be opened by a guest")
 
     def get_purchase_history(self):
@@ -211,12 +211,11 @@ class Member(UserState):
         self.purchase_details.append(response.object)
         return response
 
-    def open_store(self, store_id, store_parameters):
-        if store_id in self.responsibilities:
-            return Response(False, msg="Store cannot be re-opened")
-        store = Store(store_id, store_parameters)
-        self.responsibilities[store_id] = Responsibility(self,
-                                                         store)
+    def open_store(self, store_name):
+        store = Store(store_name)
+        self.responsibilities[store.get_id()] = Responsibility(self,
+                                                               store)
+        store.set_responsibility(self.responsibilities[store.get_id()])
         return Response[store](True, obj=store, msg="Store opened successfully")
 
     def get_purchase_history(self):
