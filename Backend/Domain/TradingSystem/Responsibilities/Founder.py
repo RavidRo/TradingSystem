@@ -49,19 +49,19 @@ class founder(responsibility):
 	# recursively call children function until the child is found and the permission is added
 	def add_manager_permission(self, username : str, permission : permission) -> Response[None]:
 		if not self._add_permission(username, permission):
-			return Response(False, msg = f"{self.user_state.username} never appointed {username} as a manager")
+			return Response(False, msg = f"{self.user_state.get_username()} never appointed {username} as a manager")
 		return Response(True)
 
 	#4.6
 	def remove_manager_permission(self, username : str, permission : permission) -> Response[None]:
 		if not self._remove_permission(username, permission):
-			return Response(False, msg = f"{self.user_state.username} never appointed {username} as a manager")
+			return Response(False, msg = f"{self.user_state.get_username()} never appointed {username} as a manager")
 		return Response(True)
 
 	#4.4, 4.7
 	def remove_appointment(self, username : str) -> Response[None]:
 		if not self._remove_appointment(username):
-			return Response(False, msg = f"{self.user_state.username} never appointed {username}")
+			return Response(False, msg = f"{self.user_state.get_username()} never appointed {username}")
 		return Response(True)
 
 	#4.9

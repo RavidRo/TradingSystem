@@ -21,7 +21,7 @@ class Manager(owner):
 		super().__init__(user_state, store)
 	
 	def __create_no_permission_Response(self, permission : permission) -> Response:
-		return Response(False, msg=f"{self.user_state.username} does not have permission to {permission.name}") 
+		return Response(False, msg=f"{self.user_state.get_username()} does not have permission to {permission.name}") 
 
 	#4.1
 	#Creating a new product a the store
@@ -100,14 +100,14 @@ class Manager(owner):
 		return self.__create_no_permission_Response(permission.GET_HISTORY)
 
 	def _add_permission(self, username : str, permission : permission) -> bool:
-		if self.user_state.username == username :
+		if self.user_state.get_username() == username :
 			self.permissions[permission] = True
 			return True
 
 		return super()._add_permission(username, permission)
 
 	def _remove_permission(self, username : str, permission : permission) -> bool:
-		if self.user_state.username == username :
+		if self.user_state.get_username() == username :
 			self.permissions[permission] = False
 			return True
 

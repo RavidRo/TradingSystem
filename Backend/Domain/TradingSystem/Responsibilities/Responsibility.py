@@ -33,7 +33,7 @@ class responsibility:
 	# TODO import Store and Member
 	def __init__(self, user_state : member, store : store) -> None:
 		self.user_state = user_state;
-		user_state.add_responsibility(self)
+		user_state.add_responsibility(self, store.get_id)
 		self.store = store;
 		self.appointed : list[responsibility] = [];
 
