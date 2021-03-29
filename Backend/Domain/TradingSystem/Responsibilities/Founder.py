@@ -27,7 +27,7 @@ class founder(responsibility):
 	
 	#4.3
 	def appoint_owner(self, user : user) -> Response[None]:
-		if user.isAppointed(self.store.id):
+		if user.isAppointed(self.store.get_id()):
 			return Response(False, msg = f"{user.get_username()} is already appointed to {self.store.get_name()}")	
 		
 		# Success
@@ -37,7 +37,7 @@ class founder(responsibility):
 
 	#4.5
 	def appoint_manager(self, user : user) -> Response[None]:
-		if user.isAppointed(self.store.id):
+		if user.isAppointed(self.store.get_id()):
 			return Response(False, msg = f"{user.get_username()} is already appointed to {self.store.get_name()}")	
 
 		# Success
