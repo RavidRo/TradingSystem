@@ -30,6 +30,14 @@ class user_manager:
 	def __create_cookie() -> str:
 		return str(uuid.uuid4())
 
+	# Called after register was successful and state was updated with the username
+	def __user_registered(username : str):
+		for cookie in user_manager.cookie_user:
+			user = user_manager.cookie_user[cookie]
+			if user.get_username() == username:
+				user_manager.username_user[username] = user
+
+
 	#2.1
 	# returns the guest newly created cookie
 	def enter_system() -> str:
@@ -39,8 +47,13 @@ class user_manager:
 
 	#2.3
 	def register(username : str, password : str, cookie : str) -> Response[None]:
-		func = lambda user: user.register(username, password)
-		return user_manager.__deligate_to_user(cookie, func)
+		user = user_manager.__get_user_by_cookie(cookie)
+		if not user:
+			return Response(False, msg="No user is identified by the given cookie")
+		response = user.register(username, password)
+		if response.succeeded:
+			user_manager.__user_registered(username)
+		return response
 
 	#2.4
 	def login(username : str, password : str, cookie : str) -> Response[None]:
@@ -160,13 +173,6 @@ class user_manager:
 
 	# Inter component functions
 	#====================
-	
-	# Called after register was successful and state was updated with the username
-	def user_registered(username : str):
-		for cookie in user_manager.cookie_user:
-			user = user_manager.cookie_user[cookie]
-			if user.get_username() == username:
-				user_manager.username_user[username] = user
 
 
 
