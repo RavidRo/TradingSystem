@@ -56,6 +56,13 @@ class TradingSystem(object):
     def purchase_cart(self, cookie: str):
         return self.trading_system_manager.purchase_cart(cookie)
 
+    def send_payment(self, cookie, price, payment_details):
+        res = self.payment_manager.pay(price, payment_details)
+        if res.succeeded():
+            return self.purchase_completed(cookie)
+        else:
+            return res.get_msg()
+
     def purchase_completed(self, cookie: str):
         return self.trading_system_manager.purchase_completed(cookie)
 
