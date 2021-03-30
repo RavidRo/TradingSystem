@@ -1,3 +1,4 @@
+# %%
 from abc import ABC, abstractmethod
 from typing import TypeVar, Generic, List, Dict
 
@@ -27,18 +28,18 @@ class PrimitiveParsable(Parsable):
         return self.value
 
 
-T = TypeVar('T', bound=Parsable)
-S = TypeVar('S')
+
+
 
 
 """
 In order to support list return objects, a parsable list wrapper is introduced
 """
 
+T = TypeVar('T', bound=Parsable)
+class ParsableList(Parsable, Generic[T]):
 
-class ParsableList(Parsable):
-
-    def __init__(self, values: List[Generic[T]]):
+    def __init__(self, values: List[T]):
         self.values = values
 
     def parse(self):
@@ -50,10 +51,10 @@ class ParsableList(Parsable):
 In order to support map return objects, a parsable map wrapper is introduced (parse only values)
 """
 
-
-class ParsableMap(Parsable):
-
-    def __init__(self, values: Dict[Generic[S], Generic[T]]):
+S = TypeVar('S')
+class ParsableMap(Parsable, Generic[S, T]):
+    
+    def __init__(self, values: Dict[S, T]):
         self.values = values
 
     def parse(self):
@@ -61,10 +62,10 @@ class ParsableMap(Parsable):
             value.parse()
 
 
-"""
-Return object which contains message to print and object to inspect, and success flag.
-*Important* each class which self.object refers to must implement parse()
-"""
+# """
+# Return object which contains message to print and object to inspect, and success flag.
+# *Important* each class which self.object refers to must implement parse()
+# """
 
 
 class Response(Generic[T]):
@@ -82,3 +83,13 @@ class Response(Generic[T]):
 
     def succeeded(self):
         return self.success
+
+class foo():
+    def __init__(self) -> None:
+        self.name = "My Name"
+        
+variable : Response[foo] = Response(True, foo())
+print(variable.object)
+
+
+# %%
