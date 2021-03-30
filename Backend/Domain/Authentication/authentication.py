@@ -30,26 +30,24 @@ class Authentication(IAuthentication):
 
     def register(self, username, password):
         if self.db_handler.is_username_exists(username=username):
-            # return "username already exists"
-            return response.PrimitiveParsable(value="username already exists")
+            return response.Response[None](success=False, msg="username already exists")
 
         else:
             self.db_handler.add_user_to_db(username=username, password=password)
-            # return "registration succeeded"
-            return response.PrimitiveParsable(value="registration succeeded")
+            return response.Response[None](success=True, msg="registration succeeded")
 
     def login(self, username, password):
         if not self.db_handler.is_username_exists(username=username):
-            # return "username doesn't exist in the system"
-            return response.PrimitiveParsable(value="username doesn't exist in the system")
+            return response.Response[None](success=False, msg="username doesn't exist in the system")
 
         else:
             if not self.db_handler.is_password_match(given_password=password, username=username):
-                # return "password incorrect"
-                return response.PrimitiveParsable(value="password incorrect")
+                return response.Response[None](success=False, msg="password incorrect")
 
             else:
                 # return "login succeeded"
-                return response.PrimitiveParsable(value="login succeeded")
+                # TODO: db_hadler.is_admin.....then response: admin, else member
+                # TODO: with sunny
+                return response.Response[None](success=True, msg="registration succeeded")
 
 
