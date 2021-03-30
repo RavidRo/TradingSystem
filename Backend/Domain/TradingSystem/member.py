@@ -53,11 +53,9 @@ class Member(UserState):
         return response
 
     def open_store(self, store_name):
-        # TODO: look again at the review.
         store = Store(store_name)
         self.responsibilities[store.get_id()] = Responsibility(self,
                                                                store)
-        store.set_responsibility(self.responsibilities[store.get_id()])
         return Response[store](True, obj=store, msg="Store opened successfully")
 
     def get_purchase_history(self):

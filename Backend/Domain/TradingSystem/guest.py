@@ -16,8 +16,8 @@ class Guest(UserState):
 
     def login(self, username, password):
         response = self.authentication.login(username, password)
-        if response.success:
-            if response.object:
+        if response.succeeded():
+            if response.object.value:
                 self.user.change_state(Admin(self.user, username))  # in later milestones, fetch data from DB
             else:
                 self.user.change_state(Member(self.user, username))
