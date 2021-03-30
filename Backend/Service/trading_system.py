@@ -7,7 +7,7 @@ from Backend.Domain.Payment import PaymentManager
 
 # TODO: import response object and the interface ItradingSystem
 
-class TradingSystem(ITradingSystem):
+class TradingSystem(object):
     __instance = None
 
     @staticmethod
@@ -24,7 +24,7 @@ class TradingSystem(ITradingSystem):
         else:
             TradingSystem.__instance = self
             self.trading_system_manager = trading_system_manager.TradingSystemManager()
-            self.payment_manager = PaymentManager()
+            self.payment_manager = PaymentManager.PaymentManager()
 
     def enter_system(self):
         return self.trading_system_manager.enter_system()

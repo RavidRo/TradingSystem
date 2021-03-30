@@ -31,4 +31,4 @@ class DBHandler(object):
         self.users_db.add_user_to_db(username=username, password=password)
 
     def is_username_admin(self,username):
-        return self.users_db[username]['admin']
+        return bool(self.users_db[username]['admin'])

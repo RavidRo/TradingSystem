@@ -45,9 +45,7 @@ class Authentication(IAuthentication):
                 return response.Response[None](success=False, msg="password incorrect")
 
             else:
-                # return "login succeeded"
-                # TODO: db_hadler.is_admin.....then response: admin, else member
-                # TODO: with sunny
-                return response.Response[None](success=True, msg="registration succeeded")
+                is_admin = self.db_handler.is_username_admin(udername=username)
+                return response.Response[None](success=True,obj=response.PrimitiveParsable(is_admin),msg="login succeeded")
 
 
