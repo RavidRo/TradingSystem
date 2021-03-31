@@ -42,8 +42,7 @@ class ParsableList(Parsable):
         self.values = values
 
     def parse(self):
-        for value in self.values:
-            value.parse()
+        return map(self.values, lambda value: value.parse())
 
 
 """
