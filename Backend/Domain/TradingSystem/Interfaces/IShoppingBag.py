@@ -36,12 +36,6 @@ class IShoppingBag(metaclass=ABC):
         raise NotImplementedError
 
     @abstractmethod
-    # todo: think how to handle the return type since can't return IShoppingBag
-    def show_bag(self) -> Response:
-        """show the bag to the user"""
-        raise NotImplementedError
-
-    @abstractmethod
     def buy_products(self, products_info, user_info) -> Response[None]:
         """buy transaction"""
         raise NotImplementedError
