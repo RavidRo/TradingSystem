@@ -136,6 +136,8 @@ class TradingSystem(ITradingSystem):
 	def get_any_store_purchase_history(cookie : str, store_id : str) -> Response[ParsableList[purchase_details_data]]:
 		return UserManager.get_any_store_purchase_history(cookie, store_id)
 
+	# Inter component functions
+	# ============================
 	#6.4
 	def get_any_user_purchase_history(username : str) -> Response[ParsableList[purchase_details_data]]:
 		return UserManager.get_any_user_purchase_history(username)
