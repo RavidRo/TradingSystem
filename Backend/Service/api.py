@@ -44,14 +44,12 @@ async def login():
 
 @app.route('/get_stores_details', methods=['GET'])
 async def get_stores_details():
-    # TODO: why there is no cookie here?
     answer = await system.get_stores_details()
     return '''<h1>Answer is: {}</h1>'''.format(answer)
 
 
 @app.route('/get_products_by_store', methods=['GET'])
 async def get_products_by_store():
-    # TODO: why there is no cookie here?
     store_id = request.args.get('store_id')
     answer = await system.get_products_by_store(store_id)
     return '''<h1>Answer is: {}</h1>'''.format(answer)
@@ -59,7 +57,6 @@ async def get_products_by_store():
 
 @app.route('/search_products', methods=['GET'])
 async def search_products():
-    # TODO: why there is no cookie here?
     product_name = request.args.get('product_name')
     category = request.args.get('category')
     min_price = request.args.get('min_price')
