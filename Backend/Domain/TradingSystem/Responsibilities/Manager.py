@@ -4,7 +4,7 @@ from Backend.Domain.TradingSystem.user_states import member
 from Backend.Domain.TradingSystem.user import user
 from Backend.Domain.TradingSystem.purchase_details import purchase_details
 from Backend.Domain.TradingSystem.store import store
-from Backend.response import Response
+from Backend.response import Response, ParsableList
 
 
 
@@ -93,7 +93,7 @@ class Manager(owner):
 		return self.__create_no_permission_Response(permission.GET_APPOINTMENTS)
 
 	#4.11
-	def get_store_purchases_history(self) -> Response[list[purchase_details]]: #TODO import Purchase Details
+	def get_store_purchases_history(self) -> Response[ParsableList[purchase_details]]: 
 		if(self.permissions[permission.GET_HISTORY]):
 			return super().get_store_purchases_history()
 

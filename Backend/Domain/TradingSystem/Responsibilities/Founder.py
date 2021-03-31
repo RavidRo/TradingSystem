@@ -3,9 +3,7 @@ from .manager import manager
 from .owner import owner
 from Backend.Domain.TradingSystem.user import user
 from Backend.Domain.TradingSystem.purchase_details import purchase_details
-from Backend.response import Response
-
-
+from Backend.response import Response, ParsableList
 
 class founder(responsibility):
 	#4.1
@@ -69,6 +67,6 @@ class founder(responsibility):
 		return self.store.get_responsibilities()
 
 	#4.11
-	def get_store_purchases_history(self) -> Response[list[purchase_details]]: #TODO import Purchase Details
+	def get_store_purchases_history(self) -> Response[ParsableList[purchase_details]]: #TODO import Purchase Details
 		return self.store.get_purchase_history()
 		
