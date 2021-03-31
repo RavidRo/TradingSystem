@@ -30,7 +30,6 @@ class permission(enum.Enum):
 class responsibility:
 	ERROR_MESSAGE = "Responsibility is an interface, function not implemented"
 
-	# TODO import Store and Member
 	def __init__(self, user_state : member, store : store) -> None:
 		self.user_state = user_state;
 		user_state.add_responsibility(self, store.get_id)
@@ -80,7 +79,7 @@ class responsibility:
 		raise Exception(responsibility.ERROR_MESSAGE)
 
 	#4.11
-	def get_store_purchases_history(self) -> Response[ParsableList[purchase_details]]: #TODO import Purchase Details
+	def get_store_purchases_history(self) -> Response[ParsableList[purchase_details]]:
 		raise Exception(responsibility.ERROR_MESSAGE)
 
 	
