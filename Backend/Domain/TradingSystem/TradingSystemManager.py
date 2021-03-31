@@ -27,7 +27,7 @@ class TradingSystem(ITradingSystem):
 		return UserManager.login(username, password, cookie)
 
 	#2.5
-	def get_stores_details() -> Response[list[store_data]]:
+	def get_stores_details() -> Response[ParsableList[store_data]]:
 		return StoresManager.get_stores_details()
 
 	#2.5
