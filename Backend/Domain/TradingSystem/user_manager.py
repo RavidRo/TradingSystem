@@ -57,8 +57,19 @@ class user_manager:
 
 	#2.4
 	def login(username : str, password : str, cookie : str) -> Response[None]:
-		func = lambda user: user.login(username, password)
-		return user_manager.__deligate_to_user(cookie, func)
+		user = user_manager.__get_user_by_cookie(cookie)
+		if not user:
+			return Response(False, msg="No user is identified by the given cookie")
+		response = user.login(username, password)
+		
+		# If response succeeded we want to connect the cookie to the username
+		for user_cookie in user_manager.cookie_user:
+			old_user = user_manager.cookie_user[user_cookie]
+			if old_user.get_username() == username:
+				user_manager.cookie_user[cookie] = old_user
+		# *This action will delete the current cart but will restore the old one and other user details
+
+		return response
 
 	#2.7
 	def add_to_cart(cookie : str, store_id : str, product_id : str, quantity : int) -> Response[None]:
