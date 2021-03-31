@@ -6,6 +6,7 @@ from Backend.Domain.TradingSystem.product_data import product_data
 from Backend.Domain.TradingSystem.store_data import store_data
 from Backend.Domain.TradingSystem.shopping_cart_data import shopping_cart_data
 from Backend.Domain.TradingSystem.purchase_details_data import purchase_details_data
+from Backend.Domain.TradingSystem.purchase_details import purchase_details
 from Backend.Domain.TradingSystem.responsibility_data import responsibility_data
 from Backend.Domain.TradingSystem.ITradingSystemManager import ITradingSystem
 from Backend.response import Response, ParsableList, PrimitiveParsable
@@ -139,9 +140,9 @@ class TradingSystem(ITradingSystem):
 	# Inter component functions
 	# ============================
 	#6.4
-	def get_any_user_purchase_history(username : str) -> Response[ParsableList[purchase_details_data]]:
+	def get_any_user_purchase_history(username : str) -> Response[ParsableList[purchase_details]]:
 		return UserManager.get_any_user_purchase_history(username)
 	
 	#6.4
-	def get_any_store_purchase_history(store_id : str) -> Response[ParsableList[purchase_details_data]]:
+	def get_any_store_purchase_history(store_id : str) -> Response[ParsableList[purchase_details]]:
 		return StoresManager.get_any_store_purchase_history(store_id)
