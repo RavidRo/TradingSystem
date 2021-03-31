@@ -1,7 +1,7 @@
 import uuid
 
 from .user import user
-from Backend.response import Response
+from Backend.response import Response, ParsableList, PrimitiveParsable
 from .Responsibilities.Responsibility import permission
 from Backend.Domain.TradingSystem.shopping_cart import shopping_cart
 from Backend.Domain.TradingSystem.purchase_details import purchase_details
@@ -31,7 +31,7 @@ class user_manager:
 		return str(uuid.uuid4())
 
 	# Called after register was successful and state was updated with the username
-	def __user_registered(username : str):
+	def __user_registered(username : str) -> None:
 		for cookie in user_manager.cookie_user:
 			user = user_manager.cookie_user[cookie]
 			if user.get_username() == username:
@@ -61,8 +61,8 @@ class user_manager:
 		return user_manager.__deligate_to_user(cookie, func)
 
 	#2.7
-	def add_to_cart(cookie : str, product_id : str, quantity : int) -> Response[None]:
-		func = lambda user: user.add_to_cart(product_id, quantity)
+	def add_to_cart(cookie : str, store_id : str, product_id : str, quantity : int) -> Response[None]:
+		func = lambda user: user.add_to_cart(store_id, product_id, quantity)
 		return user_manager.__deligate_to_user(cookie, func)
 
 	#2.8
@@ -71,12 +71,17 @@ class user_manager:
 		return user_manager.__deligate_to_user(cookie, func)
 
 	#2.8
-	def remove_product_from_cart(cookie : str, product_id : str, quantity : int) -> Response[None]:
-		func = lambda user: user.remove_product_from_cart(product_id, quantity)
+	def remove_product_from_cart(cookie : str, store_id : str, product_id : str) -> Response[None]:
+		func = lambda user: user.remove_product_from_cart(store_id, product_id)
+		return user_manager.__deligate_to_user(cookie, func)
+	
+	#2.8
+	def change_product_quantity(cookie : str, store_id, product_id, new_amount) -> Response[None]:
+		func = lambda user: user.change_product_quantity(store_id, product_id, new_amount)
 		return user_manager.__deligate_to_user(cookie, func)
 
 	#2.9
-	def purchase_cart(cookie : str) -> Response[float]:
+	def purchase_cart(cookie : str) -> Response[PrimitiveParsable[float]]:
 		func = lambda user: user.purchase_cart()
 		return user_manager.__deligate_to_user(cookie, func)
 
@@ -93,7 +98,7 @@ class user_manager:
 		func = lambda user: user.create_store(name)
 		return user_manager.__deligate_to_user(cookie, func)
 	#3.7
-	def ger_purchase_history(cookie : str) -> Response[list[purchase_details]]:
+	def ger_purchase_history(cookie : str) -> Response[ParsableList[purchase_details]]:
 		func = lambda user: user.ger_purchase_history(cookie)
 		return user_manager.__deligate_to_user(cookie, func)
 
@@ -158,7 +163,7 @@ class user_manager:
 		return user_manager.__deligate_to_user(cookie, func)
 
 	#4.11
-	def get_store_purchases_history(cookie : str, store_id : str) -> Response[list[purchase_details]]:
+	def get_store_purchases_history(cookie : str, store_id : str) -> Response[ParsableList[purchase_details]]:
 		func = lambda user: user.get_store_purchases_history(store_id)
 		return user_manager.__deligate_to_user(cookie, func)
 
@@ -166,10 +171,15 @@ class user_manager:
 	#====================
 
 	#6.4
-	def get_user_purchase_history(cookie : str, username : str) -> Response[list[purchase_details]]:
-		func = lambda user: user.get_user_purchase_history(username)
+	def get_any_store_purchase_history(cookie : str, store_id : str) -> Response[ParsableList[purchase_details]]:
+		func = lambda user: user.get_any_store_purchase_history(store_id)
 		return user_manager.__deligate_to_user(cookie, func)
 
+	#6.4
+	def get_any_user_purchase_history(cookie : str, username : str) -> Response[ParsableList[purchase_details]]:
+		func = lambda user: user.get_any_user_purchase_history(username)
+		return user_manager.__deligate_to_user(cookie, func)
+	
 
 	# Inter component functions
 	#====================
