@@ -1,11 +1,17 @@
-from .StoresManager import StoresManager
-from .UserManager import UserManager
-from .SearchEngine import SearchEngine
-from .Responsibilities.Responsibility import permissions
-from ...Response import Response
+from Backend.Domain.TradingSystem.StoresManager import StoresManager
+from Backend.Domain.TradingSystem.UserManager import UserManager
+from Backend.Domain.TradingSystem.SearchEngine import SearchEngine
+from Backend.Domain.TradingSystem.Responsibilities.Responsibility import permissions
+from Backend.Domain.TradingSystem.product_data import product_data
+from Backend.Domain.TradingSystem.store_data import store_data
+from Backend.Domain.TradingSystem.shopping_cart_data import shopping_cart_data
+from Backend.Domain.TradingSystem.purchase_details_data import purchase_details_data
+from Backend.Domain.TradingSystem.responsibility_data import responsibility_data
+from Backend.Domain.TradingSystem.ITradingSystemManager import ITradingSystem
+from Backend.response import Response, ParsableList, PrimitiveParsable
 
 # TODO: import Response and data objects
-class TradingSystem:
+class TradingSystem(ITradingSystem):
 
 	#2.1
 	# returns the guest newly created cookie
@@ -21,32 +27,36 @@ class TradingSystem:
 		return UserManager.login(username, password, cookie)
 
 	#2.5
-	def get_stores_details() -> Response[list[StoreData]]:
+	def get_stores_details() -> Response[list[store_data]]:
 		return StoresManager.get_stores_details()
 
 	#2.5
-	def get_products_by_store(store_id : str) -> Response[list[ProductData]]:
+	def get_products_by_store(store_id : str) -> Response[ParsableList[product_data]]:
 		return StoresManager.get_products_by_store(store_id)
 
 	#2.6
 	# kwargs = You can search for a product by additional key words
-	def search_products(product_name="", category=None, min_price=None, max_price=None, **kwargs) -> Response[list[ProductData]]:
-		return SearchEngine.search_products(product_name, category, min_price, max_price, **kwargs)
+	def search_products(product_name="", category=None, min_price=None, max_price=None, *keywords : tuple[str]) -> Response[ParsableList[product_data]]:
+		return SearchEngine.search_products(product_name, category, min_price, max_price, *keywords)
 
 	#2.7
-	def add_to_cart(cookie : str, product_id : str, quantity=1) -> Response[None]:
-		return UserManager.add_to_cart(cookie, product_id, quantity)
+	def save_product_in_cart(cookie : str,  store_id : str, product_id : str, quantity=1) -> Response[None]:
+		return UserManager.add_to_cart(cookie, store_id, product_id, quantity)
 
 	#2.8
-	def get_cart_details(cookie : str) -> Response[ShoppingCartData]:
+	def get_cart_details(cookie : str) -> Response[shopping_cart_data]:
 		return UserManager.get_cart_details(cookie)
 
 	#2.8
-	def remove_product_from_cart(cookie : str, product_id : str, quantity=1) -> Response[None]:
-		return UserManager.remove_product_from_cart(cookie, product_id, quantity)
+	def remove_product_from_cart(cookie : str, product_id : str) -> Response[None]:
+		return UserManager.remove_product_from_cart(cookie, product_id)
+
+	#2.8
+	def change_product_quantity_in_cart(self, store_id : str, product_id  : str, new_quantity : int):
+		return UserManager.change_product_quantity_in_cart(store_id, product_id, new_quantity)
 
 	#2.9
-	def purchase_cart(cookie : str) -> Response[float]:
+	def purchase_cart(cookie : str) -> Response[PrimitiveParsable[float]]:
 		return UserManager.purchase_cart(cookie)
 
 	#2.9
@@ -64,7 +74,7 @@ class TradingSystem:
 		return Response
 
 	#3.7
-	def ger_purchase_history(cookie : str) -> Response[list[PurchaseDetailsData]]:
+	def ger_purchase_history(cookie : str) -> Response[ParsableList[purchase_details_data]]:
 		return UserManager.ger_purchase_history(cookie)
 
 	# Owner and manager
@@ -108,16 +118,20 @@ class TradingSystem:
 		return UserManager.remove_appointment(cookie, store_id, username)
 
 	#4.9
-	def get_store_appointments(cookie : str, store_id : str) -> Response[ResponsibilityData]:
+	def get_store_appointments(cookie : str, store_id : str) -> Response[responsibility_data]:
 		return UserManager.get_store_appointments(cookie, store_id)
 
 	#4.11
-	def get_store_purchases_history(cookie : str, store_id : str) -> Response[list[PurchaseDetailsData]]:
+	def get_store_purchases_history(cookie : str, store_id : str) -> Response[ParsableList[purchase_details_data]]:
 		return UserManager.get_store_purchases_history(cookie, store_id)
 
 	#System Manager
 	#====================
 
 	#6.4
-	def get_user_purchase_history(cookie : str, username : str) -> Response[list[PurchaseDetailsData]]:
-		return UserManager.get_user_purchase_history(cookie, username)
+	def get_any_user_purchase_history(cookie : str, username : str) -> Response[ParsableList[purchase_details_data]]:
+		return UserManager.get_any_user_purchase_history(cookie, username)
+	
+	#6.4
+	def get_any_store_purchase_history(cookie : str, store_id : str) -> Response[ParsableList[purchase_details_data]]:
+		return UserManager.get_any_store_purchase_history(cookie, store_id)

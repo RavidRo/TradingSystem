@@ -1,6 +1,12 @@
-from abc import ABC, abstractmethod
+from abc import ABC, abstractmethod, 
 
-# TODO: import Response and data objects
+from Backend.Domain.TradingSystem.product_data import product_data
+from Backend.Domain.TradingSystem.store_data import store_data
+from Backend.Domain.TradingSystem.shopping_cart_data import shopping_cart_data
+from Backend.Domain.TradingSystem.purchase_details_data import purchase_details_data
+from Backend.Domain.TradingSystem.responsibility_data import responsibility_data
+from Backend.response import Response, ParsableList, PrimitiveParsable
+
 class ITradingSystem(metaclass=ABC):
 
 	#2.1
@@ -21,38 +27,43 @@ class ITradingSystem(metaclass=ABC):
 
 	#2.5
 	@abstractmethod
-	def get_stores_details() -> Response[list[StoreData]]:
+	def get_stores_details() -> Response[ParsableList[store_data]]:
 		raise NotImplementedError
 
 	#2.5
 	@abstractmethod
-	def get_products_by_store(store_id : str) -> Response[list[ProductData]]:
+	def get_products_by_store(store_id : str) -> Response[ParsableList[product_data]]:
 		raise NotImplementedError
 
 	#2.6
 	# kwargs = You can search for a product by additional key words
 	@abstractmethod
-	def search_products(product_name="", category=None, min_price=None, max_price=None, **kwargs) -> Response[list[ProductData]]:
+	def search_products(product_name : str, category : str, min_price : float, max_price : float, *keywords : tuple[str]) -> Response[ParsableList[product_data]]:
 		raise NotImplementedError
 
 	#2.7
 	@abstractmethod
-	def add_to_cart(cookie : str, product_id : str, quantity=1) -> Response[None]:
+	def save_product_in_cart(cookie : str, store_id : str, product_id : str, quantity : int) -> Response[None]:
 		raise NotImplementedError
 
 	#2.8
 	@abstractmethod
-	def get_cart_details(cookie : str) -> Response[ShoppingCartData]:
+	def get_cart_details(cookie : str) -> Response[shopping_cart_data]:
 		raise NotImplementedError
 
 	#2.8
 	@abstractmethod
-	def remove_product_from_cart(cookie : str, product_id : str, quantity=1) -> Response[None]:
+	def remove_product_from_cart(cookie : str, product_id : str) -> Response[None]:
+		raise NotImplementedError
+	
+	#2.8
+	@abstractmethod
+	def change_product_quantity_in_cart(self, store_id : str, product_id  : str, new_quantity : int):
 		raise NotImplementedError
 
 	#2.9
 	@abstractmethod
-	def purchase_cart(cookie : str) -> Response[float]:
+	def purchase_cart(cookie : str) -> Response[PrimitiveParsable[float]]:
 		raise NotImplementedError
 
 	#2.9
@@ -70,7 +81,7 @@ class ITradingSystem(metaclass=ABC):
 
 	#3.7
 	@abstractmethod
-	def ger_purchase_history(cookie : str) -> Response[list[PurchaseDetailsData]]:
+	def ger_purchase_history(cookie : str) -> Response[ParsableList[purchase_details_data]]:
 		raise NotImplementedError
 
 	# Owner and manager
@@ -123,12 +134,12 @@ class ITradingSystem(metaclass=ABC):
 
 	#4.9
 	@abstractmethod
-	def get_store_appointments(cookie : str, store_id : str) -> Response[ResponsibilityData]:
+	def get_store_appointments(cookie : str, store_id : str) -> Response[responsibility_data]:
 		raise NotImplementedError
 
 	#4.11
 	@abstractmethod
-	def get_store_purchases_history(cookie : str, store_id : str) -> Response[list[PurchaseDetailsData]]:
+	def get_store_purchases_history(cookie : str, store_id : str) -> Response[ParsableList[purchase_details_data]]:
 		raise NotImplementedError
 
 	#System Manager
@@ -136,5 +147,10 @@ class ITradingSystem(metaclass=ABC):
 
 	#6.4
 	@abstractmethod
-	def get_user_purchase_history(cookie : str, username : str) -> Response[list[PurchaseDetailsData]]:
+	def get_user_purchase_history(cookie : str, username : str) -> Response[ParsableList[purchase_details_data]]:
+		raise NotImplementedError
+	
+	#6.4
+	@abstractmethod
+	def get_any_store_purchase_history(cookie : str, store_id : str) -> Response[ParsableList[purchase_details_data]]:
 		raise NotImplementedError
