@@ -10,7 +10,6 @@ import asyncio
 system = TradingSystem.getInstance()
 app = Quart(__name__)
 
-# TODO: should i use route or websocket???
 
 @app.route('/', methods=['GET'])
 async def main_page():
@@ -66,14 +65,15 @@ async def search_products():
     return '''<h1>Answer is: {}</h1>'''.format(answer)
 
 
-@app.route('/add_to_cart', methods=['GET'])
-async def add_to_cart():
+@app.route('/save_product_in_cart', methods=['GET'])
+async def save_product_in_cart():
     cookie = request.args.get('cookie')
     if cookie is None:
         cookie = await system.enter_system()
+    store_id = request.args.get('store_id')
     product_id = request.args.get('product_id')
     quantity = request.args.get('quantity')
-    answer = await system.add_to_cart(cookie, product_id, quantity)
+    answer = await system.add_to_cart(cookie,store_id, product_id, quantity)
     return '''<h1>Answer is: {}</h1>'''.format(answer)
 
 
@@ -96,6 +96,18 @@ async def remove_product_from_cart():
     answer = await system.remove_product_from_cart(cookie, product_id, quantity)
     return '''<h1>Answer is: {}</h1>'''.format(answer)
 
+@app.route('/change_product_quantity_in_cart', methods=['GET'])
+async def change_product_quantity_in_cart():
+    cookie = request.args.get('cookie')
+    if cookie is None:
+        cookie = await system.enter_system()
+    store_id = request.args.get('store_id')
+    product_id = request.args.get('product_id')
+    quantity = request.args.get('quantity')
+    answer = await system.remove_product_from_cart(cookie, store_id,product_id, quantity)
+    return '''<h1>Answer is: {}</h1>'''.format(answer)
+
+
 
 @app.route('/purchase_cart', methods=['GET'])
 async def purchase_cart():
@@ -105,15 +117,14 @@ async def purchase_cart():
     answer = await system.purchase_cart(cookie)
     return '''<h1>Answer is: {}</h1>'''.format(answer)
 
-
-@app.route('/purchase_completed', methods=['GET'])
-async def purchase_completed():
+@app.route('/send_payment', methods=['GET'])
+async def send_payment():
     cookie = request.args.get('cookie')
     if cookie is None:
         cookie = await system.enter_system()
-    answer = await system.purchase_completed(cookie)
+    payment_details = request.args.get('payment_details')
+    answer = await system.purchase_cart(cookie,payment_details)
     return '''<h1>Answer is: {}</h1>'''.format(answer)
-
 
 # Member
 # ===============================
@@ -128,12 +139,12 @@ async def create_store():
     return '''<h1>Answer is: {}</h1>'''.format(answer)
 
 
-@app.route('/ger_purchase_history', methods=['GET'])
-async def ger_purchase_history():
+@app.route('/get_purchase_history', methods=['GET'])
+async def get_purchase_history():
     cookie = request.args.get('cookie')
     if cookie is None:
         cookie = await system.enter_system()
-    answer = await system.ger_purchase_history(cookie)
+    answer = await system.get_purchase_history(cookie)
     return '''<h1>Answer is: {}</h1>'''.format(answer)
 
 
@@ -148,19 +159,8 @@ async def create_product():
     store_id = request.args.get('store_id')
     name = request.args.get('name')
     price = request.args.get('price')
-    answer = await system.create_product(cookie, store_id, name, price)
-    return '''<h1>Answer is: {}</h1>'''.format(answer)
-
-
-@app.route('/add_products', methods=['GET'])
-async def add_products():
-    cookie = request.args.get('cookie')
-    if cookie is None:
-        cookie = await system.enter_system()
-    store_id = request.args.get('store_id')
-    product_id = request.args.get('product_id')
     quantity = request.args.get('quantity')
-    answer = await system.add_products(cookie, store_id, product_id, quantity)
+    answer = await system.create_product(cookie, store_id, name, price,quantity)
     return '''<h1>Answer is: {}</h1>'''.format(answer)
 
 
@@ -171,20 +171,31 @@ async def remove_products():
         cookie = await system.enter_system()
     store_id = request.args.get('store_id')
     product_id = request.args.get('product_id')
-    quantity = request.args.get('quantity')
-    answer = await system.remove_products(cookie, store_id, product_id, quantity)
+    answer = await system.remove_products(cookie, store_id, product_id)
     return '''<h1>Answer is: {}</h1>'''.format(answer)
 
-
-@app.route('/set_product_price', methods=['GET'])
-async def set_product_price():
+@app.route('/change_product_quantity', methods=['GET'])
+async def change_product_quantity():
     cookie = request.args.get('cookie')
     if cookie is None:
         cookie = await system.enter_system()
     store_id = request.args.get('store_id')
     product_id = request.args.get('product_id')
+    quantity = request.args.get('quantity')
+    answer = await system.change_product_quantity(cookie, store_id, product_id,quantity)
+    return '''<h1>Answer is: {}</h1>'''.format(answer)
+
+
+@app.route('/edit_product_details', methods=['GET'])
+async def edit_product_details():
+    cookie = request.args.get('cookie')
+    if cookie is None:
+        cookie = await system.enter_system()
+    store_id = request.args.get('store_id')
+    product_id = request.args.get('product_id')
+    new_name = request.args.get('new_name')
     new_price = request.args.get('new_price')
-    answer = await system.set_product_price(cookie, store_id, product_id, new_price)
+    answer = await system.edit_product_details(cookie, store_id, product_id, new_name,new_price)
     return '''<h1>Answer is: {}</h1>'''.format(answer)
 
 
@@ -276,6 +287,16 @@ async def get_user_purchase_history():
     username = request.args.get('username')
     answer = await system.get_user_purchase_history(cookie, username)
     return '''<h1>Answer is: {}</h1>'''.format(answer)
+
+@app.route('/get_any_store_purchase_history', methods=['GET'])
+async def get_any_store_purchase_history():
+    cookie = request.args.get('cookie')
+    if cookie is None:
+        cookie = await system.enter_system()
+    store_id = request.args.get('store_id')
+    answer = await system.get_any_store_purchase_history(cookie, store_id)
+    return '''<h1>Answer is: {}</h1>'''.format(answer)
+
 
 
 @app.errorhandler(404)
