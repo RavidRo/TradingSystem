@@ -1,13 +1,12 @@
 from Backend.response import Response, ParsableList, PrimitiveParsable
-from .Responsibilities.Responsibility import permission
-from Backend.Domain.TradingSystem.shopping_cart import shopping_cart
-from Backend.Domain.TradingSystem.purchase_details import purchase_details
-from Backend.Domain.TradingSystem.user_state import user_state, guest
-from .Responsibilities.Responsibility import permission, responsibility
+from Backend.Domain.TradingSystem.shopping_cart import ShoppingCart
+from Backend.Domain.TradingSystem.purchase_details import PurchaseDetails
+from Backend.Domain.TradingSystem.user_state import UserState, Guest
+from .Responsibilities.Responsibility import Permission, Responsibility
 
-class user:
+class User:
 	def __init__(self):
-		self.state : user_state = guest(self)
+		self.state : UserState = Guest(self)
 
 	#2.3
 	def register(self, username : str, password : str) -> Response[None]:
@@ -22,7 +21,7 @@ class user:
 		return self.state.save_product_in_cart(stor_id, product_id, quantity)
 
 	#2.8
-	def get_cart_details(self) -> Response[shopping_cart]:
+	def get_cart_details(self) -> Response[ShoppingCart]:
 		return self.state.show_cart()
 
 	#2.8
@@ -49,7 +48,7 @@ class user:
 		return self.state.open_store(name)
 
 	#3.7
-	def ger_purchase_history(self) -> Response[ParsableList[purchase_details]]:
+	def ger_purchase_history(self) -> Response[ParsableList[PurchaseDetails]]:
 		return self.state.ger_purchase_history()
 
 	# Owner and manager
@@ -80,11 +79,11 @@ class user:
 		return self.state.appoint_new_store_manager(store_id, user)
 
 	#4.6
-	def add_manager_permission(self, store_id : str, username : str, permission : permission) -> Response[None]:
+	def add_manager_permission(self, store_id : str, username : str, permission : Permission) -> Response[None]:
 		return self.state.add_manager_permission(store_id, username, permission)
 
 	#4.6
-	def remove_manager_permission(self, store_id : str, username : str, permission : permission) -> Response[None]:
+	def remove_manager_permission(self, store_id : str, username : str, permission : Permission) -> Response[None]:
 		return self.state.remove_manager_permission(store_id, username, permission)
 
 	#4.4, 4.7
@@ -92,22 +91,22 @@ class user:
 		return self.state.dismiss_manager(store_id, username)
 
 	#4.9
-	def get_store_appointments(self, store_id : str) -> Response[responsibility]:
+	def get_store_appointments(self, store_id : str) -> Response[Responsibility]:
 		return self.state.get_store_personnel_info(store_id)
 
 	#4.11
-	def get_store_purchases_history(self, store_id : str) -> Response[ParsableList[purchase_details]]:
+	def get_store_purchases_history(self, store_id : str) -> Response[ParsableList[PurchaseDetails]]:
 		return self.state.get_store_purchase_history(store_id)
 
 	#System Manager
 	#====================
 
 	#6.4
-	def get_any_user_purchase_history(self, username : str) -> Response[ParsableList[purchase_details]]:
+	def get_any_user_purchase_history(self, username : str) -> Response[ParsableList[PurchaseDetails]]:
 		return self.state.get_user_purchase_history(username)
 
 	#6.4
-	def get_any_store_purchase_history(self, store_id : str) -> Response[ParsableList[purchase_details]]:
+	def get_any_store_purchase_history(self, store_id : str) -> Response[ParsableList[PurchaseDetails]]:
 		return self.state.get_any_store_purchase_history(store_id)
 
 	
@@ -120,6 +119,6 @@ class user:
 	def get_username(self) -> str:
 		return self.state.get_username()
 
-	def change_state(self, new_state : user_state) -> None:
+	def change_state(self, new_state : UserState) -> None:
 		self.state = new_state
 	
