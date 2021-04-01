@@ -1,7 +1,7 @@
 from Backend.Domain.TradingSystem.user_state import UserState
 from Backend.Domain.TradingSystem.responsibility import Responsibility
 from Backend.Domain.TradingSystem.store import Store
-from Backend.response import Response, ParsableList
+from Backend.response import Response, ParsableList, PrimitiveParsable
 from Backend.Domain.TradingSystem.purchase_details import PurchaseDetails
 from typing import List
 
@@ -9,7 +9,10 @@ from typing import List
 class Member(UserState):
 
     def get_username(self):
-        return Response(True, obj=self.username, msg="got username successfully")
+        return Response(True, obj=PrimitiveParsable(self.username), msg="got username successfully")
+
+    def add_responsibility(self, responsibility, store_id):
+        self.responsibilities[store_id] = responsibility
 
     def __init__(self, user, username, responsibilities=None, purchase_details=[]):  # for DB initialization
         super().__init__(user)
