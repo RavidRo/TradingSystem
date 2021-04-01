@@ -14,8 +14,10 @@ class Member(UserState):
     def add_responsibility(self, responsibility, store_id):
         self.responsibilities[store_id] = responsibility
 
-    def __init__(self, user, username, responsibilities=None, purchase_details=[]):  # for DB initialization
+    def __init__(self, user, username, responsibilities=None, purchase_details=None):  # for DB initialization
         super().__init__(user)
+        if purchase_details is None:
+            purchase_details = []
         if responsibilities is None:
             responsibilities = dict()
         self.username = username
@@ -44,8 +46,8 @@ class Member(UserState):
         # update data in DB in later milestones
         return response
 
-    def buy_cart(self, user, product_purchase_info):
-        response = super().buy_cart(user, product_purchase_info)
+    def buy_cart(self, current_user):
+        response = super().buy_cart(current_user)
         # update data in DB in later milestones
         return response
 
@@ -79,6 +81,11 @@ class Member(UserState):
         if store_id not in self.responsibilities:
             return Response(False, msg=f"this member do not own/manage store {store_id}")
         return self.responsibilities[store_id].change_product_quantity(product_id, new_quantity)
+
+    def set_product_name(self, store_id, product_id, new_name):
+        if store_id not in self.responsibilities:
+            return Response(False, msg=f"this member do not own/manage store {store_id}")
+        return self.responsibilities[store_id].set_product_name(product_id, new_name)
 
     def set_product_price(self, store_id, product_id,
                           new_price):

@@ -41,6 +41,9 @@ class Guest(UserState):
     def change_product_quantity_in_store(self, store_id, product_id, new_quantity):
         return Response(False, msg="Guests cannot change store product's quantity")
 
+    def set_product_name(self, store_id, product_id, new_name):
+        return Response(False, msg="Guests cannot edit store product's details")
+
     def set_product_price(self, store_id, product_id, new_price):
         return Response(False, msg="Guests cannot edit store product's details")
 
