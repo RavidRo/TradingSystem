@@ -1,8 +1,7 @@
 """ this class is responsible to communicate with the trading system manager"""
 
 from Backend.Domain.TradingSystem import trading_system_manager
-from Backend.Domain.Payment import PaymentManager
-
+from Backend.Domain.Payment.payment_manager import PaymentSystem
 
 
 # TODO: import response object and the interface ItradingSystem
@@ -24,7 +23,6 @@ class TradingSystem(object):
         else:
             TradingSystem.__instance = self
             # self.trading_system_manager = trading_system_manager.TradingSystemManager()
-            self.payment_manager = PaymentManager.PaymentManager()
 
     def enter_system(self):
         return trading_system_manager.enter_system()
@@ -61,7 +59,7 @@ class TradingSystem(object):
 
     def send_payment(self, cookie, payment_details):
         price = trading_system_manager.get_cart_price(cookie)
-        res = self.payment_manager.pay(price, payment_details)
+        res = PaymentSystem.pay(price, payment_details)
         if res.succeeded():
             return self.purchase_completed(cookie)
         else:
