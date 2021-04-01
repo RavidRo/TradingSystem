@@ -2,5 +2,5 @@
 class OutsideSupplyment:
 
     @staticmethod
-    def deliver(products, address):
+    def deliver(product_ids_to_quantity, address):
         return True
