@@ -1,5 +1,5 @@
-from .Responsibility import Permission, Responsibility
-from .Owner import Owner
+from .responsibility import Permission, Responsibility
+from .owner import Owner
 from Backend.Domain.TradingSystem.user_states import Member
 from Backend.Domain.TradingSystem.user import User
 from Backend.Domain.TradingSystem.purchase_details import PurchaseDetails

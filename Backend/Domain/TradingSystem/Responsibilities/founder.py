@@ -1,6 +1,6 @@
-from .Responsibility import Permission, Responsibility
-from .Manager import Manager
-from .Owner import Owner
+from .responsibility import Permission, Responsibility
+from .manager import Manager
+from .owner import Owner
 from Backend.Domain.TradingSystem.user import User
 from Backend.Domain.TradingSystem.purchase_details import PurchaseDetails
 from Backend.response import Response, ParsableList

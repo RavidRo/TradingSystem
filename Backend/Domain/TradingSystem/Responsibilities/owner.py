@@ -1,4 +1,4 @@
-from .Founder import Founder
+from .founder import Founder
 
 
 #* This class is currently empty because Owner can do what ever a founder can do.
