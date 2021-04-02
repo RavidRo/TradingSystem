@@ -113,8 +113,8 @@ class User:
 	# Inter component functions
 	#====================
 
-	def isAppointed(self, store_id : str) -> bool:
-		return self.state.isAppointed(store_id)
+	def is_appointed(self, store_id : str) -> bool:
+		return self.state.is_appointed(store_id)
 	
 	def get_username(self) -> str:
 		return self.state.get_username()

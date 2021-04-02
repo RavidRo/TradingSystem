@@ -1,6 +1,6 @@
-from .responsibility import Permission, Responsibility
-from .manager import Manager
-from .owner import Owner
+from Backend.Domain.TradingSystem.Responsibilities.responsibility import Permission, Responsibility
+from Backend.Domain.TradingSystem.Responsibilities.manager import Manager
+from Backend.Domain.TradingSystem.Responsibilities.owner import Owner
 from Backend.Domain.TradingSystem.user import User
 from Backend.Domain.TradingSystem.purchase_details import PurchaseDetails
 from Backend.response import Response, ParsableList
@@ -25,7 +25,7 @@ class Founder(Responsibility):
 	
 	#4.3
 	def appoint_owner(self, user : User) -> Response[None]:
-		if user.isAppointed(self.store.get_id()):
+		if user.is_appointed(self.store.get_id()):
 			return Response(False, msg = f"{user.get_username()} is already appointed to {self.store.get_name()}")	
 		
 		# Success
@@ -35,7 +35,7 @@ class Founder(Responsibility):
 
 	#4.5
 	def appoint_manager(self, user : User) -> Response[None]:
-		if user.isAppointed(self.store.get_id()):
+		if user.is_appointed(self.store.get_id()):
 			return Response(False, msg = f"{user.get_username()} is already appointed to {self.store.get_name()}")	
 
 		# Success
@@ -67,6 +67,6 @@ class Founder(Responsibility):
 		return self.store.get_responsibilities()
 
 	#4.11
-	def get_store_purchases_history(self) -> Response[ParsableList[PurchaseDetails]]: #TODO import Purchase Details
+	def get_store_purchases_history(self) -> Response[ParsableList[PurchaseDetails]]:
 		return self.store.get_purchase_history()
 		

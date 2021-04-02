@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from Backend.Domain.TradingSystem.user_states import Member
 from Backend.Domain.TradingSystem.user import User
 from Backend.Domain.TradingSystem.purchase_details import PurchaseDetails
@@ -32,7 +34,7 @@ class Responsibility:
 
 	def __init__(self, user_state : Member, store : Store) -> None:
 		self.user_state = user_state;
-		user_state.add_responsibility(self, store.get_id)
+		user_state.add_responsibility(self, store.get_id())
 		self.store = store;
 		self.appointed : list[Responsibility] = [];
 
