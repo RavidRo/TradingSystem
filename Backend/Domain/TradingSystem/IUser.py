@@ -1,127 +1,152 @@
 from __future__ import annotations
+from abc import ABC, abstractmethod
 
-from Backend.Domain.TradingSystem.IUser import IUser
 from Backend.response import Response, ParsableList, PrimitiveParsable
 from Backend.Domain.TradingSystem.shopping_cart import ShoppingCart
 from Backend.Domain.TradingSystem.purchase_details import PurchaseDetails
-from Backend.Domain.TradingSystem.user_state import UserState, Guest
-from .Responsibilities.responsibility import Permission, Responsibility
+from Backend.Domain.TradingSystem.user_state import UserState
 
-class User(IUser):
-	def __init__(self):
-		self.state : UserState = Guest(self)
+class IUser(metaclass=ABC):
+	from .Responsibilities.responsibility import Permission, Responsibility
 
 	#2.3
+	@abstractmethod
 	def register(self, username : str, password : str) -> Response[None]:
-		return self.state.register(username, password)
+		raise NotImplementedError
 
 	#2.4
+	@abstractmethod
 	def login(self, username : str, password : str) -> Response[None]:
-		return self.state.login(username, password)
+		raise NotImplementedError
 
 	#2.7
+	@abstractmethod
 	def add_to_cart(self, stor_id : str, product_id : str, quantity : int) -> Response[None]:
-		return self.state.save_product_in_cart(stor_id, product_id, quantity)
+		raise NotImplementedError
 
 	#2.8
+	@abstractmethod
 	def get_cart_details(self) -> Response[ShoppingCart]:
-		return self.state.show_cart()
+		raise NotImplementedError
 
 	#2.8
+	@abstractmethod
 	def remove_product_from_cart(self, store_id : str, product_id : str) -> Response[None]:
-		return self.state.delete_from_cart(store_id, product_id)
+		raise NotImplementedError
 	
 	#2.8
+	@abstractmethod
 	def change_product_quantity(self, store_id, product_id, new_amount) -> Response[None]:
-		return self.state.change_product_quantity(store_id, product_id, new_amount)
+		raise NotImplementedError
 
 	#2.9
+	@abstractmethod
 	def purchase_cart(self) -> Response[PrimitiveParsable[float]]:
-		return self.state.buy_cart(self)
+		raise NotImplementedError
 
 	#2.9
+	@abstractmethod
 	def purchase_completed(self) -> Response[None]:
-		return self.state.delete_products_after_purchase()
+		raise NotImplementedError
 
 	# Member
 	# ===============================
 
 	#3.2
+	@abstractmethod
 	def create_store(self, name : str) -> Response[None]:
-		return self.state.open_store(name)
+		raise NotImplementedError
 
 	#3.7
+	@abstractmethod
 	def ger_purchase_history(self) -> Response[ParsableList[PurchaseDetails]]:
-		return self.state.ger_purchase_history()
+		raise NotImplementedError
 
 	# Owner and manager
 	# =======================
 
 	#4.1
 	# Creating a new product a the store and setting its quantity to 0
+	@abstractmethod
 	def create_product(self, store_id : str, name : str, price: float, quantity : int) -> Response[None]:
-		return self.state.add_new_product(store_id, name, price, quantity)
+		raise NotImplementedError
+
 	#4.1
+	@abstractmethod
 	def remove_products(self, store_id : str, product_id : str) -> Response[None]:
-		return self.state.remove_product(store_id, product_id)
+		raise NotImplementedError
 
 	#4.1
+	@abstractmethod
 	def change_product_quantity(self, store_id : str, product_id : str, new_quantity : int) -> Response[None]:
-		return self.state.change_product_quantity_in_store(store_id, product_id, new_quantity)
+		raise NotImplementedError
 
 	#4.1
+	@abstractmethod
 	def edit_product_details(self, store_id : str, product_id : str, new_name: str, new_price : float) -> Response[None]:
-		return self.state.edit_product_details(store_id, product_id, new_name, new_price)
+		raise NotImplementedError
 
 	#4.3
+	@abstractmethod
 	def appoint_owner(self, store_id : str, user : IUser) -> Response[None]:
-		return self.state.appoint_new_store_owner(store_id, user)
+		raise NotImplementedError
 
 	#4.5
+	@abstractmethod
 	def appoint_manager(self, store_id : str, user : IUser) -> Response[None]:
-		return self.state.appoint_new_store_manager(store_id, user)
+		raise NotImplementedError
 
 	#4.6
+	@abstractmethod
 	def add_manager_permission(self, store_id : str, username : str, permission : Permission) -> Response[None]:
-		return self.state.add_manager_permission(store_id, username, permission)
+		raise NotImplementedError
 
 	#4.6
+	@abstractmethod
 	def remove_manager_permission(self, store_id : str, username : str, permission : Permission) -> Response[None]:
-		return self.state.remove_manager_permission(store_id, username, permission)
+		raise NotImplementedError
 
 	#4.4, 4.7
+	@abstractmethod
 	def remove_appointment(self, store_id : str, username : str) -> Response[None]:
-		return self.state.dismiss_manager(store_id, username)
+		raise NotImplementedError
 
 	#4.9
+	@abstractmethod
 	def get_store_appointments(self, store_id : str) -> Response[Responsibility]:
-		return self.state.get_store_personnel_info(store_id)
+		raise NotImplementedError
 
 	#4.11
+	@abstractmethod
 	def get_store_purchases_history(self, store_id : str) -> Response[ParsableList[PurchaseDetails]]:
-		return self.state.get_store_purchase_history(store_id)
+		raise NotImplementedError
 
 	#System Manager
 	#====================
 
 	#6.4
+	@abstractmethod
 	def get_any_user_purchase_history(self, username : str) -> Response[ParsableList[PurchaseDetails]]:
-		return self.state.get_user_purchase_history(username)
+		raise NotImplementedError
 
 	#6.4
+	@abstractmethod
 	def get_any_store_purchase_history(self, store_id : str) -> Response[ParsableList[PurchaseDetails]]:
-		return self.state.get_any_store_purchase_history(store_id)
+		raise NotImplementedError
 
 	
 	# Inter component functions
 	#====================
 
+	@abstractmethod
 	def is_appointed(self, store_id : str) -> bool:
-		return self.state.is_appointed(store_id)
+		raise NotImplementedError
 	
+	@abstractmethod
 	def get_username(self) -> str:
-		return self.state.get_username()
+		raise NotImplementedError
 
+	@abstractmethod
 	def change_state(self, new_state : UserState) -> None:
-		self.state = new_state
+		raise NotImplementedError
 	

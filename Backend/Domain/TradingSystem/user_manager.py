@@ -1,14 +1,14 @@
 import uuid
 
-from .user import User
+from .user import IUser
 from Backend.response import Response, ParsableList, PrimitiveParsable
 from Backend.Domain.TradingSystem.shopping_cart import ShopppingCart
 from Backend.Domain.TradingSystem.purchase_details import PurchaseDetails
-from .Responsibilities.Responsibility import Permission, Responsibility
+from .Responsibilities.responsibility import Permission, Responsibility
 
 class UserManager:
-	cookie_user : dict[str, User] = {}
-	username_user : dict[str, User] = {}
+	cookie_user : dict[str, IUser] = {}
+	username_user : dict[str, IUser] = {}
 
 	def __deligate_to_user(cookie, func):
 		user = UserManager.__get_user_by_cookie(cookie)
@@ -16,12 +16,12 @@ class UserManager:
 			return Response(False, msg="No user is identified by the given cookie")
 		return func(user)
 
-	def __get_user_by_cookie(cookie) -> User:
+	def __get_user_by_cookie(cookie) -> IUser:
 		if cookie not in UserManager.cookie_user:
 			return None
 		return UserManager.cookie_user[cookie]
 			
-	def __get_user_by_username(username) -> User:
+	def __get_user_by_username(username) -> IUser:
 		if username not in UserManager.username_user:
 			return None
 		return UserManager.username_user[username]
@@ -41,7 +41,7 @@ class UserManager:
 	# returns the guest newly created cookie
 	def enter_system() -> str:
 		cookie = UserManager.__create_cookie()
-		UserManager.cookie_user[cookie] = User()
+		UserManager.cookie_user[cookie] = IUser()
 		return cookie
 
 	#2.3
@@ -98,6 +98,10 @@ class UserManager:
 	#2.9
 	def purchase_completed(cookie : str) -> Response[None]:
 		func = lambda user: user.purchase_completed()
+		return UserManager.__deligate_to_user(cookie, func)
+
+	def get_cart_price(cookie : str) -> Response[PrimitiveParsable[float]]:
+		func = lambda user: user.get_cart_price()
 		return UserManager.__deligate_to_user(cookie, func)
 
 	# Member

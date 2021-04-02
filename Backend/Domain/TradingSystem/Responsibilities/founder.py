@@ -1,7 +1,7 @@
 from Backend.Domain.TradingSystem.Responsibilities.responsibility import Permission, Responsibility
 from Backend.Domain.TradingSystem.Responsibilities.manager import Manager
 from Backend.Domain.TradingSystem.Responsibilities.owner import Owner
-from Backend.Domain.TradingSystem.user import User
+from Backend.Domain.TradingSystem.IUser import IUser
 from Backend.Domain.TradingSystem.purchase_details import PurchaseDetails
 from Backend.response import Response, ParsableList
 
@@ -24,21 +24,25 @@ class Founder(Responsibility):
 		return self.store.edit_product_details(self, product_id, new_name, new_price)
 	
 	#4.3
-	def appoint_owner(self, user : User) -> Response[None]:
+	def appoint_owner(self, user : IUser) -> Response[None]:
 		if user.is_appointed(self.store.get_id()):
 			return Response(False, msg = f"{user.get_username()} is already appointed to {self.store.get_name()}")	
 		
 		# Success
+		#! I am guessing that user.state is of type member because at user_manager, with a given username he found a user object
+		#! (guest does not hae a username)
 		newResponsibility = Owner(user.state, self.store)
 		self.appointed.append(newResponsibility)
 		return Response(True)			
 
 	#4.5
-	def appoint_manager(self, user : User) -> Response[None]:
+	def appoint_manager(self, user : IUser) -> Response[None]:
 		if user.is_appointed(self.store.get_id()):
 			return Response(False, msg = f"{user.get_username()} is already appointed to {self.store.get_name()}")	
 
 		# Success
+		#! I am guessing that user.state is of type member because at user_manager, with a given username he found a user object
+		#! (guest does not hae a username)
 		newResponsibility = Manager(user.state, self.store)
 		self.appointed.append(newResponsibility)
 		return Response(True)	
