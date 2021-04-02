@@ -1,68 +1,68 @@
-from .responsibility import permission, responsibility
-from .owner import owner
-from Backend.Domain.TradingSystem.user_states import member
-from Backend.Domain.TradingSystem.user import user
-from Backend.Domain.TradingSystem.purchase_details import purchase_details
-from Backend.Domain.TradingSystem.store import store
+from .Responsibility import Permission, Responsibility
+from .Owner import Owner
+from Backend.Domain.TradingSystem.user_states import Member
+from Backend.Domain.TradingSystem.user import User
+from Backend.Domain.TradingSystem.purchase_details import PurchaseDetails
+from Backend.Domain.TradingSystem.store import Store
 from Backend.response import Response, ParsableList
 
 
 
-class Manager(owner):
+class Manager(Owner):
 
-	def __init__(self, user_state: member, store: store) -> None:
+	def __init__(self, user_state: Member, store: Store) -> None:
 		self.permissions = {
-			permission.MANAGE_PRODUCTS: False,
-			permission.GET_APPOINTMENTS: True,
-			permission.APPOINT_MANAGER: False,
-			permission.REMOVE_MANAGER: False,
-			permission.GET_HISTORY : False,
+			Permission.MANAGE_PRODUCTS: False,
+			Permission.GET_APPOINTMENTS: True,
+			Permission.APPOINT_MANAGER: False,
+			Permission.REMOVE_MANAGER: False,
+			Permission.GET_HISTORY : False,
 		}
 		super().__init__(user_state, store)
 	
-	def __create_no_permission_Response(self, permission : permission) -> Response:
+	def __create_no_permission_Response(self, permission : Permission) -> Response:
 		return Response(False, msg=f"{self.user_state.get_username()} does not have permission to {permission.name}") 
 
 	#4.1
 	#Creating a new product a the store
 	def add_product(self, name : str, price: float, quantity : int) -> Response[None]:
-		if(self.permissions[permission.MANAGE_PRODUCTS]):
+		if(self.permissions[Permission.MANAGE_PRODUCTS]):
 			return super().add_product(name, price, quantity)
 
-		return self.__create_no_permission_Response(permission.MANAGE_PRODUCTS)
+		return self.__create_no_permission_Response(Permission.MANAGE_PRODUCTS)
 
 	#4.1
 	def remove_product(self, product_id : str) -> Response[None]:
-		if(self.permissions[permission.MANAGE_PRODUCTS]):
+		if(self.permissions[Permission.MANAGE_PRODUCTS]):
 			return super().remove_product(product_id, product_id)
 
-		return self.__create_no_permission_Response(permission.MANAGE_PRODUCTS)
+		return self.__create_no_permission_Response(Permission.MANAGE_PRODUCTS)
 
 	#4.1
 	def change_product_quantity(self, product_id : str, quantity : int) -> Response[None]:
-		if(self.permissions[permission.MANAGE_PRODUCTS]):
+		if(self.permissions[Permission.MANAGE_PRODUCTS]):
 			return super().change_product_quantity(product_id, quantity)
 
-		return self.__create_no_permission_Response(permission.MANAGE_PRODUCTS)
+		return self.__create_no_permission_Response(Permission.MANAGE_PRODUCTS)
 
 	#4.1
 	def edit_product_details(self, product_id : str, new_name: str, new_price : float) -> Response[None]:
-		if(self.permissions[permission.MANAGE_PRODUCTS]):
+		if(self.permissions[Permission.MANAGE_PRODUCTS]):
 			return super().edit_product_details(product_id, new_name, new_price)
 
-		return self.__create_no_permission_Response(permission.MANAGE_PRODUCTS)
+		return self.__create_no_permission_Response(Permission.MANAGE_PRODUCTS)
 
 	#4.3
-	def appoint_owner(self, user : user) -> Response[None]:
+	def appoint_owner(self, user : User) -> Response[None]:
 		return Response(msg=f"Managers can't appoint owners")
 
 
 	#4.5
-	def appoint_manager(self, user : user) -> Response[None]:
-		if(self.permissions[permission.APPOINT_MANAGER]):
+	def appoint_manager(self, user : User) -> Response[None]:
+		if(self.permissions[Permission.APPOINT_MANAGER]):
 			return super().appoint_manager(user)
 
-		return self.__create_no_permission_Response(permission.APPOINT_MANAGER)
+		return self.__create_no_permission_Response(Permission.APPOINT_MANAGER)
 		
 	#4.6
 	def add_manager_permission(self, username : str, permission) -> Response[None]:
@@ -80,33 +80,33 @@ class Manager(owner):
 		
 	#4.4, 4.7
 	def remove_appointment(self, username : str) -> Response[None]:
-		if(self.permissions[permission.REMOVE_MANAGER]):
+		if(self.permissions[Permission.REMOVE_MANAGER]):
 			return super().remove_appointment(username)
 
-		return self.__create_no_permission_Response(permission.REMOVE_MANAGER)
+		return self.__create_no_permission_Response(Permission.REMOVE_MANAGER)
 		
 	#4.9
-	def get_store_appointments(self) -> Response[responsibility]:
-		if(self.permissions[permission.GET_APPOINTMENTS]):
+	def get_store_appointments(self) -> Response[Responsibility]:
+		if(self.permissions[Permission.GET_APPOINTMENTS]):
 			return super().get_store_appointments()
 
-		return self.__create_no_permission_Response(permission.GET_APPOINTMENTS)
+		return self.__create_no_permission_Response(Permission.GET_APPOINTMENTS)
 
 	#4.11
-	def get_store_purchases_history(self) -> Response[ParsableList[purchase_details]]: 
-		if(self.permissions[permission.GET_HISTORY]):
+	def get_store_purchases_history(self) -> Response[ParsableList[PurchaseDetails]]: 
+		if(self.permissions[Permission.GET_HISTORY]):
 			return super().get_store_purchases_history()
 
-		return self.__create_no_permission_Response(permission.GET_HISTORY)
+		return self.__create_no_permission_Response(Permission.GET_HISTORY)
 
-	def _add_permission(self, username : str, permission : permission) -> bool:
+	def _add_permission(self, username : str, permission : Permission) -> bool:
 		if self.user_state.get_username() == username :
 			self.permissions[permission] = True
 			return True
 
 		return super()._add_permission(username, permission)
 
-	def _remove_permission(self, username : str, permission : permission) -> bool:
+	def _remove_permission(self, username : str, permission : Permission) -> bool:
 		if self.user_state.get_username() == username :
 			self.permissions[permission] = False
 			return True
