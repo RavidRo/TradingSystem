@@ -58,7 +58,7 @@ class ITradingSystem(metaclass=ABC):
 	
 	#2.8
 	@abstractmethod
-	def change_product_quantity_in_cart(self, store_id : str, product_id  : str, new_quantity : int):
+	def change_product_quantity_in_cart(cookie, store_id : str, product_id  : str, new_quantity : int):
 		raise NotImplementedError
 
 	#2.9
