@@ -184,3 +184,5 @@ fabric.properties
 .vscode/settings.json
 
 .idea
+
+__init__.py
