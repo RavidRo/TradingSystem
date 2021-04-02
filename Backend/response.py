@@ -40,7 +40,7 @@ class ParsableList(Parsable, Generic[T]):
         self.values = values
 
     def parse(self):
-        return map(self.values, lambda value: value.parse())
+        return ParsableList(map(self.values, lambda value: value.parse()))
 
 
 """
@@ -72,7 +72,7 @@ class Response(Generic[T]):
         self.success = success
 
     def parse(self):
-        return self.object.parse()
+        return Response(self.success, self.object.parse(), self.msg)
 
     def get_msg(self):
         return self.msg
