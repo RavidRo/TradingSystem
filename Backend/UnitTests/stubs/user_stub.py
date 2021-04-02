@@ -9,9 +9,10 @@ class UserStub(IUser):
 
 	def is_appointed(self, store_id):
 		return self.state.is_appointed(store_id)
-		return store_id in self.appoints
 
 	def appoint(self, store_id):
 		return self.state.appoint(store_id)
-		self.appoints.append(store_id)
+	
+	def get_username(self) -> str:
+		return self.state.get_username()
 		

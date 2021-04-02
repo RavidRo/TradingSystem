@@ -7,19 +7,19 @@ class Founder(Responsibility):
 	#4.1
 	#Creating a new product a the store
 	def add_product(self, name : str, price: float, quantity : int) -> Response[None]:
-		return self.store.add_product(self, name, price, quantity)
+		return self.store.add_product(name, price, quantity)
 
 	#4.1
 	def remove_product(self, product_id : str) -> Response[None]:
-		return self.store.remove_product(self, product_id)
+		return self.store.remove_product(product_id)
 
 	#4.1
 	def change_product_quantity(self, product_id : str, quantity : int) -> Response[None]:
-		return self.store.change_product_quantity(self, product_id, quantity)
+		return self.store.change_product_quantity(product_id, quantity)
 
 	#4.1
 	def edit_product_details(self, product_id : str, new_name: str, new_price : float) -> Response[None]:
-		return self.store.edit_product_details(self, product_id, new_name, new_price)
+		return self.store.edit_product_details(product_id, new_name, new_price)
 	
 	#4.3
 	def appoint_owner(self, user : IUser) -> Response[None]:

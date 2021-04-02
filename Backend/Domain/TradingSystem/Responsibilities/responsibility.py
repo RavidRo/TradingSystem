@@ -89,15 +89,23 @@ class Responsibility:
 		if not self.appointed:
 			# if self.user never appointed anyone
 			return False
+
+		def add_appointee_permission(appointee : Responsibility):
+			return appointee._add_permission(username, permission)
+		
 		# returns true if any one of the children returns true
-		return any(map(self.appointed.appointed, lambda worker : worker._add_permission(username, permission)))
+		return any(map(add_appointee_permission, self.appointed))
 	
 	def _remove_permission(self, username : str, permission : Permission) -> bool:
 		if not self.appointed:
 			# if self.user never appointed anyone
 			return False
+
+		def remove_appointee_permission(appointee : Responsibility):
+			return appointee._remove_permission(username, permission)
+
 		# returns true if any one of the children returns true
-		return any(map(self.appointed.appointed, lambda worker : worker._remove_permission(username, permission)))
+		return any(map(remove_appointee_permission, self.appointed))
 	
 	def _remove_appointment(self, username : str) -> bool:
 		if not self.appointed:
@@ -105,10 +113,9 @@ class Responsibility:
 			return False
 			
 		for appointment in self.appointed:
-			appointment.user_state.username == username
-			self.appointed.remove(appointment)
-			return True
-
-		return any(map(self.appointed.appointed, lambda worker : worker._remove_appointment(username)))
-	
-			
+			if appointment.user_state.get_username() == username:
+				self.appointed.remove(appointment)
+				appointment.dismiss_from_store(self.store.get_id())
+				return True
+		
+		return any(map(lambda worker : worker._remove_appointment(username), self.appointed))

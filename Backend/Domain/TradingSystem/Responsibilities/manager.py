@@ -54,7 +54,7 @@ class Manager(Owner):
 
 	#4.3
 	def appoint_owner(self, user : IUser) -> Response[None]:
-		return Response(msg=f"Managers can't appoint owners")
+		return Response(False, msg=f"Managers can't appoint owners")
 
 
 	#4.5
