@@ -115,7 +115,10 @@ class Responsibility:
 		for appointment in self.appointed:
 			if appointment.user_state.get_username() == username:
 				self.appointed.remove(appointment)
-				appointment.dismiss_from_store(self.store.get_id())
+				appointment._dismiss_from_store(self.store.get_id())
 				return True
 		
 		return any(map(lambda worker : worker._remove_appointment(username), self.appointed))
+
+	def _dismiss_from_store(self, store_id : str):
+		self.user_state.dismiss_from_store(store_id)

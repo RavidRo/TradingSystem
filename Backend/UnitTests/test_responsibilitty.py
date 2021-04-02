@@ -287,6 +287,51 @@ def test_manager_remove_manager_permission_is_prohibited_by_default(manager : Ma
 
 #* remove appointments tests - #4.4 and #4.7 
 #* ==========================================================================================
+def test_founder_removed_appointment_successfully(store : StoreStub):
+    member1 = MemberStub()
+    member2 = MemberStub()
+    founder = Founder(member1, store)
+    manager = Manager(member2, store)
+    founder.appointed.append(manager)
+
+    assert founder.remove_appointment(member2.get_username()).succeeded()
+
+def test_fails_when_trying_to_remove_himself(store : StoreStub):
+    member1 = MemberStub("other username")
+    member2 = MemberStub()
+    founder = Founder(member1, store)
+    manager = Manager(member2, store)
+    founder.appointed.append(manager)
+
+    assert not founder.remove_appointment(member1.get_username()).succeeded()
+
+def test_fails_when_removing_appointment_of_not_appointed_username(store : StoreStub):
+    member1 = MemberStub()
+    member2 = MemberStub()
+    founder = Founder(member1, store)
+    manager = Manager(member2, store)
+    founder.appointed.append(manager)
+
+    assert not founder.remove_appointment("some none appointed username").succeeded()
+
+def test_owner_removed_appointment_successfully(store : StoreStub):
+    member1 = MemberStub()
+    member2 = MemberStub()
+    owner = Owner(member1, store)
+    manager = Manager(member2, store)
+    owner.appointed.append(manager)
+
+    assert owner.remove_appointment(member2.get_username()).succeeded()
+
+
+def test_manager_prohibited_from_removing_appointments_by_default(store : StoreStub):
+    member1 = MemberStub()
+    member2 = MemberStub()
+    manager_father = Manager(member1, store)
+    manager = Manager(member2, store)
+    manager_father.appointed.append(manager)
+
+    assert not manager_father.remove_appointment(member2.get_username()).succeeded()
 
 #* get store appointments tests - #4.9
 #* ==========================================================================================
