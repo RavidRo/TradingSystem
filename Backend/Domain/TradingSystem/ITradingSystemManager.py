@@ -71,6 +71,10 @@ class ITradingSystem(metaclass=ABC):
 	def purchase_completed(cookie : str) -> Response[None]:
 		raise NotImplementedError
 
+	@abstractmethod
+	def get_cart_price(cookie : str) -> Response[PrimitiveParsable[float]]:
+		raise NotImplementedError
+
 	# Member
 	# ===============================
 

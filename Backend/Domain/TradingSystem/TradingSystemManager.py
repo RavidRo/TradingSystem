@@ -64,6 +64,9 @@ class TradingSystem(ITradingSystem):
 	def purchase_completed(cookie : str) -> Response[None]:
 		return UserManager.purchase_completed(cookie)
 
+	def get_cart_price(cookie : str) -> Response[PrimitiveParsable[float]]:
+		return UserManager.get_cart_price(cookie)
+
 	# Member
 	# ===============================
 
