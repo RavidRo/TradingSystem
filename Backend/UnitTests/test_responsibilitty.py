@@ -1,9 +1,12 @@
-from Backend.Domain.TradingSystem.Responsibilities.manager import Manager
-from Backend.Domain.TradingSystem.Responsibilities.owner import Owner
-from Backend.Domain.TradingSystem.Responsibilities.founder import Founder
-from Backend.UnitTests.stubs.member_stub import MemberStub
-from Backend.UnitTests.stubs.store_stub import StoreStub
 import pytest
+
+from .stubs.member_stub import MemberStub
+from .stubs.store_stub import StoreStub
+from .stubs.user_stub import UserStub
+from ..Domain.TradingSystem.Responsibilities.responsibility import Permission
+from ..Domain.TradingSystem.Responsibilities.manager import Manager
+from ..Domain.TradingSystem.Responsibilities.owner import Owner
+from ..Domain.TradingSystem.Responsibilities.founder import Founder
 
 #* fixtures
 #* ==========================================================================================
@@ -26,6 +29,10 @@ def owner(store, member):
 @pytest.fixture
 def manager(store, member):
     return Manager(member, store)
+
+@pytest.fixture
+def user():
+    return UserStub()
 
 #* constructor tests
 #* ==========================================================================================
@@ -100,11 +107,203 @@ def test_manager_edit_product_details_prohibited_by_default(manager : Manager):
 
 #* appoint owner tests - #4.3
 #* ==========================================================================================
-# def test_founder_edit_product_details_calls_store_successfully(founder : Founder):
-#     assert founder.edit_product_details("0", "", 0).succeeded()
+def test_founder_appoint_owner_successfully(founder : Founder, user):
+    assert founder.appoint_owner(user).succeeded()
 
-# def test_owner_edit_product_details_calls_store_successfully(owner : Owner):
-#     assert owner.edit_product_details("0", "", 0).succeeded()
+def test_owner_appoint_owner_successfully(owner : Owner, user):
+    assert owner.appoint_owner(user).succeeded()
 
-def test_manager_appoint_owner_is_prohibited(manager : Manager):
-    assert not manager.appoint_owner().succeeded()
+def test_cant_appoint_an_already_appointed_user(member, store : StoreStub, user):
+    founder = Founder(member, store)
+    user.appoint(store.get_id())
+    assert not founder.appoint_owner(user).succeeded()
+
+def test_cant_appoint_a_user_twice_to_the_same_store(founder, user):
+    assert not founder.appoint_owner(user).succeeded()
+
+def test_manager_appoint_owner_is_prohibited(manager : Manager, user):
+    assert not manager.appoint_owner(user).succeeded()
+
+#* appoint manager tests - #4.5
+#* ==========================================================================================
+def test_founder_appoint_manager_successfully(founder : Founder, user):
+    assert founder.appoint_manager(user).succeeded()
+
+def test_owner_appoint_manager_successfully(owner : Owner, user):
+    assert owner.appoint_manager(user).succeeded()
+
+def test_cant_appoint_an_already_appointed_user(member, store : StoreStub, user):
+    founder = Founder(member, store)
+    user.appoint(store.get_id())
+    assert not founder.appoint_manager(user).succeeded()
+
+def test_cant_appoint_a_user_twice_to_the_same_store(founder, user):
+    assert not founder.appoint_manager(user).succeeded()
+
+def test_manager_appoint_manager_is_prohibited_by_default(manager : Manager, user):
+    assert not manager.appoint_manager(user).succeeded()
+
+#* add manager permission tests - #4.6
+#* ==========================================================================================
+def test_founder_add_manager_permission_successfully(store : StoreStub):
+    member1 = MemberStub()
+    member2 = MemberStub()
+    founder = Founder(member1, store)
+    manager = Manager(member2, store)
+    founder.appointed.append(manager)
+
+    assert founder.add_manager_permission(member2.get_username(), Permission.MANAGE_PRODUCTS).succeeded()
+
+def test_owner_add_manager_permission_successfully(store : StoreStub):
+    member1 = MemberStub()
+    member2 = MemberStub()
+    owner = owner(member1, store)
+    manager = Manager(member2, store)
+    founder.appointed.append(manager)
+
+    assert owner.add_manager_permission(member2.get_username(), Permission.MANAGE_PRODUCTS).succeeded()
+
+def test_can_add_same_permission_twice(store : StoreStub):
+    member1 = MemberStub()
+    member2 = MemberStub()
+    founder = Founder(member1, store)
+    manager = Manager(member2, store)
+    founder.appointed.append(manager)
+
+    founder.add_manager_permission(member2.get_username(), Permission.MANAGE_PRODUCTS)
+    assert founder.add_manager_permission(member2.get_username(), Permission.MANAGE_PRODUCTS).succeeded()
+
+def test_manager_gained_the_permission(store : StoreStub):
+    member1 = MemberStub()
+    member2 = MemberStub()
+    owner = owner(member1, store)
+    manager = Manager(member2, store)
+    founder.appointed.append(manager)
+
+    owner.add_manager_permission(member2.get_username(), Permission.MANAGE_PRODUCTS).succeeded()
+    assert manager.add_product("", 0, 0).succeeded()
+
+def test_fails_when_personal_never_appointed(founder):
+    assert not founder.add_manager_permission("some_manager", Permission.MANAGE_PRODUCTS).succeeded()
+
+def test_fails_when_username_was_never_appointed(founder):
+    member1 = MemberStub()
+    member2 = MemberStub()
+    founder = Founder(member1, store)
+    manager = Manager(member2, store)
+    founder.appointed.append(manager)
+
+    assert founder.add_manager_permission("no one's username", Permission.MANAGE_PRODUCTS).succeeded()
+
+def test_fails_when_the_given_user_is_not_a_manager(founder):
+    member1 = MemberStub()
+    member2 = MemberStub()
+    founder = Founder(member1, store)
+    owner = Owner(member2, store)
+    founder.appointed.append(owner)
+
+    assert not founder.add_manager_permission(member2.get_username(), Permission.MANAGE_PRODUCTS).succeeded()
+
+def test_manager_add_manager_permission_is_prohibited_by_default(manager : Manager, store : StoreStub):
+    member1 = MemberStub()
+    member2 = MemberStub()
+    manager_father = Manager(member1, store)
+    manager = Manager(member2, store)
+    manager_father.appointed.append(manager)
+
+    assert not manager_father.add_manager_permission(member2.get_username(), Permission.MANAGE_PRODUCTS).succeeded()
+
+#* remove manager permission tests - #4.6
+#* ==========================================================================================
+def test_founder_remove_manager_permission_successfully(store : StoreStub):
+    member1 = MemberStub()
+    member2 = MemberStub()
+    founder = Founder(member1, store)
+    manager = Manager(member2, store)
+    founder.appointed.append(manager)
+
+    assert founder.remove_manager_permission(member2.get_username(), Permission.GET_APPOINTMENTS).succeeded()
+
+def test_owner_remove_manager_permission_successfully(store : StoreStub):
+    member1 = MemberStub()
+    member2 = MemberStub()
+    owner = owner(member1, store)
+    manager = Manager(member2, store)
+    founder.appointed.append(manager)
+
+    assert owner.remove_manager_permission(member2.get_username(), Permission.GET_APPOINTMENTS).succeeded()
+
+def test_can_remove_manager_permission_twice(store : StoreStub):
+    member1 = MemberStub()
+    member2 = MemberStub()
+    founder = Founder(member1, store)
+    manager = Manager(member2, store)
+    founder.appointed.append(manager)
+
+    founder.remove_manager_permission(member2.get_username(), Permission.GET_APPOINTMENTS)
+    assert founder.remove_manager_permission(member2.get_username(), Permission.GET_APPOINTMENTS).succeeded()
+
+def test_manager_cant_get_appointments_after_permission_removed(store : StoreStub):
+    member1 = MemberStub()
+    member2 = MemberStub()
+    owner = owner(member1, store)
+    manager = Manager(member2, store)
+    founder.appointed.append(manager)
+
+    owner.remove_manager_permission(member2.get_username(), Permission.GET_APPOINTMENTS).succeeded()
+    assert not manager.get_store_appointments().succeeded()
+
+def test_fails_when_personal_never_appointed(founder):
+    assert not founder.remove_manager_permission("some_manager", Permission.GET_APPOINTMENTS).succeeded()
+
+def test_fails_when_username_was_never_appointed(founder):
+    member1 = MemberStub()
+    member2 = MemberStub()
+    founder = Founder(member1, store)
+    manager = Manager(member2, store)
+    founder.appointed.append(manager)
+
+    assert founder.remove_manager_permission("no one's username", Permission.GET_APPOINTMENTS).succeeded()
+
+def test_fails_when_the_given_user_is_not_a_manager(founder):
+    member1 = MemberStub()
+    member2 = MemberStub()
+    founder = Founder(member1, store)
+    owner = Owner(member2, store)
+    founder.appointed.append(owner)
+
+    assert not founder.remove_manager_permission(member2.get_username(), Permission.GET_APPOINTMENTS).succeeded()
+
+def test_manager_remove_manager_permission_is_prohibited_by_default(manager : Manager, store : StoreStub):
+    member1 = MemberStub()
+    member2 = MemberStub()
+    manager_father = Manager(member1, store)
+    manager = Manager(member2, store)
+    manager_father.appointed.append(manager)
+
+    assert not manager_father.remove_manager_permission(member2.get_username(), Permission.GET_APPOINTMENTS).succeeded()
+
+#* remove appointments tests - #4.4 and #4.7 
+#* ==========================================================================================
+
+#* get store appointments tests - #4.9
+#* ==========================================================================================
+def test_founder_get_store_appointments_calls_store_successfully(founder : Founder):
+    assert founder.get_store_appointments().succeeded()
+
+def test_owner_get_store_appointments_calls_store_successfully(owner : Owner):
+    assert owner.get_store_appointments().succeeded()
+
+def test_manager_get_store_appointments_prohibited_by_default(manager : Manager):
+    assert not manager.get_store_appointments().succeeded()
+
+#* get store purchase history tests - #4.11
+#* ==========================================================================================
+def test_founder_get_store_purchases_history_calls_store_successfully(founder : Founder):
+    assert founder.get_store_purchases_history().succeeded()
+
+def test_owner_get_store_purchases_history_calls_store_successfully(owner : Owner):
+    assert owner.get_store_purchases_history().succeeded()
+
+def test_manager_get_store_purchases_history_prohibited_by_default(manager : Manager):
+    assert not manager.get_store_purchases_history().succeeded()

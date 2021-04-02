@@ -1,8 +1,9 @@
+from Backend.Domain.TradingSystem.store import Store
 from Backend.Domain.TradingSystem.Responsibilities.responsibility import Responsibility
 from Backend.Domain.TradingSystem.purchase_details import PurchaseDetails
 from Backend.response import Response, ParsableList
 
-class StoreStub():
+class StoreStub(Store):
 
 	def __init__(self) -> None:
 		self.product_added = False
