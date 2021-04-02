@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from Backend.Domain.TradingSystem.user_states import Member
 from Backend.Domain.TradingSystem.user import User
 from Backend.Domain.TradingSystem.purchase_details import PurchaseDetails

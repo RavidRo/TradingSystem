@@ -17,18 +17,18 @@ class Parsable(ABC):
 In order to support primitive return objects, a primitive parsable wrapper is introduced
 """
 
+S = TypeVar('S')
+class PrimitiveParsable(Parsable, Generic[S]):
 
-class PrimitiveParsable(Parsable):
+    def __init__(self, value : S):
+        self.value : S = value
 
-    def __init__(self, value):
-        self.value = value
-
-    def parse(self):
+    def parse(self) -> S:
         return self.value
 
 
 T = TypeVar('T', bound=Parsable)
-S = TypeVar('S')
+
 
 
 """
@@ -42,8 +42,7 @@ class ParsableList(Parsable):
         self.values = values
 
     def parse(self):
-        for value in self.values:
-            value.parse()
+        return map(self.values, lambda value: value.parse())
 
 
 """
