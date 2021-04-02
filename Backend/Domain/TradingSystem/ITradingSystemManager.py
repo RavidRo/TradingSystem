@@ -1,4 +1,4 @@
-from abc import ABC, abstractmethod, 
+from abc import ABC, abstractmethod
 
 from Backend.Domain.TradingSystem.product_data import product_data
 from Backend.Domain.TradingSystem.store_data import store_data
