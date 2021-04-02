@@ -1,6 +1,4 @@
 from Backend.Domain.TradingSystem.Responsibilities.responsibility import Permission, Responsibility
-from Backend.Domain.TradingSystem.Responsibilities.manager import Manager
-from Backend.Domain.TradingSystem.Responsibilities.owner import Owner
 from Backend.Domain.TradingSystem.IUser import IUser
 from Backend.Domain.TradingSystem.purchase_details import PurchaseDetails
 from Backend.response import Response, ParsableList
@@ -25,6 +23,9 @@ class Founder(Responsibility):
 	
 	#4.3
 	def appoint_owner(self, user : IUser) -> Response[None]:
+		#* The import is here to fix circular depandency problem
+		from Backend.Domain.TradingSystem.Responsibilities.owner import Owner
+
 		if user.is_appointed(self.store.get_id()):
 			return Response(False, msg = f"{user.get_username()} is already appointed to {self.store.get_name()}")	
 		
@@ -37,6 +38,9 @@ class Founder(Responsibility):
 
 	#4.5
 	def appoint_manager(self, user : IUser) -> Response[None]:
+		#* The import is here to fix circular depandency problem
+		from Backend.Domain.TradingSystem.Responsibilities.manager import Manager
+
 		if user.is_appointed(self.store.get_id()):
 			return Response(False, msg = f"{user.get_username()} is already appointed to {self.store.get_name()}")	
 
