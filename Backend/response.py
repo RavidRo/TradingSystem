@@ -8,7 +8,6 @@ Interface that every object we wish to refer to in Response must implement.
 
 
 class Parsable(ABC):
-
     @abstractmethod
     def parse(self):
         raise RuntimeError("must import parse")
@@ -18,42 +17,40 @@ class Parsable(ABC):
 In order to support primitive return objects, a primitive parsable wrapper is introduced
 """
 
+S = TypeVar("S")
 
-class PrimitiveParsable(Parsable):
 
-    def __init__(self, value):
-        self.value = value
+class PrimitiveParsable(Parsable, Generic[S]):
+    def __init__(self, value: S):
+        self.value: S = value
 
-    def parse(self):
+    def parse(self) -> S:
         return self.value
-
-
-
-
 
 
 """
 In order to support list return objects, a parsable list wrapper is introduced
 """
 
-T = TypeVar('T', bound=Parsable)
-class ParsableList(Parsable, Generic[T]):
+T = TypeVar("T", bound=Parsable)
 
+
+class ParsableList(Parsable, Generic[T]):
     def __init__(self, values: List[T]):
         self.values = values
 
     def parse(self):
-        for value in self.values:
-            value.parse()
+        return map(self.values, lambda value: value.parse())
 
 
 """
 In order to support map return objects, a parsable map wrapper is introduced (parse only values)
 """
 
-S = TypeVar('S')
+S = TypeVar("S")
+
+
 class ParsableMap(Parsable, Generic[S, T]):
-    
     def __init__(self, values: Dict[S, T]):
         self.values = values
 
@@ -69,7 +66,6 @@ class ParsableMap(Parsable, Generic[S, T]):
 
 
 class Response(Generic[T]):
-
     def __init__(self, success: bool, obj: T = None, msg="Uninitialized"):
         self.msg = msg
         self.object = obj
@@ -84,11 +80,13 @@ class Response(Generic[T]):
     def succeeded(self):
         return self.success
 
-class foo():
+
+class foo:
     def __init__(self) -> None:
         self.name = "My Name"
-        
-variable : Response[foo] = Response(True, foo())
+
+
+variable: Response[foo] = Response(True, foo())
 print(variable.object)
 
 
