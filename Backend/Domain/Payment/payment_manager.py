@@ -14,10 +14,10 @@ def pay(price, payment_details, product_ids_to_quantity, address):
                 return Response(success=False)
         except:
             rollback(price, payment_details)
+            return Response(success=False)
     else:
         return Response(success=False)
 
 
 def rollback(price, payment_details):
     return cashing_adapter.pay(-price, payment_details)
-
