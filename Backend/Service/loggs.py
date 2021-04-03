@@ -19,7 +19,7 @@ def logging(function):
             return result
 
         except Exception:
-            logging.criticalstr.format(level="exception", result=traceback.format_exc())
+            logging.critical(str.format(level="exception", result=traceback.format_exc()))
             return Response(False, msg="An unexpected error as occurred")
 
     return inner
