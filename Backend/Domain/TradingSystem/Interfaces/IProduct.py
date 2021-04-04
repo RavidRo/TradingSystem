@@ -11,12 +11,6 @@ class IProduct(metaclass=ABC):
         raise NotImplementedError
 
     @abstractmethod
-    #todo: think how to handle the return type since can't return IProduct
-    def show_product_data(self) -> Response:
-        """A query for the product's data"""
-        raise NotImplementedError
-
-    @abstractmethod
     def edit_product_details(self, product_name: str, price: float):
         """Edit product's details with received product_info"""
         raise NotImplementedError

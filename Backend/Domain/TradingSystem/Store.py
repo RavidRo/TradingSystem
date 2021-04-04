@@ -5,6 +5,7 @@ import uuid
 from Backend.Domain.TradingSystem.PurchasePolicy import DefaultPurchasePolicy
 from Backend.Domain.TradingSystem.Responsibilities import Responsibility
 from Backend.response import Response, ParsableList, Parsable
+from dataclasses import dataclass
 
 
 class Store(IStore, Parsable):
@@ -20,8 +21,26 @@ class Store(IStore, Parsable):
         self.purchase_policy = DefaultPurchasePolicy()
         self.purchase_history = []
 
-    def parse(self):
-        pass
+
+    # todo:continue the function!
+    # def parse(self):
+    #     products_ids_quantities = self.parse_products()
+    #     # todo: Tell Ravid to implement this!
+    #     responsibility_data = self.responsibility.parse()
+    #     return StoreDataObject(self.id, self.name, products_ids_quantities, responsibility_data,  )
+
+    def parse_products(self):
+        parsed_products= []
+        for product, quantity in self.products_to_quantities.values():
+            parsed_products.append((product.get_id(), product.get_name(), product.get_price(), quantity))
+        return parsed_products
+
+    def set_product_name(self, product_id, new_name) -> Response[None]:
+        if self.products_to_quantities.get(product_id) is None:
+            return Response(False, f"product with {product_id} doesn't exist in the store!")
+
+        self.products_to_quantities.get(product_id).set_product_name(new_name)
+        return Response(True, f"Product {product_id} name was changed successfully!")
 
     def show_store_data(self) -> Response:
         # in the future other field will be checked too
@@ -62,11 +81,11 @@ class Store(IStore, Parsable):
                                       str(self.products_to_quantities[product_id][0].get_name()) + "'s quantity")
         return Response(False, msg="The product with id: " + str(product_id) + " isn't in the inventory!")
 
-    def edit_product_details(self, product_id: str, product_name: str, price: float) -> Response[None]:
-        if product_id in self.products_to_quantities:
-            self.products_to_quantities[product_id][0].edit_product_details(product_name, price)
-            return Response(True, msg="Succesfully updated product " + self.products_to_quantities[product_id][0].get_name() + "'s details")
-        return Response(False, msg="The product with id: " + str(product_id) + " isn't in the inventory!")
+    # def edit_product_details(self, product_id: str, product_name: str, price: float) -> Response[None]:
+    #     if product_id in self.products_to_quantities:
+    #         self.products_to_quantities[product_id][0].edit_product_details(product_name, price)
+    #         return Response(True, msg="Succesfully updated product " + self.products_to_quantities[product_id][0].get_name() + "'s details")
+    #     return Response(False, msg="The product with id: " + str(product_id) + " isn't in the inventory!")
 
     def get_personnel_info(self) -> Response[Responsibility]:
         if self.responsibility is None:
@@ -126,3 +145,13 @@ class Store(IStore, Parsable):
     def check_purchase_types(self, products_info, user_info):
         return Response(True, msg="all purchase types arew available")
 
+
+@dataclass
+class StoreDataObject:
+    id: str
+    name: str
+    products_to_quantities: list
+    responsibility: list
+    discount_policy: str
+    purchase_policy: str
+    purchase_history: list
