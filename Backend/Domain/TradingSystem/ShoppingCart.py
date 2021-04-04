@@ -47,21 +47,18 @@ class ShoppingCart(IShoppingCart):
             return Response(False, msg="There is no product with id: " + str(product_id) +
                                                "in the bag of store with id: " + str(store_id))
 
-    def show_cart(self) -> Response:
-        return Response[self](True, msg="Full shopping cart")
 
     def change_product_qunatity(self, store_id: str, product_id: str, new_amount: int) -> Response[None]:
         bag = self.shopping_bags.get(store_id)
         if bag is None:
             return Response(False, msg="There is no existing bag for store with store id: " + str(store_id))
         if bag.product_in_bag(product_id):
-            bag.change_quantity(product_id, new_amount)
-            return Response(True, msg="Successfully changed quantity of product with id: " + str(product_id))
+            return bag.change_product_qunatity(product_id, new_amount)
         else:
             return Response(False, msg="There is no product with id: " + str(product_id) +
                                                "in the bag of store with id: " + str(store_id))
 
-    # todo: ask about products_purchase_info - I think its a dict between store_id to tuple (product_id to purchase_type)
+    # todo: ask about products_purchase_info - I think its a dict between store_id to list of tuples tuple (product_id to purchase_type)
     def buy_products(self, products_purchase_info: dict, user) -> Response[PrimitiveParsable]:
         sum = 0
         for store_id in products_purchase_info.keys():
@@ -71,12 +68,12 @@ class ShoppingCart(IShoppingCart):
             sum += result.get_obj().get_val()
         return Response[PrimitiveParsable(sum)](True, msg="All purchase details are valid. The overall sum is: " + str(sum))
 
-    #todo: complete this function
-    def delete_products_after_purchase(self) -> Response[IPurchaseDetails]:
+    # todo: complete this function
+    def delete_products_after_purchase(self, user_name="guest") -> Response[IPurchaseDetails]:
+        purchase_cart_details = []
         for store_id in self.shopping_bags.keys():
-            result = self.shopping_bags[store_id].delete_products_after_purchase()
-            if not result.success:
-                return result
+            purchase_cart_details.append(self.shopping_bags[store_id].delete_products_after_purchase(user_name))
+
 
     def show_bag(self, store_id: str) -> Response[IShoppingBag]:
         bag = self.shopping_bags.get(store_id)

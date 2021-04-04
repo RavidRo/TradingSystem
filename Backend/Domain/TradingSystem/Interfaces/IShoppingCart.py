@@ -36,12 +36,6 @@ class IShoppingCart(metaclass=ABC):
         raise NotImplementedError
 
     @abstractmethod
-    # todo: think how to handle the return type since can't return IShoppingCart
-    def show_cart(self) -> Response:
-        """show the cart of the user"""
-        raise NotImplementedError
-
-    @abstractmethod
     def change_product_qunatity(self, store_id: str, product_id: str, new_amount: int) -> Response[None]:
         """ Change product's quantity (add or remove) - new amount overrides the current amount"""
         raise NotImplementedError
