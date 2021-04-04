@@ -36,9 +36,9 @@ In order to support list return objects, a parsable list wrapper is introduced
 """
 
 
-class ParsableList(Parsable):
+class ParsableList(Parsable, Generic[T]):
 
-    def __init__(self, values: List[Generic[T]]):
+    def __init__(self, values: List[T]):
         self.values = values
 
     def parse(self):
@@ -50,9 +50,9 @@ In order to support map return objects, a parsable map wrapper is introduced (pa
 """
 
 
-class ParsableMap(Parsable):
+class ParsableMap(Parsable, Generic[S, T]):
 
-    def __init__(self, values: Dict[Generic[S], Generic[T]]):
+    def __init__(self, values: Dict[S, T]):
         self.values = values
 
     def parse(self):
