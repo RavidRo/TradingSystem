@@ -4,10 +4,10 @@ from Backend.Domain.TradingSystem import Product, PurchaseDetails
 import uuid
 from Backend.Domain.TradingSystem.PurchasePolicy import DefaultPurchasePolicy
 from Backend.Domain.TradingSystem.Responsibilities import Responsibility
-from Backend.response import Response, ParsableList
+from Backend.response import Response, ParsableList, Parsable
 
 
-class Store(IStore):
+class Store(IStore, Parsable):
 
     def __init__(self, store_name: str):
         """Create a new store with it's specified info"""
@@ -20,12 +20,18 @@ class Store(IStore):
         self.purchase_policy = DefaultPurchasePolicy()
         self.purchase_history = []
 
+    def parse(self):
+        pass
+
     def show_store_data(self) -> Response:
         # in the future other field will be checked too
         if self.responsibility is None:
             return Response(False, msg="Store's responsibilities aren't set yet")
 
-        return Response[self](True, msg="Store's details are complete")
+        return Response[Store](True, self, msg="Store's details are complete")
+
+    def get_name(self) -> str:
+        return self.name
 
     def add_product(self, product_name: str, price: float, quantity: int) -> Response[None]:
         if quantity <= 0:

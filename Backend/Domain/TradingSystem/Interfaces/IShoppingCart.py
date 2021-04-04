@@ -41,7 +41,7 @@ class IShoppingCart(metaclass=ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def buy_products(self, products_purchase_info: dict, user) -> Response[PrimitiveParsable]:
+    def buy_products(self,user, product_info={}) -> Response[PrimitiveParsable]:
         """buy transaction"""
         raise NotImplementedError
 

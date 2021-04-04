@@ -1,15 +1,18 @@
 import uuid
 
 from Backend.Domain.TradingSystem.Interfaces.IProduct import IProduct
-from Backend.response import Response
+from Backend.response import Response, Parsable
 
 
-class Product(IProduct):
+class Product(IProduct, Parsable):
 
     def __init__(self, product_name: str, price: float):
         self.product_name = product_name
         self.price = price
         self.id = str(self.id_generator())
+
+    def parse(self):
+        pass
 
     def show_product_data(self) -> Response:
         return Response[self](True, msg="Product's details")

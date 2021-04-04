@@ -17,4 +17,4 @@ class DefaultDiscountType(DiscountType):
 
     def apply_discount(self, products: Product, ) -> Response[None]:
         products_prices = [prod.price for prod in products]
-        return Response()[PrimitiveParsable(sum(products_prices))](True, msg="Discount applied")
+        return Response()[PrimitiveParsable](True, PrimitiveParsable(sum(products_prices)), msg="Discount applied")
