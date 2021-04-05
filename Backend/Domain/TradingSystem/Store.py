@@ -21,16 +21,11 @@ class Store(IStore, Parsable):
         self.purchase_policy = DefaultPurchasePolicy()
         self.purchase_history = []
 
-
-    # todo:continue the function!
-    # def parse(self):
-    #     products_ids_quantities = self.parse_products()
-    #     # todo: Tell Ravid to implement this!
-    #     responsibility_data = self.responsibility.parse()
-    #     return StoreDataObject(self.id, self.name, products_ids_quantities, responsibility_data,  )
+    def parse(self):
+        return StoreDataObject(self.id, self.name)
 
     def parse_products(self):
-        parsed_products= []
+        parsed_products = []
         for product, quantity in self.products_to_quantities.values():
             parsed_products.append((product.get_id(), product.get_name(), product.get_price(), quantity))
         return parsed_products
@@ -81,12 +76,6 @@ class Store(IStore, Parsable):
                                       str(self.products_to_quantities[product_id][0].get_name()) + "'s quantity")
         return Response(False, msg="The product with id: " + str(product_id) + " isn't in the inventory!")
 
-    # def edit_product_details(self, product_id: str, product_name: str, price: float) -> Response[None]:
-    #     if product_id in self.products_to_quantities:
-    #         self.products_to_quantities[product_id][0].edit_product_details(product_name, price)
-    #         return Response(True, msg="Succesfully updated product " + self.products_to_quantities[product_id][0].get_name() + "'s details")
-    #     return Response(False, msg="The product with id: " + str(product_id) + " isn't in the inventory!")
-
     def get_personnel_info(self) -> Response[Responsibility]:
         if self.responsibility is None:
             return Response(False, msg="The store doesn't have assigned personnel")
@@ -121,28 +110,28 @@ class Store(IStore, Parsable):
                 self.products_to_quantities[prod_id,] += quantity
 
     # This function checks for available products and catches them
-    def check_available_products(self, products_ids_to_quantities: dict):
-        checked_products = dict()
+    def check_available_products(self, products_ids_to_quantities: dict) -> Response[None]:
         for prod_id, quantity in products_ids_to_quantities.items():
             current_quantity = products_ids_to_quantities.get(prod_id)
             if current_quantity is None:
-                self.send_back(checked_products)
-                return Response(False, msg="The product with id: " + prod_id + "doesn't exist in the inventory of the store")
+                return Response(False,
+                                msg="The product with id: " + prod_id + "doesn't exist in the inventory of the store")
             elif current_quantity < quantity:
-                self.send_back(checked_products)
-                return Response(False, msg="The store has less than" + str(quantity) + "of the product with id: " + prod_id + "left")
+                return Response(False, msg="The store has less than" + str(
+                    quantity) + "of the product with id: " + prod_id + "left")
             else:
-                # acquire the product with specified quantity
-                if current_quantity == quantity:
-                    products_ids_to_quantities.pop(prod_id)
-                else:
-                    products_ids_to_quantities.update({prod_id, current_quantity - quantity})
-                checked_products.update({prod_id, quantity})
-        # ask about dict as an object to add here!
-        return Response(True, checked_products, msg="All products are available")
+                return Response(True, msg="All products are available")
+
+    def acquire_products(self, products_ids_to_quantities: dict) -> None:
+        for prod_id, quantity in products_ids_to_quantities.items():
+            current_quantity = products_ids_to_quantities.get(prod_id)
+            if current_quantity == quantity:
+                products_ids_to_quantities.pop(prod_id)
+            else:
+                products_ids_to_quantities.update({prod_id, current_quantity - quantity})
 
     # this will be added in the future - maybe I will apply Default Policy for now
-    def check_purchase_types(self, products_info, user_info):
+    def check_purchase_types(self, products_info, user_info) -> Response[None]:
         return Response(True, msg="all purchase types arew available")
 
 
@@ -150,8 +139,3 @@ class Store(IStore, Parsable):
 class StoreDataObject:
     id: str
     name: str
-    products_to_quantities: list
-    responsibility: list
-    discount_policy: str
-    purchase_policy: str
-    purchase_history: list

@@ -1,3 +1,5 @@
+from dataclasses import dataclass
+
 from Backend.Domain.TradingSystem import StoresManager
 from Backend.Domain.TradingSystem.Interfaces import IShoppingBag, IPurchaseDetails
 from Backend.Domain.TradingSystem.Interfaces.IShoppingCart import IShoppingCart
@@ -12,7 +14,10 @@ class ShoppingCart(IShoppingCart, Parsable):
         self.shopping_bags = dict()
 
     def parse(self):
-        pass
+        parsed_bags = []
+        for bag in self.shopping_bags:
+            parsed_bags.append(bag.parse())
+        return parsed_bags
 
     def add_product(self, store_id: str, product_id: str, quantity: int) -> Response[None]:
         if quantity <= 0:
@@ -25,11 +30,7 @@ class ShoppingCart(IShoppingCart, Parsable):
 
         for bag in self.shopping_bags:
             if bag.get_store_ID() == store_id:
-                if bag.product_in_bag(product_id):
-                    return Response(False,
-                                    msg="A product with id: " + str(product_id) + " already exists in the store's bag")
-                bag.add_product(product_id, quantity)
-                return self.success_adding_product(store_id, product_id)
+                return bag.add_product(product_id, quantity)
 
         # no bag for store with store_id
         new_bag = ShoppingBag(self.stores_manager.get_store(store_id))
@@ -76,8 +77,7 @@ class ShoppingCart(IShoppingCart, Parsable):
             if not result.success:
                 return result
             sum += result.get_obj().get_val()
-        return Response[PrimitiveParsable(sum)](True,
-                                                msg="All purchase details are valid. The overall sum is: " + str(sum))
+        return Response[PrimitiveParsable](True, obj=PrimitiveParsable(sum), msg=f"All purchase details are valid. The overall sum is: {sum}")
 
     def delete_products_after_purchase(self, user_name="guest") -> Response[ParsableList]:
         purchase_cart_details = []

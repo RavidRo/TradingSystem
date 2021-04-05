@@ -15,10 +15,6 @@ class Product(IProduct, Parsable):
     def parse(self):
         return ProductDataObject(self.name, self.price, self.id)
 
-    # def edit_product_details(self, product_name: str, price: float):
-    #     self.product_name = product_name
-    #     self.price = price
-
     def set_product_name(self, new_name):
         self.product_name = new_name
 
