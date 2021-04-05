@@ -35,11 +35,8 @@ class ShoppingCart(IShoppingCart, Parsable):
         # no bag for store with store_id
         new_bag = ShoppingBag(self.stores_manager.get_store(store_id))
         self.shopping_bags.update({store_id, new_bag})
-        new_bag.add_product(product_id, quantity)
-        return self.success_adding_product(store_id, product_id)
+        return new_bag.add_product(product_id, quantity)
 
-    def success_adding_product(self, store_id, product_id):
-        return Response(True, msg="Successfully added product with id: " + str(product_id) + "to cart")
 
     def remove_product(self, store_id: str, product_id: str) -> Response[None]:
         bag = self.shopping_bags.get(store_id)

@@ -16,8 +16,6 @@ class ShoppingBag(IShoppingBag, Parsable):
         self.pending_products_to_quantity = dict()
         self.pending_price = 0
 
-    # using set for checking if element exists since it's O(1) instead of O(n)
-
     def parse(self):
         products_names_to_quantities = []
         for product_id, quantity in self.product_ids_to_quantity:
@@ -76,6 +74,7 @@ class ShoppingBag(IShoppingBag, Parsable):
 
     def delete_products_after_purchase(self, user_name="guest") -> PurchaseDetails:
         # for now this function will only return details, in the future there will be specific deletion
+        self.pending_products_to_quantity.clear()
         return PurchaseDetails(user_name, self.store.get_name(), self.pending_products_to_quantity.keys(),
                                datetime.now(), self.pending_price)
 
