@@ -1,13 +1,14 @@
 from __future__ import annotations
 
+from Backend.Domain.TradingSystem.IUser import IUser
 from Backend.response import Response, ParsableList, PrimitiveParsable
 from Backend.Domain.TradingSystem.shopping_cart import ShoppingCart
 from Backend.Domain.TradingSystem.purchase_details import PurchaseDetails
 from Backend.Domain.TradingSystem.user_state import UserState, Guest
-from .Responsibilities.Responsibility import Permission, Responsibility
+from .Responsibilities.responsibility import Permission, Responsibility
 
 
-class User:
+class User(IUser):
     def __init__(self):
         self.state: UserState = Guest(self)
 
@@ -75,11 +76,11 @@ class User:
         return self.state.edit_product_details(store_id, product_id, new_name, new_price)
 
     # 4.3
-    def appoint_owner(self, store_id: str, user: User) -> Response[None]:
+    def appoint_owner(self, store_id: str, user: IUser) -> Response[None]:
         return self.state.appoint_new_store_owner(store_id, user)
 
     # 4.5
-    def appoint_manager(self, store_id: str, user: User) -> Response[None]:
+    def appoint_manager(self, store_id: str, user: IUser) -> Response[None]:
         return self.state.appoint_new_store_manager(store_id, user)
 
     # 4.6
@@ -116,8 +117,8 @@ class User:
     # Inter component functions
     # ====================
 
-    def isAppointed(self, store_id: str) -> bool:
-        return self.state.isAppointed(store_id)
+    def is_appointed(self, store_id: str) -> bool:
+        return self.state.is_appointed(store_id)
 
     def get_username(self) -> str:
         return self.state.get_username()

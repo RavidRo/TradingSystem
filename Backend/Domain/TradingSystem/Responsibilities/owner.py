@@ -1,4 +1,4 @@
-from .founder import Founder
+from Backend.Domain.TradingSystem.Responsibilities.founder import Founder
 
 
 #* This class is currently empty because Owner can do what ever a founder can do.
