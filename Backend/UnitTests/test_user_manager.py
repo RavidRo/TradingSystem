@@ -121,15 +121,15 @@ def test_remove_product_from_cart_fails_when_given_invalid_cookie():
     assert not UserManager.remove_product_from_cart("boogie boogie", "", "").succeeded()
 
 
-# * change product quantity tests - 2.8
+# * change product quantity in cart tests - 2.8
 # * ==============================================================
-def test_change_product_quantity_deligates_to_user_successfully(cookie):
-    UserManager.change_product_quantity(cookie, "", "", 0)
-    assert UserManager.cookie_user[cookie]._change_product_quantity
+def test_change_product_quantity_in_cart_deligates_to_user_successfully(cookie):
+    UserManager.change_product_quantity_in_cart(cookie, "", "", 0)
+    assert UserManager.cookie_user[cookie]._change_product_quantity_in_cart
 
 
-def test_change_product_quantity_fails_when_given_invalid_cookie():
-    assert not UserManager.change_product_quantity("boogie boogie", "", "", 0).succeeded()
+def test_change_product_quantity_in_cart_fails_when_given_invalid_cookie():
+    assert not UserManager.change_product_quantity_in_cart("boogie boogie", "", "", 0).succeeded()
 
 
 # * purchase cart tests - 2.9
@@ -200,24 +200,24 @@ def test_create_product_fails_when_given_invalid_cookie():
 
 # * remove products tests - 4.1
 # * ==============================================================
-def test_remove_products_deligates_to_user_successfully(cookie):
-    UserManager.remove_products(cookie, "", "")
-    assert UserManager.cookie_user[cookie]._remove_products
+def test_remove_product_deligates_to_user_successfully(cookie):
+    UserManager.remove_product(cookie, "", "")
+    assert UserManager.cookie_user[cookie]._remove_product
 
 
-def test_remove_products_fails_when_given_invalid_cookie():
-    assert not UserManager.remove_products("boogie boogie", "", "").succeeded()
+def test_remove_product_fails_when_given_invalid_cookie():
+    assert not UserManager.remove_product("boogie boogie", "", "").succeeded()
 
 
 # * change product quantity tests - 4.1
 # * ==============================================================
-def test_change_product_quantity_deligates_to_user_successfully(cookie):
-    UserManager.change_product_quantity(cookie, "", "", 0)
-    assert UserManager.cookie_user[cookie]._change_product_quantity
+def test_change_product_quantity_in_store_deligates_to_user_successfully(cookie):
+    UserManager.change_product_quantity_in_store(cookie, "", "", 0)
+    assert UserManager.cookie_user[cookie]._change_product_quantity_in_store
 
 
-def test_change_product_quantity_fails_when_given_invalid_cookie():
-    assert not UserManager.change_product_quantity("boogie boogie", "", "", 0).succeeded()
+def test_change_product_quantity_in_store_fails_when_given_invalid_cookie():
+    assert not UserManager.change_product_quantity_in_store("boogie boogie", "", "", 0).succeeded()
 
 
 # * edit product details tests - 4.1
@@ -273,7 +273,9 @@ def test_add_manager_permission_deligates_to_user_successfully(cookie):
 
 
 def test_add_manager_permission_fails_when_given_invalid_cookie():
-    assert not UserManager.add_manager_permission("boogie boogie", "", "", Permission.APPOINT_MANAGER).succeeded()
+    assert not UserManager.add_manager_permission(
+        "boogie boogie", "", "", Permission.APPOINT_MANAGER
+    ).succeeded()
 
 
 # * remove manager permission tests - 4.6
@@ -284,7 +286,9 @@ def test_remove_manager_permission_deligates_to_user_successfully(cookie):
 
 
 def test_remove_manager_permission_fails_when_given_invalid_cookie():
-    assert not UserManager.remove_manager_permission("boogie boogie", "", "", Permission.APPOINT_MANAGER).succeeded()
+    assert not UserManager.remove_manager_permission(
+        "boogie boogie", "", "", Permission.APPOINT_MANAGER
+    ).succeeded()
 
 
 # * remove appointment tests - 4.4 and 4.7
@@ -309,15 +313,15 @@ def test_get_store_appointments_fails_when_given_invalid_cookie():
     assert not UserManager.get_store_appointments("boogie boogie", "").succeeded()
 
 
-# * get store purchases history tests - 4.11
+# * get store purchase history tests - 4.11
 # * ==============================================================
-def test_get_store_appointments_deligates_to_user_successfully(cookie):
-    UserManager.get_store_purchases_history(cookie, "")
-    assert UserManager.cookie_user[cookie]._get_store_purchases_history
+def test_get_store_purchase_history_deligates_to_user_successfully(cookie):
+    UserManager.get_store_purchase_history(cookie, "")
+    assert UserManager.cookie_user[cookie]._get_store_purchase_history
 
 
 def test_get_store_purchases_history_fails_when_given_invalid_cookie():
-    assert not UserManager.get_store_purchases_history("boogie boogie", "").succeeded()
+    assert not UserManager.get_store_purchase_history("boogie boogie", "").succeeded()
 
 
 # * get any store purchase history tests - 6.4

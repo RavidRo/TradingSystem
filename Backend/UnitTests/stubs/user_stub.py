@@ -14,14 +14,15 @@ class UserStub(IUser):
         self._add_to_cart = False
         self._get_cart_details = False
         self._remove_product_from_cart = False
-        self._change_product_quantity = False
+        self._change_product_quantity_in_cart = False
+        self._change_product_quantity_in_store = False
         self._purchase_cart = False
         self._purchase_completed = False
         self._get_cart_price = False
         self._create_store = False
         self._get_purchase_history = False
         self._create_store = False
-        self._remove_products = False
+        self._remove_product = False
         self._edit_product_details = False
         self._appoint_owner = False
         self._appoint_manager = False
@@ -32,7 +33,7 @@ class UserStub(IUser):
         self._get_any_user_purchase_history = False
         self._create_product = False
         self._remove_manager_permission = False
-        self._get_store_purchases_history = False
+        self._get_store_purchase_history = False
 
     def is_appointed(self, store_id):
         return self.state.is_appointed(store_id)
@@ -67,8 +68,10 @@ class UserStub(IUser):
         self._remove_product_from_cart = True
         return Response(True)
 
-    def change_product_quantity(self, store_id: str, product_id: str, new_quantity: int) -> Response[None]:
-        self._change_product_quantity = True
+    def change_product_quantity_in_cart(
+        self, store_id: str, product_id: str, new_quantity: int
+    ) -> Response[None]:
+        self._change_product_quantity_in_cart = True
         return Response(True)
 
     def purchase_cart(self) -> Response[PrimitiveParsable[float]]:
@@ -95,19 +98,25 @@ class UserStub(IUser):
         self._create_store = True
         return Response(True)
 
-    def remove_products(self, store_id: str, product_id: str) -> Response[None]:
-        self._remove_products = True
+    def remove_product(self, store_id: str, product_id: str) -> Response[None]:
+        self._remove_product = True
         return Response(True)
 
-    def create_product(self, store_id: str, name: str, price: float, quantity: int) -> Response[None]:
+    def create_product(
+        self, store_id: str, name: str, price: float, quantity: int
+    ) -> Response[None]:
         self._create_product = True
         return Response(True)
 
-    def change_product_quantity(self, store_id: str, product_id: str, new_quantity: int) -> Response[None]:
-        self._change_product_quantity = True
+    def change_product_quantity_in_store(
+        self, store_id: str, product_id: str, new_quantity: int
+    ) -> Response[None]:
+        self._change_product_quantity_in_store = True
         return Response(True)
 
-    def edit_product_details(self, store_id: str, product_id: str, new_name: str, new_price: float) -> Response[None]:
+    def edit_product_details(
+        self, store_id: str, product_id: str, new_name: str, new_price: float
+    ) -> Response[None]:
         self._edit_product_details = True
         return Response(True)
 
@@ -135,14 +144,18 @@ class UserStub(IUser):
         self._get_store_appointments = True
         return Response(True)
 
-    def get_store_purchases_history(self, store_id: str) -> Response[ParsableList[PurchaseDetails]]:
-        self._get_store_purchases_history = True
+    def get_store_purchase_history(self, store_id: str) -> Response[ParsableList[PurchaseDetails]]:
+        self._get_store_purchase_history = True
         return Response(True)
 
-    def get_any_store_purchase_history(self, store_id: str) -> Response[ParsableList[PurchaseDetails]]:
+    def get_any_store_purchase_history(
+        self, store_id: str
+    ) -> Response[ParsableList[PurchaseDetails]]:
         self._get_any_store_purchase_history = True
         return Response(True)
 
-    def get_any_user_purchase_history(self, username: str) -> Response[ParsableList[PurchaseDetails]]:
+    def get_any_user_purchase_history(
+        self, username: str
+    ) -> Response[ParsableList[PurchaseDetails]]:
         self._get_any_user_purchase_history = True
         return Response(True)
