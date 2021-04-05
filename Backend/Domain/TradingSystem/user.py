@@ -4,7 +4,8 @@ from Backend.Domain.TradingSystem.IUser import IUser
 from Backend.response import Response, ParsableList, PrimitiveParsable
 from Backend.Domain.TradingSystem.shopping_cart import ShoppingCart
 from Backend.Domain.TradingSystem.purchase_details import PurchaseDetails
-from Backend.Domain.TradingSystem.user_state import UserState, Guest
+from Backend.Domain.TradingSystem.user_state import UserState
+from Backend.Domain.TradingSystem.guest import Guest
 from .Responsibilities.responsibility import Permission, Responsibility
 
 
@@ -52,7 +53,7 @@ class User(IUser):
         return self.state.open_store(name)
 
     # 3.7
-    def ger_purchase_history(self) -> Response[ParsableList[PurchaseDetails]]:
+    def get_purchase_history(self) -> Response[ParsableList[PurchaseDetails]]:
         return self.state.ger_purchase_history()
 
     # Owner and manager

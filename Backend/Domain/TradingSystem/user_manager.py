@@ -1,8 +1,9 @@
 import uuid
 
-from .user import IUser
+from .IUser import IUser
+from .user import User
 from Backend.response import Response, ParsableList, PrimitiveParsable
-from Backend.Domain.TradingSystem.shopping_cart import ShopppingCart
+from Backend.Domain.TradingSystem.shopping_cart import ShoppingCart
 from Backend.Domain.TradingSystem.purchase_details import PurchaseDetails
 from .Responsibilities.responsibility import Permission, Responsibility
 
@@ -41,7 +42,7 @@ class UserManager:
     # returns the guest newly created cookie
     def enter_system() -> str:
         cookie = UserManager.__create_cookie()
-        UserManager.cookie_user[cookie] = IUser()
+        UserManager.cookie_user[cookie] = IUser.create_user()
         return cookie
 
     # 2.3
@@ -65,7 +66,7 @@ class UserManager:
         if response.succeeded():
             for user_cookie in UserManager.cookie_user:
                 old_user = UserManager.cookie_user[user_cookie]
-                if old_user.get_username() == username:
+                if old_user.get_username() == username and old_user != user:
                     UserManager.cookie_user[cookie] = old_user
             # *This action will delete the current cart but will restore the old one and other user details
 
@@ -77,7 +78,7 @@ class UserManager:
         return UserManager.__deligate_to_user(cookie, func)
 
     # 2.8
-    def get_cart_details(cookie: str) -> Response[ShopppingCart]:
+    def get_cart_details(cookie: str) -> Response[ShoppingCart]:
         func = lambda user: user.get_cart_details()
         return UserManager.__deligate_to_user(cookie, func)
 
@@ -114,8 +115,8 @@ class UserManager:
         return UserManager.__deligate_to_user(cookie, func)
 
     # 3.7
-    def ger_purchase_history(cookie: str) -> Response[ParsableList[PurchaseDetails]]:
-        func = lambda user: user.ger_purchase_history(cookie)
+    def get_purchase_history(cookie: str) -> Response[ParsableList[PurchaseDetails]]:
+        func = lambda user: user.get_purchase_history()
         return UserManager.__deligate_to_user(cookie, func)
 
     # Owner and manager
