@@ -52,7 +52,7 @@ class Member(UserState):
         return response
 
     def delete_products_after_purchase(self):
-        response = super().delete_products_after_purchase()
+        response = super().delete_products_after_purchase(self.username)
         # update data in DB in later milestones
         self.purchase_details.append(response.object)
         return response
