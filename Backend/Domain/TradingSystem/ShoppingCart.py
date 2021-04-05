@@ -72,8 +72,18 @@ class ShoppingCart(IShoppingCart, Parsable):
     # products_purchase_info -a dict between store_id to list of tuples tuple (product_id to purchase_type)
     def buy_products(self, user, products_purchase_info={}) -> Response[PrimitiveParsable]:
         sum = 0
-        for store_id in products_purchase_info.keys():
-            result = self.shopping_bags[store_id].buy_products(products_purchase_info[store_id], user)
+
+        # this if will be deleted in the version with purchase types
+        if not products_purchase_info:
+            bags = self.shopping_bags
+        else:
+            bags = products_purchase_info
+
+        for store_id in bags:
+            # this is the function call in the version with purchase types
+            # result = self.shopping_bags[store_id].buy_products(products_purchase_info[store_id], user)
+            # this is the current function call with default empty products_purchase_info
+            result = self.shopping_bags[store_id].buy_products(user)
             if not result.success:
                 return result
             sum += result.get_obj().get_val()

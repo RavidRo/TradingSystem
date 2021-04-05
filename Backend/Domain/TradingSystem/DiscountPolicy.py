@@ -16,6 +16,6 @@ class DefaultDiscountPolicy(DiscountPolicy):
     def checkPolicy(self) -> DiscountType:
         return self.discount_type
 
-    def applyDiscount(self, user, store: Store, products: list) -> Response[PrimitiveParsable]:
+    def applyDiscount(self, user, store: Store, products_to_quantities:dict) -> Response[PrimitiveParsable]:
         discount_type = self.checkPolicy()
-        return discount_type.applyDiscount(products)
+        return discount_type.applyDiscount(products_to_quantities)

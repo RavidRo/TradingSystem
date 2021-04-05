@@ -135,6 +135,10 @@ class Store(IStore, Parsable):
         return Response(True, msg="all purchase types arew available")
 
 
+    def apply_discounts(self, user_info, product_ids_to_quantity:dict):
+        return self.discount_policy.applyDiscount(user=user_info, store=self, product_ids_to_quantity=product_ids_to_quantity)
+
+
 @dataclass
 class StoreDataObject:
     id: str

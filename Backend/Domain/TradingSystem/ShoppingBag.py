@@ -41,7 +41,7 @@ class ShoppingBag(IShoppingBag, Parsable):
         return Response(True, msg="Successfully removed product with id: " + str(product_id))
 
     # product info - list of tuples (product_id to purchase_type)
-    def buy_products(self, products_info, user_info) -> Response[None]:
+    def buy_products(self, user_info, products_info={}) -> Response[None]:
 
         """first step - check if all of the products exist in the store and acquire them"""
         availablility_response = self.store.check_available_products(self.product_ids_to_quantity)
@@ -51,13 +51,15 @@ class ShoppingBag(IShoppingBag, Parsable):
         self.store.acquire_products(self.product_ids_to_quantity)
 
         """second step - check if the purchase_types are appropriate"""
-        purchase_types_check = self.store.check_purchase_types(products_info, user_info)
-        if not purchase_types_check.success:
-            self.store.send_back(self.product_ids_to_quantity)
-            return purchase_types_check
+        # since there are no purchase types for now- this checking isn't relevant
+        if products_info:
+            purchase_types_check = self.store.check_purchase_types(products_info, user_info)
+            if not purchase_types_check.success:
+                self.store.send_back(self.product_ids_to_quantity)
+                return purchase_types_check
 
         """third step - check and apply the discount """
-        self.pending_price = self.store.store.apply_discounts(self.product_ids_to_quantity, user_info)
+        self.pending_price = self.store.apply_discounts(self.product_ids_to_quantity, user_info)
         # for now it's a copy- all of the products purchased regularly so they all passed to pending
         self.pending_products_to_quantity = self.product_ids_to_quantity.copy()
         self.product_ids_to_quantity.clear()
