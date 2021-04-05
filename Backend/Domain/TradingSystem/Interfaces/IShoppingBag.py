@@ -1,29 +1,12 @@
 from abc import ABC, abstractmethod
 
+from Backend.Domain.TradingSystem.IUser import IUser
 from Backend.Domain.TradingSystem.Interfaces import IProduct
-from Backend.response import Response, ParsableList
+from Backend.Domain.TradingSystem.Interfaces.IPurchaseDetails import IPurchaseDetails
+from Backend.response import Response, ParsableList, Parsable
 
 
-class IShoppingBag(metaclass=ABC):
-    # @classmethod
-    # def __subclasshook__(cls, subclass):
-    #     return (hasattr(subclass, 'add_shopping_bag') and
-    #             callable(subclass.load_data_source) and
-    #             hasattr(subclass, 'remove_shopping_bag') and
-    #             callable(subclass.extract_text) and
-    #             hasattr(subclass, 'add_product') and
-    #             callable(subclass.extract_text) and
-    #             hasattr(subclass, 'add_product') and
-    #             callable(subclass.extract_text) and
-    #             hasattr(subclass, 'remove_product') and
-    #             callable(subclass.extract_text) and
-    #             hasattr(subclass, 'show_cart') and
-    #             callable(subclass.extract_text) and
-    #             hasattr(subclass, 'show_bag') and
-    #             callable(subclass.extract_text) and
-    #             hasattr(subclass, 'buy_products') and
-    #             callable(subclass.extract_text) or
-    #             NotImplemented)
+class IShoppingBag(metaclass=ABC, Parsable):
 
     @abstractmethod
     def add_product(self, product_id: str, quantity: int) -> Response[None]:
@@ -36,7 +19,7 @@ class IShoppingBag(metaclass=ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def buy_products(self, products_info, user_info) -> Response[None]:
+    def buy_products(self, user_info: IUser, products_info={}) -> Response[None]:
         """buy transaction"""
         raise NotImplementedError
 
@@ -46,7 +29,7 @@ class IShoppingBag(metaclass=ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def delete_products_after_purchase(self) -> Response[ParsableList[IProduct]]:
+    def delete_products_after_purchase(self, user_name: str) -> IPurchaseDetails:
         """delete products which successfully been purchased"""
         raise NotImplementedError
 

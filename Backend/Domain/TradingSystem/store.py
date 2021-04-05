@@ -1,14 +1,14 @@
-from Backend.Domain.TradingSystem.DiscountPolicy import DefaultDiscountPolicy
+from Backend.Domain.TradingSystem.discount_policy import DefaultDiscountPolicy
 from Backend.Domain.TradingSystem.Interfaces import IPurchaseDetails, IStore
-from Backend.Domain.TradingSystem import Product, PurchaseDetails
+from Backend.Domain.TradingSystem.product import Product
 import uuid
-from Backend.Domain.TradingSystem.PurchasePolicy import DefaultPurchasePolicy
-from Backend.Domain.TradingSystem.Responsibilities import Responsibility
+from Backend.Domain.TradingSystem.purchase_policy import DefaultPurchasePolicy
+from Backend.Domain.TradingSystem.Responsibilities.responsibility import Responsibility
 from Backend.response import Response, ParsableList, Parsable
 from dataclasses import dataclass
 
 
-class Store(IStore, Parsable):
+class Store(IStore):
 
     def __init__(self, store_name: str):
         """Create a new store with it's specified info"""
@@ -69,6 +69,16 @@ class Store(IStore, Parsable):
             return Response(False, msg="The product " + str(result[0].get_name()) + " is already not in the inventory!")
         return Response(True, msg="Successfully removed product with product id: " + str(product_id))
 
+    def edit_product_details(self, product_id: str, product_name: str, price: float) -> Response[None]:
+        if price <= 0:
+            return Response(False, msg="Product's price must pe positive!")
+
+        if not self.check_existing_product(product_name):
+            return Response(False, msg="No such product in the store")
+
+        self.products_to_quantities.get(product_id)[0].edit_product_details(product_id, product_name, price)
+        return Response(True, msg="Successfully edited product with product id: " + str(product_id))
+
     def change_product_quantity(self, product_id: str, quantity: int) -> Response[None]:
         if product_id in self.products_to_quantities:
             self.products_to_quantities[product_id][1] = quantity
@@ -84,7 +94,7 @@ class Store(IStore, Parsable):
     def get_purchases_history(self) -> Response[ParsableList[IPurchaseDetails]]:
         return Response[ParsableList](True, ParsableList(self.purchase_history), msg="Purchase history")
 
-    def update_store_history(self, purchase_details: PurchaseDetails):
+    def update_store_history(self, purchase_details: IPurchaseDetails):
         self.purchase_history.append(purchase_details)
 
     def id_generator(self) -> str:
@@ -101,6 +111,9 @@ class Store(IStore, Parsable):
             if prod.get_name() == product_name:
                 return True
         return False
+
+    def get_prouct_name(self, product_id: str):
+        return self.products_to_quantities.get(product_id)[0].get_name()
 
     def send_back(self, products_to_quantities: dict):
         for prod_id, quantity in products_to_quantities.items():
@@ -133,7 +146,6 @@ class Store(IStore, Parsable):
     # this will be added in the future - maybe I will apply Default Policy for now
     def check_purchase_types(self, products_info, user_info) -> Response[None]:
         return Response(True, msg="all purchase types arew available")
-
 
     def apply_discounts(self, user_info, product_ids_to_quantity:dict):
         return self.discount_policy.applyDiscount(user=user_info, store=self, product_ids_to_quantity=product_ids_to_quantity)

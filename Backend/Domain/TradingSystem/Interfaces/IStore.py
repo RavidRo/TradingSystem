@@ -1,11 +1,11 @@
 from abc import ABC, abstractmethod
 
 from Backend.Domain.TradingSystem.Interfaces import IPurchaseDetails
-from Backend.Domain.TradingSystem.Responsibilities import Responsibility
-from Backend.response import Response, ParsableList
+from Backend.Domain.TradingSystem.Responsibilities.responsibility import Responsibility
+from Backend.response import Response, ParsableList, Parsable
 
 
-class IStore(metaclass=ABC):
+class IStore(metaclass=ABC, Parsable):
 
     @abstractmethod
     def __init__(self, store_name: str):
@@ -14,7 +14,6 @@ class IStore(metaclass=ABC):
 
     """2.5"""
     @abstractmethod
-    # todo: think how to handle the return type since can't return IStore
     def show_store_data(self) -> Response:
         """A query for the store's data"""
         raise NotImplementedError

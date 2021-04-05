@@ -1,5 +1,5 @@
-from Backend.Domain.TradingSystem import Store
-from Backend.Domain.TradingSystem.DiscountType import DefaultDiscountType
+from Backend.Domain.TradingSystem import store
+from Backend.Domain.TradingSystem.discount_type import DefaultDiscountType
 from Backend.Domain.TradingSystem.Interfaces import IPurchasePolicy, IPurchaseType
 from Backend.response import Response, PrimitiveParsable
 

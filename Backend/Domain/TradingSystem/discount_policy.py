@@ -1,5 +1,5 @@
-from Backend.Domain.TradingSystem import Store
-from Backend.Domain.TradingSystem.DiscountType import DefaultDiscountType, DiscountType
+from Backend.Domain.TradingSystem import store
+from Backend.Domain.TradingSystem.discount_type import DefaultDiscountType, DiscountType
 from Backend.Domain.TradingSystem.Interfaces import IDiscountPolicy, IDiscountType
 from Backend.response import Response, PrimitiveParsable
 
@@ -16,6 +16,6 @@ class DefaultDiscountPolicy(DiscountPolicy):
     def checkPolicy(self) -> DiscountType:
         return self.discount_type
 
-    def applyDiscount(self, user, store: Store, products_to_quantities:dict) -> Response[PrimitiveParsable]:
+    def applyDiscount(self, user, store: store, products_to_quantities:dict) -> Response[PrimitiveParsable]:
         discount_type = self.checkPolicy()
         return discount_type.applyDiscount(products_to_quantities)

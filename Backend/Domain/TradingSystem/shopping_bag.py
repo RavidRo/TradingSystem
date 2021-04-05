@@ -1,14 +1,17 @@
 from dataclasses import dataclass
 
-from Backend.Domain.TradingSystem import Store
+from Backend.Domain.TradingSystem import store
+from Backend.Domain.TradingSystem.IUser import IUser
 from Backend.Domain.TradingSystem.Interfaces import IProduct
+from Backend.Domain.TradingSystem.Interfaces.IPurchaseDetails import IPurchaseDetails
 from Backend.Domain.TradingSystem.Interfaces.IShoppingBag import IShoppingBag
-from Backend.Domain.TradingSystem.PurchaseDetails import PurchaseDetails
+from Backend.Domain.TradingSystem.purchase_details import PurchaseDetails
+from Backend.Domain.TradingSystem.store import Store
 from Backend.response import Response, ParsableList, Parsable, PrimitiveParsable
 from datetime import datetime
 
 
-class ShoppingBag(IShoppingBag, Parsable):
+class ShoppingBag(IShoppingBag):
 
     def __init__(self, store: Store):
         self.store = store
@@ -39,7 +42,7 @@ class ShoppingBag(IShoppingBag, Parsable):
         return Response(True, msg="Successfully removed product with id: " + str(product_id))
 
     # product info - list of tuples (product_id to purchase_type)
-    def buy_products(self, user_info, products_info={}) -> Response[None]:
+    def buy_products(self, user_info: IUser, products_info={}) -> Response[None]:
 
         """first step - check if all of the products exist in the store and acquire them"""
         availablility_response = self.store.check_available_products(self.product_ids_to_quantity)
@@ -72,16 +75,17 @@ class ShoppingBag(IShoppingBag, Parsable):
         self.product_ids_to_quantity[product_id] = new_amount
         return Response(True, msg="amount changed successfully")
 
-    def delete_products_after_purchase(self, user_name="guest") -> PurchaseDetails:
+    def delete_products_after_purchase(self, user_name="guest") -> IPurchaseDetails:
         # for now this function will only return details, in the future there will be specific deletion
+        product_names = [self.store.get_prouct_name(product_id) for product_id in self.product_ids_to_quantity.keys()]
         self.pending_products_to_quantity.clear()
-        return PurchaseDetails(user_name, self.store.get_name(), self.pending_products_to_quantity.keys(),
+        return PurchaseDetails(user_name, self.store.get_name(), product_names,
                                datetime.now(), self.pending_price)
 
-    def get_store_ID(self):
+    def get_store_ID(self) -> str:
         return self.store.get_id()
 
-    def product_in_bag(self, product_id: str):
+    def product_in_bag(self, product_id: str) -> bool:
         return not (self.product_ids_to_quantity.get(product_id) is None)
 
 

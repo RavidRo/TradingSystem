@@ -1,4 +1,4 @@
-from Backend.Domain.TradingSystem import Product
+from Backend.Domain.TradingSystem import product
 from Backend.Domain.TradingSystem.Interfaces import IDiscountType
 from Backend.response import Response, PrimitiveParsable
 

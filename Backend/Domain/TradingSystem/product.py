@@ -5,7 +5,7 @@ from Backend.response import Response, Parsable
 from dataclasses import  dataclass
 
 
-class Product(IProduct, Parsable):
+class Product(IProduct):
 
     def __init__(self, product_name: str, price: float):
         self.product_name = product_name
@@ -27,8 +27,15 @@ class Product(IProduct, Parsable):
     def get_price(self):
         return self.price
 
+    def get_name(self):
+        return self.product_name
+
     def id_generator(self):
         return uuid.uuid4()
+
+    def edit_product_details(self, product_name: str, price: float):
+        self.product_name = product_name
+        self.price = price
 
 
 @dataclass
