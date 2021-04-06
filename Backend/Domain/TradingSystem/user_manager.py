@@ -123,7 +123,9 @@ class UserManager:
 
     # 4.1
     # Creating a new product a the store and setting its quantity to 0
-    def create_product(cookie: str, store_id: str, name: str, price: float, quantity: int) -> Response[None]:
+    def create_product(
+        cookie: str, store_id: str, name: str, price: float, quantity: int
+    ) -> Response[None]:
         func = lambda user: user.create_product(store_id, name, price, quantity)
         return UserManager.__deligate_to_user(cookie, func)
 
@@ -133,12 +135,16 @@ class UserManager:
         return UserManager.__deligate_to_user(cookie, func)
 
     # 4.1
-    def change_product_quantity(cookie: str, store_id: str, product_id: str, quantity: int) -> Response[None]:
+    def change_product_quantity(
+        cookie: str, store_id: str, product_id: str, quantity: int
+    ) -> Response[None]:
         func = lambda user: user.change_product_quantity(store_id, product_id, quantity)
         return UserManager.__deligate_to_user(cookie, func)
 
     # 4.1
-    def edit_product_details(cookie: str, store_id: str, product_id: str, new_name: str, new_price: float) -> Response[None]:
+    def edit_product_details(
+        cookie: str, store_id: str, product_id: str, new_name: str, new_price: float
+    ) -> Response[None]:
         func = lambda user: user.edit_product_details(store_id, product_id, new_name, new_price)
         return UserManager.__deligate_to_user(cookie, func)
 
@@ -159,12 +165,16 @@ class UserManager:
         return UserManager.__deligate_to_user(cookie, func)
 
     # 4.6
-    def add_manager_permission(cookie: str, store_id: str, username: str, permission: Permission) -> Response[None]:
+    def add_manager_permission(
+        cookie: str, store_id: str, username: str, permission: Permission
+    ) -> Response[None]:
         func = lambda user: user.add_manager_permission(store_id, username, permission)
         return UserManager.__deligate_to_user(cookie, func)
 
     # 4.6
-    def remove_manager_permission(cookie: str, store_id: str, username: str, permission: Permission) -> Response[None]:
+    def remove_manager_permission(
+        cookie: str, store_id: str, username: str, permission: Permission
+    ) -> Response[None]:
         func = lambda user: user.remove_manager_permission(store_id, username, permission)
         return UserManager.__deligate_to_user(cookie, func)
 
@@ -179,7 +189,9 @@ class UserManager:
         return UserManager.__deligate_to_user(cookie, func)
 
     # 4.11
-    def get_store_purchases_history(cookie: str, store_id: str) -> Response[ParsableList[PurchaseDetails]]:
+    def get_store_purchases_history(
+        cookie: str, store_id: str
+    ) -> Response[ParsableList[PurchaseDetails]]:
         func = lambda user: user.get_store_purchases_history(store_id)
         return UserManager.__deligate_to_user(cookie, func)
 
@@ -187,12 +199,16 @@ class UserManager:
     # ====================
 
     # 6.4
-    def get_any_store_purchase_history(cookie: str, store_id: str) -> Response[ParsableList[PurchaseDetails]]:
+    def get_any_store_purchase_history(
+        cookie: str, store_id: str
+    ) -> Response[ParsableList[PurchaseDetails]]:
         func = lambda user: user.get_any_store_purchase_history(store_id)
         return UserManager.__deligate_to_user(cookie, func)
 
     # 6.4
-    def get_any_user_purchase_history(cookie: str, username: str) -> Response[ParsableList[PurchaseDetails]]:
+    def get_any_user_purchase_history(
+        cookie: str, username: str
+    ) -> Response[ParsableList[PurchaseDetails]]:
         func = lambda user: user.get_any_user_purchase_history(username)
         return UserManager.__deligate_to_user(cookie, func)
 

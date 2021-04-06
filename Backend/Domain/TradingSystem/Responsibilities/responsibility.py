@@ -56,7 +56,9 @@ class Responsibility:
         raise Exception(Responsibility.ERROR_MESSAGE)
 
     # 4.1
-    def edit_product_details(self, product_id: str, new_name: str, new_price: float) -> Response[None]:
+    def edit_product_details(
+        self, product_id: str, new_name: str, new_price: float
+    ) -> Response[None]:
         raise Exception(Responsibility.ERROR_MESSAGE)
 
     # 4.3
@@ -85,7 +87,7 @@ class Responsibility:
         raise Exception(Responsibility.ERROR_MESSAGE)
 
     # 4.11
-    def get_store_purchases_history(self) -> Response[ParsableList[PurchaseDetails]]:
+    def get_store_purchase_history(self) -> Response[ParsableList[PurchaseDetails]]:
         raise Exception(Responsibility.ERROR_MESSAGE)
 
     def _add_permission(self, username: str, permission: Permission) -> bool:
