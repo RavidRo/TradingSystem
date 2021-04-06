@@ -18,9 +18,6 @@ class Product(IProduct):
     def set_product_name(self, new_name):
         self.product_name = new_name
 
-    def get_name(self):
-        return self.name
-
     def get_id(self):
         return self.id
 

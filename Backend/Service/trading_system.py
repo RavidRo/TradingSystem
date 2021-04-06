@@ -3,7 +3,7 @@
 
 from Backend.Service.loggs import logging
 from Backend.response import Response
-from Backend.Domain.TradingSystem.TradingSystemManager import TradingSystem as trading_system_manager
+from Backend.Domain.TradingSystem.trading_system_manager import TradingSystem as trading_system_manager
 from Backend.Domain.Payment.payment_manager import PaymentSystem
 
 
