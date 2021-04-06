@@ -4,7 +4,7 @@ from Backend.Domain.TradingSystem.product_data import product_data
 from Backend.Domain.TradingSystem.store_data import store_data
 from Backend.Domain.TradingSystem.shopping_cart_data import shopping_cart_data
 from Backend.Domain.TradingSystem.purchase_details_data import purchase_details_data
-from Backend.Domain.TradingSystem.responsibility_data import responsibility_data
+from Backend.Service.DataObjects.responsibilities_data import ResponsibilitiesData
 from Backend.response import Response, ParsableList, PrimitiveParsable
 
 
@@ -153,7 +153,7 @@ class ITradingSystem(metaclass=ABC):
 
     # 4.9
     @abstractmethod
-    def get_store_appointments(cookie: str, store_id: str) -> Response[responsibility_data]:
+    def get_store_appointments(cookie: str, store_id: str) -> Response[ResponsibilitiesData]:
         raise NotImplementedError
 
     # 4.11
