@@ -40,7 +40,7 @@ class ITradingSystem(metaclass=ABC):
     # kwargs = You can search for a product by additional key words
     @abstractmethod
     def search_products(
-        product_name: str, category: str, min_price: float, max_price: float, *keywords: tuple[str]
+        product_name: str, *keywords: tuple[str], category: str, min_price: float, max_price: float
     ) -> Response[ParsableList[product_data]]:
         raise NotImplementedError
 
