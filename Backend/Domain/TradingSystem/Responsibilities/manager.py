@@ -9,6 +9,7 @@ from Backend.response import Response, ParsableList
 
 class Manager(Owner):
     def __init__(self, user_state: Member, store: Store) -> None:
+        super().__init__(user_state, store)
         self.permissions = {
             Permission.MANAGE_PRODUCTS: False,
             Permission.GET_APPOINTMENTS: True,
@@ -16,7 +17,6 @@ class Manager(Owner):
             Permission.REMOVE_MANAGER: False,
             Permission.GET_HISTORY: False,
         }
-        super().__init__(user_state, store)
 
     def __create_no_permission_Response(self, permission: Permission) -> Response:
         return Response(
@@ -68,17 +68,17 @@ class Manager(Owner):
 
     # 4.6
     def add_manager_permission(self, username: str, permission) -> Response[None]:
-        if self.permissions[permission.APPOINT_MANAGER]:
+        if self.permissions[Permission.APPOINT_MANAGER]:
             return super().add_manager_permission(username, permission)
 
-        return self.__create_no_permission_Response(permission.APPOINT_MANAGER)
+        return self.__create_no_permission_Response(Permission.APPOINT_MANAGER)
 
     # 4.6
     def remove_manager_permission(self, username: str, permission) -> Response[None]:
-        if self.permissions[permission.MANAGE_PRODUCTS]:
+        if self.permissions[Permission.MANAGE_PRODUCTS]:
             return super().remove_manager_permission(username, permission)
 
-        return self.__create_no_permission_Response(permission.MANAGE_PRODUCTS)
+        return self.__create_no_permission_Response(Permission.MANAGE_PRODUCTS)
 
     # 4.4, 4.7
     def remove_appointment(self, username: str) -> Response[None]:

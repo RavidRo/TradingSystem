@@ -1,4 +1,6 @@
 from __future__ import annotations
+import enum
+
 from Backend.Service.DataObjects.responsibilities_data import ResponsibilitiesData
 from Backend.Domain.TradingSystem.member import Member
 from Backend.Domain.TradingSystem.IUser import IUser
@@ -6,8 +8,6 @@ from Backend.Domain.TradingSystem.purchase_details import PurchaseDetails
 from Backend.Domain.TradingSystem.store import Store
 from Backend.response import Parsable, Response, ParsableList
 
-# %%
-import enum
 
 Permission = enum.Enum(
     value="Permission",
@@ -25,9 +25,7 @@ Permission = enum.Enum(
     ],
 )
 
-for per in Permission:
-    print(per)
-# %%
+
 class Responsibility(Parsable):
     ERROR_MESSAGE = "Responsibility is an interface, function not implemented"
 
