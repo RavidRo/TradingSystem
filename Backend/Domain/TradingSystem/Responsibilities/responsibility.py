@@ -87,7 +87,7 @@ class Responsibility:
         raise Exception(Responsibility.ERROR_MESSAGE)
 
     # 4.11
-    def get_store_purchases_history(self) -> Response[ParsableList[PurchaseDetails]]:
+    def get_store_purchase_history(self) -> Response[ParsableList[PurchaseDetails]]:
         raise Exception(Responsibility.ERROR_MESSAGE)
 
     def _add_permission(self, username: str, permission: Permission) -> bool:

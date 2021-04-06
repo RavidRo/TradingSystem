@@ -415,13 +415,13 @@ def test_manager_get_store_appointments_allowed_by_default(manager: Manager):
 
 # * get store purchase history tests - #4.11
 # * ==========================================================================================
-def test_founder_get_store_purchases_history_calls_store_successfully(founder: Founder):
-    assert founder.get_store_purchases_history().succeeded()
+def test_founder_get_store_purchase_history_calls_store_successfully(founder: Founder):
+    assert founder.get_store_purchase_history().succeeded()
 
 
 def test_owner_get_store_purchases_history_calls_store_successfully(owner: Owner):
-    assert owner.get_store_purchases_history().succeeded()
+    assert owner.get_store_purchase_history().succeeded()
 
 
 def test_manager_get_store_purchases_history_prohibited_by_default(manager: Manager):
-    assert not manager.get_store_purchases_history().succeeded()
+    assert not manager.get_store_purchase_history().succeeded()
