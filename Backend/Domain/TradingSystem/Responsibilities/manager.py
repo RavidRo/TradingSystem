@@ -95,9 +95,9 @@ class Manager(Owner):
         return self.__create_no_permission_Response(Permission.GET_APPOINTMENTS)
 
     # 4.11
-    def get_store_purchases_history(self) -> Response[ParsableList[PurchaseDetails]]:
+    def get_store_purchase_history(self) -> Response[ParsableList[PurchaseDetails]]:
         if self.permissions[Permission.GET_HISTORY]:
-            return super().get_store_purchases_history()
+            return super().get_store_purchase_history()
 
         return self.__create_no_permission_Response(Permission.GET_HISTORY)
 
