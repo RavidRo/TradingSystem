@@ -4,8 +4,7 @@ from Backend.Domain.TradingSystem.Interfaces.IStore import IStore as store
 from Backend.Domain.TradingSystem.Interfaces.IProduct import IProduct as product
 from Backend.Domain.TradingSystem.purchase_details import purchase_details
 
-print(Response(True, ["a", "b"]))
-# %%
+
 class StoresManager:
     stores: list[store] = []
 

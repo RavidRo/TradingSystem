@@ -44,7 +44,7 @@ class TradingSystemManager(ITradingSystem):
     # kwargs = You can search for a product by additional key words
     @staticmethod
     def search_products(
-        product_name="", category=None, min_price=None, max_price=None, *keywords: tuple[str]
+        product_name="", *keywords: tuple[str] category=None, min_price=None, max_price=None
     ) -> Response[ParsableList[product_data]]:
         return SearchEngine.search_products(
             product_name, category, min_price, max_price, *keywords

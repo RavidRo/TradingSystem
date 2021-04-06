@@ -56,11 +56,11 @@ class Manager(Owner):
         return self.__create_no_permission_Response(Permission.MANAGE_PRODUCTS)
 
     # 4.3
-    def appoint_owner(self, user: User) -> Response[None]:
+    def appoint_owner(self, user: IUser) -> Response[None]:
         return Response(msg=f"Managers can't appoint owners")
 
     # 4.5
-    def appoint_manager(self, user: User) -> Response[None]:
+    def appoint_manager(self, user: IUser) -> Response[None]:
         if self.permissions[Permission.APPOINT_MANAGER]:
             return super().appoint_manager(user)
 
