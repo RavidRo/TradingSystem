@@ -1,3 +1,4 @@
+# %%
 from abc import ABC, abstractmethod
 from typing import TypeVar, Generic, List, Dict
 
@@ -86,4 +87,7 @@ class foo:
 
 
 variable: Response[foo] = Response(True, foo())
-print(variable.object)
+
+
+
+# %%
