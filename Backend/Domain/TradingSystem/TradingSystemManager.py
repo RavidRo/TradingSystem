@@ -11,7 +11,6 @@ from Backend.Domain.TradingSystem.responsibility_data import responsibility_data
 from Backend.Domain.TradingSystem.ITradingSystemManager import ITradingSystem
 from Backend.response import Response, ParsableList, PrimitiveParsable
 
-# TODO: import Response and data objects
 class TradingSystem(ITradingSystem):
 
     # 2.1
