@@ -1,4 +1,5 @@
 from Backend.Domain.TradingSystem.member import Member
+from Backend.Domain.TradingSystem.trading_system_manager import TradingSystemManager
 
 
 class Admin(Member):
