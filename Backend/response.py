@@ -7,7 +7,6 @@ Interface that every object we wish to refer to in Response must implement.
 
 
 class Parsable(ABC):
-
     @abstractmethod
     def parse(self):
         raise RuntimeError("must import parse")
@@ -17,42 +16,41 @@ class Parsable(ABC):
 In order to support primitive return objects, a primitive parsable wrapper is introduced
 """
 
-S = TypeVar('S')
-class PrimitiveParsable(Parsable, Generic[S]):
+S = TypeVar("S")
 
-    def __init__(self, value : S):
-        self.value : S = value
+
+class PrimitiveParsable(Parsable, Generic[S]):
+    def __init__(self, value: S):
+        self.value: S = value
 
     def parse(self) -> S:
         return self.value
-
-
-T = TypeVar('T', bound=Parsable)
-
 
 
 """
 In order to support list return objects, a parsable list wrapper is introduced
 """
 
+T = TypeVar("T", bound=Parsable)
 
-class ParsableList(Parsable):
 
-    def __init__(self, values: List[Generic[T]]):
+class ParsableList(Parsable, Generic[T]):
+    def __init__(self, values: List[T]):
         self.values = values
 
     def parse(self):
-        return map(self.values, lambda value: value.parse())
+        return ParsableList(map(self.values, lambda value: value.parse()))
 
 
 """
 In order to support map return objects, a parsable map wrapper is introduced (parse only values)
 """
 
+S = TypeVar("S")
 
-class ParsableMap(Parsable):
 
-    def __init__(self, values: Dict[Generic[S], Generic[T]]):
+class ParsableMap(Parsable, Generic[S, T]):
+    def __init__(self, values: Dict[S, T]):
         self.values = values
 
     def parse(self):
@@ -60,24 +58,32 @@ class ParsableMap(Parsable):
             value.parse()
 
 
-"""
-Return object which contains message to print and object to inspect, and success flag.
-*Important* each class which self.object refers to must implement parse()
-"""
+# """
+# Return object which contains message to print and object to inspect, and success flag.
+# *Important* each class which self.object refers to must implement parse()
+# """
 
 
 class Response(Generic[T]):
-
     def __init__(self, success: bool, obj: T = None, msg="Uninitialized"):
         self.msg = msg
         self.object = obj
         self.success = success
 
     def parse(self):
-        return self.object.parse()
+        return Response(self.success, self.object.parse(), self.msg)
 
     def get_msg(self):
         return self.msg
 
     def succeeded(self):
         return self.success
+
+
+class foo:
+    def __init__(self) -> None:
+        self.name = "My Name"
+
+
+variable: Response[foo] = Response(True, foo())
+print(variable.object)

@@ -2,15 +2,8 @@ from Backend.UnitTests.authentication import DBHandlerMock
 from abc import ABC, abstractmethod
 from Backend import response
 
-class IAuthentication(metaclass=ABC):
-    @classmethod
-    def __subclasshook__(cls, subclass):
-        return (hasattr(subclass, 'register') and
-                callable(subclass.register) and
-                hasattr(subclass, 'login') and
-                callable(subclass.login))
 
-class Authentication(IAuthentication):
+class Authentication(object):
     __instance = None
 
     @staticmethod
@@ -45,7 +38,7 @@ class Authentication(IAuthentication):
                 return response.Response[None](success=False, msg="password incorrect")
 
             else:
-                is_admin = self.db_handler.is_username_admin(udername=username)
+                is_admin = self.db_handler.is_username_admin(username=username)
                 return response.Response[None](success=True,obj=response.PrimitiveParsable(is_admin),msg="login succeeded")
 
 

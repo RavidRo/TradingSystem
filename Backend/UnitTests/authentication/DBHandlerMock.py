@@ -49,4 +49,4 @@ class DBHandlerMock(object):
         self.users[username] = {'password':generate_password_hash(password,method='sha256'),'is_admin':""}
 
     def is_username_admin(self,username):
-        return bool(self.users[username]['admin'])
+        return bool(self.users[username]['is_admin'])
