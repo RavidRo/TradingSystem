@@ -1,7 +1,6 @@
 import uuid
 
 from .IUser import IUser
-from .user import User
 from Backend.response import Response, ParsableList, PrimitiveParsable
 from Backend.Domain.TradingSystem.shopping_cart import ShoppingCart
 from Backend.Domain.TradingSystem.purchase_details import PurchaseDetails
