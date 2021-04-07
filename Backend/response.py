@@ -1,4 +1,3 @@
-# %%
 from abc import ABC, abstractmethod
 from typing import TypeVar, Generic, List, Dict
 
@@ -81,13 +80,3 @@ class Response(Generic[T]):
         return self.success
 
 
-class foo:
-    def __init__(self) -> None:
-        self.name = "My Name"
-
-
-variable: Response[foo] = Response(True, foo())
-print(variable.object)
-
-
-# %%
