@@ -80,6 +80,3 @@ class Response(Generic[T]):
         return self.success
 
 
-
-
-# %%
