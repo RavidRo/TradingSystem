@@ -1,8 +1,6 @@
-from abc import ABC, abstractmethod
-
-import Backend.Domain.TradingSystem.IUser
+from abc import  abstractmethod
 import Backend.Domain.TradingSystem.purchase_details
-from Backend.response import Response, ParsableList, Parsable
+from Backend.response import Response,Parsable
 
 
 class IShoppingBag(Parsable):
@@ -18,7 +16,7 @@ class IShoppingBag(Parsable):
         raise NotImplementedError
 
     @abstractmethod
-    def buy_products(self, user_info: Backend.IUser, products_info={}) -> Response[None]:
+    def buy_products(self, user_info, products_info={}) -> Response[None]:
         """buy transaction"""
         raise NotImplementedError
 
