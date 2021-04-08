@@ -129,7 +129,7 @@ class Store(IStore):
             if current_quantity is None:
                 return Response(False,
                                 msg="The product with id: " + prod_id + "doesn't exist in the inventory of the store")
-            elif current_quantity < quantity:
+            elif current_quantity[1] < quantity:
                 return Response(False, msg="The store has less than" + str(
                     quantity) + "of the product with id: " + prod_id + "left")
             else:
