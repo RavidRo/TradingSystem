@@ -1,12 +1,15 @@
-import Backend.Domain.TradingSystem.Interfaces.IStore
+
 import uuid
+
+from Backend.Domain.TradingSystem.Interfaces.IStore import IStore
 from Backend.response import Response, ParsableList
 from dataclasses import dataclass
 
 
-class Store(Backend.IStore):
+class Store:
     from Backend.Domain.TradingSystem.Responsibilities.responsibility import Responsibility
     from Backend.Domain.TradingSystem.purchase_details import PurchaseDetails
+
     def __init__(self, store_name: str):
         from Backend.Domain.TradingSystem.discount_policy import DefaultDiscountPolicy
         from Backend.Domain.TradingSystem.purchase_policy import DefaultPurchasePolicy
