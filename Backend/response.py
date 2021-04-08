@@ -26,6 +26,8 @@ class PrimitiveParsable(Parsable, Generic[S]):
     def parse(self) -> S:
         return self.value
 
+    def get_val(self):
+        return self.value
 
 """
 In order to support list return objects, a parsable list wrapper is introduced
@@ -79,4 +81,5 @@ class Response(Generic[T]):
     def succeeded(self):
         return self.success
 
-
+    def get_obj(self):
+        return self.object
