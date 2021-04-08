@@ -1,19 +1,16 @@
 
-from Backend.Domain.TradingSystem.discount_policy import DefaultDiscountPolicy
 from Backend.Domain.TradingSystem.Interfaces import IStore
-import Backend.Domain.TradingSystem.product
 import uuid
-
-import Backend.Domain.TradingSystem.purchase_details
-import Backend.Domain.TradingSystem.purchase_policy
-import Backend.Domain.TradingSystem.Responsibilities.responsibility
 from Backend.response import Response, ParsableList
 from dataclasses import dataclass
 
 
 class Store(IStore):
-
+    from Backend.Domain.TradingSystem.Responsibilities.responsibility import Responsibility
     def __init__(self, store_name: str):
+        from Backend.Domain.TradingSystem.discount_policy import DefaultDiscountPolicy
+        from Backend.Domain.TradingSystem.purchase_policy import DefaultPurchasePolicy
+
         """Create a new store with it's specified info"""
         self.id = self.id_generator()
         self.name = store_name
@@ -21,7 +18,7 @@ class Store(IStore):
         self.responsibility = None
         # These fields will be changed in the future versions
         self.discount_policy = DefaultDiscountPolicy()
-        self.purchase_policy = Backend.DefaultPurchasePolicy()
+        self.purchase_policy = DefaultPurchasePolicy()
         self.purchase_history = []
 
     def parse(self):
@@ -36,6 +33,7 @@ class Store(IStore):
     """checks need to be made:
        ----------------------
        1. A product with product_id exists in the store"""
+
     def set_product_name(self, product_id, new_name) -> Response[None]:
         if self.products_to_quantities.get(product_id) is None:
             return Response(False, msg=f"product with {product_id} doesn't exist in the store!")
@@ -51,7 +49,10 @@ class Store(IStore):
        1. quantity > 0
        2. price > 0
        3. a product with product_name exists"""
+
     def add_product(self, product_name: str, price: float, quantity: int) -> Response[None]:
+        from Backend.Domain.TradingSystem.product import Product
+        
         if quantity <= 0:
             # actually it's non-negative but adding 0 amount is redundant
             return Response(False, msg="Product's qunatity must be positive!")
@@ -62,7 +63,7 @@ class Store(IStore):
         if self.check_existing_product(product_name):
             return Response(False, msg="This product is already in the store's inventory")
 
-        product = Backend.Product(product_name=product_name, price=price)
+        product = Product(product_name=product_name, price=price)
         product_id = product.get_id()
         self.products_to_quantities.update({product_id, (product, quantity)})
         return Response(True, msg="product" + str(product_name) + "successfully added")
@@ -70,6 +71,7 @@ class Store(IStore):
     """checks need to be made:
        ----------------------
        1. a product with product_id exists"""
+
     def remove_product(self, product_id: str) -> Response[None]:
         result = self.products_to_quantities.pop(product_id, None)
         if result is None:
@@ -80,6 +82,7 @@ class Store(IStore):
        ----------------------
        1. price > 0
        2. a product with product_name exists"""
+
     def edit_product_details(self, product_id: str, product_name: str, price: float) -> Response[None]:
         if price <= 0:
             return Response(False, msg="Product's price must pe positive!")
@@ -94,6 +97,7 @@ class Store(IStore):
        ----------------------
        1. quantity > 0
        2. a product with product_name exists"""
+
     def change_product_quantity(self, product_id: str, quantity: int) -> Response[None]:
         if quantity < 0:
             return Response(False, msg="quantity must be positive!")
@@ -103,7 +107,8 @@ class Store(IStore):
                                       str(self.products_to_quantities[product_id][0].get_name()) + "'s quantity")
         return Response(False, msg=f"The product with id: {product_id} isn't in the inventory!")
 
-    def get_personnel_info(self) -> Response[Backend.Responsibility]:
+
+    def get_personnel_info(self) -> Response[Responsibility]:
         if self.responsibility is None:
             return Response(False, msg="The store doesn't have assigned personnel")
         return Response[Backend.Responsibility](True, self.responsibility, msg="Personnel info")
