@@ -1,12 +1,13 @@
-import Backend.Domain.TradingSystem.user_state
+
 from Backend.Domain.TradingSystem.Responsibilities.responsibility import Responsibility
 from Backend.Domain.TradingSystem.store import Store
+from Backend.Domain.TradingSystem.user_state import UserState
 from Backend.response import Response, ParsableList, PrimitiveParsable
 from Backend.Domain.TradingSystem.purchase_details import PurchaseDetails
 from typing import List
 
 
-class Member(Backend.UserState):
+class Member(UserState):
 
     def get_username(self):
         return Response(True, obj=PrimitiveParsable(self.username), msg="got username successfully")
