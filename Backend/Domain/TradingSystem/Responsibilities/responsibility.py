@@ -26,10 +26,9 @@ Permission = enum.Enum(
 
 
 class Responsibility(Parsable):
-    from Backend.Domain.TradingSystem.member import Member
     ERROR_MESSAGE = "Responsibility is an interface, function not implemented"
 
-    def __init__(self, user_state: Member, store: Store) -> None:
+    def __init__(self, user_state, store: Store) -> None:
         self.user_state = user_state
         user_state.add_responsibility(self, store.get_id())
         self.store = store
