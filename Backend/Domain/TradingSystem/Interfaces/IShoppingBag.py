@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 
-from Backend.Domain.TradingSystem.IUser import IUser
-from Backend.Domain.TradingSystem.purchase_details import PurchaseDetails
+import Backend.Domain.TradingSystem.IUser
+import Backend.Domain.TradingSystem.purchase_details
 from Backend.response import Response, ParsableList, Parsable
 
 
@@ -18,7 +18,7 @@ class IShoppingBag(Parsable, metaclass=ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def buy_products(self, user_info: IUser, products_info={}) -> Response[None]:
+    def buy_products(self, user_info: Backend.IUser, products_info={}) -> Response[None]:
         """buy transaction"""
         raise NotImplementedError
 
@@ -28,7 +28,7 @@ class IShoppingBag(Parsable, metaclass=ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def delete_products_after_purchase(self, user_name: str) -> PurchaseDetails:
+    def delete_products_after_purchase(self, user_name: str) -> Backend.PurchaseDetails:
         """delete products which successfully been purchased"""
         raise NotImplementedError
 

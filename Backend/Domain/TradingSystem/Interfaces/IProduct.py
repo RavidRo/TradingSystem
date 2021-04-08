@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 
-from Backend.response import Response, ParsableList, Parsable
+from Backend.response import Parsable
 
 
 class IProduct(Parsable, metaclass=ABC):

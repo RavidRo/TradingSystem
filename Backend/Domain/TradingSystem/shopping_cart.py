@@ -1,8 +1,9 @@
 from threading import Timer
+import Backend.Domain.TradingSystem
 from Backend.Domain.TradingSystem import stores_manager
 from Backend.Domain.TradingSystem.IUser import IUser
 from Backend.Domain.TradingSystem.Interfaces.IShoppingCart import IShoppingCart
-from Backend.Domain.TradingSystem.shopping_bag import ShoppingBag
+import Backend.Domain.TradingSystem.shopping_bag
 from Backend.response import Response, PrimitiveParsable, ParsableList
 
 
@@ -39,7 +40,7 @@ class ShoppingCart(IShoppingCart):
         store = self.stores_manager.get_store(store_id)
         if store is None:
             return Response(False, msg=f"There is no such store with store_id: {store_id}")
-        new_bag = ShoppingBag(store)
+        new_bag = Backend.ShoppingBag(store)
         self.shopping_bags.update({store_id: new_bag})
         return new_bag.add_product(product_id, quantity)
 
