@@ -25,7 +25,7 @@ class UserState(ABC):
         return self.cart.add_product(store_id, product_id, quantity)
 
     def show_cart(self):
-        return Response[ShoppingCart](True, obj=self.cart, msg="got cart successfully")
+        return Response[Backend.ShoppingCart](True, obj=self.cart, msg="got cart successfully")
 
     def delete_from_cart(self, store_id, product_id):
         return self.cart.remove_product(store_id, product_id)
