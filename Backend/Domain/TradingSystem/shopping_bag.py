@@ -6,9 +6,8 @@ from datetime import datetime
 
 
 class ShoppingBag(IShoppingBag):
-    from Backend.Domain.TradingSystem.store import Store
 
-    def __init__(self, store: Store):
+    def __init__(self, store):
         self.store = store
         self.products_to_quantity = dict()
         self.pending_products_to_quantity = dict()
