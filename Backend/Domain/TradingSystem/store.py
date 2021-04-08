@@ -34,7 +34,7 @@ class Store(IStore):
         if self.products_to_quantities.get(product_id) is None:
             return Response(False, f"product with {product_id} doesn't exist in the store!")
 
-        self.products_to_quantities.get(product_id).set_product_name(new_name)
+        self.products_to_quantities.get(product_id)[0].set_product_name(new_name)
         return Response(True, f"Product {product_id} name was changed successfully!")
 
     def show_store_data(self) -> Response:
