@@ -1,12 +1,14 @@
-
 from Backend.Domain.TradingSystem.Interfaces import IStore
 import uuid
+
 from Backend.response import Response, ParsableList
 from dataclasses import dataclass
 
 
 class Store(IStore):
     from Backend.Domain.TradingSystem.Responsibilities.responsibility import Responsibility
+    from Backend.Domain.TradingSystem.purchase_details import PurchaseDetails
+
     def __init__(self, store_name: str):
         from Backend.Domain.TradingSystem.discount_policy import DefaultDiscountPolicy
         from Backend.Domain.TradingSystem.purchase_policy import DefaultPurchasePolicy
@@ -52,7 +54,7 @@ class Store(IStore):
 
     def add_product(self, product_name: str, price: float, quantity: int) -> Response[None]:
         from Backend.Domain.TradingSystem.product import Product
-        
+
         if quantity <= 0:
             # actually it's non-negative but adding 0 amount is redundant
             return Response(False, msg="Product's qunatity must be positive!")
@@ -107,16 +109,16 @@ class Store(IStore):
                                       str(self.products_to_quantities[product_id][0].get_name()) + "'s quantity")
         return Response(False, msg=f"The product with id: {product_id} isn't in the inventory!")
 
-
     def get_personnel_info(self) -> Response[Responsibility]:
+        from Backend.Domain.TradingSystem.Responsibilities.responsibility import Responsibility
         if self.responsibility is None:
             return Response(False, msg="The store doesn't have assigned personnel")
-        return Response[Backend.Responsibility](True, self.responsibility, msg="Personnel info")
+        return Response[Responsibility](True, self.responsibility, msg="Personnel info")
 
-    def get_purchases_history(self) -> Response[ParsableList[Backend.PurchaseDetails]]:
+    def get_purchases_history(self) -> Response[ParsableList[PurchaseDetails]]:
         return Response[ParsableList](True, ParsableList(self.purchase_history), msg="Purchase history")
 
-    def update_store_history(self, purchase_details: Backend.PurchaseDetails):
+    def update_store_history(self, purchase_details: PurchaseDetails):
         self.purchase_history.append(purchase_details)
 
     @staticmethod
@@ -126,7 +128,7 @@ class Store(IStore):
     def get_id(self) -> str:
         return self.id
 
-    def set_responsibility(self, responsibility: Backend.Responsibility):
+    def set_responsibility(self, responsibility: Responsibility):
         self.responsibility = responsibility
 
     def check_existing_product(self, product_name: str):
