@@ -1,5 +1,4 @@
 from dataclasses import dataclass
-from Backend.Domain.TradingSystem.IUser import IUser
 from Backend.Domain.TradingSystem.Interfaces.IShoppingBag import IShoppingBag
 from Backend.Domain.TradingSystem.purchase_details import PurchaseDetails
 from Backend.Domain.TradingSystem.store import Store
@@ -59,7 +58,7 @@ class ShoppingBag(IShoppingBag):
        2. check if purchase types are appropriate
                                             """
     # product info - list of tuples (product_id to purchase_type)
-    def buy_products(self, user_info: IUser, products_info={}) -> Response[None]:
+    def buy_products(self, user_info, products_info={}) -> Response[None]:
 
         """first step - check if all of the products exist in the store"""
         availability_response = self.store.check_available_products(self.products_to_quantity)
@@ -79,13 +78,13 @@ class ShoppingBag(IShoppingBag):
         return Response[PrimitiveParsable](True, PrimitiveParsable(self.pending_price),
                                            msg="All the details are good! here comes the price")
 
-    def purchase_types_checks(self, user_info: IUser, products_info ={}):
+    def purchase_types_checks(self, user_info, products_info ={}):
         purchase_types_check = self.store.check_purchase_types(products_info, user_info)
         if not purchase_types_check.success:
             self.store.send_back(self.products_to_quantity)
             return purchase_types_check
 
-    def discount_apply(self, user_info: IUser):
+    def discount_apply(self, user_info):
         self.pending_price = self.store.apply_discounts(user_info, self.products_to_quantity)
         # for now it's a copy- all of the products purchased regularly so they all passed to pending
         if not bool(self.products_to_quantity):
