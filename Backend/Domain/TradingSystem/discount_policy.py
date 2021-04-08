@@ -11,11 +11,12 @@ class DiscountPolicy(IDiscountPolicy):
 
 class DefaultDiscountPolicy(DiscountPolicy):
     def __init__(self):
+        super().__init__()
         self.discount_type = DefaultDiscountType()
 
     def checkPolicy(self) -> DiscountType:
         return self.discount_type
 
-    def applyDiscount(self, user, store: store, products_to_quantities:dict) -> Response[PrimitiveParsable]:
+    def applyDiscount(self, user, store: store, products_to_quantities: dict) -> Response[PrimitiveParsable]:
         discount_type = self.checkPolicy()
-        return discount_type.applyDiscount(products_to_quantities)
+        return discount_type.apply_discount(products_to_quantities)

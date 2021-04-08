@@ -11,7 +11,7 @@ class PurchasePolicy(IPurchasePolicy):
 
 class DefaultPurchasePolicy(PurchasePolicy):
     def __init__(self):
-        pass
+        super().__init__()
 
     def checkPolicy(self, purchase_type) -> Response:
         return Response(True, msg="purchase type is approved by the policy")
