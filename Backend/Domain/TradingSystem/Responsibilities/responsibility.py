@@ -2,7 +2,6 @@ from __future__ import annotations
 import enum
 
 from Backend.Service.DataObjects.responsibilities_data import ResponsibilitiesData
-from Backend.Domain.TradingSystem.member import Member
 from Backend.Domain.TradingSystem.IUser import IUser
 from Backend.Domain.TradingSystem.purchase_details import PurchaseDetails
 from Backend.Domain.TradingSystem.store import Store
@@ -27,6 +26,7 @@ Permission = enum.Enum(
 
 
 class Responsibility(Parsable):
+    from Backend.Domain.TradingSystem.member import Member
     ERROR_MESSAGE = "Responsibility is an interface, function not implemented"
 
     def __init__(self, user_state: Member, store: Store) -> None:
