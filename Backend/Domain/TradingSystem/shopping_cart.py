@@ -1,15 +1,16 @@
 from threading import Timer
 import Backend.Domain.TradingSystem
-from Backend.Domain.TradingSystem import stores_manager
-from Backend.Domain.TradingSystem.IUser import IUser
-from Backend.Domain.TradingSystem.Interfaces.IShoppingCart import IShoppingCart
+import Backend.Domain.TradingSystem
+import Backend.Domain.TradingSystem.IUser
+import Backend.Domain.TradingSystem.Interfaces.IShoppingCart
 import Backend.Domain.TradingSystem.shopping_bag
 from Backend.response import Response, PrimitiveParsable, ParsableList
 
 
-class ShoppingCart(IShoppingCart):
+class ShoppingCart(Backend.IShoppingCart):
 
     def __init__(self):
+        from Backend.Domain.TradingSystem import stores_manager
         self.stores_manager = stores_manager.get_instance()
         self.shopping_bags = dict()
         self.timer = None
@@ -68,7 +69,7 @@ class ShoppingCart(IShoppingCart):
 
     """notice: if buy_products of any bag fails -> return acquired products to stores"""
     # products_purchase_info -a dict between store_id to list of tuples tuple (product_id to purchase_type)
-    def buy_products(self, user: IUser, products_purchase_info={}) -> Response[PrimitiveParsable]:
+    def buy_products(self, user: Backend.IUser, products_purchase_info={}) -> Response[PrimitiveParsable]:
         sum = 0
         succeded_bags =[]
         # this if will be deleted in the version with purchase types
