@@ -22,7 +22,7 @@ class ShoppingBag(IShoppingBag):
     def parse(self):
         products_names_to_quantities = []
         for product_id, quantity in self.product_ids_to_quantity:
-            product_name = self.store.get_prouct_name(product_id)
+            product_name = self.store.get_product_name(product_id)
             products_names_to_quantities.append((product_name, quantity))
         return ShoppingBagDataObject(self.store.get_name(), products_names_to_quantities)
 
@@ -77,7 +77,7 @@ class ShoppingBag(IShoppingBag):
 
     def delete_products_after_purchase(self, user_name="guest") -> IPurchaseDetails:
         # for now this function will only return details, in the future there will be specific deletion
-        product_names = [self.store.get_prouct_name(product_id) for product_id in self.product_ids_to_quantity.keys()]
+        product_names = [self.store.get_product_name(product_id) for product_id in self.product_ids_to_quantity.keys()]
         self.pending_products_to_quantity.clear()
         return PurchaseDetails(user_name, self.store.get_name(), product_names,
                                datetime.now(), self.pending_price)

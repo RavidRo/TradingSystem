@@ -13,11 +13,10 @@ class Product(IProduct):
         self.id = str(self.id_generator())
 
     def parse(self):
-        return ProductDataObject(self.name, self.price, self.id)
+        return ProductDataObject(self.id, self.name, self.price)
 
     def set_product_name(self, new_name):
         self.product_name = new_name
-
 
     def get_id(self):
         return self.id
@@ -40,5 +39,5 @@ class Product(IProduct):
 class ProductDataObject:
     id: str
     name: str
-    price: str
+    price: float
 
