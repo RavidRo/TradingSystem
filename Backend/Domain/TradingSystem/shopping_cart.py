@@ -2,12 +2,12 @@ from threading import Timer
 import Backend.Domain.TradingSystem
 import Backend.Domain.TradingSystem
 import Backend.Domain.TradingSystem.IUser
-import Backend.Domain.TradingSystem.Interfaces.IShoppingCart
 import Backend.Domain.TradingSystem.shopping_bag
 from Backend.response import Response, PrimitiveParsable, ParsableList
+from Backend.Domain.TradingSystem.Interfaces.IShoppingCart import *
 
 
-class ShoppingCart(Backend.IShoppingCart):
+class ShoppingCart(IShoppingCart):
 
     def __init__(self):
         from Backend.Domain.TradingSystem import stores_manager
