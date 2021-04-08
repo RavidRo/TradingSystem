@@ -1,7 +1,8 @@
 import pytest
+
+from .stubs.member_stub import MemberStub
 from .stubs.store_stub import StoreStub
 from .stubs.user_stub import UserStub
-from Backend.UnitTests.stubs.member_stub import MemberStub
 from ..Domain.TradingSystem.Responsibilities.responsibility import Permission
 from ..Domain.TradingSystem.Responsibilities.manager import Manager
 from ..Domain.TradingSystem.Responsibilities.owner import Owner
