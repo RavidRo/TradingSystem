@@ -1,12 +1,12 @@
 from abc import ABC, abstractmethod
-from Backend.Domain.TradingSystem.shopping_cart import ShoppingCart
+import Backend.Domain.TradingSystem.shopping_cart
 from Backend.response import Response
 
 
 class UserState(ABC):
 
     def __init__(self, user):
-        self.cart = ShoppingCart()
+        self.cart = Backend.ShoppingCart()
         self.user = user
 
     @abstractmethod
