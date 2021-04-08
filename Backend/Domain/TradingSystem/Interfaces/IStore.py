@@ -1,7 +1,4 @@
-from abc import ABC, abstractmethod
-
-import Backend.Domain.TradingSystem.Responsibilities.responsibility
-import Backend.Domain.TradingSystem.purchase_details
+from abc import abstractmethod
 from Backend.response import Response, ParsableList, Parsable
 
 
@@ -40,14 +37,18 @@ class IStore(Parsable):
         raise NotImplementedError
 
     """4.9"""
+
+    from Backend.Domain.TradingSystem.Responsibilities.responsibility import Responsibility
     @abstractmethod
-    def get_personnel_info(self) -> Response[Backend.Responsibility]:
+    def get_personnel_info(self) -> Response[Responsibility]:
         "Query for the store's personnel info"
         raise NotImplementedError
 
     """4.11"""
+
+    from Backend.Domain.TradingSystem.purchase_details import PurchaseDetails
     @abstractmethod
-    def get_purchases_history(self) -> Response[ParsableList[Backend.PurchaseDetails]]:
+    def get_purchases_history(self) -> Response[ParsableList[PurchaseDetails]]:
         """Query for store's purchases history"""
         raise NotImplementedError
 
