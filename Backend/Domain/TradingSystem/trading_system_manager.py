@@ -7,11 +7,12 @@ from Backend.Service.DataObjects.store_data import StoreData
 from Backend.Service.DataObjects.shopping_cart_data import ShoppingCartData
 from Backend.Domain.TradingSystem.purchase_details import PurchaseDetails
 from Backend.Service.DataObjects.responsibilities_data import ResponsibilitiesData
-from Backend.Domain.TradingSystem.ITradingSystemManager import ITradingSystem
+
+# from Backend.Domain.TradingSystem.ITradingSystemManager import ITradingSystem
 from Backend.response import Response, ParsableList, PrimitiveParsable
 
 
-class TradingSystemManager(ITradingSystem):
+class TradingSystemManager:
 
     # 2.1
     # returns the guest newly created cookie

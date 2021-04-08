@@ -1,14 +1,17 @@
 from Backend.Domain import DBHandler
-from abc import ABC, abstractmethod
 from Backend import response
 
-class IAuthentication(metaclass=ABC):
+
+class IAuthentication:
     @classmethod
     def __subclasshook__(cls, subclass):
-        return (hasattr(subclass, 'register') and
-                callable(subclass.register) and
-                hasattr(subclass, 'login') and
-                callable(subclass.login))
+        return (
+            hasattr(subclass, "register")
+            and callable(subclass.register)
+            and hasattr(subclass, "login")
+            and callable(subclass.login)
+        )
+
 
 class Authentication(IAuthentication):
     __instance = None
@@ -38,7 +41,9 @@ class Authentication(IAuthentication):
 
     def login(self, username, password):
         if not self.db_handler.is_username_exists(username=username):
-            return response.Response[None](success=False, msg="username doesn't exist in the system")
+            return response.Response[None](
+                success=False, msg="username doesn't exist in the system"
+            )
 
         else:
             if not self.db_handler.is_password_match(given_password=password, username=username):
@@ -46,6 +51,6 @@ class Authentication(IAuthentication):
 
             else:
                 is_admin = self.db_handler.is_username_admin(udername=username)
-                return response.Response[None](success=True,obj=response.PrimitiveParsable(is_admin),msg="login succeeded")
-
-
+                return response.Response[None](
+                    success=True, obj=response.PrimitiveParsable(is_admin), msg="login succeeded"
+                )

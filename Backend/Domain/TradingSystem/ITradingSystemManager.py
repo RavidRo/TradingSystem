@@ -1,4 +1,4 @@
-from abc import ABC, abstractmethod
+from abc import abstractmethod
 
 
 from Backend.Service.DataObjects.product_data import ProductData
@@ -9,7 +9,7 @@ from Backend.Service.DataObjects.responsibilities_data import ResponsibilitiesDa
 from Backend.response import Response, ParsableList, PrimitiveParsable
 
 
-class ITradingSystem(metaclass=ABC):
+class ITradingSystem:
 
     # 2.1
     # returns the guest newly created cookie
