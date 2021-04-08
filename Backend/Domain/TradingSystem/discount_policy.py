@@ -14,9 +14,10 @@ class DefaultDiscountPolicy(DiscountPolicy):
         super().__init__()
         self.discount_type = Backend.DefaultDiscountType()
 
-    def checkPolicy(self) -> Backend.DiscountType:
-        return self.discount_type
+    # def checkPolicy(self) -> Backend.DiscountType:
+    #     return self.discount_type
 
     def applyDiscount(self, user, store: Backend.Store, products_to_quantities: dict) -> Response[PrimitiveParsable]:
-        discount_type = self.checkPolicy()
-        return discount_type.apply_discount(products_to_quantities)
+        # discount_type = self.checkPolicy()
+        # return discount_type.apply_discount(products_to_quantities)
+        return self.discount_type.apply_discount(products_to_quantities)
