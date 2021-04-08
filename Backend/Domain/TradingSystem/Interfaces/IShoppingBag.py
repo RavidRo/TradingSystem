@@ -5,7 +5,7 @@ from Backend.Domain.TradingSystem.purchase_details import PurchaseDetails
 from Backend.response import Response, ParsableList, Parsable
 
 
-class IShoppingBag(metaclass=ABC, Parsable):
+class IShoppingBag(Parsable, metaclass=ABC):
 
     @abstractmethod
     def add_product(self, product_id: str, quantity: int) -> Response[None]:

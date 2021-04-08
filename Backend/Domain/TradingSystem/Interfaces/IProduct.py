@@ -3,7 +3,7 @@ from abc import ABC, abstractmethod
 from Backend.response import Response, ParsableList, Parsable
 
 
-class IProduct(metaclass=ABC, Parsable):
+class IProduct(Parsable, metaclass=ABC):
 
     @abstractmethod
     def __init__(self, product_name: str, price: float, qunatity: int):

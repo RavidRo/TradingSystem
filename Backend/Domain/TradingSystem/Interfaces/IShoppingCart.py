@@ -4,7 +4,7 @@ from Backend.Domain.TradingSystem.IUser import IUser
 from Backend.response import Response, PrimitiveParsable, Parsable, ParsableList
 
 
-class IShoppingCart(metaclass=ABC, Parsable):
+class IShoppingCart(Parsable, metaclass=ABC):
 
     @abstractmethod
     def add_product(self, store_id: str, product_id: str, quantity: int) -> Response[None]:
