@@ -202,7 +202,7 @@ class UserManager:
     def get_any_store_purchase_history(
         cookie: str, store_id: str
     ) -> Response[ParsableList[PurchaseDetails]]:
-        func = lambda user: user.get_any_store_purchase_history(store_id)
+        func = lambda user: user.get_any_store_purchase_history_admin(store_id)
         return UserManager.__deligate_to_user(cookie, func)
 
     # 6.4

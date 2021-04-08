@@ -10,9 +10,11 @@ class Guest(UserState):
     def get_username(self):
         return Response(False, msg="Guests don't have username")
 
-    def __init__(self, user):
-        super().__init__(user)
-        self.authentication = Authentication.get_instance()
+    def __init__(self, user, authentication=None, cart=None):
+        super().__init__(user, cart)
+        if authentication is None:
+            authentication = Authentication.get_instance()
+        self.authentication = authentication
 
     def login(self, username, password):
         response = self.authentication.login(username, password)
@@ -25,6 +27,9 @@ class Guest(UserState):
 
     def register(self, username, password):
         return self.authentication.register(username, password)
+
+    def delete_products_after_purchase(self):
+        return self.cart.delete_products_after_purchase("guest")
 
     def open_store(self, store_name):
         return Response(False, msg="A store cannot be opened by a guest")
@@ -41,10 +46,7 @@ class Guest(UserState):
     def change_product_quantity_in_store(self, store_id, product_id, new_quantity):
         return Response(False, msg="Guests cannot change store product's quantity")
 
-    def set_product_name(self, store_id, product_id, new_name):
-        return Response(False, msg="Guests cannot edit store product's details")
-
-    def set_product_price(self, store_id, product_id, new_price):
+    def edit_product_details(self, store_id, product_id, new_name, new_price):
         return Response(False, msg="Guests cannot edit store product's details")
 
     def appoint_new_store_owner(self, store_id, new_owner):
@@ -59,7 +61,7 @@ class Guest(UserState):
     def remove_manager_permission(self, store_id, username, permission):
         return Response(False, msg="Guests cannot edit a stores manager's responsibilities")
 
-    def dismiss_manager(self, store_id, manager):
+    def remove_appointment(self, store_id, username):
         return Response(False, msg="Guests cannot dismiss managers")
 
     def get_store_personnel_info(self, store_id):
@@ -68,8 +70,8 @@ class Guest(UserState):
     def get_store_purchase_history(self, store_id):
         return Response(False, msg="Guests cannot get store's purchase history")
 
-    def get_any_store_purchase_history(self, store_id):
+    def get_any_store_purchase_history_admin(self, store_id):
         return Response(False, msg="Guests cannot get any store's purchase history")
 
-    def get_user_purchase_history(self, user_id):
+    def get_user_purchase_history_admin(self, username):
         return Response(False, msg="Guests cannot get any user's purchase history")

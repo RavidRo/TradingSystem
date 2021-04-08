@@ -144,8 +144,8 @@ class TradingSystem(object):
 
     @logging
     def get_any_store_purchase_history(self, cookie: str, store_id: str):
-        return trading_system_manager.get_any_store_purchase_history(cookie, store_id)
+        return trading_system_manager.get_any_store_purchase_history_admin(cookie, store_id)
 
     @logging
     def get_user_purchase_history(self, cookie: str, username: str):
-        return trading_system_manager.get_user_purchase_history(cookie, username)
+        return trading_system_manager.get_user_purchase_history_admin(cookie, username)

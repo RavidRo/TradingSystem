@@ -21,18 +21,18 @@ def member():
 
 
 @pytest.fixture
-def founder(store, member):
-    return Founder(member, store)
+def founder(store, member_with_responsibility):
+    return Founder(member_with_responsibility, store)
 
 
 @pytest.fixture
-def owner(store, member):
-    return Owner(member, store)
+def owner(store, member_with_responsibility):
+    return Owner(member_with_responsibility, store)
 
 
 @pytest.fixture
-def manager(store, member):
-    return Manager(member, store)
+def manager(store, member_with_responsibility):
+    return Manager(member_with_responsibility, store)
 
 
 @pytest.fixture
@@ -42,29 +42,29 @@ def user():
 
 # * constructor tests
 # * ==========================================================================================
-def test_constructor_setting_self_in_state(store, member):
-    founder = Founder(member, store)
-    assert member.store_responsibility[store.get_id()] == founder
+def test_constructor_setting_self_in_state(store, member_with_responsibility):
+    founder = Founder(member_with_responsibility, store)
+    assert member_with_responsibility.store_responsibility[store.get_id()] == founder
 
 
-def test_constructor_setting_store_correctly(store, member):
-    founder = Founder(member, store)
+def test_constructor_setting_store_correctly(store, member_with_responsibility):
+    founder = Founder(member_with_responsibility, store)
     assert founder.store == store
 
 
-def test_constructor_setting_state_correctly(store, member):
-    founder = Founder(member, store)
-    assert founder.user_state == member
+def test_constructor_setting_state_correctly(store, member_with_responsibility):
+    founder = Founder(member_with_responsibility, store)
+    assert founder.user_state == member_with_responsibility
 
 
 def test_constructor_no_initial_apppoints(founder):
     assert founder.appointed == []
 
 
-def test_constructor_doing_the_same_for_all_subclasses(store, member):
-    founder = Founder(member, store)
-    owner = Owner(member, store)
-    manager = Manager(member, store)
+def test_constructor_doing_the_same_for_all_subclasses(store, member_with_responsibility):
+    founder = Founder(member_with_responsibility, store)
+    owner = Owner(member_with_responsibility, store)
+    manager = Manager(member_with_responsibility, store)
 
     assert founder.appointed == owner.appointed and owner.appointed == manager.appointed
     assert founder.store == owner.store and owner.store == manager.store
@@ -137,8 +137,8 @@ def test_owner_appoint_owner_successfully(owner: Owner, user):
     assert owner.appoint_owner(user).succeeded()
 
 
-def test_cant_appoint_an_already_appointed_user(member, store: StoreStub, user):
-    founder = Founder(member, store)
+def test_cant_appoint_an_already_appointed_user(member_with_responsibility, store: StoreStub, user):
+    founder = Founder(member_with_responsibility, store)
     user.appoint(store.get_id())
     assert not founder.appoint_owner(user).succeeded()
 
@@ -162,8 +162,8 @@ def test_owner_appoint_manager_successfully(owner: Owner, user):
     assert owner.appoint_manager(user).succeeded()
 
 
-def test_cant_appoint_an_already_appointed_user(member, store: StoreStub, user):
-    founder = Founder(member, store)
+def test_cant_appoint_an_already_appointed_user(member_with_responsibility, store: StoreStub, user):
+    founder = Founder(member_with_responsibility, store)
     user.appoint(store.get_id())
     assert not founder.appoint_manager(user).succeeded()
 

@@ -5,8 +5,10 @@ from Backend.response import Response
 
 class UserState(ABC):
 
-    def __init__(self, user):
-        self.cart = ShoppingCart()
+    def __init__(self, user, cart=None):
+        if cart is None:
+            cart = ShoppingCart()
+        self.cart = cart
         self.user = user
 
     @abstractmethod
@@ -36,8 +38,9 @@ class UserState(ABC):
     def buy_cart(self, current_user):
         return self.cart.buy_products(current_user)
 
+    @abstractmethod
     def delete_products_after_purchase(self):
-        return self.cart.delete_pruducts_after_purchase()
+        return Response(False, msg="Abstract Method")
 
     @abstractmethod
     def open_store(self, store_name):
@@ -61,13 +64,7 @@ class UserState(ABC):
         return Response(False, msg="Abstract Method")
 
     @abstractmethod
-    def set_product_name(self, store_id, product_id,
-                         new_name):
-        return Response(False, msg="Abstract Method")
-
-    @abstractmethod
-    def set_product_price(self, store_id, product_id,
-                          new_price):
+    def edit_product_details(self, store_id, product_id, new_name, new_price):
         return Response(False, msg="Abstract Method")
 
     @abstractmethod
@@ -87,7 +84,7 @@ class UserState(ABC):
         return Response(False, msg="Abstract Method")
 
     @abstractmethod
-    def dismiss_manager(self, store_id, manager):
+    def remove_appointment(self, store_id, username):
         return Response(False, msg="Abstract Method")
 
     @abstractmethod
@@ -99,9 +96,9 @@ class UserState(ABC):
         return Response(False, msg="Abstract Method")
 
     @abstractmethod
-    def get_any_store_purchase_history(self, store_id):
+    def get_any_store_purchase_history_admin(self, store_id):
         return Response(False, msg="Abstract Method")
 
     @abstractmethod
-    def get_user_purchase_history(self, user_id):
+    def get_user_purchase_history_admin(self, username):
         return Response(False, msg="Abstract Method")

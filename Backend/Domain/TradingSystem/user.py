@@ -93,7 +93,7 @@ class User(IUser):
 
     # 4.4, 4.7
     def remove_appointment(self, store_id: str, username: str) -> Response[None]:
-        return self.state.dismiss_manager(store_id, username)
+        return self.state.remove_appointment(store_id, username)
 
     # 4.9
     def get_store_appointments(self, store_id: str) -> Response[Responsibility]:
@@ -108,11 +108,11 @@ class User(IUser):
 
     # 6.4
     def get_any_user_purchase_history(self, username: str) -> Response[ParsableList[PurchaseDetails]]:
-        return self.state.get_user_purchase_history(username)
+        return self.state.get_user_purchase_history_admin(username)
 
     # 6.4
     def get_any_store_purchase_history(self, store_id: str) -> Response[ParsableList[PurchaseDetails]]:
-        return self.state.get_any_store_purchase_history(store_id)
+        return self.state.get_any_store_purchase_history_admin(store_id)
 
     # Inter component functions
     # ====================
