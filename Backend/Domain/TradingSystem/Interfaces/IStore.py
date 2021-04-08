@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 
-from Backend.Domain.TradingSystem.Responsibilities.responsibility import Responsibility
+import Backend.Domain.TradingSystem.Responsibilities.responsibility
 from Backend.Domain.TradingSystem.purchase_details import PurchaseDetails
 from Backend.response import Response, ParsableList, Parsable
 
@@ -41,7 +41,7 @@ class IStore( Parsable, metaclass=ABC):
 
     """4.9"""
     @abstractmethod
-    def get_personnel_info(self) -> Response[Responsibility]:
+    def get_personnel_info(self) -> Response[Backend.Responsibility]:
         "Query for the store's personnel info"
         raise NotImplementedError
 
