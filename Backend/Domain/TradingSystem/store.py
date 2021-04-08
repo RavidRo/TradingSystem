@@ -1,10 +1,10 @@
-from Backend.Domain.TradingSystem.Interfaces import IStore
+import Backend.Domain.TradingSystem.Interfaces.IStore
 import uuid
 from Backend.response import Response, ParsableList
 from dataclasses import dataclass
 
 
-class Store(IStore):
+class Store(Backend.IStore):
     from Backend.Domain.TradingSystem.Responsibilities.responsibility import Responsibility
     from Backend.Domain.TradingSystem.purchase_details import PurchaseDetails
     def __init__(self, store_name: str):
