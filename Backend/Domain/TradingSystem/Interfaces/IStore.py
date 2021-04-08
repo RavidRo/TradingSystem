@@ -5,7 +5,7 @@ import Backend.Domain.TradingSystem.purchase_details
 from Backend.response import Response, ParsableList, Parsable
 
 
-class IStore(Parsable, metaclass=ABC):
+class IStore(Parsable):
 
     @abstractmethod
     def __init__(self, store_name: str):

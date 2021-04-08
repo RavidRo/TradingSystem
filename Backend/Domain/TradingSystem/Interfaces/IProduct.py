@@ -1,9 +1,9 @@
-from abc import ABC, abstractmethod
+from abc import abstractmethod
 
 from Backend.response import Parsable
 
 
-class IProduct(Parsable, metaclass=ABC):
+class IProduct(Parsable):
 
     @abstractmethod
     def __init__(self, product_name: str, price: float):
