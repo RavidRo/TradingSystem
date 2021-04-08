@@ -43,16 +43,6 @@ class Store(IStore):
         self.products_to_quantities.get(product_id)[0].set_product_name(new_name)
         return Response(True, msg=f"Product {product_id} name was changed successfully!")
 
-    """checks need to be made:
-       ----------------------
-       1. the responsibility tree of the store is set"""
-    def show_store_data(self) -> Response:
-        # in the future other field will be checked too
-        if self.responsibility is None:
-            return Response(False, msg="Store's responsibilities aren't set yet")
-
-        return Response[Store](True, self, msg="Store's details are complete")
-
     def get_name(self) -> str:
         return self.name
 

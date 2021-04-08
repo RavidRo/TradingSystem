@@ -62,7 +62,7 @@ class ShoppingBag(IShoppingBag):
     def buy_products(self, user_info: IUser, products_info={}) -> Response[None]:
 
         """first step - check if all of the products exist in the store"""
-        availability_response = await self.store.check_available_products(self.products_to_quantity)
+        availability_response = self.store.check_available_products(self.products_to_quantity)
         if not availability_response.success:
             return availability_response
 
@@ -88,6 +88,8 @@ class ShoppingBag(IShoppingBag):
     def discount_apply(self, user_info: IUser):
         self.pending_price = self.store.apply_discounts(user_info, self.products_to_quantity)
         # for now it's a copy- all of the products purchased regularly so they all passed to pending
+        if not bool(self.products_to_quantity):
+            self.send_back()
         self.pending_products_to_quantity = self.products_to_quantity.copy()
         self.products_to_quantity.clear()
 

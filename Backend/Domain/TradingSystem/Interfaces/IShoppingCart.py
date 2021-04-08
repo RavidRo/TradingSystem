@@ -1,7 +1,6 @@
 from abc import ABC, abstractmethod
 
 from Backend.Domain.TradingSystem.IUser import IUser
-from Backend.Domain.TradingSystem.Interfaces import IPurchaseDetails
 from Backend.response import Response, PrimitiveParsable, Parsable, ParsableList
 
 

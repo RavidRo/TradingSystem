@@ -87,12 +87,18 @@ class ShoppingCart(IShoppingCart):
                 return result
             succeded_bags.append(self.shopping_bags[store_id])
             sum += result.get_obj().get_val()
+
+        self.purchase_time_passed = False
+        if self.timer is not None:
+            self.timer.cancel()
+        self.start_timer()
         return Response[PrimitiveParsable](True, obj=PrimitiveParsable(sum),
                                            msg=f"All purchase details are valid. The overall sum is: {sum}")
 
     """notice: For now - the bag will be deleted since only regular purchase type enabled!"""
     def delete_products_after_purchase(self, user_name: str = "guest") -> Response[ParsableList]:
         self.timer.cancel()
+        self.timer = None
         purchase_cart_details = []
         for store_id in self.shopping_bags.keys():
             purchase_cart_details.append(self.shopping_bags[store_id].delete_products_after_purchase(user_name))
