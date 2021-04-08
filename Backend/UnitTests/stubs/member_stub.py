@@ -1,8 +1,8 @@
 
-from Backend.Domain.TradingSystem.member import Member
+import Backend.Domain.TradingSystem.member
 
 
-class MemberStub(Member):
+class MemberStub(Backend.Member):
 
 	def __init__(self, username = "member") -> None:
 		self.store_responsibility = {}
