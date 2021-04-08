@@ -1,13 +1,12 @@
 from Backend.Domain.TradingSystem.stores_manager import StoresManager
 from Backend.Domain.TradingSystem.user_manager import UserManager
 from Backend.Domain.TradingSystem.search_engine import SearchEngine
-from Backend.Domain.TradingSystem.Responsibilities.responsibility import permissions
-from Backend.Domain.TradingSystem.product_data import product_data
-from Backend.Domain.TradingSystem.store_data import store_data
-from Backend.Domain.TradingSystem.shopping_cart_data import shopping_cart_data
-from Backend.Domain.TradingSystem.purchase_details_data import purchase_details_data
-from Backend.Domain.TradingSystem.purchase_details import purchase_details
-from Backend.Domain.TradingSystem.responsibility_data import responsibility_data
+from Backend.Domain.TradingSystem.Responsibilities.responsibility import Permission
+from Backend.Service.DataObjects.product_data import ProductData
+from Backend.Service.DataObjects.store_data import StoreData
+from Backend.Service.DataObjects.shopping_cart_data import ShoppingCartData
+from Backend.Domain.TradingSystem.purchase_details import PurchaseDetails
+from Backend.Service.DataObjects.responsibilities_data import ResponsibilitiesData
 from Backend.Domain.TradingSystem.ITradingSystemManager import ITradingSystem
 from Backend.response import Response, ParsableList, PrimitiveParsable
 
@@ -32,12 +31,12 @@ class TradingSystemManager(ITradingSystem):
 
     # 2.5
     @staticmethod
-    def get_stores_details() -> Response[ParsableList[store_data]]:
+    def get_stores_details() -> Response[ParsableList[StoreData]]:
         return StoresManager.get_stores_details().parse()
 
     # 2.5
     @staticmethod
-    def get_products_by_store(store_id: str) -> Response[ParsableList[product_data]]:
+    def get_products_by_store(store_id: str) -> Response[ParsableList[ProductData]]:
         return StoresManager.get_products_by_store(store_id).parse()
 
     # 2.6
@@ -45,7 +44,7 @@ class TradingSystemManager(ITradingSystem):
     @staticmethod
     def search_products(
         product_name="", *keywords: tuple[str], category=None, min_price=None, max_price=None
-    ) -> Response[ParsableList[product_data]]:
+    ) -> Response[ParsableList[ProductData]]:
         return SearchEngine.search_products(
             product_name, category, min_price, max_price, *keywords
         ).parse()
@@ -59,7 +58,7 @@ class TradingSystemManager(ITradingSystem):
 
     # 2.8
     @staticmethod
-    def get_cart_details(cookie: str) -> Response[shopping_cart_data]:
+    def get_cart_details(cookie: str) -> Response[ShoppingCartData]:
         return UserManager.get_cart_details(cookie).parse()
 
     # 2.8
@@ -101,8 +100,8 @@ class TradingSystemManager(ITradingSystem):
 
     # 3.7
     @staticmethod
-    def ger_purchase_history(cookie: str) -> Response[ParsableList[purchase_details_data]]:
-        return UserManager.ger_purchase_history(cookie).parse()
+    def ger_purchase_history(cookie: str) -> Response[ParsableList[PurchaseDetails]]:
+        return UserManager.ger_purchase_history(cookie)
 
     # Owner and manager
     # =======================
@@ -150,7 +149,7 @@ class TradingSystemManager(ITradingSystem):
         cookie: str, store_id: str, username: str, permission_number: int
     ) -> Response[None]:
         return UserManager.add_manager_permission(
-            cookie, store_id, username, permissions(permission_number)
+            cookie, store_id, username, Permission(permission_number)
         )
 
     # 4.6
@@ -159,7 +158,7 @@ class TradingSystemManager(ITradingSystem):
         cookie: str, store_id: str, username: str, permission_number: int
     ) -> Response[None]:
         return UserManager.remove_manager_permission(
-            cookie, store_id, username, permissions(permission_number)
+            cookie, store_id, username, Permission(permission_number)
         )
 
     # 4.4, 4.7
@@ -169,15 +168,15 @@ class TradingSystemManager(ITradingSystem):
 
     # 4.9
     @staticmethod
-    def get_store_appointments(cookie: str, store_id: str) -> Response[responsibility_data]:
+    def get_store_appointments(cookie: str, store_id: str) -> Response[ResponsibilitiesData]:
         return UserManager.get_store_appointments(cookie, store_id).parse()
 
     # 4.11
     @staticmethod
     def get_store_purchases_history(
         cookie: str, store_id: str
-    ) -> Response[ParsableList[purchase_details_data]]:
-        return UserManager.get_store_purchases_history(cookie, store_id).parse()
+    ) -> Response[ParsableList[PurchaseDetails]]:
+        return UserManager.get_store_purchases_history(cookie, store_id)
 
     # System Manager
     # ====================
@@ -186,24 +185,24 @@ class TradingSystemManager(ITradingSystem):
     @staticmethod
     def get_any_user_purchase_history(
         cookie: str, username: str
-    ) -> Response[ParsableList[purchase_details_data]]:
-        return UserManager.get_any_user_purchase_history(cookie, username).parse()
+    ) -> Response[ParsableList[PurchaseDetails]]:
+        return UserManager.get_any_user_purchase_history(cookie, username)
 
     # 6.4
     @staticmethod
     def get_any_store_purchase_history(
         cookie: str, store_id: str
-    ) -> Response[ParsableList[purchase_details_data]]:
-        return UserManager.get_any_store_purchase_history(cookie, store_id).parse()
+    ) -> Response[ParsableList[PurchaseDetails]]:
+        return UserManager.get_any_store_purchase_history(cookie, store_id)
 
     # Inter component functions
     # ============================
     # 6.4
     @staticmethod
-    def get_any_user_purchase_history(username: str) -> Response[ParsableList[purchase_details]]:
-        return UserManager.get_any_user_purchase_history(username).parse()
+    def get_any_user_purchase_history(username: str) -> Response[ParsableList[PurchaseDetails]]:
+        return UserManager.get_any_user_purchase_history(username)
 
     # 6.4
     @staticmethod
-    def get_any_store_purchase_history(store_id: str) -> Response[ParsableList[purchase_details]]:
-        return StoresManager.get_any_store_purchase_history(store_id).parse()
+    def get_any_store_purchase_history(store_id: str) -> Response[ParsableList[PurchaseDetails]]:
+        return StoresManager.get_any_store_purchase_history(store_id)

@@ -1,9 +1,10 @@
 from abc import ABC, abstractmethod
 
-from Backend.Domain.TradingSystem.product_data import product_data
-from Backend.Domain.TradingSystem.store_data import store_data
-from Backend.Domain.TradingSystem.shopping_cart_data import shopping_cart_data
-from Backend.Domain.TradingSystem.purchase_details_data import purchase_details_data
+
+from Backend.Service.DataObjects.product_data import ProductData
+from Backend.Service.DataObjects.store_data import StoreData
+from Backend.Service.DataObjects.shopping_cart_data import ShoppingCartData
+from Backend.Domain.TradingSystem.purchase_details import PurchaseDetails
 from Backend.Service.DataObjects.responsibilities_data import ResponsibilitiesData
 from Backend.response import Response, ParsableList, PrimitiveParsable
 
@@ -28,12 +29,12 @@ class ITradingSystem(metaclass=ABC):
 
     # 2.5
     @abstractmethod
-    def get_stores_details() -> Response[ParsableList[store_data]]:
+    def get_stores_details() -> Response[ParsableList[StoreData]]:
         raise NotImplementedError
 
     # 2.5
     @abstractmethod
-    def get_products_by_store(store_id: str) -> Response[ParsableList[product_data]]:
+    def get_products_by_store(store_id: str) -> Response[ParsableList[ProductData]]:
         raise NotImplementedError
 
     # 2.6
@@ -41,7 +42,7 @@ class ITradingSystem(metaclass=ABC):
     @abstractmethod
     def search_products(
         product_name: str, *keywords: tuple[str], category: str, min_price: float, max_price: float
-    ) -> Response[ParsableList[product_data]]:
+    ) -> Response[ParsableList[ProductData]]:
         raise NotImplementedError
 
     # 2.7
@@ -53,7 +54,7 @@ class ITradingSystem(metaclass=ABC):
 
     # 2.8
     @abstractmethod
-    def get_cart_details(cookie: str) -> Response[shopping_cart_data]:
+    def get_cart_details(cookie: str) -> Response[ShoppingCartData]:
         raise NotImplementedError
 
     # 2.8
@@ -90,7 +91,7 @@ class ITradingSystem(metaclass=ABC):
 
     # 3.7
     @abstractmethod
-    def ger_purchase_history(cookie: str) -> Response[ParsableList[purchase_details_data]]:
+    def ger_purchase_history(cookie: str) -> Response[ParsableList[PurchaseDetails]]:
         raise NotImplementedError
 
     # Owner and manager
@@ -160,7 +161,7 @@ class ITradingSystem(metaclass=ABC):
     @abstractmethod
     def get_store_purchases_history(
         cookie: str, store_id: str
-    ) -> Response[ParsableList[purchase_details_data]]:
+    ) -> Response[ParsableList[PurchaseDetails]]:
         raise NotImplementedError
 
     # System Manager
@@ -170,12 +171,12 @@ class ITradingSystem(metaclass=ABC):
     @abstractmethod
     def get_user_purchase_history(
         cookie: str, username: str
-    ) -> Response[ParsableList[purchase_details_data]]:
+    ) -> Response[ParsableList[PurchaseDetails]]:
         raise NotImplementedError
 
     # 6.4
     @abstractmethod
     def get_any_store_purchase_history(
         cookie: str, store_id: str
-    ) -> Response[ParsableList[purchase_details_data]]:
+    ) -> Response[ParsableList[PurchaseDetails]]:
         raise NotImplementedError

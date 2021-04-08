@@ -2,7 +2,7 @@ from Backend.response import Response
 from Backend.response import ParsableList
 from Backend.Domain.TradingSystem.Interfaces.IStore import IStore as store
 from Backend.Domain.TradingSystem.Interfaces.IProduct import IProduct as product
-from Backend.Domain.TradingSystem.purchase_details import purchase_details
+from Backend.Domain.TradingSystem.purchase_details import PurchaseDetails
 
 
 class StoresManager:
@@ -42,7 +42,7 @@ class StoresManager:
         return Response(False, msg=f"No store with the ID {store_id} exists")
 
     # 6.4
-    def get_any_store_purchase_history(store_id: str) -> Response[ParsableList[purchase_details]]:
+    def get_any_store_purchase_history(store_id: str) -> Response[ParsableList[PurchaseDetails]]:
         for store in StoresManager.stores:
             if store.get_id():
                 return store.get_purchase_history()

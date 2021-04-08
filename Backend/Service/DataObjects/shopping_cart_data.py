@@ -1,0 +1,2 @@
+class ShoppingCartData:
+    pass
