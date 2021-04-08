@@ -1,9 +1,8 @@
-from Backend.Domain.TradingSystem.member import Member
+from .member import Member
 from Backend.Domain.TradingSystem.trading_system_manager import TradingSystemManager
 
 
 class Admin(Member):
-
     def __init__(self, user, username, responsibilities=None):
         super().__init__(user, username, responsibilities)
 

@@ -4,7 +4,6 @@ from Backend.response import Response
 
 
 class UserState(ABC):
-
     def __init__(self, user):
         self.cart = ShoppingCart()
         self.user = user
@@ -48,8 +47,7 @@ class UserState(ABC):
         return Response(False, msg="Abstract Method")
 
     @abstractmethod
-    def add_new_product(self, store_id, product_name, product_price,
-                        quantity):
+    def add_new_product(self, store_id, product_name, product_price, quantity):
         return Response(False, msg="Abstract Method")
 
     @abstractmethod
@@ -61,13 +59,11 @@ class UserState(ABC):
         return Response(False, msg="Abstract Method")
 
     @abstractmethod
-    def set_product_name(self, store_id, product_id,
-                         new_name):
+    def set_product_name(self, store_id, product_id, new_name):
         return Response(False, msg="Abstract Method")
 
     @abstractmethod
-    def set_product_price(self, store_id, product_id,
-                          new_price):
+    def set_product_price(self, store_id, product_id, new_price):
         return Response(False, msg="Abstract Method")
 
     @abstractmethod

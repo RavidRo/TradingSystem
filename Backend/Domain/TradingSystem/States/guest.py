@@ -1,24 +1,25 @@
-from Backend.Domain.TradingSystem.user_state import UserState
-from Backend.Domain.TradingSystem.member import Member
-from Backend.Domain.TradingSystem.admin import Admin
+from .user_state import UserState
+from .member import Member
+from .admin import Admin
 from Backend.Domain.Authentication.authentication import Authentication
 from Backend.response import Response
 
 
 class Guest(UserState):
-
-    def get_username(self):
-        return Response(False, msg="Guests don't have username")
-
     def __init__(self, user):
         super().__init__(user)
         self.authentication = Authentication.get_instance()
+
+    def get_username(self):
+        return Response(False, msg="Guests don't have username")
 
     def login(self, username, password):
         response = self.authentication.login(username, password)
         if response.succeeded():
             if response.object.value:
-                self.user.change_state(Admin(self.user, username))  # in later milestones, fetch data from DB
+                self.user.change_state(
+                    Admin(self.user, username)
+                )  # in later milestones, fetch data from DB
             else:
                 self.user.change_state(Member(self.user, username))
         return response

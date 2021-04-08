@@ -4,7 +4,7 @@ from Backend.Domain.TradingSystem.IUser import IUser
 from Backend.response import Response, ParsableList, PrimitiveParsable
 from Backend.Domain.TradingSystem.shopping_cart import ShoppingCart
 from Backend.Domain.TradingSystem.purchase_details import PurchaseDetails
-from Backend.Domain.TradingSystem.user_state import UserState, Guest
+from Backend.Domain.TradingSystem.States.user_state import UserState, Guest
 from .Responsibilities.responsibility import Permission, Responsibility
 
 
@@ -60,7 +60,9 @@ class User(IUser):
 
     # 4.1
     # Creating a new product a the store and setting its quantity to 0
-    def create_product(self, store_id: str, name: str, price: float, quantity: int) -> Response[None]:
+    def create_product(
+        self, store_id: str, name: str, price: float, quantity: int
+    ) -> Response[None]:
         return self.state.add_new_product(store_id, name, price, quantity)
 
     # 4.1
@@ -68,11 +70,15 @@ class User(IUser):
         return self.state.remove_product(store_id, product_id)
 
     # 4.1
-    def change_product_quantity(self, store_id: str, product_id: str, new_quantity: int) -> Response[None]:
+    def change_product_quantity(
+        self, store_id: str, product_id: str, new_quantity: int
+    ) -> Response[None]:
         return self.state.change_product_quantity_in_store(store_id, product_id, new_quantity)
 
     # 4.1
-    def edit_product_details(self, store_id: str, product_id: str, new_name: str, new_price: float) -> Response[None]:
+    def edit_product_details(
+        self, store_id: str, product_id: str, new_name: str, new_price: float
+    ) -> Response[None]:
         return self.state.edit_product_details(store_id, product_id, new_name, new_price)
 
     # 4.3
@@ -84,11 +90,15 @@ class User(IUser):
         return self.state.appoint_new_store_manager(store_id, user)
 
     # 4.6
-    def add_manager_permission(self, store_id: str, username: str, permission: Permission) -> Response[None]:
+    def add_manager_permission(
+        self, store_id: str, username: str, permission: Permission
+    ) -> Response[None]:
         return self.state.add_manager_permission(store_id, username, permission)
 
     # 4.6
-    def remove_manager_permission(self, store_id: str, username: str, permission: Permission) -> Response[None]:
+    def remove_manager_permission(
+        self, store_id: str, username: str, permission: Permission
+    ) -> Response[None]:
         return self.state.remove_manager_permission(store_id, username, permission)
 
     # 4.4, 4.7
@@ -107,11 +117,15 @@ class User(IUser):
     # ====================
 
     # 6.4
-    def get_any_user_purchase_history(self, username: str) -> Response[ParsableList[PurchaseDetails]]:
+    def get_any_user_purchase_history(
+        self, username: str
+    ) -> Response[ParsableList[PurchaseDetails]]:
         return self.state.get_user_purchase_history(username)
 
     # 6.4
-    def get_any_store_purchase_history(self, store_id: str) -> Response[ParsableList[PurchaseDetails]]:
+    def get_any_store_purchase_history(
+        self, store_id: str
+    ) -> Response[ParsableList[PurchaseDetails]]:
         return self.state.get_any_store_purchase_history(store_id)
 
     # Inter component functions
