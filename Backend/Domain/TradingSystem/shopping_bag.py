@@ -1,12 +1,12 @@
 from dataclasses import dataclass
 from Backend.Domain.TradingSystem.Interfaces.IShoppingBag import IShoppingBag
 from Backend.Domain.TradingSystem.purchase_details import PurchaseDetails
-from Backend.Domain.TradingSystem.store import Store
 from Backend.response import Response, PrimitiveParsable
 from datetime import datetime
 
 
 class ShoppingBag(IShoppingBag):
+    from Backend.Domain.TradingSystem.store import Store
 
     def __init__(self, store: Store):
         self.store = store
