@@ -1,9 +1,8 @@
-from Backend.Domain.TradingSystem import product
-from Backend.Domain.TradingSystem.Interfaces import IDiscountType
+
 from Backend.response import Response, PrimitiveParsable
 
 
-class DiscountType(IDiscountType):
+class DiscountType:
     def __init__(self):
         pass
 

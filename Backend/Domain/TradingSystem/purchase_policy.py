@@ -1,10 +1,8 @@
-from Backend.Domain.TradingSystem import store
-from Backend.Domain.TradingSystem.discount_type import DefaultDiscountType
-from Backend.Domain.TradingSystem.Interfaces import IPurchasePolicy, IPurchaseType
+
 from Backend.response import Response, PrimitiveParsable
 
 
-class PurchasePolicy(IPurchasePolicy):
+class PurchasePolicy:
     def __init__(self):
         pass
 

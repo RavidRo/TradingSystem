@@ -1,11 +1,10 @@
 
 import Backend.Domain.TradingSystem.discount_type
-from Backend.Domain.TradingSystem.Interfaces import IDiscountPolicy
 import Backend.Domain.TradingSystem.store
 from Backend.response import Response, PrimitiveParsable
 
 
-class DiscountPolicy(IDiscountPolicy):
+class DiscountPolicy:
     def __init__(self):
         pass
 
