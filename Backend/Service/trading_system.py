@@ -3,8 +3,10 @@
 
 from Backend.Service.loggs import logging
 from Backend.response import Response
-from Backend.Domain.TradingSystem.TradingSystemManager import TradingSystem as trading_system_manager
-from Backend.Domain.Payment.payment_manager import PaymentSystem
+from Backend.Domain.TradingSystem.trading_system_manager import TradingSystemManager as trading_system_manager
+# from Backend.Domain.TradingSystem.TradingSystemManager import TradingSystem as trading_system_manager
+from Backend.Domain.Payment import payment_manager
+# from Backend.Domain.Payment.payment_manager import PaymentSystem
 
 
 # TODO: import response object and the interface ItradingSystem
@@ -26,8 +28,8 @@ class TradingSystem(object):
             raise Exception("This class is a singleton!")
         else:
             TradingSystem.__instance = self
-            # self.trading_system_manager = trading_system_manager.TradingSystemManager()
-
+            self.trading_system_manager = trading_system_manager.TradingSystemManager()
+            self.payment_manager = payment_manager
     @logging
     def enter_system(self):
         return trading_system_manager.enter_system()
@@ -75,7 +77,7 @@ class TradingSystem(object):
     @logging
     def send_payment(self, cookie, payment_details):
         price = trading_system_manager.get_cart_price(cookie)
-        res = PaymentSystem.pay(price, payment_details)
+        res = self.payment_manager.pay(price, payment_details)
         if res.succeeded():
             return self.purchase_completed(cookie)
         else:
