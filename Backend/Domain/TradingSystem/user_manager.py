@@ -32,13 +32,6 @@ class UserManager:
     def __create_cookie() -> str:
         return str(uuid.uuid4())
 
-    # Called after register was successful and state was updated with the username
-    def __user_registered(username: str) -> None:
-        for cookie in UserManager.cookie_user:
-            user = UserManager.cookie_user[cookie]
-            if user.get_username() == username:
-                UserManager.username_user[username] = user
-
     # 2.1
     # returns the guest newly created cookie
     def enter_system() -> str:
@@ -53,7 +46,7 @@ class UserManager:
             return Response(False, msg="No user is identified by the given cookie")
         response = user.register(username, password)
         if response.succeeded:
-            UserManager.__user_registered(username)
+            UserManager.username_user[username] = user
         return response
 
     # 2.4
