@@ -50,7 +50,7 @@ class Authentication(IAuthentication):
                 return response.Response[None](success=False, msg="password incorrect")
 
             else:
-                is_admin = self.db_handler.is_username_admin(udername=username)
+                is_admin = self.db_handler.is_username_admin(username=username)
                 return response.Response[None](
                     success=True, obj=response.PrimitiveParsable(is_admin), msg="login succeeded"
                 )
