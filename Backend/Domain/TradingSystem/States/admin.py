@@ -9,5 +9,5 @@ class Admin(Member):
     def get_any_store_purchase_history(self, store_id):
         return TradingSystemManager.get_any_store_purchase_history(store_id)
 
-    def get_user_purchase_history(self, user_id):
-        return TradingSystemManager.get_user_purchase_history(user_id)
+    def get_user_purchase_history(self, username):
+        return TradingSystemManager.get_any_user_purchase_history(username)

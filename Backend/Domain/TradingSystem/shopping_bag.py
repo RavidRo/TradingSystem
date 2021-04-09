@@ -6,7 +6,6 @@ from datetime import datetime
 
 
 class ShoppingBag(IShoppingBag):
-
     def __init__(self, store):
         self.store = store
         self.products_to_quantity = dict()
@@ -25,28 +24,39 @@ class ShoppingBag(IShoppingBag):
        1. quantity is a positive number
        2. product with product_id exists in store with specified quantity 
        3. product with product_id doesn't already exist in the bag """
+
     def add_product(self, product_id: str, quantity: int) -> Response[None]:
 
         if quantity <= 0:
             return Response(False, msg="quantity must be a positive number!")
 
         if not self.store.product_exists(product_id, quantity):
-            return Response(False, msg="A product with id: " + str(product_id) + " doesn't exist in store's inventory")
+            return Response(
+                False,
+                msg="A product with id: " + str(product_id) + " doesn't exist in store's inventory",
+            )
 
         if self.products_to_quantity.get(product_id) is not None:
-            return Response(False, msg=f"A product with id: {product_id} already exists in the store's bag")
+            return Response(
+                False, msg=f"A product with id: {product_id} already exists in the store's bag"
+            )
 
-        self.products_to_quantity.update({product_id: (self.store.get_product(product_id), quantity)})
+        self.products_to_quantity.update(
+            {product_id: (self.store.get_product(product_id), quantity)}
+        )
         return Response(True, msg=f"The product with id: {product_id} added successfully!")
 
     """checks need to be made:
        ----------------------
        1. product with product_id exists in bag 
                                             """
+
     def remove_product(self, product_id: str) -> Response[None]:
 
         if self.products_to_quantity.get(product_id) is None:
-            return Response(False, msg=f"No such product in the bag of ths store{self.store.get_name()}")
+            return Response(
+                False, msg=f"No such product in the bag of ths store{self.store.get_name()}"
+            )
         else:
             self.products_to_quantity.pop(product_id)
         return Response(True, msg="Successfully removed product with id: " + str(product_id))
@@ -74,10 +84,13 @@ class ShoppingBag(IShoppingBag):
 
         """fourth step - check and apply the discount """
         self.discount_apply(user_info)
-        return Response[PrimitiveParsable](True, PrimitiveParsable(self.pending_price),
-                                           msg="All the details are good! here comes the price")
+        return Response[PrimitiveParsable](
+            True,
+            PrimitiveParsable(self.pending_price),
+            msg="All the details are good! here comes the price",
+        )
 
-    def purchase_types_checks(self, user_info, products_info ={}):
+    def purchase_types_checks(self, user_info, products_info={}):
         purchase_types_check = self.store.check_purchase_types(products_info, user_info)
         if not purchase_types_check.success:
             self.store.send_back(self.products_to_quantity)
@@ -96,7 +109,8 @@ class ShoppingBag(IShoppingBag):
        1. new_amount is a positive number
        2. product with product_id exists in the bag 
                                                 """
-    def change_product_qunatity(self, product_id: str, new_amount: int) -> Response[None]:
+
+    def change_product_quantity(self, product_id: str, new_amount: int) -> Response[None]:
         if new_amount <= 0:
             return Response(False, msg="Amount can't be negative!")
         if self.products_to_quantity.get(product_id) is None:
@@ -106,10 +120,13 @@ class ShoppingBag(IShoppingBag):
 
     def delete_products_after_purchase(self, user_name="guest") -> PurchaseDetails:
         # for now this function will only return details, in the future there will be specific deletion
-        product_names = [prod.get_name() for product_id, (prod, quantity) in self.products_to_quantity.items()]
+        product_names = [
+            prod.get_name() for product_id, (prod, quantity) in self.products_to_quantity.items()
+        ]
         self.pending_products_to_quantity.clear()
-        return PurchaseDetails(user_name, self.store.get_name(), product_names,
-                               datetime.now(), self.pending_price)
+        return PurchaseDetails(
+            user_name, self.store.get_name(), product_names, datetime.now(), self.pending_price
+        )
 
     def send_back(self):
         self.store.send_back(products_to_quantities=self.pending_products_to_quantity)

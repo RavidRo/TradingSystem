@@ -1,7 +1,7 @@
 from Backend.Domain.TradingSystem.Responsibilities.responsibility import Permission, Responsibility
 from Backend.Domain.TradingSystem.Responsibilities.owner import Owner
 from Backend.Domain.TradingSystem.States.member import Member
-from Backend.Domain.TradingSystem.IUser import IUser
+from Backend.Domain.TradingSystem.Interfaces.IUser import IUser
 from Backend.Domain.TradingSystem.purchase_details import PurchaseDetails
 from Backend.Domain.TradingSystem.store import Store
 from Backend.response import Response, ParsableList

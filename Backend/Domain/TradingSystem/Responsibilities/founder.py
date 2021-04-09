@@ -1,5 +1,5 @@
 from Backend.Domain.TradingSystem.Responsibilities.responsibility import Permission, Responsibility
-from Backend.Domain.TradingSystem.IUser import IUser
+from Backend.Domain.TradingSystem.Interfaces.IUser import IUser
 from Backend.Domain.TradingSystem.purchase_details import PurchaseDetails
 from Backend.response import Response, ParsableList
 

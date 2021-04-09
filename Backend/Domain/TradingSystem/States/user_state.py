@@ -1,11 +1,11 @@
 from abc import ABC, abstractmethod
-import Backend.Domain.TradingSystem.shopping_cart
+from Backend.Domain.TradingSystem.shopping_cart import ShoppingCart
 from Backend.response import Response
 
 
 class UserState(ABC):
     def __init__(self, user):
-        self.cart = Backend.ShoppingCart()
+        self.cart = ShoppingCart()
         self.user = user
 
     @abstractmethod
@@ -24,19 +24,22 @@ class UserState(ABC):
         return self.cart.add_product(store_id, product_id, quantity)
 
     def show_cart(self):
-        return Response[Backend.ShoppingCart](True, obj=self.cart, msg="got cart successfully")
+        return Response[ShoppingCart](True, obj=self.cart, msg="got cart successfully")
 
     def delete_from_cart(self, store_id, product_id):
         return self.cart.remove_product(store_id, product_id)
 
-    def change_product_quantity(self, store_id, product_id, new_amount):
-        return self.cart.change_product_qunatity(store_id, product_id, new_amount)
+    def change_product_quantity_in_cart(self, store_id, product_id, new_amount):
+        return self.cart.change_product_quantity(store_id, product_id, new_amount)
 
     def buy_cart(self, current_user):
         return self.cart.buy_products(current_user)
 
+    def get_cart_price(self):
+        return self.cart.get_price()
+
     def delete_products_after_purchase(self):
-        return self.cart.delete_pruducts_after_purchase()
+        return self.cart.delete_products_after_purchase()
 
     @abstractmethod
     def open_store(self, store_name):
@@ -59,11 +62,7 @@ class UserState(ABC):
         return Response(False, msg="Abstract Method")
 
     @abstractmethod
-    def set_product_name(self, store_id, product_id, new_name):
-        return Response(False, msg="Abstract Method")
-
-    @abstractmethod
-    def set_product_price(self, store_id, product_id, new_price):
+    def edit_product_details(self, store_id, product_id, new_name, new_price):
         return Response(False, msg="Abstract Method")
 
     @abstractmethod
@@ -99,5 +98,5 @@ class UserState(ABC):
         return Response(False, msg="Abstract Method")
 
     @abstractmethod
-    def get_user_purchase_history(self, user_id):
+    def get_user_purchase_history(self, username):
         return Response(False, msg="Abstract Method")

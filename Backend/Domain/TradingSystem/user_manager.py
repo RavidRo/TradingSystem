@@ -1,8 +1,10 @@
+from typing import Callable
 import uuid
 
-from .user import IUser
+from Backend.Domain.TradingSystem.Interfaces.IUser import IUser
+from .user import User
 from Backend.response import Response, ParsableList, PrimitiveParsable
-from Backend.Domain.TradingSystem.shopping_cart import ShopppingCart
+from Backend.Domain.TradingSystem.shopping_cart import ShoppingCart
 from Backend.Domain.TradingSystem.purchase_details import PurchaseDetails
 from .Responsibilities.responsibility import Permission, Responsibility
 
@@ -30,18 +32,11 @@ class UserManager:
     def __create_cookie() -> str:
         return str(uuid.uuid4())
 
-    # Called after register was successful and state was updated with the username
-    def __user_registered(username: str) -> None:
-        for cookie in UserManager.cookie_user:
-            user = UserManager.cookie_user[cookie]
-            if user.get_username() == username:
-                UserManager.username_user[username] = user
-
     # 2.1
     # returns the guest newly created cookie
     def enter_system() -> str:
         cookie = UserManager.__create_cookie()
-        UserManager.cookie_user[cookie] = IUser()
+        UserManager.cookie_user[cookie] = IUser.create_user()
         return cookie
 
     # 2.3
@@ -51,7 +46,7 @@ class UserManager:
             return Response(False, msg="No user is identified by the given cookie")
         response = user.register(username, password)
         if response.succeeded:
-            UserManager.__user_registered(username)
+            UserManager.username_user[username] = user
         return response
 
     # 2.4
@@ -65,7 +60,7 @@ class UserManager:
         if response.succeeded():
             for user_cookie in UserManager.cookie_user:
                 old_user = UserManager.cookie_user[user_cookie]
-                if old_user.get_username() == username:
+                if old_user.get_username() == username and old_user != user:
                     UserManager.cookie_user[cookie] = old_user
             # *This action will delete the current cart but will restore the old one and other user details
 
@@ -73,36 +68,45 @@ class UserManager:
 
     # 2.7
     def add_to_cart(cookie: str, store_id: str, product_id: str, quantity: int) -> Response[None]:
-        func = lambda user: user.add_to_cart(store_id, product_id, quantity)
+        func: Callable[[User], Response] = lambda user: user.add_to_cart(
+            store_id, product_id, quantity
+        )
         return UserManager.__deligate_to_user(cookie, func)
 
     # 2.8
-    def get_cart_details(cookie: str) -> Response[ShopppingCart]:
-        func = lambda user: user.get_cart_details()
+    def get_cart_details(cookie: str) -> Response[ShoppingCart]:
+        func: Callable[[User], Response] = lambda user: user.get_cart_details()
         return UserManager.__deligate_to_user(cookie, func)
 
     # 2.8
     def remove_product_from_cart(cookie: str, store_id: str, product_id: str) -> Response[None]:
-        func = lambda user: user.remove_product_from_cart(store_id, product_id)
+        func: Callable[[User], Response] = lambda user: user.remove_product_from_cart(
+            store_id, product_id
+        )
         return UserManager.__deligate_to_user(cookie, func)
 
     # 2.8
-    def change_product_quantity(cookie: str, store_id, product_id, new_amount) -> Response[None]:
-        func = lambda user: user.change_product_quantity(store_id, product_id, new_amount)
+    def change_product_quantity_in_cart(
+        cookie: str, store_id, product_id, new_amount
+    ) -> Response[None]:
+        func: Callable[[User], Response] = lambda user: user.change_product_quantity_in_cart(
+            store_id, product_id, new_amount
+        )
         return UserManager.__deligate_to_user(cookie, func)
 
     # 2.9
     def purchase_cart(cookie: str) -> Response[PrimitiveParsable[float]]:
-        func = lambda user: user.purchase_cart()
+        func: Callable[[User], Response] = lambda user: user.purchase_cart()
         return UserManager.__deligate_to_user(cookie, func)
 
     # 2.9
     def purchase_completed(cookie: str) -> Response[None]:
-        func = lambda user: user.purchase_completed()
+        func: Callable[[User], Response] = lambda user: user.purchase_completed()
         return UserManager.__deligate_to_user(cookie, func)
 
+    # 2.9
     def get_cart_price(cookie: str) -> Response[PrimitiveParsable[float]]:
-        func = lambda user: user.get_cart_price()
+        func: Callable[[User], Response] = lambda user: user.get_cart_price()
         return UserManager.__deligate_to_user(cookie, func)
 
     # Member
@@ -110,12 +114,12 @@ class UserManager:
 
     # 3.2
     def create_store(cookie: str, name: str) -> Response[None]:
-        func = lambda user: user.create_store(name)
+        func: Callable[[User], Response] = lambda user: user.create_store(name)
         return UserManager.__deligate_to_user(cookie, func)
 
     # 3.7
-    def ger_purchase_history(cookie: str) -> Response[ParsableList[PurchaseDetails]]:
-        func = lambda user: user.ger_purchase_history(cookie)
+    def get_purchase_history(cookie: str) -> Response[ParsableList[PurchaseDetails]]:
+        func: Callable[[User], Response] = lambda user: user.get_purchase_history()
         return UserManager.__deligate_to_user(cookie, func)
 
     # Owner and manager
@@ -126,26 +130,34 @@ class UserManager:
     def create_product(
         cookie: str, store_id: str, name: str, price: float, quantity: int
     ) -> Response[None]:
-        func = lambda user: user.create_product(store_id, name, price, quantity)
+        func: Callable[[User], Response] = lambda user: user.create_product(
+            store_id, name, price, quantity
+        )
         return UserManager.__deligate_to_user(cookie, func)
 
     # 4.1
-    def remove_products(cookie: str, store_id: str, product_id: str) -> Response[None]:
-        func = lambda user: user.remove_products(store_id, product_id)
+    def remove_product_from_store(cookie: str, store_id: str, product_id: str) -> Response[None]:
+        func: Callable[[User], Response] = lambda user: user.remove_product_from_store(
+            store_id, product_id
+        )
         return UserManager.__deligate_to_user(cookie, func)
 
     # 4.1
-    def change_product_quantity(
+    def change_product_quantity_in_store(
         cookie: str, store_id: str, product_id: str, quantity: int
     ) -> Response[None]:
-        func = lambda user: user.change_product_quantity(store_id, product_id, quantity)
+        func: Callable[[User], Response] = lambda user: user.change_product_quantity_in_store(
+            store_id, product_id, quantity
+        )
         return UserManager.__deligate_to_user(cookie, func)
 
     # 4.1
     def edit_product_details(
         cookie: str, store_id: str, product_id: str, new_name: str, new_price: float
     ) -> Response[None]:
-        func = lambda user: user.edit_product_details(store_id, product_id, new_name, new_price)
+        func: Callable[[User], Response] = lambda user: user.edit_product_details(
+            store_id, product_id, new_name, new_price
+        )
         return UserManager.__deligate_to_user(cookie, func)
 
     # 4.3
@@ -153,7 +165,7 @@ class UserManager:
         user = UserManager.__get_user_by_username(username)
         if not user:
             return Response(False, "Given username odes not exists")
-        func = lambda user: user.appoint_owner(store_id, user)
+        func: Callable[[User], Response] = lambda user: user.appoint_owner(store_id, user)
         return UserManager.__deligate_to_user(cookie, func)
 
     # 4.5
@@ -168,7 +180,9 @@ class UserManager:
     def add_manager_permission(
         cookie: str, store_id: str, username: str, permission: Permission
     ) -> Response[None]:
-        func = lambda user: user.add_manager_permission(store_id, username, permission)
+        func: Callable[[User], Response] = lambda user: user.add_manager_permission(
+            store_id, username, permission
+        )
         return UserManager.__deligate_to_user(cookie, func)
 
     # 4.6
@@ -180,33 +194,35 @@ class UserManager:
 
     # 4.4, 4.7
     def remove_appointment(cookie: str, store_id: str, username: str) -> Response[None]:
-        func = lambda user: user.remove_appointment(store_id, username)
+        func: Callable[[User], Response] = lambda user: user.remove_appointment(store_id, username)
         return UserManager.__deligate_to_user(cookie, func)
 
     # 4.9
     def get_store_appointments(cookie: str, store_id: str) -> Response[Responsibility]:
-        func = lambda user: user.get_store_appointments(store_id)
+        func: Callable[[User], Response] = lambda user: user.get_store_appointments(store_id)
         return UserManager.__deligate_to_user(cookie, func)
 
     # 4.11
-    def get_store_purchases_history(
+    def get_store_purchase_history(
         cookie: str, store_id: str
     ) -> Response[ParsableList[PurchaseDetails]]:
-        func = lambda user: user.get_store_purchases_history(store_id)
+        func = lambda user: user.get_store_purchase_history(store_id)
         return UserManager.__deligate_to_user(cookie, func)
 
     # System Manager
     # ====================
 
     # 6.4
-    def get_any_store_purchase_history(
+    def get_any_store_purchase_history_admin(
         cookie: str, store_id: str
     ) -> Response[ParsableList[PurchaseDetails]]:
-        func = lambda user: user.get_any_store_purchase_history(store_id)
+        func: Callable[[User], Response] = lambda user: user.get_any_store_purchase_history(
+            store_id
+        )
         return UserManager.__deligate_to_user(cookie, func)
 
     # 6.4
-    def get_any_user_purchase_history(
+    def get_any_user_purchase_history_admin(
         cookie: str, username: str
     ) -> Response[ParsableList[PurchaseDetails]]:
         func = lambda user: user.get_any_user_purchase_history(username)
@@ -214,3 +230,7 @@ class UserManager:
 
     # Inter component functions
     # ====================
+
+    # 6.4
+    def get_any_user_purchase_history(username: str) -> Response[ParsableList[PurchaseDetails]]:
+        return UserManager.__get_user_by_username(username).get_purchase_history()

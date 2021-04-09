@@ -1,11 +1,9 @@
 from abc import ABC, abstractmethod
 
-import Backend.Domain.TradingSystem.IUser
 from Backend.response import Response, PrimitiveParsable, Parsable, ParsableList
 
 
 class IShoppingCart(Parsable):
-
     @abstractmethod
     def add_product(self, store_id: str, product_id: str, quantity: int) -> Response[None]:
         """Add a product from a specified store with specified quantity"""
@@ -17,7 +15,9 @@ class IShoppingCart(Parsable):
         raise NotImplementedError
 
     @abstractmethod
-    def change_product_quantity(self, store_id: str, product_id: str, new_amount: int) -> Response[None]:
+    def change_product_quantity(
+        self, store_id: str, product_id: str, new_amount: int
+    ) -> Response[None]:
         """ Change product's quantity (add or remove) - new amount overrides the current amount"""
         raise NotImplementedError
 
@@ -30,4 +30,3 @@ class IShoppingCart(Parsable):
     def delete_products_after_purchase(self, user_name: str) -> Response[ParsableList]:
         """delete products which successfully been purchased"""
         raise NotImplementedError
-

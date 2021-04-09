@@ -8,6 +8,17 @@ from Backend.Domain.TradingSystem.States.user_state import UserState
 
 class IUser:
 
+    # Used for testing purposes
+    use_mock = False
+
+    def create_user():
+        from Backend.UnitTests.stubs.user_stub import UserStub
+        from Backend.Domain.TradingSystem.user import User
+
+        if IUser.use_mock:
+            return UserStub()
+        return User()
+
     # 2.3
     def register(self, username: str, password: str) -> Response[None]:
         raise NotImplementedError
@@ -40,6 +51,10 @@ class IUser:
     def purchase_completed(self) -> Response[None]:
         raise NotImplementedError
 
+    # 2.9
+    def get_cart_price(self) -> Response[PrimitiveParsable[float]]:
+        raise NotImplementedError
+
     # Member
     # ===============================
 
@@ -48,7 +63,7 @@ class IUser:
         raise NotImplementedError
 
     # 3.7
-    def ger_purchase_history(self) -> Response[ParsableList[PurchaseDetails]]:
+    def get_purchase_history(self) -> Response[ParsableList[PurchaseDetails]]:
         raise NotImplementedError
 
     # Owner and manager
