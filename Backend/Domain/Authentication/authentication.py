@@ -1,5 +1,6 @@
 from Backend.Domain import DBHandler
 from Backend import response
+from Backend.UnitTests.authentication.DBHandlerMock import DBHandlerMock
 
 
 class IAuthentication:
@@ -10,7 +11,12 @@ class IAuthentication:
             and callable(subclass.register)
             and hasattr(subclass, "login")
             and callable(subclass.login)
+            and hasattr(subclass, "create_DBHandler")
+            and callable(subclass.create_DBHandler)
         )
+
+    def create_DBHandler(self, is_mock):
+        return DBHandlerMock() if is_mock else DBHandler()
 
 
 class Authentication(IAuthentication):
@@ -20,16 +26,16 @@ class Authentication(IAuthentication):
     def get_instance():
         """ Static access method. """
         if Authentication.__instance is None:
-            Authentication()
+            Authentication(False)
         return Authentication.__instance
 
-    def __init__(self):
+    def __init__(self, is_mock):
         """ Virtually private constructor. """
         if Authentication.__instance is not None:
             raise Exception("This class is a singleton!")
         else:
             Authentication.__instance = self
-            self.db_handler = DBHandler.DBHandler()
+            self.db_handler = IAuthentication.create_DBHandler(self, is_mock)
 
     def register(self, username, password):
         if self.db_handler.is_username_exists(username=username):
