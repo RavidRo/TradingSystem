@@ -37,7 +37,7 @@ class StoresManager:
 
     def get_store(store_id: str):
         for store in StoresManager.stores:
-            if store.get_id():
+            if store.get_id() == store_id:
                 return Response(True, store)
         return Response(False, msg=f"No store with the ID {store_id} exists")
 
