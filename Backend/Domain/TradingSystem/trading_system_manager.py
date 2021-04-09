@@ -66,8 +66,8 @@ class TradingSystemManager:
 
     # 2.8
     @staticmethod
-    def remove_product_from_cart(cookie: str, product_id: str) -> Response[None]:
-        return UserManager.remove_product_from_cart(cookie, product_id)
+    def remove_product_from_cart(cookie: str, store_id: str, product_id: str) -> Response[None]:
+        return UserManager.remove_product_from_cart(cookie, store_id, product_id)
 
     # 2.8
     @staticmethod
