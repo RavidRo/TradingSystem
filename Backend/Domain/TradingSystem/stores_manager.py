@@ -21,7 +21,7 @@ class StoresManager:
 
     # 2.6
     def get_products(self) -> Response[list[Product]]:
-        products_per_store = map(lambda store: store.get_p(), StoresManager.stores)
+        products_per_store = map(lambda store: store.get_products(), StoresManager.stores)
         products = []
         # iterating over the data
         for product_list in products_per_store:
