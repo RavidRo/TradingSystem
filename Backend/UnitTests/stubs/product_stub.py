@@ -4,8 +4,9 @@ from Backend.response import Response
 
 class ProductStub(Product):
 
-    def __init__(self) -> None:
+    def __init__(self, name: str) -> None:
         self.product_edited = False
+        self.name = name
 
     def edit_product_details(self, product_name: str, price: float):
         self.product_edited = True
@@ -15,7 +16,7 @@ class ProductStub(Product):
         return "product"
 
     def get_id(self):
-        return 0
+        return '0'
 
     def get_price(self):
-        return 0
+        return 1.0

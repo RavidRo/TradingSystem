@@ -2,16 +2,14 @@ from threading import Timer
 import Backend.Domain.TradingSystem
 import Backend.Domain.TradingSystem
 import Backend.Domain.TradingSystem.IUser
-import Backend.Domain.TradingSystem.shopping_bag
-from Backend.response import Response, PrimitiveParsable, ParsableList
+# from Backend.Domain.TradingSystem.stores_manager import StoresManager
 from Backend.Domain.TradingSystem.Interfaces.IShoppingCart import *
+from Backend.Domain.TradingSystem.shopping_bag import ShoppingBag
 
 
 class ShoppingCart(IShoppingCart):
 
     def __init__(self):
-        from Backend.Domain.TradingSystem import stores_manager
-        self.stores_manager = stores_manager.get_instance()
         self.shopping_bags = dict()
         self.timer = None
         self.INTERVAL_TIME = 10 * 60
@@ -33,17 +31,25 @@ class ShoppingCart(IShoppingCart):
         if quantity <= 0:
             return Response(False, msg="Product's quantity must be positive!")
 
-        for bag in self.shopping_bags:
-            if bag.get_store_ID() == store_id:
-                return bag.add_product(product_id, quantity)
+        if self.shopping_bags.get(store_id) is not None:
+                return self.shopping_bags.get(store_id).add_product(product_id, quantity)
 
         # no bag for store with store_id
-        store = self.stores_manager.get_store(store_id)
+        store = self.get_store_by_id(store_id)
         if store is None:
             return Response(False, msg=f"There is no such store with store_id: {store_id}")
-        new_bag = Backend.ShoppingBag(store)
-        self.shopping_bags.update({store_id: new_bag})
+
+        new_bag = self.create_new_bag(store)
         return new_bag.add_product(product_id, quantity)
+
+    def get_store_by_id(self, store_id: str):
+        from Backend.Domain.TradingSystem.stores_manager import StoresManager
+        return StoresManager.get_store(store_id)
+
+    def create_new_bag(self, store):
+        new_bag = ShoppingBag(store)
+        self.shopping_bags.update({store.get_id(): new_bag})
+        return new_bag
 
     """checks need to be made:
        ----------------------

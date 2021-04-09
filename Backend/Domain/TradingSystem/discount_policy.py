@@ -1,4 +1,4 @@
-import Backend.Domain.TradingSystem.discount_type
+
 import Backend.Domain.TradingSystem.store
 from Backend.response import Response, PrimitiveParsable
 
@@ -9,9 +9,11 @@ class DiscountPolicy:
 
 
 class DefaultDiscountPolicy(DiscountPolicy):
+
     def __init__(self):
+        from Backend.Domain.TradingSystem.discount_type import DefaultDiscountType
         super().__init__()
-        self.discount_type = Backend.DefaultDiscountType()
+        self.discount_type = DefaultDiscountType()
 
     # def checkPolicy(self) -> Backend.DiscountType:
     #     return self.discount_type

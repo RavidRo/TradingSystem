@@ -1,7 +1,6 @@
 
 import uuid
 
-from Backend.Domain.TradingSystem.Interfaces.IStore import IStore
 from Backend.response import Response, ParsableList
 from dataclasses import dataclass
 
@@ -68,7 +67,7 @@ class Store:
 
         product = Product(product_name=product_name, price=price)
         product_id = product.get_id()
-        self.products_to_quantities.update({product_id, (product, quantity)})
+        self.products_to_quantities.update({product_id : (product, quantity)})
         return Response(True, msg="product" + str(product_name) + "successfully added")
 
     """checks need to be made:
@@ -84,16 +83,16 @@ class Store:
     """checks need to be made:
        ----------------------
        1. price > 0
-       2. a product with product_name exists"""
+       2. a product with product_id exists"""
 
     def edit_product_details(self, product_id: str, product_name: str, price: float) -> Response[None]:
         if price <= 0:
             return Response(False, msg="Product's price must pe positive!")
 
-        if not self.check_existing_product(product_name):
+        if self.products_to_quantities.get(product_id) is None:
             return Response(False, msg="No such product in the store")
 
-        self.products_to_quantities.get(product_id)[0].edit_product_details(product_id, product_name, price)
+        self.products_to_quantities.get(product_id)[0].edit_product_details(product_name, price)
         return Response(True, msg="Successfully edited product with product id: " + str(product_id))
 
     """checks need to be made:
@@ -105,7 +104,7 @@ class Store:
         if quantity < 0:
             return Response(False, msg="quantity must be positive!")
         if product_id in self.products_to_quantities:
-            self.products_to_quantities[product_id][1] = quantity
+            self.products_to_quantities.update({product_id: (self.products_to_quantities[product_id][0], quantity)})
             return Response(True, msg="Successfully updated product " +
                                       str(self.products_to_quantities[product_id][0].get_name()) + "'s quantity")
         return Response(False, msg=f"The product with id: {product_id} isn't in the inventory!")
