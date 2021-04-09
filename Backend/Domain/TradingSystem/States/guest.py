@@ -66,8 +66,8 @@ class Guest(UserState):
     def get_store_purchase_history(self, store_id):
         return Response(False, msg="Guests cannot get store's purchase history")
 
-    def get_any_store_purchase_history(self, store_id):
+    def get_any_store_purchase_history_admin(self, store_id):
         return Response(False, msg="Guests cannot get any store's purchase history")
 
-    def get_user_purchase_history(self, username):
+    def get_user_purchase_history_admin(self, username):
         return Response(False, msg="Guests cannot get any user's purchase history")

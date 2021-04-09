@@ -124,16 +124,16 @@ class User(IUser):
     # ====================
 
     # 6.4
-    def get_any_user_purchase_history(
+    def get_any_user_purchase_history_admin(
         self, username: str
     ) -> Response[ParsableList[PurchaseDetails]]:
-        return self.state.get_user_purchase_history(username)
+        return self.state.get_user_purchase_history_admin(username)
 
     # 6.4
-    def get_any_store_purchase_history(
+    def get_any_store_purchase_history_admin(
         self, store_id: str
     ) -> Response[ParsableList[PurchaseDetails]]:
-        return self.state.get_any_store_purchase_history(store_id)
+        return self.state.get_any_store_purchase_history_admin(store_id)
 
     # Inter component functions
     # ====================

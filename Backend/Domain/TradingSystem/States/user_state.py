@@ -94,9 +94,9 @@ class UserState(ABC):
         return Response(False, msg="Abstract Method")
 
     @abstractmethod
-    def get_any_store_purchase_history(self, store_id):
+    def get_any_store_purchase_history_admin(self, store_id):
         return Response(False, msg="Abstract Method")
 
     @abstractmethod
-    def get_user_purchase_history(self, username):
+    def get_user_purchase_history_admin(self, username):
         return Response(False, msg="Abstract Method")

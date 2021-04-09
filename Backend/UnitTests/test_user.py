@@ -166,14 +166,14 @@ def test_get_store_purchase_history_deligates_to_state(user: User):
 # * get_any_user_purchase_history tests - 6.4
 # * ===========================================================
 def test_get_any_user_purchase_history_deligates_to_state(user: User):
-    result = user.get_any_user_purchase_history("")
+    result = user.get_any_user_purchase_history_admin("")
     assert user.state._get_user_purchase_history and result
 
 
 # * get_any_store_purchase_history tests - 6.4
 # * ===========================================================
 def test_get_any_store_purchase_history_deligates_to_state(user: User):
-    result = user.get_any_store_purchase_history("")
+    result = user.get_any_store_purchase_history_admin("")
     assert user.state._get_any_store_purchase_history and result
 
 

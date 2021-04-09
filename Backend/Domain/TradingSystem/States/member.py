@@ -125,8 +125,8 @@ class Member(UserState):
             return Response(False, msg=f"this member do not own/manage store {store_id}")
         return self.responsibilities[store_id].get_store_purchases_history()
 
-    def get_any_store_purchase_history(self, store_id):
+    def get_any_store_purchase_history_admin(self, store_id):
         return Response(False, msg="Members cannot get any store's purchase history")
 
-    def get_user_purchase_history(self, username):
+    def get_user_purchase_history_admin(self, username):
         return Response(False, msg="Members cannot get any user's purchase history")
