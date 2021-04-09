@@ -120,7 +120,7 @@ class TradingSystem(object):
 
     @logging
     def edit_product_details(
-        cookie: str, store_id: str, product_id: str, new_name: str, new_price: float
+        cookie: str, store_id: str, product_id: str, new_name: str = None, new_price: float = None
     ):
         return TradingSystemManager.edit_product_details(
             cookie, store_id, product_id, new_name, new_price
@@ -163,8 +163,8 @@ class TradingSystem(object):
 
     @logging
     def get_any_store_purchase_history(self, cookie: str, store_id: str):
-        return TradingSystemManager.get_any_store_purchase_history(cookie, store_id)
+        return TradingSystemManager.get_any_store_purchase_history_admin(cookie, store_id)
 
     @logging
     def get_user_purchase_history(self, cookie: str, username: str):
-        return TradingSystemManager.get_user_purchase_history(cookie, username)
+        return TradingSystemManager.get_any_user_purchase_history_admin(cookie, username)

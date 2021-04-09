@@ -95,8 +95,8 @@ def test_create_product_deligates_to_state(user: User):
 
 # * remove_product tests - 4.1
 # * ===========================================================
-def test_remove_product_deligates_to_state(user: User):
-    result = user.remove_product("", "")
+def test_remove_product_from_store_deligates_to_state(user: User):
+    result = user.remove_product_from_store("", "")
     assert user.state._remove_product and result
 
 

@@ -135,7 +135,7 @@ class Store:
             return Response(False, msg="The store doesn't have assigned personnel")
         return Response[Responsibility](True, self.responsibility, msg="Personnel info")
 
-    def get_purchases_history(self) -> Response[ParsableList[PurchaseDetails]]:
+    def get_purchase_history(self) -> Response[ParsableList[PurchaseDetails]]:
         return Response[ParsableList](
             True, ParsableList(self.purchase_history), msg="Purchase history"
         )

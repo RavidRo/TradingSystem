@@ -172,7 +172,7 @@ class UserManager:
         user = UserManager.__get_user_by_username(username)
         if not user:
             return Response(False, "Given username odes not exists")
-        func = lambda user: user.appoint_owner(store_id, user)
+        func: Callable[[User], Response] = lambda user: user.appoint_owner(store_id, user)
         return UserManager.__deligate_to_user(cookie, func)
 
     # 4.5
@@ -187,7 +187,9 @@ class UserManager:
     def add_manager_permission(
         cookie: str, store_id: str, username: str, permission: Permission
     ) -> Response[None]:
-        func = lambda user: user.add_manager_permission(store_id, username, permission)
+        func: Callable[[User], Response] = lambda user: user.add_manager_permission(
+            store_id, username, permission
+        )
         return UserManager.__deligate_to_user(cookie, func)
 
     # 4.6
@@ -199,12 +201,12 @@ class UserManager:
 
     # 4.4, 4.7
     def remove_appointment(cookie: str, store_id: str, username: str) -> Response[None]:
-        func = lambda user: user.remove_appointment(store_id, username)
+        func: Callable[[User], Response] = lambda user: user.remove_appointment(store_id, username)
         return UserManager.__deligate_to_user(cookie, func)
 
     # 4.9
     def get_store_appointments(cookie: str, store_id: str) -> Response[Responsibility]:
-        func = lambda user: user.get_store_appointments(store_id)
+        func: Callable[[User], Response] = lambda user: user.get_store_appointments(store_id)
         return UserManager.__deligate_to_user(cookie, func)
 
     # 4.11
@@ -221,7 +223,9 @@ class UserManager:
     def get_any_store_purchase_history_admin(
         cookie: str, store_id: str
     ) -> Response[ParsableList[PurchaseDetails]]:
-        func = lambda user: user.get_any_store_purchase_history(store_id)
+        func: Callable[[User], Response] = lambda user: user.get_any_store_purchase_history(
+            store_id
+        )
         return UserManager.__deligate_to_user(cookie, func)
 
     # 6.4
