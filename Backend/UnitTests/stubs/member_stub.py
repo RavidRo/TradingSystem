@@ -1,4 +1,4 @@
-from Backend.Domain.TradingSystem.member import Member
+from Backend.Domain.TradingSystem.States.member import Member
 
 
 def update_field(function):

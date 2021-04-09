@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-from Backend.Domain.TradingSystem.IUserState import IUserState
-from Backend.Domain.TradingSystem.IUser import IUser
+from Backend.Domain.TradingSystem.Interfaces.IUserState import IUserState
+from Backend.Domain.TradingSystem.Interfaces.IUser import IUser
 from Backend.response import Response, ParsableList, PrimitiveParsable
 from Backend.Domain.TradingSystem.shopping_cart import ShoppingCart
 from Backend.Domain.TradingSystem.purchase_details import PurchaseDetails
@@ -34,7 +34,7 @@ class User(IUser):
         return self.state.delete_from_cart(store_id, product_id)
 
     # 2.8
-    def change_product_quantity_int_cart(
+    def change_product_quantity_in_cart(
         self, store_id: str, product_id: str, new_amount: int
     ) -> Response[None]:
         return self.state.change_product_quantity_in_cart(store_id, product_id, new_amount)
@@ -73,7 +73,7 @@ class User(IUser):
         return self.state.add_new_product(store_id, name, price, quantity)
 
     # 4.1
-    def remove_product(self, store_id: str, product_id: str) -> Response[None]:
+    def remove_product_from_store(self, store_id: str, product_id: str) -> Response[None]:
         return self.state.remove_product(store_id, product_id)
 
     # 4.1

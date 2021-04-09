@@ -1,26 +1,26 @@
+from Backend.Domain.TradingSystem.product import Product
+from Backend.Domain.TradingSystem.store import Store
 from Backend.response import Response
 from Backend.response import ParsableList
-from Backend.Domain.TradingSystem.Interfaces.IStore import IStore as store
-from Backend.Domain.TradingSystem.Interfaces.IProduct import IProduct as product
 from Backend.Domain.TradingSystem.purchase_details import PurchaseDetails
 
 
 class StoresManager:
-    stores: list[store] = []
+    stores: list[Store] = []
 
     # 2.5
-    def get_stores_details(self) -> Response[ParsableList[store]]:
+    def get_stores_details(self) -> Response[ParsableList[Store]]:
         return Response(True, ParsableList(StoresManager.stores))
 
     # 2.5
-    def get_products_by_store(store_id: str) -> Response[ParsableList[product]]:
+    def get_products_by_store(store_id: str) -> Response[ParsableList[Product]]:
         for store in StoresManager.stores:
             if store.get_id():
                 return store.get_products()
         return Response(False, msg=f"No store with the ID {store_id} exists")
 
     # 2.6
-    def get_products(self) -> Response[list[product]]:
+    def get_products(self) -> Response[list[Product]]:
         products_per_store = map(lambda store: store.get_p(), StoresManager.stores)
         products = []
         # iterating over the data
@@ -32,10 +32,10 @@ class StoresManager:
 
     # Inter component functions
     # used in 3.2
-    def create_store(store: store) -> None:
+    def create_store(store: Store) -> None:
         StoresManager.stores.append(store)
 
-    def get_store(store_id):
+    def get_store(store_id: str):
         for store in StoresManager.stores:
             if store.get_id():
                 return Response(True, store)

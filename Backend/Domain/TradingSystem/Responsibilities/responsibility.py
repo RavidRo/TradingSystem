@@ -2,7 +2,7 @@ from __future__ import annotations
 import enum
 
 from Backend.Service.DataObjects.responsibilities_data import ResponsibilitiesData
-from Backend.Domain.TradingSystem.IUser import IUser
+from Backend.Domain.TradingSystem.Interfaces.IUser import IUser
 from Backend.Domain.TradingSystem.purchase_details import PurchaseDetails
 from Backend.response import Parsable, Response, ParsableList
 

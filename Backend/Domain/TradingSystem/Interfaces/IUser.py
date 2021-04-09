@@ -1,9 +1,9 @@
 from __future__ import annotations
 
 from Backend.response import Response, ParsableList, PrimitiveParsable
-import Backend.Domain.TradingSystem.shopping_cart
-import Backend.Domain.TradingSystem.purchase_details
-import Backend.Domain.TradingSystem.user_state
+from Backend.Domain.TradingSystem.shopping_cart import ShoppingCart
+from Backend.Domain.TradingSystem.purchase_details import PurchaseDetails
+from Backend.Domain.TradingSystem.States.user_state import UserState
 
 
 class IUser:

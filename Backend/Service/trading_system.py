@@ -3,7 +3,7 @@
 
 from Backend.Service.logs import logging
 from Backend.Domain.TradingSystem.trading_system_manager import TradingSystemManager
-from Backend.Domain.Payment.payment_manager import PaymentSystem
+import Backend.Domain.Payment.payment_manager as PaymentSystem
 
 
 class TradingSystem(object):
@@ -84,13 +84,9 @@ class TradingSystem(object):
         price = TradingSystemManager.get_cart_price(cookie)
         res = PaymentSystem.pay(price, payment_details)
         if res.succeeded():
-            return self.purchase_completed(cookie)
+            return TradingSystemManager.purchase_completed(cookie)
         else:
             return res.get_msg()
-
-    @logging
-    def purchase_completed(self, cookie: str):
-        return TradingSystemManager.purchase_completed(cookie)
 
     # Member
     # ===============================
@@ -111,12 +107,16 @@ class TradingSystem(object):
         return TradingSystemManager.create_product(cookie, store_id, name, price, quantity)
 
     @logging
-    def remove_products(self, cookie: str, store_id: str, product_id: str):
-        return TradingSystemManager.remove_products(cookie, store_id, product_id)
+    def remove_product_from_store(self, cookie: str, store_id: str, product_id: str):
+        return TradingSystemManager.remove_product_from_store(cookie, store_id, product_id)
 
     @logging
-    def change_product_quantity(cookie: str, store_id: str, product_id: str, quantity: int):
-        return TradingSystemManager.change_product_quantity(cookie, store_id, product_id, quantity)
+    def change_product_quantity_in_store(
+        cookie: str, store_id: str, product_id: str, quantity: int
+    ):
+        return TradingSystemManager.change_product_quantity_in_store(
+            cookie, store_id, product_id, quantity
+        )
 
     @logging
     def edit_product_details(

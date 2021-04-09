@@ -8,7 +8,6 @@ from Backend.Service.DataObjects.shopping_cart_data import ShoppingCartData
 from Backend.Domain.TradingSystem.purchase_details import PurchaseDetails
 from Backend.Service.DataObjects.responsibilities_data import ResponsibilitiesData
 
-# from Backend.Domain.TradingSystem.ITradingSystemManager import ITradingSystem
 from Backend.response import Response, ParsableList, PrimitiveParsable
 
 
@@ -96,7 +95,7 @@ class TradingSystemManager:
     def create_store(cookie: str, name: str) -> Response[None]:
         Response = UserManager.create_store(cookie, name)
         if Response.success:
-            return StoresManager.create_store(Response.data)
+            return StoresManager.create_store(Response.get_obj())
         return Response
 
     # 3.7

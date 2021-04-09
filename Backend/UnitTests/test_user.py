@@ -1,9 +1,9 @@
 from Backend.Domain.TradingSystem.Responsibilities.responsibility import Permission
 from Backend.UnitTests.stubs.member_stub import MemberStub
-import pytest
-
-from Backend.Domain.TradingSystem.IUserState import IUserState
+from Backend.Domain.TradingSystem.Interfaces.IUserState import IUserState
 from Backend.Domain.TradingSystem.user import User
+
+import pytest
 
 
 @pytest.fixture(scope="function", autouse=True)
@@ -54,7 +54,7 @@ def test_remove_product_from_cart_deligates_to_state(user: User):
 # * change_product_quantity in cart tests - 2.8
 # * ===========================================================
 def test_change_product_quantity_deligates_in_cart_to_state(user: User):
-    result = user.change_product_quantity_int_cart("", "", 0)
+    result = user.change_product_quantity_in_cart("", "", 0)
     assert user.state._change_product_quantity_in_cart and result
 
 

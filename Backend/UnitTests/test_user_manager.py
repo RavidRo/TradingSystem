@@ -1,10 +1,8 @@
 import pytest
 
-
 from Backend.Domain.TradingSystem.Responsibilities.responsibility import Permission
-from Backend.Domain.TradingSystem.user import User
 from Backend.Domain.TradingSystem.user_manager import UserManager
-from Backend.Domain.TradingSystem.IUser import IUser
+from Backend.Domain.TradingSystem.Interfaces.IUser import IUser
 
 
 @pytest.fixture(scope="function", autouse=True)
@@ -200,13 +198,13 @@ def test_create_product_fails_when_given_invalid_cookie():
 
 # * remove products tests - 4.1
 # * ==============================================================
-def test_remove_product_deligates_to_user_successfully(cookie):
-    UserManager.remove_product(cookie, "", "")
-    assert UserManager.cookie_user[cookie]._remove_product
+def test_remove_product_from_store_deligates_to_user_successfully(cookie):
+    UserManager.remove_product_from_store(cookie, "", "")
+    assert UserManager.cookie_user[cookie]._remove_product_from_store
 
 
-def test_remove_product_fails_when_given_invalid_cookie():
-    assert not UserManager.remove_product("boogie boogie", "", "").succeeded()
+def test_remove_product_from_store_fails_when_given_invalid_cookie():
+    assert not UserManager.remove_product_from_store("boogie boogie", "", "").succeeded()
 
 
 # * change product quantity tests - 4.1
@@ -327,20 +325,20 @@ def test_get_store_purchases_history_fails_when_given_invalid_cookie():
 # * get any store purchase history tests - 6.4
 # * ==============================================================
 def test_get_any_store_purchase_history_deligates_to_user_successfully(cookie):
-    UserManager.get_any_store_purchase_history(cookie, "")
+    UserManager.get_any_store_purchase_history_admin(cookie, "")
     assert UserManager.cookie_user[cookie]._get_any_store_purchase_history
 
 
 def test_get_any_store_purchase_history_fails_when_given_invalid_cookie():
-    assert not UserManager.get_any_store_purchase_history("boogie boogie", "").succeeded()
+    assert not UserManager.get_any_store_purchase_history_admin("boogie boogie", "").succeeded()
 
 
 # * get any user purchase history tests - 4.11
 # * ==============================================================
 def test_get_any_user_purchase_history_deligates_to_user_successfully(cookie):
-    UserManager.get_any_user_purchase_history(cookie, "")
+    UserManager.get_any_user_purchase_history_admin(cookie, "")
     assert UserManager.cookie_user[cookie]._get_any_user_purchase_history
 
 
 def test_get_any_user_purchase_history_fails_when_given_invalid_cookie():
-    assert not UserManager.get_any_user_purchase_history("boogie boogie", "").succeeded()
+    assert not UserManager.get_any_user_purchase_history_admin("boogie boogie", "").succeeded()

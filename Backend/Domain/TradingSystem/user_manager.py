@@ -1,6 +1,8 @@
+from typing import Callable
 import uuid
 
-from .IUser import IUser
+from Backend.Domain.TradingSystem.Interfaces.IUser import IUser
+from .user import User
 from Backend.response import Response, ParsableList, PrimitiveParsable
 from Backend.Domain.TradingSystem.shopping_cart import ShoppingCart
 from Backend.Domain.TradingSystem.purchase_details import PurchaseDetails
@@ -73,39 +75,45 @@ class UserManager:
 
     # 2.7
     def add_to_cart(cookie: str, store_id: str, product_id: str, quantity: int) -> Response[None]:
-        func = lambda user: user.add_to_cart(store_id, product_id, quantity)
+        func: Callable[[User], Response] = lambda user: user.add_to_cart(
+            store_id, product_id, quantity
+        )
         return UserManager.__deligate_to_user(cookie, func)
 
     # 2.8
     def get_cart_details(cookie: str) -> Response[ShoppingCart]:
-        func = lambda user: user.get_cart_details()
+        func: Callable[[User], Response] = lambda user: user.get_cart_details()
         return UserManager.__deligate_to_user(cookie, func)
 
     # 2.8
     def remove_product_from_cart(cookie: str, store_id: str, product_id: str) -> Response[None]:
-        func = lambda user: user.remove_product_from_cart(store_id, product_id)
+        func: Callable[[User], Response] = lambda user: user.remove_product_from_cart(
+            store_id, product_id
+        )
         return UserManager.__deligate_to_user(cookie, func)
 
     # 2.8
     def change_product_quantity_in_cart(
         cookie: str, store_id, product_id, new_amount
     ) -> Response[None]:
-        func = lambda user: user.change_product_quantity_in_cart(store_id, product_id, new_amount)
+        func: Callable[[User], Response] = lambda user: user.change_product_quantity_in_cart(
+            store_id, product_id, new_amount
+        )
         return UserManager.__deligate_to_user(cookie, func)
 
     # 2.9
     def purchase_cart(cookie: str) -> Response[PrimitiveParsable[float]]:
-        func = lambda user: user.purchase_cart()
+        func: Callable[[User], Response] = lambda user: user.purchase_cart()
         return UserManager.__deligate_to_user(cookie, func)
 
     # 2.9
     def purchase_completed(cookie: str) -> Response[None]:
-        func = lambda user: user.purchase_completed()
+        func: Callable[[User], Response] = lambda user: user.purchase_completed()
         return UserManager.__deligate_to_user(cookie, func)
 
     # 2.9
     def get_cart_price(cookie: str) -> Response[PrimitiveParsable[float]]:
-        func = lambda user: user.get_cart_price()
+        func: Callable[[User], Response] = lambda user: user.get_cart_price()
         return UserManager.__deligate_to_user(cookie, func)
 
     # Member
@@ -113,12 +121,12 @@ class UserManager:
 
     # 3.2
     def create_store(cookie: str, name: str) -> Response[None]:
-        func = lambda user: user.create_store(name)
+        func: Callable[[User], Response] = lambda user: user.create_store(name)
         return UserManager.__deligate_to_user(cookie, func)
 
     # 3.7
     def get_purchase_history(cookie: str) -> Response[ParsableList[PurchaseDetails]]:
-        func = lambda user: user.get_purchase_history()
+        func: Callable[[User], Response] = lambda user: user.get_purchase_history()
         return UserManager.__deligate_to_user(cookie, func)
 
     # Owner and manager
@@ -129,26 +137,34 @@ class UserManager:
     def create_product(
         cookie: str, store_id: str, name: str, price: float, quantity: int
     ) -> Response[None]:
-        func = lambda user: user.create_product(store_id, name, price, quantity)
+        func: Callable[[User], Response] = lambda user: user.create_product(
+            store_id, name, price, quantity
+        )
         return UserManager.__deligate_to_user(cookie, func)
 
     # 4.1
     def remove_product_from_store(cookie: str, store_id: str, product_id: str) -> Response[None]:
-        func = lambda user: user.remove_product_from_store(store_id, product_id)
+        func: Callable[[User], Response] = lambda user: user.remove_product_from_store(
+            store_id, product_id
+        )
         return UserManager.__deligate_to_user(cookie, func)
 
     # 4.1
     def change_product_quantity_in_store(
         cookie: str, store_id: str, product_id: str, quantity: int
     ) -> Response[None]:
-        func = lambda user: user.change_product_quantity_in_store(store_id, product_id, quantity)
+        func: Callable[[User], Response] = lambda user: user.change_product_quantity_in_store(
+            store_id, product_id, quantity
+        )
         return UserManager.__deligate_to_user(cookie, func)
 
     # 4.1
     def edit_product_details(
         cookie: str, store_id: str, product_id: str, new_name: str, new_price: float
     ) -> Response[None]:
-        func = lambda user: user.edit_product_details(store_id, product_id, new_name, new_price)
+        func: Callable[[User], Response] = lambda user: user.edit_product_details(
+            store_id, product_id, new_name, new_price
+        )
         return UserManager.__deligate_to_user(cookie, func)
 
     # 4.3

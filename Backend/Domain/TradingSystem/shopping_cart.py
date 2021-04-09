@@ -1,7 +1,4 @@
 from threading import Timer
-import Backend.Domain.TradingSystem
-import Backend.Domain.TradingSystem
-import Backend.Domain.TradingSystem.IUser
 from Backend.Domain.TradingSystem.shopping_bag import ShoppingBag
 from Backend.response import Response, PrimitiveParsable, ParsableList
 from Backend.Domain.TradingSystem.Interfaces.IShoppingCart import *
@@ -16,10 +13,11 @@ class ShoppingCart(IShoppingCart):
         self.timer = None
         self.INTERVAL_TIME = 10 * 60
         self.purchase_time_passed = False
+        self.price = None
 
     def parse(self):
         parsed_bags = []
-        for bag in self.shopping_bags:
+        for bag in self.shopping_bags.values():
             parsed_bags.append(bag.parse())
         return parsed_bags
 
@@ -42,7 +40,7 @@ class ShoppingCart(IShoppingCart):
         store = self.stores_manager.get_store(store_id)
         if store is None:
             return Response(False, msg=f"There is no such store with store_id: {store_id}")
-        new_bag = Backend.ShoppingBag(store)
+        new_bag = ShoppingBag(store)
         self.shopping_bags.update({store_id: new_bag})
         return new_bag.add_product(product_id, quantity)
 
@@ -80,7 +78,7 @@ class ShoppingCart(IShoppingCart):
     # products_purchase_info -a dict between store_id to list of tuples tuple (product_id to purchase_type)
     def buy_products(self, user, products_purchase_info={}) -> Response[PrimitiveParsable]:
         sum = 0
-        succeeded_bags = []
+        succeeded_bags: list[ShoppingBag] = []
         # this if will be deleted in the version with purchase types
         if not products_purchase_info:
             bags = self.shopping_bags
@@ -98,6 +96,7 @@ class ShoppingCart(IShoppingCart):
                 return result
             succeeded_bags.append(self.shopping_bags[store_id])
             sum += result.get_obj().get_val()
+            self.price = sum
 
         self.purchase_time_passed = False
         if self.timer is not None:
@@ -109,13 +108,19 @@ class ShoppingCart(IShoppingCart):
             msg=f"All purchase details are valid. The overall sum is: {sum}",
         )
 
+    def get_price(self):
+        if self.price:
+            return Response(True, self.price)
+        return Response(False, msg="Can't get price when not in purchase state")
+
     """notice: For now - the bag will be deleted since only regular purchase type enabled!"""
 
     def delete_products_after_purchase(self, user_name: str = "guest") -> Response[ParsableList]:
         self.timer.cancel()
         self.timer = None
+        self.price = None
         purchase_cart_details = []
-        for store_id in self.shopping_bags.keys():
+        for store_id in self.shopping_bags:
             purchase_cart_details.append(
                 self.shopping_bags[store_id].delete_products_after_purchase(user_name)
             )
@@ -128,8 +133,9 @@ class ShoppingCart(IShoppingCart):
     """notice: I use a flag that marks the time passed for the purchase"""
 
     def send_back(self):
+        self.price = None
         self.purchase_time_passed = True
-        for bag in self.shopping_bags:
+        for bag in self.shopping_bags.values():
             bag.send_back()
 
     def start_timer(self):

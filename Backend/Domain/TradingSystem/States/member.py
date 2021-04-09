@@ -22,7 +22,7 @@ class Member(UserState):
         if responsibilities is None:
             responsibilities = dict()
         self.username = username
-        self.responsibilities = responsibilities
+        self.responsibilities: dict[str, Responsibility] = responsibilities
         self.purchase_details = purchase_details
         # get cart data from DB
 
@@ -85,15 +85,10 @@ class Member(UserState):
             return Response(False, msg=f"this member do not own/manage store {store_id}")
         return self.responsibilities[store_id].change_product_quantity(product_id, new_quantity)
 
-    def set_product_name(self, store_id, product_id, new_name):
+    def edit_product_details(self, store_id, product_id, new_name, new_price):
         if store_id not in self.responsibilities:
             return Response(False, msg=f"this member do not own/manage store {store_id}")
-        return self.responsibilities[store_id].set_product_name(product_id, new_name)
-
-    def set_product_price(self, store_id, product_id, new_price):
-        if store_id not in self.responsibilities:
-            return Response(False, msg=f"this member do not own/manage store {store_id}")
-        return self.responsibilities[store_id].set_product_price(product_id, new_price)
+        return self.responsibilities[store_id].edit_product_details(product_id, new_name, new_price)
 
     def appoint_new_store_owner(self, store_id, new_owner):
         if store_id not in self.responsibilities:
@@ -133,5 +128,5 @@ class Member(UserState):
     def get_any_store_purchase_history(self, store_id):
         return Response(False, msg="Members cannot get any store's purchase history")
 
-    def get_user_purchase_history(self, user_id):
+    def get_user_purchase_history(self, username):
         return Response(False, msg="Members cannot get any user's purchase history")

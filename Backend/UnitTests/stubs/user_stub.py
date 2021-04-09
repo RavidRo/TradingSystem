@@ -2,7 +2,7 @@ from Backend.Domain.TradingSystem.purchase_details import PurchaseDetails
 from Backend.Domain.TradingSystem.shopping_cart import ShoppingCart
 from Backend.response import ParsableList, PrimitiveParsable, Response
 from .member_stub import MemberStub
-from ...Domain.TradingSystem.IUser import IUser
+from Backend.Domain.TradingSystem.Interfaces.IUser import IUser
 
 
 class UserStub(IUser):
@@ -22,7 +22,7 @@ class UserStub(IUser):
         self._create_store = False
         self._get_purchase_history = False
         self._create_store = False
-        self._remove_product = False
+        self._remove_product_from_store = False
         self._edit_product_details = False
         self._appoint_owner = False
         self._appoint_manager = False
@@ -98,8 +98,8 @@ class UserStub(IUser):
         self._create_store = True
         return Response(True)
 
-    def remove_product(self, store_id: str, product_id: str) -> Response[None]:
-        self._remove_product = True
+    def remove_product_from_store(self, store_id: str, product_id: str) -> Response[None]:
+        self._remove_product_from_store = True
         return Response(True)
 
     def create_product(
