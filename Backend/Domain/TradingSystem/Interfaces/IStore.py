@@ -1,3 +1,4 @@
+from Backend.Domain.TradingSystem.product import Product
 from abc import abstractmethod
 from Backend.response import Response, ParsableList, Parsable
 
@@ -25,6 +26,11 @@ class IStore(Parsable):
     @abstractmethod
     def remove_product(self, product_id: str) -> Response[None]:
         """Remove a product from the store"""
+        raise NotImplementedError
+
+    @abstractmethod
+    def get_products(self) -> Response[ParsableList[Product]]:
+        """Gets all the store products"""
         raise NotImplementedError
 
     @abstractmethod

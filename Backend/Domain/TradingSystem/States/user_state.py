@@ -1,12 +1,11 @@
 from abc import ABC, abstractmethod
-import Backend.Domain.TradingSystem.shopping_cart
+from Backend.Domain.TradingSystem.shopping_cart import ShoppingCart
 from Backend.response import Response
 
 
 class UserState(ABC):
-
     def __init__(self, user):
-        self.cart = Backend.ShoppingCart()
+        self.cart = ShoppingCart()
         self.user = user
 
     @abstractmethod
@@ -25,7 +24,7 @@ class UserState(ABC):
         return self.cart.add_product(store_id, product_id, quantity)
 
     def show_cart(self):
-        return Response[Backend.ShoppingCart](True, obj=self.cart, msg="got cart successfully")
+        return Response[ShoppingCart](True, obj=self.cart, msg="got cart successfully")
 
     def delete_from_cart(self, store_id, product_id):
         return self.cart.remove_product(store_id, product_id)
@@ -48,8 +47,7 @@ class UserState(ABC):
         return Response(False, msg="Abstract Method")
 
     @abstractmethod
-    def add_new_product(self, store_id, product_name, product_price,
-                        quantity):
+    def add_new_product(self, store_id, product_name, product_price, quantity):
         return Response(False, msg="Abstract Method")
 
     @abstractmethod
@@ -61,13 +59,11 @@ class UserState(ABC):
         return Response(False, msg="Abstract Method")
 
     @abstractmethod
-    def set_product_name(self, store_id, product_id,
-                         new_name):
+    def set_product_name(self, store_id, product_id, new_name):
         return Response(False, msg="Abstract Method")
 
     @abstractmethod
-    def set_product_price(self, store_id, product_id,
-                          new_price):
+    def set_product_price(self, store_id, product_id, new_price):
         return Response(False, msg="Abstract Method")
 
     @abstractmethod

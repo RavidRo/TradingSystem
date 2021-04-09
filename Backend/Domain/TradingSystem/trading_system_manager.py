@@ -44,7 +44,7 @@ class TradingSystemManager:
     # kwargs = You can search for a product by additional key words
     @staticmethod
     def search_products(
-        product_name="", *keywords: tuple[str], category=None, min_price=None, max_price=None
+        *keywords, product_name, category, min_price, max_price
     ) -> Response[ParsableList[ProductData]]:
         return SearchEngine.search_products(
             product_name, category, min_price, max_price, *keywords
@@ -53,7 +53,7 @@ class TradingSystemManager:
     # 2.7
     @staticmethod
     def save_product_in_cart(
-        cookie: str, store_id: str, product_id: str, quantity=1
+        cookie: str, store_id: str, product_id: str, quantity
     ) -> Response[None]:
         return UserManager.add_to_cart(cookie, store_id, product_id, quantity)
 
@@ -101,8 +101,8 @@ class TradingSystemManager:
 
     # 3.7
     @staticmethod
-    def ger_purchase_history(cookie: str) -> Response[ParsableList[PurchaseDetails]]:
-        return UserManager.ger_purchase_history(cookie)
+    def get_purchase_history(cookie: str) -> Response[ParsableList[PurchaseDetails]]:
+        return UserManager.get_purchase_history(cookie)
 
     # Owner and manager
     # =======================
@@ -117,22 +117,22 @@ class TradingSystemManager:
 
     # 4.1
     @staticmethod
-    def remove_products(cookie: str, store_id: str, product_id: str) -> Response[None]:
-        return UserManager.remove_products(cookie, store_id, product_id)
+    def remove_product_from_store(cookie: str, store_id: str, product_id: str) -> Response[None]:
+        return UserManager.remove_product_from_store(cookie, store_id, product_id)
 
     # 4.1
     @staticmethod
-    def change_product_quantity(
+    def change_product_quantity_in_store(
         cookie: str, store_id: str, product_id: str, quantity: int
     ) -> Response[None]:
-        return UserManager.change_product_quantity(cookie, store_id, product_id, quantity)
+        return UserManager.change_product_quantity_in_store(cookie, store_id, product_id, quantity)
 
     # 4.1
     @staticmethod
     def edit_product_details(
         cookie: str, store_id: str, product_id: str, new_name: str, new_price: float
     ) -> Response[None]:
-        return UserManager.set_product_price(cookie, store_id, product_id, new_name, new_price)
+        return UserManager.edit_product_details(cookie, store_id, product_id, new_name, new_price)
 
     # 4.3
     @staticmethod
@@ -174,27 +174,27 @@ class TradingSystemManager:
 
     # 4.11
     @staticmethod
-    def get_store_purchases_history(
+    def get_store_purchase_history(
         cookie: str, store_id: str
     ) -> Response[ParsableList[PurchaseDetails]]:
-        return UserManager.get_store_purchases_history(cookie, store_id)
+        return UserManager.get_store_purchase_history(cookie, store_id)
 
     # System Manager
     # ====================
 
     # 6.4
     @staticmethod
-    def get_any_user_purchase_history(
+    def get_any_user_purchase_history_admin(
         cookie: str, username: str
     ) -> Response[ParsableList[PurchaseDetails]]:
-        return UserManager.get_any_user_purchase_history(cookie, username)
+        return UserManager.get_any_user_purchase_history_admin(cookie, username)
 
     # 6.4
     @staticmethod
-    def get_any_store_purchase_history(
+    def get_any_store_purchase_history_admin(
         cookie: str, store_id: str
     ) -> Response[ParsableList[PurchaseDetails]]:
-        return UserManager.get_any_store_purchase_history(cookie, store_id)
+        return UserManager.get_any_store_purchase_history_admin(cookie, store_id)
 
     # Inter component functions
     # ============================

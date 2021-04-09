@@ -133,8 +133,8 @@ class UserManager:
         return UserManager.__deligate_to_user(cookie, func)
 
     # 4.1
-    def remove_product(cookie: str, store_id: str, product_id: str) -> Response[None]:
-        func = lambda user: user.remove_product(store_id, product_id)
+    def remove_product_from_store(cookie: str, store_id: str, product_id: str) -> Response[None]:
+        func = lambda user: user.remove_product_from_store(store_id, product_id)
         return UserManager.__deligate_to_user(cookie, func)
 
     # 4.1
@@ -202,14 +202,14 @@ class UserManager:
     # ====================
 
     # 6.4
-    def get_any_store_purchase_history(
+    def get_any_store_purchase_history_admin(
         cookie: str, store_id: str
     ) -> Response[ParsableList[PurchaseDetails]]:
         func = lambda user: user.get_any_store_purchase_history(store_id)
         return UserManager.__deligate_to_user(cookie, func)
 
     # 6.4
-    def get_any_user_purchase_history(
+    def get_any_user_purchase_history_admin(
         cookie: str, username: str
     ) -> Response[ParsableList[PurchaseDetails]]:
         func = lambda user: user.get_any_user_purchase_history(username)
@@ -217,3 +217,7 @@ class UserManager:
 
     # Inter component functions
     # ====================
+
+    # 6.4
+    def get_any_user_purchase_history(username: str) -> Response[ParsableList[PurchaseDetails]]:
+        return UserManager.__get_user_by_username(username).get_purchase_history()

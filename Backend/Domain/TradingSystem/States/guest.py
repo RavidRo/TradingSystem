@@ -1,6 +1,6 @@
-from Backend.Domain.TradingSystem.user_state import UserState
-from Backend.Domain.TradingSystem.member import Member
-from Backend.Domain.TradingSystem.admin import Admin
+from .user_state import UserState
+from .member import Member
+from .admin import Admin
 from Backend.Domain.Authentication.authentication import Authentication
 from Backend.response import Response
 
