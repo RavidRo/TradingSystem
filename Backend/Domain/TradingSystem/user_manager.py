@@ -216,7 +216,7 @@ class UserManager:
     def get_any_store_purchase_history_admin(
         cookie: str, store_id: str
     ) -> Response[ParsableList[PurchaseDetails]]:
-        func: Callable[[User], Response] = lambda user: user.get_any_store_purchase_history(
+        func: Callable[[User], Response] = lambda user: user.get_any_store_purchase_history_admin(
             store_id
         )
         return UserManager.__deligate_to_user(cookie, func)
@@ -225,7 +225,9 @@ class UserManager:
     def get_any_user_purchase_history_admin(
         cookie: str, username: str
     ) -> Response[ParsableList[PurchaseDetails]]:
-        func = lambda user: user.get_any_user_purchase_history(username)
+        func: Callable[[User], Response] = lambda user: user.get_any_user_purchase_history_admin(
+            username
+        )
         return UserManager.__deligate_to_user(cookie, func)
 
     # Inter component functions

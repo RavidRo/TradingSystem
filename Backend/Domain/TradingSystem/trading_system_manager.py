@@ -1,10 +1,7 @@
 from Backend.Domain.TradingSystem.stores_manager import StoresManager
 from Backend.Domain.TradingSystem.user_manager import UserManager
 from Backend.Domain.TradingSystem.search_engine import SearchEngine
-from Backend.Domain.TradingSystem.Responsibilities.responsibility import (
-    name_to_permission,
-    Permission,
-)
+from Backend.Domain.TradingSystem.Responsibilities.responsibility import name_to_permission
 from Backend.Service.DataObjects.product_data import ProductData
 from Backend.Service.DataObjects.store_data import StoreData
 from Backend.Service.DataObjects.shopping_cart_data import ShoppingCartData
@@ -66,8 +63,8 @@ class TradingSystemManager:
 
     # 2.8
     @staticmethod
-    def remove_product_from_cart(cookie: str, product_id: str) -> Response[None]:
-        return UserManager.remove_product_from_cart(cookie, product_id)
+    def remove_product_from_cart(cookie: str, store_id: str, product_id: str) -> Response[None]:
+        return UserManager.remove_product_from_cart(cookie, store_id, product_id)
 
     # 2.8
     @staticmethod

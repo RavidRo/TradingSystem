@@ -22,7 +22,6 @@ class TradingSystem(object):
             raise Exception("This class is a singleton!")
         else:
             TradingSystem.__instance = self
-            # self.trading_system_manager = trading_system_manager.TradingSystemManager()
 
     @logging
     def enter_system(self):
@@ -66,8 +65,8 @@ class TradingSystem(object):
         return TradingSystemManager.get_cart_details(cookie)
 
     @logging
-    def remove_product_from_cart(self, cookie: str, product_id):
-        return TradingSystemManager.remove_product_from_cart(cookie, product_id)
+    def remove_product_from_cart(self, cookie: str, store_id, product_id):
+        return TradingSystemManager.remove_product_from_cart(cookie, store_id, product_id)
 
     @logging
     def change_product_quantity_in_cart(self, cookie, store_id, product_id, new_quantity):
