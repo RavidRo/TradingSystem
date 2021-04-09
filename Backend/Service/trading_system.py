@@ -135,19 +135,13 @@ class TradingSystem(object):
         return TradingSystemManager.appoint_manager(cookie, store_id, username)
 
     @logging
-    def add_manager_permission(
-        self, cookie: str, store_id: str, username: str, permission_number: int
-    ):
-        return TradingSystemManager.add_manager_permission(
-            cookie, store_id, username, permission_number
-        )
+    def add_manager_permission(self, cookie: str, store_id: str, username: str, permission: str):
+        return TradingSystemManager.add_manager_permission(cookie, store_id, username, permission)
 
     @logging
-    def remove_manager_permission(
-        self, cookie: str, store_id: str, username: str, permission_number: int
-    ):
+    def remove_manager_permission(self, cookie: str, store_id: str, username: str, permission: str):
         return TradingSystemManager.remove_manager_permission(
-            cookie, store_id, username, permission_number
+            cookie, store_id, username, permission
         )
 
     @logging

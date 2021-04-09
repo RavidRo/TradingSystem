@@ -1,7 +1,10 @@
 from Backend.Domain.TradingSystem.stores_manager import StoresManager
 from Backend.Domain.TradingSystem.user_manager import UserManager
 from Backend.Domain.TradingSystem.search_engine import SearchEngine
-from Backend.Domain.TradingSystem.Responsibilities.responsibility import Permission
+from Backend.Domain.TradingSystem.Responsibilities.responsibility import (
+    name_to_permission,
+    Permission,
+)
 from Backend.Service.DataObjects.product_data import ProductData
 from Backend.Service.DataObjects.store_data import StoreData
 from Backend.Service.DataObjects.shopping_cart_data import ShoppingCartData
@@ -146,19 +149,19 @@ class TradingSystemManager:
     # 4.6
     @staticmethod
     def add_manager_permission(
-        cookie: str, store_id: str, username: str, permission_number: int
+        cookie: str, store_id: str, username: str, permission: str
     ) -> Response[None]:
         return UserManager.add_manager_permission(
-            cookie, store_id, username, Permission(permission_number)
+            cookie, store_id, username, name_to_permission[permission]
         )
 
     # 4.6
     @staticmethod
     def remove_manager_permission(
-        cookie: str, store_id: str, username: str, permission_number: int
+        cookie: str, store_id: str, username: str, permission: str
     ) -> Response[None]:
         return UserManager.remove_manager_permission(
-            cookie, store_id, username, Permission(permission_number)
+            cookie, store_id, username, name_to_permission[permission]
         )
 
     # 4.4, 4.7

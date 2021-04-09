@@ -23,6 +23,14 @@ Permission = enum.Enum(
     ],
 )
 
+name_to_permission: dict[str, Permission] = {
+    "manage_products": Permission.MANAGE_PRODUCTS,
+    "get_appointments": Permission.GET_APPOINTMENTS,
+    "appoint_mannager": Permission.APPOINT_MANAGER,
+    "remove_manager": Permission.REMOVE_MANAGER,
+    "get_history": Permission.GET_HISTORY,
+}
+
 
 class Responsibility(Parsable):
     ERROR_MESSAGE = "Responsibility is an interface, function not implemented"
