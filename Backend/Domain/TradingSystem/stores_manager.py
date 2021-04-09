@@ -21,7 +21,7 @@ class StoresManager:
 
     # 2.6
     def get_products(self) -> Response[list[Product]]:
-        products_per_store = map(lambda store: store.get_p(), StoresManager.stores)
+        products_per_store = map(lambda store: store.get_products(), StoresManager.stores)
         products = []
         # iterating over the data
         for product_list in products_per_store:
@@ -37,7 +37,7 @@ class StoresManager:
 
     def get_store(store_id: str):
         for store in StoresManager.stores:
-            if store.get_id():
+            if store.get_id() == store_id:
                 return Response(True, store)
         return Response(False, msg=f"No store with the ID {store_id} exists")
 
