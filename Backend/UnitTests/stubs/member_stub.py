@@ -1,4 +1,3 @@
-
 from Backend.Domain.TradingSystem.member import Member
 
 

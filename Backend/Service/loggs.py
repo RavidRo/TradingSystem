@@ -3,7 +3,7 @@ import logging
 import traceback
 
 
-logging.basicConfig(filemode="logs.txt", format="%(asctime)s %(levelname)s - %(message)s", datefmt="%d/%m/%Y %H:%M:%S", filemode="a")
+logging.basicConfig(filename="logs.txt", format="%(asctime)s %(levelname)s - %(message)s", datefmt="%d/%m/%Y %H:%M:%S", filemode="a")
 
 
 def logging(function):

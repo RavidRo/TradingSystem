@@ -1,42 +1,33 @@
 from __future__ import annotations
+import enum
 
-from Backend.Domain.TradingSystem.member import Member
+from Backend.Service.DataObjects.responsibilities_data import ResponsibilitiesData
 from Backend.Domain.TradingSystem.IUser import IUser
 from Backend.Domain.TradingSystem.purchase_details import PurchaseDetails
-from Backend.Domain.TradingSystem.store import Store
-from Backend.response import Response, ParsableList
+from Backend.response import Parsable, Response, ParsableList
 
-import enum
 
 Permission = enum.Enum(
     value="Permission",
     names=[
-        ("MANAGE_PRODUCTS", 1),
         ("manage products", 1),
-        ("GET_APPOINTMENTS", 2),
+        ("MANAGE_PRODUCTS", 1),
         ("get appointments", 2),
-        ("APPOINT_MANAGER", 3),
+        ("GET_APPOINTMENTS", 2),
         ("appoint mannager", 3),
-        ("REMOVE_MANAGER", 4),
+        ("APPOINT_MANAGER", 3),
         ("remove manager", 4),
-        ("GET_HISTORY", 5),
+        ("REMOVE_MANAGER", 4),
         ("get history", 5),
+        ("GET_HISTORY", 5),
     ],
 )
 
 
-class Permission(enum.Enum):
-    MANAGE_PRODUCTS = 1
-    GET_APPOINTMENTS = 2
-    APPOINT_MANAGER = 3
-    REMOVE_MANAGER = 4
-    GET_HISTORY = 5
-
-
-class Responsibility:
+class Responsibility(Parsable):
     ERROR_MESSAGE = "Responsibility is an interface, function not implemented"
 
-    def __init__(self, user_state: Member, store: Store) -> None:
+    def __init__(self, user_state, store) -> None:
         self.user_state = user_state
         user_state.add_responsibility(self, store.get_id())
         self.store = store
@@ -56,7 +47,9 @@ class Responsibility:
         raise Exception(Responsibility.ERROR_MESSAGE)
 
     # 4.1
-    def edit_product_details(self, product_id: str, new_name: str, new_price: float) -> Response[None]:
+    def edit_product_details(
+        self, product_id: str, new_name: str, new_price: float
+    ) -> Response[None]:
         raise Exception(Responsibility.ERROR_MESSAGE)
 
     # 4.3
@@ -85,7 +78,7 @@ class Responsibility:
         raise Exception(Responsibility.ERROR_MESSAGE)
 
     # 4.11
-    def get_store_purchases_history(self) -> Response[ParsableList[PurchaseDetails]]:
+    def get_store_purchase_history(self) -> Response[ParsableList[PurchaseDetails]]:
         raise Exception(Responsibility.ERROR_MESSAGE)
 
     def _add_permission(self, username: str, permission: Permission) -> bool:
@@ -127,3 +120,19 @@ class Responsibility:
         for appointment in self.appointed:
             appointment.__dismiss_from_store(store_id)
         self.user_state.dismiss_from_store(store_id)
+
+    # Parsing the object for user representation
+    def parse(self) -> ResponsibilitiesData:
+        return ResponsibilitiesData(
+            self.store.get_id(),
+            self._is_manager(),
+            self.__class__.__name__,
+            [appointee.parse() for appointee in self.appointed],
+            self._permissions(),
+        )
+
+    def _is_manager(self) -> bool:
+        return False
+
+    def _permissions(self) -> list[str]:
+        return [per.name for per in Permission]

@@ -1,7 +1,5 @@
 import uuid
-
 from Backend.Domain.TradingSystem.Interfaces.IProduct import IProduct
-from Backend.response import Response, Parsable
 from dataclasses import  dataclass
 
 
@@ -13,7 +11,7 @@ class Product(IProduct):
         self.id = str(self.id_generator())
 
     def parse(self):
-        return ProductDataObject(self.name, self.price, self.id)
+        return ProductDataObject(self.id, self.product_name, self.price)
 
     def set_product_name(self, new_name):
         self.product_name = new_name
@@ -39,5 +37,5 @@ class Product(IProduct):
 class ProductDataObject:
     id: str
     name: str
-    price: str
+    price: float
 

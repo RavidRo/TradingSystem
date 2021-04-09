@@ -1,9 +1,9 @@
 from __future__ import annotations
 
 from Backend.response import Response, ParsableList, PrimitiveParsable
-from Backend.Domain.TradingSystem.shopping_cart import ShoppingCart
-from Backend.Domain.TradingSystem.purchase_details import PurchaseDetails
-from Backend.Domain.TradingSystem.user_state import UserState
+import Backend.Domain.TradingSystem.shopping_cart
+import Backend.Domain.TradingSystem.purchase_details
+import Backend.Domain.TradingSystem.user_state
 
 class IUser():
 
@@ -20,7 +20,7 @@ class IUser():
 		raise NotImplementedError
 
 	#2.8
-	def get_cart_details(self) -> Response[ShoppingCart]:
+	def get_cart_details(self) -> Response[Backend.ShoppingCart]:
 		raise NotImplementedError
 
 	#2.8
@@ -47,7 +47,7 @@ class IUser():
 		raise NotImplementedError
 
 	#3.7
-	def ger_purchase_history(self) -> Response[ParsableList[PurchaseDetails]]:
+	def ger_purchase_history(self) -> Response[ParsableList[Backend.PurchaseDetails]]:
 		raise NotImplementedError
 
 	# Owner and manager
@@ -95,18 +95,18 @@ class IUser():
 		raise NotImplementedError
 
 	#4.11
-	def get_store_purchases_history(self, store_id : str) -> Response[ParsableList[PurchaseDetails]]:
+	def get_store_purchases_history(self, store_id : str) -> Response[ParsableList[Backend.PurchaseDetails]]:
 		raise NotImplementedError
 
 	#System Manager
 	#====================
 
 	#6.4
-	def get_any_user_purchase_history(self, username : str) -> Response[ParsableList[PurchaseDetails]]:
+	def get_any_user_purchase_history(self, username : str) -> Response[ParsableList[Backend.PurchaseDetails]]:
 		raise NotImplementedError
 
 	#6.4
-	def get_any_store_purchase_history(self, store_id : str) -> Response[ParsableList[PurchaseDetails]]:
+	def get_any_store_purchase_history(self, store_id : str) -> Response[ParsableList[Backend.PurchaseDetails]]:
 		raise NotImplementedError
 
 	
@@ -119,6 +119,6 @@ class IUser():
 	def get_username(self) -> str:
 		raise NotImplementedError
 
-	def change_state(self, new_state : UserState) -> None:
+	def change_state(self, new_state : Backend.UserState) -> None:
 		raise NotImplementedError
 	

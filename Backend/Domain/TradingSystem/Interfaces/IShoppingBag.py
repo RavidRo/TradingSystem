@@ -1,12 +1,9 @@
-from abc import ABC, abstractmethod
-
-from Backend.Domain.TradingSystem.IUser import IUser
-from Backend.Domain.TradingSystem.Interfaces import IProduct
-from Backend.Domain.TradingSystem.Interfaces.IPurchaseDetails import IPurchaseDetails
-from Backend.response import Response, ParsableList, Parsable
+from abc import abstractmethod
+from Backend.response import Response, Parsable
 
 
-class IShoppingBag(metaclass=ABC, Parsable):
+class IShoppingBag(Parsable):
+    from Backend.Domain.TradingSystem.purchase_details import PurchaseDetails
 
     @abstractmethod
     def add_product(self, product_id: str, quantity: int) -> Response[None]:
@@ -19,7 +16,7 @@ class IShoppingBag(metaclass=ABC, Parsable):
         raise NotImplementedError
 
     @abstractmethod
-    def buy_products(self, user_info: IUser, products_info={}) -> Response[None]:
+    def buy_products(self, user_info, products_info={}) -> Response[None]:
         """buy transaction"""
         raise NotImplementedError
 
@@ -29,7 +26,7 @@ class IShoppingBag(metaclass=ABC, Parsable):
         raise NotImplementedError
 
     @abstractmethod
-    def delete_products_after_purchase(self, user_name: str) -> IPurchaseDetails:
+    def delete_products_after_purchase(self, user_name: str) -> PurchaseDetails:
         """delete products which successfully been purchased"""
         raise NotImplementedError
 
