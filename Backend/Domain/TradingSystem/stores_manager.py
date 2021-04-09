@@ -9,7 +9,7 @@ class StoresManager:
     stores: list[store] = []
 
     # 2.5
-    def get_stores_details() -> Response[ParsableList[store]]:
+    def get_stores_details(self) -> Response[ParsableList[store]]:
         return Response(True, ParsableList(StoresManager.stores))
 
     # 2.5
@@ -20,7 +20,7 @@ class StoresManager:
         return Response(False, msg=f"No store with the ID {store_id} exists")
 
     # 2.6
-    def get_products() -> list[product]:
+    def get_products(self) -> list[product]:
         products_per_store = map(lambda store: store.show_store_data(), StoresManager.stores)
         products = []
         # iterating over the data

@@ -1,9 +1,9 @@
 from __future__ import annotations
 
 from Backend.response import Response, ParsableList, PrimitiveParsable
-from Backend.Domain.TradingSystem.shopping_cart import ShoppingCart
-from Backend.Domain.TradingSystem.purchase_details import PurchaseDetails
-from Backend.Domain.TradingSystem.user_state import UserState
+import Backend.Domain.TradingSystem.shopping_cart
+import Backend.Domain.TradingSystem.purchase_details
+import Backend.Domain.TradingSystem.user_state
 
 
 class IUser:
@@ -71,7 +71,9 @@ class IUser:
 
     # 4.1
     # Creating a new product a the store and setting its quantity to 0
-    def create_product(self, store_id: str, name: str, price: float, quantity: int) -> Response[None]:
+    def create_product(
+        self, store_id: str, name: str, price: float, quantity: int
+    ) -> Response[None]:
         raise NotImplementedError
 
     # 4.1
@@ -79,11 +81,15 @@ class IUser:
         raise NotImplementedError
 
     # 4.1
-    def change_product_quantity(self, store_id: str, product_id: str, new_quantity: int) -> Response[None]:
+    def change_product_quantity(
+        self, store_id: str, product_id: str, new_quantity: int
+    ) -> Response[None]:
         raise NotImplementedError
 
     # 4.1
-    def edit_product_details(self, store_id: str, product_id: str, new_name: str, new_price: float) -> Response[None]:
+    def edit_product_details(
+        self, store_id: str, product_id: str, new_name: str, new_price: float
+    ) -> Response[None]:
         raise NotImplementedError
 
     # 4.3
@@ -118,11 +124,15 @@ class IUser:
     # ====================
 
     # 6.4
-    def get_any_user_purchase_history(self, username: str) -> Response[ParsableList[PurchaseDetails]]:
+    def get_any_user_purchase_history(
+        self, username: str
+    ) -> Response[ParsableList[PurchaseDetails]]:
         raise NotImplementedError
 
     # 6.4
-    def get_any_store_purchase_history(self, store_id: str) -> Response[ParsableList[PurchaseDetails]]:
+    def get_any_store_purchase_history(
+        self, store_id: str
+    ) -> Response[ParsableList[PurchaseDetails]]:
         raise NotImplementedError
 
     # Inter component functions

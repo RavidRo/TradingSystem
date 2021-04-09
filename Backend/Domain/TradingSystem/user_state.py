@@ -1,12 +1,12 @@
 from abc import ABC, abstractmethod
-from Backend.Domain.TradingSystem.shopping_cart import ShoppingCart
+import Backend.Domain.TradingSystem.shopping_cart
 from Backend.response import Response
 
 
 class UserState(ABC):
 
     def __init__(self, user):
-        self.cart = ShoppingCart()
+        self.cart = Backend.ShoppingCart()
         self.user = user
 
     @abstractmethod
@@ -25,7 +25,7 @@ class UserState(ABC):
         return self.cart.add_product(store_id, product_id, quantity)
 
     def show_cart(self):
-        return Response[ShoppingCart](True, obj=self.cart, msg="got cart successfully")
+        return Response[Backend.ShoppingCart](True, obj=self.cart, msg="got cart successfully")
 
     def delete_from_cart(self, store_id, product_id):
         return self.cart.remove_product(store_id, product_id)
