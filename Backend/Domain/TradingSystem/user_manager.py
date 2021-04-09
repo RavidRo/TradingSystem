@@ -45,7 +45,7 @@ class UserManager:
         if not user:
             return Response(False, msg="No user is identified by the given cookie")
         response = user.register(username, password)
-        if response.succeeded:
+        if response.succeeded():
             UserManager.username_user[username] = user
         return response
 

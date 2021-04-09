@@ -1,4 +1,4 @@
-from Backend.UnitTests.authentication import DBHandlerMock
+from Backend.Tests.Unit.authentication import DBHandlerMock
 from abc import ABC, abstractmethod
 from Backend import response
 
@@ -31,7 +31,9 @@ class Authentication(object):
 
     def login(self, username, password):
         if not self.db_handler.is_username_exists(username=username):
-            return response.Response[None](success=False, msg="username doesn't exist in the system")
+            return response.Response[None](
+                success=False, msg="username doesn't exist in the system"
+            )
 
         else:
             if not self.db_handler.is_password_match(given_password=password, username=username):
@@ -39,6 +41,6 @@ class Authentication(object):
 
             else:
                 is_admin = self.db_handler.is_username_admin(username=username)
-                return response.Response[None](success=True,obj=response.PrimitiveParsable(is_admin),msg="login succeeded")
-
-
+                return response.Response[None](
+                    success=True, obj=response.PrimitiveParsable(is_admin), msg="login succeeded"
+                )
