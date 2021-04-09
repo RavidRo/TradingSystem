@@ -123,9 +123,9 @@ class MemberStub(Member):
         pass
 
     @update_field
-    def get_user_purchase_history():
+    def get_user_purchase_history_admin():
         pass
 
     @update_field
-    def get_any_store_purchase_history():
+    def get_any_store_purchase_history_admin():
         pass

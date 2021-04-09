@@ -148,13 +148,13 @@ class UserStub(IUser):
         self._get_store_purchase_history = True
         return Response(True)
 
-    def get_any_store_purchase_history(
+    def get_any_store_purchase_history_admin(
         self, store_id: str
     ) -> Response[ParsableList[PurchaseDetails]]:
         self._get_any_store_purchase_history = True
         return Response(True)
 
-    def get_any_user_purchase_history(
+    def get_any_user_purchase_history_admin(
         self, username: str
     ) -> Response[ParsableList[PurchaseDetails]]:
         self._get_any_user_purchase_history = True
