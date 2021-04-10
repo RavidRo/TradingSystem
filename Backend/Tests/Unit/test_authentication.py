@@ -29,8 +29,8 @@ def admin_password(config_path):
 
 
 def test_login_all_good(auth):
-    auth.register("some_username", "some_password")
-    response = auth.login("some_username", "some_password")
+    auth.register("test_login_all_good", "test_login_all_good")
+    response = auth.login("test_login_all_good", "test_login_all_good")
     assert response.succeeded(), response.get_msg()
 
 
@@ -51,8 +51,12 @@ def test_login_as_admin_returns_true(auth: Authentication, admin_username, admin
 
 
 def test_login_as_none_admin_returns_false(auth: Authentication):
-    auth.register("some_username", "some_password")
-    response = auth.login("some_username", "some_password")
+    auth.register(
+        "test_login_as_none_admin_returns_false", "test_login_as_none_admin_returns_false"
+    )
+    response = auth.login(
+        "test_login_as_none_admin_returns_false", "test_login_as_none_admin_returns_false"
+    )
     assert response.succeeded() and not response.get_obj().get_val(), response.get_msg()
 
 

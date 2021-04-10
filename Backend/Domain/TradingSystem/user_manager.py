@@ -1,3 +1,4 @@
+from Backend.Domain.TradingSystem.store import Store
 from typing import Callable
 import uuid
 
@@ -113,7 +114,7 @@ class UserManager:
     # ===============================
 
     # 3.2
-    def create_store(cookie: str, name: str) -> Response[None]:
+    def create_store(cookie: str, name: str) -> Response[Store]:
         func: Callable[[User], Response] = lambda user: user.create_store(name)
         return UserManager.__deligate_to_user(cookie, func)
 

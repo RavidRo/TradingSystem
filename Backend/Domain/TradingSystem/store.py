@@ -55,18 +55,22 @@ class Store:
 
     """checks need to be made:
        ----------------------
-       1. quantity > 0
-       2. price > 0
-       3. a product with product_name exists"""
+       1. product_name != ""
+       2. quantity >= 0
+       3. price >= 0
+       4. a product with product_name exists"""
 
     def add_product(self, product_name: str, price: float, quantity: int) -> Response[None]:
         from Backend.Domain.TradingSystem.product import Product
 
-        if quantity <= 0:
-            # actually it's non-negative but adding 0 amount is redundant
-            return Response(False, msg="Product's qunatity must be positive!")
+        if not product_name:
+            return Response(False, msg="Product's name can't be empty!")
 
-        if price <= 0:
+        if quantity < 0:
+            # actually it's non-negative but adding 0 amount is redundant
+            return Response(False, msg="Product's quantity must be positive!")
+
+        if price < 0:
             return Response(False, msg="Product's price must pe positive!")
 
         if self.check_existing_product(product_name):
@@ -74,7 +78,7 @@ class Store:
 
         product = Product(product_name=product_name, price=price)
         product_id = product.get_id()
-        self.products_to_quantities.update({product_id, (product, quantity)})
+        self.products_to_quantities[product_id] = (product, quantity)
         return Response(True, msg="product" + str(product_name) + "successfully added")
 
     """checks need to be made:

@@ -94,7 +94,7 @@ class TradingSystemManager:
     @staticmethod
     def create_store(cookie: str, name: str) -> Response[None]:
         Response = UserManager.create_store(cookie, name)
-        if Response.success:
+        if Response.succeeded():
             return StoresManager.create_store(Response.get_obj())
         return Response
 
