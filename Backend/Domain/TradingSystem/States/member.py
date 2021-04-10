@@ -43,8 +43,8 @@ class Member(UserState):
         # update data in DB in later milestones
         return response
 
-    def change_product_quantity(self, store_id, product_id, new_quantity):
-        response = super().change_product_quantity(store_id, product_id, new_quantity)
+    def change_product_quantity_in_cart(self, store_id, product_id, new_quantity):
+        response = super().change_product_quantity_in_cart(store_id, product_id, new_quantity)
         # update data in DB in later milestones
         return response
 
@@ -82,7 +82,7 @@ class Member(UserState):
     def change_product_quantity_in_store(self, store_id, product_id, new_quantity):
         if store_id not in self.responsibilities:
             return Response(False, msg=f"this member do not own/manage store {store_id}")
-        return self.responsibilities[store_id].change_product_quantity(product_id, new_quantity)
+        return self.responsibilities[store_id].change_product_quantity_in_cart(product_id, new_quantity)
 
     def edit_product_details(self, store_id, product_id, new_name, new_price):
         if store_id not in self.responsibilities:

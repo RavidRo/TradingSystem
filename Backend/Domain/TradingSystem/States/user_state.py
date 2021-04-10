@@ -35,7 +35,7 @@ class UserState(ABC):
     def delete_from_cart(self, store_id, product_id):
         return self.cart.remove_product(store_id, product_id)
 
-    def change_product_quantity(self, store_id, product_id, new_amount):
+    def change_product_quantity_in_cart(self, store_id, product_id, new_amount):
         return self.cart.change_product_quantity(store_id, product_id, new_amount)
 
     def buy_cart(self, current_user):

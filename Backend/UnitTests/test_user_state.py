@@ -159,7 +159,7 @@ def test_remove_product_delegate(guest_user):
 
 
 def test_change_quantity_delegate(guest_user):
-    guest_user.state.change_product_quantity("0", "0", 1)
+    guest_user.state.change_product_quantity_in_cart("0", "0", 1)
     assert guest_user.state.cart.change_quantity
 
 

@@ -182,7 +182,7 @@ async def change_product_quantity():
     store_id = request.args.get('store_id')
     product_id = request.args.get('product_id')
     quantity = request.args.get('quantity')
-    answer = await system.change_product_quantity(cookie, store_id, product_id,quantity)
+    answer = await system.change_product_quantity_in_cart(cookie, store_id, product_id, quantity)
     return '''<h1>Answer is: {}</h1>'''.format(answer)
 
 
