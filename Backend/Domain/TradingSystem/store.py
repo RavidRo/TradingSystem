@@ -166,7 +166,7 @@ class Store:
                 self.products_to_quantities.pop(prod_id)
             else:
                 product = self.products_to_quantities.get(prod_id)[0]
-                self.products_to_quantities.update({prod_id, (product, current_quantity - quantity)})
+                self.products_to_quantities.update({prod_id : (product, current_quantity - quantity)})
 
     # this will be added in the future - maybe I will apply Default Policy for now
     def check_purchase_types(self, products_info, user_info) -> Response[None]:

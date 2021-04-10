@@ -58,3 +58,5 @@ class StoreStub(Store):
 
     def get_product(self, product_id):
         return self.products_to_quantities.get(product_id)[0]
+
+    # def acquire_products(self):
