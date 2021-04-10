@@ -1,14 +1,26 @@
-from Backend.Domain import DBHandler
+from Backend.Domain.DBHandler import DBHandler
 from abc import ABC, abstractmethod
 from Backend import response
+from Backend.UnitTests.authentication.DBHandlerMock import DBHandlerMock
 
-class IAuthentication(metaclass=ABC):
+class IAuthentication():
+
     @classmethod
     def __subclasshook__(cls, subclass):
         return (hasattr(subclass, 'register') and
                 callable(subclass.register) and
                 hasattr(subclass, 'login') and
-                callable(subclass.login))
+                callable(subclass.login)and
+                hasattr(subclass, 'create_DBHandler') and
+                callable(subclass.create_DBHandler) and
+                hasattr(subclass, 'set_mock') and
+                callable(subclass.set_mock))
+
+    def create_DBHandler(self,is_mock):
+        return DBHandlerMock() if is_mock else DBHandler()
+
+    def set_mock(self):
+        self.use_mock = True
 
 class Authentication(IAuthentication):
     __instance = None
@@ -20,13 +32,13 @@ class Authentication(IAuthentication):
             Authentication()
         return Authentication.__instance
 
-    def __init__(self):
+    def __init__(self,is_mock):
         """ Virtually private constructor. """
         if Authentication.__instance is not None:
             raise Exception("This class is a singleton!")
         else:
             Authentication.__instance = self
-            self.db_handler = DBHandler.DBHandler()
+            self.db_handler = IAuthentication.create_DBHandler(self,is_mock)
 
     def register(self, username, password):
         if self.db_handler.is_username_exists(username=username):
@@ -45,7 +57,7 @@ class Authentication(IAuthentication):
                 return response.Response[None](success=False, msg="password incorrect")
 
             else:
-                is_admin = self.db_handler.is_username_admin(udername=username)
+                is_admin = self.db_handler.is_username_admin(username=username)
                 return response.Response[None](success=True,obj=response.PrimitiveParsable(is_admin),msg="login succeeded")
 
 
