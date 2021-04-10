@@ -204,6 +204,14 @@ def test_can_not_change_product_of_none_existent_store(member: User):
     assert not member.change_product_quantity_in_store("some_wrong_id", product_id, 24).succeeded()
 
 
+def test_can_not_change_product_of_none_existent_product(member: User):
+    store: Store = member.create_store("store_name").get_obj()
+    product_id = member.create_product(store.get_id(), "new_product", 19.90, 5).get_obj()
+    assert not member.change_product_quantity_in_store(
+        store.get_id(), "some_wrong_id", 24
+    ).succeeded()
+
+
 def test_can_not_change_product_of_unassigned_store(member: User, user_member2: User):
     store: Store = user_member2.create_store("store_name").get_obj()
     product_id = user_member2.create_product(store.get_id(), "new_product", 19.90, 5).get_obj()
@@ -216,8 +224,59 @@ def test_changes_product_quantity_in_store_successfully(member: User):
     assert member.change_product_quantity_in_store(store.get_id(), product_id, 24).succeeded()
 
 
+def test_changes_product_quantity_in_store_to_0_successfully(member: User):
+    store: Store = member.create_store("store_name").get_obj()
+    product_id = member.create_product(store.get_id(), "new_product", 19.90, 5).get_obj()
+    assert member.change_product_quantity_in_store(store.get_id(), product_id, 0).succeeded()
+
+
+def test_changes_product_quantity_in_store_to_negative_fails(member: User):
+    store: Store = member.create_store("store_name").get_obj()
+    product_id = member.create_product(store.get_id(), "new_product", 19.90, 5).get_obj()
+    assert not member.change_product_quantity_in_store(store.get_id(), product_id, -1).succeeded()
+
+
 # * edit_product_details
 # * =================================================================
+def test_can_not_edit_product_details_of_none_existent_store(member: User):
+    store: Store = member.create_store("store_name").get_obj()
+    product_id = member.create_product(store.get_id(), "new_product", 19.90, 5).get_obj()
+    assert not member.edit_product_details(
+        "some_wrong_id", product_id, "product name", 123.45
+    ).succeeded()
+
+
+def test_can_not_edit_product_details_of_none_existent_product(member: User):
+    store: Store = member.create_store("store_name").get_obj()
+    product_id = member.create_product(store.get_id(), "new_product", 19.90, 5).get_obj()
+    assert not member.edit_product_details(
+        store.get_id(), "some_wrong_id", "product name", 24.54
+    ).succeeded()
+
+
+# def test_can_not_change_product_of_unassigned_store(member: User, user_member2: User):
+#     store: Store = user_member2.create_store("store_name").get_obj()
+#     product_id = user_member2.create_product(store.get_id(), "new_product", 19.90, 5).get_obj()
+#     assert not member.change_product_quantity_in_store(store.get_id(), product_id, 24).succeeded()
+
+
+# def test_changes_product_quantity_in_store_successfully(member: User):
+#     store: Store = member.create_store("store_name").get_obj()
+#     product_id = member.create_product(store.get_id(), "new_product", 19.90, 5).get_obj()
+#     assert member.change_product_quantity_in_store(store.get_id(), product_id, 24).succeeded()
+
+
+# def test_changes_product_quantity_in_store_to_0_successfully(member: User):
+#     store: Store = member.create_store("store_name").get_obj()
+#     product_id = member.create_product(store.get_id(), "new_product", 19.90, 5).get_obj()
+#     assert member.change_product_quantity_in_store(store.get_id(), product_id, 0).succeeded()
+
+
+# def test_changes_product_quantity_in_store_to_negative_fails(member: User):
+#     store: Store = member.create_store("store_name").get_obj()
+#     product_id = member.create_product(store.get_id(), "new_product", 19.90, 5).get_obj()
+#     assert not member.change_product_quantity_in_store(store.get_id(), product_id, -1).succeeded()
+
 
 # * appoint_owner
 # * =================================================================
