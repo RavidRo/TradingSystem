@@ -87,7 +87,10 @@ class ShoppingCart(IShoppingCart):
     """notice: if buy_products of any bag fails -> return acquired products to stores"""
     # products_purchase_info -a dict between store_id to list of tuples tuple (product_id to purchase_type)
     def buy_products(self, user, products_purchase_info={}) -> Response[PrimitiveParsable]:
-        sum = 0
+        if not self.shopping_bags:
+            return Response(False, msg="Cant buy an empty cart")
+
+        sum_amount = 0
         succeeded_bags: list[ShoppingBag] = []
         # this if will be deleted in the version with purchase types
         if not products_purchase_info:
@@ -105,8 +108,8 @@ class ShoppingCart(IShoppingCart):
                     bag.send_back()
                 return result
             succeeded_bags.append(self.shopping_bags[store_id])
-            sum += result.get_obj().get_val()
-            self.price = sum
+            sum_amount += result.get_obj().get_val()
+            self.price = sum_amount
 
         self.purchase_time_passed = False
         if self.timer is not None:
@@ -114,8 +117,8 @@ class ShoppingCart(IShoppingCart):
         self.start_timer()
         return Response[PrimitiveParsable](
             True,
-            obj=PrimitiveParsable(sum),
-            msg=f"All purchase details are valid. The overall sum is: {sum}",
+            obj=PrimitiveParsable(sum_amount),
+            msg=f"All purchase details are valid. The overall sum is: {sum_amount}",
         )
 
     def get_price(self):

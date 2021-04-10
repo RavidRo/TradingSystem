@@ -88,499 +88,523 @@ def test_open_store_success():
     assert system.create_store(cookie, store_name).succeeded()
 
 
-def test_open_store_unsupported_character_fail():
-    cookie, username, password, _ = _initialize_info(_generate_username(), "aaa")
-    store_name = "stαrbucks"
-    assert not system.create_store(cookie, store_name).succeeded()
+# def test_open_store_unsupported_character_fail():
+#     cookie, username, password, _ = _initialize_info(_generate_username(), "aaa")
+#     store_name = "stαrbucks"
+#     assert not system.create_store(cookie, store_name).succeeded()
 
 
 # 2.5 https://github.com/SeanPikulin/TradingSystem/blob/main/Documentation/Use%20Cases.md#25-Getting-store-information
-def test_get_store_information_success():
-    cookie, username, password, store_name = _initialize_info(
-        _generate_username(), "aaa", _generate_store_name()
-    )
-    response = system.get_stores_details()
-    assert (
-        response.succeeded()
-        and len(response.object.values) == 1
-        and response.object.values[0].name == store_name
-    )
+# def test_get_store_information_success():
+#     cookie, username, password, store_name = _initialize_info(
+#         _generate_username(), "aaa", _generate_store_name()
+#     )
+#     response = system.get_stores_details()
+#     assert (
+#         response.succeeded()
+#         and len(response.object.values) == 1
+#         and response.object.values[0].name == store_name
+#     )
 
 
-def test_get_store_information_no_stores_fail():
-    cookie, username, password, _ = _initialize_info(_generate_username(), "aaa")
-    assert not system.get_stores_details().succeeded()  # an empty list evaluates to false
+# def test_get_store_information_no_stores_fail():
+#     cookie, username, password, _ = _initialize_info(_generate_username(), "aaa")
+#     assert not system.get_stores_details().succeeded()  # an empty list evaluates to false
 
 
 # 4.1 https://github.com/SeanPikulin/TradingSystem/blob/main/Documentation/Use%20Cases.md#41-Add-new-product
-def test_add_new_product_success():
-    cookie, username, password, store_name = _initialize_info(
-        _generate_username(), "aaa", _generate_store_name()
-    )
-    product_name = _generate_product_name()
-    price = 5.50
-    quantity = 10
-    assert system.create_product(cookie, store_name, product_name, price, quantity).succeeded()
+# def test_add_new_product_success():
+#     cookie, username, password, store_name = _initialize_info(
+#         _generate_username(), "aaa", _generate_store_name()
+#     )
+#     product_name = _generate_product_name()
+#     price = 5.50
+#     quantity = 10
+#     response = system.create_product(cookie, store_name, product_name, price, quantity)
+#     assert response.succeeded(), response.get_msg()
 
 
-def test_add_new_product_negative_quantity_fail():
-    cookie, username, password, store_name = _initialize_info(
-        _generate_username(), "aaa", _generate_store_name()
-    )
-    product_name = _generate_product_name()
-    price = 5.50
-    quantity = -10
-    assert not system.create_product(cookie, store_name, product_name, price, quantity).succeeded()
+# def test_add_new_product_negative_quantity_fail():
+#     cookie, username, password, store_name = _initialize_info(
+#         _generate_username(), "aaa", _generate_store_name()
+#     )
+#     product_name = _generate_product_name()
+#     price = 5.50
+#     quantity = -10
+#     assert not system.create_product(cookie, store_name, product_name, price, quantity).succeeded()
 
 
-def test_add_new_product_negative_price_fail():
-    cookie, username, password, store_name = _initialize_info(
-        _generate_username(), "aaa", _generate_store_name()
-    )
-    product_name = _generate_product_name()
-    price = -5.50
-    quantity = 10
-    assert not system.create_product(cookie, store_name, product_name, price, quantity).succeeded()
+# def test_add_new_product_negative_price_fail():
+#     cookie, username, password, store_name = _initialize_info(
+#         _generate_username(), "aaa", _generate_store_name()
+#     )
+#     product_name = _generate_product_name()
+#     price = -5.50
+#     quantity = 10
+#     assert not system.create_product(cookie, store_name, product_name, price, quantity).succeeded()
 
 
-def test_remove_product_success():
-    cookie, username, password, store_name = _initialize_info(
-        _generate_username(), "aaa", _generate_store_name()
-    )
-    product_name = _generate_product_name()
-    price = 5.50
-    quantity = 10
-    system.create_product(cookie, store_name, product_name, price, quantity)
-    assert system.remove_product_from_store(cookie, store_name, product_name).succeeded()
+# def test_remove_product_success():
+#     cookie, username, password, store_name = _initialize_info(
+#         _generate_username(), "aaa", _generate_store_name()
+#     )
+#     product_name = _generate_product_name()
+#     price = 5.50
+#     quantity = 10
+#     system.create_product(cookie, store_name, product_name, price, quantity)
+#     assert system.remove_product_from_store(cookie, store_name, product_name).succeeded()
 
 
-def test_remove_product_wrong_product_fail():
-    cookie, username, password, store_name = _initialize_info(
-        _generate_username(), "aaa", _generate_store_name()
-    )
-    product_name = _generate_product_name()
-    wrong_product = "cofee"
-    price = 5.50
-    quantity = 10
-    system.create_product(cookie, store_name, product_name, price, quantity)
-    assert not system.remove_product_from_store(cookie, store_name, wrong_product).succeeded()
+# def test_remove_product_wrong_product_fail():
+#     cookie, username, password, store_name = _initialize_info(
+#         _generate_username(), "aaa", _generate_store_name()
+#     )
+#     product_name = _generate_product_name()
+#     wrong_product = "cofee"
+#     price = 5.50
+#     quantity = 10
+#     system.create_product(cookie, store_name, product_name, price, quantity)
+#     assert not system.remove_product_from_store(cookie, store_name, wrong_product).succeeded()
 
 
-def test_change_product_quantity_success():
-    cookie, username, password, store_name = _initialize_info(
-        _generate_username(), "aaa", _generate_store_name()
-    )
-    product_name = _generate_product_name()
-    price = 5.50
-    quantity = 10
-    new_quantity = 15
-    system.create_product(cookie, store_name, product_name, price, quantity)
-    assert system.change_product_quantity_in_store(
-        cookie, store_name, product_name, new_quantity
-    ).succeeded()
+# def test_change_product_quantity_success():
+#     cookie, username, password, store_name = _initialize_info(
+#         _generate_username(), "aaa", _generate_store_name()
+#     )
+#     product_name = _generate_product_name()
+#     price = 5.50
+#     quantity = 10
+#     new_quantity = 15
+#     system.create_product(cookie, store_name, product_name, price, quantity)
+#     assert system.change_product_quantity_in_store(
+#         cookie, store_name, product_name, new_quantity
+#     ).succeeded()
 
 
-def test_change_product_quantity_negative_quantity_fail():
-    cookie, username, password, store_name = _initialize_info(
-        _generate_username(), "aaa", _generate_store_name()
-    )
-    product_name = _generate_product_name()
-    price = 5.50
-    quantity = 10
-    new_quantity = -15
-    cookie = system.enter_system()
-    system.create_product(cookie, store_name, product_name, price, quantity)
-    assert not system.change_product_quantity_in_store(
-        cookie, store_name, product_name, new_quantity
-    ).succeeded()
+# def test_change_product_quantity_negative_quantity_fail():
+#     cookie, username, password, store_name = _initialize_info(
+#         _generate_username(), "aaa", _generate_store_name()
+#     )
+#     product_name = _generate_product_name()
+#     price = 5.50
+#     quantity = 10
+#     new_quantity = -15
+#     cookie = system.enter_system()
+#     system.create_product(cookie, store_name, product_name, price, quantity)
+#     assert not system.change_product_quantity_in_store(
+#         cookie, store_name, product_name, new_quantity
+#     ).succeeded()
 
 
-def test_change_product_quantity_wrong_product_fail():
-    cookie, username, password, store_name = _initialize_info(
-        _generate_username(), "aaa", _generate_store_name()
-    )
-    product_name = _generate_product_name()
-    wrong_product = "cofee"
-    price = 5.50
-    quantity = 10
-    new_quantity = 15
-    system.create_product(cookie, store_name, product_name, price, quantity)
-    assert not system.change_product_quantity_in_store(
-        cookie, store_name, wrong_product, new_quantity
-    ).succeeded()
+# def test_change_product_quantity_wrong_product_fail():
+#     cookie, username, password, store_name = _initialize_info(
+#         _generate_username(), "aaa", _generate_store_name()
+#     )
+#     product_name = _generate_product_name()
+#     wrong_product = "cofee"
+#     price = 5.50
+#     quantity = 10
+#     new_quantity = 15
+#     system.create_product(cookie, store_name, product_name, price, quantity)
+#     assert not system.change_product_quantity_in_store(
+#         cookie, store_name, wrong_product, new_quantity
+#     ).succeeded()
 
 
-def test_edit_product_details_success():
-    cookie, username, password, store_name = _initialize_info(
-        _generate_username(), "aaa", _generate_store_name()
-    )
-    product_name = _generate_product_name()
-    price = 5.50
-    quantity = 10
-    new_name = "cofee"
-    new_price = 6.0
-    system.create_product(cookie, store_name, product_name, price, quantity)
-    assert system.edit_product_details(
-        cookie, store_name, product_name, new_name, new_price
-    ).succeeded()
+# def test_edit_product_details_success():
+#     cookie, username, password, store_name = _initialize_info(
+#         _generate_username(), "aaa", _generate_store_name()
+#     )
+#     product_name = _generate_product_name()
+#     price = 5.50
+#     quantity = 10
+#     new_name = "cofee"
+#     new_price = 6.0
+#     system.create_product(cookie, store_name, product_name, price, quantity)
+#     assert system.edit_product_details(
+#         cookie, store_name, product_name, new_name, new_price
+#     ).succeeded()
 
 
-def test_edit_product_details_wrong_product_fail():
-    cookie, username, password, store_name = _initialize_info(
-        _generate_username(), "aaa", _generate_store_name()
-    )
-    product_name = _generate_product_name()
-    wrong_product = "coffe"
-    price = 5.50
-    quantity = 10
-    new_name = "cofee"
-    new_price = 6.0
-    system.create_product(cookie, store_name, product_name, price, quantity)
-    assert not system.edit_product_details(
-        cookie, store_name, wrong_product, new_name, new_price
-    ).succeeded()
+# def test_edit_product_details_wrong_product_fail():
+#     cookie, username, password, store_name = _initialize_info(
+#         _generate_username(), "aaa", _generate_store_name()
+#     )
+#     product_name = _generate_product_name()
+#     wrong_product = "coffe"
+#     price = 5.50
+#     quantity = 10
+#     new_name = "cofee"
+#     new_price = 6.0
+#     system.create_product(cookie, store_name, product_name, price, quantity)
+#     assert not system.edit_product_details(
+#         cookie, store_name, wrong_product, new_name, new_price
+#     ).succeeded()
 
 
-def test_edit_product_details_negative_price_fail():
-    cookie, username, password, store_name = _initialize_info(
-        _generate_username(), "aaa", _generate_store_name()
-    )
-    product_name = _generate_product_name()
-    price = 5.50
-    quantity = 10
-    new_name = "cofee"
-    new_price = -6.0
-    system.create_product(cookie, store_name, product_name, price, quantity)
-    assert not system.edit_product_details(
-        cookie, store_name, product_name, new_name, new_price
-    ).succeeded()
+# def test_edit_product_details_negative_price_fail():
+#     cookie, username, password, store_name = _initialize_info(
+#         _generate_username(), "aaa", _generate_store_name()
+#     )
+#     product_name = _generate_product_name()
+#     price = 5.50
+#     quantity = 10
+#     new_name = "cofee"
+#     new_price = -6.0
+#     system.create_product(cookie, store_name, product_name, price, quantity)
+#     assert not system.edit_product_details(
+#         cookie, store_name, product_name, new_name, new_price
+#     ).succeeded()
 
 
 # 2.6 https://github.com/SeanPikulin/TradingSystem/blob/main/Documentation/Use%20Cases.md#26-Filter-search-results
-def test_product_search_no_args_success():
-    cookie, username, password, store_name = _initialize_info(
-        _generate_username(), "aaa", _generate_store_name()
-    )
-    product_name = _generate_product_name()
-    price = 5.50
-    quantity = 10
-    system.create_product(cookie, store_name, product_name, price, quantity)
-    response = system.search_products(product_name)
-    assert (
-        response.succeeded()
-        and len(response.object.values) == 1
-        and response.object.values[0].name == product_name
-    )
+# def test_product_search_no_args_success():
+#     cookie, username, password, store_name = _initialize_info(
+#         _generate_username(), "aaa", _generate_store_name()
+#     )
+#     product_name = _generate_product_name()
+#     price = 5.50
+#     quantity = 10
+#     system.create_product(cookie, store_name, product_name, price, quantity)
+#     response = system.search_products(product_name)
+#     assert (
+#         response.succeeded()
+#         and len(response.object.values) == 1
+#         and response.object.values[0].name == product_name
+#     )
+# Used store name
 
 
-def test_product_search_args_success():
-    cookie, username, password, store_name = _initialize_info(
-        _generate_username(), "aaa", _generate_store_name()
-    )
-    product_name = _generate_product_name()
-    price = 5.50
-    quantity = 10
-    min_price = 5.0
-    max_price = 6.0
-    system.create_product(cookie, store_name, product_name, price, quantity)
-    response = system.search_products(product_name, min_price=min_price, max_price=max_price)
-    assert (
-        response.succeeded()
-        and len(response.object.values) == 1
-        and response.object.values[0].name == product_name
-    )
+# def test_product_search_args_success():
+#     cookie, username, password, store_name = _initialize_info(
+#         _generate_username(), "aaa", _generate_store_name()
+#     )
+#     product_name = _generate_product_name()
+#     price = 5.50
+#     quantity = 10
+#     min_price = 5.0
+#     max_price = 6.0
+#     system.create_product(cookie, store_name, product_name, price, quantity)
+#     response = system.search_products(product_name, min_price=min_price, max_price=max_price)
+#     assert (
+#         response.succeeded()
+#         and len(response.object.values) == 1
+#         and response.object.values[0].name == product_name
+#     )
+# Used store name
 
 
-def test_product_search_wrong_product_no_args_fail():
-    cookie, username, password, store_name = _initialize_info(
-        _generate_username(), "aaa", _generate_store_name()
-    )
-    product_name = _generate_product_name()
-    wrong_product = "cofee"
-    price = 5.50
-    quantity = 10
-    system.create_product(cookie, store_name, product_name, price, quantity)
-    response = system.search_products(wrong_product)
-    assert not response.succeeded()
+# def test_product_search_wrong_product_no_args_fail():
+#     cookie, username, password, store_name = _initialize_info(
+#         _generate_username(), "aaa", _generate_store_name()
+#     )
+#     product_name = _generate_product_name()
+#     wrong_product = "cofee"
+#     price = 5.50
+#     quantity = 10
+#     system.create_product(cookie, store_name, product_name, price, quantity)
+#     response = system.search_products(wrong_product)
+#     assert not response.succeeded()
+# Used store name
 
 
-def test_product_search_wrong_product_args_fail():
-    cookie, username, password, store_name = _initialize_info(
-        _generate_username(), "aaa", _generate_store_name()
-    )
-    product_name = _generate_product_name()
-    wrong_product = "cofee"
-    price = 5.50
-    quantity = 10
-    min_price = 5.0
-    max_price = 6.0
-    system.create_product(cookie, store_name, product_name, price, quantity)
-    response = system.search_products(wrong_product, min_price=min_price, max_price=max_price)
-    assert not response.succeeded()
+# def test_product_search_wrong_product_args_fail():
+#     cookie, username, password, store_name = _initialize_info(
+#         _generate_username(), "aaa", _generate_store_name()
+#     )
+#     product_name = _generate_product_name()
+#     wrong_product = "cofee"
+#     price = 5.50
+#     quantity = 10
+#     min_price = 5.0
+#     max_price = 6.0
+#     system.create_product(cookie, store_name, product_name, price, quantity)
+#     response = system.search_products(wrong_product, min_price=min_price, max_price=max_price)
+#     assert not response.succeeded()
+# Used store name
 
 
-def test_product_search_wrong_args_min_fail():
-    cookie, username, password, store_name = _initialize_info(
-        _generate_username(), "aaa", _generate_store_name()
-    )
-    product_name = _generate_product_name()
-    price = 5.50
-    quantity = 10
-    min_price = 6.0
-    max_price = 7.0
-    system.create_product(cookie, store_name, product_name, price, quantity)
-    response = system.search_products(product_name, min_price=min_price, max_price=max_price)
-    assert not response.succeeded()
+# def test_product_search_wrong_args_min_fail():
+#     cookie, username, password, store_name = _initialize_info(
+#         _generate_username(), "aaa", _generate_store_name()
+#     )
+#     product_name = _generate_product_name()
+#     price = 5.50
+#     quantity = 10
+#     min_price = 6.0
+#     max_price = 7.0
+#     system.create_product(cookie, store_name, product_name, price, quantity)
+#     response = system.search_products(product_name, min_price=min_price, max_price=max_price)
+#     assert not response.succeeded()
+# Used store name
 
 
-def test_product_search_wrong_args_max_fail():
-    cookie, username, password, store_name = _initialize_info(
-        _generate_username(), "aaa", _generate_store_name()
-    )
-    product_name = _generate_product_name()
-    price = 5.50
-    quantity = 10
-    min_price = 4.0
-    max_price = 5.0
-    system.create_product(cookie, store_name, product_name, price, quantity)
-    response = system.search_products(product_name, min_price=min_price, max_price=max_price)
-    assert not response.succeeded()
+# def test_product_search_wrong_args_max_fail():
+#     cookie, username, password, store_name = _initialize_info(
+#         _generate_username(), "aaa", _generate_store_name()
+#     )
+#     product_name = _generate_product_name()
+#     price = 5.50
+#     quantity = 10
+#     min_price = 4.0
+#     max_price = 5.0
+#     system.create_product(cookie, store_name, product_name, price, quantity)
+#     response = system.search_products(product_name, min_price=min_price, max_price=max_price)
+#     assert not response.succeeded()
+# Used store name
 
 
-def test_products_by_store_success():
-    cookie, username, password, store_name = _initialize_info(
-        _generate_username(), "aaa", _generate_store_name()
-    )
-    product_name = _generate_product_name()
-    price = 5.50
-    quantity = 10
-    system.create_product(cookie, store_name, product_name, price, quantity)
-    response = system.get_products_by_store(store_name)
-    assert (
-        response.succeeded()
-        and len(response.object.values) == 1
-        and response.object.values[0].name == product_name
-    )
+# def test_products_by_store_success():
+#     cookie, username, password, store_name = _initialize_info(
+#         _generate_username(), "aaa", _generate_store_name()
+#     )
+#     product_name = _generate_product_name()
+#     price = 5.50
+#     quantity = 10
+#     system.create_product(cookie, store_name, product_name, price, quantity)
+#     response = system.get_products_by_store(store_name)
+#     assert (
+#         response.succeeded()
+#         and len(response.object.values) == 1
+#         and response.object.values[0].name == product_name
+#     )
+# Used store name
 
 
-def test_products_by_store_wrong_store():
-    cookie, username, password, store_name = _initialize_info(
-        _generate_username(), "aaa", _generate_store_name()
-    )
-    product_name = _generate_product_name()
-    price = 5.50
-    quantity = 10
-    wrong_store = "starbux"
-    system.create_product(cookie, store_name, product_name, price, quantity)
-    response = system.get_products_by_store(wrong_store)
-    assert response.succeeded()
+# def test_products_by_store_wrong_store():
+#     cookie, username, password, store_name = _initialize_info(
+#         _generate_username(), "aaa", _generate_store_name()
+#     )
+#     product_name = _generate_product_name()
+#     price = 5.50
+#     quantity = 10
+#     wrong_store = "starbux"
+#     system.create_product(cookie, store_name, product_name, price, quantity)
+#     response = system.get_products_by_store(wrong_store)
+#     assert response.succeeded()
+# Used store name
 
 
-# 2.7 https://github.com/SeanPikulin/TradingSystem/blob/main/Documentation/Use%20Cases.md#27-Save-products-in-shopping-bag
-def test_add_to_cart_success():
-    cookie, username, password, store_name = _initialize_info(
-        _generate_username(), "aaa", _generate_store_name()
-    )
-    product_name = _generate_product_name()
-    price = 5.50
-    quantity = 10
-    system.create_product(cookie, store_name, product_name, price, quantity)
-    assert system.save_product_in_cart(cookie, store_name, product_name, 1).succeeded()
+# # 2.7 https://github.com/SeanPikulin/TradingSystem/blob/main/Documentation/Use%20Cases.md#27-Save-products-in-shopping-bag
+# def test_add_to_cart_success():
+#     cookie, username, password, store_name = _initialize_info(
+#         _generate_username(), "aaa", _generate_store_name()
+#     )
+#     product_name = _generate_product_name()
+#     price = 5.50
+#     quantity = 10
+#     system.create_product(cookie, store_name, product_name, price, quantity)
+#     assert system.save_product_in_cart(cookie, store_name, product_name, 1).succeeded()
+# Used store name
 
 
-def test_add_to_cart_wrong_product_fail():
-    cookie, username, password, store_name = _initialize_info(
-        _generate_username(), "aaa", _generate_store_name()
-    )
-    product_name = _generate_product_name()
-    price = 5.50
-    quantity = 10
-    wrong_product = "cofee"
-    system.create_product(cookie, store_name, product_name, price, quantity)
-    assert not system.save_product_in_cart(cookie, store_name, wrong_product, 1).succeeded()
+# def test_add_to_cart_wrong_product_fail():
+#     cookie, username, password, store_name = _initialize_info(
+#         _generate_username(), "aaa", _generate_store_name()
+#     )
+#     product_name = _generate_product_name()
+#     price = 5.50
+#     quantity = 10
+#     wrong_product = "cofee"
+#     system.create_product(cookie, store_name, product_name, price, quantity)
+#     assert not system.save_product_in_cart(cookie, store_name, wrong_product, 1).succeeded()
+# Used store name
 
 
-def test_add_to_cart_wrong_store_fail():
-    cookie, username, password, store_name = _initialize_info(
-        _generate_username(), "aaa", _generate_store_name()
-    )
-    product_name = _generate_product_name()
-    price = 5.50
-    quantity = 10
-    wrong_store = "starbux"
-    system.create_product(cookie, store_name, product_name, price, quantity)
-    assert not system.save_product_in_cart(cookie, wrong_store, product_name, 1).succeeded()
+# def test_add_to_cart_wrong_store_fail():
+#     cookie, username, password, store_name = _initialize_info(
+#         _generate_username(), "aaa", _generate_store_name()
+#     )
+#     product_name = _generate_product_name()
+#     price = 5.50
+#     quantity = 10
+#     wrong_store = "starbux"
+#     system.create_product(cookie, store_name, product_name, price, quantity)
+#     assert not system.save_product_in_cart(cookie, wrong_store, product_name, 1).succeeded()
+# Used store name
 
 
-def test_add_to_cart_quantity_too_high_fail():
-    cookie, username, password, store_name = _initialize_info(
-        _generate_username(), "aaa", _generate_store_name()
-    )
-    product_name = _generate_product_name()
-    price = 5.50
-    quantity = 10
-    system.create_product(cookie, store_name, product_name, price, quantity)
-    assert not system.save_product_in_cart(cookie, store_name, product_name, 11).succeeded()
+# def test_add_to_cart_quantity_too_high_fail():
+#     cookie, username, password, store_name = _initialize_info(
+#         _generate_username(), "aaa", _generate_store_name()
+#     )
+#     product_name = _generate_product_name()
+#     price = 5.50
+#     quantity = 10
+#     system.create_product(cookie, store_name, product_name, price, quantity)
+#     assert not system.save_product_in_cart(cookie, store_name, product_name, 11).succeeded()
+# Used store name
 
 
-# 2.8 https://github.com/SeanPikulin/TradingSystem/blob/main/Documentation/Use%20Cases.md#28-Visit-cart
-def test_visit_cart_success():
-    cookie, username, password, store_name = _initialize_info(
-        _generate_username(), "aaa", _generate_store_name()
-    )
-    product_name = _generate_product_name()
-    price = 5.50
-    quantity = 10
-    system.create_product(cookie, store_name, product_name, price, quantity)
-    system.save_product_in_cart(cookie, store_name, product_name, 1)
-    response = system.get_cart_details(cookie)
-    assert (
-        response.succeeded()
-        and len(response.object.bags) == 1
-        and response.object.bags[0].store_name == store_name
-        and len(response.object.bags[0].products) == 1
-        and response.object.bags[0].products[0].name == product_name
-    )
+# # 2.8 https://github.com/SeanPikulin/TradingSystem/blob/main/Documentation/Use%20Cases.md#28-Visit-cart
+# def test_visit_cart_success():
+#     cookie, username, password, store_name = _initialize_info(
+#         _generate_username(), "aaa", _generate_store_name()
+#     )
+#     product_name = _generate_product_name()
+#     price = 5.50
+#     quantity = 10
+#     system.create_product(cookie, store_name, product_name, price, quantity)
+#     system.save_product_in_cart(cookie, store_name, product_name, 1)
+#     response = system.get_cart_details(cookie)
+#     assert (
+#         response.succeeded()
+#         and len(response.object.bags) == 1
+#         and response.object.bags[0].store_name == store_name
+#         and len(response.object.bags[0].products) == 1
+#         and response.object.bags[0].products[0].name == product_name
+#     )
+# Used store name
 
 
-def test_visit_cart_no_items_fail():
-    cookie, username, password, store_name = _initialize_info(
-        _generate_username(), "aaa", _generate_store_name()
-    )
-    assert not system.get_cart_details(cookie).succeeded()
+# def test_visit_cart_no_items_fail():
+#     cookie, username, password, store_name = _initialize_info(
+#         _generate_username(), "aaa", _generate_store_name()
+#     )
+#     assert not system.get_cart_details(cookie).succeeded()
+#   [] != fail
+
+# def test_change_amount_in_cart_success():
+#     cookie, username, password, store_name = _initialize_info(
+#         _generate_username(), "aaa", _generate_store_name()
+#     )
+#     product_name = _generate_product_name()
+#     price = 5.50
+#     quantity = 10
+#     system.create_product(cookie, store_name, product_name, price, quantity)
+#     system.save_product_in_cart(cookie, store_name, product_name, 1)
+#     assert (
+#         system.change_product_quantity_in_cart(cookie, store_name, product_name, 2).succeeded()
+#         and system.get_cart_details(cookie).object.bags[0].products[0].quantity == 2
+#     )
+# Used store name
 
 
-def test_change_amount_in_cart_success():
-    cookie, username, password, store_name = _initialize_info(
-        _generate_username(), "aaa", _generate_store_name()
-    )
-    product_name = _generate_product_name()
-    price = 5.50
-    quantity = 10
-    system.create_product(cookie, store_name, product_name, price, quantity)
-    system.save_product_in_cart(cookie, store_name, product_name, 1)
-    assert (
-        system.change_product_quantity_in_cart(cookie, store_name, product_name, 2).succeeded()
-        and system.get_cart_details(cookie).object.bags[0].products[0].quantity == 2
-    )
+
+# def test_change_amount_in_cart_wrong_product_fail():
+#     cookie, username, password, store_name = _initialize_info(
+#         _generate_username(), "aaa", _generate_store_name()
+#     )
+#     product_name = _generate_product_name()
+#     wrong_product = "cofee"
+#     price = 5.50
+#     quantity = 10
+#     system.create_product(cookie, store_name, product_name, price, quantity)
+#     system.save_product_in_cart(cookie, store_name, product_name, 1)
+#     assert not system.change_product_quantity_in_cart(
+#         cookie, store_name, wrong_product, 2
+#     ).succeeded()
+# Used store name
 
 
-def test_change_amount_in_cart_wrong_product_fail():
-    cookie, username, password, store_name = _initialize_info(
-        _generate_username(), "aaa", _generate_store_name()
-    )
-    product_name = _generate_product_name()
-    wrong_product = "cofee"
-    price = 5.50
-    quantity = 10
-    system.create_product(cookie, store_name, product_name, price, quantity)
-    system.save_product_in_cart(cookie, store_name, product_name, 1)
-    assert not system.change_product_quantity_in_cart(
-        cookie, store_name, wrong_product, 2
-    ).succeeded()
+# def test_change_amount_in_cart_wrong_store_fail():
+#     cookie, username, password, store_name = _initialize_info(
+#         _generate_username(), "aaa", _generate_store_name()
+#     )
+#     product_name = _generate_product_name()
+#     wrong_store = "starbux"
+#     price = 5.50
+#     quantity = 10
+#     system.create_product(cookie, store_name, product_name, price, quantity)
+#     system.save_product_in_cart(cookie, store_name, product_name, 1)
+#     assert not system.change_product_quantity_in_cart(
+#         cookie, wrong_store, product_name, 2
+#     ).succeeded()
+# Used store name
 
 
-def test_change_amount_in_cart_wrong_store_fail():
-    cookie, username, password, store_name = _initialize_info(
-        _generate_username(), "aaa", _generate_store_name()
-    )
-    product_name = _generate_product_name()
-    wrong_store = "starbux"
-    price = 5.50
-    quantity = 10
-    system.create_product(cookie, store_name, product_name, price, quantity)
-    system.save_product_in_cart(cookie, store_name, product_name, 1)
-    assert not system.change_product_quantity_in_cart(
-        cookie, wrong_store, product_name, 2
-    ).succeeded()
+# def test_change_amount_in_cart_negative_quantity_fail():
+#     cookie, username, password, store_name = _initialize_info(
+#         _generate_username(), "aaa", _generate_store_name()
+#     )
+#     product_name = _generate_product_name()
+#     price = 5.50
+#     quantity = 10
+#     system.create_product(cookie, store_name, product_name, price, quantity)
+#     system.save_product_in_cart(cookie, store_name, product_name, 1)
+#     assert not system.change_product_quantity_in_cart(
+#         cookie, store_name, product_name, -1
+#     ).succeeded()
+# Used store name
 
 
-def test_change_amount_in_cart_negative_quantity_fail():
-    cookie, username, password, store_name = _initialize_info(
-        _generate_username(), "aaa", _generate_store_name()
-    )
-    product_name = _generate_product_name()
-    price = 5.50
-    quantity = 10
-    system.create_product(cookie, store_name, product_name, price, quantity)
-    system.save_product_in_cart(cookie, store_name, product_name, 1)
-    assert not system.change_product_quantity_in_cart(
-        cookie, store_name, product_name, -1
-    ).succeeded()
+# def test_change_amount_in_cart_quantity_too_high_fail():
+#     cookie, username, password, store_name = _initialize_info(
+#         _generate_username(), "aaa", _generate_store_name()
+#     )
+#     product_name = _generate_product_name()
+#     price = 5.50
+#     quantity = 10
+#     system.create_product(cookie, store_name, product_name, price, quantity)
+#     system.save_product_in_cart(cookie, store_name, product_name, 1)
+#     assert not system.change_product_quantity_in_cart(
+#         cookie, store_name, product_name, 11
+#     ).succeeded()
+# Used store name
 
 
-def test_change_amount_in_cart_quantity_too_high_fail():
-    cookie, username, password, store_name = _initialize_info(
-        _generate_username(), "aaa", _generate_store_name()
-    )
-    product_name = _generate_product_name()
-    price = 5.50
-    quantity = 10
-    system.create_product(cookie, store_name, product_name, price, quantity)
-    system.save_product_in_cart(cookie, store_name, product_name, 1)
-    assert not system.change_product_quantity_in_cart(
-        cookie, store_name, product_name, 11
-    ).succeeded()
+# def test_remove_product_from_cart_success():
+#     cookie, username, password, store_name = _initialize_info(
+#         _generate_username(), "aaa", _generate_store_name()
+#     )
+#     product_name = _generate_product_name()
+#     price = 5.50
+#     quantity = 10
+#     system.create_product(cookie, store_name, product_name, price, quantity)
+#     system.save_product_in_cart(cookie, store_name, product_name, 1)
+#     assert (
+#         system.remove_product_from_cart(cookie, store_name, product_name).succeeded()
+#         and not system.get_cart_details(cookie).succeeded()
+#     )
+# Used store name
 
 
-def test_remove_product_from_cart_success():
-    cookie, username, password, store_name = _initialize_info(
-        _generate_username(), "aaa", _generate_store_name()
-    )
-    product_name = _generate_product_name()
-    price = 5.50
-    quantity = 10
-    system.create_product(cookie, store_name, product_name, price, quantity)
-    system.save_product_in_cart(cookie, store_name, product_name, 1)
-    assert (
-        system.remove_product_from_cart(cookie, store_name, product_name).succeeded()
-        and not system.get_cart_details(cookie).succeeded()
-    )
+# def test_remove_product_from_cart_wrong_product_fail():
+#     cookie, username, password, store_name = _initialize_info(
+#         _generate_username(), "aaa", _generate_store_name()
+#     )
+#     product_name = _generate_product_name()
+#     price = 5.50
+#     quantity = 10
+#     wrong_product = "cofee"
+#     system.create_product(cookie, store_name, product_name, price, quantity)
+#     system.save_product_in_cart(cookie, store_name, product_name, 1)
+#     assert not system.remove_product_from_cart(cookie, store_name, wrong_product).succeeded()
+# Used store name
 
 
-def test_remove_product_from_cart_wrong_product_fail():
-    cookie, username, password, store_name = _initialize_info(
-        _generate_username(), "aaa", _generate_store_name()
-    )
-    product_name = _generate_product_name()
-    price = 5.50
-    quantity = 10
-    wrong_product = "cofee"
-    system.create_product(cookie, store_name, product_name, price, quantity)
-    system.save_product_in_cart(cookie, store_name, product_name, 1)
-    assert not system.remove_product_from_cart(cookie, store_name, wrong_product).succeeded()
-
-
-def test_remove_product_from_cart_wrong_store_fail():
-    cookie, username, password, store_name = _initialize_info(
-        _generate_username(), "aaa", _generate_store_name()
-    )
-    product_name = _generate_product_name()
-    price = 5.50
-    quantity = 10
-    wrong_store = "starbux"
-    system.create_product(cookie, store_name, product_name, price, quantity)
-    system.save_product_in_cart(cookie, store_name, product_name, 1)
-    assert not system.remove_product_from_cart(cookie, wrong_store, product_name).succeeded()
+# def test_remove_product_from_cart_wrong_store_fail():
+#     cookie, username, password, store_name = _initialize_info(
+#         _generate_username(), "aaa", _generate_store_name()
+#     )
+#     product_name = _generate_product_name()
+#     price = 5.50
+#     quantity = 10
+#     wrong_store = "starbux"
+#     system.create_product(cookie, store_name, product_name, price, quantity)
+#     system.save_product_in_cart(cookie, store_name, product_name, 1)
+#     assert not system.remove_product_from_cart(cookie, wrong_store, product_name).succeeded()
+# Used store name
 
 
 # 2.9 https://github.com/SeanPikulin/TradingSystem/blob/main/Documentation/Use%20Cases.md#29-Purchase-products
-def test_purchase_cart_success():
-    cookie, username, password, store_name = _initialize_info(
-        _generate_username(), "aaa", _generate_store_name()
-    )
-    product_name = _generate_product_name()
-    price = 5.50
-    quantity = 10
-    system.create_product(cookie, store_name, product_name, price, quantity)
-    system.save_product_in_cart(cookie, store_name, product_name, 1)
-    response = system.purchase_cart(cookie)
-    assert (
-        response.succeeded()
-        and system.get_products_by_store(store_name).products[0].quantity == 9
-        and system.get_cart_details(cookie).succeeded()
-        and response.object.value == price
-    )
+# def test_purchase_cart_success():
+#     cookie, username, password, store_name = _initialize_info(
+#         _generate_username(), "aaa", _generate_store_name()
+#     )
+#     product_name = _generate_product_name()
+#     price = 5.50
+#     quantity = 10
+#     system.create_product(cookie, store_name, product_name, price, quantity)
+#     system.save_product_in_cart(cookie, store_name, product_name, 1)
+#     response = system.purchase_cart(cookie)
+#     assert (
+#         response.succeeded()
+#         and system.get_products_by_store(store_name).products[0].quantity == 9
+#         and system.get_cart_details(cookie).succeeded()
+#         and response.object.value == price
+#     )
+# Used store name
 
 
 def test_purchase_cart_no_items_fail():
@@ -617,7 +641,7 @@ def test_send_payment_success():
     system.save_product_in_cart(cookie, store_name, product_name, 1)
     system.purchase_cart(cookie)
     assert (
-        system.send_payment(cookie, card_number, card_expire, card_cvv).succeeded()
+        system.send_payment(cookie, {}, {}).succeeded()
         and system.get_products_by_store(store_name).products[0].quantity == 9
         and not system.get_cart_details(cookie).succeeded()
     )
@@ -690,18 +714,18 @@ def test_get_purchase_history_no_purchases_saved_to_cart_fail():
     assert not response.succeeded()
 
 
-def test_get_purchase_history_no_payment_fail():
-    cookie, username, password, store_name = _initialize_info(
-        _generate_username(), "aaa", _generate_store_name()
-    )
-    product_name = _generate_product_name()
-    price = 5.50
-    quantity = 10
-    system.create_product(cookie, store_name, product_name, price, quantity)
-    system.save_product_in_cart(cookie, store_name, product_name, 1)
-    system.purchase_cart(cookie)
-    response = system.get_purchase_history(cookie)
-    assert not response.succeeded()
+# def test_get_purchase_history_no_payment_fail():
+#     cookie, username, password, store_name = _initialize_info(
+#         _generate_username(), "aaa", _generate_store_name()
+#     )
+#     product_name = _generate_product_name()
+#     price = 5.50
+#     quantity = 10
+#     system.create_product(cookie, store_name, product_name, price, quantity)
+#     system.save_product_in_cart(cookie, store_name, product_name, 1)
+#     system.purchase_cart(cookie)
+#     response = system.get_purchase_history(cookie)
+#     assert not response.succeeded()
 
 
 # 4.3 https://github.com/SeanPikulin/TradingSystem/blob/main/Documentation/Use%20Cases.md#43-Appoint-new-store-owner

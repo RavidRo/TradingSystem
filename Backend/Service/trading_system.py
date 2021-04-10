@@ -51,11 +51,12 @@ class TradingSystem(object):
         self, *keywords, product_name="", category=None, min_price=None, max_price=None
     ):
         return TradingSystemManager.search_products(
-            *keywords,
+
             product_name,
             category,
             min_price,
             max_price,
+            *keywords,
         )
 
     @logging
