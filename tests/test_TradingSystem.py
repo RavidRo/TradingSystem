@@ -2,9 +2,7 @@ import pytest
 from Backend.Service.trading_system import TradingSystem
 
 # TODO: parallel testing
-# TODO: more coverage
 # TODO: get admin permissions
-# TODO: decide on permissions, positions and discounts names
 system = TradingSystem.getInstance()
 
 
@@ -117,7 +115,7 @@ def test_remove_product_success():
     price = 5.50
     quantity = 10
     system.create_product(cookie, store_name, product_name, price, quantity)
-    assert system.remove_products(cookie, store_name, product_name).succeeded()
+    assert system.remove_product_from_store(cookie, store_name, product_name).succeeded()
 
 
 def test_remove_product_wrong_product_fail():
@@ -127,7 +125,7 @@ def test_remove_product_wrong_product_fail():
     price = 5.50
     quantity = 10
     system.create_product(cookie, store_name, product_name, price, quantity)
-    assert not system.remove_products(cookie, store_name, wrong_product).succeeded()
+    assert not system.remove_product_from_store(cookie, store_name, wrong_product).succeeded()
 
 
 def test_change_product_quantity_success():
@@ -137,7 +135,7 @@ def test_change_product_quantity_success():
     quantity = 10
     new_quantity = 15
     system.create_product(cookie, store_name, product_name, price, quantity)
-    assert system.change_product_quantity(cookie, store_name, product_name, new_quantity).succeeded()
+    assert system.change_product_quantity_in_store(cookie, store_name, product_name, new_quantity).succeeded()
 
 
 def test_change_product_quantity_negative_quantity_fail():
@@ -148,7 +146,7 @@ def test_change_product_quantity_negative_quantity_fail():
     new_quantity = -15
     cookie = system.enter_system()
     system.create_product(cookie, store_name, product_name, price, quantity)
-    assert not system.change_product_quantity(cookie, store_name, product_name, new_quantity).succeeded()
+    assert not system.change_product_quantity_in_store(cookie, store_name, product_name, new_quantity).succeeded()
 
 
 def test_change_product_quantity_wrong_product_fail():
@@ -159,7 +157,7 @@ def test_change_product_quantity_wrong_product_fail():
     quantity = 10
     new_quantity = 15
     system.create_product(cookie, store_name, product_name, price, quantity)
-    assert not system.change_product_quantity(cookie, store_name, wrong_product, new_quantity).succeeded()
+    assert not system.change_product_quantity_in_store(cookie, store_name, wrong_product, new_quantity).succeeded()
 
 
 def test_edit_product_details_success():
@@ -247,27 +245,46 @@ def test_product_search_wrong_product_args_fail():
 def test_product_search_wrong_args_min_fail():
     cookie, username, password, store_name = _initialize_info("doorbellman", "aaa", "starbucks")
     product_name = "coffee"
-    wrong_product = "cofee"
     price = 5.50
     quantity = 10
     min_price = 6.0
     max_price = 7.0
     system.create_product(cookie, store_name, product_name, price, quantity)
-    response = system.search_products(wrong_product, min_price=min_price, max_price=max_price)
+    response = system.search_products(product_name, min_price=min_price, max_price=max_price)
     assert not response.succeeded()
 
 
 def test_product_search_wrong_args_max_fail():
     cookie, username, password, store_name = _initialize_info("doorbellman", "aaa", "starbucks")
     product_name = "coffee"
-    wrong_product = "cofee"
     price = 5.50
     quantity = 10
     min_price = 4.0
     max_price = 5.0
     system.create_product(cookie, store_name, product_name, price, quantity)
-    response = system.search_products(wrong_product, min_price=min_price, max_price=max_price)
+    response = system.search_products(product_name, min_price=min_price, max_price=max_price)
     assert not response.succeeded()
+
+
+def test_products_by_store_success():
+    cookie, username, password, store_name = _initialize_info("doorbellman", "aaa", "starbucks")
+    product_name = "coffee"
+    price = 5.50
+    quantity = 10
+    system.create_product(cookie, store_name, product_name, price, quantity)
+    response = system.get_products_by_store(store_name)
+    assert response.succeeded() and len(response.object.values) == 1 and response.object.values[0].name == product_name
+
+
+def test_products_by_store_wrong_store():
+    cookie, username, password, store_name = _initialize_info("doorbellman", "aaa", "starbucks")
+    product_name = "coffee"
+    price = 5.50
+    quantity = 10
+    wrong_store = "starbux"
+    system.create_product(cookie, store_name, product_name, price, quantity)
+    response = system.get_products_by_store(wrong_store)
+    assert response.succeeded()
 
 
 # 2.7 https://github.com/SeanPikulin/TradingSystem/blob/main/Documentation/Use%20Cases.md#27-Save-products-in-shopping-bag
@@ -298,6 +315,15 @@ def test_add_to_cart_wrong_store_fail():
     wrong_store = "starbux"
     system.create_product(cookie, store_name, product_name, price, quantity)
     assert not system.save_product_in_cart(cookie, wrong_store, product_name, 1).succeeded()
+
+
+def test_add_to_cart_quantity_too_high_fail():
+    cookie, username, password, store_name = _initialize_info("doorbellman", "aaa", "starbucks")
+    product_name = "coffee"
+    price = 5.50
+    quantity = 10
+    system.create_product(cookie, store_name, product_name, price, quantity)
+    assert not system.save_product_in_cart(cookie, store_name, product_name, 11).succeeded()
 
 
 # 2.8 https://github.com/SeanPikulin/TradingSystem/blob/main/Documentation/Use%20Cases.md#28-Visit-cart
@@ -361,6 +387,16 @@ def test_change_amount_in_cart_negative_quantity_fail():
     assert not system.change_product_quantity_in_cart(cookie, store_name, product_name, -1).succeeded()
 
 
+def test_change_amount_in_cart_quantity_too_high_fail():
+    cookie, username, password, store_name = _initialize_info("doorbellman", "aaa", "starbucks")
+    product_name = "coffee"
+    price = 5.50
+    quantity = 10
+    system.create_product(cookie, store_name, product_name, price, quantity)
+    system.save_product_in_cart(cookie, store_name, product_name, 1)
+    assert not system.change_product_quantity_in_cart(cookie, store_name, product_name, 11).succeeded()
+
+
 def test_remove_product_from_cart_success():
     cookie, username, password, store_name = _initialize_info("doorbellman", "aaa", "starbucks")
     product_name = "coffee"
@@ -394,7 +430,113 @@ def test_remove_product_from_cart_wrong_store_fail():
 
 
 # 2.9 https://github.com/SeanPikulin/TradingSystem/blob/main/Documentation/Use%20Cases.md#29-Purchase-products
-def test_
+def test_purchase_cart_success():
+    cookie, username, password, store_name = _initialize_info("doorbellman", "aaa", "starbucks")
+    product_name = "coffee"
+    price = 5.50
+    quantity = 10
+    system.create_product(cookie, store_name, product_name, price, quantity)
+    system.save_product_in_cart(cookie, store_name, product_name, 1)
+    response = system.purchase_cart(cookie)
+    assert response.succeeded() and system.get_products_by_store(store_name).products[0].quantity\
+           == 9 and system.get_cart_details(cookie).succeeded() and response.object.value == price
+
+
+def test_purchase_cart_no_items_fail():
+    cookie, username, password, store_name = _initialize_info("doorbellman", "aaa", "starbucks")
+    assert not system.purchase_cart(cookie).succeeded()
+
+
+def test_purchase_cart_twice_fail():
+    cookie, username, password, store_name = _initialize_info("doorbellman", "aaa", "starbucks")
+    product_name = "coffee"
+    price = 5.50
+    quantity = 10
+    system.create_product(cookie, store_name, product_name, price, quantity)
+    system.save_product_in_cart(cookie, store_name, product_name, 1)
+    system.purchase_cart(cookie)
+    assert not system.purchase_cart(cookie).succeeded()
+
+
+def test_send_payment_success():
+    cookie, username, password, store_name = _initialize_info("doorbellman", "aaa", "starbucks")
+    card_number = "1234-1234-1234-1234"
+    card_expire = "12/34"
+    card_cvv = "123"
+    product_name = "coffee"
+    price = 5.50
+    quantity = 10
+    system.create_product(cookie, store_name, product_name, price, quantity)
+    system.save_product_in_cart(cookie, store_name, product_name, 1)
+    system.purchase_cart(cookie)
+    assert system.send_payment(cookie, card_number, card_expire, card_cvv).succeeded() \
+           and system.get_products_by_store(store_name).products[0].quantity == 9 \
+           and not system.get_cart_details(cookie).succeeded()
+
+
+def test_send_payment_before_purchase_cart_fail():
+    cookie, username, password, store_name = _initialize_info("doorbellman", "aaa", "starbucks")
+    card_number = "1234-1234-1234-1234"
+    card_expire = "12/34"
+    card_cvv = "123"
+    product_name = "coffee"
+    price = 5.50
+    quantity = 10
+    system.create_product(cookie, store_name, product_name, price, quantity)
+    system.save_product_in_cart(cookie, store_name, product_name, 1)
+    assert not system.send_payment(cookie, card_number, card_expire, card_cvv).succeeded() \
+           and system.get_products_by_store(store_name).products[0].quantity == 9 \
+           and system.get_cart_details(cookie).succeeded()
+
+
+# 3.7 https://github.com/SeanPikulin/TradingSystem/blob/main/Documentation/Use%20Cases.md#37-Get-personal-purchase-history
+def test_get_purchase_history_success():
+    cookie, username, password, store_name = _initialize_info("doorbellman", "aaa", "starbucks")
+    card_number = "1234-1234-1234-1234"
+    card_expire = "12/34"
+    card_cvv = "123"
+    product_name = "coffee"
+    price = 5.50
+    quantity = 10
+    system.create_product(cookie, store_name, product_name, price, quantity)
+    system.save_product_in_cart(cookie, store_name, product_name, 1)
+    system.purchase_cart(cookie)
+    system.send_payment(cookie, card_number, card_expire, card_cvv)
+    response = system.get_purchase_history(cookie)
+    assert response.succeeded() and len(response.object.values) == 1 and response.object.values[0].name == product_name
+
+
+def test_get_purchase_history_no_purchases_fail():
+    cookie, username, password, store_name = _initialize_info("doorbellman", "aaa", "starbucks")
+    product_name = "coffee"
+    price = 5.50
+    quantity = 10
+    system.create_product(cookie, store_name, product_name, price, quantity)
+    response = system.get_purchase_history(cookie)
+    assert not response.succeeded()
+
+
+def test_get_purchase_history_no_purchases_saved_to_cart_fail():
+    cookie, username, password, store_name = _initialize_info("doorbellman", "aaa", "starbucks")
+    product_name = "coffee"
+    price = 5.50
+    quantity = 10
+    system.create_product(cookie, store_name, product_name, price, quantity)
+    system.save_product_in_cart(cookie, store_name, product_name, 1)
+    response = system.get_purchase_history(cookie)
+    assert not response.succeeded()
+
+
+def test_get_purchase_history_no_payment_fail():
+    cookie, username, password, store_name = _initialize_info("doorbellman", "aaa", "starbucks")
+    product_name = "coffee"
+    price = 5.50
+    quantity = 10
+    system.create_product(cookie, store_name, product_name, price, quantity)
+    system.save_product_in_cart(cookie, store_name, product_name, 1)
+    system.purchase_cart(cookie)
+    response = system.get_purchase_history(cookie)
+    assert not response.succeeded()
 
 # 4.3 https://github.com/SeanPikulin/TradingSystem/blob/main/Documentation/Use%20Cases.md#43-Appoint-new-store-owner
 def test_appoint_store_owner_success():
@@ -521,6 +663,17 @@ def test_remove_responsibility_success():
     assert system.remove_manager_permission(cookie, store_name, new_manager_username, new_responsibility).succeeded()
 
 
+def test_default_permissions_success():
+    cookie, username, password, store_name = _initialize_info("doorbellman", "aaa", "starbucks")
+    new_manager_cookie, new_manager_username, new_manager_password, _ = _initialize_info("Ravid Rom", "bbb")
+    default_permission = "get appointments"
+    other_permissions = ["remove manager", "manage products", "appoint manager", "get history"]
+    system.appoint_manager(cookie, store_name, new_manager_username)
+    assert system.remove_manager_permission(cookie, store_name, new_manager_username, default_permission).succeeded()
+    for responsibility in other_permissions:
+        assert system.add_manager_permission(cookie, store_name, new_manager_username, responsibility).succeeded()
+
+
 def test_add_responsibility_twice_fail():
     cookie, username, password, store_name = _initialize_info("doorbellman", "aaa", "starbucks")
     new_manager_cookie, new_manager_username, new_manager_password, _ = _initialize_info("Ravid Rom", "bbb")
@@ -537,7 +690,92 @@ def test_remove_responsibility_twice_fail():
     system.appoint_manager(cookie, store_name, new_manager_username)
     assert not system.remove_manager_permission(cookie, store_name, new_manager_username, new_responsibility).succeeded()
 
-# TODO: check if the manager can/'t in fact use the responsibilities.
+
+def test_get_appointment_permission_success():
+    cookie, username, password, store_name = _initialize_info("doorbellman", "aaa", "starbucks")
+    new_manager_cookie, new_manager_username, new_manager_password, _ = _initialize_info("Ravid Rom", "bbb")
+    system.appoint_manager(cookie, store_name, new_manager_username)
+    assert system.get_store_appointments(new_manager_cookie, store_name).succeeded()
+
+
+def test_get_history_permission_success():
+    cookie, username, password, store_name = _initialize_info("doorbellman", "aaa", "starbucks")
+    new_manager_cookie, new_manager_username, new_manager_password, _ = _initialize_info("Ravid Rom", "bbb")
+    system.appoint_manager(cookie, store_name, new_manager_username)
+    system.add_manager_permission(cookie, store_name, new_manager_username, "get history")
+    assert system.get_store_purchase_history(new_manager_cookie, store_name).succeeded()
+
+
+def test_appoint_manager_permission_success():
+    cookie, username, password, store_name = _initialize_info("doorbellman", "aaa", "starbucks")
+    new_manager_cookie, new_manager_username, new_manager_password, _ = _initialize_info("Ravid Rom", "bbb")
+    last_manager_cookie, last_manager_username, last_manager_password, _ = _initialize_info("Inon Katz", "ccc")
+    system.appoint_manager(cookie, store_name, new_manager_username)
+    system.add_manager_permission(cookie, store_name, new_manager_username, "appoint manager")
+    assert system.appoint_manager(new_manager_cookie, store_name, last_manager_username).succeeded()
+
+
+def test_remove_manager_permission_success():
+    cookie, username, password, store_name = _initialize_info("doorbellman", "aaa", "starbucks")
+    new_manager_cookie, new_manager_username, new_manager_password, _ = _initialize_info("Ravid Rom", "bbb")
+    last_manager_cookie, last_manager_username, last_manager_password, _ = _initialize_info("Inon Katz", "ccc")
+    system.appoint_manager(cookie, store_name, new_manager_username)
+    system.appoint_manager(cookie, store_name, last_manager_username)
+    system.add_manager_permission(cookie, store_name, new_manager_username, "remove manager")
+    assert system.remove_appointment(new_manager_cookie, store_name, last_manager_username).succeeded()
+
+
+def test_manage_products_permission_success():
+    cookie, username, password, store_name = _initialize_info("doorbellman", "aaa", "starbucks")
+    new_manager_cookie, new_manager_username, new_manager_password, _ = _initialize_info("Ravid Rom", "bbb")
+    system.appoint_manager(cookie, store_name, new_manager_username)
+    system.add_manager_permission(cookie, store_name, new_manager_username, "manage products")
+    product_name = "coffee"
+    price = 5.50
+    quantity = 10
+    assert system.create_product(new_manager_cookie, store_name, product_name, price, quantity).succeeded()
+
+
+def test_get_appointment_no_permission_fail():
+    cookie, username, password, store_name = _initialize_info("doorbellman", "aaa", "starbucks")
+    new_manager_cookie, new_manager_username, new_manager_password, _ = _initialize_info("Ravid Rom", "bbb")
+    system.appoint_manager(cookie, store_name, new_manager_username)
+    system.remove_manager_permission(cookie, store_name, new_manager_username, "get appointments")
+    assert not system.get_store_appointments(new_manager_cookie, store_name).succeeded()
+
+
+def test_get_history_no_permission_fail():
+    cookie, username, password, store_name = _initialize_info("doorbellman", "aaa", "starbucks")
+    new_manager_cookie, new_manager_username, new_manager_password, _ = _initialize_info("Ravid Rom", "bbb")
+    system.appoint_manager(cookie, store_name, new_manager_username)
+    assert not system.get_store_purchase_history(new_manager_cookie, store_name).succeeded()
+
+
+def test_appoint_manager_no_permission_fail():
+    cookie, username, password, store_name = _initialize_info("doorbellman", "aaa", "starbucks")
+    new_manager_cookie, new_manager_username, new_manager_password, _ = _initialize_info("Ravid Rom", "bbb")
+    last_manager_cookie, last_manager_username, last_manager_password, _ = _initialize_info("Inon Katz", "ccc")
+    system.appoint_manager(cookie, store_name, new_manager_username)
+    assert not system.appoint_manager(new_manager_cookie, store_name, last_manager_username).succeeded()
+
+
+def test_remove_manager_no_permission_fail():
+    cookie, username, password, store_name = _initialize_info("doorbellman", "aaa", "starbucks")
+    new_manager_cookie, new_manager_username, new_manager_password, _ = _initialize_info("Ravid Rom", "bbb")
+    last_manager_cookie, last_manager_username, last_manager_password, _ = _initialize_info("Inon Katz", "ccc")
+    system.appoint_manager(cookie, store_name, new_manager_username)
+    system.appoint_manager(cookie, store_name, last_manager_username)
+    assert not system.remove_appointment(new_manager_cookie, store_name, last_manager_username).succeeded()
+
+
+def test_manage_products_no_permission_fail():
+    cookie, username, password, store_name = _initialize_info("doorbellman", "aaa", "starbucks")
+    new_manager_cookie, new_manager_username, new_manager_password, _ = _initialize_info("Ravid Rom", "bbb")
+    system.appoint_manager(cookie, store_name, new_manager_username)
+    product_name = "coffee"
+    price = 5.50
+    quantity = 10
+    assert not system.create_product(new_manager_cookie, store_name, product_name, price, quantity).succeeded()
 
 
 # 4.7 https://github.com/SeanPikulin/TradingSystem/blob/main/Documentation/Use%20Cases.md#43-Dismiss-an-owner
@@ -616,7 +854,102 @@ def test_get_store_personnel_wrong_store_name_fail():
     wrong_store = "starbux"
     assert not system.get_store_appointments(cookie, wrong_store).succeeded()
 
-# 4.11 TODO: not implemented
+
+# 4.11 https://github.com/SeanPikulin/TradingSystem/blob/main/Documentation/Use%20Cases.md#411-Get-store-purchase-history
+def test_get_store_purchase_history_success():
+    cookie, username, password, store_name = _initialize_info("doorbellman", "aaa", "starbucks")
+    card_number = "1234-1234-1234-1234"
+    card_expire = "12/34"
+    card_cvv = "123"
+    product_name = "coffee"
+    price = 5.50
+    quantity = 10
+    system.create_product(cookie, store_name, product_name, price, quantity)
+    system.save_product_in_cart(cookie, store_name, product_name, 1)
+    system.purchase_cart(cookie)
+    system.send_payment(cookie, card_number, card_expire, card_cvv)
+    response = system.get_store_purchase_history(cookie, store_name)
+    assert response.succeeded() and len(response.object.values) == 1 and response.object.values[0].name == product_name
+
+
+def test_get_store_purchase_history_no_purchases_fail():
+    cookie, username, password, store_name = _initialize_info("doorbellman", "aaa", "starbucks")
+    product_name = "coffee"
+    price = 5.50
+    quantity = 10
+    system.create_product(cookie, store_name, product_name, price, quantity)
+    response = system.get_store_purchase_history(cookie, store_name)
+    assert not response.succeeded()
+
+
+def test_get_store_purchase_history_no_purchases_saved_to_cart_fail():
+    cookie, username, password, store_name = _initialize_info("doorbellman", "aaa", "starbucks")
+    product_name = "coffee"
+    price = 5.50
+    quantity = 10
+    system.create_product(cookie, store_name, product_name, price, quantity)
+    system.save_product_in_cart(cookie, store_name, product_name, 1)
+    response = system.get_store_purchase_history(cookie, store_name)
+    assert not response.succeeded()
+
+
+def test_get_store_purchase_history_no_payment_fail():
+    cookie, username, password, store_name = _initialize_info("doorbellman", "aaa", "starbucks")
+    product_name = "coffee"
+    price = 5.50
+    quantity = 10
+    system.create_product(cookie, store_name, product_name, price, quantity)
+    system.save_product_in_cart(cookie, store_name, product_name, 1)
+    system.purchase_cart(cookie)
+    response = system.get_store_purchase_history(cookie, store_name)
+    assert not response.succeeded()
+
 
 # 6.4 https://github.com/SeanPikulin/TradingSystem/blob/main/Documentation/Use%20Cases.md#64-Get-store-purchase-history-system-manager
-# TODO: this
+def test_admin_get_store_purchase_history_success():
+    cookie, username, password, store_name = _initialize_info("doorbellman", "aaa", "starbucks")
+    card_number = "1234-1234-1234-1234"
+    card_expire = "12/34"
+    card_cvv = "123"
+    product_name = "coffee"
+    price = 5.50
+    quantity = 10
+    system.create_product(cookie, store_name, product_name, price, quantity)
+    system.save_product_in_cart(cookie, store_name, product_name, 1)
+    system.purchase_cart(cookie)
+    system.send_payment(cookie, card_number, card_expire, card_cvv)
+    response = system.get_store_purchase_history(cookie, store_name)
+    assert response.succeeded() and len(response.object.values) == 1 and response.object.values[0].name == product_name
+
+
+def test_admin_get_store_purchase_history_no_purchases_fail():
+    cookie, username, password, store_name = _initialize_info("doorbellman", "aaa", "starbucks")
+    product_name = "coffee"
+    price = 5.50
+    quantity = 10
+    system.create_product(cookie, store_name, product_name, price, quantity)
+    response = system.get_store_purchase_history(cookie, store_name)
+    assert not response.succeeded()
+
+
+def test_admin_get_store_purchase_history_no_purchases_saved_to_cart_fail():
+    cookie, username, password, store_name = _initialize_info("doorbellman", "aaa", "starbucks")
+    product_name = "coffee"
+    price = 5.50
+    quantity = 10
+    system.create_product(cookie, store_name, product_name, price, quantity)
+    system.save_product_in_cart(cookie, store_name, product_name, 1)
+    response = system.get_store_purchase_history(cookie, store_name)
+    assert not response.succeeded()
+
+
+def test_admin_get_store_purchase_history_no_payment_fail():
+    cookie, username, password, store_name = _initialize_info("doorbellman", "aaa", "starbucks")
+    product_name = "coffee"
+    price = 5.50
+    quantity = 10
+    system.create_product(cookie, store_name, product_name, price, quantity)
+    system.save_product_in_cart(cookie, store_name, product_name, 1)
+    system.purchase_cart(cookie)
+    response = system.get_store_purchase_history(cookie, store_name)
+    assert not response.succeeded()
