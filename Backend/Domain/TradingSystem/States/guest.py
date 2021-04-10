@@ -6,12 +6,12 @@ from Backend.response import Response
 
 
 class Guest(UserState):
-    def get_username(self):
-        return Response(False, msg="Guests don't have username")
-
     def __init__(self, user):
         super().__init__(user)
         self.authentication = Authentication.get_instance()
+
+    def get_username(self):
+        return Response(False, msg="Guests don't have username")
 
     def login(self, username, password):
         response = self.authentication.login(username, password)

@@ -1,9 +1,11 @@
+from Backend.response import Response, ParsableList, PrimitiveParsable
+
+from Backend.Domain.TradingSystem.Responsibilities.founder import Founder
 from Backend.Domain.TradingSystem.Responsibilities.responsibility import Responsibility
 from Backend.Domain.TradingSystem.store import Store
-from .user_state import UserState
-from Backend.response import Response, ParsableList, PrimitiveParsable
 from Backend.Domain.TradingSystem.purchase_details import PurchaseDetails
-from typing import List
+
+from .user_state import UserState
 
 
 class Member(UserState):
@@ -60,11 +62,11 @@ class Member(UserState):
 
     def open_store(self, store_name):
         store = Store(store_name)
-        self.responsibilities[store.get_id()] = Responsibility(self, store)
-        return Response[store](True, obj=store, msg="Store opened successfully")
+        self.responsibilities[store.get_id()] = Founder(self, store)
+        return Response[Store](True, obj=store, msg="Store opened successfully")
 
     def get_purchase_history(self):
-        return Response[List[PurchaseDetails]](
+        return Response[list[PurchaseDetails]](
             True,
             obj=ParsableList(self.purchase_details),
             msg="Purchase history " "got successfully",

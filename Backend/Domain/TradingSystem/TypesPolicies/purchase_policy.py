@@ -1,5 +1,4 @@
-
-from Backend.response import Response, PrimitiveParsable
+from Backend.response import Response
 
 
 class PurchasePolicy:

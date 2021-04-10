@@ -36,11 +36,12 @@ class StoresManager:
     # Inter component functions
     # used in 3.2
     @staticmethod
-    def create_store(store: Store) -> None:
+    def create_store(store: Store) -> Response[None]:
         StoresManager.stores.append(store)
+        return Response(True)
 
     @staticmethod
-    def get_store(store_id: str):
+    def get_store(store_id: str) -> Response[Store]:
         for store in StoresManager.stores:
             if store.get_id() == store_id:
                 return Response(True, store)

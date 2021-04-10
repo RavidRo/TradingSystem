@@ -59,7 +59,7 @@ class TradingSystem(object):
         )
 
     @logging
-    def save_product_in_cart(self, cookie, store_id, product_id, quantity=1):
+    def save_product_in_cart(self, cookie, store_id, product_id, quantity=0):
         return TradingSystemManager.save_product_in_cart(cookie, store_id, product_id, quantity)
 
     @logging

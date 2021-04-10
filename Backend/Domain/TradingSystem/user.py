@@ -1,12 +1,14 @@
 from __future__ import annotations
 
-from Backend.Domain.TradingSystem.Interfaces.IUserState import IUserState
-from Backend.Domain.TradingSystem.Interfaces.IUser import IUser
 from Backend.response import Response, ParsableList, PrimitiveParsable
+
+from Backend.Domain.TradingSystem.Interfaces.IUser import IUser
+from Backend.Domain.TradingSystem.Interfaces.IUserState import IUserState
+from Backend.Domain.TradingSystem.store import Store
 from Backend.Domain.TradingSystem.shopping_cart import ShoppingCart
 from Backend.Domain.TradingSystem.purchase_details import PurchaseDetails
 from Backend.Domain.TradingSystem.States.user_state import UserState
-from .Responsibilities.responsibility import Permission, Responsibility
+from Backend.Domain.TradingSystem.Responsibilities.responsibility import Permission, Responsibility
 
 
 class User(IUser):
@@ -55,7 +57,7 @@ class User(IUser):
     # ===============================
 
     # 3.2
-    def create_store(self, name: str) -> Response[None]:
+    def create_store(self, name: str) -> Response[Store]:
         return self.state.open_store(name)
 
     # 3.7
@@ -69,7 +71,7 @@ class User(IUser):
     # Creating a new product a the store and setting its quantity to 0
     def create_product(
         self, store_id: str, name: str, price: float, quantity: int
-    ) -> Response[None]:
+    ) -> Response[str]:
         return self.state.add_new_product(store_id, name, price, quantity)
 
     # 4.1
@@ -141,7 +143,7 @@ class User(IUser):
     def is_appointed(self, store_id: str) -> bool:
         return self.state.is_appointed(store_id)
 
-    def get_username(self) -> str:
+    def get_username(self) -> Response[PrimitiveParsable[str]]:
         return self.state.get_username()
 
     def change_state(self, new_state: UserState) -> None:
