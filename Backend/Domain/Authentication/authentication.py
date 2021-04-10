@@ -1,3 +1,4 @@
+import threading
 from werkzeug.security import generate_password_hash, check_password_hash
 import json
 
@@ -21,14 +22,17 @@ class Authentication:
 
         Authentication.__instance = self
         self.users = {}
+        self.register_lock = threading.Lock()
         self.__register_admins()
 
     def register(self, username, password) -> Response[None]:
-        if username in self.users:
-            return Response(False, msg="username already exists")
+        # We don't want to register to users with the same username
+        with self.register_lock:
+            if username in self.users:
+                return Response(False, msg="username already exists")
 
-        self.__add_user_to_db(username, password)
-        return Response(True, msg="registration succeeded")
+            self.__add_user_to_db(username, password)
+            return Response(True, msg="registration succeeded")
 
     # Fail if login failed and returns true if the user logged into is an admin
     def login(self, username, password) -> Response[PrimitiveParsable[bool]]:

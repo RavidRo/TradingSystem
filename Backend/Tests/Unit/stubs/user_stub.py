@@ -1,3 +1,5 @@
+import threading
+
 from Backend.Domain.TradingSystem.purchase_details import PurchaseDetails
 from Backend.Domain.TradingSystem.shopping_cart import ShoppingCart
 from Backend.response import ParsableList, PrimitiveParsable, Response
@@ -159,6 +161,9 @@ class UserStub(IUser):
     ) -> Response[ParsableList[PurchaseDetails]]:
         self._get_any_user_purchase_history = True
         return Response(True)
+
+    def get_appointment_lock(self):
+        return threading.Lock()
 
     def change_state(self, new_state: UserState) -> None:
         self.state = new_state

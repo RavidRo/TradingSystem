@@ -147,3 +147,6 @@ class IUser:
 
     def change_state(self, new_state: UserState) -> None:
         raise NotImplementedError
+
+    def get_appointment_lock(self):
+        raise NotImplementedError
