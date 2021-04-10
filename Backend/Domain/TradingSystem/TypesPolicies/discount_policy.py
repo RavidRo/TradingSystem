@@ -1,5 +1,6 @@
-from Backend.Domain.TradingSystem.discount_type import DefaultDiscountType
 from Backend.response import Response, PrimitiveParsable
+
+from .discount_type import DefaultDiscountType
 
 
 class DiscountPolicy:

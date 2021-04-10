@@ -1,7 +1,6 @@
 from Backend.Domain.TradingSystem.product import Product
 import uuid
 
-from Backend.Domain.TradingSystem.Interfaces.IStore import IStore
 from Backend.response import Response, ParsableList
 from dataclasses import dataclass
 
@@ -11,8 +10,8 @@ class Store:
     from Backend.Domain.TradingSystem.purchase_details import PurchaseDetails
 
     def __init__(self, store_name: str):
-        from Backend.Domain.TradingSystem.discount_policy import DefaultDiscountPolicy
-        from Backend.Domain.TradingSystem.purchase_policy import DefaultPurchasePolicy
+        from Backend.Domain.TradingSystem.TypesPolicies.discount_policy import DefaultDiscountPolicy
+        from Backend.Domain.TradingSystem.TypesPolicies.purchase_policy import DefaultPurchasePolicy
 
         """Create a new store with it's specified info"""
         self.id = self.id_generator()
