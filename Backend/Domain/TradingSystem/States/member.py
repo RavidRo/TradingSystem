@@ -1,6 +1,7 @@
 from Backend.response import Response, ParsableList, PrimitiveParsable
 
 from Backend.Domain.TradingSystem.Responsibilities.founder import Founder
+from Backend.Domain.TradingSystem.Responsibilities.responsibility import Responsibility
 from Backend.Domain.TradingSystem.store import Store
 from Backend.Domain.TradingSystem.purchase_details import PurchaseDetails
 
