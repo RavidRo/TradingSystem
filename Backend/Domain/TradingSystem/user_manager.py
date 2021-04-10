@@ -66,7 +66,7 @@ class UserManager:
             if response.succeeded():
                 for user_cookie in UserManager.cookie_user:
                     old_user = UserManager.cookie_user[user_cookie]
-                    if old_user.get_username() == username and old_user != user:
+                    if old_user != user and old_user.get_username() == username:
                         UserManager.cookie_user[cookie] = old_user
             # *This action will delete the current cart but will restore the old one and other user details
 
