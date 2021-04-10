@@ -24,7 +24,8 @@ class TradingSystem(object):
         else:
             TradingSystem.__instance = self
 
-    @logging
+    # @logging
+
     def enter_system(self):
         return TradingSystemManager.enter_system()
 
