@@ -23,8 +23,8 @@ class StoresManager:
 
     # 2.6
     @staticmethod
-    def get_products() -> Response[ParsableList[Product]]:
-        products_per_store = map(lambda store: store.get_products().get_obj().values, StoresManager.stores)
+    def get_products() -> Response[list[Product]]:
+        products_per_store = map(lambda store: store.get_products(), StoresManager.stores)
         products = []
         # iterating over the data
         for product_list in products_per_store:

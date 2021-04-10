@@ -112,7 +112,7 @@ class User(IUser):
 
     # 4.4, 4.7
     def remove_appointment(self, store_id: str, username: str) -> Response[None]:
-        return self.state.dismiss_manager(store_id, username)
+        return self.state.remove_appointment(store_id, username)
 
     # 4.9
     def get_store_appointments(self, store_id: str) -> Response[Responsibility]:

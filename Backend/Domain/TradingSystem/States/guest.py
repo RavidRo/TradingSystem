@@ -1,19 +1,25 @@
-from .user_state import UserState
-from .member import Member
-from .admin import Admin
+from Backend.Domain.TradingSystem.States.user_state import UserState
 from Backend.Domain.Authentication.authentication import Authentication
 from Backend.response import Response
 
 
 class Guest(UserState):
-    def __init__(self, user):
-        super().__init__(user)
-        self.authentication = Authentication.get_instance()
+    def get_username(self):
+        return Response(False, msg="Guests don't have username")
+
+    def __init__(self, user, authentication=None, cart=None):
+        super().__init__(user, cart)
+        if authentication is None:
+            authentication = Authentication.get_instance()
+        self.authentication = authentication
 
     def get_username(self):
         return Response(False, msg="Guests don't have username")
 
     def login(self, username, password):
+        from Backend.Domain.TradingSystem.States.member import Member
+        from Backend.Domain.TradingSystem.States.admin import Admin
+
         response = self.authentication.login(username, password)
         if response.succeeded():
             if response.object.value:
@@ -26,6 +32,9 @@ class Guest(UserState):
 
     def register(self, username, password):
         return self.authentication.register(username, password)
+
+    def delete_products_after_purchase(self):
+        return self.cart.delete_products_after_purchase("guest")
 
     def open_store(self, store_name):
         return Response(False, msg="A store cannot be opened by a guest")
@@ -57,7 +66,7 @@ class Guest(UserState):
     def remove_manager_permission(self, store_id, username, permission):
         return Response(False, msg="Guests cannot edit a stores manager's responsibilities")
 
-    def dismiss_manager(self, store_id, manager):
+    def remove_appointment(self, store_id, username):
         return Response(False, msg="Guests cannot dismiss managers")
 
     def get_store_personnel_info(self, store_id):
