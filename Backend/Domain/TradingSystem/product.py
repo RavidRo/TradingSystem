@@ -1,3 +1,4 @@
+from Backend.response import Response
 import uuid
 
 from Backend.Service.DataObjects.product_data import ProductData
@@ -29,5 +30,10 @@ class Product(IProduct):
         return uuid.uuid4()
 
     def edit_product_details(self, product_name: str, price: float):
+        if price <= 0:
+            return Response(False, msg="Product's price must pe positive!")
+
         self.product_name = product_name
         self.price = price
+
+        return Response(True, msg=f"Successfully edited product with product id: {self.id}")

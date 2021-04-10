@@ -1,7 +1,7 @@
 from unittest.mock import patch
 import pytest
 from Backend.Domain.TradingSystem.store import Store
-from Backend.UnitTests.stubs.product_stub import ProductStub
+from Backend.Tests.Unit.stubs.product_stub import ProductStub
 
 
 @pytest.fixture
@@ -40,8 +40,8 @@ def test_add_product_existing_product(store: Store):
 # * remove product
 # * ====================================================
 def test_remove_product_valid_one_product(store: Store):
-    with patch.dict(store.products_to_quantities, {'123': (ProductStub("prod1"), 1)}):
-        result = store.remove_product('123')
+    with patch.dict(store.products_to_quantities, {"123": (ProductStub("prod1"), 1)}):
+        result = store.remove_product("123")
         assert result.success == True
         assert store.products_to_quantities == {}
 
@@ -50,41 +50,44 @@ def test_remove_product_valid_multiple_products(store: Store):
     product1 = ProductStub("prod1")
     product2 = ProductStub("prod2")
     product3 = ProductStub("prod3")
-    with patch.dict(store.products_to_quantities, {'123': (product1, 1), '345': (product2, 5), '121': (product3, 4)}):
-        result = store.remove_product('123')
+    with patch.dict(
+        store.products_to_quantities,
+        {"123": (product1, 1), "345": (product2, 5), "121": (product3, 4)},
+    ):
+        result = store.remove_product("123")
         assert result.success == True
-        assert store.products_to_quantities == {'345': (product2, 5), '121': (product3, 4)}
+        assert store.products_to_quantities == {"345": (product2, 5), "121": (product3, 4)}
 
 
 def test_remove_product_not_existing(store: Store):
     product1 = ProductStub("prod1")
     product2 = ProductStub("prod2")
     product3 = ProductStub("prod3")
-    with patch.dict(store.products_to_quantities, {'123': (product1, 1), '345': (product2, 5), '121': (product3, 4)}):
-        result = store.remove_product('444')
+    with patch.dict(
+        store.products_to_quantities,
+        {"123": (product1, 1), "345": (product2, 5), "121": (product3, 4)},
+    ):
+        result = store.remove_product("444")
         assert result.success == False
-        assert store.products_to_quantities == {'123': (product1, 1), '345': (product2, 5), '121': (product3, 4)}
+        assert store.products_to_quantities == {
+            "123": (product1, 1),
+            "345": (product2, 5),
+            "121": (product3, 4),
+        }
 
 
 # * edit product details
 # * ====================================================
 def test_edit_product_details_valid(store: Store, product1: ProductStub):
-    with patch.dict(store.products_to_quantities, {'123': (product1, 1)}):
-        result = store.edit_product_details('123', "prod2", 2.0)
+    with patch.dict(store.products_to_quantities, {"123": (product1, 1)}):
+        result = store.edit_product_details("123", "prod2", 2.0)
         assert result.success == True
         assert product1.product_edited == True
 
 
-def test_edit_product_details_negative_price(store: Store, product1: ProductStub):
-    with patch.dict(store.products_to_quantities, {'123': (product1, 1)}):
-        result = store.edit_product_details('123', "prod2", -2.0)
-        assert result.success == False
-        assert product1.product_edited == False
-
-
 def test_edit_product_details_not_existing(store: Store, product1: ProductStub):
-    with patch.dict(store.products_to_quantities, {'123': (product1, 1)}):
-        result = store.edit_product_details('111', "prod2", 2.0)
+    with patch.dict(store.products_to_quantities, {"123": (product1, 1)}):
+        result = store.edit_product_details("111", "prod2", 2.0)
         assert result.success == False
         assert product1.product_edited == False
 
@@ -92,21 +95,21 @@ def test_edit_product_details_not_existing(store: Store, product1: ProductStub):
 # * change product quantity
 # * ====================================================
 def test_change_product_quantity_valid(store: Store, product1: ProductStub):
-    with patch.dict(store.products_to_quantities, {'123': (product1, 1)}):
-        result = store.change_product_quantity('123', 5)
+    with patch.dict(store.products_to_quantities, {"123": (product1, 1)}):
+        result = store.change_product_quantity("123", 5)
         assert result.success == True
-        assert store.products_to_quantities.get('123')[1] == 5
+        assert store.products_to_quantities.get("123")[1] == 5
 
 
 def test_change_product_quantity_negative(store: Store, product1: ProductStub):
-    with patch.dict(store.products_to_quantities, {'123': (product1, 1)}):
-        result = store.change_product_quantity('123', -5)
+    with patch.dict(store.products_to_quantities, {"123": (product1, 1)}):
+        result = store.change_product_quantity("123", -5)
         assert result.success == False
-        assert store.products_to_quantities.get('123')[1] == 1
+        assert store.products_to_quantities.get("123")[1] == 1
 
 
 def test_change_product_quantity_not_existing(store: Store, product1: ProductStub):
-    with patch.dict(store.products_to_quantities, {'123': (product1, 1)}):
-        result = store.change_product_quantity('151', 5)
+    with patch.dict(store.products_to_quantities, {"123": (product1, 1)}):
+        result = store.change_product_quantity("151", 5)
         assert result.success == False
-        assert store.products_to_quantities.get('123')[1] == 1
+        assert store.products_to_quantities.get("123")[1] == 1

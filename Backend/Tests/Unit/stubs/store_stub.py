@@ -1,18 +1,16 @@
 from Backend.Domain.TradingSystem.store import Store
 from Backend.Domain.TradingSystem.Responsibilities.responsibility import Responsibility
 from Backend.Domain.TradingSystem.purchase_details import PurchaseDetails
-from Backend.UnitTests.stubs.product_stub import ProductStub
 from Backend.response import Response, ParsableList
 
 
 class StoreStub(Store):
-
     def __init__(self, products={}) -> None:
         self.product_added = False
         self.product_removed = False
         self.product_quantity_changed = False
         self.product_details_changed = False
-        self.products_to_quantities : dict = products
+        self.products_to_quantities: dict = products
 
     # 4.1
     # Creating a new product a the store
@@ -31,12 +29,14 @@ class StoreStub(Store):
         return Response(True)
 
     # 4.1
-    def edit_product_details(self, product_id: str, new_name: str, new_price: float) -> Response[None]:
+    def edit_product_details(
+        self, product_id: str, new_name: str, new_price: float
+    ) -> Response[None]:
         self.product_details_changed = True
         return Response(True)
 
     def get_id(self):
-        return '0'
+        return "0"
 
     def get_name(self):
         return "store"
