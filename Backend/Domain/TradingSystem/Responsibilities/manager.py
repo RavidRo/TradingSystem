@@ -40,9 +40,9 @@ class Manager(Owner):
         return self.__create_no_permission_Response(Permission.MANAGE_PRODUCTS)
 
     # 4.1
-    def change_product_quantity(self, product_id: str, quantity: int) -> Response[None]:
+    def change_product_quantity_in_store(self, product_id: str, quantity: int) -> Response[None]:
         if self.permissions[Permission.MANAGE_PRODUCTS]:
-            return super().change_product_quantity(product_id, quantity)
+            return super().change_product_quantity_in_store(product_id, quantity)
 
         return self.__create_no_permission_Response(Permission.MANAGE_PRODUCTS)
 

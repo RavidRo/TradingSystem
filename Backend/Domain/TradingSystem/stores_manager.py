@@ -1,3 +1,5 @@
+from typing import List
+
 from Backend.Domain.TradingSystem.product import Product
 from Backend.Domain.TradingSystem.store import Store
 from Backend.response import Response
@@ -6,7 +8,7 @@ from Backend.Domain.TradingSystem.purchase_details import PurchaseDetails
 
 
 class StoresManager:
-    stores: list[Store] = []
+    stores: List[Store] = []
 
     # 2.5
     @staticmethod
@@ -23,7 +25,7 @@ class StoresManager:
 
     # 2.6
     @staticmethod
-    def get_products() -> Response[list[Product]]:
+    def get_products() -> Response[List[Product]]:
         products_per_store = map(lambda store: store.get_products(), StoresManager.stores)
         products = []
         # iterating over the data

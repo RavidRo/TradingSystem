@@ -1,7 +1,7 @@
-from Backend.Domain.TradingSystem.store import Store
 from typing import Callable
 import uuid
 
+from Backend.Domain.TradingSystem.store import Store
 from Backend.Domain.TradingSystem.Interfaces.IUser import IUser
 from .user import User
 from Backend.response import Response, ParsableList, PrimitiveParsable
