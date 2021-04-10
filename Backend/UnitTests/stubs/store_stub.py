@@ -7,7 +7,7 @@ from Backend.response import Response, ParsableList
 
 class StoreStub(Store):
 
-    def __init__(self, products) -> None:
+    def __init__(self, products={}) -> None:
         self.product_added = False
         self.product_removed = False
         self.product_quantity_changed = False
