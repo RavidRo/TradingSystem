@@ -1,5 +1,3 @@
-from typing import List
-
 from Backend.Domain.TradingSystem.product import Product
 from Backend.Domain.TradingSystem.store import Store
 from Backend.response import Response
@@ -8,7 +6,7 @@ from Backend.Domain.TradingSystem.purchase_details import PurchaseDetails
 
 
 class StoresManager:
-    stores: List[Store] = []
+    stores: list[Store] = []
 
     # 2.5
     @staticmethod
@@ -25,7 +23,7 @@ class StoresManager:
 
     # 2.6
     @staticmethod
-    def get_products() -> Response[List[Product]]:
+    def get_products() -> Response[list[Product]]:
         products_per_store = map(lambda store: store.get_products(), StoresManager.stores)
         products = []
         # iterating over the data
@@ -33,7 +31,7 @@ class StoresManager:
             # appending elements to the flat_list
             products += product_list
 
-        return products
+        return Response(True, ParsableList(products))
 
     # Inter component functions
     # used in 3.2
@@ -46,7 +44,7 @@ class StoresManager:
     def get_store(store_id: str) -> Response[Store]:
         for store in StoresManager.stores:
             if store.get_id() == store_id:
-                return Response(True, store)
+                return Response[Store](True, obj=store)
         return Response(False, msg=f"No store with the ID {store_id} exists")
 
     # 6.4

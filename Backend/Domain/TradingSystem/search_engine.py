@@ -8,6 +8,7 @@ class SearchEngine:
 
     # 2.6
     # kwargs = You can search for a product by additional key words
+    @staticmethod
     def search_products(
         product_name: str, category: str, min_price: float, max_price: float, *keywords
     ) -> Response[ParsableList[product]]:
@@ -31,5 +32,5 @@ class SearchEngine:
 
             return True
 
-        filtered_products = filter(filter_predicate, all_products)
+        filtered_products = filter(filter_predicate, all_products.values)
         return Response(True, ParsableList(filtered_products))

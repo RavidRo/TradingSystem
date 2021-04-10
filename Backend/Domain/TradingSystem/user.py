@@ -51,7 +51,7 @@ class User(IUser):
 
     # 2.9
     def get_cart_price(self) -> Response[PrimitiveParsable[float]]:
-        return self.state.get_cart_price(self)
+        return self.state.get_cart_price()
 
     # Member
     # ===============================

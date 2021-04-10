@@ -24,7 +24,8 @@ class TradingSystem(object):
         else:
             TradingSystem.__instance = self
 
-    @logging
+    # @logging
+
     def enter_system(self):
         return TradingSystemManager.enter_system()
 
@@ -50,11 +51,12 @@ class TradingSystem(object):
         self, *keywords, product_name="", category=None, min_price=None, max_price=None
     ):
         return TradingSystemManager.search_products(
-            *keywords,
+
             product_name,
             category,
             min_price,
             max_price,
+            *keywords,
         )
 
     @logging
