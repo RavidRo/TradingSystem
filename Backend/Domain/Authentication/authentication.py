@@ -29,7 +29,7 @@ class Authentication(IAuthentication):
             Authentication(False)
         return Authentication.__instance
 
-    def __init__(self, is_mock):
+    def __init__(self, is_mock=False):
         """ Virtually private constructor. """
         if Authentication.__instance is not None:
             raise Exception("This class is a singleton!")
