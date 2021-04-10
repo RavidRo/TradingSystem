@@ -1,8 +1,9 @@
-from dataclasses import dataclass
+from datetime import datetime
+
+from Backend.response import Response, PrimitiveParsable
+from Backend.Service.DataObjects.shopping_bag_data import ShoppingBagData
 from Backend.Domain.TradingSystem.Interfaces.IShoppingBag import IShoppingBag
 from Backend.Domain.TradingSystem.purchase_details import PurchaseDetails
-from Backend.response import Response, PrimitiveParsable
-from datetime import datetime
 
 
 class ShoppingBag(IShoppingBag):
@@ -13,11 +14,10 @@ class ShoppingBag(IShoppingBag):
         self.pending_price = 0
 
     def parse(self):
-        products_names_to_quantities = []
+        products_ids_to_quantities = {}
         for product_id, quantity in self.products_to_quantity:
-            product_name = self.store.get_product_name(product_id)
-            products_names_to_quantities.append((product_name, quantity))
-        return ShoppingBagDataObject(self.store.get_name(), products_names_to_quantities)
+            products_ids_to_quantities[product_id, quantity]
+        return ShoppingBagData(self.store.get_name(), products_ids_to_quantities)
 
     """checks need to be made:
        ----------------------
@@ -133,9 +133,3 @@ class ShoppingBag(IShoppingBag):
 
     def get_store_ID(self) -> str:
         return self.store.get_id()
-
-
-@dataclass
-class ShoppingBagDataObject:
-    store_name: str
-    product_names_to_quantities: list

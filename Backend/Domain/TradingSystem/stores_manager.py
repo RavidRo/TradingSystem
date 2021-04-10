@@ -51,6 +51,6 @@ class StoresManager:
     @staticmethod
     def get_any_store_purchase_history(store_id: str) -> Response[ParsableList[PurchaseDetails]]:
         for store in StoresManager.stores:
-            if store.get_id():
+            if store.get_id() == store_id:
                 return store.get_purchase_history()
         return Response(False, msg=f"No store with the ID {store_id} exists")

@@ -1,8 +1,9 @@
 from threading import Timer
 
 from Backend.response import Response, PrimitiveParsable, ParsableList
+from Backend.Service.DataObjects.shopping_cart_data import ShoppingCartData
 from Backend.Domain.TradingSystem.shopping_bag import ShoppingBag
-from Backend.Domain.TradingSystem.Interfaces.IShoppingCart import *
+from Backend.Domain.TradingSystem.Interfaces.IShoppingCart import IShoppingCart
 
 
 class ShoppingCart(IShoppingCart):
@@ -18,7 +19,7 @@ class ShoppingCart(IShoppingCart):
         parsed_bags = []
         for bag in self.shopping_bags.values():
             parsed_bags.append(bag.parse())
-        return parsed_bags
+        return ShoppingCartData(parsed_bags)
 
     """checks need to be made:
        ----------------------
