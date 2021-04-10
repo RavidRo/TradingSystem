@@ -44,7 +44,7 @@ class StoresManager:
     def get_store(store_id: str) -> Response[Store]:
         for store in StoresManager.stores:
             if store.get_id() == store_id:
-                return Response(True, store)
+                return Response[Store](True, obj=store)
         return Response(False, msg=f"No store with the ID {store_id} exists")
 
     # 6.4

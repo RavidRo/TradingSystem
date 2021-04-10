@@ -47,7 +47,7 @@ class ShoppingCart(IShoppingCart):
     def get_store_by_id(self, store_id: str):
         from Backend.Domain.TradingSystem.stores_manager import StoresManager
 
-        return StoresManager.get_store(store_id)
+        return StoresManager.get_store(store_id).object
 
     def create_new_bag(self, store):
         new_bag = ShoppingBag(store)

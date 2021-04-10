@@ -1,6 +1,6 @@
 from Backend.Domain.DBHandler import DBHandler
 from Backend import response
-from Backend.UnitTests.authentication.DBHandlerMock import DBHandlerMock
+from Backend.Tests.Unit.stubs.DBHandlerMock import DBHandlerMock
 
 
 class IAuthentication:

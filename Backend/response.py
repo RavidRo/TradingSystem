@@ -42,7 +42,7 @@ class ParsableList(Parsable, Generic[T]):
         self.values = values
 
     def parse(self):
-        return ParsableList(map(self.values, lambda value: value.parse()))
+        return ParsableList(list(map(lambda value: value.parse(), self.values)))
 
 
 """
