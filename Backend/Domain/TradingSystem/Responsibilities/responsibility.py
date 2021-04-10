@@ -2,7 +2,7 @@ from __future__ import annotations
 import enum
 
 from Backend.Service.DataObjects.responsibilities_data import ResponsibilitiesData
-from Backend.Domain.TradingSystem.IUser import IUser
+from Backend.Domain.TradingSystem.Interfaces.IUser import IUser
 from Backend.Domain.TradingSystem.purchase_details import PurchaseDetails
 from Backend.response import Parsable, Response, ParsableList
 
@@ -22,6 +22,14 @@ Permission = enum.Enum(
         ("GET_HISTORY", 5),
     ],
 )
+
+name_to_permission: dict[str, Permission] = {
+    "manage_products": Permission.MANAGE_PRODUCTS,
+    "get_appointments": Permission.GET_APPOINTMENTS,
+    "appoint_mannager": Permission.APPOINT_MANAGER,
+    "remove_manager": Permission.REMOVE_MANAGER,
+    "get_history": Permission.GET_HISTORY,
+}
 
 
 class Responsibility(Parsable):
