@@ -12,7 +12,7 @@ class Founder(Responsibility):
 
     # 4.1
     def remove_product(self, product_id: str) -> Response[None]:
-        return self.store.remove_product_delegated(product_id)
+        return self.store.remove_product(product_id)
 
     # 4.1
     def change_product_quantity(self, product_id: str, quantity: int) -> Response[None]:
