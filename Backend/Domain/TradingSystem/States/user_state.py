@@ -4,8 +4,14 @@ from Backend.response import Response
 
 
 class UserState(ABC):
-    def __init__(self, user):
-        self.cart = ShoppingCart()
+
+    def __init__(self, user, cart=None):
+        if cart is None:
+            cart = ShoppingCart()
+        self.cart = cart
+        self.user = user
+
+    def set_user(self, user):
         self.user = user
 
     @abstractmethod
@@ -38,8 +44,9 @@ class UserState(ABC):
     def get_cart_price(self):
         return self.cart.get_price()
 
+    @abstractmethod
     def delete_products_after_purchase(self):
-        return self.cart.delete_products_after_purchase()
+        return Response(False, msg="Abstract Method")
 
     @abstractmethod
     def open_store(self, store_name):
@@ -50,7 +57,8 @@ class UserState(ABC):
         return Response(False, msg="Abstract Method")
 
     @abstractmethod
-    def add_new_product(self, store_id, product_name, product_price, quantity):
+    def add_new_product(self, store_id, product_name, product_price,
+                        quantity):
         return Response(False, msg="Abstract Method")
 
     @abstractmethod
@@ -82,7 +90,7 @@ class UserState(ABC):
         return Response(False, msg="Abstract Method")
 
     @abstractmethod
-    def dismiss_manager(self, store_id, manager):
+    def remove_appointment(self, store_id, username):
         return Response(False, msg="Abstract Method")
 
     @abstractmethod

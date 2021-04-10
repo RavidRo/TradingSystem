@@ -182,7 +182,7 @@ async def change_product_quantity():
     store_id = request.args.get('store_id')
     product_id = request.args.get('product_id')
     quantity = request.args.get('quantity')
-    answer = await system.change_product_quantity(cookie, store_id, product_id,quantity)
+    answer = await system.change_product_quantity_in_cart(cookie, store_id, product_id, quantity)
     return '''<h1>Answer is: {}</h1>'''.format(answer)
 
 
@@ -285,7 +285,7 @@ async def get_user_purchase_history():
     if cookie is None:
         cookie = await system.enter_system()
     username = request.args.get('username')
-    answer = await system.get_user_purchase_history(cookie, username)
+    answer = await system.get_user_purchase_history_admin(cookie, username)
     return '''<h1>Answer is: {}</h1>'''.format(answer)
 
 @app.route('/get_any_store_purchase_history', methods=['GET'])
@@ -294,7 +294,7 @@ async def get_any_store_purchase_history():
     if cookie is None:
         cookie = await system.enter_system()
     store_id = request.args.get('store_id')
-    answer = await system.get_any_store_purchase_history(cookie, store_id)
+    answer = await system.get_any_store_purchase_history_admin(cookie, store_id)
     return '''<h1>Answer is: {}</h1>'''.format(answer)
 
 

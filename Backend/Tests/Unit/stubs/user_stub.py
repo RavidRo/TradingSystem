@@ -4,13 +4,16 @@ from Backend.Domain.TradingSystem.purchase_details import PurchaseDetails
 from Backend.Domain.TradingSystem.shopping_cart import ShoppingCart
 from Backend.response import ParsableList, PrimitiveParsable, Response
 from Backend.Domain.TradingSystem.Interfaces.IUser import IUser
+from Backend.Domain.TradingSystem.States.user_state import UserState
 
 from .member_stub import MemberStub
 
 
 class UserStub(IUser):
-    def __init__(self) -> None:
-        self.state = MemberStub()
+    def __init__(self, state=None) -> None:
+        if state is None:
+            state = MemberStub()
+        self.state = state
         self.registered = False
         self.can_register = True
         self.can_login = True
@@ -97,10 +100,6 @@ class UserStub(IUser):
         self._get_purchase_history = True
         return Response(True)
 
-    def create_store(self, name: str) -> Response[None]:
-        self._create_store = True
-        return Response(True)
-
     def remove_product_from_store(self, store_id: str, product_id: str) -> Response[None]:
         self._remove_product_from_store = True
         return Response(True)
@@ -165,3 +164,6 @@ class UserStub(IUser):
 
     def get_appointment_lock(self):
         return threading.Lock()
+
+    def change_state(self, new_state: UserState) -> None:
+        self.state = new_state

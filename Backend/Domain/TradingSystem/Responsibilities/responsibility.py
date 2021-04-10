@@ -14,7 +14,7 @@ Permission = enum.Enum(
         ("MANAGE_PRODUCTS", 1),
         ("get appointments", 2),
         ("GET_APPOINTMENTS", 2),
-        ("appoint mannager", 3),
+        ("appoint manager", 3),
         ("APPOINT_MANAGER", 3),
         ("remove manager", 4),
         ("REMOVE_MANAGER", 4),
@@ -26,7 +26,7 @@ Permission = enum.Enum(
 name_to_permission: dict[str, Permission] = {
     "manage_products": Permission.MANAGE_PRODUCTS,
     "get_appointments": Permission.GET_APPOINTMENTS,
-    "appoint_mannager": Permission.APPOINT_MANAGER,
+    "appoint_manager": Permission.APPOINT_MANAGER,
     "remove_manager": Permission.REMOVE_MANAGER,
     "get_history": Permission.GET_HISTORY,
 }
@@ -51,7 +51,7 @@ class Responsibility(Parsable):
         raise Exception(Responsibility.ERROR_MESSAGE)
 
     # 4.1
-    def change_product_quantity(self, product_id: str, quantity: int) -> Response[None]:
+    def change_product_quantity_in_store(self, product_id: str, quantity: int) -> Response[None]:
         raise Exception(Responsibility.ERROR_MESSAGE)
 
     # 4.1

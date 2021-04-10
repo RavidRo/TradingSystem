@@ -103,15 +103,15 @@ def test_manager_remove_product_prohibited_by_default(manager: Manager):
 # * change product quantity tests - #4.1
 # * ==========================================================================================
 def test_founder_change_product_quantity_calls_store_successfully(founder: Founder):
-    assert founder.change_product_quantity("0", 0).succeeded()
+    assert founder.change_product_quantity_in_store("0", 0).succeeded()
 
 
 def test_owner_change_product_quantity_calls_store_successfully(owner: Owner):
-    assert owner.change_product_quantity("0", 0).succeeded()
+    assert owner.change_product_quantity_in_store("0", 0).succeeded()
 
 
 def test_manager_change_product_quantity_prohibited_by_default(manager: Manager):
-    assert not manager.change_product_quantity("0", 0).succeeded()
+    assert not manager.change_product_quantity_in_store("0", 0).succeeded()
 
 
 # * edit product details tests - #4.1

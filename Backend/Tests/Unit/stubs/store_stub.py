@@ -5,12 +5,12 @@ from Backend.response import Response, ParsableList
 
 
 class StoreStub(Store):
-
-    def __init__(self) -> None:
+    def __init__(self, products={}) -> None:
         self.product_added = False
         self.product_removed = False
         self.product_quantity_changed = False
         self.product_details_changed = False
+        self.products_to_quantities: dict = products
 
     # 4.1
     # Creating a new product a the store
@@ -29,12 +29,14 @@ class StoreStub(Store):
         return Response(True)
 
     # 4.1
-    def edit_product_details(self, product_id: str, new_name: str, new_price: float) -> Response[None]:
+    def edit_product_details(
+        self, product_id: str, new_name: str, new_price: float
+    ) -> Response[None]:
         self.product_details_changed = True
         return Response(True)
 
     def get_id(self):
-        return 0
+        return "0"
 
     def get_name(self):
         return "store"
@@ -46,3 +48,15 @@ class StoreStub(Store):
     # 4.11
     def get_purchase_history(self) -> Response[ParsableList[PurchaseDetails]]:
         return Response(True, ParsableList([]))
+
+    def product_exists(self, product_id, quantity):
+        if self.products_to_quantities.get(product_id) is None:
+            return False
+        if self.products_to_quantities.get(product_id)[1] < quantity:
+            return False
+        return True
+
+    def get_product(self, product_id):
+        return self.products_to_quantities.get(product_id)[0]
+
+    # def acquire_products(self):
