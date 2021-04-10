@@ -59,9 +59,9 @@ def responsibility():
 # * Constructor tests
 # * =================================================================
 
-def test_user_assigned_in_guest(guest_user):
+def test_user_assigned_in_guest(guest_user, authentication):
     from ..Domain.TradingSystem.guest import Guest
-    guest = Guest(guest_user)
+    guest = Guest(guest_user, authentication)
     assert guest.user == guest_user
 
 

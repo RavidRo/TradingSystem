@@ -2,10 +2,9 @@ from Backend.Domain.Authentication.authentication import Authentication
 from Backend.response import Response, PrimitiveParsable
 
 
-class AuthenticationStub(Authentication):
+class AuthenticationStub():
 
     def __init__(self):
-        super().__init__()
         self.registered = False
         self.logged_in = False
 
