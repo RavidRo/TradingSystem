@@ -96,12 +96,12 @@ class ShoppingBag(IShoppingBag):
        1. new_amount is a positive number
        2. product with product_id exists in the bag 
                                                 """
-    def change_product_qunatity(self, product_id: str, new_amount: int) -> Response[None]:
+    def change_product_quantity(self, product_id: str, new_amount: int) -> Response[None]:
         if new_amount <= 0:
             return Response(False, msg="Amount can't be negative!")
         if self.products_to_quantity.get(product_id) is None:
             return Response(False, msg="No such product in the bag")
-        self.products_to_quantity[product_id][1] = new_amount
+        self.products_to_quantity[product_id] = (self.products_to_quantity.get(product_id)[0], new_amount)
         return Response(True, msg="amount changed successfully")
 
     def delete_products_after_purchase(self, user_name="guest") -> PurchaseDetails:
