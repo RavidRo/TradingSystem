@@ -48,31 +48,31 @@ class UserManager:
     # 2.3
     @staticmethod
     def register(username: str, password: str, cookie: str) -> Response[None]:
-        user = UserManager.__get_user_by_cookie(cookie)
-        if not user:
-            return Response(False, msg="No user is identified by the given cookie")
-        response = user.register(username, password)
-        if response.succeeded():
-            UserManager.username_user[username] = user
-        return response
+        def func(user: User):
+            response = user.register(username, password)
+            if response.succeeded():
+                UserManager.username_user[username] = user
+            return response
+
+        return UserManager.__deligate_to_user(cookie, func)
 
     # 2.4
     @staticmethod
     def login(username: str, password: str, cookie: str) -> Response[None]:
-        user = UserManager.__get_user_by_cookie(cookie)
-        if not user:
-            return Response(False, msg="No user is identified by the given cookie")
-        response = user.login(username, password)
+        def func(user: User):
+            response = user.login(username, password)
 
-        # If response succeeded we want to connect the cookie to the username
-        if response.succeeded():
-            for user_cookie in UserManager.cookie_user:
-                old_user = UserManager.cookie_user[user_cookie]
-                if old_user.get_username() == username and old_user != user:
-                    UserManager.cookie_user[cookie] = old_user
+            # If response succeeded we want to connect the cookie to the username
+            if response.succeeded():
+                for user_cookie in UserManager.cookie_user:
+                    old_user = UserManager.cookie_user[user_cookie]
+                    if old_user.get_username() == username and old_user != user:
+                        UserManager.cookie_user[cookie] = old_user
             # *This action will delete the current cart but will restore the old one and other user details
 
-        return response
+            return response
+
+        return UserManager.__deligate_to_user(cookie, func)
 
     # 2.7
     @staticmethod
