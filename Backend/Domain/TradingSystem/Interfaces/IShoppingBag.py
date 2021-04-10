@@ -21,7 +21,7 @@ class IShoppingBag(Parsable):
         raise NotImplementedError
 
     @abstractmethod
-    def change_product_qunatity(self, product_id: str, new_amount: int) -> Response[None]:
+    def change_product_quantity(self, product_id: str, new_amount: int) -> Response[None]:
         """ Change product's quantity (add or remove) - new amount overrides the current amount"""
         raise NotImplementedError
 
