@@ -111,7 +111,7 @@ class MemberStub(Member):
         pass
 
     @update_field
-    def dismiss_manager():
+    def remove_appointment():
         pass
 
     @update_field

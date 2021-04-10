@@ -15,7 +15,7 @@ class Founder(Responsibility):
         return self.store.remove_product(product_id)
 
     # 4.1
-    def change_product_quantity(self, product_id: str, quantity: int) -> Response[None]:
+    def change_product_quantity_in_store(self, product_id: str, quantity: int) -> Response[None]:
         return self.store.change_product_quantity(product_id, quantity)
 
     # 4.1

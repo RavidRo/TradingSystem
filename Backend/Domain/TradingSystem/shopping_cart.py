@@ -28,8 +28,6 @@ class ShoppingCart(IShoppingCart):
        4. If store exists -> create new bag and add product"""
 
     def add_product(self, store_id: str, product_id: str, quantity: int) -> Response[None]:
-        from Backend.Domain.TradingSystem.stores_manager import StoresManager
-
         if quantity <= 0:
             return Response(False, msg="Product's quantity must be positive!")
 

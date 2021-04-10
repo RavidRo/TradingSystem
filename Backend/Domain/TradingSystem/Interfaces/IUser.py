@@ -11,6 +11,7 @@ class IUser:
     # Used for testing purposes
     use_mock = False
 
+    @staticmethod
     def create_user():
         from Backend.Tests.Unit.stubs.user_stub import UserStub
         from Backend.Domain.TradingSystem.user import User
