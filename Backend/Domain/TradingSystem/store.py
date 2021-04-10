@@ -97,7 +97,7 @@ class Store:
     """checks need to be made:
        ----------------------
        1. price > 0
-       2. a product with product_name exists"""
+       2. a product with product_id exists"""
 
     def edit_product_details(
         self, product_id: str, product_name: str, price: float
@@ -105,9 +105,7 @@ class Store:
         if product_id not in self.products_to_quantities:
             return Response(False, msg="No such product in the store")
 
-        return self.products_to_quantities[product_id][0].edit_product_details(
-            product_id, product_name, price
-        )
+        return self.products_to_quantities[product_id][0].edit_product_details(product_name, price)
 
     """checks need to be made:
        ----------------------
@@ -118,7 +116,8 @@ class Store:
         if quantity < 0:
             return Response(False, msg="quantity must be positive!")
         if product_id in self.products_to_quantities:
-            self.products_to_quantities[product_id][1] = quantity
+            new_product_quantity = (self.products_to_quantities[product_id][0], quantity)
+            self.products_to_quantities[product_id] = new_product_quantity
             return Response(
                 True,
                 msg="Successfully updated product "
@@ -170,14 +169,14 @@ class Store:
 
     # This function checks for available products
     def check_available_products(self, products_to_quantities: dict) -> Response[None]:
-        for prod_id, (product, quantity) in products_to_quantities.items():
-            current_quantity = self.products_to_quantities.get(prod_id)[1]
-            if current_quantity is None:
+        for prod_id, (_, quantity) in products_to_quantities.items():
+            prod_to_current_quantity = self.products_to_quantities.get(prod_id)
+            if prod_to_current_quantity is None:
                 return Response(
                     False,
                     msg=f"The product with id: {prod_id} doesn't exist in the inventory of the store",
                 )
-            elif current_quantity < quantity:
+            elif prod_to_current_quantity[1] < quantity:
                 return Response(
                     False,
                     msg=f"The store has less than {quantity} of product with id: {prod_id} left",
@@ -192,9 +191,7 @@ class Store:
                 self.products_to_quantities.pop(prod_id)
             else:
                 product = self.products_to_quantities.get(prod_id)[0]
-                self.products_to_quantities.update(
-                    {prod_id, (product, current_quantity - quantity)}
-                )
+                self.products_to_quantities[prod_id] = (product, current_quantity - quantity)
 
     # this will be added in the future - maybe I will apply Default Policy for now
     def check_purchase_types(self, products_info, user_info) -> Response[None]:

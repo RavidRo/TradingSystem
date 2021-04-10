@@ -156,6 +156,11 @@ class TradingSystem(object):
     def get_store_appointments(self, cookie: str, store_id: str):
         return TradingSystemManager.get_store_appointments(cookie, store_id)
 
+    # 4.11
+    @logging
+    def get_store_purchase_history(self, cookie: str, store_id: str):
+        return TradingSystemManager.get_store_purchase_history(cookie, store_id)
+
     # System Manager
     # ====================
 
