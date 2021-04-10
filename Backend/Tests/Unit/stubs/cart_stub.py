@@ -1,9 +1,8 @@
-from ...Domain.TradingSystem.shopping_cart import ShoppingCart
+from Backend.Domain.TradingSystem.shopping_cart import ShoppingCart
 from Backend.response import Response, ParsableList, PrimitiveParsable
 
 
 class CartStub(ShoppingCart):
-
     def __init__(self):
         self.save_product = False
         self.remove_product_delegated = False

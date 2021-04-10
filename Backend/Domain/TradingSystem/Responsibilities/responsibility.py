@@ -51,7 +51,7 @@ class Responsibility(Parsable):
         raise Exception(Responsibility.ERROR_MESSAGE)
 
     # 4.1
-    def change_product_quantity(self, product_id: str, quantity: int) -> Response[None]:
+    def change_product_quantity_in_store(self, product_id: str, quantity: int) -> Response[None]:
         raise Exception(Responsibility.ERROR_MESSAGE)
 
     # 4.1

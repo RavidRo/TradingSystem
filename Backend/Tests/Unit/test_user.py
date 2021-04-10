@@ -147,7 +147,7 @@ def test_remove_manager_permission_deligates_to_state(user: User):
 # * ===========================================================
 def test_remove_appointment_deligates_to_state(user: User):
     result = user.remove_appointment("", "")
-    assert user.state._dismiss_manager and result
+    assert user.state._remove_appointment and result
 
 
 # * get_store_appointments tests - 4.9

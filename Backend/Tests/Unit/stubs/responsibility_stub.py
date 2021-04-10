@@ -1,11 +1,10 @@
-from ...Domain.TradingSystem.Interfaces.IUser import IUser
-from ...Domain.TradingSystem.Responsibilities.responsibility import Responsibility, Permission
+from Backend.Domain.TradingSystem.Interfaces.IUser import IUser
+from Backend.Domain.TradingSystem.Responsibilities.responsibility import Responsibility, Permission
 from Backend.response import Response, ParsableList
-from ...Domain.TradingSystem.purchase_details import PurchaseDetails
+from Backend.Domain.TradingSystem.purchase_details import PurchaseDetails
 
 
 class ResponsibilityStub(Responsibility):
-
     def __init__(self):
         self.add_product_delegated = False
         self.remove_product_delegated = False
@@ -27,7 +26,7 @@ class ResponsibilityStub(Responsibility):
         self.remove_product_delegated = True
         return Response(True)
 
-    def change_product_quantity(self, product_id: str, quantity: int) -> Response[None]:
+    def change_product_quantity_in_store(self, product_id: str, quantity: int) -> Response[None]:
         self.change_product_quantity_delegated = True
         return Response(True)
 

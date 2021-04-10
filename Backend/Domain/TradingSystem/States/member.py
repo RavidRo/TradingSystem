@@ -1,4 +1,4 @@
-from Backend.Domain.TradingSystem.Responsibilities.responsibility import Responsibility
+from Backend.Domain.TradingSystem.Responsibilities.founder import Founder
 from Backend.Domain.TradingSystem.store import Store
 from Backend.Domain.TradingSystem.States.user_state import UserState
 from Backend.response import Response, ParsableList, PrimitiveParsable
@@ -62,7 +62,7 @@ class Member(UserState):
 
     def open_store(self, store_name):
         store = Store(store_name)
-        self.responsibilities[store.get_id()] = Responsibility(self, store)
+        self.responsibilities[store.get_id()] = Founder(self, store)
         return Response[Store](True, obj=store, msg="Store opened successfully")
 
     def get_purchase_history(self):
@@ -85,7 +85,7 @@ class Member(UserState):
     def change_product_quantity_in_store(self, store_id, product_id, new_quantity):
         if store_id not in self.responsibilities:
             return Response(False, msg=f"this member do not own/manage store {store_id}")
-        return self.responsibilities[store_id].change_product_quantity_in_cart(
+        return self.responsibilities[store_id].change_product_quantity_in_store(
             product_id, new_quantity
         )
 
