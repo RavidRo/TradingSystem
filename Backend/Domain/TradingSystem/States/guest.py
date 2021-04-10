@@ -4,7 +4,6 @@ from Backend.response import Response
 
 
 class Guest(UserState):
-
     def get_username(self):
         return Response(False, msg="Guests don't have username")
 
@@ -14,13 +13,19 @@ class Guest(UserState):
             authentication = Authentication.get_instance()
         self.authentication = authentication
 
+    def get_username(self):
+        return Response(False, msg="Guests don't have username")
+
     def login(self, username, password):
         from Backend.Domain.TradingSystem.States.member import Member
         from Backend.Domain.TradingSystem.States.admin import Admin
+
         response = self.authentication.login(username, password)
         if response.succeeded():
             if response.object.value:
-                self.user.change_state(Admin(self.user, username))  # in later milestones, fetch data from DB
+                self.user.change_state(
+                    Admin(self.user, username)
+                )  # in later milestones, fetch data from DB
             else:
                 self.user.change_state(Member(self.user, username))
         return response

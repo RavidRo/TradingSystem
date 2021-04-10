@@ -115,7 +115,10 @@ class ShoppingBag(IShoppingBag):
             return Response(False, msg="Amount can't be negative!")
         if self.products_to_quantity.get(product_id) is None:
             return Response(False, msg="No such product in the bag")
-        self.products_to_quantity[product_id][1] = new_amount
+        self.products_to_quantity[product_id] = (
+            self.products_to_quantity.get(product_id)[0],
+            new_amount,
+        )
         return Response(True, msg="amount changed successfully")
 
     def delete_products_after_purchase(self, user_name="guest") -> PurchaseDetails:

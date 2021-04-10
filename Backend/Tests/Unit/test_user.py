@@ -1,9 +1,10 @@
+import pytest
+
 from Backend.Domain.TradingSystem.Responsibilities.responsibility import Permission
-from Backend.UnitTests.stubs.member_stub import MemberStub
 from Backend.Domain.TradingSystem.Interfaces.IUserState import IUserState
 from Backend.Domain.TradingSystem.user import User
 
-import pytest
+from .stubs.member_stub import MemberStub
 
 
 @pytest.fixture(scope="function", autouse=True)

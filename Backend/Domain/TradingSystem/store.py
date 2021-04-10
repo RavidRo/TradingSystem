@@ -10,13 +10,13 @@ class Store:
     from Backend.Domain.TradingSystem.purchase_details import PurchaseDetails
 
     def __init__(self, store_name: str):
-        from Backend.Domain.TradingSystem.discount_policy import DefaultDiscountPolicy
-        from Backend.Domain.TradingSystem.purchase_policy import DefaultPurchasePolicy
+        from Backend.Domain.TradingSystem.TypesPolicies.discount_policy import DefaultDiscountPolicy
+        from Backend.Domain.TradingSystem.TypesPolicies.purchase_policy import DefaultPurchasePolicy
 
         """Create a new store with it's specified info"""
         self.id = self.id_generator()
         self.name = store_name
-        self.products_to_quantities = dict()
+        self.products_to_quantities: dict[str, tuple[Product, int]] = {}
         self.responsibility = None
         # These fields will be changed in the future versions
         self.discount_policy = DefaultDiscountPolicy()
@@ -43,10 +43,10 @@ class Store:
        1. A product with product_id exists in the store"""
 
     def set_product_name(self, product_id, new_name) -> Response[None]:
-        if self.products_to_quantities.get(product_id) is None:
+        if self.products_to_quantities[product_id] is None:
             return Response(False, msg=f"product with {product_id} doesn't exist in the store!")
 
-        self.products_to_quantities.get(product_id)[0].set_product_name(new_name)
+        self.products_to_quantities[product_id][0].set_product_name(new_name)
         return Response(True, msg=f"Product {product_id} name was changed successfully!")
 
     def get_name(self) -> str:
@@ -54,18 +54,22 @@ class Store:
 
     """checks need to be made:
        ----------------------
-       1. quantity > 0
-       2. price > 0
-       3. a product with product_name exists"""
+       1. product_name != ""
+       2. quantity >= 0
+       3. price >= 0
+       4. a product with product_name exists"""
 
-    def add_product(self, product_name: str, price: float, quantity: int) -> Response[None]:
+    def add_product(self, product_name: str, price: float, quantity: int) -> Response[str]:
         from Backend.Domain.TradingSystem.product import Product
 
-        if quantity <= 0:
-            # actually it's non-negative but adding 0 amount is redundant
-            return Response(False, msg="Product's qunatity must be positive!")
+        if not product_name:
+            return Response(False, msg="Product's name can't be empty!")
 
-        if price <= 0:
+        if quantity < 0:
+            # actually it's non-negative but adding 0 amount is redundant
+            return Response(False, msg="Product's quantity must be positive!")
+
+        if price < 0:
             return Response(False, msg="Product's price must pe positive!")
 
         if self.check_existing_product(product_name):
@@ -73,8 +77,8 @@ class Store:
 
         product = Product(product_name=product_name, price=price)
         product_id = product.get_id()
-        self.products_to_quantities.update({product_id, (product, quantity)})
-        return Response(True, msg="product" + str(product_name) + "successfully added")
+        self.products_to_quantities[product_id] = (product, quantity)
+        return Response(True, product_id, msg=f"The product {product_name} successfully added")
 
     """checks need to be made:
        ----------------------
@@ -93,21 +97,15 @@ class Store:
     """checks need to be made:
        ----------------------
        1. price > 0
-       2. a product with product_name exists"""
+       2. a product with product_id exists"""
 
     def edit_product_details(
         self, product_id: str, product_name: str, price: float
     ) -> Response[None]:
-        if price <= 0:
-            return Response(False, msg="Product's price must pe positive!")
-
-        if not self.check_existing_product(product_name):
+        if product_id not in self.products_to_quantities:
             return Response(False, msg="No such product in the store")
 
-        self.products_to_quantities.get(product_id)[0].edit_product_details(
-            product_id, product_name, price
-        )
-        return Response(True, msg="Successfully edited product with product id: " + str(product_id))
+        return self.products_to_quantities[product_id][0].edit_product_details(product_name, price)
 
     """checks need to be made:
        ----------------------
@@ -118,7 +116,8 @@ class Store:
         if quantity < 0:
             return Response(False, msg="quantity must be positive!")
         if product_id in self.products_to_quantities:
-            self.products_to_quantities[product_id][1] = quantity
+            new_product_quantity = (self.products_to_quantities[product_id][0], quantity)
+            self.products_to_quantities[product_id] = new_product_quantity
             return Response(
                 True,
                 msg="Successfully updated product "
@@ -170,14 +169,14 @@ class Store:
 
     # This function checks for available products
     def check_available_products(self, products_to_quantities: dict) -> Response[None]:
-        for prod_id, (product, quantity) in products_to_quantities.items():
-            current_quantity = self.products_to_quantities.get(prod_id)[1]
-            if current_quantity is None:
+        for prod_id, (_, quantity) in products_to_quantities.items():
+            prod_to_current_quantity = self.products_to_quantities.get(prod_id)
+            if prod_to_current_quantity is None:
                 return Response(
                     False,
                     msg=f"The product with id: {prod_id} doesn't exist in the inventory of the store",
                 )
-            elif current_quantity < quantity:
+            elif prod_to_current_quantity[1] < quantity:
                 return Response(
                     False,
                     msg=f"The store has less than {quantity} of product with id: {prod_id} left",
@@ -192,9 +191,7 @@ class Store:
                 self.products_to_quantities.pop(prod_id)
             else:
                 product = self.products_to_quantities.get(prod_id)[0]
-                self.products_to_quantities.update(
-                    {prod_id, (product, current_quantity - quantity)}
-                )
+                self.products_to_quantities[prod_id] = (product, current_quantity - quantity)
 
     # this will be added in the future - maybe I will apply Default Policy for now
     def check_purchase_types(self, products_info, user_info) -> Response[None]:

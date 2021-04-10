@@ -1,9 +1,10 @@
 from Backend.Domain.TradingSystem.purchase_details import PurchaseDetails
 from Backend.Domain.TradingSystem.shopping_cart import ShoppingCart
 from Backend.response import ParsableList, PrimitiveParsable, Response
-from .member_stub import MemberStub
 from Backend.Domain.TradingSystem.Interfaces.IUser import IUser
 from ...Domain.TradingSystem.States.user_state import UserState
+
+from .member_stub import MemberStub
 
 
 class UserStub(IUser):

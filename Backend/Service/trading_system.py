@@ -58,7 +58,7 @@ class TradingSystem(object):
         )
 
     @logging
-    def save_product_in_cart(self, cookie, store_id, product_id, quantity=1):
+    def save_product_in_cart(self, cookie, store_id, product_id, quantity=0):
         return TradingSystemManager.save_product_in_cart(cookie, store_id, product_id, quantity)
 
     @logging
@@ -155,6 +155,11 @@ class TradingSystem(object):
     @logging
     def get_store_appointments(self, cookie: str, store_id: str):
         return TradingSystemManager.get_store_appointments(cookie, store_id)
+
+    # 4.11
+    @logging
+    def get_store_purchase_history(self, cookie: str, store_id: str):
+        return TradingSystemManager.get_store_purchase_history(cookie, store_id)
 
     # System Manager
     # ====================

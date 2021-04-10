@@ -1,21 +1,22 @@
-
 from Backend.Domain.TradingSystem.Responsibilities.responsibility import Responsibility
 from Backend.Domain.TradingSystem.store import Store
 from Backend.Domain.TradingSystem.States.user_state import UserState
 from Backend.response import Response, ParsableList, PrimitiveParsable
 from Backend.Domain.TradingSystem.purchase_details import PurchaseDetails
-from typing import List
+
+from .user_state import UserState
 
 
 class Member(UserState):
-
     def get_username(self):
         return Response(True, obj=PrimitiveParsable(self.username), msg="got username successfully")
 
     def add_responsibility(self, responsibility, store_id):
         self.responsibilities[store_id] = responsibility
 
-    def __init__(self, user, username, responsibilities=None, purchase_details=None, cart=None):  # for DB
+    def __init__(
+        self, user, username, responsibilities=None, purchase_details=None, cart=None
+    ):  # for DB
         # initialization
         super().__init__(user, cart)
         if purchase_details is None:
@@ -61,13 +62,15 @@ class Member(UserState):
 
     def open_store(self, store_name):
         store = Store(store_name)
-        self.responsibilities[store.get_id()] = Responsibility(self,
-                                                               store)
+        self.responsibilities[store.get_id()] = Responsibility(self, store)
         return Response[Store](True, obj=store, msg="Store opened successfully")
 
     def get_purchase_history(self):
-        return Response[List[PurchaseDetails]](True, obj=ParsableList(self.purchase_details), msg="Purchase history "
-                                                                                                  "got successfully")
+        return Response[list[PurchaseDetails]](
+            True,
+            obj=ParsableList(self.purchase_details),
+            msg="Purchase history " "got successfully",
+        )
 
     def add_new_product(self, store_id, product_name, product_price, quantity):
         if store_id not in self.responsibilities:
@@ -82,7 +85,9 @@ class Member(UserState):
     def change_product_quantity_in_store(self, store_id, product_id, new_quantity):
         if store_id not in self.responsibilities:
             return Response(False, msg=f"this member do not own/manage store {store_id}")
-        return self.responsibilities[store_id].change_product_quantity_in_cart(product_id, new_quantity)
+        return self.responsibilities[store_id].change_product_quantity_in_cart(
+            product_id, new_quantity
+        )
 
     def edit_product_details(self, store_id, product_id, new_name, new_price):
         if store_id not in self.responsibilities:

@@ -1,6 +1,7 @@
-from typing import Callable, Dict
+from typing import Callable
 import uuid
 
+from Backend.Domain.TradingSystem.store import Store
 from Backend.Domain.TradingSystem.Interfaces.IUser import IUser
 from .user import User
 from Backend.response import Response, ParsableList, PrimitiveParsable
@@ -10,8 +11,8 @@ from .Responsibilities.responsibility import Permission, Responsibility
 
 
 class UserManager:
-    cookie_user: Dict[str, IUser] = {}
-    username_user: Dict[str, IUser] = {}
+    cookie_user: dict[str, IUser] = {}
+    username_user: dict[str, IUser] = {}
 
     @staticmethod
     def __deligate_to_user(cookie, func):
@@ -128,7 +129,7 @@ class UserManager:
 
     # 3.2
     @staticmethod
-    def create_store(cookie: str, name: str) -> Response[None]:
+    def create_store(cookie: str, name: str) -> Response[Store]:
         func: Callable[[User], Response] = lambda user: user.create_store(name)
         return UserManager.__deligate_to_user(cookie, func)
 
@@ -146,7 +147,7 @@ class UserManager:
     @staticmethod
     def create_product(
         cookie: str, store_id: str, name: str, price: float, quantity: int
-    ) -> Response[None]:
+    ) -> Response[str]:
         func: Callable[[User], Response] = lambda user: user.create_product(
             store_id, name, price, quantity
         )
