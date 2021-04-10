@@ -1,9 +1,8 @@
-from Backend.Domain.TradingSystem.product import Product
 import uuid
 
-from Backend.Domain.TradingSystem.Interfaces.IStore import IStore
 from Backend.response import Response, ParsableList
-from dataclasses import dataclass
+from Backend.Domain.TradingSystem.product import Product
+from Backend.Service.DataObjects.store_data import StoreData
 
 
 class Store:
@@ -25,7 +24,7 @@ class Store:
         self.purchase_history = []
 
     def parse(self):
-        return StoreDataObject(self.id, self.name)
+        return StoreData(self.id, self.name)
 
     def parse_products(self):
         parsed_products = []
@@ -214,9 +213,3 @@ class Store:
         if product_quantity is None or product_quantity[1] < quantity:
             return False
         return True
-
-
-@dataclass
-class StoreDataObject:
-    id: str
-    name: str

@@ -1,6 +1,7 @@
 """ this class is responsible to communicate with the trading system manager"""
 
 
+from Backend.Service.DataObjects.shopping_cart_data import ShoppingCartData
 from Backend.Service.logs import logging
 from Backend.Domain.TradingSystem.trading_system_manager import TradingSystemManager
 import Backend.Domain.Payment.payment_manager as PaymentSystem
@@ -79,9 +80,13 @@ class TradingSystem(object):
         return TradingSystemManager.purchase_cart(cookie)
 
     @logging
-    def send_payment(self, cookie, payment_details):
+    def send_payment(self, cookie, payment_details, address):
         price = TradingSystemManager.get_cart_price(cookie)
-        res = PaymentSystem.pay(price, payment_details)
+        cart: ShoppingCartData = TradingSystemManager.get_cart_details(cookie).get_obj()
+        products_ids_to_quantity = {}
+        for bag in cart.bags:
+            products_ids_to_quantity |= bag.product_ids_to_quantities
+        res = PaymentSystem.pay(price, payment_details, products_ids_to_quantity, address)
         if res.succeeded():
             return TradingSystemManager.purchase_completed(cookie)
         else:

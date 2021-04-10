@@ -1,2 +1,7 @@
+from dataclasses import dataclass
+
+
+@dataclass
 class StoreData:
-    pass
+    id: str
+    name: str

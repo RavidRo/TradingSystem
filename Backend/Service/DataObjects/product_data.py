@@ -1,2 +1,8 @@
+from dataclasses import dataclass
+
+
+@dataclass
 class ProductData:
-    pass
+    id: str
+    name: str
+    price: float
