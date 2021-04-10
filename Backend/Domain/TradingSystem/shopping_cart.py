@@ -8,9 +8,6 @@ from Backend.Domain.TradingSystem.Interfaces.IShoppingCart import IShoppingCart
 
 class ShoppingCart(IShoppingCart):
     def __init__(self):
-        from Backend.Domain.TradingSystem import stores_manager
-
-        self.stores_manager = stores_manager.get_instance()
         self.shopping_bags: dict[str, ShoppingBag] = dict()
         self.timer = None
         self.INTERVAL_TIME = 10 * 60
