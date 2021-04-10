@@ -74,7 +74,9 @@ class Response(Generic[T]):
         self.success = success
 
     def parse(self):
-        return Response(self.success, self.object.parse() if self.object else None, self.msg)
+        return Response(
+            self.success, self.object.parse() if self.object is not None else None, self.msg
+        )
 
     def get_msg(self):
         return self.msg
