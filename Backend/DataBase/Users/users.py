@@ -28,8 +28,11 @@ class Users(object):
 
     """adds username and hashed password to DB"""
 
-    def add_user_to_db(self, username, password, is_admin):
+    def add_user_to_db(self, username, password, is_admin=False):
         self.users[username] = {
             'password':generate_password_hash(password, method='sha256'),
             'admin':is_admin
         }
+
+    def is_user_admin(self, username: str):
+        return bool(self.users[username]['admin'])

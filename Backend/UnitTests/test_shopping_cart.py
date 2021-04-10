@@ -101,8 +101,8 @@ def test_change_product_quantity_not_valid_amount(shopping_cart: ShoppingCart):
         assert result.success == False
 
 
-# * buy products
-# * ====================================================
+# # * buy products
+# # * ====================================================
 def test_buy_products(shopping_cart: ShoppingCart, user_stub: UserStub):
     with patch.dict(shopping_cart.shopping_bags, {'0': ShoppingBagStub(), '1': ShoppingBagStub()}):
         result = shopping_cart.buy_products(user_stub)

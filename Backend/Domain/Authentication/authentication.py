@@ -1,4 +1,4 @@
-from Backend.Domain import DBHandler
+from Backend.Domain.DBHandler import DBHandler
 from Backend import response
 from Backend.UnitTests.authentication.DBHandlerMock import DBHandlerMock
 
