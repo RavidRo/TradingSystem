@@ -40,7 +40,7 @@ class IUser:
         raise NotImplementedError
 
     # 2.8
-    def change_product_quantity(self, store_id, product_id, new_amount) -> Response[None]:
+    def change_product_quantity_in_cart(self, store_id, product_id, new_amount) -> Response[None]:
         raise NotImplementedError
 
     # 2.9
@@ -81,7 +81,7 @@ class IUser:
         raise NotImplementedError
 
     # 4.1
-    def change_product_quantity(
+    def change_product_quantity_in_store(
         self, store_id: str, product_id: str, new_quantity: int
     ) -> Response[None]:
         raise NotImplementedError

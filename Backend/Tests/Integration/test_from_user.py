@@ -190,13 +190,31 @@ def test_can_not_remove_product_from_unassigned_store(member: User, user_member2
     assert not member.remove_product_from_store(store.get_id(), product_id).succeeded()
 
 
-# def test_adds_product_successfully(member: User):
-#     store: Store = member.create_store("test_adds_product_successfully").get_obj()
-#     assert member.create_product(store.get_id(), "new_product", 19.90, 5).succeeded()
+def test_removes_product_successfully(member: User):
+    store: Store = member.create_store("test_removes_product_successfully").get_obj()
+    product_id = member.create_product(store.get_id(), "new_product", 19.90, 5).get_obj()
+    assert member.remove_product_from_store(store.get_id(), product_id).succeeded()
 
 
 # * change_product_quantity_in_store
 # * =================================================================
+def test_can_not_change_product_of_none_existent_store(member: User):
+    store: Store = member.create_store("store_name").get_obj()
+    product_id = member.create_product(store.get_id(), "new_product", 19.90, 5).get_obj()
+    assert not member.change_product_quantity_in_store("some_wrong_id", product_id, 24).succeeded()
+
+
+def test_can_not_change_product_of_unassigned_store(member: User, user_member2: User):
+    store: Store = user_member2.create_store("store_name").get_obj()
+    product_id = user_member2.create_product(store.get_id(), "new_product", 19.90, 5).get_obj()
+    assert not member.change_product_quantity_in_store(store.get_id(), product_id, 24).succeeded()
+
+
+def test_changes_product_quantity_in_store_successfully(member: User):
+    store: Store = member.create_store("store_name").get_obj()
+    product_id = member.create_product(store.get_id(), "new_product", 19.90, 5).get_obj()
+    assert member.change_product_quantity_in_store(store.get_id(), product_id, 24).succeeded()
+
 
 # * edit_product_details
 # * =================================================================
