@@ -1,9 +1,6 @@
-from Backend.Domain.TradingSystem.States.member import Member
-from Backend.Domain.TradingSystem.States.admin import Admin
-from Backend.Domain.TradingSystem.user import User
 import pytest
 
-from Backend.Domain.TradingSystem.States.guest import Guest
+from Backend.Domain.TradingSystem.user import User
 
 
 @pytest.fixture
@@ -31,4 +28,4 @@ def user_admin():
 # * get username
 # * =================================================================
 def test_guest_does_not_have_a_username(user_guest: User):
-    assert not guest.get_username().succeeded()
+    assert not user_guest.get_username().succeeded()
