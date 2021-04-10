@@ -4,7 +4,6 @@ from Backend.response import Parsable
 
 
 class IProduct(Parsable):
-
     @abstractmethod
     def __init__(self, product_name: str, price: float):
         """Create a new store with it's specified info"""

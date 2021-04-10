@@ -1,12 +1,11 @@
-from Backend.Domain.TradingSystem.user_state import UserState
-from Backend.Domain.TradingSystem.member import Member
-from Backend.Domain.TradingSystem.admin import Admin
+from .user_state import UserState
+from .member import Member
+from .admin import Admin
 from Backend.Domain.Authentication.authentication import Authentication
 from Backend.response import Response
 
 
 class Guest(UserState):
-
     def get_username(self):
         return Response(False, msg="Guests don't have username")
 
@@ -18,7 +17,9 @@ class Guest(UserState):
         response = self.authentication.login(username, password)
         if response.succeeded():
             if response.object.value:
-                self.user.change_state(Admin(self.user, username))  # in later milestones, fetch data from DB
+                self.user.change_state(
+                    Admin(self.user, username)
+                )  # in later milestones, fetch data from DB
             else:
                 self.user.change_state(Member(self.user, username))
         return response
@@ -41,10 +42,7 @@ class Guest(UserState):
     def change_product_quantity_in_store(self, store_id, product_id, new_quantity):
         return Response(False, msg="Guests cannot change store product's quantity")
 
-    def set_product_name(self, store_id, product_id, new_name):
-        return Response(False, msg="Guests cannot edit store product's details")
-
-    def set_product_price(self, store_id, product_id, new_price):
+    def edit_product_details(self, store_id, product_id, new_name, new_price):
         return Response(False, msg="Guests cannot edit store product's details")
 
     def appoint_new_store_owner(self, store_id, new_owner):
@@ -68,8 +66,8 @@ class Guest(UserState):
     def get_store_purchase_history(self, store_id):
         return Response(False, msg="Guests cannot get store's purchase history")
 
-    def get_any_store_purchase_history(self, store_id):
+    def get_any_store_purchase_history_admin(self, store_id):
         return Response(False, msg="Guests cannot get any store's purchase history")
 
-    def get_user_purchase_history(self, user_id):
+    def get_user_purchase_history_admin(self, username):
         return Response(False, msg="Guests cannot get any user's purchase history")

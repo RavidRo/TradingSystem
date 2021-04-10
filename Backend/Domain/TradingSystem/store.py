@@ -1,8 +1,8 @@
-
 import uuid
 
 from Backend.response import Response, ParsableList
-from dataclasses import dataclass
+from Backend.Domain.TradingSystem.product import Product
+from Backend.Service.DataObjects.store_data import StoreData
 
 
 class Store:
@@ -24,13 +24,19 @@ class Store:
         self.purchase_history = []
 
     def parse(self):
-        return StoreDataObject(self.id, self.name)
+        return StoreData(self.id, self.name)
 
     def parse_products(self):
         parsed_products = []
         for product, quantity in self.products_to_quantities.values():
-            parsed_products.append((product.get_id(), product.get_name(), product.get_price(), quantity))
+            parsed_products.append(
+                (product.get_id(), product.get_name(), product.get_price(), quantity)
+            )
         return parsed_products
+
+    def get_products(self) -> Response[ParsableList[Product]]:
+        products = [product for product, _ in self.products_to_quantities.values()]
+        return Response(True, ParsableList(products))
 
     """checks need to be made:
        ----------------------
@@ -67,7 +73,7 @@ class Store:
 
         product = Product(product_name=product_name, price=price)
         product_id = product.get_id()
-        self.products_to_quantities.update({product_id : (product, quantity)})
+        self.products_to_quantities.update({product_id: (product, quantity)})
         return Response(True, msg="product" + str(product_name) + "successfully added")
 
     """checks need to be made:
@@ -77,22 +83,28 @@ class Store:
     def remove_product(self, product_id: str) -> Response[None]:
         result = self.products_to_quantities.pop(product_id, None)
         if result is None:
-            return Response(False, msg="The product " + product_id + "is already not in the inventory!")
-        return Response(True, msg="Successfully removed product with product id: " + str(product_id))
+            return Response(
+                False, msg="The product " + product_id + "is already not in the inventory!"
+            )
+        return Response(
+            True, msg="Successfully removed product with product id: " + str(product_id)
+        )
 
     """checks need to be made:
        ----------------------
        1. price > 0
        2. a product with product_id exists"""
 
-    def edit_product_details(self, product_id: str, product_name: str, price: float) -> Response[None]:
+    def edit_product_details(
+        self, product_id: str, product_name: str, price: float
+    ) -> Response[None]:
         if price <= 0:
             return Response(False, msg="Product's price must pe positive!")
 
         if self.products_to_quantities.get(product_id) is None:
             return Response(False, msg="No such product in the store")
 
-        self.products_to_quantities.get(product_id)[0].edit_product_details(product_name, price)
+        self.products_to_quantities[product_id][0].edit_product_details(product_name, price)
         return Response(True, msg="Successfully edited product with product id: " + str(product_id))
 
     """checks need to be made:
@@ -104,19 +116,27 @@ class Store:
         if quantity < 0:
             return Response(False, msg="quantity must be positive!")
         if product_id in self.products_to_quantities:
-            self.products_to_quantities.update({product_id: (self.products_to_quantities[product_id][0], quantity)})
-            return Response(True, msg="Successfully updated product " +
-                                      str(self.products_to_quantities[product_id][0].get_name()) + "'s quantity")
+            new_product_quantity = (self.products_to_quantities[product_id][0], quantity)
+            self.products_to_quantities[product_id] = new_product_quantity
+            return Response(
+                True,
+                msg="Successfully updated product "
+                + str(self.products_to_quantities[product_id][0].get_name())
+                + "'s quantity",
+            )
         return Response(False, msg=f"The product with id: {product_id} isn't in the inventory!")
 
     def get_personnel_info(self) -> Response[Responsibility]:
         from Backend.Domain.TradingSystem.Responsibilities.responsibility import Responsibility
+
         if self.responsibility is None:
             return Response(False, msg="The store doesn't have assigned personnel")
         return Response[Responsibility](True, self.responsibility, msg="Personnel info")
 
-    def get_purchases_history(self) -> Response[ParsableList[PurchaseDetails]]:
-        return Response[ParsableList](True, ParsableList(self.purchase_history), msg="Purchase history")
+    def get_purchase_history(self) -> Response[ParsableList[PurchaseDetails]]:
+        return Response[ParsableList](
+            True, ParsableList(self.purchase_history), msg="Purchase history"
+        )
 
     def update_store_history(self, purchase_details: PurchaseDetails):
         self.purchase_history.append(purchase_details)
@@ -149,13 +169,18 @@ class Store:
 
     # This function checks for available products
     def check_available_products(self, products_to_quantities: dict) -> Response[None]:
-        for prod_id, (product, quantity) in products_to_quantities.items():
+        for prod_id, (_, quantity) in products_to_quantities.items():
             prod_to_current_quantity = self.products_to_quantities.get(prod_id)
             if prod_to_current_quantity is None:
-                return Response(False,
-                                msg=f"The product with id: {prod_id} doesn't exist in the inventory of the store")
+                return Response(
+                    False,
+                    msg=f"The product with id: {prod_id} doesn't exist in the inventory of the store",
+                )
             elif prod_to_current_quantity[1] < quantity:
-                return Response(False, msg=f"The store has less than {quantity} of product with id: {prod_id} left")
+                return Response(
+                    False,
+                    msg=f"The store has less than {quantity} of product with id: {prod_id} left",
+                )
 
         return Response(True, msg="All products are available")
 
@@ -166,15 +191,16 @@ class Store:
                 self.products_to_quantities.pop(prod_id)
             else:
                 product = self.products_to_quantities.get(prod_id)[0]
-                self.products_to_quantities.update({prod_id : (product, current_quantity - quantity)})
+                self.products_to_quantities[prod_id] = (product, current_quantity - quantity)
 
     # this will be added in the future - maybe I will apply Default Policy for now
     def check_purchase_types(self, products_info, user_info) -> Response[None]:
         return Response(True, msg="all purchase types arew available")
 
     def apply_discounts(self, user_info, product_to_quantity: dict):
-        return self.discount_policy.applyDiscount(user=user_info, store=self,
-                                                  products_to_quantities=product_to_quantity)
+        return self.discount_policy.applyDiscount(
+            user=user_info, store=self, products_to_quantities=product_to_quantity
+        )
 
     def get_product(self, product_id: str):
         return self.products_to_quantities.get(product_id)[0]
@@ -184,9 +210,3 @@ class Store:
         if product_quantity is None or product_quantity[1] < quantity:
             return False
         return True
-
-
-@dataclass
-class StoreDataObject:
-    id: str
-    name: str
