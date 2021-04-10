@@ -59,7 +59,7 @@ class Store:
        3. price >= 0
        4. a product with product_name exists"""
 
-    def add_product(self, product_name: str, price: float, quantity: int) -> Response[None]:
+    def add_product(self, product_name: str, price: float, quantity: int) -> Response[str]:
         from Backend.Domain.TradingSystem.product import Product
 
         if not product_name:
@@ -78,7 +78,7 @@ class Store:
         product = Product(product_name=product_name, price=price)
         product_id = product.get_id()
         self.products_to_quantities[product_id] = (product, quantity)
-        return Response(True, msg="product" + str(product_name) + "successfully added")
+        return Response(True, product_id, msg="product" + str(product_name) + "successfully added")
 
     """checks need to be made:
        ----------------------

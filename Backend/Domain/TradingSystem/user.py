@@ -71,7 +71,7 @@ class User(IUser):
     # Creating a new product a the store and setting its quantity to 0
     def create_product(
         self, store_id: str, name: str, price: float, quantity: int
-    ) -> Response[None]:
+    ) -> Response[str]:
         return self.state.add_new_product(store_id, name, price, quantity)
 
     # 4.1

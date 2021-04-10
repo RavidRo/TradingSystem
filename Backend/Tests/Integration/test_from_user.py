@@ -126,6 +126,11 @@ def test_stores_names_are_not_unique(user_member: User):
 
 # * create_product
 # * =================================================================
+def test_can_not_create_product_to_none_existent_store(member: User):
+    store: Store = member.create_store("test_can_not_create_product_to_unassigned_store").get_obj()
+    assert not member.create_product("some_wrong_id", "new_product", 19.90, 5).succeeded()
+
+
 def test_can_not_create_product_to_unassigned_store(member: User, user_member2: User):
     store: Store = member.create_store("test_can_not_create_product_to_unassigned_store").get_obj()
     assert not user_member2.create_product(store.get_id(), "new_product", 19.90, 5).succeeded()
@@ -163,12 +168,32 @@ def test_can_add_products_with_zero_quantity(member: User):
 
 
 def test_cant_add_products_with_empty_strings(member: User):
-    store: Store = member.create_store("test_cant_add_product_with_negative_price").get_obj()
+    store: Store = member.create_store("test_cant_add_products_with_empty_strings").get_obj()
     assert not member.create_product(store.get_id(), "", 20.7, 30).succeeded()
 
 
 # * remove_product_from_store
 # * =================================================================
+def test_can_not_remove_product_from_none_existent_store(member: User):
+    store: Store = member.create_store(
+        "test_can_not_remove_product_from_none_existent_store"
+    ).get_obj()
+    product_id = member.create_product(store.get_id(), "new_product", 19.90, 5).get_obj()
+    assert not member.remove_product_from_store("some_wrong_id", product_id).succeeded()
+
+
+def test_can_not_remove_product_from_unassigned_store(member: User, user_member2: User):
+    store: Store = user_member2.create_store(
+        "test_can_not_remove_product_from_unassigned_store"
+    ).get_obj()
+    product_id = user_member2.create_product(store.get_id(), "new_product", 19.90, 5).get_obj()
+    assert not member.remove_product_from_store(store.get_id(), product_id).succeeded()
+
+
+# def test_adds_product_successfully(member: User):
+#     store: Store = member.create_store("test_adds_product_successfully").get_obj()
+#     assert member.create_product(store.get_id(), "new_product", 19.90, 5).succeeded()
+
 
 # * change_product_quantity_in_store
 # * =================================================================

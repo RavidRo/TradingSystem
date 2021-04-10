@@ -130,7 +130,7 @@ class UserManager:
     # Creating a new product a the store and setting its quantity to 0
     def create_product(
         cookie: str, store_id: str, name: str, price: float, quantity: int
-    ) -> Response[None]:
+    ) -> Response[str]:
         func: Callable[[User], Response] = lambda user: user.create_product(
             store_id, name, price, quantity
         )

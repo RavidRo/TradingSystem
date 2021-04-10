@@ -107,11 +107,11 @@ class TradingSystemManager:
     # =======================
 
     # 4.1
-    # Creating a new product a the store and setting its quantity to 0
+    # Creating a new product and returns its id
     @staticmethod
     def create_product(
         cookie: str, store_id: str, name: str, price: float, quantity: int
-    ) -> Response[None]:
+    ) -> Response[str]:
         return UserManager.create_product(cookie, store_id, name, price, quantity)
 
     # 4.1
