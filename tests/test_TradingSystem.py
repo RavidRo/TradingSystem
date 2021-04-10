@@ -1,260 +1,622 @@
 import pytest
-from Backend.Service.TradingSystem import TradingSystem
+from Backend.Service.trading_system import TradingSystem
 
-system = TradingSystem.getInstance()  #TODO: for some reason, the object returned does not have the methods
+# TODO: parallel testing
+# TODO: more coverage
+# TODO: get admin permissions
+# TODO: decide on permissions, positions and discounts names
+system = TradingSystem.getInstance()
 
-#2.3
+
+def _initialize_info(username: str, password: str, store_name: str = None) -> (str, str, str, str):
+    cookie = system.enter_system()
+    system.register(cookie, username, password)
+    system.login(cookie, username, password)
+    if store_name:
+        system.create_store(cookie, store_name)
+    return cookie, username, password, store_name
+
+
+# 2.3 https://github.com/SeanPikulin/TradingSystem/blob/main/Documentation/Use%20Cases.md#23-Registration
 def test_register_success():
     new_username = "doorbellman"
     password = "aaa"
-    cookie = TradingSystem.enter_system(system)   #TODO: assuming the returned value is the cookie
-    assert TradingSystem.register(system, cookie, new_username, password) #TODO: assuming the return value is a boolean
+    cookie = system.enter_system()
+    assert system.register(cookie, new_username, password).succeeded()
+
 
 def test_register_used_username_fail():
     existing_username = "doorbellman"
     password = "aaa"
-    cookie = TradingSystem.enter_system(system)
-    TradingSystem.register(system, cookie, existing_username, password)
-    assert not TradingSystem.register(system, cookie, existing_username, password)
+    cookie = system.enter_system()
+    system.register(cookie, existing_username, password)
+    assert not system.register(cookie, existing_username, password).succeeded()
 
-#2.4
+
+# 2.4 https://github.com/SeanPikulin/TradingSystem/blob/main/Documentation/Use%20Cases.md#24-Login
 def test_login_success():
     new_username = "doorbellman"
     password = "aaa"
-    cookie = TradingSystem.enter_system(system)
-    TradingSystem.register(system, cookie, new_username, password)
-    assert TradingSystem.login(system, cookie, new_username, password)  #TODO: assuming return value is a boolean, might hove to check if the user strategy is different
+    cookie = system.enter_system()
+    system.register(cookie, new_username, password)
+    assert system.login(cookie, new_username, password).succeeded()
+
 
 def test_login_wrong_username_fail():
     new_username = "doorbellman"
     password = "aaa"
     wrong_username = "doorbelman"
-    cookie = TradingSystem.enter_system(system)
-    TradingSystem.register(system, cookie, new_username, password)
-    assert not TradingSystem.login(system, cookie, wrong_username, password)
+    cookie = system.enter_system()
+    system.register(cookie, new_username, password)
+    assert not system.login(cookie, wrong_username, password).succeeded()
+
 
 def test_login_wrong_password_fail():
     new_username = "doorbellman"
     password = "aaa"
     wrong_password = "aa"
-    cookie = TradingSystem.enter_system(system)
-    TradingSystem.register(system, cookie, new_username, password)
-    assert not TradingSystem.login(system, cookie, new_username, wrong_password)
+    cookie = system.enter_system()
+    system.register(cookie, new_username, password)
+    assert not system.login(cookie, new_username, wrong_password).succeeded()
 
-#3.2
+
+# 3.2 https://github.com/SeanPikulin/TradingSystem/blob/main/Documentation/Use%20Cases.md#32-#Open-a-store
 def test_open_store_success():
-    new_username = "doorbellman"
-    password = "aaa"
+    cookie, username, password, _ = _initialize_info("doorbellman", "aaa")
     store_name = "starbucks"
-    cookie = TradingSystem.enter_system(system)
-    TradingSystem.register(system, cookie, new_username, password)
-    TradingSystem.login(system, cookie, new_username, password)
-    assert TradingSystem.create_store(system, cookie, store_name)   #TODO: assuming return value is a boolean
+    assert system.create_store(cookie, store_name).succeeded()
+
 
 def test_open_store_unsupported_character_fail():
-    new_username = "doorbellman"
-    password = "aaa"
+    cookie, username, password, _ = _initialize_info("doorbellman", "aaa")
     store_name = "stαrbucks"
-    cookie = TradingSystem.enter_system(system)
-    TradingSystem.register(system, cookie, new_username, password)
-    TradingSystem.login(system, cookie, new_username, password)
-    assert not TradingSystem.create_store(system, cookie, store_name)
+    assert not system.create_store(cookie, store_name).succeeded()
 
-#2.5
+
+# 2.5 https://github.com/SeanPikulin/TradingSystem/blob/main/Documentation/Use%20Cases.md#25-Getting-store-information
 def test_get_store_information_success():
-    new_username = "doorbellman"
-    password = "aaa"
-    store_name = "starbucks"
-    cookie = TradingSystem.enter_system(system)
-    TradingSystem.register(system, cookie, new_username, password)
-    TradingSystem.login(system, cookie, new_username, password)
-    TradingSystem.create_store(system, cookie, store_name)
-    assert TradingSystem.get_stores_details(system) #TODO: assuming return value is list, might need to figure out how to see if that's the right store
+    cookie, username, password, store_name = _initialize_info("doorbellman", "aaa", "starbucks")
+    response = system.get_stores_details()
+    assert response.succeeded() and len(response.object.values) == 1 \
+           and response.object.values[0].name == store_name
+
 
 def test_get_store_information_no_stores_fail():
-    new_username = "doorbellman"
-    password = "aaa"
-    cookie = TradingSystem.enter_system(system)
-    TradingSystem.register(system, cookie, new_username, password)
-    TradingSystem.login(system, cookie, new_username, password)
-    assert not TradingSystem.get_stores_details(system) #an empty list evaluates to false
+    cookie, username, password, _ = _initialize_info("doorbellman", "aaa")
+    assert not system.get_stores_details().succeeded()  # an empty list evaluates to false
 
-#4.1
+
+# 4.1 https://github.com/SeanPikulin/TradingSystem/blob/main/Documentation/Use%20Cases.md#41-Add-new-product
 def test_add_new_product_success():
-    new_username = "doorbellman"
-    password = "aaa"
-    store_name = "starbucks"
+    cookie, username, password, store_name = _initialize_info("doorbellman", "aaa", "starbucks")
     product_name = "coffee"
     price = 5.50
     quantity = 10
-    cookie = TradingSystem.enter_system(system)
-    TradingSystem.register(system, cookie, new_username, password)
-    TradingSystem.login(system, cookie, new_username, password)
-    TradingSystem.create_store(system, cookie, store_name)
-    assert TradingSystem.create_product(system, cookie, store_name, product_name, price, quantity) #TODO: assuming store_id is the store's name, return value is a boolean
+    assert system.create_product(cookie, store_name, product_name, price, quantity).succeeded()
+
 
 def test_add_new_product_negative_quantity_fail():
-    new_username = "doorbellman"
-    password = "aaa"
-    store_name = "starbucks"
+    cookie, username, password, store_name = _initialize_info("doorbellman", "aaa", "starbucks")
     product_name = "coffee"
     price = 5.50
     quantity = -10
-    cookie = TradingSystem.enter_system(system)
-    TradingSystem.register(system, cookie, new_username, password)
-    TradingSystem.login(system, cookie, new_username, password)
-    TradingSystem.create_store(system, cookie, store_name)
-    assert not TradingSystem.create_product(system, cookie, store_name, product_name, price, quantity) #TODO: assuming store_id is the store's name, return value is a boolean
+    assert not system.create_product(cookie, store_name, product_name, price, quantity).succeeded()
+
 
 def test_add_new_product_negative_price_fail():
-    new_username = "doorbellman"
-    password = "aaa"
-    store_name = "starbucks"
+    cookie, username, password, store_name = _initialize_info("doorbellman", "aaa", "starbucks")
     product_name = "coffee"
     price = -5.50
     quantity = 10
-    cookie = TradingSystem.enter_system(system)
-    TradingSystem.register(system, cookie, new_username, password)
-    TradingSystem.login(system, cookie, new_username, password)
-    TradingSystem.create_store(system, cookie, store_name)
-    assert not TradingSystem.create_product(system, cookie, store_name, product_name, price, quantity) #TODO: assuming store_id is the store's name, return value is a boolean
+    assert not system.create_product(cookie, store_name, product_name, price, quantity).succeeded()
+
 
 def test_remove_product_success():
-    new_username = "doorbellman"
-    password = "aaa"
-    store_name = "starbucks"
+    cookie, username, password, store_name = _initialize_info("doorbellman", "aaa", "starbucks")
     product_name = "coffee"
     price = 5.50
     quantity = 10
-    cookie = TradingSystem.enter_system(system)
-    TradingSystem.register(system, cookie, new_username, password)
-    TradingSystem.login(system, cookie, new_username, password)
-    TradingSystem.create_store(system, cookie, store_name)
-    TradingSystem.create_product(system, cookie, store_name, product_name, price, quantity)
-    assert TradingSystem.remove_products(system, cookie, store_name, product_name)  #TODO: assuming return value is a boolean
+    system.create_product(cookie, store_name, product_name, price, quantity)
+    assert system.remove_products(cookie, store_name, product_name).succeeded()
+
 
 def test_remove_product_wrong_product_fail():
-    new_username = "doorbellman"
-    password = "aaa"
-    store_name = "starbucks"
+    cookie, username, password, store_name = _initialize_info("doorbellman", "aaa", "starbucks")
     product_name = "coffee"
     wrong_product = "cofee"
     price = 5.50
     quantity = 10
-    cookie = TradingSystem.enter_system(system)
-    TradingSystem.register(system, cookie, new_username, password)
-    TradingSystem.login(system, cookie, new_username, password)
-    TradingSystem.create_store(system, cookie, store_name)
-    TradingSystem.create_product(system, cookie, store_name, product_name, price, quantity)
-    assert not TradingSystem.remove_products(system, cookie, store_name, wrong_product)
+    system.create_product(cookie, store_name, product_name, price, quantity)
+    assert not system.remove_products(cookie, store_name, wrong_product).succeeded()
+
 
 def test_change_product_quantity_success():
-    new_username = "doorbellman"
-    password = "aaa"
-    store_name = "starbucks"
+    cookie, username, password, store_name = _initialize_info("doorbellman", "aaa", "starbucks")
     product_name = "coffee"
     price = 5.50
     quantity = 10
     new_quantity = 15
-    cookie = TradingSystem.enter_system(system)
-    TradingSystem.register(system, cookie, new_username, password)
-    TradingSystem.login(system, cookie, new_username, password)
-    TradingSystem.create_store(system, cookie, store_name)
-    TradingSystem.create_product(system, cookie, store_name, product_name, price, quantity)
-    assert TradingSystem.change_product_quantity(cookie, store_name, product_name, new_quantity)
+    system.create_product(cookie, store_name, product_name, price, quantity)
+    assert system.change_product_quantity(cookie, store_name, product_name, new_quantity).succeeded()
+
 
 def test_change_product_quantity_negative_quantity_fail():
-    new_username = "doorbellman"
-    password = "aaa"
-    store_name = "starbucks"
+    cookie, username, password, store_name = _initialize_info("doorbellman", "aaa", "starbucks")
     product_name = "coffee"
     price = 5.50
     quantity = 10
     new_quantity = -15
-    cookie = TradingSystem.enter_system(system)
-    TradingSystem.register(system, cookie, new_username, password)
-    TradingSystem.login(system, cookie, new_username, password)
-    TradingSystem.create_store(system, cookie, store_name)
-    TradingSystem.create_product(system, cookie, store_name, product_name, price, quantity)
-    assert not TradingSystem.change_product_quantity(cookie, store_name, product_name, new_quantity)
+    cookie = system.enter_system()
+    system.create_product(cookie, store_name, product_name, price, quantity)
+    assert not system.change_product_quantity(cookie, store_name, product_name, new_quantity).succeeded()
+
 
 def test_change_product_quantity_wrong_product_fail():
-    new_username = "doorbellman"
-    password = "aaa"
-    store_name = "starbucks"
+    cookie, username, password, store_name = _initialize_info("doorbellman", "aaa", "starbucks")
     product_name = "coffee"
     wrong_product = "cofee"
     price = 5.50
     quantity = 10
     new_quantity = 15
-    cookie = TradingSystem.enter_system(system)
-    TradingSystem.register(system, cookie, new_username, password)
-    TradingSystem.login(system, cookie, new_username, password)
-    TradingSystem.create_store(system, cookie, store_name)
-    TradingSystem.create_product(system, cookie, store_name, product_name, price, quantity)
-    assert not TradingSystem.change_product_quantity(cookie, store_name, wrong_product, new_quantity)
+    system.create_product(cookie, store_name, product_name, price, quantity)
+    assert not system.change_product_quantity(cookie, store_name, wrong_product, new_quantity).succeeded()
+
 
 def test_edit_product_details_success():
-    new_username = "doorbellman"
-    password = "aaa"
-    store_name = "starbucks"
+    cookie, username, password, store_name = _initialize_info("doorbellman", "aaa", "starbucks")
     product_name = "coffee"
     price = 5.50
     quantity = 10
     new_name = "cofee"
     new_price = 6.0
-    cookie = TradingSystem.enter_system(system)
-    TradingSystem.register(system, cookie, new_username, password)
-    TradingSystem.login(system, cookie, new_username, password)
-    TradingSystem.create_store(system, cookie, store_name)
-    TradingSystem.create_product(system, cookie, store_name, product_name, price, quantity)
-    assert TradingSystem.edit_product_details(cookie, store_name, product_name, new_name, new_price)
+    system.create_product(cookie, store_name, product_name, price, quantity)
+    assert system.edit_product_details(cookie, store_name, product_name, new_name, new_price).succeeded()
+
 
 def test_edit_product_details_wrong_product_fail():
-    new_username = "doorbellman"
-    password = "aaa"
-    store_name = "starbucks"
+    cookie, username, password, store_name = _initialize_info("doorbellman", "aaa", "starbucks")
     product_name = "coffee"
     wrong_product = "coffe"
     price = 5.50
     quantity = 10
     new_name = "cofee"
     new_price = 6.0
-    cookie = TradingSystem.enter_system(system)
-    TradingSystem.register(system, cookie, new_username, password)
-    TradingSystem.login(system, cookie, new_username, password)
-    TradingSystem.create_store(system, cookie, store_name)
-    TradingSystem.create_product(system, cookie, store_name, product_name, price, quantity)
-    assert not TradingSystem.edit_product_details(cookie, store_name, wrong_product, new_name, new_price)
+    system.create_product(cookie, store_name, product_name, price, quantity)
+    assert not system.edit_product_details(cookie, store_name, wrong_product, new_name, new_price).succeeded()
+
 
 def test_edit_product_details_negative_price_fail():
-    new_username = "doorbellman"
-    password = "aaa"
-    store_name = "starbucks"
+    cookie, username, password, store_name = _initialize_info("doorbellman", "aaa", "starbucks")
     product_name = "coffee"
     price = 5.50
     quantity = 10
     new_name = "cofee"
     new_price = -6.0
-    cookie = TradingSystem.enter_system(system)
-    TradingSystem.register(system, cookie, new_username, password)
-    TradingSystem.login(system, cookie, new_username, password)
-    TradingSystem.create_store(system, cookie, store_name)
-    TradingSystem.create_product(system, cookie, store_name, product_name, price, quantity)
-    assert not TradingSystem.edit_product_details(cookie, store_name, product_name, new_name, new_price)
+    system.create_product(cookie, store_name, product_name, price, quantity)
+    assert not system.edit_product_details(cookie, store_name, product_name, new_name, new_price).succeeded()
 
-#2.6
-def test_product_search_with_filter_no_args_success():
-    new_username = "doorbellman"
-    password = "aaa"
-    store_name = "starbucks"
+
+# 2.6 https://github.com/SeanPikulin/TradingSystem/blob/main/Documentation/Use%20Cases.md#26-Filter-search-results
+def test_product_search_no_args_success():
+    cookie, username, password, store_name = _initialize_info("doorbellman", "aaa", "starbucks")
     product_name = "coffee"
     price = 5.50
     quantity = 10
-    cookie = TradingSystem.enter_system(system)
-    TradingSystem.register(system, cookie, new_username, password)
-    TradingSystem.login(system, cookie, new_username, password)
-    TradingSystem.create_store(system, cookie, store_name)
-    TradingSystem.create_product(system, cookie, store_name, product_name, price, quantity)
-    assert system.search_products(product_name)
+    system.create_product(cookie, store_name, product_name, price, quantity)
+    response = system.search_products(product_name)
+    assert response.succeeded() and len(response.object.values) == 1 \
+           and response.object.values[0].name == product_name
 
+
+def test_product_search_args_success():
+    cookie, username, password, store_name = _initialize_info("doorbellman", "aaa", "starbucks")
+    product_name = "coffee"
+    price = 5.50
+    quantity = 10
+    min_price = 5.0
+    max_price = 6.0
+    system.create_product(cookie, store_name, product_name, price, quantity)
+    response = system.search_products(product_name, min_price=min_price, max_price=max_price)
+    assert response.succeeded() and len(response.object.values) == 1 and response.object.values[0].name == product_name
+
+
+def test_product_search_wrong_product_no_args_fail():
+    cookie, username, password, store_name = _initialize_info("doorbellman", "aaa", "starbucks")
+    product_name = "coffee"
+    wrong_product = "cofee"
+    price = 5.50
+    quantity = 10
+    system.create_product(cookie, store_name, product_name, price, quantity)
+    response = system.search_products(wrong_product)
+    assert not response.succeeded()
+
+
+def test_product_search_wrong_product_args_fail():
+    cookie, username, password, store_name = _initialize_info("doorbellman", "aaa", "starbucks")
+    product_name = "coffee"
+    wrong_product = "cofee"
+    price = 5.50
+    quantity = 10
+    min_price = 5.0
+    max_price = 6.0
+    system.create_product(cookie, store_name, product_name, price, quantity)
+    response = system.search_products(wrong_product, min_price=min_price, max_price=max_price)
+    assert not response.succeeded()
+
+
+def test_product_search_wrong_args_min_fail():
+    cookie, username, password, store_name = _initialize_info("doorbellman", "aaa", "starbucks")
+    product_name = "coffee"
+    wrong_product = "cofee"
+    price = 5.50
+    quantity = 10
+    min_price = 6.0
+    max_price = 7.0
+    system.create_product(cookie, store_name, product_name, price, quantity)
+    response = system.search_products(wrong_product, min_price=min_price, max_price=max_price)
+    assert not response.succeeded()
+
+
+def test_product_search_wrong_args_max_fail():
+    cookie, username, password, store_name = _initialize_info("doorbellman", "aaa", "starbucks")
+    product_name = "coffee"
+    wrong_product = "cofee"
+    price = 5.50
+    quantity = 10
+    min_price = 4.0
+    max_price = 5.0
+    system.create_product(cookie, store_name, product_name, price, quantity)
+    response = system.search_products(wrong_product, min_price=min_price, max_price=max_price)
+    assert not response.succeeded()
+
+
+# 2.7 https://github.com/SeanPikulin/TradingSystem/blob/main/Documentation/Use%20Cases.md#27-Save-products-in-shopping-bag
+def test_add_to_cart_success():
+    cookie, username, password, store_name = _initialize_info("doorbellman", "aaa", "starbucks")
+    product_name = "coffee"
+    price = 5.50
+    quantity = 10
+    system.create_product(cookie, store_name, product_name, price, quantity)
+    assert system.save_product_in_cart(cookie, store_name, product_name, 1).succeeded()
+
+
+def test_add_to_cart_wrong_product_fail():
+    cookie, username, password, store_name = _initialize_info("doorbellman", "aaa", "starbucks")
+    product_name = "coffee"
+    price = 5.50
+    quantity = 10
+    wrong_product = "cofee"
+    system.create_product(cookie, store_name, product_name, price, quantity)
+    assert not system.save_product_in_cart(cookie, store_name, wrong_product, 1).succeeded()
+
+
+def test_add_to_cart_wrong_store_fail():
+    cookie, username, password, store_name = _initialize_info("doorbellman", "aaa", "starbucks")
+    product_name = "coffee"
+    price = 5.50
+    quantity = 10
+    wrong_store = "starbux"
+    system.create_product(cookie, store_name, product_name, price, quantity)
+    assert not system.save_product_in_cart(cookie, wrong_store, product_name, 1).succeeded()
+
+
+# 2.8 https://github.com/SeanPikulin/TradingSystem/blob/main/Documentation/Use%20Cases.md#28-Visit-cart
+def test_visit_cart_success():
+    cookie, username, password, store_name = _initialize_info("doorbellman", "aaa", "starbucks")
+    product_name = "coffee"
+    price = 5.50
+    quantity = 10
+    system.create_product(cookie, store_name, product_name, price, quantity)
+    system.save_product_in_cart(cookie, store_name, product_name, 1)
+    response = system.get_cart_details(cookie)
+    assert response.succeeded() and len(response.object.bags) == 1 and response.object.bags[0].store_name == store_name\
+           and len(response.object.bags[0].products) == 1 and response.object.bags[0].products[0].name == product_name
+
+
+def test_visit_cart_no_items_fail():
+    cookie, username, password, store_name = _initialize_info("doorbellman", "aaa", "starbucks")
+    assert not system.get_cart_details(cookie).succeeded()
+
+
+def test_change_amount_in_cart_success():
+    cookie, username, password, store_name = _initialize_info("doorbellman", "aaa", "starbucks")
+    product_name = "coffee"
+    price = 5.50
+    quantity = 10
+    system.create_product(cookie, store_name, product_name, price, quantity)
+    system.save_product_in_cart(cookie, store_name, product_name, 1)
+    assert system.change_product_quantity_in_cart(cookie, store_name, product_name, 2).succeeded() and\
+           system.get_cart_details(cookie).object.bags[0].products[0].quantity == 2
+
+
+def test_change_amount_in_cart_wrong_product_fail():
+    cookie, username, password, store_name = _initialize_info("doorbellman", "aaa", "starbucks")
+    product_name = "coffee"
+    wrong_product = "cofee"
+    price = 5.50
+    quantity = 10
+    system.create_product(cookie, store_name, product_name, price, quantity)
+    system.save_product_in_cart(cookie, store_name, product_name, 1)
+    assert not system.change_product_quantity_in_cart(cookie, store_name, wrong_product, 2).succeeded()
+
+
+def test_change_amount_in_cart_wrong_store_fail():
+    cookie, username, password, store_name = _initialize_info("doorbellman", "aaa", "starbucks")
+    product_name = "coffee"
+    wrong_store = "starbux"
+    price = 5.50
+    quantity = 10
+    system.create_product(cookie, store_name, product_name, price, quantity)
+    system.save_product_in_cart(cookie, store_name, product_name, 1)
+    assert not system.change_product_quantity_in_cart(cookie, wrong_store, product_name, 2).succeeded()
+
+
+def test_change_amount_in_cart_negative_quantity_fail():
+    cookie, username, password, store_name = _initialize_info("doorbellman", "aaa", "starbucks")
+    product_name = "coffee"
+    price = 5.50
+    quantity = 10
+    system.create_product(cookie, store_name, product_name, price, quantity)
+    system.save_product_in_cart(cookie, store_name, product_name, 1)
+    assert not system.change_product_quantity_in_cart(cookie, store_name, product_name, -1).succeeded()
+
+
+def test_remove_product_from_cart_success():
+    cookie, username, password, store_name = _initialize_info("doorbellman", "aaa", "starbucks")
+    product_name = "coffee"
+    price = 5.50
+    quantity = 10
+    system.create_product(cookie, store_name, product_name, price, quantity)
+    system.save_product_in_cart(cookie, store_name, product_name, 1)
+    assert system.remove_product_from_cart(cookie, store_name, product_name).succeeded() and not system.get_cart_details(cookie).succeeded()
+
+
+def test_remove_product_from_cart_wrong_product_fail():
+    cookie, username, password, store_name = _initialize_info("doorbellman", "aaa", "starbucks")
+    product_name = "coffee"
+    price = 5.50
+    quantity = 10
+    wrong_product = "cofee"
+    system.create_product(cookie, store_name, product_name, price, quantity)
+    system.save_product_in_cart(cookie, store_name, product_name, 1)
+    assert not system.remove_product_from_cart(cookie, store_name, wrong_product).succeeded()
+
+
+def test_remove_product_from_cart_wrong_store_fail():
+    cookie, username, password, store_name = _initialize_info("doorbellman", "aaa", "starbucks")
+    product_name = "coffee"
+    price = 5.50
+    quantity = 10
+    wrong_store = "starbux"
+    system.create_product(cookie, store_name, product_name, price, quantity)
+    system.save_product_in_cart(cookie, store_name, product_name, 1)
+    assert not system.remove_product_from_cart(cookie, wrong_store, product_name).succeeded()
+
+
+# 2.9 https://github.com/SeanPikulin/TradingSystem/blob/main/Documentation/Use%20Cases.md#29-Purchase-products
+def test_
+
+# 4.3 https://github.com/SeanPikulin/TradingSystem/blob/main/Documentation/Use%20Cases.md#43-Appoint-new-store-owner
+def test_appoint_store_owner_success():
+    cookie, username, password, store_name = _initialize_info("doorbellman", "aaa", "starbucks")
+    new_owner_cookie, new_owner_username, new_owner_password, _ = _initialize_info("Ravid Rom", "bbb")
+    assert system.appoint_owner(cookie, store_name, new_owner_username).succeeded()
+
+
+def test_appoint_store_owner_chain_success():
+    cookie, username, password, store_name = _initialize_info("doorbellman", "aaa", "starbucks")
+    new_owner_cookie, new_owner_username, new_owner_password, _ = _initialize_info("Ravid Rom", "bbb")
+    last_owner_cookie, last_owner_username, last_owner_password, _ = _initialize_info("Inon Katz", "ccc")
+    system.appoint_owner(cookie, store_name, new_owner_username)
+    assert system.appoint_owner(new_owner_cookie, store_name, last_owner_username).succeeded()
+
+
+def test_appoint_store_owner_wrong_name_fail():
+    cookie, username, password, store_name = _initialize_info("doorbellman", "aaa", "starbucks")
+    new_owner_cookie, new_owner_username, new_owner_password, _ = _initialize_info("Ravid Rom", "bbb")
+    wrong_name = "Ravit Ron"
+    assert not system.appoint_owner(cookie, store_name, wrong_name).succeeded()
+
+
+def test_appoint_store_owner_wrong_store_fail():
+    cookie, username, password, store_name = _initialize_info("doorbellman", "aaa", "starbucks")
+    new_owner_cookie, new_owner_username, new_owner_password, _ = _initialize_info("Ravid Rom", "bbb")
+    wrong_store = "starbux"
+    assert not system.appoint_owner(cookie, wrong_store, new_owner_username).succeeded()
+
+
+def test_appoint_store_owner_direct_circular_appointment_fail():
+    cookie, username, password, store_name = _initialize_info("doorbellman", "aaa", "starbucks")
+    new_owner_cookie, new_owner_username, new_owner_password, _ = _initialize_info("Ravid Rom", "bbb")
+    last_owner_cookie, last_owner_username, last_owner_password, _ = _initialize_info("Inon Katz", "ccc")
+    system.appoint_owner(cookie, store_name, new_owner_username)
+    assert not system.appoint_owner(new_owner_cookie, store_name, username).succeeded()
+
+
+def test_appoint_store_owner_circular_fail():
+    cookie, username, password, store_name = _initialize_info("doorbellman", "aaa", "starbucks")
+    new_owner_cookie, new_owner_username, new_owner_password, _ = _initialize_info("Ravid Rom", "bbb")
+    last_owner_cookie, last_owner_username, last_owner_password, _ = _initialize_info("Inon Katz", "ccc")
+    system.appoint_owner(cookie, store_name, new_owner_username)
+    system.appoint_owner(new_owner_cookie, store_name, last_owner_username)
+    assert not system.appoint_owner(last_owner_cookie, store_name, username).succeeded()
+
+
+# 4.5 https://github.com/SeanPikulin/TradingSystem/blob/main/Documentation/Use%20Cases.md#45-Appoint-new-store-manager
+def test_appoint_store_manager_success():
+    cookie, username, password, store_name = _initialize_info("doorbellman", "aaa", "starbucks")
+    new_manager_cookie, new_manager_username, new_manager_password, _ = _initialize_info("Ravid Rom", "bbb")
+    assert system.appoint_manager(cookie, store_name, new_manager_username).succeeded()
+
+
+def test_appoint_store_manager_manager_chain_success():
+    cookie, username, password, store_name = _initialize_info("doorbellman", "aaa", "starbucks")
+    new_manager_cookie, new_manager_username, new_manager_password, _ = _initialize_info("Ravid Rom", "bbb")
+    last_manager_cookie, last_manager_username, last_manager_password, _ = _initialize_info("Inon Katz", "ccc")
+    system.appoint_manager(cookie, store_name, new_manager_username)
+    assert system.appoint_manager(new_manager_cookie, store_name, last_manager_username).succeeded()
+
+
+def test_appoint_store_owner_manager_chain_success():
+    cookie, username, password, store_name = _initialize_info("doorbellman", "aaa", "starbucks")
+    new_owner_cookie, new_owner_username, new_owner_password, _ = _initialize_info("Ravid Rom", "bbb")
+    last_manager_cookie, last_manager_username, last_manager_password, _ = _initialize_info("Inon Katz", "ccc")
+    system.appoint_owner(cookie, store_name, new_owner_username)
+    assert system.appoint_manager(new_owner_cookie, store_name, last_manager_username).succeeded()
+
+
+def test_appoint_store_manager_wrong_name_fail():
+    cookie, username, password, store_name = _initialize_info("doorbellman", "aaa", "starbucks")
+    new_manager_cookie, new_manager_username, new_manager_password, _ = _initialize_info("Ravid Rom", "bbb")
+    wrong_name = "Ravit Ron"
+    assert not system.appoint_manager(cookie, store_name, wrong_name).succeeded()
+
+
+def test_appoint_store_manager_wrong_store_fail():
+    cookie, username, password, store_name = _initialize_info("doorbellman", "aaa", "starbucks")
+    new_manager_cookie, new_manager_username, new_manager_password, _ = _initialize_info("Ravid Rom", "bbb")
+    wrong_store = "starbux"
+    assert not system.appoint_manager(cookie, wrong_store, new_manager_username).succeeded()
+
+
+def test_appoint_store_manager_direct_circular_appointment_fail():
+    cookie, username, password, store_name = _initialize_info("doorbellman", "aaa", "starbucks")
+    new_manager_cookie, new_manager_username, new_manager_password, _ = _initialize_info("Ravid Rom", "bbb")
+    system.appoint_manager(cookie, store_name, new_manager_username)
+    assert not system.appoint_manager(new_manager_cookie, store_name, username).succeeded()
+
+
+def test_appoint_store_manager_circular_fail():
+    cookie, username, password, store_name = _initialize_info("doorbellman", "aaa", "starbucks")
+    new_manager_cookie, new_manager_username, new_manager_password, _ = _initialize_info("Ravid Rom", "bbb")
+    last_manager_cookie, last_manager_username, last_manager_password, _ = _initialize_info("Inon Katz", "ccc")
+    system.appoint_manager(cookie, store_name, new_manager_username)
+    system.appoint_manager(new_manager_cookie, store_name, last_manager_username)
+    assert not system.appoint_manager(last_manager_cookie, store_name, username).succeeded()
+
+
+def test_appoint_store_manager_owner_chain_fail():
+    cookie, username, password, store_name = _initialize_info("doorbellman", "aaa", "starbucks")
+    new_manager_cookie, new_manager_username, new_manager_password, _ = _initialize_info("Ravid Rom", "bbb")
+    last_owner_cookie, last_owner_username, last_owner_password, _ = _initialize_info("Inon Katz", "ccc")
+    system.appoint_manager(cookie, store_name, new_manager_username)
+    assert not system.appoint_owner(new_manager_cookie, store_name, last_owner_username).succeeded()
+
+
+# 4.6 https://github.com/SeanPikulin/TradingSystem/blob/main/Documentation/Use%20Cases.md#46-Edit-manager%E2%80%99s-responsibilities
+def test_add_responsibility_success():
+    cookie, username, password, store_name = _initialize_info("doorbellman", "aaa", "starbucks")
+    new_manager_cookie, new_manager_username, new_manager_password, _ = _initialize_info("Ravid Rom", "bbb")
+    new_responsibility = "remove_manager"
+    system.appoint_manager(cookie, store_name, new_manager_username)
+    assert system.add_manager_permission(cookie, store_name, new_manager_username, new_responsibility).succeeded()
+
+
+def test_remove_responsibility_success():
+    cookie, username, password, store_name = _initialize_info("doorbellman", "aaa", "starbucks")
+    new_manager_cookie, new_manager_username, new_manager_password, _ = _initialize_info("Ravid Rom", "bbb")
+    new_responsibility = "remove_manager"
+    system.appoint_manager(cookie, store_name, new_manager_username)
+    system.add_manager_permission(cookie, store_name, new_manager_username, new_responsibility)
+    assert system.remove_manager_permission(cookie, store_name, new_manager_username, new_responsibility).succeeded()
+
+
+def test_add_responsibility_twice_fail():
+    cookie, username, password, store_name = _initialize_info("doorbellman", "aaa", "starbucks")
+    new_manager_cookie, new_manager_username, new_manager_password, _ = _initialize_info("Ravid Rom", "bbb")
+    new_responsibility = "remove_manager"
+    system.appoint_manager(cookie, store_name, new_manager_username)
+    system.add_manager_permission(cookie, store_name, new_manager_username, new_responsibility)
+    assert not system.add_manager_permission(cookie, store_name, new_manager_username, new_responsibility).succeeded()
+
+
+def test_remove_responsibility_twice_fail():
+    cookie, username, password, store_name = _initialize_info("doorbellman", "aaa", "starbucks")
+    new_manager_cookie, new_manager_username, new_manager_password, _ = _initialize_info("Ravid Rom", "bbb")
+    new_responsibility = "remove_manager"
+    system.appoint_manager(cookie, store_name, new_manager_username)
+    assert not system.remove_manager_permission(cookie, store_name, new_manager_username, new_responsibility).succeeded()
+
+# TODO: check if the manager can/'t in fact use the responsibilities.
+
+
+# 4.7 https://github.com/SeanPikulin/TradingSystem/blob/main/Documentation/Use%20Cases.md#43-Dismiss-an-owner
+def test_dismiss_owner_success():
+    cookie, username, password, store_name = _initialize_info("doorbellman", "aaa", "starbucks")
+    new_owner_cookie, new_owner_username, new_owner_password, _ = _initialize_info("Ravid Rom", "bbb")
+    last_manager_cookie, last_manager_username, last_manager_password, _ = _initialize_info("Inon Katz", "ccc")
+    system.appoint_owner(cookie, store_name, new_owner_username)
+    response = system.remove_appointment(cookie, store_name, new_owner_username)
+    assert response.succeeded()
+
+
+def test_dismiss_owner_wrong_name_fail():
+    cookie, username, password, store_name = _initialize_info("doorbellman", "aaa", "starbucks")
+    new_owner_cookie, new_owner_username, new_owner_password, _ = _initialize_info("Ravid Rom", "bbb")
+    wrong_name = "Ravit Ron"
+    system.appoint_owner(cookie, store_name, new_owner_username)
+    assert not system.remove_appointment(cookie, store_name, wrong_name).succeeded()
+
+
+def test_dismiss_owner_wrong_store_fail():
+    cookie, username, password, store_name = _initialize_info("doorbellman", "aaa", "starbucks")
+    new_owner_cookie, new_owner_username, new_owner_password, _ = _initialize_info("Ravid Rom", "bbb")
+    wrong_store = "starbux"
+    system.appoint_owner(cookie, store_name, new_owner_username)
+    assert not system.remove_appointment(cookie, wrong_store, new_owner_username).succeeded()
+
+
+def test_dismiss_owner_appointing_fail():
+    cookie, username, password, store_name = _initialize_info("doorbellman", "aaa", "starbucks")
+    new_owner_cookie, new_owner_username, new_owner_password, _ = _initialize_info("Ravid Rom", "bbb")
+    last_manager_cookie, last_manager_username, last_manager_password, _ = _initialize_info("Inon Katz", "ccc")
+    system.appoint_owner(cookie, store_name, new_owner_username)
+    system.remove_appointment(cookie, store_name, new_owner_username)
+    assert not system.appoint_manager(new_owner_cookie, store_name, last_manager_username).succeeded()
+
+
+def test_dismiss_owner_chain_appointing_fail():
+    cookie, username, password, store_name = _initialize_info("doorbellman", "aaa", "starbucks")
+    new_owner_cookie, new_owner_username, new_owner_password, _ = _initialize_info("Ravid Rom", "bbb")
+    last_owner_cookie, last_owner_username, last_owner_password, _ = _initialize_info("Inon Katz", "ccc")
+    final_manager_cookie, final_manager_username, final_manager_password, _ = _initialize_info("Sean Pikulin", "ddd")
+    system.appoint_owner(cookie, store_name, new_owner_username)
+    system.appoint_owner(new_owner_cookie, store_name, last_owner_username)
+    system.remove_appointment(cookie, store_name, new_owner_username)
+    assert not system.appoint_manager(last_owner_cookie, store_name, final_manager_username).succeeded()
+
+
+# 4.9 https://github.com/SeanPikulin/TradingSystem/blob/main/Documentation/Use%20Cases.md#49-Get-store-personnel-information
+def test_get_store_personnel_success():
+    cookie, username, password, store_name = _initialize_info("doorbellman", "aaa", "starbucks")
+    response = system.get_store_appointments(cookie, store_name)
+    assert response.succeeded() and response.object.name == username and response.object.position == "founder"
+
+
+def test_get_store_personnel_owner_success():
+    cookie, username, password, store_name = _initialize_info("doorbellman", "aaa", "starbucks")
+    new_owner_cookie, new_owner_username, new_owner_password, _ = _initialize_info("Ravid Rom", "bbb")
+    system.appoint_owner(cookie, store_name, new_owner_username)
+    response = system.get_store_appointments(cookie, store_name)
+    assert response.succeeded() and len(response.object.appointments) == 1 and response.object.appointments[0].name == \
+           new_owner_username and response.object.appointments[0].position == "owner"
+
+
+def test_get_store_personnel_manager_success():
+    cookie, username, password, store_name = _initialize_info("doorbellman", "aaa", "starbucks")
+    new_manager_cookie, new_manager_username, new_manager_password, _ = _initialize_info("Ravid Rom", "bbb")
+    system.appoint_owner(cookie, store_name, new_manager_username)
+    response = system.get_store_appointments(cookie, store_name)
+    assert response.succeeded() and len(response.object.appointments) == 1 and response.object.appointments[0].name == \
+           new_manager_username and response.object.appointments[0].position == "manager"
+
+
+def test_get_store_personnel_wrong_store_name_fail():
+    cookie, username, password, store_name = _initialize_info("doorbellman", "aaa", "starbucks")
+    wrong_store = "starbux"
+    assert not system.get_store_appointments(cookie, wrong_store).succeeded()
+
+# 4.11 TODO: not implemented
+
+# 6.4 https://github.com/SeanPikulin/TradingSystem/blob/main/Documentation/Use%20Cases.md#64-Get-store-purchase-history-system-manager
+# TODO: this
