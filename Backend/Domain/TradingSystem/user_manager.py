@@ -1,4 +1,4 @@
-from typing import Callable
+from typing import Callable, Dict
 import uuid
 
 from Backend.Domain.TradingSystem.Interfaces.IUser import IUser
@@ -10,8 +10,8 @@ from .Responsibilities.responsibility import Permission, Responsibility
 
 
 class UserManager:
-    cookie_user: dict[str, IUser] = {}
-    username_user: dict[str, IUser] = {}
+    cookie_user: Dict[str, IUser] = {}
+    username_user: Dict[str, IUser] = {}
 
     @staticmethod
     def __deligate_to_user(cookie, func):

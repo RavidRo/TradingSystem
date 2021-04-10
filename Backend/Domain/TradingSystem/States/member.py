@@ -1,7 +1,7 @@
 
 from Backend.Domain.TradingSystem.Responsibilities.responsibility import Responsibility
 from Backend.Domain.TradingSystem.store import Store
-from Backend.Domain.TradingSystem.user_state import UserState
+from Backend.Domain.TradingSystem.States.user_state import UserState
 from Backend.response import Response, ParsableList, PrimitiveParsable
 from Backend.Domain.TradingSystem.purchase_details import PurchaseDetails
 from typing import List
@@ -15,7 +15,8 @@ class Member(UserState):
     def add_responsibility(self, responsibility, store_id):
         self.responsibilities[store_id] = responsibility
 
-    def __init__(self, user, username, responsibilities=None, purchase_details=None, cart=None):  # for DB initialization
+    def __init__(self, user, username, responsibilities=None, purchase_details=None, cart=None):  # for DB
+        # initialization
         super().__init__(user, cart)
         if purchase_details is None:
             purchase_details = []
@@ -62,7 +63,7 @@ class Member(UserState):
         store = Store(store_name)
         self.responsibilities[store.get_id()] = Responsibility(self,
                                                                store)
-        return Response[store](True, obj=store, msg="Store opened successfully")
+        return Response[Store](True, obj=store, msg="Store opened successfully")
 
     def get_purchase_history(self):
         return Response[List[PurchaseDetails]](True, obj=ParsableList(self.purchase_details), msg="Purchase history "
@@ -121,7 +122,7 @@ class Member(UserState):
     def get_store_purchase_history(self, store_id):
         if store_id not in self.responsibilities:
             return Response(False, msg=f"this member do not own/manage store {store_id}")
-        return self.responsibilities[store_id].get_store_purchases_history()
+        return self.responsibilities[store_id].get_store_purchase_history()
 
     def get_any_store_purchase_history_admin(self, store_id):
         return Response(False, msg="Regular members cannot get any store's purchase history")

@@ -1,4 +1,4 @@
-from ...Domain.TradingSystem.IUser import IUser
+from ...Domain.TradingSystem.Interfaces.IUser import IUser
 from ...Domain.TradingSystem.Responsibilities.responsibility import Responsibility, Permission
 from Backend.response import Response, ParsableList
 from ...Domain.TradingSystem.purchase_details import PurchaseDetails

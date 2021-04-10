@@ -11,6 +11,9 @@ class UserState(ABC):
         self.cart = cart
         self.user = user
 
+    def set_user(self, user):
+        self.user = user
+
     @abstractmethod
     def get_username(self):
         return Response(False, msg="Abstract Method")
@@ -33,10 +36,13 @@ class UserState(ABC):
         return self.cart.remove_product(store_id, product_id)
 
     def change_product_quantity(self, store_id, product_id, new_amount):
-        return self.cart.change_product_qunatity(store_id, product_id, new_amount)
+        return self.cart.change_product_quantity(store_id, product_id, new_amount)
 
     def buy_cart(self, current_user):
         return self.cart.buy_products(current_user)
+
+    def get_cart_price(self):
+        return self.cart.get_price()
 
     @abstractmethod
     def delete_products_after_purchase(self):

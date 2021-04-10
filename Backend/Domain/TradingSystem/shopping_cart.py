@@ -1,5 +1,7 @@
 from threading import Timer
 
+from typing import Dict
+
 from Backend.response import Response, PrimitiveParsable, ParsableList
 from Backend.Service.DataObjects.shopping_cart_data import ShoppingCartData
 from Backend.Domain.TradingSystem.shopping_bag import ShoppingBag
@@ -8,10 +10,8 @@ from Backend.Domain.TradingSystem.Interfaces.IShoppingCart import IShoppingCart
 
 class ShoppingCart(IShoppingCart):
     def __init__(self):
-        from Backend.Domain.TradingSystem import stores_manager
 
-        self.stores_manager = stores_manager.get_instance()
-        self.shopping_bags: dict[str, ShoppingBag] = dict()
+        self.shopping_bags: Dict[str, ShoppingBag] = dict()
         self.timer = None
         self.INTERVAL_TIME = 10 * 60
         self.purchase_time_passed = False
@@ -31,6 +31,7 @@ class ShoppingCart(IShoppingCart):
        4. If store exists -> create new bag and add product"""
 
     def add_product(self, store_id: str, product_id: str, quantity: int) -> Response[None]:
+        from Backend.Domain.TradingSystem import stores_manager
         if quantity <= 0:
             return Response(False, msg="Product's quantity must be positive!")
 
@@ -39,7 +40,7 @@ class ShoppingCart(IShoppingCart):
                 return bag.add_product(product_id, quantity)
 
         # no bag for store with store_id
-        store = self.stores_manager.get_store(store_id)
+        store = stores_manager.StoresManager.get_store(store_id)
         if store is None:
             return Response(False, msg=f"There is no such store with store_id: {store_id}")
         new_bag = ShoppingBag(store)

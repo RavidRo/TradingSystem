@@ -1,14 +1,16 @@
 from __future__ import annotations
 
+from typing import List
+
 
 class ResponsibilitiesData:
     def __init__(
         self,
         store_id: str,
         is_manager: bool,
-        permissions: list[str],
+        permissions: List[str],
         role: str,
-        appointees: list[ResponsibilitiesData],
+        appointees: List[ResponsibilitiesData],
     ) -> None:
 
         self.store_id = store_id

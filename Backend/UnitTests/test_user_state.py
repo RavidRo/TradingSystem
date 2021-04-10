@@ -1,7 +1,7 @@
 from typing import List
 
 import pytest
-from ..Domain.TradingSystem.member import Member
+from ..Domain.TradingSystem.States.member import Member
 from ..Domain.TradingSystem.store import Store
 from .stubs.store_stub import StoreStub
 from .stubs.authentication_stub import AuthenticationStub
@@ -31,24 +31,32 @@ def authentication():
 
 @pytest.fixture
 def guest_user(authentication, cart):
-    from ..Domain.TradingSystem.guest import Guest
-    return UserStub(Guest(guest_user, authentication, cart))
+    from ..Domain.TradingSystem.States.guest import Guest
+    user = UserStub(Guest(None, authentication, cart))
+    user.state.set_user(user)
+    return user
 
 
 @pytest.fixture
 def member_user_with_responsibility(cart, responsibility):
-    return UserStub(Member(member_user_with_responsibility, "inon", responsibilities={"0": responsibility}, cart=cart))
+    user = UserStub(Member(None, "inon", responsibilities={"0": responsibility}, cart=cart))
+    user.state.set_user(user)
+    return user
 
 
 @pytest.fixture
 def member_user_without_responsibility(cart):
-    return UserStub(Member(member_user_with_responsibility, "user", cart=cart))
+    user = UserStub(Member(None, "user", cart=cart))
+    user.state.set_user(user)
+    return user
 
 
 @pytest.fixture
 def admin_user(cart):
-    from ..Domain.TradingSystem.admin import Admin
-    return UserStub(Admin(admin_user, "admin", cart=cart))
+    from ..Domain.TradingSystem.States.admin import Admin
+    user = UserStub(Admin(None, "admin", cart=cart))
+    user.state.set_user(user)
+    return user
 
 
 @pytest.fixture
@@ -60,7 +68,7 @@ def responsibility():
 # * =================================================================
 
 def test_user_assigned_in_guest(guest_user, authentication):
-    from ..Domain.TradingSystem.guest import Guest
+    from ..Domain.TradingSystem.States.guest import Guest
     guest = Guest(guest_user, authentication)
     assert guest.user == guest_user
 
@@ -71,7 +79,7 @@ def test_user_assigned_in_member(member_user_with_responsibility):
 
 
 def test_user_assigned_in_admin(admin_user):
-    from ..Domain.TradingSystem.admin import Admin
+    from ..Domain.TradingSystem.States.admin import Admin
     admin = Admin(admin_user, "admin")
     assert admin.user == admin_user
 
@@ -115,7 +123,7 @@ def test_guest_turns_to_member(guest_user):
 
 def test_guest_turns_to_admin(guest_user):
     guest_user.state.login("admin", "123")
-    from ..Domain.TradingSystem.admin import Admin
+    from ..Domain.TradingSystem.States.admin import Admin
     assert isinstance(guest_user.state, Admin)
 
 
@@ -124,17 +132,17 @@ def test_guest_turns_to_admin(guest_user):
 
 def test_guest_save_products_delegate(guest_user):
     guest_user.state.save_product_in_cart("0", "0", 3)
-    assert guest_user.state.cart.save_products
+    assert guest_user.state.cart.save_product
 
 
 def test_member_save_products_delegate(member_user_with_responsibility):
     member_user_with_responsibility.state.save_product_in_cart("0", "0", 3)
-    assert member_user_with_responsibility.state.cart.save_products
+    assert member_user_with_responsibility.state.cart.save_product
 
 
 def test_admin_save_products_delegate(admin_user):
     admin_user.state.save_product_in_cart("0", "0", 3)
-    assert admin_user.state.cart.save_products
+    assert admin_user.state.cart.save_product
 
 
 # * Cart Options (2.8)
@@ -146,8 +154,8 @@ def test_show_cart(member_user_with_responsibility):
 
 
 def test_remove_product_delegate(guest_user):
-    guest_user.state.remove_product("0", "0")
-    assert guest_user.state.cart.remove_product
+    guest_user.state.delete_from_cart("0", "0")
+    assert guest_user.state.cart.remove_product_delegated
 
 
 def test_change_quantity_delegate(guest_user):
@@ -240,17 +248,17 @@ def test_member_remove_product_delegated(member_user_with_responsibility):
 
 
 def test_guest_cannot_change_product_quantity(guest_user):
-    response = guest_user.state.change_product_quantity("0", "", 5)
+    response = guest_user.state.change_product_quantity_in_store("0", "", 5)
     assert not response.succeeded()
 
 
 def test_member_need_responsibility_to_change_quantity(member_user_without_responsibility):
-    response = member_user_without_responsibility.state.change_product_quantity("0", "", 5)
+    response = member_user_without_responsibility.state.change_product_quantity_in_store("0", "", 5)
     assert not response.succeeded()
 
 
 def test_member_change_quantity_delegated(member_user_with_responsibility):
-    member_user_with_responsibility.state.change_product_quantity("0", "", 0)
+    member_user_with_responsibility.state.change_product_quantity_in_store("0", "", 0)
     assert member_user_with_responsibility.state.responsibilities["0"].change_product_quantity_delegated
 
 
