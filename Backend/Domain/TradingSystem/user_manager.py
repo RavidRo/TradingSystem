@@ -1,15 +1,17 @@
 import uuid
 
+from typing import Dict
+
 from .user import IUser
 from Backend.response import Response, ParsableList, PrimitiveParsable
-from Backend.Domain.TradingSystem.shopping_cart import ShopppingCart
+from Backend.Domain.TradingSystem.shopping_cart import ShoppingCart
 from Backend.Domain.TradingSystem.purchase_details import PurchaseDetails
 from .Responsibilities.responsibility import Permission, Responsibility
 
 
 class UserManager:
-    cookie_user: dict[str, IUser] = {}
-    username_user: dict[str, IUser] = {}
+    cookie_user: Dict[str, IUser] = {}
+    username_user: Dict[str, IUser] = {}
 
     def __deligate_to_user(cookie, func):
         user = UserManager.__get_user_by_cookie(cookie)
@@ -77,7 +79,7 @@ class UserManager:
         return UserManager.__deligate_to_user(cookie, func)
 
     # 2.8
-    def get_cart_details(cookie: str) -> Response[ShopppingCart]:
+    def get_cart_details(cookie: str) -> Response[ShoppingCart]:
         func = lambda user: user.get_cart_details()
         return UserManager.__deligate_to_user(cookie, func)
 

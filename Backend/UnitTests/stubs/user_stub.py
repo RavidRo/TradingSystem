@@ -1,9 +1,6 @@
 from .member_stub import MemberStub
 from ...Domain.TradingSystem.IUser import IUser
 from ...Domain.TradingSystem.user_state import UserState
-from ...Domain.TradingSystem.guest import Guest
-from ...Domain.TradingSystem.member import Member
-from ...Domain.TradingSystem.admin import Admin
 
 
 class UserStub(IUser):
@@ -26,10 +23,13 @@ class UserStub(IUser):
         return self.state.get_username()
 
     def is_guest(self):
+        from ...Domain.TradingSystem.guest import Guest
         return isinstance(self.state, Guest)
 
     def is_member(self):
+        from ...Domain.TradingSystem.member import Member
         return isinstance(self.state, Member)
 
     def is_admin(self):
+        from ...Domain.TradingSystem.admin import Admin
         return isinstance(self.state, Admin)

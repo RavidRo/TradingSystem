@@ -1,3 +1,5 @@
+from typing import List
+
 from Backend.response import Response
 from Backend.response import ParsableList
 from Backend.Domain.TradingSystem.Interfaces.IStore import IStore as store
@@ -6,7 +8,7 @@ from Backend.Domain.TradingSystem.purchase_details import PurchaseDetails
 
 
 class StoresManager:
-    stores: list[store] = []
+    stores: List[store] = []
 
     # 2.5
     def get_stores_details(self) -> Response[ParsableList[store]]:
@@ -20,7 +22,7 @@ class StoresManager:
         return Response(False, msg=f"No store with the ID {store_id} exists")
 
     # 2.6
-    def get_products(self) -> list[product]:
+    def get_products(self) -> List[product]:
         products_per_store = map(lambda store: store.show_store_data(), StoresManager.stores)
         products = []
         # iterating over the data

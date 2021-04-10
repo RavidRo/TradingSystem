@@ -1,6 +1,4 @@
 from Backend.Domain.TradingSystem.user_state import UserState
-from Backend.Domain.TradingSystem.member import Member
-from Backend.Domain.TradingSystem.admin import Admin
 from Backend.Domain.Authentication.authentication import Authentication
 from Backend.response import Response
 
@@ -17,6 +15,8 @@ class Guest(UserState):
         self.authentication = authentication
 
     def login(self, username, password):
+        from Backend.Domain.TradingSystem.member import Member
+        from Backend.Domain.TradingSystem.admin import Admin
         response = self.authentication.login(username, password)
         if response.succeeded():
             if response.object.value:
