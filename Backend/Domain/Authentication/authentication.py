@@ -1,63 +1,69 @@
-from Backend.Domain.DBHandler import DBHandler
-from abc import ABC, abstractmethod
-from Backend import response
-from Backend.UnitTests.authentication.DBHandlerMock import DBHandlerMock
+import threading
+from werkzeug.security import generate_password_hash, check_password_hash
+import json
 
-class IAuthentication():
+from Backend.response import Response, PrimitiveParsable
 
-    @classmethod
-    def __subclasshook__(cls, subclass):
-        return (hasattr(subclass, 'register') and
-                callable(subclass.register) and
-                hasattr(subclass, 'login') and
-                callable(subclass.login)and
-                hasattr(subclass, 'create_DBHandler') and
-                callable(subclass.create_DBHandler) and
-                hasattr(subclass, 'set_mock') and
-                callable(subclass.set_mock))
 
-    def create_DBHandler(self,is_mock):
-        return DBHandlerMock() if is_mock else DBHandler()
-
-    def set_mock(self):
-        self.use_mock = True
-
-class Authentication(IAuthentication):
+class Authentication:
     __instance = None
 
     @staticmethod
     def get_instance():
         """ Static access method. """
         if Authentication.__instance is None:
-            Authentication()
+            with threading.Lock():
+                if Authentication.__instance is None:
+                    # double locking mechanism
+                    # https://medium.com/@rohitgupta2801/the-singleton-class-python-c9e5acfe106c
+                    Authentication()
         return Authentication.__instance
 
-    def __init__(self,is_mock):
+    def __init__(self):
         """ Virtually private constructor. """
         if Authentication.__instance is not None:
             raise Exception("This class is a singleton!")
         else:
             Authentication.__instance = self
-            self.db_handler = IAuthentication.create_DBHandler(self,is_mock)
+            self.users = {}
+            self.register_lock = threading.Lock()
+            self.__register_admins()
 
-    def register(self, username, password):
-        if self.db_handler.is_username_exists(username=username):
-            return response.Response[None](success=False, msg="username already exists")
+    def register(self, username, password) -> Response[None]:
+        # We don't want to register to users with the same username
+        with self.register_lock:
+            if username in self.users:
+                return Response(False, msg="username already exists")
 
-        else:
-            self.db_handler.add_user_to_db(username=username, password=password)
-            return response.Response[None](success=True, msg="registration succeeded")
+            self.__add_user_to_db(username, password)
+            return Response(True, msg="registration succeeded")
 
-    def login(self, username, password):
-        if not self.db_handler.is_username_exists(username=username):
-            return response.Response[None](success=False, msg="username doesn't exist in the system")
+    # Fail if login failed and returns true if the user logged into is an admin
+    def login(self, username, password) -> Response[PrimitiveParsable[bool]]:
+        if username not in self.users:
+            return Response(False, msg="username doesn't exist in the system")
 
-        else:
-            if not self.db_handler.is_password_match(given_password=password, username=username):
-                return response.Response[None](success=False, msg="password incorrect")
+        if not self.__is_password_match(password, username):
+            return Response(False, msg="password incorrect")
 
-            else:
-                is_admin = self.db_handler.is_username_admin(username=username)
-                return response.Response[None](success=True,obj=response.PrimitiveParsable(is_admin),msg="login succeeded")
+        is_admin = self.__is_username_admin(username)
+        return Response(True, PrimitiveParsable(is_admin), msg="login succeeded")
 
+    def __add_user_to_db(self, username, password, is_admin=False) -> None:
+        self.users[username] = {
+            "password": generate_password_hash(password, method="sha256"),
+            "admin": is_admin,
+        }
 
+    def __is_password_match(self, given_password, username) -> bool:
+        return check_password_hash(self.users[username]["password"], given_password)
+
+    def __is_username_admin(self, username) -> bool:
+        return self.users[username]["admin"]
+
+    def __register_admins(self) -> None:
+        with open("config.json", "r") as read_file:
+            data = json.load(read_file)
+            admin_password = data["admin-password"]
+            for username in data["admins"]:
+                self.register(username, admin_password)
