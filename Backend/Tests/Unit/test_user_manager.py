@@ -11,6 +11,10 @@ def set_up(request):
     IUser.use_mock = True
     UserManager.cookie_user.clear()
     UserManager.username_user.clear()
+    yield
+    IUser.use_mock = False
+    UserManager.cookie_user.clear()
+    UserManager.username_user.clear()
 
 
 @pytest.fixture

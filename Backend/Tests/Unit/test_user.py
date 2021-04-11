@@ -10,6 +10,8 @@ from .stubs.member_stub import MemberStub
 @pytest.fixture(scope="function", autouse=True)
 def set_up():
     IUserState.use_mock = True
+    yield
+    IUserState.use_mock = False
 
 
 @pytest.fixture
