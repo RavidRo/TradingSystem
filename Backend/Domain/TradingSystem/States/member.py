@@ -62,7 +62,7 @@ class Member(UserState):
 
     def open_store(self, store_name):
         store = Store(store_name)
-        self.responsibilities[store.get_id()] = Founder(self, store)
+        store.set_responsibility(Founder(self, store))
         return Response[Store](True, obj=store, msg="Store opened successfully")
 
     def get_purchase_history(self):
@@ -134,3 +134,6 @@ class Member(UserState):
 
     def get_user_purchase_history_admin(self, username):
         return Response(False, msg="Regular members cannot get any user's purchase history")
+
+    def is_appointed(self, store_id):
+        return Response(True, store_id in self.responsibilities)

@@ -1,3 +1,5 @@
+import threading
+
 from Backend.Domain.TradingSystem.purchase_details import PurchaseDetails
 from Backend.Domain.TradingSystem.shopping_cart import ShoppingCart
 from Backend.response import ParsableList, PrimitiveParsable, Response
@@ -40,7 +42,7 @@ class UserStub(IUser):
         self._get_store_purchase_history = False
 
     def is_appointed(self, store_id):
-        return self.state.is_appointed(store_id)
+        return Response(True, self.state.is_appointed(store_id))
 
     def appoint(self, store_id):
         return self.state.appoint(store_id)
@@ -159,6 +161,9 @@ class UserStub(IUser):
     ) -> Response[ParsableList[PurchaseDetails]]:
         self._get_any_user_purchase_history = True
         return Response(True)
+
+    def get_appointment_lock(self):
+        return threading.Lock()
 
     def change_state(self, new_state: UserState) -> None:
         self.state = new_state

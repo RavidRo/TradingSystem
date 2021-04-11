@@ -1,4 +1,5 @@
 from __future__ import annotations
+import threading
 
 from Backend.response import Response, ParsableList, PrimitiveParsable
 
@@ -14,6 +15,7 @@ from Backend.Domain.TradingSystem.Responsibilities.responsibility import Permiss
 class User(IUser):
     def __init__(self):
         self.state: UserState = IUserState.create_guest(self)
+        self.appointment_lock = threading.Lock()
 
     # 2.3
     def register(self, username: str, password: str) -> Response[None]:
@@ -140,7 +142,7 @@ class User(IUser):
     # Inter component functions
     # ====================
 
-    def is_appointed(self, store_id: str) -> bool:
+    def is_appointed(self, store_id: str) -> Response[bool]:
         return self.state.is_appointed(store_id)
 
     def get_username(self) -> Response[PrimitiveParsable[str]]:
@@ -148,3 +150,6 @@ class User(IUser):
 
     def change_state(self, new_state: UserState) -> None:
         self.state = new_state
+
+    def get_appointment_lock(self) -> threading.Lock():
+        return self.appointment_lock

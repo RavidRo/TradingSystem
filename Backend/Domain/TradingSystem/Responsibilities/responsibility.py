@@ -117,7 +117,7 @@ class Responsibility(Parsable):
             return False
 
         for appointment in self.appointed:
-            if appointment.user_state.get_username() == username:
+            if appointment.user_state.get_username().get_obj().get_val() == username:
                 self.appointed.remove(appointment)
                 appointment.__dismiss_from_store(self.store.get_id())
                 return True
