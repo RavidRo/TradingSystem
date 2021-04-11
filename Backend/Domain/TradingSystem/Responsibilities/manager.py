@@ -1,10 +1,11 @@
+from Backend.response import Response, ParsableList
+
 from Backend.Domain.TradingSystem.Responsibilities.responsibility import Permission, Responsibility
 from Backend.Domain.TradingSystem.Responsibilities.owner import Owner
-from Backend.Domain.TradingSystem.member import Member
-from Backend.Domain.TradingSystem.IUser import IUser
+from Backend.Domain.TradingSystem.States.member import Member
+from Backend.Domain.TradingSystem.Interfaces.IUser import IUser
 from Backend.Domain.TradingSystem.purchase_details import PurchaseDetails
 from Backend.Domain.TradingSystem.store import Store
-from Backend.response import Response, ParsableList
 
 
 class Manager(Owner):
@@ -26,7 +27,7 @@ class Manager(Owner):
 
     # 4.1
     # Creating a new product a the store
-    def add_product(self, name: str, price: float, quantity: int) -> Response[None]:
+    def add_product(self, name: str, price: float, quantity: int) -> Response[str]:
         if self.permissions[Permission.MANAGE_PRODUCTS]:
             return super().add_product(name, price, quantity)
 
@@ -40,9 +41,9 @@ class Manager(Owner):
         return self.__create_no_permission_Response(Permission.MANAGE_PRODUCTS)
 
     # 4.1
-    def change_product_quantity(self, product_id: str, quantity: int) -> Response[None]:
+    def change_product_quantity_in_store(self, product_id: str, quantity: int) -> Response[None]:
         if self.permissions[Permission.MANAGE_PRODUCTS]:
-            return super().change_product_quantity(product_id, quantity)
+            return super().change_product_quantity_in_store(product_id, quantity)
 
         return self.__create_no_permission_Response(Permission.MANAGE_PRODUCTS)
 

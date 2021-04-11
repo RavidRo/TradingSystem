@@ -1,5 +1,5 @@
 from Backend.Domain.TradingSystem.Responsibilities.responsibility import Permission, Responsibility
-from Backend.Domain.TradingSystem.IUser import IUser
+from Backend.Domain.TradingSystem.Interfaces.IUser import IUser
 from Backend.Domain.TradingSystem.purchase_details import PurchaseDetails
 from Backend.response import Response, ParsableList
 
@@ -7,7 +7,7 @@ from Backend.response import Response, ParsableList
 class Founder(Responsibility):
     # 4.1
     # Creating a new product a the store
-    def add_product(self, name: str, price: float, quantity: int) -> Response[None]:
+    def add_product(self, name: str, price: float, quantity: int) -> Response[str]:
         return self.store.add_product(name, price, quantity)
 
     # 4.1
@@ -15,7 +15,7 @@ class Founder(Responsibility):
         return self.store.remove_product(product_id)
 
     # 4.1
-    def change_product_quantity(self, product_id: str, quantity: int) -> Response[None]:
+    def change_product_quantity_in_store(self, product_id: str, quantity: int) -> Response[None]:
         return self.store.change_product_quantity(product_id, quantity)
 
     # 4.1
@@ -29,16 +29,19 @@ class Founder(Responsibility):
         # * The import is here to fix circular depandency problem
         from Backend.Domain.TradingSystem.Responsibilities.owner import Owner
 
-        if user.is_appointed(self.store.get_id()):
-            return Response(
-                False, msg=f"{user.get_username()} is already appointed to {self.store.get_name()}"
-            )
+        # We don't to appoint a user to the same store twice
+        with user.get_appointment_lock():
+            if user.is_appointed(self.store.get_id()):
+                return Response(
+                    False,
+                    msg=f"{user.get_username()} is already appointed to {self.store.get_name()}",
+                )
 
-        # Success
-        #! I am guessing that user.state is of type member because at user_manager, with a given username he found a user object
-        #! (guest does not hae a username)
-        newResponsibility = Owner(user.state, self.store)
-        self.appointed.append(newResponsibility)
+            #! I am guessing that user.state is of type member because at user_manager, with a given username he found a user object
+            #! (guest does not hae a username)
+            newResponsibility = Owner(user.state, self.store)
+            self.appointed.append(newResponsibility)
+
         return Response(True)
 
     # 4.5
@@ -46,16 +49,19 @@ class Founder(Responsibility):
         # * The import is here to fix circular depandency problem
         from Backend.Domain.TradingSystem.Responsibilities.manager import Manager
 
-        if user.is_appointed(self.store.get_id()):
-            return Response(
-                False, msg=f"{user.get_username()} is already appointed to {self.store.get_name()}"
-            )
+        # We don't to appoint a user to the same store twice
+        with user.get_appointment_lock():
+            if user.is_appointed(self.store.get_id()):
+                return Response(
+                    False,
+                    msg=f"{user.get_username()} is already appointed to {self.store.get_name()}",
+                )
 
-        # Success
-        #! I am guessing that user.state is of type member because at user_manager, with a given username he found a user object
-        #! (guest does not hae a username)
-        newResponsibility = Manager(user.state, self.store)
-        self.appointed.append(newResponsibility)
+            #! I am guessing that user.state is of type member because at user_manager, with a given username he found a user object
+            #! (guest does not hae a username)
+            newResponsibility = Manager(user.state, self.store)
+            self.appointed.append(newResponsibility)
+
         return Response(True)
 
     # 4.6

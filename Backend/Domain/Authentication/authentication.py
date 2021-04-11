@@ -12,22 +12,18 @@ class Authentication:
     def get_instance():
         """ Static access method. """
         if Authentication.__instance is None:
-            with threading.Lock():
-                if Authentication.__instance is None:
-                    # double locking mechanism
-                    # https://medium.com/@rohitgupta2801/the-singleton-class-python-c9e5acfe106c
-                    Authentication()
+            Authentication()
         return Authentication.__instance
 
     def __init__(self):
         """ Virtually private constructor. """
         if Authentication.__instance is not None:
             raise Exception("This class is a singleton!")
-        else:
-            Authentication.__instance = self
-            self.users = {}
-            self.register_lock = threading.Lock()
-            self.__register_admins()
+
+        Authentication.__instance = self
+        self.users = {}
+        self.register_lock = threading.Lock()
+        self.__register_admins()
 
     def register(self, username, password) -> Response[None]:
         # We don't want to register to users with the same username
