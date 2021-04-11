@@ -10,6 +10,8 @@ import threading
 class TradingSystem(object):
     __instance = None
 
+    # https://medium.com/@rohitgupta2801/the-singleton-class-python-c9e5acfe106c
+    # double locking mechanism
     @staticmethod
     def getInstance():
         """ Static access method. """
