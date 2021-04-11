@@ -39,6 +39,10 @@ class TradingSystemManager:
     def get_products_by_store(store_id: str) -> Response[ParsableList[ProductData]]:
         return StoresManager.get_products_by_store(store_id).parse()
 
+    @staticmethod
+    def get_store(store_id : str) -> Response[StoreData]:
+        return StoresManager.get_store(store_id).parse()
+
     # 2.6
     # kwargs = You can search for a product by additional key words
     @staticmethod
@@ -69,14 +73,14 @@ class TradingSystemManager:
     # 2.8
     @staticmethod
     def change_product_quantity_in_cart(
-        self, store_id: str, product_id: str, new_quantity: int
+        cookie: str, store_id: str, product_id: str, new_quantity: int
     ) -> Response[None]:
-        return UserManager.change_product_quantity_in_cart(store_id, product_id, new_quantity)
+        return UserManager.change_product_quantity_in_cart(cookie, store_id, product_id, new_quantity)
 
     # 2.9
     @staticmethod
     def purchase_cart(cookie: str) -> Response[PrimitiveParsable[float]]:
-        return UserManager.purchase_cart(cookie).parse()
+        return UserManager.purchase_cart(cookie)
 
     # 2.9
     @staticmethod
@@ -148,6 +152,8 @@ class TradingSystemManager:
     def add_manager_permission(
         cookie: str, store_id: str, username: str, permission: str
     ) -> Response[None]:
+        if permission not in name_to_permission:
+            return Response(False, msg="Invalid permission was given")
         return UserManager.add_manager_permission(
             cookie, store_id, username, name_to_permission[permission]
         )
@@ -157,6 +163,8 @@ class TradingSystemManager:
     def remove_manager_permission(
         cookie: str, store_id: str, username: str, permission: str
     ) -> Response[None]:
+        if permission not in name_to_permission:
+            return Response(False, msg="Invalid permission was given")
         return UserManager.remove_manager_permission(
             cookie, store_id, username, name_to_permission[permission]
         )

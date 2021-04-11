@@ -1,4 +1,5 @@
 """ this class is responsible to communicate with the trading system manager"""
+from __future__ import annotations
 
 
 from Backend.Service.DataObjects.shopping_cart_data import ShoppingCartData
@@ -13,7 +14,7 @@ class TradingSystem(object):
     # https://medium.com/@rohitgupta2801/the-singleton-class-python-c9e5acfe106c
     # double locking mechanism
     @staticmethod
-    def getInstance():
+    def getInstance() -> TradingSystem:
         """ Static access method. """
         if TradingSystem.__instance is None:
             with threading.Lock():
@@ -48,6 +49,10 @@ class TradingSystem(object):
     @log.loging
     def get_products_by_store(self, store_id: str):
         return TradingSystemManager.get_products_by_store(store_id)
+
+    @log.loging
+    def get_store(self, store_id : str):
+        return TradingSystemManager.get_store(store_id)
 
     # kwargs = You can search for a product by additional key words
     @log.loging
@@ -121,7 +126,7 @@ class TradingSystem(object):
 
     @log.loging
     def change_product_quantity_in_store(
-        cookie: str, store_id: str, product_id: str, quantity: int
+        self, cookie: str, store_id: str, product_id: str, quantity: int
     ):
         return TradingSystemManager.change_product_quantity_in_store(
             cookie, store_id, product_id, quantity
@@ -129,7 +134,7 @@ class TradingSystem(object):
 
     @log.loging
     def edit_product_details(
-        cookie: str, store_id: str, product_id: str, new_name: str = None, new_price: float = None
+        self, cookie: str, store_id: str, product_id: str, new_name: str = None, new_price: float = None
     ):
         return TradingSystemManager.edit_product_details(
             cookie, store_id, product_id, new_name, new_price

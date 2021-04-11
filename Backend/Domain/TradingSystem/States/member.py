@@ -57,7 +57,7 @@ class Member(UserState):
     def delete_products_after_purchase(self):
         response = self.cart.delete_products_after_purchase(self.username)
         # update data in DB in later milestones
-        self.purchase_details.append(response.object)
+        self.purchase_details += response.object.values
         return response
 
     def open_store(self, store_name):
@@ -66,7 +66,7 @@ class Member(UserState):
         return Response[Store](True, obj=store, msg="Store opened successfully")
 
     def get_purchase_history(self):
-        return Response[list[PurchaseDetails]](
+        return Response[ParsableList[PurchaseDetails]](
             True,
             obj=ParsableList(self.purchase_details),
             msg="Purchase history " "got successfully",
@@ -98,6 +98,9 @@ class Member(UserState):
         if store_id not in self.responsibilities:
             return Response(False, msg=f"this member do not own/manage store {store_id}")
         return self.responsibilities[store_id].appoint_owner(new_owner)
+
+    def dismiss_from_store(self, store_id):
+        self.responsibilities.pop(store_id)
 
     def appoint_new_store_manager(self, store_id, new_manager):
         if store_id not in self.responsibilities:
