@@ -218,7 +218,7 @@
 2. <ins>System</ins>: asks the user for the action
 4. <ins>User</ins>: chooses to change \_to_change_product's amount with new_amount
 5. <ins>System</ins>: if cart doesn't hold a bag for store_id, abort with error.
-6. <ins>System</ins>: if bag of store_id doesn't hold to_delete_product, abort with error.
+6. <ins>System</ins>: if bag of store_id doesn't hold \_to_change_product, abort with error.
 7. <ins>System</ins>: updates \_to_change_product's amount to \_amount.
 
 **Tests**:
