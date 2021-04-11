@@ -8,11 +8,15 @@ from Backend.response import Response, PrimitiveParsable
 class Authentication:
     __instance = None
 
+    # double locking mechanism.
+    # https://medium.com/@rohitgupta2801/the-singleton-class-python-c9e5acfe106c
     @staticmethod
     def get_instance():
         """ Static access method. """
         if Authentication.__instance is None:
-            Authentication()
+            with threading.Lock():
+                if Authentication.__instance is None:
+                    Authentication()
         return Authentication.__instance
 
     def __init__(self):
