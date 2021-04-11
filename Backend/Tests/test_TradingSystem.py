@@ -8,9 +8,11 @@ from Backend.Service.trading_system import TradingSystem
 # TODO: get admin permissions
 system = TradingSystem.getInstance()
 username_number = 0
+user_lock = threading.Lock()
 store_number = 0
+store_lock = threading.Lock()
 product_number = 0
-
+product_lock = threading.Lock()
 
 def _initialize_info(
     username: str, password: str, store_name: str = None
@@ -31,20 +33,29 @@ def _create_product(cookie: str, store_id: str, product_name: str, price: float,
 
 def _generate_username() -> str:
     global username_number
+    user_lock.acquire()
     username_number += 1
-    return str(username_number)
+    username = str(username_number)
+    user_lock.release()
+    return username
 
 
 def _generate_store_name() -> str:
     global store_number
+    store_lock.acquire()
     store_number += 1
-    return str(store_number)
+    store = str(store_number)
+    store_lock.release()
+    return store
 
 
 def _generate_product_name() -> str:
     global product_number
+    product_lock.acquire()
     product_number += 1
-    return str(product_number)
+    product = str(product_number)
+    product_lock.release()
+    return product
 
 
 # 2.3 https://github.com/SeanPikulin/TradingSystem/blob/main/Documentation/Use%20Cases.md#23-Registration
