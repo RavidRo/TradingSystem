@@ -196,7 +196,7 @@
 3. <ins>System</ins>: asks the user for the action
 4. <ins>User</ins>: chooses to delete \_to_delete_product
 5. <ins>System</ins>: if cart doesn't hold a bag for store_id, abort with error.
-6. <ins>System</ins>: if bag of store_id doesn't hold to_delete_product, abort with error.
+6. <ins>System</ins>: if bag of store_id doesn't hold \_to_delete_product, abort with error.
 7. <ins>System</ins>: deletes \_to_delete_product from the cart.
 
 **Tests**:
