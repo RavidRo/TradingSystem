@@ -110,8 +110,9 @@ class Manager(Owner):
 
         return super()._remove_permission(username, permission)
 
-    def _is_manager() -> bool:
+    def _is_manager(self) -> bool:
         return True
 
     def _permissions(self) -> list[str]:
-        return filter(lambda per: self.permissions[per], super())
+        exec = list(filter(lambda per: self.permissions[per], Permission))
+        return [per.name for per in exec]

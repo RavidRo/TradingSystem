@@ -17,14 +17,14 @@ class StoresManager:
     @staticmethod
     def get_products_by_store(store_id: str) -> Response[ParsableList[Product]]:
         for store in StoresManager.stores:
-            if store.get_id():
+            if store.get_id() == store_id:
                 return store.get_products()
         return Response(False, msg=f"No store with the ID {store_id} exists")
 
     # 2.6
     @staticmethod
     def get_products() -> Response[list[Product]]:
-        products_per_store = map(lambda store: store.get_products(), StoresManager.stores)
+        products_per_store =(map(lambda store: store.get_products().object.values, StoresManager.stores))
         products = []
         # iterating over the data
         for product_list in products_per_store:

@@ -8,9 +8,10 @@ class ResponsibilitiesData:
         self,
         store_id: str,
         is_manager: bool,
-        permissions: List[str],
         role: str,
         appointees: List[ResponsibilitiesData],
+        permissions: List[str],
+        username: str
     ) -> None:
 
         self.store_id = store_id
@@ -18,3 +19,4 @@ class ResponsibilitiesData:
         self.role = role
         self.appointees = appointees
         self.permissions = permissions
+        self.username = username

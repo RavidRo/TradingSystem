@@ -20,7 +20,7 @@ class DefaultDiscountPolicy(DiscountPolicy):
 
     def applyDiscount(
         self, user, store, products_to_quantities: dict
-    ) -> Response[PrimitiveParsable]:
+    ) -> float:
         # discount_type = self.checkPolicy()
         # return discount_type.apply_discount(products_to_quantities)
         return self.discount_type.apply_discount(products_to_quantities)
