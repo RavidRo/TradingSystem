@@ -10,7 +10,7 @@ class ShoppingCart(IShoppingCart):
     def __init__(self):
         self.shopping_bags: dict[str, ShoppingBag] = dict()
         self.timer = None
-        self.INTERVAL_TIME = 10 * 1 # TODO: change back
+        self.INTERVAL_TIME = 60
         self.purchase_time_passed = False
         self.price = None
         self.pending_purchase = False

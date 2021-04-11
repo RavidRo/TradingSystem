@@ -1309,7 +1309,7 @@ def test_parallel():
              test_get_store_purchase_history_success, test_get_store_purchase_history_no_purchases_saved_to_cart_success, test_get_store_purchase_history_no_payment_success,
              test_admin_get_store_purchase_history_success, test_admin_get_user_purchase_history_success]   # TODO: suggest a better idea
     threads = []
-    for i in range(50):
+    for i in range(5):
         for test in tests:
             t = threading.Thread(target=test)
             threads.append(t)

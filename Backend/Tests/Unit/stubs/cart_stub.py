@@ -28,4 +28,5 @@ class CartStub(ShoppingCart):
 
     def delete_products_after_purchase(self, user_name: str = "guest") -> Response[ParsableList]:
         self.remove_after_purchase = True
-        return Response(True)
+        from Backend.Domain.TradingSystem.purchase_details import PurchaseDetails
+        return Response(True, obj=ParsableList([PurchaseDetails("a", "a", [], None, 0.0)]))
