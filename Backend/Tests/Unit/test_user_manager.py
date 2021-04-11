@@ -236,8 +236,12 @@ def test_edit_product_details_fails_when_given_invalid_cookie():
 # * appoint owner tests - 4.3
 # * ==============================================================
 def test_appoint_owner_deligates_to_user_successfully(cookie, cookie2):
-    UserManager.register(UserManager.cookie_user[cookie2].get_username(), "", cookie2)
-    UserManager.appoint_owner(cookie, "", UserManager.cookie_user[cookie2].get_username())
+    UserManager.register(
+        UserManager.cookie_user[cookie2].get_username().get_obj().get_val(), "", cookie2
+    )
+    UserManager.appoint_owner(
+        cookie, "", UserManager.cookie_user[cookie2].get_username().get_obj().get_val()
+    )
     assert UserManager.cookie_user[cookie]._appoint_owner
 
 
@@ -253,8 +257,12 @@ def test_appoint_owner_fails_when_given_username_does_not_exist(cookie):
 # * appoint manager tests - 4.5
 # * ==============================================================
 def test_appoint_manager_deligates_to_user_successfully(cookie, cookie2):
-    UserManager.register(UserManager.cookie_user[cookie2].get_username(), "", cookie2)
-    UserManager.appoint_manager(cookie, "", UserManager.cookie_user[cookie2].get_username())
+    UserManager.register(
+        UserManager.cookie_user[cookie2].get_username().get_obj().get_val(), "", cookie2
+    )
+    UserManager.appoint_manager(
+        cookie, "", UserManager.cookie_user[cookie2].get_username().get_obj().get_val()
+    )
     assert UserManager.cookie_user[cookie]._appoint_manager
 
 

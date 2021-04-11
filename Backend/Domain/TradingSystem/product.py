@@ -30,10 +30,14 @@ class Product(IProduct):
         return uuid.uuid4()
 
     def edit_product_details(self, product_name: str, price: float):
-        if price <= 0:
-            return Response(False, msg="Product's price must pe positive!")
+        if price is not None:
+            if price < 0:
+                return Response(False, msg="Product's price must pe none negative!")
+            self.price = price
 
-        self.product_name = product_name
-        self.price = price
+        if product_name is not None:
+            if product_name == "":
+                return Response(False, msg="Product's name can be an empty string!")
+            self.product_name = product_name
 
         return Response(True, msg=f"Successfully edited product with product id: {self.id}")

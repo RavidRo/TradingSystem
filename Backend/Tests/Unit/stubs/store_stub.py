@@ -44,7 +44,7 @@ class StoreStub(Store):
         return "store"
 
     # 4.9
-    def get_responsibilities(self) -> Response[Responsibility]:
+    def get_personnel_info(self) -> Response[Responsibility]:
         return Response(True)
 
     # 4.11

@@ -192,7 +192,7 @@ def test_is_appointed_deligates_to_state(user: User):
 # * get_username tests
 # * ===========================================================
 def test_get_username_deligates_to_state(user: User):
-    assert user.state.get_username() == user.get_username()
+    assert user.state.get_username().get_obj().get_val() == user.get_username().get_obj().get_val()
 
 
 # * change_state tests

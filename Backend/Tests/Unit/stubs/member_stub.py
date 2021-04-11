@@ -1,3 +1,4 @@
+from Backend.response import PrimitiveParsable, Response
 from Backend.Domain.TradingSystem.States.member import Member
 
 
@@ -16,8 +17,8 @@ class MemberStub(Member):
         self.username = username
         self.user = user
 
-    def get_username(self):
-        return self.username
+    def get_username(self) -> Response[PrimitiveParsable[str]]:
+        return Response(True, PrimitiveParsable(self.username))
 
     def add_responsibility(self, responsibility, store_id):
         self.store_responsibility[store_id] = responsibility

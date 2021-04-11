@@ -139,10 +139,10 @@ class IUser:
     # Inter component functions
     # ====================
 
-    def is_appointed(self, store_id: str) -> bool:
+    def is_appointed(self, store_id: str) -> Response[bool]:
         raise NotImplementedError
 
-    def get_username(self) -> str:
+    def get_username(self) -> Response[PrimitiveParsable[str]]:
         raise NotImplementedError
 
     def change_state(self, new_state: UserState) -> None:
