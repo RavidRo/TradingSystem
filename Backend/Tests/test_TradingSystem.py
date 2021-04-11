@@ -4,8 +4,6 @@ import threading
 import pytest
 from Backend.Service.trading_system import TradingSystem
 
-# TODO: parallel testing
-# TODO: get admin permissions
 system = TradingSystem.getInstance()
 username_number = 0
 user_lock = threading.Lock()
