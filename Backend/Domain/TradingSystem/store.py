@@ -69,28 +69,28 @@ class Store:
 
     def add_product(self, product_name: str, price: float, quantity: int) -> Response[str]:
         from Backend.Domain.TradingSystem.product import Product
-        # self.products_lock.acquire_write()
+        self.products_lock.acquire_write()
         if not product_name:
-            # self.products_lock.release_write()
+            self.products_lock.release_write()
             return Response(False, msg="Product's name can't be empty!")
 
         if quantity < 0:
             # actually it's non-negative but adding 0 amount is redundant
-            # self.products_lock.release_write()
+            self.products_lock.release_write()
             return Response(False, msg="Product's quantity must be positive!")
 
         if price < 0:
-            # self.products_lock.release_write()
+            self.products_lock.release_write()
             return Response(False, msg="Product's price must pe positive!")
 
         if self.check_existing_product(product_name):
-            # self.products_lock.release_write()
+            self.products_lock.release_write()
             return Response(False, msg="This product is already in the store's inventory")
 
         product = Product(product_name=product_name, price=price)
         product_id = product.get_id()
         self.products_to_quantities[product_id] = (product, quantity)
-        # self.products_lock.release_write()
+        self.products_lock.release_write()
         return Response(True, product_id, msg=f"The product {product_name} successfully added")
 
     """checks need to be made:
@@ -173,12 +173,9 @@ class Store:
         self.responsibility = responsibility
 
     def check_existing_product(self, product_name: str):
-        self.products_lock.acquire_read()
         for (prod, quantity) in self.products_to_quantities.values():
             if prod.get_name() == product_name:
-                self.products_lock.release_read()
                 return True
-        self.products_lock.release_read()
         return False
 
     def get_product_name(self, product_id: str):
