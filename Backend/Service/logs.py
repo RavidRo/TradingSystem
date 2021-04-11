@@ -16,7 +16,7 @@ logging.basicConfig(
 
 def loging(function):
     def inner(*args, **kwargs):
-        msg = f"Function: {function.__name__} , args: {args} {kwargs}  , result: "
+        msg = f"Function: {function.__name__} , args: {args[1:]} {kwargs}  , result: "
         to_format = "{level} - {result}"
 
         try:

@@ -80,3 +80,6 @@ class Guest(UserState):
 
     def get_user_purchase_history_admin(self, username):
         return Response(False, msg="Guests cannot get any user's purchase history")
+
+    def is_appointed(self, store_id):
+        return Response(False, msg="Can't appoint guests to stores")

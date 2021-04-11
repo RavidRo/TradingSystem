@@ -188,7 +188,7 @@ def test_founder_add_manager_permission_successfully(store: StoreStub):
     founder.appointed.append(manager)
 
     assert founder.add_manager_permission(
-        member2.get_username(), Permission.MANAGE_PRODUCTS
+        member2.get_username().get_obj().get_val(), Permission.MANAGE_PRODUCTS
     ).succeeded()
 
 
@@ -200,7 +200,7 @@ def test_owner_add_manager_permission_successfully(store: StoreStub):
     owner.appointed.append(manager)
 
     assert owner.add_manager_permission(
-        member2.get_username(), Permission.MANAGE_PRODUCTS
+        member2.get_username().get_obj().get_val(), Permission.MANAGE_PRODUCTS
     ).succeeded()
 
 
@@ -211,9 +211,11 @@ def test_can_add_same_permission_twice(store: StoreStub):
     manager = Manager(member2, store)
     founder.appointed.append(manager)
 
-    founder.add_manager_permission(member2.get_username(), Permission.MANAGE_PRODUCTS)
+    founder.add_manager_permission(
+        member2.get_username().get_obj().get_val(), Permission.MANAGE_PRODUCTS
+    )
     assert founder.add_manager_permission(
-        member2.get_username(), Permission.MANAGE_PRODUCTS
+        member2.get_username().get_obj().get_val(), Permission.MANAGE_PRODUCTS
     ).succeeded()
 
 
@@ -224,7 +226,9 @@ def test_manager_gained_the_permission(store: StoreStub):
     manager = Manager(member2, store)
     owner.appointed.append(manager)
 
-    owner.add_manager_permission(member2.get_username(), Permission.MANAGE_PRODUCTS).succeeded()
+    owner.add_manager_permission(
+        member2.get_username().get_obj().get_val(), Permission.MANAGE_PRODUCTS
+    ).succeeded()
     assert manager.add_product("", 0, 0).succeeded()
 
 
@@ -254,7 +258,7 @@ def test_add_permission_fails_when_the_given_user_is_not_a_manager(founder, stor
     founder.appointed.append(owner)
 
     assert not founder.add_manager_permission(
-        member2.get_username(), Permission.MANAGE_PRODUCTS
+        member2.get_username().get_obj().get_val(), Permission.MANAGE_PRODUCTS
     ).succeeded()
 
 
@@ -268,7 +272,7 @@ def test_manager_add_manager_permission_is_prohibited_by_default(
     manager_father.appointed.append(manager)
 
     assert not manager_father.add_manager_permission(
-        member2.get_username(), Permission.MANAGE_PRODUCTS
+        member2.get_username().get_obj().get_val(), Permission.MANAGE_PRODUCTS
     ).succeeded()
 
 
@@ -282,7 +286,7 @@ def test_founder_remove_manager_permission_successfully(store: StoreStub):
     founder.appointed.append(manager)
 
     assert founder.remove_manager_permission(
-        member2.get_username(), Permission.GET_APPOINTMENTS
+        member2.get_username().get_obj().get_val(), Permission.GET_APPOINTMENTS
     ).succeeded()
 
 
@@ -294,7 +298,7 @@ def test_owner_remove_manager_permission_successfully(store: StoreStub):
     owner.appointed.append(manager)
 
     assert owner.remove_manager_permission(
-        member2.get_username(), Permission.GET_APPOINTMENTS
+        member2.get_username().get_obj().get_val(), Permission.GET_APPOINTMENTS
     ).succeeded()
 
 
@@ -305,9 +309,11 @@ def test_can_remove_manager_permission_twice(store: StoreStub):
     manager = Manager(member2, store)
     founder.appointed.append(manager)
 
-    founder.remove_manager_permission(member2.get_username(), Permission.GET_APPOINTMENTS)
+    founder.remove_manager_permission(
+        member2.get_username().get_obj().get_val(), Permission.GET_APPOINTMENTS
+    )
     assert founder.remove_manager_permission(
-        member2.get_username(), Permission.GET_APPOINTMENTS
+        member2.get_username().get_obj().get_val(), Permission.GET_APPOINTMENTS
     ).succeeded()
 
 
@@ -318,7 +324,9 @@ def test_manager_cant_get_appointments_after_permission_removed(store: StoreStub
     manager = Manager(member2, store)
     owner.appointed.append(manager)
 
-    owner.remove_manager_permission(member2.get_username(), Permission.GET_APPOINTMENTS).succeeded()
+    owner.remove_manager_permission(
+        member2.get_username().get_obj().get_val(), Permission.GET_APPOINTMENTS
+    ).succeeded()
     assert not manager.get_store_appointments().succeeded()
 
 
@@ -348,7 +356,7 @@ def test_remove_permission_fails_when_the_given_user_is_not_a_manager(founder, s
     founder.appointed.append(owner)
 
     assert not founder.remove_manager_permission(
-        member2.get_username(), Permission.GET_APPOINTMENTS
+        member2.get_username().get_obj().get_val(), Permission.GET_APPOINTMENTS
     ).succeeded()
 
 
@@ -362,7 +370,7 @@ def test_manager_remove_manager_permission_is_prohibited_by_default(
     manager_father.appointed.append(manager)
 
     assert not manager_father.remove_manager_permission(
-        member2.get_username(), Permission.GET_APPOINTMENTS
+        member2.get_username().get_obj().get_val(), Permission.GET_APPOINTMENTS
     ).succeeded()
 
 
@@ -375,7 +383,7 @@ def test_founder_removed_appointment_successfully(store: StoreStub):
     manager = Manager(member2, store)
     founder.appointed.append(manager)
 
-    assert founder.remove_appointment(member2.get_username()).succeeded()
+    assert founder.remove_appointment(member2.get_username().get_obj().get_val()).succeeded()
 
 
 def test_all_child_appointments_removed_too_when_father_was_removed(store: StoreStub):
@@ -388,7 +396,7 @@ def test_all_child_appointments_removed_too_when_father_was_removed(store: Store
     founder.appointed.append(owner)
     owner.appointed.append(manager)
 
-    founder.remove_appointment(member2.get_username()).succeeded()
+    founder.remove_appointment(member2.get_username().get_obj().get_val()).succeeded()
     assert not member3.is_appointed(store.get_id())
 
 
@@ -399,7 +407,7 @@ def test_fails_when_trying_to_remove_himself(store: StoreStub):
     manager = Manager(member2, store)
     founder.appointed.append(manager)
 
-    assert not founder.remove_appointment(member1.get_username()).succeeded()
+    assert not founder.remove_appointment(member1.get_username().get_obj().get_val()).succeeded()
 
 
 def test_fails_when_removing_appointment_of_not_appointed_username(store: StoreStub):
@@ -419,7 +427,7 @@ def test_owner_removed_appointment_successfully(store: StoreStub):
     manager = Manager(member2, store)
     owner.appointed.append(manager)
 
-    assert owner.remove_appointment(member2.get_username()).succeeded()
+    assert owner.remove_appointment(member2.get_username().get_obj().get_val()).succeeded()
 
 
 def test_manager_prohibited_from_removing_appointments_by_default(store: StoreStub):
@@ -429,7 +437,9 @@ def test_manager_prohibited_from_removing_appointments_by_default(store: StoreSt
     manager = Manager(member2, store)
     manager_father.appointed.append(manager)
 
-    assert not manager_father.remove_appointment(member2.get_username()).succeeded()
+    assert not manager_father.remove_appointment(
+        member2.get_username().get_obj().get_val()
+    ).succeeded()
 
 
 # * get store appointments tests - #4.9

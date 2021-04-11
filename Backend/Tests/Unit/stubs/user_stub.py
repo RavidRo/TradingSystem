@@ -42,7 +42,7 @@ class UserStub(IUser):
         self._get_store_purchase_history = False
 
     def is_appointed(self, store_id):
-        return self.state.is_appointed(store_id)
+        return Response(True, self.state.is_appointed(store_id))
 
     def appoint(self, store_id):
         return self.state.appoint(store_id)

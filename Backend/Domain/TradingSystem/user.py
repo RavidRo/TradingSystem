@@ -142,7 +142,7 @@ class User(IUser):
     # Inter component functions
     # ====================
 
-    def is_appointed(self, store_id: str) -> bool:
+    def is_appointed(self, store_id: str) -> Response[bool]:
         return self.state.is_appointed(store_id)
 
     def get_username(self) -> Response[PrimitiveParsable[str]]:

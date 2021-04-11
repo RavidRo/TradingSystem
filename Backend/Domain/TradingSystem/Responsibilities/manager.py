@@ -22,7 +22,7 @@ class Manager(Owner):
     def __create_no_permission_Response(self, permission: Permission) -> Response:
         return Response(
             False,
-            msg=f"{self.user_state.get_username()} does not have permission to {permission.name}",
+            msg=f"{self.user_state.get_username().get_obj().get_val()} does not have permission to {permission.name}",
         )
 
     # 4.1
@@ -69,17 +69,11 @@ class Manager(Owner):
 
     # 4.6
     def add_manager_permission(self, username: str, permission) -> Response[None]:
-        if self.permissions[Permission.APPOINT_MANAGER]:
-            return super().add_manager_permission(username, permission)
-
-        return self.__create_no_permission_Response(Permission.APPOINT_MANAGER)
+        return Response(False, msg=f"Managers can't add permissions")
 
     # 4.6
     def remove_manager_permission(self, username: str, permission) -> Response[None]:
-        if self.permissions[Permission.MANAGE_PRODUCTS]:
-            return super().remove_manager_permission(username, permission)
-
-        return self.__create_no_permission_Response(Permission.MANAGE_PRODUCTS)
+        return Response(False, msg=f"Managers can't remove permissions")
 
     # 4.4, 4.7
     def remove_appointment(self, username: str) -> Response[None]:
@@ -103,14 +97,14 @@ class Manager(Owner):
         return self.__create_no_permission_Response(Permission.GET_HISTORY)
 
     def _add_permission(self, username: str, permission: Permission) -> bool:
-        if self.user_state.get_username() == username:
+        if self.user_state.get_username().get_obj().get_val() == username:
             self.permissions[permission] = True
             return True
 
         return super()._add_permission(username, permission)
 
     def _remove_permission(self, username: str, permission: Permission) -> bool:
-        if self.user_state.get_username() == username:
+        if self.user_state.get_username().get_obj().get_val() == username:
             self.permissions[permission] = False
             return True
 
