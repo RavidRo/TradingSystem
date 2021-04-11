@@ -3,6 +3,7 @@ import uuid
 from Backend.response import Response, ParsableList
 from Backend.Domain.TradingSystem.product import Product
 from Backend.Service.DataObjects.store_data import StoreData
+from Backend.rw_lock import ReadWriteLock
 
 
 class Store:
@@ -22,6 +23,8 @@ class Store:
         self.discount_policy = DefaultDiscountPolicy()
         self.purchase_policy = DefaultPurchasePolicy()
         self.purchase_history = []
+        self.products_lock = ReadWriteLock()
+        self.history_lock = ReadWriteLock()
 
     def parse(self):
         return StoreData(self.id, self.name)
@@ -35,7 +38,9 @@ class Store:
         return parsed_products
 
     def get_products(self) -> Response[ParsableList[Product]]:
+        self.products_lock.acquire_read()
         products = [product for product, _ in self.products_to_quantities.values()]
+        self.products_lock.release_read()
         return Response(True, ParsableList(products))
 
     """checks need to be made:
@@ -43,10 +48,13 @@ class Store:
        1. A product with product_id exists in the store"""
 
     def set_product_name(self, product_id, new_name) -> Response[None]:
+        self.products_lock.acquire_write()
         if self.products_to_quantities[product_id] is None:
+            self.products_lock.release_write()
             return Response(False, msg=f"product with {product_id} doesn't exist in the store!")
 
         self.products_to_quantities[product_id][0].set_product_name(new_name)
+        self.products_lock.release_write()
         return Response(True, msg=f"Product {product_id} name was changed successfully!")
 
     def get_name(self) -> str:
@@ -61,23 +69,28 @@ class Store:
 
     def add_product(self, product_name: str, price: float, quantity: int) -> Response[str]:
         from Backend.Domain.TradingSystem.product import Product
-
+        self.products_lock.acquire_write()
         if not product_name:
+            self.products_lock.release_write()
             return Response(False, msg="Product's name can't be empty!")
 
         if quantity < 0:
             # actually it's non-negative but adding 0 amount is redundant
+            self.products_lock.release_write()
             return Response(False, msg="Product's quantity must be positive!")
 
         if price < 0:
+            self.products_lock.release_write()
             return Response(False, msg="Product's price must pe positive!")
 
         if self.check_existing_product(product_name):
+            self.products_lock.release_write()
             return Response(False, msg="This product is already in the store's inventory")
 
         product = Product(product_name=product_name, price=price)
         product_id = product.get_id()
         self.products_to_quantities[product_id] = (product, quantity)
+        self.products_lock.release_write()
         return Response(True, product_id, msg=f"The product {product_name} successfully added")
 
     """checks need to be made:
@@ -85,11 +98,14 @@ class Store:
        1. a product with product_id exists"""
 
     def remove_product(self, product_id: str) -> Response[None]:
+        self.products_lock.acquire_write()
         result = self.products_to_quantities.pop(product_id, None)
         if result is None:
+            self.products_lock.release_write()
             return Response(
                 False, msg="The product " + product_id + "is already not in the inventory!"
             )
+        self.products_lock.release_write()
         return Response(
             True, msg="Successfully removed product with product id: " + str(product_id)
         )
@@ -99,13 +115,15 @@ class Store:
        1. price > 0
        2. a product with product_id exists"""
 
-    def edit_product_details(
-        self, product_id: str, product_name: str, price: float
-    ) -> Response[None]:
+    def edit_product_details(self, product_id: str, product_name: str, price: float) -> Response[None]:
+        self.products_lock.acquire_write()
         if product_id not in self.products_to_quantities:
+            self.products_lock.release_write()
             return Response(False, msg="No such product in the store")
 
-        return self.products_to_quantities[product_id][0].edit_product_details(product_name, price)
+        response = self.products_to_quantities[product_id][0].edit_product_details(product_name, price)
+        self.products_lock.release_write()
+        return response
 
     """checks need to be made:
        ----------------------
@@ -113,17 +131,17 @@ class Store:
        2. a product with product_name exists"""
 
     def change_product_quantity(self, product_id: str, quantity: int) -> Response[None]:
+        self.products_lock.acquire_write()
         if quantity < 0:
+            self.products_lock.release_write()
             return Response(False, msg="quantity must be positive!")
         if product_id in self.products_to_quantities:
             new_product_quantity = (self.products_to_quantities[product_id][0], quantity)
             self.products_to_quantities[product_id] = new_product_quantity
-            return Response(
-                True,
-                msg="Successfully updated product "
-                + str(self.products_to_quantities[product_id][0].get_name())
-                + "'s quantity",
-            )
+            prod_name = self.products_to_quantities[product_id][0].get_name()
+            self.products_lock.release_write()
+            return Response(True, msg=f"Successfully updated product {prod_name} 's quantity")
+        self.products_lock.release_write()
         return Response(False, msg=f"The product with id: {product_id} isn't in the inventory!")
 
     def get_personnel_info(self) -> Response[Responsibility]:
@@ -134,12 +152,15 @@ class Store:
         return Response[Responsibility](True, self.responsibility, msg="Personnel info")
 
     def get_purchase_history(self) -> Response[ParsableList[PurchaseDetails]]:
-        return Response[ParsableList](
-            True, ParsableList(self.purchase_history), msg="Purchase history"
-        )
+        self.history_lock.acquire_read()
+        history = self.purchase_history
+        self.history_lock.release_read()
+        return Response[ParsableList](True, ParsableList(history), msg="Purchase history")
 
     def update_store_history(self, purchase_details: PurchaseDetails):
+        self.history_lock.acquire_write()
         self.purchase_history.append(purchase_details)
+        self.history_lock.release_write()
 
     @staticmethod
     def id_generator() -> str:
@@ -158,33 +179,38 @@ class Store:
         return False
 
     def get_product_name(self, product_id: str):
-        return self.products_to_quantities.get(product_id)[0].get_name()
+        self.products_lock.acquire_read()
+        name = self.products_to_quantities.get(product_id)[0].get_name()
+        self.products_lock.release_read()
+        return name
 
     def send_back(self, products_to_quantities: dict):
+        self.products_lock.acquire_write()
         for prod_id, (product, quantity) in products_to_quantities.items():
             if self.products_to_quantities.get(prod_id) is None:
                 self.products_to_quantities.update({prod_id: (product, quantity)})
             else:
                 self.products_to_quantities[prod_id][1] += quantity
+        self.products_lock.release_write()
 
     # This function checks for available products
     def check_available_products(self, products_to_quantities: dict) -> Response[None]:
+        self.products_lock.acquire_read()
         for prod_id, (_, quantity) in products_to_quantities.items():
             prod_to_current_quantity = self.products_to_quantities.get(prod_id)
             if prod_to_current_quantity is None:
-                return Response(
-                    False,
-                    msg=f"The product with id: {prod_id} doesn't exist in the inventory of the store",
-                )
-            elif prod_to_current_quantity[1] < quantity:
-                return Response(
-                    False,
-                    msg=f"The store has less than {quantity} of product with id: {prod_id} left",
-                )
+                self.products_lock.release_read()
+                return Response(False, msg=f"The product with id: {prod_id} doesn't exist in the inventory of the store")
 
+            elif prod_to_current_quantity[1] < quantity:
+                self.products_lock.release_read()
+                return Response(False, msg=f"The store has less than {quantity} of product with id: {prod_id} left")
+
+        self.products_lock.release_read()
         return Response(True, msg="All products are available")
 
     def acquire_products(self, products_to_quantities: dict) -> None:
+        self.products_lock.acquire_write()
         for prod_id, (product, quantity) in products_to_quantities.items():
             current_quantity = self.products_to_quantities.get(prod_id)[1]
             if current_quantity == quantity:
@@ -192,6 +218,7 @@ class Store:
             else:
                 product = self.products_to_quantities.get(prod_id)[0]
                 self.products_to_quantities[prod_id] = (product, current_quantity - quantity)
+        self.products_lock.release_write()
 
     # this will be added in the future - maybe I will apply Default Policy for now
     def check_purchase_types(self, products_info, user_info) -> Response[None]:
@@ -203,10 +230,16 @@ class Store:
         )
 
     def get_product(self, product_id: str):
-        return self.products_to_quantities.get(product_id)[0]
+        self.products_lock.acquire_read()
+        prod = self.products_to_quantities.get(product_id)[0]
+        self.products_lock.release_read()
+        return prod
 
     def product_exists(self, product_id, quantity):
+        self.products_lock.acquire_read()
         product_quantity = self.products_to_quantities.get(product_id)
         if product_quantity is None or product_quantity[1] < quantity:
+            self.products_lock.release_read()
             return False
+        self.products_lock.release_read()
         return True

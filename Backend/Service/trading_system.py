@@ -5,16 +5,20 @@ from Backend.Service.DataObjects.shopping_cart_data import ShoppingCartData
 import Backend.Service.logs as log
 from Backend.Domain.TradingSystem.trading_system_manager import TradingSystemManager
 import Backend.Domain.Payment.payment_manager as PaymentSystem
-
+import threading
 
 class TradingSystem(object):
     __instance = None
 
+    # https://medium.com/@rohitgupta2801/the-singleton-class-python-c9e5acfe106c
+    # double locking mechanism
     @staticmethod
     def getInstance():
         """ Static access method. """
         if TradingSystem.__instance is None:
-            TradingSystem()
+            with threading.Lock():
+                if TradingSystem.__instance is None:
+                    TradingSystem()
         return TradingSystem.__instance
 
     def __init__(self):
