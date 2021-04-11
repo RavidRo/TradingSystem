@@ -2,6 +2,7 @@ from Backend.Domain.TradingSystem.store import Store
 from Backend.Domain.TradingSystem.Responsibilities.responsibility import Responsibility
 from Backend.Domain.TradingSystem.purchase_details import PurchaseDetails
 from Backend.response import Response, ParsableList
+from Backend.rw_lock import ReadWriteLock
 
 
 class StoreStub(Store):
@@ -11,6 +12,7 @@ class StoreStub(Store):
         self.product_quantity_changed = False
         self.product_details_changed = False
         self.products_to_quantities: dict = products
+        self.products_lock = ReadWriteLock()
 
     # 4.1
     # Creating a new product a the store
