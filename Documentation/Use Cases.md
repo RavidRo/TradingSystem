@@ -51,14 +51,14 @@
 ### 2.3. Registration
 
 **Actors**: User  
-**Parameters**: \_username, \_user_details  
+**Parameters**: \_username, \_credentials  
 **Pre-conditions**: User is not logged in.  
 **Post-conditions**: There is a member in the system whose user name is username.  
 **Actions**:
 
 1. <ins>User</ins>: Chooses to register
-2. <ins>System</ins>: Asks for user name and user details
-3. <ins>User</ins>: Enters \_username and \_user_details
+2. <ins>System</ins>: Asks for user name and credentials
+3. <ins>User</ins>: Enters \_username and \_credentials
 4. <ins>System</ins>: If \_username is already a member, generate error message and return to action 2.
 5. <ins>System</ins>: Else, register \_username as member and generate success message.
 
@@ -69,21 +69,22 @@
 ### 2.4. Login
 
 **Actors**: User  
-**Parameters**: \_username, \_user_details  
+**Parameters**: \_username, \_credentials 
 **Pre-conditions**: User is not logged in.  
 **Post-condition**: User is logged in.  
 **Actions**:
 
 1. <ins>User</ins>: Chooses to log in.
-2. <ins>System</ins>: Asks for user name and \_user_details
-3. <ins>User</ins>: Enters \_username and \_user_details
-4. <ins>System</ins>: If \_username is a member and the other \_user_details match, log the user in.
+2. <ins>System</ins>: Asks for user name and \_credentials
+3. <ins>User</ins>: Enters \_username and \_credentials
+4. <ins>System</ins>: If \_username is a member and the \_credentials match, log the user in.
 5. <ins>System</ins>: Else, generate error message and return to action 2.
 
 **Tests**:
 
 -   <ins>_Happy Path_</ins>: The user logs in with correct username and match details. The system logs the user in.
--   <ins>_Sad Path_</ins>: The user enters user name that exist in the system but the other user details (password for example does not match to the username)
+-   <ins>_Sad Path_</ins>: The user enters user name that doesn't exist in the system.
+-   <ins>_Sad Path_</ins>: The user enters user name that exist in the system but the credentials (password for example) does not match to the username
 
 ### 2.5. Getting store information
 
@@ -105,7 +106,7 @@
 ### 2.6. Product search with filter
 
 **Actors**: User  
-**Parameters**: \_search_phrase  
+**Parameters**: \_search_phrase, \_filter_field, \_optional_parameters 
 **Pre-condition**: None.  
 **Post-condition**: None.  
 **Actions**:
@@ -144,26 +145,30 @@
 
 **Tests**:
 
--   <ins>_Happy Path_</ins>: The user filter by store rank (above average).
--   <ins>_Sad Path_</ins>: The user filter by price range and enters negative prices
+-   <ins>_Happy Path_</ins>: The user filter by one of the possible options (for example: store rank (above average)).
+-   <ins>_Sad Path_</ins>: The user tries to filter by a non possible option and doesn't get results.
+-   <ins>_Sad Path_</ins>: The user filters by a possible option but enters invalid param (price range - enters negative prices)
 
 ### 2.7. Save products in shopping bag
 
 **Actors**: User  
-**Parameters**: \_product, store_id, quantity   
+**Parameters**: \_product, \_store_id, \_quantity   
 **Pre-condition**: quantity > 0.  
 **Post-condition**: \_product is added to the store's bag with the specified quantity.  
 **Actions**:
 
-1. <ins>User</ins>: choose to save \_product with specified quantity.
-2. <ins>System</ins>: if \_product already in the bag, update the amount of \_product in the bag.
-3. <ins>System</ins>: Else, add \_product to the bag.
-4. <ins>System</ins>: if User is logged in, save \_product to the database.
+1. <ins>User</ins>: choose to save \_product with \_quantity.
+2. <ins>System</ins>: if \_product doesn't exist with \_quantity in store with \_store_id, abort with error.
+3. <ins>System</ins>: if \_product already in the bag, abort with error.
+4. <ins>System</ins>: Else, add \_product to the bag with \_quantity.
+5. <ins>System</ins>: if User is logged in, save \_product to the database.
 
 **Tests**:
 
 -   <ins>_Happy Path_</ins>: The user chooses to save to the bag a product that already exists there and the shopping bag updates accordingly.
 -   <ins>_Sad Path_</ins>: The user though he saved the product, but he didn’t.
+-   <ins>_Sad Path_</ins>: The user chooses a product which he already added to the bag.
+-   <ins>_Sad Path_</ins>: The user chooses a product which is out of stock.
 
 ### 2.8 Visit cart
 
@@ -177,87 +182,93 @@
 2. <ins>System</ins>: shows the user's cart.
 
 -   <ins>_Happy Path_</ins>: User chooses to visit his cart and the system shows him all of his cart details.
--   <ins>_Sad Path_</ins>: User chooses to visit hist cart but there is no items in his cart.
 
 ### 2.8. Delete product from cart
 
 **Actors**: User, Visit cart  
-**Parameters**: \_to_delete_product, store_id  
-**Pre-condition**: The cart contains \_to_delete_product.  
+**Parameters**: \_to_delete_product, \_store_id  
+**Pre-condition**: None 
 **Post-condition**: The cart doesn't contain \_to_delete_product.  
 **Actions**:
 
 1. <ins>Visit cart</ins>: finished
-2. <ins>User</ins>: chooses \_to_delete_product from store with specified store_id from the cart.
+2. <ins>User</ins>: chooses to delete \_to_delete_product from store with \_store_id from the cart.
 3. <ins>System</ins>: asks the user for the action
 4. <ins>User</ins>: chooses to delete \_to_delete_product
-5. <ins>System</ins>: deletes \_to_delete_product from the cart.
+5. <ins>System</ins>: if cart doesn't hold a bag for store_id, abort with error.
+6. <ins>System</ins>: if bag of store_id doesn't hold to_delete_product, abort with error.
+7. <ins>System</ins>: deletes \_to_delete_product from the cart.
 
 **Tests**:
 
 -   <ins>_Happy Path_</ins>: User chooses to delete a product that exists in the cart and the system asks for the action from the user. The user accepts the action and the product is deleted from the cart.
 -   <ins>_Sad Path_</ins>: User accidentally chooses to delete a product from the cart. The product exists in the cart. When the system asks the user for the action, the user cancels the deletion.
+-   <ins>_Sad Path_</ins>: User accidently chooses a store_id which has no appropriate bag in cart.
+-   <ins>_Sad Path_</ins>: User accidently chooses a product which is not in the shopping cart.
 
 ### 2.8. Change amount of product in cart
 
 **Actors**: User, Visit cart  
 **Parameters**: \_to_change_product, \_amount, store_id  
-**Pre-condition**: \_amount > 0, to_change_product is in the cart.  
+**Pre-condition**: \_amount > 0.  
 **Post-condition**: The cart contains \_amount of \_to_change_product.  
 **Actions**:
 
 1. <ins>Visit cart</ins>: finished
-2. <ins>User</ins>: chooses \_to_change_product from store with store_id from the cart.
-3. <ins>System</ins>: asks the user for the action
-4. <ins>User</ins>: chooses to change \_to_change_product's amount
-5. <ins>System</ins>: queries user for the new amount.
-6. <ins>User</ins>: enters \_amount
+2. <ins>System</ins>: asks the user for the action
+4. <ins>User</ins>: chooses to change \_to_change_product's amount with new_amount
+5. <ins>System</ins>: if cart doesn't hold a bag for store_id, abort with error.
+6. <ins>System</ins>: if bag of store_id doesn't hold to_delete_product, abort with error.
 7. <ins>System</ins>: updates \_to_change_product's amount to \_amount.
 
 **Tests**:
 
 -   <ins>_Happy Path_</ins>: User chooses to change product’s amount in the cart. Right now the product exists in the cart and has 5 copies of it. after the system queries the user for the action and the amount , the user changes the product’s quantity from 5 to 7 and the cart updates successfully.
 -   <ins>_Sad Path_</ins>: User accidentally chooses to change a product’s A amount in the cart. instead of to change product’s B amount in the cart. after the system queries the user for the action , the user cancels it.
+-   <ins>_Sad Path_</ins>: User accidently chooses a store_id which has no appropriate bag in cart.
+-   <ins>_Sad Path_</ins>: User accidently chooses a product which is not in the shopping cart.
 
 ### 2.9. Purchase products
 
 **Actors**: User, Outside Cashing, Outside Supplyment  
-**Parameters**: \_payment_information, products_purchase_info  
+**Parameters**: \_payment_information, products_purchase_info, \_address
 **Pre-condition**: None.  
 **Post-condition**: Cart (of immediate products section) is empty.  
 **Actions**:
 
 1. <ins>User</ins>: chooses to purchase the products in his cart.
-2. <ins>System</ins>: start timer (10 minutes)
-3. <ins>System: foreach shopping bag:
+2. <ins>System</ins>:  ask User to choose purchase types for products.
+3. <ins>User</ins>: enters products with purchase types.
+4. <ins>System: foreach shopping bag:
     1. for each product:
-        1. <ins>System</ins>: if product is not available, generate error message.
-        2. <ins>System</ins>: if product has multiple purchase options.
-            1. <ins>System</ins>: ask User to choose purchase type.
-            2. <ins>User</ins>: chooses the type.
+        1. <ins>System</ins>: if product is not available, generate error message and abort.
+        2. <ins>System</ins>: if purchase type for product doesn't match the bag's store purchase policy, abort with error message.
         3. <ins>System</ins>: If the type is “immediate purchase”:
             1. <ins>System</ins>: apply discount policy on the product and sum up its price.
             2. <ins>System</ins>: else, move the product to the other product’s section in the bag (for example, bid offer).
-4. <ins>System</ins>: removes all the products were bought from the store.
-5. <ins>System</ins>: ask for user the payment information.
-6. <ins>User</ins>: enters \_payment_information.
-7. <ins>System</ins>: sends \_payment_information and total price to Outside Cashing.
-8. <ins>Outside Cashing</ins>: performs billing and returns indicate message.
-9. <ins>System</ins>: if the process succeeded, return success message, else generate error message and abort.
-10. <ins>System</ins>: sends the products to Outside Supplyment.
-11. <ins>Outside Supplyment</ins>: supply products, return indicate message.
-12. <ins>System</ins>: if outside supplyment accepts, generates success message and returns to the user.
-13. <ins>System</ins>: else, generate error message.
-14. <ins>System</ins>: generates the appropriate shopping details and saves it as “user purchase history” and “stores purchase history”.
+    2. <ins>System</ins>: removes all the products that were acquired from the store.
+5. <ins>System</ins>: start timer (10 minutes)
+6. <ins>System</ins>: ask for user the payment information and address.
+7. <ins>User</ins>: enters \_payment_information and \_address.
+8. <ins>System</ins>: sends \_payment_information and total price to Outside Cashing.
+9. <ins>Outside Cashing</ins>: performs billing and returns indicate message.
+10. <ins>System</ins>: if the process succeeded, return success message, else rollback the purchase and return error.
+11. <ins>System</ins>: sends the products and \_address to Outside Supplyment.
+12. <ins>Outside Supplyment</ins>: supply products, return indicate message, else rollback the purchase and return error..
+13. <ins>System</ins>: if outside supplyment accepts, generates success message and returns to the user.
+14. <ins>System</ins>: else, generate error message and rollback the purchase.
 15. <ins>System</ins>: removes all the products from user’s shopping cart.
-    Timer timeout : generate error message
+16. <ins>System</ins>: generates the appropriate shopping details and saves it as “user purchase history” and “stores purchase history”.
+    Timer timeout : generate error message, rollback the purchase and abort
 
 **Tests**:
 
 -   <ins>_Happy Path_</ins>: User chooses to purchase products in her cart, the system applies discounts . The user enters payment information correctly, the purchase was done and the system updates the products in the stores and the cart.
+-   <ins>_Sad Path_</ins>: User chooses to purchase products from cart, but there are missing products in the store.
+-   <ins>_Sad Path_</ins>: User chooses to purchase products from cart, but accidently chose not appropraite purchase types.s
 -   <ins>_Sad Path_</ins>: User chooses to purchase products in her cart, the system applies discounts . When the system asks for payment information, the user enters her details but the cashing system declines the process and generates an error message.
 -   <ins>_Sad Path_</ins>: User chooses to purchase products in her cart, the system applies discounts . When the system asks for payment information, user inserts all needed but then she goes and disappears for 15 minutes so the system gets into timeout and generates an error message.
--   <ins>_Sad Path_</ins>: User chooses to purchase products in her cart, the system applies discounts . When the system asks for payment information, user inserts all needed and then the system turns to supplement system that rejects the process and generates an error message.
+-   <ins>_Sad Path_</ins>: User chooses to purchase products in her cart, the system applies discounts . When the system asks for payment information, user inserts all needed and then the system turns to supplyment system that rejects the process and generates an error message.
 
 ## Member
 
@@ -288,7 +299,7 @@
 1. <ins>Member</ins>: chooses to open a new store.
 2. <ins>System</ins>: asks for the store information.
 3. <ins>Member</ins>: enters store_information.
-4. <ins>System</ins>: creates a new store with Member as the owner and Store_information as the store information.
+4. <ins>System</ins>: creates a new store with Member as the founder and Store_information as the store information.
 5. <ins>System</ins>: adds the new store’s reference to the member
 
 **Tests**:
@@ -305,13 +316,13 @@
 **Actions**:
 
 1. <ins>Member</ins>: chooses to get personal purchase history.
-1. <ins>System</ins>: gets the purchase history from the database.
-1. <ins>System</ins>: shows the purchase history.
+2. <ins>System</ins>: gets the purchase history.
+3. <ins>System</ins>: shows the purchase history.
 
 **Tests**:
 
 -   <ins>_Happy Path_</ins>: Member chooses to see her personal purchase history and the system retrieves the data from the DB and shows it to her.
--   <ins>_Sad Path_</ins>: Member chooses to see her personal purchase history by mistake (did not mean to) and the system retrieves the data from the DB and shows it to her.
+-   <ins>_Sad Path_</ins>: Member chooses to see her personal purchase history by mistake (did not mean to) and the system retrieves the data and shows it to her.
 
 ## Owner and manager
 
@@ -324,9 +335,9 @@
 **Actions**:
 
 1. <ins>Store personnel</ins>: chooses to enter a store.
-1. <ins>System</ins>: asks for the store identifier.
-1. <ins>Store owner</ins>: enters \_store.
-1. <ins>System</ins>: shows \_store’s data and possible actions.
+2. <ins>System</ins>: asks for the store identifier.
+3. <ins>Store owner</ins>: enters \_store.
+4. <ins>System</ins>: shows \_store’s data and possible actions.
 
 ### 4.1. Add new product
 
@@ -337,16 +348,16 @@
 **Actions**:
 
 1. <ins>Enter store</ins>: finishes.
-1. <ins>Store personnel</ins>: chooses to add a new product.
-1. <ins>System</ins>: if Store personnel is an owner of \_store or a manager with permissions to do this:
+2. <ins>Store personnel</ins>: chooses to add a new product.
+3. <ins>System</ins>: if Store personnel is an owner of \_store or a manager with permissions to do this:
     1. <ins>System</ins>: asks for product information and \_quantity.
-    1. <ins>Store personnel</ins>: enters \_product_information and \_quantity.
+    2. <ins>Store personnel</ins>: enters \_product_information and \_quantity.
         1. if \_quantity legal and information legal
             1. <ins>System</ins>: asks the user for approval
-        1. <ins>System</ins>: if user approves ,adds \_quantity of products to \_store.
-        1. else, decline the process
-        1. else, generate an error message
-1. Else, generate an error message
+        2. <ins>System</ins>: if user approves ,adds \_quantity of products to \_store.
+        3. else, decline the process
+        4. else, generate an error message
+4. Else, generate an error message
 
 **Tests**:
 
@@ -362,14 +373,14 @@
 **Actions**:
 
 1. <ins>Enter store</ins>: finishes.
-1. <ins>Store personnel</ins>: chooses to remove a product.
-1. <ins>System</ins>: if Store personnel is an owner of \_store or a manager with permissions to do this:
+2. <ins>Store personnel</ins>: chooses to remove a product.
+3. <ins>System</ins>: if Store personnel is an owner of \_store or a manager with permissions to do this:
     1. <ins>System</ins>: asks for product identifier.
-    1. <ins>Store personnel</ins>: enters product_identifier.
+    2. <ins>Store personnel</ins>: enters product_identifier.
         1. if product identifier correct
             1. <ins>System</ins>: the product is removed from store.
-        1. else, generate error message
-1. else, generate an error message
+        2. else, generate error message
+4. else, generate an error message
 
 **Tests**:
 
@@ -385,12 +396,12 @@
 **Actions**:
 
 1. <ins>Enter store</ins>: finishes.
-1. <ins>Store personnel</ins>: chooses to update a product’s quantity.
-1. <ins>System</ins>: if Store personnel is an owner of \_store or a manager with permissions to do this:
+2. <ins>Store personnel</ins>: chooses to update a product’s quantity.
+3. <ins>System</ins>: if Store personnel is an owner of \_store or a manager with permissions to do this:
     1. <ins>System</ins>: asks for product identifier and quantity.
-    1. <ins>Store personnel</ins>: enters product_identifier and \_quantity.
-    1. <ins>System</ins>: the product’s quantity is updated in \_store.
-    1. <ins>System</ins>: else, genetate error message and abort.
+    2. <ins>Store personnel</ins>: enters product_identifier and \_quantity.
+    3. <ins>System</ins>: the product’s quantity is updated in \_store.
+    4. <ins>System</ins>: else, genetate error message and abort.
 
 **Tests**:
 
@@ -406,14 +417,14 @@
 **Actions**:
 
 1. <ins>Enter store</ins>: finishes.
-1. <ins>Store </ins>: chooses to update product’s information.
-1. <ins>System</ins>: if Store personnel is an owner of \_store or a manager with permissions to do this:
+2. <ins>Store </ins>: chooses to update product’s information.
+3. <ins>System</ins>: if Store personnel is an owner of \_store or a manager with permissions to do this:
     1. <ins>System</ins>: asks for product information.
-    1. <ins>Store personnel</ins>: enters product_information.
-    1. <ins>System</ins>: asks for approval for the update
+    2. <ins>Store personnel</ins>: enters product_information.
+    3. <ins>System</ins>: asks for approval for the update
         1. if user approves
             1. the product’s information is updated in \_store.
-        1. Else, dicline process
+        2. Else, dicline process
 
 **Tests**:
 
@@ -429,11 +440,11 @@
 **Actions**:
 
 1. <ins>Enter store</ins>: finishes.
-1. <ins>Store personnel</ins>: chooses to receive purchase types and policies.
-1. <ins>System</ins>: if the personnel is an owner or a manager with the relevant responsibility:
+2. <ins>Store personnel</ins>: chooses to receive purchase types and policies.
+3. <ins>System</ins>: if the personnel is an owner or a manager with the relevant responsibility:
     1. <ins>System</ins>: searches the information.
-    1. <ins>System</ins>: shows the information.
-    1. <ins>System</ins>: else, generate error message and abort.
+    2. <ins>System</ins>: shows the information.
+    3. <ins>System</ins>: else, generate error message and abort.
 
 **Tests**:
 
@@ -449,11 +460,11 @@
 **Actions**:
 
 1. <ins>Enter store</ins>: finishes.
-1. <ins>Store personnel</ins>: chooses to receive purchase types and policies.
-1. <ins>System</ins>: if the personnel is an owner or a manager with the relevant responsibility:
+2. <ins>Store personnel</ins>: chooses to receive purchase types and policies.
+3. <ins>System</ins>: if the personnel is an owner or a manager with the relevant responsibility:
     1. <ins>System</ins>: searches the information.
-    1. <ins>System</ins>: shows the information.
-    1. <ins>System</ins>: else, generate error message and abort.
+    2. <ins>System</ins>: shows the information.
+    3. <ins>System</ins>: else, generate error message and abort.
 
 **Tests**:
 
@@ -469,13 +480,13 @@
 **Actions**:
 
 1. <ins>Enter store</ins>: finishes.
-1. <ins>Store personnel</ins>: chooses to edit the store’s purchase types.
-1. <ins>System</ins>: if the personnel is an owner or a manager with the relevant responsibility:
+2. <ins>Store personnel</ins>: chooses to edit the store’s purchase types.
+3. <ins>System</ins>: if the personnel is an owner or a manager with the relevant responsibility:
     1. <ins>System</ins>: asks for the updated purchase types.
-    1. <ins>Store personnel</ins>: enters \_types.
-    1. If user chooses to delete the default type:
+    2. <ins>Store personnel</ins>: enters \_types.
+    3. If user chooses to delete the default type:
         1. Generate an error message.
-        1. Else, delete the type.
+        2. Else, delete the type.
     1. <ins>System</ins>: updates the purchase types of the store to \_types.
     1. <ins>System</ins>: else, generate error message and abort.
 
@@ -493,15 +504,15 @@
 **Actions**:
 
 1. <ins>Enter store</ins>: finishes.
-1. <ins>Store personnel</ins>: chooses to edit the store’s purchase types.
-1. <ins>System</ins>: if the personnel is an owner or a manager with the relevant responsibility:
+2. <ins>Store personnel</ins>: chooses to edit the store’s purchase types.
+3. <ins>System</ins>: if the personnel is an owner or a manager with the relevant responsibility:
     1. <ins>System</ins>: asks for the updated purchase types.
-    1. <ins>Store personnel</ins>: enters \_types.
-    1. If user chooses to delete the default type:
+    2. <ins>Store personnel</ins>: enters \_types.
+    3. If user chooses to delete the default type:
         1. Generate an error message.
-        1. Else, delete the type.
-    1. <ins>System</ins>: updates the purchase types of the store to \_types.
-    1. <ins>System</ins>: else, generate error message and abort.
+        2. Else, delete the type.
+    4. <ins>System</ins>: updates the purchase types of the store to \_types.
+    5. <ins>System</ins>: else, generate error message and abort.
 
 **Tests**:
 
@@ -517,12 +528,12 @@
 **Actions**:
 
 1. <ins>Enter store</ins>: finishes.
-1. <ins>Store personnel</ins>: chooses to edit the store’s purchase policy.
-1. <ins>System</ins>: if the personnel is an owner or a manager with the relevant responsibility:
+2. <ins>Store personnel</ins>: chooses to edit the store’s purchase policy.
+3. <ins>System</ins>: if the personnel is an owner or a manager with the relevant responsibility:
     1. <ins>System</ins>: asks for the updated purchase policy.
-    1. <ins>Store personnel</ins>: enters \_policy.
-    1. <ins>System</ins>: updates the purchase policy of the store to \_policies.
-    1. <ins>System</ins>: else, generate error message and abort.
+    2. <ins>Store personnel</ins>: enters \_policy.
+    3. <ins>System</ins>: updates the purchase policy of the store to \_policies.
+    4. <ins>System</ins>: else, generate error message and abort.
 
 **Tests**:
 
@@ -538,12 +549,12 @@
 **Actions**:
 
 1. <ins>Enter store</ins>: finishes.
-1. <ins>Store personnel</ins>: chooses to edit the store’s discount policy.
-1. <ins>System</ins>: if the personnel is an owner or a manager with the relevant responsibility:
+2. <ins>Store personnel</ins>: chooses to edit the store’s discount policy.
+3. <ins>System</ins>: if the personnel is an owner or a manager with the relevant responsibility:
     1. <ins>System</ins>: asks for the updated discount policy.
-    1. <ins>Store personnel</ins>: enters \_policy.
-    1. <ins>System</ins>: updates the discount policy of the store to \_policies.
-    1. <ins>System</ins>: else, generate error message and abort.
+    2. <ins>Store personnel</ins>: enters \_policy.
+    3. <ins>System</ins>: updates the discount policy of the store to \_policies.
+    4. <ins>System</ins>: else, generate error message and abort.
 
 **Tests**:
 
@@ -559,10 +570,10 @@
 **Actions**:
 
 1. <ins>Enter store</ins>: finishes.
-1. <ins>Store owner</ins>: chooses to appoint a new store owner.
-1. <ins>System</ins>: asks for the new owner information.
-1. <ins>Store owner</ins>: enters new_owner.
-1. <ins>System</ins>: adds the new owner to the store.
+2. <ins>Store owner</ins>: chooses to appoint a new store owner.
+3. <ins>System</ins>: asks for the new owner information.
+4. <ins>Store owner</ins>: enters new_owner.
+5. <ins>System</ins>: adds the new owner to the store.
 
 **Tests**:
 
@@ -578,11 +589,11 @@
 **Actions**:
 
 1. <ins>Enter store</ins>: finishes.
-1. <ins>Store owner</ins>: chooses to appoint a new store manager.
-1. <ins>System</ins>: asks for the new manager information.
-1. <ins>Store owner</ins>: enters new_manager.
-1. <ins>System</ins>: adds new_manager to the store.
-1. <ins>System</ins>: assign the default responsibilities to new_manager.
+2. <ins>Store owner</ins>: chooses to appoint a new store manager.
+3. <ins>System</ins>: asks for the new manager information.
+4. <ins>Store owner</ins>: enters new_manager.
+5. <ins>System</ins>: adds new_manager to the store.
+6. <ins>System</ins>: assign the default responsibilities to new_manager.
 
 **Tests**:
 
@@ -598,10 +609,10 @@
 **Actions**:
 
 1. <ins>Enter store</ins>: finishes.
-1. <ins>Store </ins>: chooses to change a manager’s responsibilities.
-1. <ins>System</ins>: asks for the manager identifier and updated responsibilities.
-1. <ins>Store owner</ins>: enters \_manager and \_responsibilities.
-1. <ins>System</ins>: updates \_manager’s responsibilities.
+2. <ins>Store </ins>: chooses to change a manager’s responsibilities.
+3. <ins>System</ins>: asks for the manager identifier and updated responsibilities.
+4. <ins>Store owner</ins>: enters \_manager and \_responsibilities.
+5. <ins>System</ins>: updates \_manager’s responsibilities.
 
 **Tests**:
 
@@ -618,12 +629,12 @@
 **Actions**:
 
 1. <ins>Enter store</ins>: finishes.
-1. <ins>Store owner</ins>: chooses to dismiss a manager.
-1. <ins>System</ins>: asks for the manager’s information.
-1. <ins>Store owner</ins>: enters \_manager.
+2. <ins>Store owner</ins>: chooses to dismiss a manager.
+3. <ins>System</ins>: asks for the manager’s information.
+4. <ins>Store owner</ins>: enters \_manager.
     1. if data legal removes \_manager from the store.
         1. removes all the users that were appointed by him and their subtrees of responsibilities.
-    1. else, generate an error message.
+    2. else, generate an error message.
 
 **Tests**:
 
@@ -640,10 +651,10 @@
 **Actions**:
 
 1. <ins>Enter store</ins>: finishes.
-1. <ins>Store personnel</ins>: chooses to get personal information.
-1. <ins>System</ins>: if Store personnel is an owner of this store or a manager with permission to access this information:
+2. <ins>Store personnel</ins>: chooses to get personal information.
+3. <ins>System</ins>: if Store personnel is an owner of this store or a manager with permission to access this information:
     1. <ins>System</ins>: searches for the personnel information for the store.
-    1. <ins>System</ins>: shows the information.
+    2. <ins>System</ins>: shows the information.
 
 **Tests**:
 
@@ -660,10 +671,10 @@
 **Actions**:
 
 1. <ins>Enter store</ins>: finishes.
-1. <ins>Store personnel</ins>: chooses to get store purchase history.
-1. <ins>System</ins>: if Store personnel is an owner of this store or a manager with permission to access this information:
+2. <ins>Store personnel</ins>: chooses to get store purchase history.
+3. <ins>System</ins>: if Store personnel is an owner of this store or a manager with permission to access this information:
     1. <ins>System</ins>: searches for the store’s purchase history.
-    1. <ins></ins>: shows the purchase history.
+    2. <ins></ins>: shows the purchase history.
 
 **Tests**:
 
@@ -681,10 +692,10 @@
 **Actions**:
 
 1. <ins>System manager</ins>: chooses to get a store’s purchase history.
-1. <ins>System</ins>: asks for the store identifier.
-1. <ins>Store owner</ins>: enters \_store.
-1. <ins>System</ins>: searches for the information in the database.
-1. <ins>System</ins>: shows the information.
+2. <ins>System</ins>: asks for the store identifier.
+3. <ins>Store owner</ins>: enters \_store.
+4. <ins>System</ins>: searches for the information in the database.
+5. <ins>System</ins>: shows the information.
 
 **Tests**:
 
@@ -700,10 +711,10 @@
 **Actions**:
 
 1. <ins>System manager</ins>: chooses get user’s purchase history.
-1. <ins>System</ins>: asks for the user identifier.
-1. <ins>Store owner</ins>: enters \_user.
-1. <ins>System</ins>: searches for the information in the database.
-1. <ins>System</ins>: shows the information.
+2. <ins>System</ins>: asks for the user identifier.
+3. <ins>Store owner</ins>: enters \_user.
+4. <ins>System</ins>: searches for the information in the database.
+5. <ins>System</ins>: shows the information.
 
 **Tests**:
 
