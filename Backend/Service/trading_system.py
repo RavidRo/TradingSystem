@@ -5,6 +5,7 @@ from __future__ import annotations
 from Backend.Service.DataObjects.shopping_cart_data import ShoppingCartData
 import Backend.Service.logs as log
 from Backend.Domain.TradingSystem.trading_system_manager import TradingSystemManager
+from Backend.Domain.Payment.payment_manager import PaymentManager
 import Backend.Domain.Payment.payment_manager as PaymentSystem
 import threading
 
@@ -28,6 +29,7 @@ class TradingSystem(object):
             raise Exception("This class is a singleton!")
         else:
             TradingSystem.__instance = self
+            self.payment_manager = PaymentManager(is_using_stub_systems=False)
 
     # @logging
 
@@ -96,7 +98,7 @@ class TradingSystem(object):
         products_ids_to_quantity = {}
         for bag in cart.bags:
             products_ids_to_quantity |= bag.product_ids_to_quantities
-        res = PaymentSystem.pay(price, payment_details, products_ids_to_quantity, address)
+        res = self.payment_manager.pay(price, payment_details, products_ids_to_quantity, address)
         if res.succeeded():
             return TradingSystemManager.purchase_completed(cookie)
         else:
