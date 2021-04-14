@@ -11,7 +11,7 @@ class OutsideSupplymentStub(OutsideSupplyment):
 
     def deliver(self, product_ids_to_quantity, address):
         if self.faulty:
-            return Response(False, msg="The Delivery system is currently not working")
+            raise RuntimeError()
         if not self.can_deliver[address]:
             return Response(False, msg="The client with this address cannot be delivered")
         return not Response(True)
@@ -21,3 +21,9 @@ class OutsideSupplymentStub(OutsideSupplyment):
 
     def fix(self):
         self.faulty = False
+
+    def make_address_wrong(self, address):
+        self.can_deliver[address] = False
+
+    def make_address_right(self, address):
+        self.can_deliver[address] = True

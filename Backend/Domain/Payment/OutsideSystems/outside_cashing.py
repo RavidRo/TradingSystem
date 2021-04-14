@@ -11,3 +11,9 @@ class OutsideCashing:
     def pay(self, price, payment_details):
         sleep(1)
         return True
+
+    # test_function:
+    def get_balance(self, payment_details):
+        # implementation in testing
+        pass
+

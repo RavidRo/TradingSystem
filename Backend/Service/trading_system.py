@@ -6,7 +6,8 @@ from Backend.Service.DataObjects.shopping_cart_data import ShoppingCartData
 import Backend.Service.logs as log
 from Backend.Domain.TradingSystem.trading_system_manager import TradingSystemManager
 from Backend.Domain.Payment.payment_manager import PaymentManager
-import Backend.Domain.Payment.payment_manager as PaymentSystem
+from Backend.Domain.Payment.OutsideSystems.outside_supplyment import OutsideSupplyment
+from Backend.Domain.Payment.OutsideSystems.outside_cashing import OutsideCashing
 import threading
 
 class TradingSystem(object):
@@ -29,7 +30,7 @@ class TradingSystem(object):
             raise Exception("This class is a singleton!")
         else:
             TradingSystem.__instance = self
-            self.payment_manager = PaymentManager(is_using_stub_systems=False)
+            self.payment_manager = PaymentManager(OutsideCashing(), OutsideSupplyment())    # for stub injection in testing
 
     # @logging
 

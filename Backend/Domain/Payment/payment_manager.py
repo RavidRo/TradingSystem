@@ -1,31 +1,34 @@
 from .Adapters.cashing_adapter import CashingAdapter
 from .Adapters.supply_adapter import SupplyAdapter
 from Backend.response import Response
-from OutsideSystems.outside_supplyment import OutsideSupplyment
-from OutsideSystems.outside_cashing import OutsideCashing
 
 
 class PaymentManager:
 
-    def __init__(self, is_using_stub_systems):
-        self.cashing_adapter = CashingAdapter(OutsideCashing(), is_using_stub_systems)
-        self.supply_adapter = SupplyAdapter(OutsideSupplyment, is_using_stub_systems)
+    def __init__(self, outside_cashing, outside_supply):
+        self.cashing_adapter = CashingAdapter(outside_cashing)
+        self.supply_adapter = SupplyAdapter(outside_supply)
 
     def pay(self, price, payment_details, product_ids_to_quantity, address):
-        payment_response = self.cashing_adapter.pay(price, payment_details)
+        try:
+            payment_response = self.cashing_adapter.pay(price, payment_details)
+        except:
+            return Response(success=False, msg="Something went wrong with Outside Cashing")
         if payment_response.success:
             try:
                 supply_response = self.supply_adapter.deliver(product_ids_to_quantity, address)
-                if supply_response.success:
-                    return Response(success=True)
-                else:
+                if not supply_response.success:
                     self.rollback(price, payment_details)
-                    return Response(success=False, msg="Something went wrong with the deliver")
+                return supply_response
             except:  # for any error occurs:
                 self.rollback(price, payment_details)
-                return Response(success=False, msg="An error occurred during the process")
+                return Response(success=False, msg="Something went wrong with Outside Supplyment")
         else:
-            return Response(success=False, msg="Something went wrong with the payment")
+            return payment_response
 
     def rollback(self, price, payment_details):
         return self.cashing_adapter.pay(-price, payment_details)
+
+    # test function:
+    def get_balance(self, payment_details):
+        return self.cashing_adapter.get_balance(payment_details)

@@ -12,7 +12,7 @@ class OutsideCashingStub(OutsideCashing):
 
     def pay(self, price, payment_details):
         if self.faulty:
-            return Response(False, msg="The Cashing system is currently not working")
+            raise RuntimeError()
         if not self.can_pay[payment_details]:
             return Response(False, msg="The client with those payment details cannot pay")
         self.balances[payment_details] += price
@@ -23,3 +23,12 @@ class OutsideCashingStub(OutsideCashing):
 
     def fix(self):
         self.faulty = False
+
+    def make_details_wrong(self, payment_details):
+        self.can_pay[payment_details] = False
+
+    def make_details_right(self, payment_details):
+        self.can_pay[payment_details] = True
+
+    def get_balance(self, payment_details):
+        return self.balances[payment_details]
