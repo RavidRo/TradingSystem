@@ -14,7 +14,7 @@ class OutsideSupplymentStub(OutsideSupplyment):
             raise RuntimeError()
         if not self.can_deliver[address]:
             return Response(False, msg="The client with this address cannot be delivered")
-        return not Response(True)
+        return Response(True)
 
     def brake(self):
         self.faulty = True

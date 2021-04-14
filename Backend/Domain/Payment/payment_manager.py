@@ -1,3 +1,5 @@
+import sys
+
 from .Adapters.cashing_adapter import CashingAdapter
 from .Adapters.supply_adapter import SupplyAdapter
 from Backend.response import Response
@@ -29,6 +31,18 @@ class PaymentManager:
     def rollback(self, price, payment_details):
         return self.cashing_adapter.pay(-price, payment_details)
 
-    # test function:
+    # test functions:
     def get_balance(self, payment_details):
         return self.cashing_adapter.get_balance(payment_details)
+
+    def make_details_wrong(self, payment_details):
+        self.cashing_adapter.make_details_wrong(payment_details)
+
+    def make_details_right(self, payment_details):
+        self.cashing_adapter.make_details_right(payment_details)
+
+    def make_address_wrong(self, address):
+        self.supply_adapter.make_address_wrong(address)
+
+    def make_address_right(self, address):
+        self.supply_adapter.make_address_right(address)

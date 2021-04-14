@@ -20,13 +20,13 @@ def outside_supplyment():
 
 
 @pytest.fixture
-def payment_manager():
+def payment_manager(outside_cashing, outside_supplyment):
     return PaymentManager(outside_cashing, outside_supplyment)
 
 
 @pytest.fixture
 def payment_details():
-    return {"credit_card": "1234-5678-9123-4567", "id": "123456789", "CVV": "000"}
+    return "some payment information"           # currently not dict because dict is not hashable
 
 
 @pytest.fixture
@@ -34,7 +34,7 @@ def address():
     return "BGU"
 
 
-# * single_threaded testing
+# * Tests
 # * ==========================================================================================
 
 
@@ -59,10 +59,10 @@ def test_payment_fail_delivery_success_faulty_system(payment_manager, outside_ca
     assert not response.succeeded() and payment_manager.get_balance(payment_details) == 0.0
 
 
-def test_payment_fail_delivery_success_for_specific_costumer(payment_manager, outside_cashing, payment_details):
-    outside_cashing.make_details_wrong(payment_details)
+def test_payment_fail_delivery_success_for_specific_costumer(payment_manager, payment_details):
+    payment_manager.make_details_wrong(payment_details)
     response = payment_manager.pay(5, payment_details, {}, "")
-    outside_cashing.make_details_right(payment_details)
+    payment_manager.make_details_right(payment_details)
     assert not response.succeeded() and payment_manager.get_balance(payment_details) == 0.0
 
 
@@ -73,8 +73,8 @@ def test_payment_success_delivery_fail_faulty_system(payment_manager, outside_su
     assert not response.succeeded() and payment_manager.get_balance(payment_details) == 0
 
 
-def test_payment_success_delivery_fail_for_specific_costumer(payment_manager, outside_supplyment, payment_details, address):
-    outside_supplyment.make_address_wrong(address)
-    response = payment_manager.pay(5, payment_details, {}, "")
-    outside_supplyment.make_address_right(address)
+def test_payment_success_delivery_fail_for_specific_costumer(payment_manager, payment_details, address):
+    payment_manager.make_address_wrong(address)
+    response = payment_manager.pay(5, payment_details, {}, address)
+    payment_manager.make_address_right(address)
     assert not response.succeeded() and payment_manager.get_balance(payment_details) == 0

@@ -17,3 +17,8 @@ class OutsideCashing:
         # implementation in testing
         pass
 
+    def make_details_wrong(self, payment_details):
+        pass
+
+    def make_details_right(self, payment_details):
+        pass
