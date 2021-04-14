@@ -556,7 +556,7 @@ def test_send_payment_success():
     product_id, product_name, price, quantity = _create_product(cookie, store_id, _generate_product_name(), 5.50, 10)
     system.save_product_in_cart(cookie, store_id, product_id, 1)
     system.purchase_cart(cookie)
-    response = system.send_payment(cookie, {}, {})
+    response = system.send_payment(cookie, "", "")
     assert (
         response.succeeded()
         and system.get_store(store_id).object.ids_to_quantities[product_id] == 9
@@ -572,7 +572,7 @@ def test_send_payment_before_purchase_cart_fail():
     product_id, product_name, price, quantity = _create_product(cookie, store_id, _generate_product_name(), 5.50, 10)
     system.save_product_in_cart(cookie, store_id, product_id, 1)
     assert (
-        not system.send_payment(cookie, {}, {}).succeeded()
+        not system.send_payment(cookie, "", "").succeeded()
         and system.get_store(store_id).object.ids_to_quantities[product_id] == 10
         and system.get_cart_details(cookie).succeeded()
     )
@@ -589,7 +589,7 @@ def test_get_purchase_history_success():
     product_id, product_name, price, quantity = _create_product(cookie, store_id, _generate_product_name(), 5.50, 10)
     system.save_product_in_cart(cookie, store_id, product_id, 1)
     system.purchase_cart(cookie)
-    system.send_payment(cookie, {}, {})
+    system.send_payment(cookie, "", "")
     response = system.get_purchase_history(cookie)
     assert (
         response.succeeded()
@@ -1193,7 +1193,7 @@ def test_get_store_purchase_history_success():
     product_id, product_name, price, quantity = _create_product(cookie, store_id, _generate_product_name(), 5.50, 10)
     system.save_product_in_cart(cookie, store_id, product_id, 1)
     system.purchase_cart(cookie)
-    system.send_payment(cookie, {}, {})
+    system.send_payment(cookie, "", "")
     response = system.get_store_purchase_history(cookie, store_id)
     assert (
         response.succeeded()
@@ -1255,7 +1255,7 @@ def test_admin_get_store_purchase_history_success():
     product_id, product_name, price, quantity = _create_product(cookie, store_id, _generate_product_name(), 5.50, 10)
     system.save_product_in_cart(cookie, store_id, product_id, 1)
     system.purchase_cart(cookie)
-    system.send_payment(cookie, {}, {})
+    system.send_payment(cookie, "", "")
     response = system.get_any_store_purchase_history(admin_cookie, store_id)
     assert (
         response.succeeded()
