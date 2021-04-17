@@ -46,24 +46,15 @@ class Authentication:
         if not self.__is_password_match(password, username):
             return Response(False, msg="password incorrect")
 
-        is_admin = self.__is_username_admin(username)
-        return Response(True, PrimitiveParsable(is_admin), msg="login succeeded")
+        # is_admin = self.__is_username_admin(username)
+        return Response(True, msg="login succeeded")
 
     def __add_user_to_db(self, username, password, is_admin=False) -> None:
         self.users[username] = {
-            "password": generate_password_hash(password, method="sha256"),
-            "admin": is_admin,
+            "password": generate_password_hash(password, method="sha256")
         }
 
     def __is_password_match(self, given_password, username) -> bool:
         return check_password_hash(self.users[username]["password"], given_password)
 
-    def __is_username_admin(self, username) -> bool:
-        return self.users[username]["admin"]
 
-    def __register_admins(self) -> None:
-        with open("config.json", "r") as read_file:
-            data = json.load(read_file)
-            admin_password = data["admin-password"]
-            for username in data["admins"]:
-                self.__add_user_to_db(username, admin_password, True)
