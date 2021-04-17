@@ -198,22 +198,20 @@ class Store:
 
     # This function checks for available products
     def check_available_products(self, products_to_quantities: dict) -> Response[None]:
-        self.products_lock.acquire_read()
+        self.products_lock.acquire_write()
         for prod_id, (_, quantity) in products_to_quantities.items():
             prod_to_current_quantity = self.products_to_quantities.get(prod_id)
             if prod_to_current_quantity is None:
-                self.products_lock.release_read()
+                self.products_lock.release_write()
                 return Response(False, msg=f"The product with id: {prod_id} doesn't exist in the inventory of the store")
 
             elif prod_to_current_quantity[1] < quantity:
-                self.products_lock.release_read()
+                self.products_lock.release_write()
                 return Response(False, msg=f"The store has less than {quantity} of product with id: {prod_id} left")
 
-        self.products_lock.release_read()
         return Response(True, msg="All products are available")
 
     def acquire_products(self, products_to_quantities: dict) -> None:
-        self.products_lock.acquire_write()
         for prod_id, (product, quantity) in products_to_quantities.items():
             current_quantity = self.products_to_quantities.get(prod_id)[1]
             if current_quantity == quantity:
