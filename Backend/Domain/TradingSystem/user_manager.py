@@ -1,5 +1,6 @@
 from typing import Callable
 import uuid
+import json
 
 from Backend.Domain.TradingSystem.store import Store
 from Backend.Domain.TradingSystem.Interfaces.IUser import IUser
@@ -11,6 +12,18 @@ from Backend.Domain.TradingSystem.shopping_cart import ShoppingCart
 from Backend.Domain.TradingSystem.purchase_details import PurchaseDetails
 from Backend.Domain.TradingSystem.Responsibilities.responsibility import Permission, Responsibility
 from Backend.Domain.TradingSystem.user import User
+
+
+def at_least_one_admin():
+    with open("config.json", "r") as read_file:
+        data = json.load(read_file)
+        if "admins" not in data or len(data["admins"]) <= 0:
+            raise Exception(
+                "At least one admin should be at the system. Check config.json to add admins."
+            )
+
+
+at_least_one_admin()
 
 
 class UserManager:
