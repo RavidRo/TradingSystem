@@ -3,9 +3,9 @@ from unittest.mock import patch, MagicMock
 import pytest
 
 from Backend.Domain.TradingSystem.shopping_cart import ShoppingCart
-from Backend.Tests.Unit.stubs.shopping_bag_stub import ShoppingBagStub
-from Backend.Tests.Unit.stubs.store_stub import StoreStub
-from Backend.Tests.Unit.stubs.user_stub import UserStub
+from Backend.Tests.stubs.shopping_bag_stub import ShoppingBagStub
+from Backend.Tests.stubs.store_stub import StoreStub
+from Backend.Tests.stubs.user_stub import UserStub
 
 
 @pytest.fixture

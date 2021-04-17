@@ -1,12 +1,14 @@
 """ this class is responsible to communicate with the trading system manager"""
 from __future__ import annotations
 
-
 from Backend.Service.DataObjects.shopping_cart_data import ShoppingCartData
 import Backend.Service.logs as log
 from Backend.Domain.TradingSystem.trading_system_manager import TradingSystemManager
 import Backend.Domain.Payment.payment_manager as PaymentSystem
 import threading
+
+from Backend.response import Response
+
 
 class TradingSystem(object):
     __instance = None
@@ -51,13 +53,13 @@ class TradingSystem(object):
         return TradingSystemManager.get_products_by_store(store_id)
 
     @log.loging
-    def get_store(self, store_id : str):
+    def get_store(self, store_id: str):
         return TradingSystemManager.get_store(store_id)
 
     # kwargs = You can search for a product by additional key words
     @log.loging
     def search_products(
-        self, *keywords, product_name="", category=None, min_price=None, max_price=None
+            self, *keywords, product_name="", category=None, min_price=None, max_price=None
     ):
         return TradingSystemManager.search_products(
             product_name,
@@ -96,10 +98,16 @@ class TradingSystem(object):
         products_ids_to_quantity = {}
         for bag in cart.bags:
             products_ids_to_quantity |= bag.product_ids_to_quantities
+
+        # Don't need to send back because the timer has done it. This function also cancels the timer if time not passed
+        if TradingSystemManager.is_time_passed(cookie).success:
+            return Response(False, msg="Time passed!")
+
         res = PaymentSystem.pay(price, payment_details, products_ids_to_quantity, address)
         if res.succeeded():
             return TradingSystemManager.purchase_completed(cookie)
         else:
+            TradingSystemManager.send_back(cookie)
             return res.get_msg()
 
     # Member
@@ -126,7 +134,7 @@ class TradingSystem(object):
 
     @log.loging
     def change_product_quantity_in_store(
-        self, cookie: str, store_id: str, product_id: str, quantity: int
+            self, cookie: str, store_id: str, product_id: str, quantity: int
     ):
         return TradingSystemManager.change_product_quantity_in_store(
             cookie, store_id, product_id, quantity
@@ -134,7 +142,7 @@ class TradingSystem(object):
 
     @log.loging
     def edit_product_details(
-        self, cookie: str, store_id: str, product_id: str, new_name: str = None, new_price: float = None
+            self, cookie: str, store_id: str, product_id: str, new_name: str = None, new_price: float = None
     ):
         return TradingSystemManager.edit_product_details(
             cookie, store_id, product_id, new_name, new_price

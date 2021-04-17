@@ -110,3 +110,9 @@ class UserState(ABC):
     @abstractmethod
     def is_appointed(self, store_id):
         return Response(False, msg="Abstract Method")
+
+    def send_back(self):
+        return self.cart.send_back()
+
+    def is_time_passed(self):
+        return self.cart.is_time_passed()

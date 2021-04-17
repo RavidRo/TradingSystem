@@ -5,9 +5,9 @@ from Backend.Domain.TradingSystem.Responsibilities.manager import Manager
 from Backend.Domain.TradingSystem.Responsibilities.owner import Owner
 from Backend.Domain.TradingSystem.Responsibilities.founder import Founder
 
-from .stubs.member_stub import MemberStub
-from .stubs.store_stub import StoreStub
-from .stubs.user_stub import UserStub
+from Backend.Tests.stubs import MemberStub
+from Backend.Tests.stubs.store_stub import StoreStub
+from Backend.Tests.stubs.user_stub import UserStub
 
 # * fixtures
 # * ==========================================================================================

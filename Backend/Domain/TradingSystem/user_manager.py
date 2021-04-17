@@ -275,3 +275,14 @@ class UserManager:
     @staticmethod
     def get_any_user_purchase_history(username: str) -> Response[ParsableList[PurchaseDetails]]:
         return UserManager.__get_user_by_username(username).get_purchase_history()
+
+    @staticmethod
+    def send_back(cookie: str) -> Response[None]:
+        func: Callable[[User], Response] = lambda user: user.send_back()
+        return UserManager.__deligate_to_user(cookie, func)
+
+    @staticmethod
+    def is_time_passed(cookie: str) -> Response[None]:
+        func: Callable[[User], Response] = lambda user: user.is_time_passed()
+        return UserManager.__deligate_to_user(cookie, func)
+

@@ -4,7 +4,7 @@ from Backend.Domain.TradingSystem.Responsibilities.responsibility import Permiss
 from Backend.Domain.TradingSystem.Interfaces.IUserState import IUserState
 from Backend.Domain.TradingSystem.user import User
 
-from .stubs.member_stub import MemberStub
+from Backend.Tests.stubs import MemberStub
 
 
 @pytest.fixture(scope="function", autouse=True)

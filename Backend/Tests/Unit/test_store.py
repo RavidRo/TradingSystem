@@ -1,7 +1,7 @@
 from unittest.mock import patch
 import pytest
 from Backend.Domain.TradingSystem.store import Store
-from Backend.Tests.Unit.stubs.product_stub import ProductStub
+from Backend.Tests.stubs.product_stub import ProductStub
 
 
 @pytest.fixture

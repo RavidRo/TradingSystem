@@ -55,6 +55,13 @@ class User(IUser):
     def get_cart_price(self) -> Response[PrimitiveParsable[float]]:
         return self.state.get_cart_price()
 
+    # 2.9
+    def send_back(self) -> Response[None]:
+        return self.state.send_back()
+
+    # 2.9
+    def is_time_passed(self) -> Response[PrimitiveParsable[bool]]:
+        return self.state.is_time_passed()
     # Member
     # ===============================
 
@@ -153,3 +160,4 @@ class User(IUser):
 
     def get_appointment_lock(self) -> threading.Lock():
         return self.appointment_lock
+

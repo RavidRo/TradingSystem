@@ -149,12 +149,22 @@ class ShoppingCart(IShoppingCart):
 
     """notice: I use a flag that marks the time passed for the purchase"""
 
-    def send_back(self):
+    def send_back(self) -> Response[None]:
+        if self.timer is not None:
+            self.timer.cancel()
         self.price = None
-        self.purchase_time_passed = True
+        self.purchase_time_passed = True    #todo: think if this field needs to be changed when stopping the timer manually.
         for bag in self.shopping_bags.values():
             bag.send_back()
+        return Response(True, msg="Products sent back to the store!")
 
     def start_timer(self):
         self.timer = Timer(self.INTERVAL_TIME, self.send_back)
         self.timer.start()
+
+    def is_time_passed(self) -> Response[None]:
+        if self.purchase_time_passed:
+            return Response(True, msg="Time passed!")
+        else:
+            self.timer.cancel()
+            return Response(False, msg="Time didn't pass, payment allowed!")
