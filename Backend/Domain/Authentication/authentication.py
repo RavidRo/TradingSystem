@@ -41,7 +41,7 @@ class Authentication:
     # Fail if login failed and returns true if the user logged into is an admin
     def login(self, username, password) -> Response[PrimitiveParsable[bool]]:
         if username not in self.users:
-            return Response(False, msg="username doesn't exist in the system")
+            return Response(False, msg="username doesn't exist in the __system")
 
         if not self.__is_password_match(password, username):
             return Response(False, msg="password incorrect")

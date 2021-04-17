@@ -1,4 +1,4 @@
-""" this class is responsible to communicate with the trading system manager"""
+""" this class is responsible to communicate with the trading __system manager"""
 from __future__ import annotations
 
 
