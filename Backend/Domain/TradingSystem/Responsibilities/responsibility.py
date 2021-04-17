@@ -36,10 +36,10 @@ class Responsibility(Parsable):
     ERROR_MESSAGE = "Responsibility is an interface, function not implemented"
 
     def __init__(self, user_state, store) -> None:
-        self.user_state = user_state
+        self._user_state = user_state
         user_state.add_responsibility(self, store.get_id())
-        self.store = store
-        self.appointed: list[Responsibility] = []
+        self._store = store
+        self._appointed: list[Responsibility] = []
 
     # 4.1
     # Creating a new product a the store
@@ -90,7 +90,7 @@ class Responsibility(Parsable):
         raise Exception(Responsibility.ERROR_MESSAGE)
 
     def _add_permission(self, username: str, permission: Permission) -> bool:
-        if not self.appointed:
+        if not self._appointed:
             # if self.user never appointed anyone
             return False
 
@@ -98,10 +98,10 @@ class Responsibility(Parsable):
             return appointee._add_permission(username, permission)
 
         # returns true if any one of the children returns true
-        return any(map(add_appointee_permission, self.appointed))
+        return any(map(add_appointee_permission, self._appointed))
 
     def _remove_permission(self, username: str, permission: Permission) -> bool:
-        if not self.appointed:
+        if not self._appointed:
             # if self.user never appointed anyone
             return False
 
@@ -109,35 +109,35 @@ class Responsibility(Parsable):
             return appointee._remove_permission(username, permission)
 
         # returns true if any one of the children returns true
-        return any(map(remove_appointee_permission, self.appointed))
+        return any(map(remove_appointee_permission, self._appointed))
 
     def _remove_appointment(self, username: str) -> bool:
-        if not self.appointed:
+        if not self._appointed:
             # if self.user never appointed anyone
             return False
 
-        for appointment in self.appointed:
-            if appointment.user_state.get_username().get_obj().get_val() == username:
-                self.appointed.remove(appointment)
-                appointment.__dismiss_from_store(self.store.get_id())
+        for appointment in self._appointed:
+            if appointment._user_state.get_username().get_obj().get_val() == username:
+                self._appointed.remove(appointment)
+                appointment.__dismiss_from_store(self._store.get_id())
                 return True
 
-        return any(map(lambda worker: worker._remove_appointment(username), self.appointed))
+        return any(map(lambda worker: worker._remove_appointment(username), self._appointed))
 
     def __dismiss_from_store(self, store_id: str) -> None:
-        for appointment in self.appointed:
+        for appointment in self._appointed:
             appointment.__dismiss_from_store(store_id)
-        self.user_state.dismiss_from_store(store_id)
+        self._user_state.dismiss_from_store(store_id)
 
     # Parsing the object for user representation
     def parse(self) -> ResponsibilitiesData:
         return ResponsibilitiesData(
-            self.store.get_id(),
+            self._store.get_id(),
             self._is_manager(),
             self.__class__.__name__,
-            [appointee.parse() for appointee in self.appointed],
+            [appointee.parse() for appointee in self._appointed],
             self._permissions(),
-            self.user_state.get_username().object.value,
+            self._user_state.get_username().object.value,
         )
 
     def _is_manager(self) -> bool:
