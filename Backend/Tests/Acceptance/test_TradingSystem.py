@@ -561,7 +561,7 @@ def test_send_payment_success():
     product_id, product_name, price, quantity = _create_product(cookie, store_id, _generate_product_name(), 5.50, 10)
     system.save_product_in_cart(cookie, store_id, product_id, 1)
     system.purchase_cart(cookie)
-    response = system.send_payment(cookie, {}, {})
+    response = system.send_payment(cookie, "", "")
     assert (
             response.succeeded()
             and system.get_store(store_id).object.ids_to_quantities[product_id] == 9
@@ -572,13 +572,11 @@ def test_send_payment_before_purchase_cart_fail():
     cookie, username, password, store_name, store_id = _initialize_info(
         _generate_username(), "aaa", _generate_store_name()
     )
-    card_number = "1234-1234-1234-1234"
-    card_expire = "12/34"
-    card_cvv = "123"
     product_id, product_name, price, quantity = _create_product(cookie, store_id, _generate_product_name(), 5.50, 10)
     system.save_product_in_cart(cookie, store_id, product_id, 1)
+    response = system.send_payment(cookie, "", "")
     assert (
-            not system.send_payment(cookie, {}, {}).succeeded()
+            not response.succeeded()
             and system.get_store(store_id).object.ids_to_quantities[product_id] == 10
             and system.get_cart_details(cookie).succeeded()
     )
@@ -593,7 +591,7 @@ def test_send_payment_failed():
         product_id, product_name, price, quantity = _create_product(cookie, store_id, _generate_product_name(), 5.50, 10)
         system.save_product_in_cart(cookie, store_id, product_id, 1)
         system.purchase_cart(cookie).get_obj().get_val()
-        response = system.send_payment(cookie, {}, {})
+        response = system.send_payment(cookie, "", "")
         # this line is added since the user might cancel the purchase after unsuccessful payment
         system.cancel_purchase(cookie)
         assert (
@@ -613,7 +611,7 @@ def test_try_paying_after_time_passed():
     system.save_product_in_cart(cookie, store_id, product_id, 1)
     system.purchase_cart(cookie).get_obj().get_val()
     time.sleep(6)
-    response = system.send_payment(cookie, {}, {})
+    response = system.send_payment(cookie, "", "")
     assert (
             not response.succeeded()
             and system.get_store(store_id).object.ids_to_quantities[product_id] == 10
@@ -630,9 +628,9 @@ def test_try_paying_first_time_failed_than_success():
                                                                     10)
         system.save_product_in_cart(cookie, store_id, product_id, 1)
         system.purchase_cart(cookie).get_obj().get_val()
-        response = system.send_payment(cookie, {}, {})
+        response = system.send_payment(cookie, "", "")
         with mock.patch.object(OutsideCashing, 'pay', return_value=True):
-            try_again_response = system.send_payment(cookie, {}, {})
+            try_again_response = system.send_payment(cookie, "", "")
             assert (
                     not response.succeeded()
                     and try_again_response.succeeded()
@@ -651,15 +649,15 @@ def test_try_paying_first_time_incorrect_info_second_time_timer_over():
                                                                     10)
         system.save_product_in_cart(cookie, store_id, product_id, 1)
         system.purchase_cart(cookie).get_obj().get_val()
-        response = system.send_payment(cookie, {}, {})
-        with mock.patch.object(OutsideCashing, 'pay', return_value=True):
-            time.sleep(6)
-            try_again_response = system.send_payment(cookie, {}, {})
-            assert (
-                    not response.succeeded()
-                    and not try_again_response.succeeded()
-                    and system.get_store(store_id).object.ids_to_quantities[product_id] == 10
-            )
+        response = system.send_payment(cookie, "", "")
+
+    time.sleep(6)
+    try_again_response = system.send_payment(cookie, "", "")
+    assert (
+            not response.succeeded()
+            and not try_again_response.succeeded()
+            and system.get_store(store_id).object.ids_to_quantities[product_id] == 10
+    )
 
 # 3.7 https://github.com/SeanPikulin/TradingSystem/blob/main/Documentation/Use%20Cases.md#37-Get-personal-purchase-history
 def test_get_purchase_history_success():
@@ -672,7 +670,7 @@ def test_get_purchase_history_success():
     product_id, product_name, price, quantity = _create_product(cookie, store_id, _generate_product_name(), 5.50, 10)
     system.save_product_in_cart(cookie, store_id, product_id, 1)
     system.purchase_cart(cookie)
-    system.send_payment(cookie, {}, {})
+    system.send_payment(cookie, "", "")
     response = system.get_purchase_history(cookie)
     assert (
             response.succeeded()
@@ -1280,7 +1278,7 @@ def test_get_store_purchase_history_success():
     product_id, product_name, price, quantity = _create_product(cookie, store_id, _generate_product_name(), 5.50, 10)
     system.save_product_in_cart(cookie, store_id, product_id, 1)
     system.purchase_cart(cookie)
-    system.send_payment(cookie, {}, {})
+    system.send_payment(cookie, "", "")
     response = system.get_store_purchase_history(cookie, store_id)
     assert (
             response.succeeded()
@@ -1343,7 +1341,7 @@ def test_admin_get_store_purchase_history_success():
     product_id, product_name, price, quantity = _create_product(cookie, store_id, _generate_product_name(), 5.50, 10)
     system.save_product_in_cart(cookie, store_id, product_id, 1)
     system.purchase_cart(cookie)
-    system.send_payment(cookie, {}, {})
+    system.send_payment(cookie, "", "")
     response = system.get_any_store_purchase_history(admin_cookie, store_id)
     assert (
             response.succeeded()
@@ -1362,7 +1360,7 @@ def test_admin_get_user_purchase_history_success():
     product_id, product_name, price, quantity = _create_product(cookie, store_id, _generate_product_name(), 5.50, 10)
     system.save_product_in_cart(cookie, store_id, product_id, 1)
     system.purchase_cart(cookie)
-    system.send_payment(cookie, {}, {})
+    system.send_payment(cookie, "", "")
     response = system.get_user_purchase_history(admin_cookie, username)
     assert response.succeeded()
 

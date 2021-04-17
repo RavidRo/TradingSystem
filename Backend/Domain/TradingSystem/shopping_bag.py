@@ -8,17 +8,17 @@ from Backend.Domain.TradingSystem.purchase_details import PurchaseDetails
 
 class ShoppingBag(IShoppingBag):
     def __init__(self, store):
-        self.store = store
-        self.products_to_quantity = dict()
-        self.pending_products_to_quantity = dict()
-        self.pending_price = 0
+        self.__store = store
+        self.__products_to_quantity = dict()
+        self.__pending_products_to_quantity = dict()
+        self.__pending_price = 0
 
     def parse(self):
         products_ids_to_quantities = {}
-        self_prods_to_quantites = self.products_to_quantity if self.products_to_quantity != {} else self.pending_products_to_quantity
+        self_prods_to_quantites = self.__products_to_quantity if self.__products_to_quantity != {} else self.__pending_products_to_quantity
         for product_id in self_prods_to_quantites:
             products_ids_to_quantities[product_id] = self_prods_to_quantites[product_id][1]
-        return ShoppingBagData(self.store.get_name(), products_ids_to_quantities)
+        return ShoppingBagData(self.__store.get_name(), products_ids_to_quantities)
 
     """checks need to be made:
        ----------------------
@@ -31,25 +31,25 @@ class ShoppingBag(IShoppingBag):
         if quantity <= 0:
             return Response(False, msg="quantity must be a positive number!")
 
-        if not self.store.product_exists(product_id):
+        if not self.__store.product_exists(product_id):
             return Response(
                 False,
                 msg="A product with id: " + str(product_id) + " doesn't exist in store's inventory",
             )
 
-        if not self.store.has_enough(product_id, quantity):
+        if not self.__store.has_enough(product_id, quantity):
             return Response(
                 False,
                 msg="A product with id: " + str(product_id) + " no in inventory enough",
             )
 
-        if self.products_to_quantity.get(product_id) is not None:
+        if self.__products_to_quantity.get(product_id) is not None:
             return Response(
                 False, msg=f"A product with id: {product_id} already exists in the store's bag"
             )
 
-        self.products_to_quantity.update(
-            {product_id: (self.store.get_product(product_id), quantity)}
+        self.__products_to_quantity.update(
+            {product_id: (self.__store.get_product(product_id), quantity)}
         )
         return Response(True, msg=f"The product with id: {product_id} added successfully!")
 
@@ -60,12 +60,12 @@ class ShoppingBag(IShoppingBag):
 
     def remove_product(self, product_id: str) -> Response[None]:
 
-        if self.products_to_quantity.get(product_id) is None:
+        if self.__products_to_quantity.get(product_id) is None:
             return Response(
-                False, msg=f"No such product in the bag of ths store{self.store.get_name()}"
+                False, msg=f"No such product in the bag of ths store{self.__store.get_name()}"
             )
         else:
-            self.products_to_quantity.pop(product_id)
+            self.__products_to_quantity.pop(product_id)
         return Response(True, msg="Successfully removed product with id: " + str(product_id))
 
     """checks need to be made:
@@ -79,12 +79,12 @@ class ShoppingBag(IShoppingBag):
         """first step - check if all of the products exist in the store"""
         if products_info is None:
             products_info = {}
-        availability_response = self.store.check_available_products(self.products_to_quantity)
+        availability_response = self.__store.check_available_products(self.__products_to_quantity)
         if not availability_response.success:
             return availability_response
 
         """second step - acquire the products"""
-        self.store.acquire_products(self.products_to_quantity)
+        self.__store.acquire_products(self.__products_to_quantity)
 
         """third step - check if the purchase_types are appropriate"""
         # since there are no purchase types for now- this checking isn't relevant
@@ -95,25 +95,25 @@ class ShoppingBag(IShoppingBag):
         self.discount_apply(user_info)
         return Response[PrimitiveParsable[float]](
             True,
-            PrimitiveParsable(self.pending_price),
+            PrimitiveParsable(self.__pending_price),
             msg="All the details are good! here comes the price",
         )
 
     def purchase_types_checks(self, user_info, products_info=None):
         if products_info is None:
             products_info = {}
-        purchase_types_check = self.store.check_purchase_types(products_info, user_info)
+        purchase_types_check = self.__store.check_purchase_types(products_info, user_info)
         if not purchase_types_check.success:
-            self.store.send_back(self.products_to_quantity)
+            self.__store.send_back(self.__products_to_quantity)
             return purchase_types_check
 
     def discount_apply(self, user_info):
-        self.pending_price = self.store.apply_discounts(user_info, self.products_to_quantity)
+        self.__pending_price = self.__store.apply_discounts(user_info, self.__products_to_quantity)
         # for now it's a copy- all of the products purchased regularly so they all passed to pending
-        if not bool(self.products_to_quantity):
+        if not bool(self.__products_to_quantity):
             self.send_back()
-        self.pending_products_to_quantity = self.products_to_quantity.copy()
-        self.products_to_quantity.clear()
+        self.__pending_products_to_quantity = self.__products_to_quantity.copy()
+        self.__products_to_quantity.clear()
 
     """checks need to be made:
        ----------------------
@@ -124,15 +124,15 @@ class ShoppingBag(IShoppingBag):
     def change_product_quantity(self, product_id: str, new_amount: int) -> Response[None]:
         if new_amount <= 0:
             return Response(False, msg="Amount can't be negative!")
-        if self.products_to_quantity.get(product_id) is None:
+        if self.__products_to_quantity.get(product_id) is None:
             return Response(False, msg="No such product in the bag")
-        if not self.store.has_enough(product_id, new_amount):
+        if not self.__store.has_enough(product_id, new_amount):
             return Response(
                 False,
                 msg="A product with id: " + str(product_id) + " no in inventory enough",
             )
-        self.products_to_quantity[product_id] = (
-            self.products_to_quantity.get(product_id)[0],
+        self.__products_to_quantity[product_id] = (
+            self.__products_to_quantity.get(product_id)[0],
             new_amount,
         )
         return Response(True, msg="amount changed successfully")
@@ -140,18 +140,18 @@ class ShoppingBag(IShoppingBag):
     def delete_products_after_purchase(self, user_name="guest") -> PurchaseDetails:
         # for now this function will only return details, in the future there will be specific deletion
         product_names = [
-            prod.get_name() for product_id, (prod, quantity) in self.pending_products_to_quantity.items()
+            prod.get_name() for product_id, (prod, quantity) in self.__pending_products_to_quantity.items()
         ]
-        self.pending_products_to_quantity.clear()
-        purchase_details = PurchaseDetails(user_name, self.store.get_name(), product_names, datetime.now(), self.pending_price)
-        self.store.update_store_history(purchase_details)
+        self.__pending_products_to_quantity.clear()
+        purchase_details = PurchaseDetails(user_name, self.__store.get_name(), product_names, datetime.now(), self.__pending_price)
+        self.__store.update_store_history(purchase_details)
         return purchase_details
 
     def send_back(self):
-        self.products_to_quantity = self.pending_products_to_quantity.copy()
-        self.pending_products_to_quantity.clear()
-        self.store.send_back(products_to_quantities=self.products_to_quantity)
+        self.__products_to_quantity = self.__pending_products_to_quantity.copy()
+        self.__pending_products_to_quantity.clear()
+        self.__store.send_back(products_to_quantities=self.__products_to_quantity)
 
     def get_store_ID(self) -> str:
-        return self.store.get_id()
+        return self.__store.get_id()
 
