@@ -1,5 +1,5 @@
+from Backend.Domain.Authentication import authentication
 from Backend.Domain.TradingSystem.States.user_state import UserState
-from Backend.Domain.Authentication.authentication import Authentication
 from Backend.response import Response
 import json
 
@@ -10,36 +10,30 @@ def register_admins() -> None:
     with open("config.json", "r") as read_file:
         data = json.load(read_file)
         for username in data["admins"]:
+            authentication.register(username, data["admin-password"])
             admins.append(username)
+
+
+register_admins()
 
 
 def is_username_admin(username) -> bool:
     return username in admins
 
+
 class Guest(UserState):
 
-
     def get_username(self):
         return Response(False, msg="Guests don't have username")
 
-    def __init__(self, user, authentication=None, cart=None):
+    def __init__(self, user, cart=None):
         super().__init__(user, cart)
-        if authentication is None:
-            authentication = Authentication.get_instance()
-        self.authentication = authentication
-
-
-
-    def get_username(self):
-        return Response(False, msg="Guests don't have username")
-
-
 
     def login(self, username, password):
         from Backend.Domain.TradingSystem.States.member import Member
         from Backend.Domain.TradingSystem.States.admin import Admin
 
-        response = self.authentication.login(username, password)
+        response = authentication.login(username, password)
         if response.succeeded():
             if is_username_admin(username):
                 self.user.change_state(
@@ -50,7 +44,7 @@ class Guest(UserState):
         return response
 
     def register(self, username, password):
-        return self.authentication.register(username, password)
+        return authentication.register(username, password)
 
     def delete_products_after_purchase(self):
         return self.cart.delete_products_after_purchase("guest")
