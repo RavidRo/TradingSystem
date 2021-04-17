@@ -111,8 +111,11 @@ class UserState(ABC):
     def is_appointed(self, store_id):
         return Response(False, msg="Abstract Method")
 
-    def send_back(self):
-        return self.cart.send_back()
+    def lock_cart(self):
+        return self.cart.lock_cart()
 
-    def is_time_passed(self):
-        return self.cart.is_time_passed()
+    def release_cart(self):
+        return self.cart.release_cart()
+
+    def cancel_purchase(self):
+        return self.cart.cancel_purchase()

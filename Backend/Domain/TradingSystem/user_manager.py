@@ -277,12 +277,17 @@ class UserManager:
         return UserManager.__get_user_by_username(username).get_purchase_history()
 
     @staticmethod
-    def send_back(cookie: str) -> Response[None]:
-        func: Callable[[User], Response] = lambda user: user.send_back()
+    def lock_cart(cookie):
+        func: Callable = lambda user: user.lock_cart()
         return UserManager.__deligate_to_user(cookie, func)
 
     @staticmethod
-    def is_time_passed(cookie: str) -> Response[None]:
-        func: Callable[[User], Response] = lambda user: user.is_time_passed()
+    def release_cart(cookie):
+        func: Callable = lambda user: user.release_cart()
+        return UserManager.__deligate_to_user(cookie, func)
+
+    @staticmethod
+    def cancel_purchase(cookie):
+        func: Callable = lambda user: user.cancel_purchase()
         return UserManager.__deligate_to_user(cookie, func)
 

@@ -93,22 +93,27 @@ class TradingSystem(object):
 
     @log.loging
     def send_payment(self, cookie, payment_details, address):
-        price = TradingSystemManager.get_cart_price(cookie)
+        TradingSystemManager.lock_cart(cookie)
+        price = TradingSystemManager.get_cart_price(cookie) # check cart price is None
+        if not price.succeeded():
+            return price
         cart: ShoppingCartData = TradingSystemManager.get_cart_details(cookie).get_obj()
         products_ids_to_quantity = {}
         for bag in cart.bags:
             products_ids_to_quantity |= bag.product_ids_to_quantities
 
-        # Don't need to send back because the timer has done it. This function also cancels the timer if time not passed
-        if TradingSystemManager.is_time_passed(cookie).success:
-            return Response(False, msg="Time passed!")
-
         res = PaymentSystem.pay(price, payment_details, products_ids_to_quantity, address)
         if res.succeeded():
+            TradingSystemManager.release_cart(cookie)
             return TradingSystemManager.purchase_completed(cookie)
         else:
-            TradingSystemManager.send_back(cookie)
-            return res.get_msg()
+            TradingSystemManager.release_cart(cookie)
+            return res
+
+    @log.loging
+    def cancel_purchase(self, cookie: str):
+        return TradingSystemManager.cancel_purchase(cookie)
+
 
     # Member
     # ===============================

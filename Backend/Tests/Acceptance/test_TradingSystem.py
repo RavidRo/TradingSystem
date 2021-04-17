@@ -1,6 +1,10 @@
 import json
 import threading
+from unittest import mock
+from unittest.mock import patch, MagicMock
 
+from Backend.Domain.Payment.outside_cashing import OutsideCashing
+from Backend.Domain.TradingSystem.shopping_cart import ShoppingCart
 from Backend.Service.trading_system import TradingSystem
 
 system = TradingSystem.getInstance()
@@ -13,7 +17,7 @@ product_lock = threading.Lock()
 
 
 def _initialize_info(
-    username: str, password: str, store_name: str = None
+        username: str, password: str, store_name: str = None
 ) -> tuple[str, str, str, str, str]:
     store_id = ""
     cookie = system.enter_system()
@@ -24,7 +28,8 @@ def _initialize_info(
     return cookie, username, password, store_name, store_id
 
 
-def _create_product(cookie: str, store_id: str, product_name: str, price: float, quantity: int) -> tuple[str, str, float, int]:
+def _create_product(cookie: str, store_id: str, product_name: str, price: float, quantity: int) -> tuple[
+    str, str, float, int]:
     product_id = system.create_product(cookie, store_id, product_name, price, quantity).object
     return product_id, product_name, price, quantity
 
@@ -121,8 +126,8 @@ def test_get_store_information_success():
     )
     response = system.get_stores_details()
     assert (
-        response.succeeded()
-        and len(response.object.values) == num_of_stores+1
+            response.succeeded()
+            and len(response.object.values) == num_of_stores + 1
     )
 
 
@@ -153,8 +158,7 @@ def test_add_new_product_negative_quantity_fail():
     quantity = -10
     assert not system.create_product(cookie, store_id, product_name, price, quantity).succeeded()
 
-
-# def test_add_new_product_negative_price_fail():
+    # def test_add_new_product_negative_price_fail():
     cookie, username, password, store_name, store_id = _initialize_info(
         _generate_username(), "aaa", _generate_store_name()
     )
@@ -261,8 +265,8 @@ def test_product_search_no_args_success():
     product_id, product_name, price, quantity = _create_product(cookie, store_id, _generate_product_name(), 5.50, 10)
     response = system.search_products(product_name=product_name)
     assert (
-        response.succeeded()
-        and len(list(filter(lambda product: product.name == product_name, response.object.values))) == 1
+            response.succeeded()
+            and len(list(filter(lambda product: product.name == product_name, response.object.values))) == 1
     ), response.get_msg()
 
 
@@ -275,8 +279,8 @@ def test_product_search_args_success():
     max_price = 6.0
     response = system.search_products(product_name, min_price=min_price, max_price=max_price)
     assert (
-        response.succeeded()
-        and len(list(filter(lambda product: product.name == product_name, response.object.values))) == 1
+            response.succeeded()
+            and len(list(filter(lambda product: product.name == product_name, response.object.values))) == 1
     )
 
 
@@ -347,9 +351,9 @@ def test_products_by_store_success():
     product_id, product_name, price, quantity = _create_product(cookie, store_id, _generate_product_name(), 5.50, 10)
     response = system.get_products_by_store(store_id)
     assert (
-        response.succeeded()
-        and len(response.object.values) == 1
-        and response.object.values[0].name == product_name
+            response.succeeded()
+            and len(response.object.values) == 1
+            and response.object.values[0].name == product_name
     )
 
 
@@ -407,11 +411,11 @@ def test_visit_cart_success():
     system.save_product_in_cart(cookie, store_id, product_id, 1)
     response = system.get_cart_details(cookie)
     assert (
-        response.succeeded()
-        and len(response.object.bags) == 1
-        and response.object.bags[0].store_name == store_name
-        and len(response.object.bags[0].product_ids_to_quantities) == 1
-        and response.object.bags[0].product_ids_to_quantities[product_id] == 1
+            response.succeeded()
+            and len(response.object.bags) == 1
+            and response.object.bags[0].store_name == store_name
+            and len(response.object.bags[0].product_ids_to_quantities) == 1
+            and response.object.bags[0].product_ids_to_quantities[product_id] == 1
     ), response.get_msg()
 
 
@@ -430,8 +434,8 @@ def test_change_amount_in_cart_success():
     system.save_product_in_cart(cookie, store_id, product_id, 1)
     response = system.change_product_quantity_in_cart(cookie, store_id, product_id, 2)
     assert (
-        response.succeeded()
-        and system.get_cart_details(cookie).object.bags[0].product_ids_to_quantities[product_id] == 2
+            response.succeeded()
+            and system.get_cart_details(cookie).object.bags[0].product_ids_to_quantities[product_id] == 2
     ), response.get_msg()
 
 
@@ -521,10 +525,10 @@ def test_purchase_cart_success():
     system.save_product_in_cart(cookie, store_id, product_id, 1)
     response = system.purchase_cart(cookie)
     assert (
-        response.succeeded()
-        and system.get_store(store_id).object.ids_to_quantities[product_id] == 9
-        and system.get_cart_details(cookie).succeeded()
-        and response.object.value == price
+            response.succeeded()
+            and system.get_store(store_id).object.ids_to_quantities[product_id] == 9
+            and system.get_cart_details(cookie).succeeded()
+            and response.object.value == price
     ), response.get_msg()
 
 
@@ -546,6 +550,7 @@ def test_purchase_cart_twice_fail():
     assert not response.succeeded(), response.get_msg()
 
 
+# @patch.multiple(ShoppingCart, interval_time=MagicMock(return_value=5))
 def test_send_payment_success():
     cookie, username, password, store_name, store_id = _initialize_info(
         _generate_username(), "aaa", _generate_store_name()
@@ -558,9 +563,10 @@ def test_send_payment_success():
     system.purchase_cart(cookie)
     response = system.send_payment(cookie, {}, {})
     assert (
-        response.succeeded()
-        and system.get_store(store_id).object.ids_to_quantities[product_id] == 9
+            response.succeeded()
+            and system.get_store(store_id).object.ids_to_quantities[product_id] == 9
     ), response.get_msg()
+
 
 def test_send_payment_before_purchase_cart_fail():
     cookie, username, password, store_name, store_id = _initialize_info(
@@ -572,11 +578,88 @@ def test_send_payment_before_purchase_cart_fail():
     product_id, product_name, price, quantity = _create_product(cookie, store_id, _generate_product_name(), 5.50, 10)
     system.save_product_in_cart(cookie, store_id, product_id, 1)
     assert (
-        not system.send_payment(cookie, {}, {}).succeeded()
-        and system.get_store(store_id).object.ids_to_quantities[product_id] == 10
-        and system.get_cart_details(cookie).succeeded()
+            not system.send_payment(cookie, {}, {}).succeeded()
+            and system.get_store(store_id).object.ids_to_quantities[product_id] == 10
+            and system.get_cart_details(cookie).succeeded()
     )
 
+
+# bad scenarios
+def test_send_payment_failed():
+    with mock.patch.object(OutsideCashing, 'pay', return_value=False):
+        cookie, username, password, store_name, store_id = _initialize_info(
+            _generate_username(), "aaa", _generate_store_name()
+        )
+        product_id, product_name, price, quantity = _create_product(cookie, store_id, _generate_product_name(), 5.50, 10)
+        system.save_product_in_cart(cookie, store_id, product_id, 1)
+        system.purchase_cart(cookie).get_obj().get_val()
+        response = system.send_payment(cookie, {}, {})
+        # this line is added since the user might cancel the purchase after unsuccessful payment
+        system.cancel_purchase(cookie)
+        assert (
+            not response.succeeded()
+            and system.get_store(store_id).object.ids_to_quantities[product_id] == 10
+            and system.get_cart_details(cookie).object.bags[0].product_ids_to_quantities[product_id] == 1
+        )
+
+
+@patch.multiple(ShoppingCart, interval_time=MagicMock(return_value=5))
+def test_try_paying_after_time_passed():
+    import time
+    cookie, username, password, store_name, store_id = _initialize_info(
+        _generate_username(), "aaa", _generate_store_name()
+    )
+    product_id, product_name, price, quantity = _create_product(cookie, store_id, _generate_product_name(), 5.50, 10)
+    system.save_product_in_cart(cookie, store_id, product_id, 1)
+    system.purchase_cart(cookie).get_obj().get_val()
+    time.sleep(6)
+    response = system.send_payment(cookie, {}, {})
+    assert (
+            not response.succeeded()
+            and system.get_store(store_id).object.ids_to_quantities[product_id] == 10
+            and system.get_cart_details(cookie).object.bags[0].product_ids_to_quantities[product_id] == 1
+    )
+
+
+def test_try_paying_first_time_failed_than_success():
+    with mock.patch.object(OutsideCashing, 'pay', return_value=False):
+        cookie, username, password, store_name, store_id = _initialize_info(
+            _generate_username(), "aaa", _generate_store_name()
+        )
+        product_id, product_name, price, quantity = _create_product(cookie, store_id, _generate_product_name(), 5.50,
+                                                                    10)
+        system.save_product_in_cart(cookie, store_id, product_id, 1)
+        system.purchase_cart(cookie).get_obj().get_val()
+        response = system.send_payment(cookie, {}, {})
+        with mock.patch.object(OutsideCashing, 'pay', return_value=True):
+            try_again_response = system.send_payment(cookie, {}, {})
+            assert (
+                    not response.succeeded()
+                    and try_again_response.succeeded()
+                    and system.get_store(store_id).object.ids_to_quantities[product_id] == 9
+            )
+
+
+@patch.multiple(ShoppingCart, interval_time=MagicMock(return_value=5))
+def test_try_paying_first_time_incorrect_info_second_time_timer_over():
+    import time
+    with mock.patch.object(OutsideCashing, 'pay', return_value=False):
+        cookie, username, password, store_name, store_id = _initialize_info(
+            _generate_username(), "aaa", _generate_store_name()
+        )
+        product_id, product_name, price, quantity = _create_product(cookie, store_id, _generate_product_name(), 5.50,
+                                                                    10)
+        system.save_product_in_cart(cookie, store_id, product_id, 1)
+        system.purchase_cart(cookie).get_obj().get_val()
+        response = system.send_payment(cookie, {}, {})
+        with mock.patch.object(OutsideCashing, 'pay', return_value=True):
+            time.sleep(6)
+            try_again_response = system.send_payment(cookie, {}, {})
+            assert (
+                    not response.succeeded()
+                    and not try_again_response.succeeded()
+                    and system.get_store(store_id).object.ids_to_quantities[product_id] == 10
+            )
 
 # 3.7 https://github.com/SeanPikulin/TradingSystem/blob/main/Documentation/Use%20Cases.md#37-Get-personal-purchase-history
 def test_get_purchase_history_success():
@@ -592,10 +675,11 @@ def test_get_purchase_history_success():
     system.send_payment(cookie, {}, {})
     response = system.get_purchase_history(cookie)
     assert (
-        response.succeeded()
-        and len(response.object.values) == 1
-        and response.object.values[0].product_names[0] == product_name
+            response.succeeded()
+            and len(response.object.values) == 1
+            and response.object.values[0].product_names[0] == product_name
     )
+
 
 # def test_get_purchase_history_no_purchases_fail():
 #     cookie, username, password, store_name, store_id = _initialize_info(
@@ -619,6 +703,7 @@ def test_get_purchase_history_no_purchases_saved_to_cart_success():
     response = system.get_purchase_history(cookie)
     assert len(response.object.values) == 0
 
+
 def test_get_purchase_history_no_payment_fail():
     cookie, username, password, store_name, store_id = _initialize_info(
         _generate_username(), "aaa", _generate_store_name()
@@ -640,6 +725,7 @@ def test_appoint_store_owner_success():
     )
     response = system.appoint_owner(cookie, store_id, new_owner_username)
     assert response.succeeded(), response.get_msg()
+
 
 def test_appoint_store_owner_chain_success():
     cookie, username, password, store_name, store_id = _initialize_info(
@@ -1135,10 +1221,11 @@ def test_get_store_personnel_success():
     )
     response = system.get_store_appointments(cookie, store_id)
     assert (
-        response.succeeded()
-        and response.object.username == username
-        and response.object.role == "Founder"
+            response.succeeded()
+            and response.object.username == username
+            and response.object.role == "Founder"
     )
+
 
 def test_get_store_personnel_owner_success():
     cookie, username, password, store_name, store_id = _initialize_info(
@@ -1150,10 +1237,10 @@ def test_get_store_personnel_owner_success():
     system.appoint_owner(cookie, store_id, new_owner_username)
     response = system.get_store_appointments(cookie, store_id)
     assert (
-        response.succeeded()
-        and len(response.object.appointees) == 1
-        and response.object.appointees[0].username == new_owner_username
-        and response.object.appointees[0].role == "Owner"
+            response.succeeded()
+            and len(response.object.appointees) == 1
+            and response.object.appointees[0].username == new_owner_username
+            and response.object.appointees[0].role == "Owner"
     )
 
 
@@ -1167,10 +1254,10 @@ def test_get_store_personnel_manager_success():
     system.appoint_manager(cookie, store_id, new_manager_username)
     response = system.get_store_appointments(cookie, store_id)
     assert (
-        response.succeeded()
-        and len(response.object.appointees) == 1
-        and response.object.appointees[0].username == new_manager_username
-        and response.object.appointees[0].role == "Manager"
+            response.succeeded()
+            and len(response.object.appointees) == 1
+            and response.object.appointees[0].username == new_manager_username
+            and response.object.appointees[0].role == "Manager"
     )
 
 
@@ -1196,9 +1283,9 @@ def test_get_store_purchase_history_success():
     system.send_payment(cookie, {}, {})
     response = system.get_store_purchase_history(cookie, store_id)
     assert (
-        response.succeeded()
-        and len(response.object.values) == 1
-        and response.object.values[0].product_names[0] == product_name
+            response.succeeded()
+            and len(response.object.values) == 1
+            and response.object.values[0].product_names[0] == product_name
     )
 
 
@@ -1240,14 +1327,15 @@ def test_get_store_purchase_history_no_payment_success():
 
 def _get_admin() -> str:
     admin_cookie = system.enter_system()
-    with open("config.json",  "r") as read_file:
+    with open("config.json", "r") as read_file:
         data = json.load(read_file)
         system.login(admin_cookie, data["admins"][0], data["admin-password"])
     return admin_cookie
 
 
 def test_admin_get_store_purchase_history_success():
-    cookie, username, password, store_name, store_id = _initialize_info(_generate_username(), "aaa", _generate_store_name())
+    cookie, username, password, store_name, store_id = _initialize_info(_generate_username(), "aaa",
+                                                                        _generate_store_name())
     admin_cookie = _get_admin()
     card_number = "1234-1234-1234-1234"
     card_expire = "12/34"
@@ -1258,14 +1346,15 @@ def test_admin_get_store_purchase_history_success():
     system.send_payment(cookie, {}, {})
     response = system.get_any_store_purchase_history(admin_cookie, store_id)
     assert (
-        response.succeeded()
-        and len(response.object.values) == 1
-        and response.object.values[0].product_names[0] == product_name
+            response.succeeded()
+            and len(response.object.values) == 1
+            and response.object.values[0].product_names[0] == product_name
     ), response.get_msg()
 
 
 def test_admin_get_user_purchase_history_success():
-    cookie, username, password, store_name, store_id = _initialize_info(_generate_username(), "aaa", _generate_store_name())
+    cookie, username, password, store_name, store_id = _initialize_info(_generate_username(), "aaa",
+                                                                        _generate_store_name())
     admin_cookie = _get_admin()
     card_number = "1234-1234-1234-1234"
     card_expire = "12/34"
@@ -1282,32 +1371,51 @@ def test_admin_get_user_purchase_history_success():
 def test_parallel():
     tests = [test_register_success, test_register_used_username_fail, test_login_success,
              test_login_wrong_username_fail, test_login_wrong_password_fail, test_open_store_success,
-             test_get_store_information_success, test_add_new_product_success, test_add_new_product_negative_quantity_fail,
+             test_get_store_information_success, test_add_new_product_success,
+             test_add_new_product_negative_quantity_fail,
              test_remove_product_success, test_remove_product_wrong_product_fail, test_change_product_quantity_success,
              test_change_product_quantity_negative_quantity_fail, test_change_product_quantity_wrong_product_fail,
-             test_edit_product_details_success, test_edit_product_details_wrong_product_fail, test_edit_product_details_negative_price_fail,
+             test_edit_product_details_success, test_edit_product_details_wrong_product_fail,
+             test_edit_product_details_negative_price_fail,
              test_product_search_no_args_success, test_product_search_args_success, test_products_by_store_success,
              test_products_by_store_wrong_store_fail, test_add_to_cart_success, test_add_to_cart_wrong_product_fail,
              test_add_to_cart_wrong_store_fail, test_add_to_cart_quantity_too_high_fail, test_visit_cart_success,
-             test_change_amount_in_cart_success, test_change_amount_in_cart_wrong_product_fail, test_change_amount_in_cart_wrong_store_fail,
-             test_change_amount_in_cart_negative_quantity_fail, test_change_amount_in_cart_quantity_too_high_fail, test_remove_product_from_cart_success,
-             test_remove_product_from_cart_wrong_product_fail, test_remove_product_from_cart_wrong_store_fail, test_purchase_cart_success,
+             test_change_amount_in_cart_success, test_change_amount_in_cart_wrong_product_fail,
+             test_change_amount_in_cart_wrong_store_fail,
+             test_change_amount_in_cart_negative_quantity_fail, test_change_amount_in_cart_quantity_too_high_fail,
+             test_remove_product_from_cart_success,
+             test_remove_product_from_cart_wrong_product_fail, test_remove_product_from_cart_wrong_store_fail,
+             test_purchase_cart_success,
              test_purchase_cart_no_items_fail, test_purchase_cart_twice_fail, test_send_payment_success,
-             test_send_payment_before_purchase_cart_fail, test_get_purchase_history_success, test_get_store_purchase_history_no_purchases_saved_to_cart_success,
-             test_get_purchase_history_no_payment_fail, test_appoint_store_owner_success, test_appoint_store_owner_chain_success,
-             test_appoint_store_owner_wrong_name_fail, test_appoint_store_owner_wrong_store_fail, test_appoint_store_owner_direct_circular_appointment_fail,
-             test_appoint_store_owner_circular_fail, test_appoint_store_manager_success, test_appoint_store_owner_manager_chain_success,
-             test_appoint_store_manager_wrong_name_fail, test_appoint_store_manager_wrong_store_fail, test_appoint_store_manager_direct_circular_appointment_fail,
-             test_appoint_store_manager_owner_chain_fail, test_add_responsibility_success, test_remove_responsibility_success,
+             test_send_payment_before_purchase_cart_fail, test_get_purchase_history_success,
+             test_get_store_purchase_history_no_purchases_saved_to_cart_success,
+             test_get_purchase_history_no_payment_fail, test_appoint_store_owner_success,
+             test_appoint_store_owner_chain_success,
+             test_appoint_store_owner_wrong_name_fail, test_appoint_store_owner_wrong_store_fail,
+             test_appoint_store_owner_direct_circular_appointment_fail,
+             test_appoint_store_owner_circular_fail, test_appoint_store_manager_success,
+             test_appoint_store_owner_manager_chain_success,
+             test_appoint_store_manager_wrong_name_fail, test_appoint_store_manager_wrong_store_fail,
+             test_appoint_store_manager_direct_circular_appointment_fail,
+             test_appoint_store_manager_owner_chain_fail, test_add_responsibility_success,
+             test_remove_responsibility_success,
              test_default_permissions_success, test_get_appointment_permission_success,
-             test_get_history_permission_success, test_appoint_manager_permission_success, test_remove_manager_permission_success,
-             test_manage_products_permission_success, test_get_appointment_no_permission_fail, test_get_history_no_permission_fail,
-             test_appoint_manager_no_permission_fail, test_remove_manager_no_permission_fail, test_manage_products_no_permission_fail,
+             test_get_history_permission_success, test_appoint_manager_permission_success,
+             test_remove_manager_permission_success,
+             test_manage_products_permission_success, test_get_appointment_no_permission_fail,
+             test_get_history_no_permission_fail,
+             test_appoint_manager_no_permission_fail, test_remove_manager_no_permission_fail,
+             test_manage_products_no_permission_fail,
              test_dismiss_owner_success, test_dismiss_owner_wrong_name_fail, test_dismiss_owner_wrong_store_fail,
-             test_dismiss_owner_appointing_fail, test_dismiss_owner_chain_appointing_fail, test_get_store_personnel_success,
-             test_get_store_personnel_owner_success, test_get_store_personnel_manager_success, test_get_store_personnel_wrong_store_name_fail,
-             test_get_store_purchase_history_success, test_get_store_purchase_history_no_purchases_saved_to_cart_success, test_get_store_purchase_history_no_payment_success,
-             test_admin_get_store_purchase_history_success, test_admin_get_user_purchase_history_success]   # TODO: suggest a better idea
+             test_dismiss_owner_appointing_fail, test_dismiss_owner_chain_appointing_fail,
+             test_get_store_personnel_success,
+             test_get_store_personnel_owner_success, test_get_store_personnel_manager_success,
+             test_get_store_personnel_wrong_store_name_fail,
+             test_get_store_purchase_history_success,
+             test_get_store_purchase_history_no_purchases_saved_to_cart_success,
+             test_get_store_purchase_history_no_payment_success,
+             test_admin_get_store_purchase_history_success,
+             test_admin_get_user_purchase_history_success]  # TODO: suggest a better idea
     threads = []
     for i in range(5):
         for test in tests:
@@ -1316,4 +1424,3 @@ def test_parallel():
             t.start()
         for t in threads:
             t.join()
-

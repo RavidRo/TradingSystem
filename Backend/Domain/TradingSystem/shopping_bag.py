@@ -15,8 +15,9 @@ class ShoppingBag(IShoppingBag):
 
     def parse(self):
         products_ids_to_quantities = {}
-        for product_id in self.products_to_quantity:
-            products_ids_to_quantities[product_id] = self.products_to_quantity[product_id][1]
+        self_prods_to_quantites = self.products_to_quantity if self.products_to_quantity != {} else self.pending_products_to_quantity
+        for product_id in self_prods_to_quantites:
+            products_ids_to_quantities[product_id] = self_prods_to_quantites[product_id][1]
         return ShoppingBagData(self.store.get_name(), products_ids_to_quantities)
 
     """checks need to be made:
@@ -147,7 +148,10 @@ class ShoppingBag(IShoppingBag):
         return purchase_details
 
     def send_back(self):
-        self.store.send_back(products_to_quantities=self.pending_products_to_quantity)
+        self.products_to_quantity = self.pending_products_to_quantity.copy()
+        self.pending_products_to_quantity.clear()
+        self.store.send_back(products_to_quantities=self.products_to_quantity)
 
     def get_store_ID(self) -> str:
         return self.store.get_id()
+

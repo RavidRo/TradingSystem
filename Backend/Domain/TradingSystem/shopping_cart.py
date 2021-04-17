@@ -1,3 +1,4 @@
+import threading
 from threading import Timer
 
 from Backend.response import Response, PrimitiveParsable, ParsableList
@@ -10,10 +11,15 @@ class ShoppingCart(IShoppingCart):
     def __init__(self):
         self.shopping_bags: dict[str, ShoppingBag] = dict()
         self.timer = None
-        self.INTERVAL_TIME = 60
+        self.INTERVAL_TIME = self.interval_time()
         self.purchase_time_passed = False
         self.price = None
         self.pending_purchase = False
+        self.transaction_lock = threading.Lock()
+
+
+    def interval_time(self):
+        return 10 * 60
 
     def parse(self):
         parsed_bags = []
@@ -126,7 +132,7 @@ class ShoppingCart(IShoppingCart):
         )
 
     def get_price(self):
-        if self.price:
+        if self.price is not None:
             return Response(True, self.price)
         return Response(False, msg="Can't get price when not in purchase state")
 
@@ -148,23 +154,31 @@ class ShoppingCart(IShoppingCart):
         )
 
     """notice: I use a flag that marks the time passed for the purchase"""
-
     def send_back(self) -> Response[None]:
-        if self.timer is not None:
-            self.timer.cancel()
-        self.price = None
-        self.purchase_time_passed = True    #todo: think if this field needs to be changed when stopping the timer manually.
-        for bag in self.shopping_bags.values():
-            bag.send_back()
-        return Response(True, msg="Products sent back to the store!")
+        self.transaction_lock.acquire()
+        if self.pending_purchase:
+            self.price = None
+            self.purchase_time_passed = True
+            for bag in self.shopping_bags.values():
+                bag.send_back()
+        self.transaction_lock.release()
 
     def start_timer(self):
         self.timer = Timer(self.INTERVAL_TIME, self.send_back)
         self.timer.start()
 
-    def is_time_passed(self) -> Response[None]:
-        if self.purchase_time_passed:
-            return Response(True, msg="Time passed!")
-        else:
+    def lock_cart(self):
+        self.transaction_lock.acquire()
+
+    def release_cart(self):
+        self.transaction_lock.release()
+
+    def cancel_purchase(self):
+        if self.timer is not None:
             self.timer.cancel()
-            return Response(False, msg="Time didn't pass, payment allowed!")
+        self.timer = None
+        self.pending_purchase = False
+        self.price = None
+        for bag in self.shopping_bags.values():
+            bag.send_back()
+

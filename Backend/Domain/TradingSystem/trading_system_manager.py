@@ -216,9 +216,13 @@ class TradingSystemManager:
         return StoresManager.get_any_store_purchase_history(store_id)
 
     @staticmethod
-    def send_back(cookie):
-        return UserManager.send_back(cookie)
+    def lock_cart(cookie):
+        return UserManager.lock_cart(cookie)
 
     @staticmethod
-    def is_time_passed(cookie: str):
-        return UserManager.is_time_passed(cookie)
+    def release_cart(cookie):
+        return UserManager.release_cart(cookie)
+
+    @staticmethod
+    def cancel_purchase(cookie):
+        return UserManager.cancel_purchase(cookie)

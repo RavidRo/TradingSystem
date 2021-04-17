@@ -56,12 +56,16 @@ class User(IUser):
         return self.state.get_cart_price()
 
     # 2.9
-    def send_back(self) -> Response[None]:
-        return self.state.send_back()
+    def lock_cart(self):
+        return self.state.lock_cart()
 
-    # 2.9
-    def is_time_passed(self) -> Response[PrimitiveParsable[bool]]:
-        return self.state.is_time_passed()
+    #2.9
+    def release_cart(self):
+        return self.state.release_cart()
+
+    #2.9
+    def cancel_purchase(self):
+        return self.state.cancel_purchase()
     # Member
     # ===============================
 
