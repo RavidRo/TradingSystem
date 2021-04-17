@@ -51,9 +51,12 @@ class StoreStub(Store):
     def get_purchase_history(self) -> Response[ParsableList[PurchaseDetails]]:
         return Response(True, ParsableList([]))
 
-    def product_exists(self, product_id, quantity):
+    def product_exists(self, product_id):
         if self.products_to_quantities.get(product_id) is None:
             return False
+        return True
+
+    def has_enough(self, product_id, quantity):
         if self.products_to_quantities.get(product_id)[1] < quantity:
             return False
         return True

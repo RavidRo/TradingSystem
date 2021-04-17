@@ -10,9 +10,10 @@ class ShoppingCart(IShoppingCart):
     def __init__(self):
         self.shopping_bags: dict[str, ShoppingBag] = dict()
         self.timer = None
-        self.INTERVAL_TIME = 10 * 60
+        self.INTERVAL_TIME = 60
         self.purchase_time_passed = False
         self.price = None
+        self.pending_purchase = False
 
     def parse(self):
         parsed_bags = []
@@ -84,11 +85,15 @@ class ShoppingCart(IShoppingCart):
 
     """notice: if buy_products of any bag fails -> return acquired products to stores"""
     # products_purchase_info -a dict between store_id to list of tuples tuple (product_id to purchase_type)
-    def buy_products(self, user, products_purchase_info={}) -> Response[PrimitiveParsable]:
+    def buy_products(self, user, products_purchase_info=None) -> Response[PrimitiveParsable[float]]:
+        if products_purchase_info is None:
+            products_purchase_info = {}
+        if self.pending_purchase:
+            return Response(False, msg="Purchase already in progress")
         if not self.shopping_bags:
             return Response(False, msg="Cant buy an empty cart")
 
-        sum_amount = 0
+        sum_amount : float = 0
         succeeded_bags: list[ShoppingBag] = []
         # this if will be deleted in the version with purchase types
         if not products_purchase_info:
@@ -106,13 +111,14 @@ class ShoppingCart(IShoppingCart):
                     bag.send_back()
                 return result
             succeeded_bags.append(self.shopping_bags[store_id])
-            sum_amount += result.get_obj().get_val()
+            sum_amount += result.object.value
             self.price = sum_amount
 
         self.purchase_time_passed = False
         if self.timer is not None:
             self.timer.cancel()
         self.start_timer()
+        self.pending_purchase = True
         return Response[PrimitiveParsable](
             True,
             obj=PrimitiveParsable(sum_amount),
@@ -128,6 +134,7 @@ class ShoppingCart(IShoppingCart):
 
     def delete_products_after_purchase(self, user_name: str = "guest") -> Response[ParsableList]:
         self.timer.cancel()
+        self.pending_purchase = False
         self.timer = None
         self.price = None
         purchase_cart_details = []
@@ -135,8 +142,7 @@ class ShoppingCart(IShoppingCart):
             purchase_cart_details.append(
                 self.shopping_bags[store_id].delete_products_after_purchase(user_name)
             )
-            self.shopping_bags.pop(store_id)
-
+        self.shopping_bags.clear()
         return Response[ParsableList](
             True, ParsableList(purchase_cart_details), msg="Here are the purchase details!"
         )

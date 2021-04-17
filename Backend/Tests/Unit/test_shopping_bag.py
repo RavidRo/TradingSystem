@@ -72,7 +72,7 @@ def products_stubs_shopping_bag_missing_prod():
 @pytest.fixture
 def shopping_bag():
     products_to_quantities = {
-        "1": (ProductStub("product1"), 2),
+        "1": (ProductStub("product1"), 9),
         "2": (ProductStub("product2"), 1),
         "3": (ProductStub("product3"), 1),
     }
@@ -186,7 +186,7 @@ def test_change_product_quantity_valid(
 ):
     with patch.dict(shopping_bag.products_to_quantity, products_stubs_shopping_bag):
         result = shopping_bag.change_product_quantity("1", 7)
-        assert result.success == True
+        assert result.success
         assert shopping_bag.products_to_quantity.get("1")[1] == 7
 
 
@@ -195,7 +195,7 @@ def test_change_product_quantity_invalid_amount(
 ):
     with patch.dict(shopping_bag.products_to_quantity, products_stubs_shopping_bag):
         result = shopping_bag.change_product_quantity("1", -7)
-        assert result.success == False
+        assert not result.success
         assert shopping_bag.products_to_quantity.get("1")[1] == 2
 
 

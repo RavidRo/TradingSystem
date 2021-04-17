@@ -5,7 +5,7 @@ class DiscountType:
     def __init__(self):
         pass
 
-    def apply_discount(self, products: list) -> Response[None]:
+    def apply_discount(self, products: list) -> Response[PrimitiveParsable[float]]:
         raise NotImplementedError
 
 
@@ -13,10 +13,8 @@ class DefaultDiscountType(DiscountType):
     def __init__(self):
         super().__init__()
 
-    def apply_discount(self, products_to_quantities: dict) -> Response[None]:
+    def apply_discount(self, products_to_quantities: dict) -> float:
         products_prices = [
-            prod.price * quantity for prod_id, (prod, quantity) in products_to_quantities
+            prod.price * quantity for prod_id, (prod, quantity) in products_to_quantities.items()
         ]
-        return Response()[PrimitiveParsable](
-            True, PrimitiveParsable(sum(products_prices)), msg="Discount applied"
-        )
+        return sum(products_prices)

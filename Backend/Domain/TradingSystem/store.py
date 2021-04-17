@@ -27,7 +27,10 @@ class Store:
         self.history_lock = ReadWriteLock()
 
     def parse(self):
-        return StoreData(self.id, self.name)
+        id_to_quantity = {}
+        for id, (_, quantity) in self.products_to_quantities.items():
+            id_to_quantity.update({id: quantity})
+        return StoreData(self.id, self.name, id_to_quantity)
 
     def parse_products(self):
         parsed_products = []
@@ -190,7 +193,7 @@ class Store:
             if self.products_to_quantities.get(prod_id) is None:
                 self.products_to_quantities.update({prod_id: (product, quantity)})
             else:
-                self.products_to_quantities[prod_id][1] += quantity
+                self.products_to_quantities[prod_id] = (self.products_to_quantities[prod_id][0], self.products_to_quantities[prod_id][1]+quantity)
         self.products_lock.release_write()
 
     # This function checks for available products
@@ -235,10 +238,19 @@ class Store:
         self.products_lock.release_read()
         return prod
 
-    def product_exists(self, product_id, quantity):
+    def product_exists(self, product_id,):
         self.products_lock.acquire_read()
         product_quantity = self.products_to_quantities.get(product_id)
-        if product_quantity is None or product_quantity[1] < quantity:
+        if product_quantity is None:
+            self.products_lock.release_read()
+            return False
+        self.products_lock.release_read()
+        return True
+
+    def has_enough(self, product_id, quantity):
+        self.products_lock.acquire_read()
+        product_quantity = self.products_to_quantities.get(product_id)
+        if product_id in self.products_to_quantities and product_quantity[1] < quantity:
             self.products_lock.release_read()
             return False
         self.products_lock.release_read()

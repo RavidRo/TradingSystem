@@ -66,4 +66,4 @@ class Authentication:
             data = json.load(read_file)
             admin_password = data["admin-password"]
             for username in data["admins"]:
-                self.register(username, admin_password)
+                self.__add_user_to_db(username, admin_password, True)
