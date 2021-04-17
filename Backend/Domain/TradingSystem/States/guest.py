@@ -1,9 +1,24 @@
 from Backend.Domain.TradingSystem.States.user_state import UserState
 from Backend.Domain.Authentication.authentication import Authentication
 from Backend.response import Response
+import json
 
+admins = []
+
+
+def register_admins() -> None:
+    with open("config.json", "r") as read_file:
+        data = json.load(read_file)
+        for username in data["admins"]:
+            admins.append(username)
+
+
+def is_username_admin(username) -> bool:
+    return username in admins
 
 class Guest(UserState):
+
+
     def get_username(self):
         return Response(False, msg="Guests don't have username")
 
@@ -12,6 +27,8 @@ class Guest(UserState):
         if authentication is None:
             authentication = Authentication.get_instance()
         self.authentication = authentication
+
+
 
     def get_username(self):
         return Response(False, msg="Guests don't have username")
@@ -22,7 +39,7 @@ class Guest(UserState):
 
         response = self.authentication.login(username, password)
         if response.succeeded():
-            if response.object.value:
+            if is_username_admin(username):
                 self.user.change_state(
                     Admin(self.user, username)
                 )  # in later milestones, fetch data from DB
