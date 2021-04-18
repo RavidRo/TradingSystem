@@ -95,6 +95,7 @@ class TradingSystem(object):
         TradingSystemManager.lock_cart(cookie)
         price = TradingSystemManager.get_cart_price(cookie)  # check cart price is None
         if not price.succeeded():
+            TradingSystemManager.release_cart(cookie)
             return price
         cart: ShoppingCartData = TradingSystemManager.get_cart_details(cookie).get_obj()
         products_ids_to_quantity = {}
