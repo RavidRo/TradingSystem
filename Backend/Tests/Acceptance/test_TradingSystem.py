@@ -568,6 +568,11 @@ def test_send_payment_success():
     ), response.get_msg()
 
 
+# todo: complete
+def test_send_payment_success_timer_over():
+    pass
+
+
 def test_send_payment_before_purchase_cart_fail():
     cookie, username, password, store_name, store_id = _initialize_info(
         _generate_username(), "aaa", _generate_store_name()
@@ -629,13 +634,13 @@ def test_try_paying_first_time_failed_than_success():
         system.save_product_in_cart(cookie, store_id, product_id, 1)
         system.purchase_cart(cookie).get_obj().get_val()
         response = system.send_payment(cookie, "", "")
-        with mock.patch.object(OutsideCashing, 'pay', return_value=True):
-            try_again_response = system.send_payment(cookie, "", "")
-            assert (
-                    not response.succeeded()
-                    and try_again_response.succeeded()
-                    and system.get_store(store_id).object.ids_to_quantities[product_id] == 9
-            )
+
+    try_again_response = system.send_payment(cookie, "", "")
+    assert (
+            not response.succeeded()
+            and try_again_response.succeeded()
+            and system.get_store(store_id).object.ids_to_quantities[product_id] == 9
+    )
 
 
 @patch.multiple(ShoppingCart, interval_time=MagicMock(return_value=5))
