@@ -1,11 +1,12 @@
 from Backend.response import Response
 from werkzeug.security import generate_password_hash
+from Backend.Domain.Payment.OutsideSystems.outside_cashing import OutsideCashing
 
 
 class CashingAdapter:
 
-    def __init__(self, outside_system):
-        self.outside_cashing = outside_system
+    def __init__(self, ):
+        self.outside_cashing = OutsideCashing()
         self.hashes = dict()
 
     def pay(self, price, payment_info):
@@ -15,8 +16,6 @@ class CashingAdapter:
         if payment_info not in self.hashes:
             self.hashes[payment_info] = hashed_details
         answer = self.outside_cashing.pay(price, self.hashes[payment_info])
-        if isinstance(answer, Response):        # I wanted for test purposes to return Response, and I can't trust real outside system to return Response
-            return answer
         return Response(success=answer)
 
     # test function:
@@ -25,15 +24,3 @@ class CashingAdapter:
         if payment_details not in self.hashes:
             self.hashes[payment_details] = hashed_details
         return self.outside_cashing.get_balance(self.hashes[payment_details])
-
-    def make_details_wrong(self, payment_details):
-        hashed_details = generate_password_hash(payment_details, method="sha256")
-        if payment_details not in self.hashes:
-            self.hashes[payment_details] = hashed_details
-        return self.outside_cashing.make_details_wrong(self.hashes[payment_details])
-
-    def make_details_right(self, payment_details):
-        hashed_details = generate_password_hash(payment_details, method="sha256")
-        if payment_details not in self.hashes:
-            self.hashes[payment_details] = hashed_details
-        return self.outside_cashing.make_details_right(self.hashes[payment_details])

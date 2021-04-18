@@ -7,9 +7,9 @@ from Backend.response import Response
 
 class PaymentManager:
 
-    def __init__(self, outside_cashing, outside_supply):
-        self.cashing_adapter = CashingAdapter(outside_cashing)
-        self.supply_adapter = SupplyAdapter(outside_supply)
+    def __init__(self):
+        self.cashing_adapter = CashingAdapter()
+        self.supply_adapter = SupplyAdapter()
 
     def pay(self, price, payment_details, product_ids_to_quantity, address):
         try:
@@ -34,15 +34,3 @@ class PaymentManager:
     # test functions:
     def get_balance(self, payment_details):
         return self.cashing_adapter.get_balance(payment_details)
-
-    def make_details_wrong(self, payment_details):
-        self.cashing_adapter.make_details_wrong(payment_details)
-
-    def make_details_right(self, payment_details):
-        self.cashing_adapter.make_details_right(payment_details)
-
-    def make_address_wrong(self, address):
-        self.supply_adapter.make_address_wrong(address)
-
-    def make_address_right(self, address):
-        self.supply_adapter.make_address_right(address)

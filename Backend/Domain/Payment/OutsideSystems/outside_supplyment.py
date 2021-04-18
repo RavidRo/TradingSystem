@@ -9,5 +9,5 @@ class OutsideSupplyment:
         pass
 
     def deliver(self, product_ids_to_quantity, address):
-        sleep(1)
+        # sleep(1)
         return True

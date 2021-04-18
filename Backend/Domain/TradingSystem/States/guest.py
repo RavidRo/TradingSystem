@@ -13,9 +13,6 @@ class Guest(UserState):
             authentication = Authentication.get_instance()
         self.authentication = authentication
 
-    def get_username(self):
-        return Response(False, msg="Guests don't have username")
-
     def login(self, username, password):
         from Backend.Domain.TradingSystem.States.member import Member
         from Backend.Domain.TradingSystem.States.admin import Admin
