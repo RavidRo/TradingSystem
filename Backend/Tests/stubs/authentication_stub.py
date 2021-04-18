@@ -1,5 +1,4 @@
-from Backend.Domain.Authentication.authentication import Authentication
-from Backend.response import Response, PrimitiveParsable
+from Backend.response import Response
 
 
 class AuthenticationStub:
@@ -13,6 +12,4 @@ class AuthenticationStub:
 
     def login(self, username, password):
         self.logged_in = True
-        if username == "admin":
-            return Response(True, PrimitiveParsable(True))
-        return Response(True, PrimitiveParsable(False))
+        return Response(True)
