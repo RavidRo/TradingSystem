@@ -173,6 +173,7 @@ class ShoppingCart(IShoppingCart):
         self.__transaction_lock.release()
 
     def cancel_purchase(self):
+        self.__transaction_lock.acquire()
         if self.__timer is not None:
             self.__timer.cancel()
         self.__timer = None
@@ -180,4 +181,4 @@ class ShoppingCart(IShoppingCart):
         self.price = None
         for bag in self.__shopping_bags.values():
             bag.send_back()
-
+        self.__transaction_lock.release()
