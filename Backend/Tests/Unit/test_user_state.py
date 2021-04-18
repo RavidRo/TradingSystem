@@ -34,7 +34,7 @@ def authentication():
 def guest_user(authentication, cart):
     from Backend.Domain.TradingSystem.States.guest import Guest
 
-    user = UserStub(Guest(None, authentication, cart))
+    user = UserStub(Guest(None, cart))
     user.state.set_user(user)
     return user
 
@@ -86,17 +86,12 @@ def test_user_assigned_in_member(member_user_with_responsibility):
 def test_user_assigned_in_admin(admin_user):
     from Backend.Domain.TradingSystem.States.admin import Admin
 
-    admin = Admin(admin_user, "admin")
+    admin = Admin(admin_user, "inon")
     assert admin.user == admin_user
 
 
 # * Register (2.3)
 # * =================================================================
-
-
-def test_register_delegate_authentication(guest_user, authentication):
-    guest_user.state.register("me", "123")
-    assert authentication.registered
 
 
 def test_member_cannot_register(member_user_with_responsibility):
@@ -111,30 +106,35 @@ def test_admin_cannot_register(admin_user):
 # * =================================================================
 
 
-def test_login_delegate_authentication(guest_user, authentication):
-    guest_user.state.login("me", "123")
-    assert authentication.logged_in
-
-
 def test_member_cannot_login(member_user_with_responsibility):
+    member_user_with_responsibility.state.register("me", "123")
     assert not member_user_with_responsibility.state.login("me", "123").succeeded()
 
 
 def test_admin_cannot_login(admin_user):
-    assert not admin_user.state.login("me", "123").succeeded()
+    assert not admin_user.state.login("omer", "123").succeeded()
 
 
 def test_guest_turns_to_member(guest_user):
-    guest_user.state.login("inon", "123")
+    guest_user.state.register("user", "123")
+    guest_user.state.login("user", "123")
     assert isinstance(guest_user.state, Member)
 
 
 def test_guest_turns_to_admin(guest_user):
-    guest_user.state.login("admin", "123")
+    guest_user.state.login("tali", "cool-kidz")
     from Backend.Domain.TradingSystem.States.admin import Admin
 
     assert isinstance(guest_user.state, Admin)
 
+# def test_login_as_none_admin_returns_false(auth: Authentication):
+#     auth.register(
+#         "test_login_as_none_admin_returns_false", "test_login_as_none_admin_returns_false"
+#     )
+#     response = auth.login(
+#         "test_login_as_none_admin_returns_false", "test_login_as_none_admin_returns_false"
+#     )
+#     assert response.succeeded() and not response.get_obj().get_val(), response.get_msg()
 
 # * Save Products In Cart (2.7) Only delegate
 # * =================================================================
