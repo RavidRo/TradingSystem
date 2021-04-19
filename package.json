@@ -4,7 +4,7 @@
 	"description": "Describe trading-system here",
 	"private": true,
 	"scripts": {
-		"postinstall": "cd ./Frontend && npm install -g nwb && npm install --save-dev nwb-sass && npm install && npm run-script build"
+		"postinstall": "cd ./Frontend && npm install -g nwb && npm install nwb-sass && npm install && npm run-script build"
 	},
 	"dependencies": {},
 	"devDependencies": {},
