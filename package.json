@@ -4,9 +4,11 @@
 	"description": "Describe trading-system here",
 	"private": true,
 	"scripts": {
-		"postinstall": "cd ./Frontend && npm install -g nwb && npm install nwb-sass && npm install && npm run-script build"
+		"postinstall": "cd ./Frontend && npm install -g nwb && npm install && npm run-script build"
 	},
-	"dependencies": {},
+	"dependencies": {
+		"nwb-sass": "^0.10.2"
+	},
 	"devDependencies": {},
 	"author": "",
 	"license": "MIT",
