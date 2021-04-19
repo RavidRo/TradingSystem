@@ -1,6 +1,6 @@
 import './styles/App.scss';
 
-import React, { Component, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 const App = () => {
 	const [cookie, setCookie] = useState(null);
