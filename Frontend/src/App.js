@@ -15,7 +15,7 @@ const App = () => {
 		<div className="App">
 			<div className="App-heading App-flex">
 				<h2>
-					Welcome to <span className="App-react">React</span>
+					Welcome to <span className="App-react">Shooping World</span>
 				</h2>
 				{cookie && <h4>My cookie is {cookie}</h4>}
 			</div>
