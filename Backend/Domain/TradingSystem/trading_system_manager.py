@@ -7,6 +7,7 @@ from Backend.Service.DataObjects.store_data import StoreData
 from Backend.Service.DataObjects.shopping_cart_data import ShoppingCartData
 from Backend.Domain.TradingSystem.purchase_details import PurchaseDetails
 from Backend.Service.DataObjects.responsibilities_data import ResponsibilitiesData
+from asgiref.sync import sync_to_async
 
 from Backend.response import Response, ParsableList, PrimitiveParsable
 

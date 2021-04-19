@@ -1,5 +1,8 @@
+import asyncio
 import json
 import threading
+
+import pytest
 
 from Backend.Service.trading_system import TradingSystem
 
@@ -12,20 +15,29 @@ product_number = 0
 product_lock = threading.Lock()
 
 
-def _initialize_info(
+# @pytest.fixture
+# def event_loop():
+#     loop = asyncio.get_event_loop()
+#     yield loop
+#     loop.close()
+
+
+async def _initialize_info(
     username: str, password: str, store_name: str = None
 ) -> tuple[str, str, str, str, str]:
     store_id = ""
-    cookie = system.enter_system()
-    system.register(cookie, username, password)
-    system.login(cookie, username, password)
+    cookie = await system.enter_system()
+    await system.register(cookie, username, password)
+    await system.login(cookie, username, password)
     if store_name:
-        store_id = system.create_store(cookie, store_name).object
+        store_res = await system.create_store(cookie, store_name)
+        store_id = store_res.object
     return cookie, username, password, store_name, store_id
 
 
-def _create_product(cookie: str, store_id: str, product_name: str, price: float, quantity: int) -> tuple[str, str, float, int]:
-    product_id = system.create_product(cookie, store_id, product_name, price, quantity).object
+async def _create_product(cookie: str, store_id: str, product_name: str, price: float, quantity: int) -> tuple[str, str, float, int]:
+    product_res = await system.create_product(cookie, store_id, product_name, price, quantity)
+    product_id = product_res.object
     return product_id, product_name, price, quantity
 
 
@@ -57,53 +69,65 @@ def _generate_product_name() -> str:
 
 
 # 2.3 https://github.com/SeanPikulin/TradingSystem/blob/main/Documentation/Use%20Cases.md#23-Registration
-def test_register_success():
+@pytest.mark.asyncio
+async def test_register_success():
     new_username = _generate_username()
     password = "aaa"
-    cookie = system.enter_system()
-    assert system.register(cookie, new_username, password).succeeded()
+    cookie = await system.enter_system()
+    res = await system.register(cookie, new_username, password)
+    assert res.succeeded()
 
 
-def test_register_used_username_fail():
+@pytest.mark.asyncio
+async def test_register_used_username_fail():
     existing_username = _generate_username()
     password = "aaa"
-    cookie = system.enter_system()
-    system.register(cookie, existing_username, password)
-    assert not system.register(cookie, existing_username, password).succeeded()
+    cookie = await system.enter_system()
+    await system.register(cookie, existing_username, password)
+    res = await system.register(cookie, existing_username, password)
+    assert not res.succeeded()
 
 
 # 2.4 https://github.com/SeanPikulin/TradingSystem/blob/main/Documentation/Use%20Cases.md#24-Login
-def test_login_success():
+@pytest.mark.asyncio
+async def test_login_success():
     new_username = _generate_username()
     password = "aaa"
-    cookie = system.enter_system()
-    system.register(cookie, new_username, password)
-    assert system.login(cookie, new_username, password).succeeded()
+    cookie = await system.enter_system()
+    await system.register(cookie, new_username, password)
+    res = await system.login(cookie, new_username, password)
+    assert res.succeeded()
 
 
-def test_login_wrong_username_fail():
+@pytest.mark.asyncio
+async def test_login_wrong_username_fail():
     new_username = _generate_username()
     password = "aaa"
     wrong_username = "doorbelman"
-    cookie = system.enter_system()
-    system.register(cookie, new_username, password)
-    assert not system.login(cookie, wrong_username, password).succeeded()
+    cookie = await system.enter_system()
+    await system.register(cookie, new_username, password)
+    res = await system.login(cookie, wrong_username, password)
+    assert not res.succeeded()
 
 
-def test_login_wrong_password_fail():
+@pytest.mark.asyncio
+async def test_login_wrong_password_fail():
     new_username = _generate_username()
     password = "aaa"
     wrong_password = "aa"
-    cookie = system.enter_system()
-    system.register(cookie, new_username, password)
-    assert not system.login(cookie, new_username, wrong_password).succeeded()
+    cookie = await system.enter_system()
+    await system.register(cookie, new_username, password)
+    res = await system.login(cookie, new_username, wrong_password)
+    assert not res.succeeded()
 
 
 # 3.2 https://github.com/SeanPikulin/TradingSystem/blob/main/Documentation/Use%20Cases.md#32-#Open-a-store
-def test_open_store_success():
-    cookie, username, password, _, _ = _initialize_info(_generate_username(), "aaa")
+@pytest.mark.asyncio
+async def test_open_store_success():
+    cookie, username, password, _, _ = await _initialize_info(_generate_username(), "aaa")
     store_name = _generate_store_name()
-    assert system.create_store(cookie, store_name).succeeded()
+    res = await system.create_store(cookie, store_name)
+    assert res.succeeded()
 
 
 # def test_open_store_unsupported_character_fail():
@@ -114,12 +138,14 @@ def test_open_store_success():
 
 
 # 2.5 https://github.com/SeanPikulin/TradingSystem/blob/main/Documentation/Use%20Cases.md#25-Getting-store-information
-def test_get_store_information_success():
-    num_of_stores = len(system.get_stores_details().object.values)
-    cookie, username, password, store_name, store_id = _initialize_info(
+@pytest.mark.asyncio
+async def test_get_store_information_success():
+    store_details = await system.get_stores_details()
+    num_of_stores = len(store_details.object.values)
+    cookie, username, password, store_name, store_id = await _initialize_info(
         _generate_username(), "aaa", _generate_store_name()
     )
-    response = system.get_stores_details()
+    response = await system.get_stores_details()
     assert (
         response.succeeded()
         and len(response.object.values) == num_of_stores+1
@@ -133,147 +159,166 @@ def test_get_store_information_success():
 
 
 # 4.1 https://github.com/SeanPikulin/TradingSystem/blob/main/Documentation/Use%20Cases.md#41-Add-new-product
-def test_add_new_product_success():
-    cookie, username, password, store_name, store_id = _initialize_info(
+@pytest.mark.asyncio
+async def test_add_new_product_success():
+    cookie, username, password, store_name, store_id = await _initialize_info(
         _generate_username(), "aaa", _generate_store_name()
     )
     product_name = _generate_product_name()
     price = 5.50
     quantity = 10
-    response = system.create_product(cookie, store_id, product_name, price, quantity)
+    response = await system.create_product(cookie, store_id, product_name, price, quantity)
     assert response.succeeded(), response.get_msg()
 
 
-def test_add_new_product_negative_quantity_fail():
-    cookie, username, password, store_name, store_id = _initialize_info(
+@pytest.mark.asyncio
+async def test_add_new_product_negative_quantity_fail():
+    cookie, username, password, store_name, store_id = await _initialize_info(
         _generate_username(), "aaa", _generate_store_name()
     )
     product_name = _generate_product_name()
     price = 5.50
     quantity = -10
-    assert not system.create_product(cookie, store_id, product_name, price, quantity).succeeded()
+    res = await system.create_product(cookie, store_id, product_name, price, quantity)
+    assert not res.succeeded()
 
 
 # def test_add_new_product_negative_price_fail():
-    cookie, username, password, store_name, store_id = _initialize_info(
+    cookie, username, password, store_name, store_id = await _initialize_info(
         _generate_username(), "aaa", _generate_store_name()
     )
     product_name = _generate_product_name()
     price = -5.50
     quantity = 10
-    assert not system.create_product(cookie, store_id, product_name, price, quantity).succeeded()
+    res = await system.create_product(cookie, store_id, product_name, price, quantity)
+    assert not res.succeeded()
 
 
-def test_remove_product_success():
-    cookie, username, password, store_name, store_id = _initialize_info(
+@pytest.mark.asyncio
+async def test_remove_product_success():
+    cookie, username, password, store_name, store_id = await _initialize_info(
         _generate_username(), "aaa", _generate_store_name()
     )
-    product_id, product_name, price, quantity = _create_product(cookie, store_id, _generate_product_name(), 5.50, 10)
-    assert system.remove_product_from_store(cookie, store_id, product_id).succeeded()
+    product_id, product_name, price, quantity = await _create_product(cookie, store_id, _generate_product_name(), 5.50, 10)
+    res = await system.remove_product_from_store(cookie, store_id, product_id)
+    assert res.succeeded()
 
 
-def test_remove_product_wrong_product_fail():
-    cookie, username, password, store_name, store_id = _initialize_info(
+@pytest.mark.asyncio
+async def test_remove_product_wrong_product_fail():
+    cookie, username, password, store_name, store_id = await _initialize_info(
         _generate_username(), "aaa", _generate_store_name()
     )
     wrong_product = "cofee"
-    product_id, product_name, price, quantity = _create_product(cookie, store_id, _generate_product_name(), 5.50, 10)
-    assert not system.remove_product_from_store(cookie, store_id, wrong_product).succeeded()
+    product_id, product_name, price, quantity = await _create_product(cookie, store_id, _generate_product_name(), 5.50, 10)
+    res = await system.remove_product_from_store(cookie, store_id, wrong_product)
+    assert not res.succeeded()
 
 
-def test_change_product_quantity_success():
-    cookie, username, password, store_name, store_id = _initialize_info(
+@pytest.mark.asyncio
+async def test_change_product_quantity_success():
+    cookie, username, password, store_name, store_id = await _initialize_info(
         _generate_username(), "aaa", _generate_store_name()
     )
     new_quantity = 15
-    product_id, product_name, price, quantity = _create_product(cookie, store_id, _generate_product_name(), 5.50, 10)
-    response = system.change_product_quantity_in_store(
+    product_id, product_name, price, quantity = await _create_product(cookie, store_id, _generate_product_name(), 5.50, 10)
+    response = await system.change_product_quantity_in_store(
         cookie, store_id, product_id, new_quantity
     )
     assert response.succeeded(), response.get_msg()
 
 
-def test_change_product_quantity_negative_quantity_fail():
-    cookie, username, password, store_name, store_id = _initialize_info(
+@pytest.mark.asyncio
+async def test_change_product_quantity_negative_quantity_fail():
+    cookie, username, password, store_name, store_id = await _initialize_info(
         _generate_username(), "aaa", _generate_store_name()
     )
     new_quantity = -15
-    product_id, product_name, price, quantity = _create_product(cookie, store_id, _generate_product_name(), 5.50, 10)
-    assert not system.change_product_quantity_in_store(
+    product_id, product_name, price, quantity = await _create_product(cookie, store_id, _generate_product_name(), 5.50, 10)
+    res = await system.change_product_quantity_in_store(
         cookie, store_id, product_id, new_quantity
-    ).succeeded()
+    )
+    assert not res.succeeded()
 
 
-def test_change_product_quantity_wrong_product_fail():
-    cookie, username, password, store_name, store_id = _initialize_info(
+@pytest.mark.asyncio
+async def test_change_product_quantity_wrong_product_fail():
+    cookie, username, password, store_name, store_id = await _initialize_info(
         _generate_username(), "aaa", _generate_store_name()
     )
     wrong_product = "cofee"
     new_quantity = 15
-    product_id, product_name, price, quantity = _create_product(cookie, store_id, _generate_product_name(), 5.50, 10)
-    assert not system.change_product_quantity_in_store(
+    product_id, product_name, price, quantity = await _create_product(cookie, store_id, _generate_product_name(), 5.50, 10)
+    res = await system.change_product_quantity_in_store(
         cookie, store_id, wrong_product, new_quantity
-    ).succeeded()
+    )
+    assert not res.succeeded()
 
 
-def test_edit_product_details_success():
-    cookie, username, password, store_name, store_id = _initialize_info(
+@pytest.mark.asyncio
+async def test_edit_product_details_success():
+    cookie, username, password, store_name, store_id = await _initialize_info(
         _generate_username(), "aaa", _generate_store_name()
     )
     new_name = _generate_product_name()
     new_price = 6.0
-    product_id, product_name, price, quantity = _create_product(cookie, store_id, _generate_product_name(), 5.50, 10)
-    assert system.edit_product_details(
+    product_id, product_name, price, quantity = await _create_product(cookie, store_id, _generate_product_name(), 5.50, 10)
+    res = await system.edit_product_details(
         cookie, store_id, product_id, new_name, new_price
-    ).succeeded()
+    )
+    assert res.succeeded()
 
-
-def test_edit_product_details_wrong_product_fail():
-    cookie, username, password, store_name, store_id = _initialize_info(
+@pytest.mark.asyncio
+async def test_edit_product_details_wrong_product_fail():
+    cookie, username, password, store_name, store_id = await _initialize_info(
         _generate_username(), "aaa", _generate_store_name()
     )
     wrong_product = "coffe"
     new_name = _generate_product_name()
     new_price = 6.0
-    product_id, product_name, price, quantity = _create_product(cookie, store_id, _generate_product_name(), 5.50, 10)
-    assert not system.edit_product_details(
+    product_id, product_name, price, quantity = await _create_product(cookie, store_id, _generate_product_name(), 5.50, 10)
+    res = await system.edit_product_details(
         cookie, store_id, wrong_product, new_name, new_price
-    ).succeeded()
+    )
+    assert not res.succeeded()
 
-
-def test_edit_product_details_negative_price_fail():
-    cookie, username, password, store_name, store_id = _initialize_info(
+@pytest.mark.asyncio
+async def test_edit_product_details_negative_price_fail():
+    cookie, username, password, store_name, store_id = await _initialize_info(
         _generate_username(), "aaa", _generate_store_name()
     )
-    product_id, product_name, price, quantity = _create_product(cookie, store_id, _generate_product_name(), 5.50, 10)
+    product_id, product_name, price, quantity = await _create_product(cookie, store_id, _generate_product_name(), 5.50, 10)
     new_name = _generate_product_name()
     new_price = -6.0
-    assert not system.edit_product_details(
+    res = await system.edit_product_details(
         cookie, store_id, product_id, new_name, new_price
-    ).succeeded()
+    )
+    assert not res.succeeded()
 
 
 # 2.6 https://github.com/SeanPikulin/TradingSystem/blob/main/Documentation/Use%20Cases.md#26-Filter-search-results
-def test_product_search_no_args_success():
-    cookie, username, password, store_name, store_id = _initialize_info(
+@pytest.mark.asyncio
+async def test_product_search_no_args_success():
+    cookie, username, password, store_name, store_id = await _initialize_info(
         _generate_username(), "aaa", _generate_store_name()
     )
-    product_id, product_name, price, quantity = _create_product(cookie, store_id, _generate_product_name(), 5.50, 10)
-    response = system.search_products(product_name=product_name)
+    product_id, product_name, price, quantity = await _create_product(cookie, store_id, _generate_product_name(), 5.50, 10)
+    response = await system.search_products(product_name=product_name)
     assert (
         response.succeeded()
         and len(list(filter(lambda product: product.name == product_name, response.object.values))) == 1
     ), response.get_msg()
 
 
-def test_product_search_args_success():
-    cookie, username, password, store_name, store_id = _initialize_info(
+@pytest.mark.asyncio
+async def test_product_search_args_success():
+    cookie, username, password, store_name, store_id = await _initialize_info(
         _generate_username(), "aaa", _generate_store_name()
     )
-    product_id, product_name, price, quantity = _create_product(cookie, store_id, _generate_product_name(), 5.50, 10)
+    product_id, product_name, price, quantity = await _create_product(cookie, store_id, _generate_product_name(), 5.50, 10)
     min_price = 5.0
     max_price = 6.0
-    response = system.search_products(product_name, min_price=min_price, max_price=max_price)
+    response = await system.search_products(product_name, min_price=min_price, max_price=max_price)
     assert (
         response.succeeded()
         and len(list(filter(lambda product: product.name == product_name, response.object.values))) == 1
@@ -340,12 +385,13 @@ def test_product_search_args_success():
 # assumed empty list means failure
 
 
-def test_products_by_store_success():
-    cookie, username, password, store_name, store_id = _initialize_info(
+@pytest.mark.asyncio
+async def test_products_by_store_success():
+    cookie, username, password, store_name, store_id = await _initialize_info(
         _generate_username(), "aaa", _generate_store_name()
     )
-    product_id, product_name, price, quantity = _create_product(cookie, store_id, _generate_product_name(), 5.50, 10)
-    response = system.get_products_by_store(store_id)
+    product_id, product_name, price, quantity = await _create_product(cookie, store_id, _generate_product_name(), 5.50, 10)
+    response = await system.get_products_by_store(store_id)
     assert (
         response.succeeded()
         and len(response.object.values) == 1
@@ -353,59 +399,69 @@ def test_products_by_store_success():
     )
 
 
-def test_products_by_store_wrong_store_fail():
-    cookie, username, password, store_name, store_id = _initialize_info(
+@pytest.mark.asyncio
+async def test_products_by_store_wrong_store_fail():
+    cookie, username, password, store_name, store_id = await _initialize_info(
         _generate_username(), "aaa", _generate_store_name()
     )
-    product_id, product_name, price, quantity = _create_product(cookie, store_id, _generate_product_name(), 5.50, 10)
+    product_id, product_name, price, quantity = await _create_product(cookie, store_id, _generate_product_name(), 5.50, 10)
     wrong_store = "starbux"
-    response = system.get_products_by_store(wrong_store)
+    response = await system.get_products_by_store(wrong_store)
     assert not response.succeeded()
 
 
 # # 2.7 https://github.com/SeanPikulin/TradingSystem/blob/main/Documentation/Use%20Cases.md#27-Save-products-in-shopping-bag
-def test_add_to_cart_success():
-    cookie, username, password, store_name, store_id = _initialize_info(
+@pytest.mark.asyncio
+async def test_add_to_cart_success():
+    cookie, username, password, store_name, store_id = await _initialize_info(
         _generate_username(), "aaa", _generate_store_name()
     )
-    product_id, product_name, price, quantity = _create_product(cookie, store_id, _generate_product_name(), 5.50, 10)
-    assert system.save_product_in_cart(cookie, store_id, product_id, 1).succeeded()
+    product_id, product_name, price, quantity = await _create_product(cookie, store_id, _generate_product_name(), 5.50, 10)
+    res = await system.save_product_in_cart(cookie, store_id, product_id, 1)
+    assert res.succeeded()
 
 
-def test_add_to_cart_wrong_product_fail():
-    cookie, username, password, store_name, store_id = _initialize_info(
+@pytest.mark.asyncio
+async def test_add_to_cart_wrong_product_fail():
+    cookie, username, password, store_name, store_id = await _initialize_info(
         _generate_username(), "aaa", _generate_store_name()
     )
     product_id, product_name, price, quantity = _create_product(cookie, store_id, _generate_product_name(), 5.50, 10)
     wrong_product = "cofee"
-    assert not system.save_product_in_cart(cookie, store_id, wrong_product, 1).succeeded()
+    res = await system.save_product_in_cart(cookie, store_id, wrong_product, 1)
+    assert not res.succeeded()
 
 
-def test_add_to_cart_wrong_store_fail():
-    cookie, username, password, store_name, store_id = _initialize_info(
+@pytest.mark.asyncio
+async def test_add_to_cart_wrong_store_fail():
+    cookie, username, password, store_name, store_id = await _initialize_info(
         _generate_username(), "aaa", _generate_store_name()
     )
     product_id, product_name, price, quantity = _create_product(cookie, store_id, _generate_product_name(), 5.50, 10)
     wrong_store = "starbux"
-    assert not system.save_product_in_cart(cookie, wrong_store, product_id, 1).succeeded()
+    res = await system.save_product_in_cart(cookie, wrong_store, product_id, 1)
+    assert not res.succeeded()
 
 
-def test_add_to_cart_quantity_too_high_fail():
-    cookie, username, password, store_name, store_id = _initialize_info(
+@pytest.mark.asyncio
+async def test_add_to_cart_quantity_too_high_fail():
+    cookie, username, password, store_name, store_id = await _initialize_info(
         _generate_username(), "aaa", _generate_store_name()
     )
-    product_id, product_name, price, quantity = _create_product(cookie, store_id, _generate_product_name(), 5.50, 10)
-    assert not system.save_product_in_cart(cookie, store_id, product_id, 11).succeeded()
+    product_id, product_name, price, quantity = await _create_product(cookie, store_id, _generate_product_name(), 5.50, 10)
+    res = await system.save_product_in_cart(cookie, store_id, product_id, 11)
+    assert not res.succeeded()
 
 
 # # 2.8 https://github.com/SeanPikulin/TradingSystem/blob/main/Documentation/Use%20Cases.md#28-Visit-cart
-def test_visit_cart_success():
-    cookie, username, password, store_name, store_id = _initialize_info(
+@pytest.mark.asyncio
+async def test_visit_cart_success():
+    cookie, username, password, store_name, store_id = await _initialize_info(
         _generate_username(), "aaa", _generate_store_name()
     )
-    product_id, product_name, price, quantity = _create_product(cookie, store_id, _generate_product_name(), 5.50, 10)
-    system.save_product_in_cart(cookie, store_id, product_id, 1)
-    response = system.get_cart_details(cookie)
+    product_id, product_name, price, quantity =await  _create_product(cookie, store_id, _generate_product_name(), 5.50, 10)
+    await system.save_product_in_cart(cookie, store_id, product_id, 1)
+    response = await system.get_cart_details(cookie)
     assert (
         response.succeeded()
         and len(response.object.bags) == 1
@@ -422,132 +478,155 @@ def test_visit_cart_success():
 #     assert not system.get_cart_details(cookie).succeeded()
 #   assumed empty list means failure
 
-def test_change_amount_in_cart_success():
-    cookie, username, password, store_name, store_id = _initialize_info(
+@pytest.mark.asyncio
+async def test_change_amount_in_cart_success():
+    cookie, username, password, store_name, store_id = await _initialize_info(
         _generate_username(), "aaa", _generate_store_name()
     )
-    product_id, product_name, price, quantity = _create_product(cookie, store_id, _generate_product_name(), 5.50, 10)
-    system.save_product_in_cart(cookie, store_id, product_id, 1)
-    response = system.change_product_quantity_in_cart(cookie, store_id, product_id, 2)
+    product_id, product_name, price, quantity = await _create_product(cookie, store_id, _generate_product_name(), 5.50, 10)
+    await system.save_product_in_cart(cookie, store_id, product_id, 1)
+    response = await system.change_product_quantity_in_cart(cookie, store_id, product_id, 2)
+    cart_details_res = await system.get_cart_details(cookie)
     assert (
         response.succeeded()
-        and system.get_cart_details(cookie).object.bags[0].product_ids_to_quantities[product_id] == 2
+        and cart_details_res.object.bags[0].product_ids_to_quantities[product_id] == 2
     ), response.get_msg()
 
 
-def test_change_amount_in_cart_wrong_product_fail():
-    cookie, username, password, store_name, store_id = _initialize_info(
+@pytest.mark.asyncio
+async def test_change_amount_in_cart_wrong_product_fail():
+    cookie, username, password, store_name, store_id = await _initialize_info(
         _generate_username(), "aaa", _generate_store_name()
     )
     product_id, product_name, price, quantity = _create_product(cookie, store_id, _generate_product_name(), 5.50, 10)
     wrong_product = "cofee"
-    system.save_product_in_cart(cookie, store_id, product_id, 1)
-    assert not system.change_product_quantity_in_cart(
+    await system.save_product_in_cart(cookie, store_id, product_id, 1)
+    res = await system.change_product_quantity_in_cart(
         cookie, store_id, wrong_product, 2
-    ).succeeded()
+    )
+    assert not res.succeeded()
 
 
-def test_change_amount_in_cart_wrong_store_fail():
-    cookie, username, password, store_name, store_id = _initialize_info(
+@pytest.mark.asyncio
+async def test_change_amount_in_cart_wrong_store_fail():
+    cookie, username, password, store_name, store_id = await _initialize_info(
         _generate_username(), "aaa", _generate_store_name()
     )
     product_id, product_name, price, quantity = _create_product(cookie, store_id, _generate_product_name(), 5.50, 10)
     wrong_store = "starbux"
-    system.save_product_in_cart(cookie, store_id, product_id, 1)
-    assert not system.change_product_quantity_in_cart(
+    await system.save_product_in_cart(cookie, store_id, product_id, 1)
+    res = await system.change_product_quantity_in_cart(
         cookie, wrong_store, product_id, 2
-    ).succeeded()
+    )
+    assert not res.succeeded()
 
 
-def test_change_amount_in_cart_negative_quantity_fail():
-    cookie, username, password, store_name, store_id = _initialize_info(
+@pytest.mark.asyncio
+async def test_change_amount_in_cart_negative_quantity_fail():
+    cookie, username, password, store_name, store_id = await _initialize_info(
         _generate_username(), "aaa", _generate_store_name()
     )
-    product_id, product_name, price, quantity = _create_product(cookie, store_id, _generate_product_name(), 5.50, 10)
-    system.save_product_in_cart(cookie, store_id, product_id, 1)
-    assert not system.change_product_quantity_in_cart(
+    product_id, product_name, price, quantity = await _create_product(cookie, store_id, _generate_product_name(), 5.50, 10)
+    await system.save_product_in_cart(cookie, store_id, product_id, 1)
+    res = await system.change_product_quantity_in_cart(
         cookie, store_id, product_id, -1
-    ).succeeded()
+    )
+    assert not res.succeeded()
 
 
-def test_change_amount_in_cart_quantity_too_high_fail():
-    cookie, username, password, store_name, store_id = _initialize_info(
+@pytest.mark.asyncio
+async def test_change_amount_in_cart_quantity_too_high_fail():
+    cookie, username, password, store_name, store_id = await _initialize_info(
         _generate_username(), "aaa", _generate_store_name()
     )
-    product_id, product_name, price, quantity = _create_product(cookie, store_id, _generate_product_name(), 5.50, 10)
-    system.save_product_in_cart(cookie, store_id, product_id, 1)
-    assert not system.change_product_quantity_in_cart(
+    product_id, product_name, price, quantity = await _create_product(cookie, store_id, _generate_product_name(), 5.50, 10)
+    await system.save_product_in_cart(cookie, store_id, product_id, 1)
+    res = await system.change_product_quantity_in_cart(
         cookie, store_id, product_id, 11
-    ).succeeded()
+    )
+    assert not res.succeeded()
 
 
-def test_remove_product_from_cart_success():
-    cookie, username, password, store_name, store_id = _initialize_info(
+@pytest.mark.asyncio
+async def test_remove_product_from_cart_success():
+    cookie, username, password, store_name, store_id = await _initialize_info(
         _generate_username(), "aaa", _generate_store_name()
     )
-    product_id, product_name, price, quantity = _create_product(cookie, store_id, _generate_product_name(), 5.50, 10)
-    system.save_product_in_cart(cookie, store_id, product_id, 1)
+    product_id, product_name, price, quantity =await  _create_product(cookie, store_id, _generate_product_name(), 5.50, 10)
+    await system.save_product_in_cart(cookie, store_id, product_id, 1)
+    res = await system.remove_product_from_cart(cookie, store_id, product_id)
     assert (
-        system.remove_product_from_cart(cookie, store_id, product_id).succeeded()
+        res.succeeded()
     )
 
 
-def test_remove_product_from_cart_wrong_product_fail():
-    cookie, username, password, store_name, store_id = _initialize_info(
+@pytest.mark.asyncio
+async def test_remove_product_from_cart_wrong_product_fail():
+    cookie, username, password, store_name, store_id = await _initialize_info(
         _generate_username(), "aaa", _generate_store_name()
     )
     product_id, product_name, price, quantity = _create_product(cookie, store_id, _generate_product_name(), 5.50, 10)
     wrong_product = "cofee"
-    system.save_product_in_cart(cookie, store_id, product_id, 1)
-    assert not system.remove_product_from_cart(cookie, store_id, wrong_product).succeeded()
+    await system.save_product_in_cart(cookie, store_id, product_id, 1)
+    res = await system.remove_product_from_cart(cookie, store_id, wrong_product)
+    assert not res.succeeded()
 
 
-def test_remove_product_from_cart_wrong_store_fail():
-    cookie, username, password, store_name, store_id = _initialize_info(
+@pytest.mark.asyncio
+async def test_remove_product_from_cart_wrong_store_fail():
+    cookie, username, password, store_name, store_id = await _initialize_info(
         _generate_username(), "aaa", _generate_store_name()
     )
     product_id, product_name, price, quantity = _create_product(cookie, store_id, _generate_product_name(), 5.50, 10)
     wrong_store = "starbux"
-    system.save_product_in_cart(cookie, store_id, product_id, 1)
-    assert not system.remove_product_from_cart(cookie, wrong_store, product_id).succeeded()
+    await system.save_product_in_cart(cookie, store_id, product_id, 1)
+    res = await system.remove_product_from_cart(cookie, wrong_store, product_id)
+    assert not res.succeeded()
 
 
 # 2.9 https://github.com/SeanPikulin/TradingSystem/blob/main/Documentation/Use%20Cases.md#29-Purchase-products
-def test_purchase_cart_success():
-    cookie, username, password, store_name, store_id = _initialize_info(
+@pytest.mark.asyncio
+async def test_purchase_cart_success():
+    cookie, username, password, store_name, store_id = await _initialize_info(
         _generate_username(), "aaa", _generate_store_name()
     )
-    product_id, product_name, price, quantity = _create_product(cookie, store_id, _generate_product_name(), 5.50, 10)
-    system.save_product_in_cart(cookie, store_id, product_id, 1)
-    response = system.purchase_cart(cookie)
+    product_id, product_name, price, quantity =await  _create_product(cookie, store_id, _generate_product_name(), 5.50, 10)
+    await system.save_product_in_cart(cookie, store_id, product_id, 1)
+    response = await system.purchase_cart(cookie)
+    store_res = await system.get_store(store_id)
+    cart_res = await system.get_cart_details(cookie)
     assert (
         response.succeeded()
-        and system.get_store(store_id).object.ids_to_quantities[product_id] == 9
-        and system.get_cart_details(cookie).succeeded()
+        and store_res.object.ids_to_quantities[product_id] == 9
+        and cart_res.succeeded()
         and response.object.value == price
     ), response.get_msg()
 
 
-def test_purchase_cart_no_items_fail():
-    cookie, username, password, store_name, store_id = _initialize_info(
+@pytest.mark.asyncio
+async def test_purchase_cart_no_items_fail():
+    cookie, username, password, store_name, store_id = await _initialize_info(
         _generate_username(), "aaa", _generate_store_name()
     )
-    assert not system.purchase_cart(cookie).succeeded()
+    res = await system.purchase_cart(cookie)
+    assert not res.succeeded()
 
 
-def test_purchase_cart_twice_fail():
-    cookie, username, password, store_name, store_id = _initialize_info(
+@pytest.mark.asyncio
+async def test_purchase_cart_twice_fail():
+    cookie, username, password, store_name, store_id =await  _initialize_info(
         _generate_username(), "aaa", _generate_store_name()
     )
-    product_id, product_name, price, quantity = _create_product(cookie, store_id, _generate_product_name(), 5.50, 10)
-    system.save_product_in_cart(cookie, store_id, product_id, 1)
-    system.purchase_cart(cookie)
-    response = system.purchase_cart(cookie)
+    product_id, product_name, price, quantity =await  _create_product(cookie, store_id, _generate_product_name(), 5.50, 10)
+    await system.save_product_in_cart(cookie, store_id, product_id, 1)
+    await system.purchase_cart(cookie)
+    response = await system.purchase_cart(cookie)
     assert not response.succeeded(), response.get_msg()
 
 
-def test_send_payment_success():
-    cookie, username, password, store_name, store_id = _initialize_info(
+@pytest.mark.asyncio
+async def test_send_payment_success():
+    cookie, username, password, store_name, store_id = await _initialize_info(
         _generate_username(), "aaa", _generate_store_name()
     )
     card_number = "1234-1234-1234-1234"
@@ -562,8 +641,10 @@ def test_send_payment_success():
         and system.get_store(store_id).object.ids_to_quantities[product_id] == 9
     ), response.get_msg()
 
-def test_send_payment_before_purchase_cart_fail():
-    cookie, username, password, store_name, store_id = _initialize_info(
+
+@pytest.mark.asyncio
+async def test_send_payment_before_purchase_cart_fail():
+    cookie, username, password, store_name, store_id = await _initialize_info(
         _generate_username(), "aaa", _generate_store_name()
     )
     card_number = "1234-1234-1234-1234"
@@ -579,8 +660,9 @@ def test_send_payment_before_purchase_cart_fail():
 
 
 # 3.7 https://github.com/SeanPikulin/TradingSystem/blob/main/Documentation/Use%20Cases.md#37-Get-personal-purchase-history
-def test_get_purchase_history_success():
-    cookie, username, password, store_name, store_id = _initialize_info(
+@pytest.mark.asyncio
+async def test_get_purchase_history_success():
+    cookie, username, password, store_name, store_id = await _initialize_info(
         _generate_username(), "aaa", _generate_store_name()
     )
     card_number = "1234-1234-1234-1234"
@@ -610,8 +692,9 @@ def test_get_purchase_history_success():
 # assumed empty list means failure
 
 
-def test_get_purchase_history_no_purchases_saved_to_cart_success():
-    cookie, username, password, store_name, store_id = _initialize_info(
+@pytest.mark.asyncio
+async def test_get_purchase_history_no_purchases_saved_to_cart_success():
+    cookie, username, password, store_name, store_id = await _initialize_info (
         _generate_username(), "aaa", _generate_store_name()
     )
     product_id, product_name, price, quantity = _create_product(cookie, store_id, _generate_product_name(), 5.50, 10)
@@ -619,8 +702,10 @@ def test_get_purchase_history_no_purchases_saved_to_cart_success():
     response = system.get_purchase_history(cookie)
     assert len(response.object.values) == 0
 
-def test_get_purchase_history_no_payment_fail():
-    cookie, username, password, store_name, store_id = _initialize_info(
+
+@pytest.mark.asyncio
+async def test_get_purchase_history_no_payment_fail():
+    cookie, username, password, store_name, store_id = await _initialize_info(
         _generate_username(), "aaa", _generate_store_name()
     )
     product_id, product_name, price, quantity = _create_product(cookie, store_id, _generate_product_name(), 5.50, 10)
@@ -631,8 +716,9 @@ def test_get_purchase_history_no_payment_fail():
 
 
 # 4.3 https://github.com/SeanPikulin/TradingSystem/blob/main/Documentation/Use%20Cases.md#43-Appoint-new-store-owner
-def test_appoint_store_owner_success():
-    cookie, username, password, store_name, store_id = _initialize_info(
+@pytest.mark.asyncio
+async def test_appoint_store_owner_success():
+    cookie, username, password, store_name, store_id = await _initialize_info(
         _generate_username(), "aaa", _generate_store_name()
     )
     new_owner_cookie, new_owner_username, new_owner_password, _, _ = _initialize_info(
@@ -641,8 +727,10 @@ def test_appoint_store_owner_success():
     response = system.appoint_owner(cookie, store_id, new_owner_username)
     assert response.succeeded(), response.get_msg()
 
-def test_appoint_store_owner_chain_success():
-    cookie, username, password, store_name, store_id = _initialize_info(
+
+@pytest.mark.asyncio
+async def test_appoint_store_owner_chain_success():
+    cookie, username, password, store_name, store_id = await _initialize_info(
         _generate_username(), "aaa", _generate_store_name()
     )
     new_owner_cookie, new_owner_username, new_owner_password, _, _ = _initialize_info(
@@ -655,8 +743,9 @@ def test_appoint_store_owner_chain_success():
     assert system.appoint_owner(new_owner_cookie, store_id, last_owner_username).succeeded()
 
 
-def test_appoint_store_owner_wrong_name_fail():
-    cookie, username, password, store_name, store_id = _initialize_info(
+@pytest.mark.asyncio
+async def test_appoint_store_owner_wrong_name_fail():
+    cookie, username, password, store_name, store_id = await _initialize_info(
         _generate_username(), "aaa", _generate_store_name()
     )
     new_owner_cookie, new_owner_username, new_owner_password, _, _ = _initialize_info(
@@ -666,8 +755,9 @@ def test_appoint_store_owner_wrong_name_fail():
     assert not system.appoint_owner(cookie, store_id, wrong_name).succeeded()
 
 
-def test_appoint_store_owner_wrong_store_fail():
-    cookie, username, password, store_name, store_id = _initialize_info(
+@pytest.mark.asyncio
+async def test_appoint_store_owner_wrong_store_fail():
+    cookie, username, password, store_name, store_id = await _initialize_info(
         _generate_username(), "aaa", _generate_store_name()
     )
     new_owner_cookie, new_owner_username, new_owner_password, _, _ = _initialize_info(
@@ -677,8 +767,9 @@ def test_appoint_store_owner_wrong_store_fail():
     assert not system.appoint_owner(cookie, wrong_store, new_owner_username).succeeded()
 
 
-def test_appoint_store_owner_direct_circular_appointment_fail():
-    cookie, username, password, store_name, store_id = _initialize_info(
+@pytest.mark.asyncio
+async def test_appoint_store_owner_direct_circular_appointment_fail():
+    cookie, username, password, store_name, store_id = await _initialize_info(
         _generate_username(), "aaa", _generate_store_name()
     )
     new_owner_cookie, new_owner_username, new_owner_password, _, _ = _initialize_info(
@@ -691,8 +782,9 @@ def test_appoint_store_owner_direct_circular_appointment_fail():
     assert not system.appoint_owner(new_owner_cookie, store_id, username).succeeded()
 
 
-def test_appoint_store_owner_circular_fail():
-    cookie, username, password, store_name, store_id = _initialize_info(
+@pytest.mark.asyncio
+async def test_appoint_store_owner_circular_fail():
+    cookie, username, password, store_name, store_id = await _initialize_info(
         _generate_username(), "aaa", _generate_store_name()
     )
     new_owner_cookie, new_owner_username, new_owner_password, _, _ = _initialize_info(
@@ -707,8 +799,9 @@ def test_appoint_store_owner_circular_fail():
 
 
 # 4.5 https://github.com/SeanPikulin/TradingSystem/blob/main/Documentation/Use%20Cases.md#45-Appoint-new-store-manager
-def test_appoint_store_manager_success():
-    cookie, username, password, store_name, store_id = _initialize_info(
+@pytest.mark.asyncio
+async def test_appoint_store_manager_success():
+    cookie, username, password, store_name, store_id = await _initialize_info(
         _generate_username(), "aaa", _generate_store_name()
     )
     new_manager_cookie, new_manager_username, new_manager_password, _, _ = _initialize_info(
@@ -732,8 +825,9 @@ def test_appoint_store_manager_success():
 # tested elsewhere
 
 
-def test_appoint_store_owner_manager_chain_success():
-    cookie, username, password, store_name, store_id = _initialize_info(
+@pytest.mark.asyncio
+async def test_appoint_store_owner_manager_chain_success():
+    cookie, username, password, store_name, store_id = await _initialize_info(
         _generate_username(), "aaa", _generate_store_name()
     )
     new_owner_cookie, new_owner_username, new_owner_password, _, _ = _initialize_info(
@@ -746,8 +840,9 @@ def test_appoint_store_owner_manager_chain_success():
     assert system.appoint_manager(new_owner_cookie, store_id, last_manager_username).succeeded()
 
 
-def test_appoint_store_manager_wrong_name_fail():
-    cookie, username, password, store_name, store_id = _initialize_info(
+@pytest.mark.asyncio
+async def test_appoint_store_manager_wrong_name_fail():
+    cookie, username, password, store_name, store_id = await _initialize_info(
         _generate_username(), "aaa", _generate_store_name()
     )
     new_manager_cookie, new_manager_username, new_manager_password, _, _ = _initialize_info(
@@ -757,8 +852,9 @@ def test_appoint_store_manager_wrong_name_fail():
     assert not system.appoint_manager(cookie, store_id, wrong_name).succeeded()
 
 
-def test_appoint_store_manager_wrong_store_fail():
-    cookie, username, password, store_name, store_id = _initialize_info(
+@pytest.mark.asyncio
+async def test_appoint_store_manager_wrong_store_fail():
+    cookie, username, password, store_name, store_id = await _initialize_info(
         _generate_username(), "aaa", _generate_store_name()
     )
     new_manager_cookie, new_manager_username, new_manager_password, _, _ = _initialize_info(
@@ -768,8 +864,9 @@ def test_appoint_store_manager_wrong_store_fail():
     assert not system.appoint_manager(cookie, wrong_store, new_manager_username).succeeded()
 
 
-def test_appoint_store_manager_direct_circular_appointment_fail():
-    cookie, username, password, store_name, store_id = _initialize_info(
+@pytest.mark.asyncio
+async def test_appoint_store_manager_direct_circular_appointment_fail():
+    cookie, username, password, store_name, store_id = await _initialize_info (
         _generate_username(), "aaa", _generate_store_name()
     )
     new_manager_cookie, new_manager_username, new_manager_password, _, _ = _initialize_info(
@@ -795,8 +892,9 @@ def test_appoint_store_manager_direct_circular_appointment_fail():
 # tested elsewhere
 
 
-def test_appoint_store_manager_owner_chain_fail():
-    cookie, username, password, store_name, store_id = _initialize_info(
+@pytest.mark.asyncio
+async def test_appoint_store_manager_owner_chain_fail():
+    cookie, username, password, store_name, store_id = await _initialize_info(
         _generate_username(), "aaa", _generate_store_name()
     )
     new_manager_cookie, new_manager_username, new_manager_password, _, _ = _initialize_info(
@@ -810,8 +908,9 @@ def test_appoint_store_manager_owner_chain_fail():
 
 
 # 4.6 https://github.com/SeanPikulin/TradingSystem/blob/main/Documentation/Use%20Cases.md#46-Edit-manager%E2%80%99s-responsibilities
-def test_add_responsibility_success():
-    cookie, username, password, store_name, store_id = _initialize_info(
+@pytest.mark.asyncio
+async def test_add_responsibility_success():
+    cookie, username, password, store_name, store_id = await _initialize_info(
         _generate_username(), "aaa", _generate_store_name()
     )
     new_manager_cookie, new_manager_username, new_manager_password, _, _ = _initialize_info(
@@ -824,8 +923,9 @@ def test_add_responsibility_success():
     assert response.succeeded(), response.get_msg()
 
 
-def test_remove_responsibility_success():
-    cookie, username, password, store_name, store_id = _initialize_info(
+@pytest.mark.asyncio
+async def test_remove_responsibility_success():
+    cookie, username, password, store_name, store_id = await _initialize_info(
         _generate_username(), "aaa", _generate_store_name()
     )
     new_manager_cookie, new_manager_username, new_manager_password, _, _ = _initialize_info(
@@ -839,8 +939,9 @@ def test_remove_responsibility_success():
     ).succeeded()
 
 
-def test_default_permissions_success():
-    cookie, username, password, store_name, store_id = _initialize_info(
+@pytest.mark.asyncio
+async def test_default_permissions_success():
+    cookie, username, password, store_name, store_id = await _initialize_info(
         _generate_username(), "aaa", _generate_store_name()
     )
     new_manager_cookie, new_manager_username, new_manager_password, _, _ = _initialize_info(
@@ -858,8 +959,9 @@ def test_default_permissions_success():
         ).succeeded()
 
 
-def test_add_responsibility_twice_success():
-    cookie, username, password, store_name, store_id = _initialize_info(
+@pytest.mark.asyncio
+async def test_add_responsibility_twice_success():
+    cookie, username, password, store_name, store_id = await _initialize_info(
         _generate_username(), "aaa", _generate_store_name()
     )
     new_manager_cookie, new_manager_username, new_manager_password, _, _ = _initialize_info(
@@ -873,8 +975,9 @@ def test_add_responsibility_twice_success():
     ).succeeded()
 
 
-def test_remove_responsibility_twice_success():
-    cookie, username, password, store_name, store_id = _initialize_info(
+@pytest.mark.asyncio
+async def test_remove_responsibility_twice_success():
+    cookie, username, password, store_name, store_id = await _initialize_info(
         _generate_username(), "aaa", _generate_store_name()
     )
     new_manager_cookie, new_manager_username, new_manager_password, _, _ = _initialize_info(
@@ -887,8 +990,9 @@ def test_remove_responsibility_twice_success():
     ).succeeded()
 
 
-def test_get_appointment_permission_success():
-    cookie, username, password, store_name, store_id = _initialize_info(
+@pytest.mark.asyncio
+async def test_get_appointment_permission_success():
+    cookie, username, password, store_name, store_id =await  _initialize_info(
         _generate_username(), "aaa", _generate_store_name()
     )
     new_manager_cookie, new_manager_username, new_manager_password, _, _ = _initialize_info(
@@ -899,8 +1003,9 @@ def test_get_appointment_permission_success():
     assert response.succeeded(), response.get_msg()
 
 
-def test_get_history_permission_success():
-    cookie, username, password, store_name, store_id = _initialize_info(
+@pytest.mark.asyncio
+async def test_get_history_permission_success():
+    cookie, username, password, store_name, store_id =await  _initialize_info(
         _generate_username(), "aaa", _generate_store_name()
     )
     new_manager_cookie, new_manager_username, new_manager_password, _, _ = _initialize_info(
@@ -911,8 +1016,9 @@ def test_get_history_permission_success():
     assert system.get_store_purchase_history(new_manager_cookie, store_id).succeeded()
 
 
-def test_appoint_manager_permission_success():
-    cookie, username, password, store_name, store_id = _initialize_info(
+@pytest.mark.asyncio
+async def test_appoint_manager_permission_success():
+    cookie, username, password, store_name, store_id = await _initialize_info(
         _generate_username(), "aaa", _generate_store_name()
     )
     new_manager_cookie, new_manager_username, new_manager_password, _, _ = _initialize_info(
@@ -926,8 +1032,9 @@ def test_appoint_manager_permission_success():
     assert system.appoint_manager(new_manager_cookie, store_id, last_manager_username).succeeded()
 
 
-def test_remove_manager_permission_fail():
-    cookie, username, password, store_name, store_id = _initialize_info(
+@pytest.mark.asyncio
+async def test_remove_manager_permission_fail():
+    cookie, username, password, store_name, store_id =await  _initialize_info(
         _generate_username(), "aaa", _generate_store_name()
     )
     new_manager_cookie, new_manager_username, new_manager_password, _, _ = _initialize_info(
@@ -944,8 +1051,9 @@ def test_remove_manager_permission_fail():
     ).succeeded()
 
 
-def test_remove_manager_permission_success():
-    cookie, username, password, store_name, store_id = _initialize_info(
+@pytest.mark.asyncio
+async def test_remove_manager_permission_success():
+    cookie, username, password, store_name, store_id = await _initialize_info(
         _generate_username(), "aaa", _generate_store_name()
     )
     new_manager_cookie, new_manager_username, new_manager_password, _, _ = _initialize_info(
@@ -962,8 +1070,9 @@ def test_remove_manager_permission_success():
     assert response.succeeded(), response.get_msg()
 
 
-def test_manage_products_permission_success():
-    cookie, username, password, store_name, store_id = _initialize_info(
+@pytest.mark.asyncio
+async def test_manage_products_permission_success():
+    cookie, username, password, store_name, store_id = await _initialize_info(
         _generate_username(), "aaa", _generate_store_name()
     )
     new_manager_cookie, new_manager_username, new_manager_password, _, _ = _initialize_info(
@@ -978,8 +1087,9 @@ def test_manage_products_permission_success():
     assert response.succeeded(), response.get_msg()
 
 
-def test_get_appointment_no_permission_fail():
-    cookie, username, password, store_name, store_id = _initialize_info(
+@pytest.mark.asyncio
+async def test_get_appointment_no_permission_fail():
+    cookie, username, password, store_name, store_id = await _initialize_info (
         _generate_username(), "aaa", _generate_store_name()
     )
     new_manager_cookie, new_manager_username, new_manager_password, _, _ = _initialize_info(
@@ -990,8 +1100,9 @@ def test_get_appointment_no_permission_fail():
     assert not system.get_store_appointments(new_manager_cookie, store_id).succeeded()
 
 
-def test_get_history_no_permission_fail():
-    cookie, username, password, store_name, store_id = _initialize_info(
+@pytest.mark.asyncio
+async def test_get_history_no_permission_fail():
+    cookie, username, password, store_name, store_id =await  _initialize_info(
         _generate_username(), "aaa", _generate_store_name()
     )
     new_manager_cookie, new_manager_username, new_manager_password, _, _ = _initialize_info(
@@ -1001,8 +1112,9 @@ def test_get_history_no_permission_fail():
     assert not system.get_store_purchase_history(new_manager_cookie, store_id).succeeded()
 
 
-def test_appoint_manager_no_permission_fail():
-    cookie, username, password, store_name, store_id = _initialize_info(
+@pytest.mark.asyncio
+async def test_appoint_manager_no_permission_fail():
+    cookie, username, password, store_name, store_id = await _initialize_info(
         _generate_username(), "aaa", _generate_store_name()
     )
     new_manager_cookie, new_manager_username, new_manager_password, _, _ = _initialize_info(
@@ -1017,8 +1129,9 @@ def test_appoint_manager_no_permission_fail():
     ).succeeded()
 
 
-def test_remove_manager_no_permission_fail():
-    cookie, username, password, store_name, store_id = _initialize_info(
+@pytest.mark.asyncio
+async def test_remove_manager_no_permission_fail():
+    cookie, username, password, store_name, store_id =await  _initialize_info(
         _generate_username(), "aaa", _generate_store_name()
     )
     new_manager_cookie, new_manager_username, new_manager_password, _, _ = _initialize_info(
@@ -1034,8 +1147,9 @@ def test_remove_manager_no_permission_fail():
     ).succeeded()
 
 
-def test_manage_products_no_permission_fail():
-    cookie, username, password, store_name, store_id = _initialize_info(
+@pytest.mark.asyncio
+async def test_manage_products_no_permission_fail():
+    cookie, username, password, store_name, store_id = await _initialize_info(
         _generate_username(), "aaa", _generate_store_name()
     )
     new_manager_cookie, new_manager_username, new_manager_password, _, _ = _initialize_info(
@@ -1051,8 +1165,9 @@ def test_manage_products_no_permission_fail():
 
 
 # 4.7 https://github.com/SeanPikulin/TradingSystem/blob/main/Documentation/Use%20Cases.md#43-Dismiss-an-owner
-def test_dismiss_owner_success():
-    cookie, username, password, store_name, store_id = _initialize_info(
+@pytest.mark.asyncio
+async def test_dismiss_owner_success():
+    cookie, username, password, store_name, store_id =await  _initialize_info(
         _generate_username(), "aaa", _generate_store_name()
     )
     new_owner_cookie, new_owner_username, new_owner_password, _, _ = _initialize_info(
@@ -1066,8 +1181,9 @@ def test_dismiss_owner_success():
     assert response.succeeded()
 
 
-def test_dismiss_owner_wrong_name_fail():
-    cookie, username, password, store_name, store_id = _initialize_info(
+@pytest.mark.asyncio
+async def test_dismiss_owner_wrong_name_fail():
+    cookie, username, password, store_name, store_id =await  _initialize_info(
         _generate_username(), "aaa", _generate_store_name()
     )
     new_owner_cookie, new_owner_username, new_owner_password, _, _ = _initialize_info(
@@ -1078,8 +1194,9 @@ def test_dismiss_owner_wrong_name_fail():
     assert not system.remove_appointment(cookie, store_id, wrong_name).succeeded()
 
 
-def test_dismiss_owner_wrong_store_fail():
-    cookie, username, password, store_name, store_id = _initialize_info(
+@pytest.mark.asyncio
+async def test_dismiss_owner_wrong_store_fail():
+    cookie, username, password, store_name, store_id =await  _initialize_info(
         _generate_username(), "aaa", _generate_store_name()
     )
     new_owner_cookie, new_owner_username, new_owner_password, _, _ = _initialize_info(
@@ -1090,8 +1207,9 @@ def test_dismiss_owner_wrong_store_fail():
     assert not system.remove_appointment(cookie, wrong_store, new_owner_username).succeeded()
 
 
-def test_dismiss_owner_appointing_fail():
-    cookie, username, password, store_name, store_id = _initialize_info(
+@pytest.mark.asyncio
+async def test_dismiss_owner_appointing_fail():
+    cookie, username, password, store_name, store_id =await  _initialize_info(
         _generate_username(), "aaa", _generate_store_name()
     )
     new_owner_cookie, new_owner_username, new_owner_password, _, _ = _initialize_info(
@@ -1107,8 +1225,9 @@ def test_dismiss_owner_appointing_fail():
     ).succeeded()
 
 
-def test_dismiss_owner_chain_appointing_fail():
-    cookie, username, password, store_name, store_id = _initialize_info(
+@pytest.mark.asyncio
+async def test_dismiss_owner_chain_appointing_fail():
+    cookie, username, password, store_name, store_id =await  _initialize_info(
         _generate_username(), "aaa", _generate_store_name()
     )
     new_owner_cookie, new_owner_username, new_owner_password, _, _ = _initialize_info(
@@ -1129,8 +1248,9 @@ def test_dismiss_owner_chain_appointing_fail():
 
 
 # 4.9 https://github.com/SeanPikulin/TradingSystem/blob/main/Documentation/Use%20Cases.md#49-Get-store-personnel-information
-def test_get_store_personnel_success():
-    cookie, username, password, store_name, store_id = _initialize_info(
+@pytest.mark.asyncio
+async def test_get_store_personnel_success():
+    cookie, username, password, store_name, store_id =await  _initialize_info(
         _generate_username(), "aaa", _generate_store_name()
     )
     response = system.get_store_appointments(cookie, store_id)
@@ -1140,8 +1260,10 @@ def test_get_store_personnel_success():
         and response.object.role == "Founder"
     )
 
-def test_get_store_personnel_owner_success():
-    cookie, username, password, store_name, store_id = _initialize_info(
+
+@pytest.mark.asyncio
+async def test_get_store_personnel_owner_success():
+    cookie, username, password, store_name, store_id = await  _initialize_info(
         _generate_username(), "aaa", _generate_store_name()
     )
     new_owner_cookie, new_owner_username, new_owner_password, _, _ = _initialize_info(
@@ -1157,8 +1279,9 @@ def test_get_store_personnel_owner_success():
     )
 
 
-def test_get_store_personnel_manager_success():
-    cookie, username, password, store_name, store_id = _initialize_info(
+@pytest.mark.asyncio
+async def test_get_store_personnel_manager_success():
+    cookie, username, password, store_name, store_id = await _initialize_info(
         _generate_username(), "aaa", _generate_store_name()
     )
     new_manager_cookie, new_manager_username, new_manager_password, _, _ = _initialize_info(
@@ -1174,8 +1297,9 @@ def test_get_store_personnel_manager_success():
     )
 
 
-def test_get_store_personnel_wrong_store_name_fail():
-    cookie, username, password, store_name, store_id = _initialize_info(
+@pytest.mark.asyncio
+async def test_get_store_personnel_wrong_store_name_fail():
+    cookie, username, password, store_name, store_id = await _initialize_info (
         _generate_username(), "aaa", _generate_store_name()
     )
     wrong_store = "starbux"
@@ -1183,8 +1307,9 @@ def test_get_store_personnel_wrong_store_name_fail():
 
 
 # 4.11 https://github.com/SeanPikulin/TradingSystem/blob/main/Documentation/Use%20Cases.md#411-Get-store-purchase-history
-def test_get_store_purchase_history_success():
-    cookie, username, password, store_name, store_id = _initialize_info(
+@pytest.mark.asyncio
+async def test_get_store_purchase_history_success():
+    cookie, username, password, store_name, store_id = await _initialize_info(
         _generate_username(), "aaa", _generate_store_name()
     )
     card_number = "1234-1234-1234-1234"
@@ -1214,8 +1339,10 @@ def test_get_store_purchase_history_success():
 #     assert response.succeeded()
 # assumed empty list means failure
 
-def test_get_store_purchase_history_no_purchases_saved_to_cart_success():
-    cookie, username, password, store_name, store_id = _initialize_info(
+
+@pytest.mark.asyncio
+async def test_get_store_purchase_history_no_purchases_saved_to_cart_success():
+    cookie, username, password, store_name, store_id =await  _initialize_info(
         _generate_username(), "aaa", _generate_store_name()
     )
     product_id, product_name, price, quantity = _create_product(cookie, store_id, _generate_product_name(), 5.50, 10)
@@ -1224,8 +1351,9 @@ def test_get_store_purchase_history_no_purchases_saved_to_cart_success():
     assert len(response.object.values) == 0
 
 
-def test_get_store_purchase_history_no_payment_success():
-    cookie, username, password, store_name, store_id = _initialize_info(
+@pytest.mark.asyncio
+async def test_get_store_purchase_history_no_payment_success():
+    cookie, username, password, store_name, store_id = await _initialize_info(
         _generate_username(), "aaa", _generate_store_name()
     )
     product_id, product_name, price, quantity = _create_product(cookie, store_id, _generate_product_name(), 5.50, 10)
@@ -1246,9 +1374,10 @@ def _get_admin() -> str:
     return admin_cookie
 
 
-def test_admin_get_store_purchase_history_success():
-    cookie, username, password, store_name, store_id = _initialize_info(_generate_username(), "aaa", _generate_store_name())
-    admin_cookie = _get_admin()
+@pytest.mark.asyncio
+async def test_admin_get_store_purchase_history_success():
+    cookie, username, password, store_name, store_id = await _initialize_info(_generate_username(), "aaa", _generate_store_name())
+    admin_cookie = await _get_admin()
     card_number = "1234-1234-1234-1234"
     card_expire = "12/34"
     card_cvv = "123"
@@ -1264,9 +1393,10 @@ def test_admin_get_store_purchase_history_success():
     ), response.get_msg()
 
 
-def test_admin_get_user_purchase_history_success():
-    cookie, username, password, store_name, store_id = _initialize_info(_generate_username(), "aaa", _generate_store_name())
-    admin_cookie = _get_admin()
+@pytest.mark.asyncio
+async def test_admin_get_user_purchase_history_success():
+    cookie, username, password, store_name, store_id = await _initialize_info(_generate_username(), "aaa", _generate_store_name())
+    admin_cookie = await _get_admin()
     card_number = "1234-1234-1234-1234"
     card_expire = "12/34"
     card_cvv = "123"
@@ -1279,7 +1409,8 @@ def test_admin_get_user_purchase_history_success():
 
 
 # parallel testing
-def test_parallel():
+@pytest.mark.asyncio
+async def test_parallel():
     tests = [test_register_success, test_register_used_username_fail, test_login_success,
              test_login_wrong_username_fail, test_login_wrong_password_fail, test_open_store_success,
              test_get_store_information_success, test_add_new_product_success, test_add_new_product_negative_quantity_fail,
