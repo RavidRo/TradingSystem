@@ -4,21 +4,10 @@
 	"description": "Describe trading-system here",
 	"private": true,
 	"scripts": {
-		"build": "cd ./Frontend && nwb build-react-app",
-		"clean": "cd ./Frontend && nwb clean-app",
-		"start": "cd ./Frontend && nwb serve-react-app",
-		"test": "cd ./Frontend && nwb test-react",
-		"test:coverage": "cd ./Frontend && nwb test-react --coverage",
-		"test:watch": "cd ./Frontend && nwb test-react --server"
+		"postinstall": "cd ./Frontend && npm install && npm run-script build"
 	},
-	"dependencies": {
-		"react": "^17.0.2",
-		"react-dom": "^17.0.2"
-	},
-	"devDependencies": {
-		"nwb": "0.25.x",
-		"nwb-sass": "^0.10.2"
-	},
+	"dependencies": {},
+	"devDependencies": {},
 	"author": "",
 	"license": "MIT",
 	"repository": ""
