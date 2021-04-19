@@ -1,3 +1,22 @@
+# Installation
+
+### Backend:
+
+-   install python version >3.9
+-   install pip
+-   install all requirements `pip install -r "requirements.txt"`
+
+### Fronted:
+
+-   install node version >12.0.0
+-   install nwb `npm list -g nwb`
+-   install install dependencies `cd ./Frontend && npm install`
+
+# Run the app:
+
+-   **Backend**: `python api.py`
+-   **Frontend**: `cd ./Frontend && npm start`
+
 # Documentation
 
 ### [Use Cases](Documentation/Use%20Cases.md)
