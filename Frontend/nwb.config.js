@@ -3,8 +3,8 @@ module.exports = {
 	devServer: {
 		proxy: {
 			'/': {
-				target: 'http://localhost:5000',
-				// target: 'https://trading-system-workshop.herokuapp.com/',
+				// target: 'http://localhost:5000',
+				target: 'https://trading-system-workshop.herokuapp.com/',
 				// pathRewrite: { '^/api': '' },
 			},
 		},
