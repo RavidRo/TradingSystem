@@ -6,6 +6,7 @@ from Backend.Domain.TradingSystem.shopping_bag import ShoppingBag
 from Backend.Tests.stubs.product_stub import ProductStub
 from Backend.Tests.stubs.store_stub import StoreStub
 from Backend.Tests.stubs.user_stub import UserStub
+from Backend.response import Response
 
 
 @pytest.fixture
@@ -31,7 +32,7 @@ def user_stub():
 @pytest.fixture()
 def products_stubs_store():
     products_to_quantities = {
-        "1": (ProductStub("product1"), 5),
+        "1": (ProductStub("product1"), 4),
         "2": (ProductStub("product2"), 4),
         "3": (ProductStub("product3"), 4),
     }
@@ -147,7 +148,7 @@ def test_buy_products_valid(
             assert shopping_bag.get_products_to_quantity() == {}
 
 
-@patch.multiple(StoreStub, apply_discounts=MagicMock(return_value=10))
+@patch.multiple(StoreStub, apply_discounts=MagicMock(return_value=10), check_and_acquire_available_products=MagicMock(return_value=Response(False)))
 def test_buy_products_not_existing(
     shopping_bag: ShoppingBag,
     user_stub: UserStub,
@@ -159,11 +160,11 @@ def test_buy_products_not_existing(
             shopping_bag.get_products_to_quantity(), products_stubs_shopping_bag_not_existing_prod
         ):
             result = shopping_bag.buy_products(user_stub)
-            assert result.success == False
+            assert not result.success
             assert shopping_bag.get_store()._products_to_quantities == products_stubs_store
 
 
-@patch.multiple(StoreStub, apply_discounts=MagicMock(return_value=10))
+@patch.multiple(StoreStub, apply_discounts=MagicMock(return_value=10), check_and_acquire_available_products=MagicMock(return_value=Response(False)))
 def test_buy_products_missing_quantity(
     shopping_bag: ShoppingBag,
     user_stub: UserStub,
@@ -175,7 +176,7 @@ def test_buy_products_missing_quantity(
             shopping_bag.get_products_to_quantity(), products_stubs_shopping_bag_missing_prod
         ):
             result = shopping_bag.buy_products(user_stub)
-            assert result.success == False
+            assert not result.success
             assert shopping_bag.get_store()._products_to_quantities == products_stubs_store
 
 
@@ -204,4 +205,4 @@ def test_change_product_quantity_not_existing_product(
 ):
     with patch.dict(shopping_bag.get_products_to_quantity(), products_stubs_shopping_bag):
         result = shopping_bag.change_product_quantity("4", 7)
-        assert result.success == False
+        assert not result.success

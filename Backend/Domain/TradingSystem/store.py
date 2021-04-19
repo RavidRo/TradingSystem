@@ -200,29 +200,38 @@ class Store:
         self._products_lock.release_write()
 
     # This function checks for available products
-    def check_available_products(self, products_to_quantities: dict) -> Response[None]:
+    def check_and_acquire_available_products(self, products_to_quantities: dict) -> Response[None]:
+        acquired_product_ids_to_quantities = {}
         self._products_lock.acquire_write()
         for prod_id, (_, quantity) in products_to_quantities.items():
             prod_to_current_quantity = self._products_to_quantities.get(prod_id)
             if prod_to_current_quantity is None:
+                self.__restore_products(acquired_product_ids_to_quantities)
                 self._products_lock.release_write()
                 return Response(False, msg=f"The product with id: {prod_id} doesn't exist in the inventory of the store")
 
             elif prod_to_current_quantity[1] < quantity:
+                self.__restore_products(acquired_product_ids_to_quantities)
                 self._products_lock.release_write()
                 return Response(False, msg=f"The store has less than {quantity} of product with id: {prod_id} left")
 
-        return Response(True, msg="All products are available")
-
-    def acquire_products(self, products_to_quantities: dict) -> None:
-        for prod_id, (product, quantity) in products_to_quantities.items():
             current_quantity = self._products_to_quantities.get(prod_id)[1]
             if current_quantity == quantity:
                 self._products_to_quantities.pop(prod_id)
             else:
                 product = self._products_to_quantities.get(prod_id)[0]
                 self._products_to_quantities[prod_id] = (product, current_quantity - quantity)
+
+            acquired_product_ids_to_quantities[prod_id] = quantity
+
         self._products_lock.release_write()
+        return Response(True, msg="All products are available")
+
+    def __restore_products(self, acquires_product_ids_to_quantities: dict):
+        for product_id, quantity in acquires_product_ids_to_quantities.items():
+            prod, current_quantity = self._products_to_quantities.get(product_id)
+            self._products_to_quantities[product_id] = (prod, current_quantity  + quantity)
+
 
     # this will be added in the future - maybe I will apply Default Policy for now
     def check_purchase_types(self, products_info, user_info) -> Response[None]:

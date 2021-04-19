@@ -89,22 +89,19 @@ class ShoppingBag(IShoppingBag):
     # product info - list of tuples (product_id to purchase_type)
     def buy_products(self, user_info, products_info=None) -> Response[PrimitiveParsable[float]]:
 
-        """first step - check if all of the products exist in the store"""
+        """first step - check if all of the products exist in the store and acquire"""
         if products_info is None:
             products_info = {}
-        availability_response = self.__store.check_available_products(self._products_to_quantity)
+        availability_response = self.__store.check_and_acquire_available_products(self._products_to_quantity)
         if not availability_response.success:
             return availability_response
 
-        """second step - acquire the products"""
-        self.__store.acquire_products(self._products_to_quantity)
-
-        """third step - check if the purchase_types are appropriate"""
+        """second step - check if the purchase_types are appropriate"""
         # since there are no purchase types for now- this checking isn't relevant
         if products_info:
             self.purchase_types_checks(user_info, products_info)
 
-        """fourth step - check and apply the discount """
+        """third step - check and apply the discount """
         self.discount_apply(user_info)
         return Response[PrimitiveParsable[float]](
             True,

@@ -12,7 +12,6 @@ class StoreStub(Store):
         self.product_quantity_changed = False
         self.product_details_changed = False
         self._products_to_quantities: dict = products
-        self._products_lock = ReadWriteLock()
     # 4.1
     # Creating a new product a the store
     def add_product(self, name: str, price: float, quantity: int) -> Response[None]:
@@ -63,16 +62,7 @@ class StoreStub(Store):
     def get_product(self, product_id):
         return self._products_to_quantities.get(product_id)[0]
 
-    # def check_available_products(self, products_to_quantities: dict) -> Response[None]:
-    #     return Response(True)
-    #
-    # def acquire_products(self, products_to_quantities: dict) -> Response[None]:
-    #     for prod_id, (product, quantity) in products_to_quantities.items():
-    #         current_quantity = self.products_to_quantities.get(prod_id)[1]
-    #         if current_quantity == quantity:
-    #             self.products_to_quantities.pop(prod_id)
-    #         else:
-    #             product = self.products_to_quantities.get(prod_id)[0]
-    #             self.products_to_quantities[prod_id] = (product, current_quantity - quantity)
-
-    # def acquire_products(self):
+    def check_and_acquire_available_products(self, products_to_quantities: dict) -> Response[None]:
+        for i in range(1, 4):
+            self._products_to_quantities[f"{i}"] = (self._products_to_quantities[f"{i}"][0], self._products_to_quantities[f"{i}"][1] - 1)
+        return Response(True)
