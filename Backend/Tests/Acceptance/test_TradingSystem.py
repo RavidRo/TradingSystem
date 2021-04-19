@@ -517,6 +517,7 @@ def test_remove_product_from_cart_wrong_store_fail():
 
 
 # 2.9 https://github.com/SeanPikulin/TradingSystem/blob/main/Documentation/Use%20Cases.md#29-Purchase-products
+@patch.multiple(ShoppingCart, interval_time=MagicMock(return_value=5))
 def test_purchase_cart_success():
     cookie, username, password, store_name, store_id = _initialize_info(
         _generate_username(), "aaa", _generate_store_name()
@@ -532,6 +533,7 @@ def test_purchase_cart_success():
     ), response.get_msg()
 
 
+@patch.multiple(ShoppingCart, interval_time=MagicMock(return_value=5))
 def test_purchase_cart_no_items_fail():
     cookie, username, password, store_name, store_id = _initialize_info(
         _generate_username(), "aaa", _generate_store_name()
@@ -539,6 +541,7 @@ def test_purchase_cart_no_items_fail():
     assert not system.purchase_cart(cookie).succeeded()
 
 
+@patch.multiple(ShoppingCart, interval_time=MagicMock(return_value=5))
 def test_purchase_cart_twice_fail():
     cookie, username, password, store_name, store_id = _initialize_info(
         _generate_username(), "aaa", _generate_store_name()
@@ -550,14 +553,12 @@ def test_purchase_cart_twice_fail():
     assert not response.succeeded(), response.get_msg()
 
 
-# @patch.multiple(ShoppingCart, interval_time=MagicMock(return_value=5))
+@patch.multiple(ShoppingCart, interval_time=MagicMock(return_value=5))
 def test_send_payment_success():
     cookie, username, password, store_name, store_id = _initialize_info(
         _generate_username(), "aaa", _generate_store_name()
     )
-    card_number = "1234-1234-1234-1234"
-    card_expire = "12/34"
-    card_cvv = "123"
+
     product_id, product_name, price, quantity = _create_product(cookie, store_id, _generate_product_name(), 5.50, 10)
     system.save_product_in_cart(cookie, store_id, product_id, 1)
     system.purchase_cart(cookie)
@@ -568,11 +569,25 @@ def test_send_payment_success():
     ), response.get_msg()
 
 
-# todo: complete
+@patch.multiple(ShoppingCart, interval_time=MagicMock(return_value=5))
 def test_send_payment_success_timer_over():
-    pass
+    import time
+    cookie, username, password, store_name, store_id = _initialize_info(
+        _generate_username(), "aaa", _generate_store_name()
+    )
+
+    product_id, product_name, price, quantity = _create_product(cookie, store_id, _generate_product_name(), 5.50, 10)
+    system.save_product_in_cart(cookie, store_id, product_id, 1)
+    system.purchase_cart(cookie)
+    response = system.send_payment(cookie, "", "")
+    time.sleep(6)
+    assert (
+            response.succeeded()
+            and system.get_store(store_id).object.ids_to_quantities[product_id] == 9
+    ), response.get_msg()
 
 
+@patch.multiple(ShoppingCart, interval_time=MagicMock(return_value=5))
 def test_send_payment_before_purchase_cart_fail():
     cookie, username, password, store_name, store_id = _initialize_info(
         _generate_username(), "aaa", _generate_store_name()
@@ -588,6 +603,7 @@ def test_send_payment_before_purchase_cart_fail():
 
 
 # bad scenarios
+@patch.multiple(ShoppingCart, interval_time=MagicMock(return_value=5))
 def test_send_payment_failed():
     with mock.patch.object(OutsideCashing, 'pay', return_value=False):
         cookie, username, password, store_name, store_id = _initialize_info(
@@ -623,7 +639,7 @@ def test_try_paying_after_time_passed():
             and system.get_cart_details(cookie).object.bags[0].product_ids_to_quantities[product_id] == 1
     )
 
-
+@patch.multiple(ShoppingCart, interval_time=MagicMock(return_value=5))
 def test_try_paying_first_time_failed_than_success():
     with mock.patch.object(OutsideCashing, 'pay', return_value=False):
         cookie, username, password, store_name, store_id = _initialize_info(
@@ -664,7 +680,9 @@ def test_try_paying_first_time_incorrect_info_second_time_timer_over():
             and system.get_store(store_id).object.ids_to_quantities[product_id] == 10
     )
 
+
 # 3.7 https://github.com/SeanPikulin/TradingSystem/blob/main/Documentation/Use%20Cases.md#37-Get-personal-purchase-history
+@patch.multiple(ShoppingCart, interval_time=MagicMock(return_value=5))
 def test_get_purchase_history_success():
     cookie, username, password, store_name, store_id = _initialize_info(
         _generate_username(), "aaa", _generate_store_name()
@@ -684,19 +702,6 @@ def test_get_purchase_history_success():
     )
 
 
-# def test_get_purchase_history_no_purchases_fail():
-#     cookie, username, password, store_name, store_id = _initialize_info(
-#         _generate_username(), "aaa", _generate_store_name()
-#     )
-#     product_name = _generate_product_name()
-#     price = 5.50
-#     quantity = 10
-#     system.create_product(cookie, store_name, product_name, price, quantity)
-#     response = system.get_purchase_history(cookie)
-#     assert not response.succeeded()
-# assumed empty list means failure
-
-
 def test_get_purchase_history_no_purchases_saved_to_cart_success():
     cookie, username, password, store_name, store_id = _initialize_info(
         _generate_username(), "aaa", _generate_store_name()
@@ -707,6 +712,7 @@ def test_get_purchase_history_no_purchases_saved_to_cart_success():
     assert len(response.object.values) == 0
 
 
+@patch.multiple(ShoppingCart, interval_time=MagicMock(return_value=5))
 def test_get_purchase_history_no_payment_fail():
     cookie, username, password, store_name, store_id = _initialize_info(
         _generate_username(), "aaa", _generate_store_name()
@@ -1273,6 +1279,7 @@ def test_get_store_personnel_wrong_store_name_fail():
 
 
 # 4.11 https://github.com/SeanPikulin/TradingSystem/blob/main/Documentation/Use%20Cases.md#411-Get-store-purchase-history
+@patch.multiple(ShoppingCart, interval_time=MagicMock(return_value=5))
 def test_get_store_purchase_history_success():
     cookie, username, password, store_name, store_id = _initialize_info(
         _generate_username(), "aaa", _generate_store_name()
@@ -1313,7 +1320,7 @@ def test_get_store_purchase_history_no_purchases_saved_to_cart_success():
     response = system.get_store_purchase_history(cookie, store_id)
     assert len(response.object.values) == 0
 
-
+@patch.multiple(ShoppingCart, interval_time=MagicMock(return_value=5))
 def test_get_store_purchase_history_no_payment_success():
     cookie, username, password, store_name, store_id = _initialize_info(
         _generate_username(), "aaa", _generate_store_name()
@@ -1335,7 +1342,7 @@ def _get_admin() -> str:
         system.login(admin_cookie, data["admins"][0], data["admin-password"])
     return admin_cookie
 
-
+@patch.multiple(ShoppingCart, interval_time=MagicMock(return_value=5))
 def test_admin_get_store_purchase_history_success():
     cookie, username, password, store_name, store_id = _initialize_info(_generate_username(), "aaa",
                                                                         _generate_store_name())
@@ -1354,7 +1361,7 @@ def test_admin_get_store_purchase_history_success():
             and response.object.values[0].product_names[0] == product_name
     ), response.get_msg()
 
-
+@patch.multiple(ShoppingCart, interval_time=MagicMock(return_value=5))
 def test_admin_get_user_purchase_history_success():
     cookie, username, password, store_name, store_id = _initialize_info(_generate_username(), "aaa",
                                                                         _generate_store_name())
