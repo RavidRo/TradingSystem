@@ -11,9 +11,8 @@ class StoreStub(Store):
         self.product_removed = False
         self.product_quantity_changed = False
         self.product_details_changed = False
-        self.products_to_quantities: dict = products
-        self.products_lock = ReadWriteLock()
-
+        self._products_to_quantities: dict = products
+        self._products_lock = ReadWriteLock()
     # 4.1
     # Creating a new product a the store
     def add_product(self, name: str, price: float, quantity: int) -> Response[None]:
@@ -52,16 +51,28 @@ class StoreStub(Store):
         return Response(True, ParsableList([]))
 
     def product_exists(self, product_id):
-        if self.products_to_quantities.get(product_id) is None:
+        if self._products_to_quantities.get(product_id) is None:
             return False
         return True
 
     def has_enough(self, product_id, quantity):
-        if self.products_to_quantities.get(product_id)[1] < quantity:
+        if self._products_to_quantities.get(product_id)[1] < quantity:
             return False
         return True
 
     def get_product(self, product_id):
-        return self.products_to_quantities.get(product_id)[0]
+        return self._products_to_quantities.get(product_id)[0]
+
+    # def check_available_products(self, products_to_quantities: dict) -> Response[None]:
+    #     return Response(True)
+    #
+    # def acquire_products(self, products_to_quantities: dict) -> Response[None]:
+    #     for prod_id, (product, quantity) in products_to_quantities.items():
+    #         current_quantity = self.products_to_quantities.get(prod_id)[1]
+    #         if current_quantity == quantity:
+    #             self.products_to_quantities.pop(prod_id)
+    #         else:
+    #             product = self.products_to_quantities.get(prod_id)[0]
+    #             self.products_to_quantities[prod_id] = (product, current_quantity - quantity)
 
     # def acquire_products(self):

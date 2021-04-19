@@ -20,6 +20,12 @@ class ShoppingCart(IShoppingCart):
     def interval_time(self):
         return 10 * 60
 
+    def get_shopping_bags(self):
+        return self.__shopping_bags
+
+    def cancel_timer(self):
+        self.__timer.cancel()
+
     def parse(self):
         parsed_bags = []
         for bag in self.__shopping_bags.values():
