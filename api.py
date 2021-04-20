@@ -7,7 +7,7 @@ from quart import Quart, render_template, websocket, redirect, request, url_for,
 import asyncio
 
 system = TradingSystem.getInstance()
-app = Quart(__name__, static_url_path="", static_folder="Frontend/dist")
+app = Quart(__name__, static_url_path="", static_folder="Frontend/build")
 
 
 @app.route("/", methods=["GET"])
