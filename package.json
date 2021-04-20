@@ -6,9 +6,7 @@
 	"scripts": {
 		"postinstall": "cd ./Frontend && npm install && npm run-script build"
 	},
-	"dependencies": {
-		"nwb-sass": "^0.10.2"
-	},
+	"dependencies": {},
 	"devDependencies": {},
 	"author": "",
 	"license": "MIT",
