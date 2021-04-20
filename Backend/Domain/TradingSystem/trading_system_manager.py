@@ -214,3 +214,15 @@ class TradingSystemManager:
     @staticmethod
     def get_any_store_purchase_history(store_id: str) -> Response[ParsableList[PurchaseDetails]]:
         return StoresManager.get_any_store_purchase_history(store_id)
+
+    @staticmethod
+    def lock_cart(cookie):
+        return UserManager.lock_cart(cookie)
+
+    @staticmethod
+    def release_cart(cookie):
+        return UserManager.release_cart(cookie)
+
+    @staticmethod
+    def cancel_purchase(cookie):
+        return UserManager.cancel_purchase(cookie)
