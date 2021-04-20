@@ -3,7 +3,6 @@ all the api calls and data asked from the server goes here
 this class is responsible for calling the right methods in the login classes"""
 
 from Backend.Service.trading_system import TradingSystem
-from Backend.Service import trading_system
 from quart import Quart, render_template, websocket, redirect, request, url_for
 import asyncio
 
@@ -73,7 +72,7 @@ async def save_product_in_cart():
     store_id = request.args.get('store_id')
     product_id = request.args.get('product_id')
     quantity = request.args.get('quantity')
-    answer = await system.add_to_cart(cookie,store_id, product_id, quantity)
+    answer = await system.save_product_in_cart(cookie, store_id, product_id, quantity)
     return '''<h1>Answer is: {}</h1>'''.format(answer)
 
 
@@ -96,6 +95,7 @@ async def remove_product_from_cart():
     answer = await system.remove_product_from_cart(cookie, product_id, quantity)
     return '''<h1>Answer is: {}</h1>'''.format(answer)
 
+
 @app.route('/change_product_quantity_in_cart', methods=['GET'])
 async def change_product_quantity_in_cart():
     cookie = request.args.get('cookie')
@@ -108,7 +108,6 @@ async def change_product_quantity_in_cart():
     return '''<h1>Answer is: {}</h1>'''.format(answer)
 
 
-
 @app.route('/purchase_cart', methods=['GET'])
 async def purchase_cart():
     cookie = request.args.get('cookie')
@@ -116,6 +115,7 @@ async def purchase_cart():
         cookie = await system.enter_system()
     answer = await system.purchase_cart(cookie)
     return '''<h1>Answer is: {}</h1>'''.format(answer)
+
 
 @app.route('/send_payment', methods=['GET'])
 async def send_payment():
@@ -128,6 +128,7 @@ async def send_payment():
 
 # Member
 # ===============================
+
 
 @app.route('/create_store', methods=['GET'])
 async def create_store():
@@ -171,8 +172,9 @@ async def remove_products():
         cookie = await system.enter_system()
     store_id = request.args.get('store_id')
     product_id = request.args.get('product_id')
-    answer = await system.remove_products(cookie, store_id, product_id)
+    answer = await system.remove_product_from_store(cookie, store_id, product_id)
     return '''<h1>Answer is: {}</h1>'''.format(answer)
+
 
 @app.route('/change_product_quantity', methods=['GET'])
 async def change_product_quantity():
@@ -272,7 +274,7 @@ async def get_store_purchases_history():
     if cookie is None:
         cookie = await system.enter_system()
     store_id = request.args.get('store_id')
-    answer = await system.get_store_purchases_history(cookie, store_id)
+    answer = await system.get_store_purchase_history(cookie, store_id)
     return '''<h1>Answer is: {}</h1>'''.format(answer)
 
 
@@ -285,8 +287,9 @@ async def get_user_purchase_history():
     if cookie is None:
         cookie = await system.enter_system()
     username = request.args.get('username')
-    answer = await system.get_user_purchase_history_admin(cookie, username)
+    answer = await system.get_user_purchase_history(cookie, username)
     return '''<h1>Answer is: {}</h1>'''.format(answer)
+
 
 @app.route('/get_any_store_purchase_history', methods=['GET'])
 async def get_any_store_purchase_history():
@@ -294,7 +297,7 @@ async def get_any_store_purchase_history():
     if cookie is None:
         cookie = await system.enter_system()
     store_id = request.args.get('store_id')
-    answer = await system.get_any_store_purchase_history_admin(cookie, store_id)
+    answer = await system.get_any_store_purchase_history(cookie, store_id)
     return '''<h1>Answer is: {}</h1>'''.format(answer)
 
 
