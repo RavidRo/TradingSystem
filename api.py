@@ -15,6 +15,12 @@ async def index():
     return await send_from_directory(app.static_folder, "index.html")
 
 
+@app.route("/cart", methods=["GET"])
+async def index():
+    context = TradingSystem.get_cart_details()
+    return await send_from_directory(app.static_folder, "cart.html", context)
+
+
 @app.route("/cookie", methods=["GET"])
 def get_cookie():
     cookie = system.enter_system()
