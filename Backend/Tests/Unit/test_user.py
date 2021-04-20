@@ -3,8 +3,7 @@ import pytest
 from Backend.Domain.TradingSystem.Responsibilities.responsibility import Permission
 from Backend.Domain.TradingSystem.Interfaces.IUserState import IUserState
 from Backend.Domain.TradingSystem.user import User
-
-from .stubs.member_stub import MemberStub
+from Backend.Tests.stubs.member_stub import MemberStub
 
 
 @pytest.fixture(scope="function", autouse=True)

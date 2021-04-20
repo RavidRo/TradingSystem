@@ -1,9 +1,13 @@
 import asyncio
 import json
 import threading
+from unittest import mock
+from unittest.mock import patch, MagicMock
 
 import pytest
 
+from Backend.Domain.Payment.outside_cashing import OutsideCashing
+from Backend.Domain.TradingSystem.shopping_cart import ShoppingCart
 from Backend.Service.trading_system import TradingSystem
 
 system = TradingSystem.getInstance()
@@ -13,13 +17,6 @@ store_number = 0
 store_lock = threading.Lock()
 product_number = 0
 product_lock = threading.Lock()
-
-
-# @pytest.fixture
-# def event_loop():
-#     loop = asyncio.get_event_loop()
-#     yield loop
-#     loop.close()
 
 
 async def _initialize_info(
@@ -182,8 +179,7 @@ async def test_add_new_product_negative_quantity_fail():
     res = await system.create_product(cookie, store_id, product_name, price, quantity)
     assert not res.succeeded()
 
-
-# def test_add_new_product_negative_price_fail():
+    # def test_add_new_product_negative_price_fail():
     cookie, username, password, store_name, store_id = await _initialize_info(
         _generate_username(), "aaa", _generate_store_name()
     )
@@ -586,11 +582,12 @@ async def test_remove_product_from_cart_wrong_store_fail():
 
 # 2.9 https://github.com/SeanPikulin/TradingSystem/blob/main/Documentation/Use%20Cases.md#29-Purchase-products
 @pytest.mark.asyncio
+@patch.multiple(ShoppingCart, interval_time=MagicMock(return_value=5))
 async def test_purchase_cart_success():
     cookie, username, password, store_name, store_id = await _initialize_info(
         _generate_username(), "aaa", _generate_store_name()
     )
-    product_id, product_name, price, quantity =await  _create_product(cookie, store_id, _generate_product_name(), 5.50, 10)
+    product_id, product_name, price, quantity = await _create_product(cookie, store_id, _generate_product_name(), 5.50, 10)
     await system.save_product_in_cart(cookie, store_id, product_id, 1)
     response = await system.purchase_cart(cookie)
     store_res = await system.get_store(store_id)
@@ -604,6 +601,7 @@ async def test_purchase_cart_success():
 
 
 @pytest.mark.asyncio
+@patch.multiple(ShoppingCart, interval_time=MagicMock(return_value=5))
 async def test_purchase_cart_no_items_fail():
     cookie, username, password, store_name, store_id = await _initialize_info(
         _generate_username(), "aaa", _generate_store_name()
@@ -613,6 +611,7 @@ async def test_purchase_cart_no_items_fail():
 
 
 @pytest.mark.asyncio
+@patch.multiple(ShoppingCart, interval_time=MagicMock(return_value=5))
 async def test_purchase_cart_twice_fail():
     cookie, username, password, store_name, store_id =await  _initialize_info(
         _generate_username(), "aaa", _generate_store_name()
@@ -625,17 +624,15 @@ async def test_purchase_cart_twice_fail():
 
 
 @pytest.mark.asyncio
+@patch.multiple(ShoppingCart, interval_time=MagicMock(return_value=5))
 async def test_send_payment_success():
     cookie, username, password, store_name, store_id = await _initialize_info(
         _generate_username(), "aaa", _generate_store_name()
     )
-    card_number = "1234-1234-1234-1234"
-    card_expire = "12/34"
-    card_cvv = "123"
     product_id, product_name, price, quantity = await _create_product(cookie, store_id, _generate_product_name(), 5.50, 10)
     await system.save_product_in_cart(cookie, store_id, product_id, 1)
     await system.purchase_cart(cookie)
-    response = await system.send_payment(cookie, {}, {})
+    response = await system.send_payment(cookie, "", "")
     res = await system.get_store(store_id)
     ids_to_quantity = res.object.ids_to_quantities[product_id]
     assert (
@@ -645,16 +642,37 @@ async def test_send_payment_success():
 
 
 @pytest.mark.asyncio
+@patch.multiple(ShoppingCart, interval_time=MagicMock(return_value=5))
+async def test_send_payment_success_timer_over():
+    cookie, username, password, store_name, store_id = await _initialize_info(
+        _generate_username(), "aaa", _generate_store_name()
+    )
+
+    product_id, product_name, price, quantity = await _create_product(cookie, store_id, _generate_product_name(), 5.50, 10)
+    await system.save_product_in_cart(cookie, store_id, product_id, 1)
+    await system.purchase_cart(cookie)
+    response = await system.send_payment(cookie, "", "")
+    timer = threading.Timer(6, finish_test_send_payment_success_timer_over(store_id, product_id,response))
+    timer.start()
+
+
+async def finish_test_send_payment_success_timer_over(store_id, product_id, response):
+    res2 = await system.get_store(store_id)
+    assert (
+            response.succeeded()
+            and res2.object.ids_to_quantities[product_id] == 9
+    ), response.get_msg()
+
+@pytest.mark.asyncio
+@patch.multiple(ShoppingCart, interval_time=MagicMock(return_value=5))
 async def test_send_payment_before_purchase_cart_fail():
     cookie, username, password, store_name, store_id = await _initialize_info(
         _generate_username(), "aaa", _generate_store_name()
     )
-    card_number = "1234-1234-1234-1234"
-    card_expire = "12/34"
-    card_cvv = "123"
+
     product_id, product_name, price, quantity = await _create_product(cookie, store_id, _generate_product_name(), 5.50, 10)
     await system.save_product_in_cart(cookie, store_id, product_id, 1)
-    res1 = await system.send_payment(cookie, {}, {})
+    res1 = await system.send_payment(cookie, "", "")
     res2 = await system.get_store(store_id)
     res2 = res2.object.ids_to_quantities[product_id]
     res3 = await system.get_cart_details(cookie)
@@ -665,19 +683,116 @@ async def test_send_payment_before_purchase_cart_fail():
     )
 
 
+# bad scenarios
+@pytest.mark.asyncio
+@patch.multiple(ShoppingCart, interval_time=MagicMock(return_value=5))
+async def test_send_payment_failed():
+    with mock.patch.object(OutsideCashing, 'pay', return_value=False):
+        cookie, username, password, store_name, store_id = await _initialize_info(
+            _generate_username(), "aaa", _generate_store_name()
+        )
+        product_id, product_name, price, quantity = await _create_product(cookie, store_id, _generate_product_name(), 5.50, 10)
+        await system.save_product_in_cart(cookie, store_id, product_id, 1)
+        await system.purchase_cart(cookie)
+        res1= await system.send_payment(cookie, "", "")
+        # this line is added since the user might cancel the purchase after unsuccessful payment
+        res_cancel = await system.cancel_purchase(cookie)
+        res2 = await system.get_store(store_id)
+        res3 = await system.get_cart_details(cookie)
+        assert (
+            res_cancel.succeeded()
+            and not res1.succeeded()
+            and res2.object.ids_to_quantities[product_id] == 10
+            and res3.object.bags[0].product_ids_to_quantities[product_id] == 1
+        )
+
+
+@pytest.mark.asyncio
+@patch.multiple(ShoppingCart, interval_time=MagicMock(return_value=5))
+async def test_try_paying_after_time_passed():
+    import time
+    cookie, username, password, store_name, store_id = await _initialize_info(
+        _generate_username(), "aaa", _generate_store_name()
+    )
+    product_id, product_name, price, quantity = await _create_product(cookie, store_id, _generate_product_name(), 5.50, 10)
+    await system.save_product_in_cart(cookie, store_id, product_id, 1)
+    await system.purchase_cart(cookie)
+    timer = threading.Timer(6, finish_test_try_paying_after_time_passed(cookie, store_id, product_id))
+    timer.start()
+
+
+async def finish_test_try_paying_after_time_passed(cookie, store_id, product_id):
+    res1 = await system.send_payment(cookie, "", "")
+    res2 = await system.get_store(store_id)
+    res3 = await system.get_cart_details(cookie)
+    assert (
+            not res1.succeeded()
+            and res2.object.ids_to_quantities[product_id] == 10
+            and res3.object.bags[0].product_ids_to_quantities[product_id] == 1
+    )
+
+@pytest.mark.asyncio
+@patch.multiple(ShoppingCart, interval_time=MagicMock(return_value=5))
+async def test_try_paying_first_time_failed_than_success():
+    with mock.patch.object(OutsideCashing, 'pay', return_value=False):
+        cookie, username, password, store_name, store_id = await _initialize_info(
+            _generate_username(), "aaa", _generate_store_name()
+        )
+        product_id, product_name, price, quantity = await _create_product(cookie, store_id, _generate_product_name(), 5.50,
+                                                                    10)
+        await system.save_product_in_cart(cookie, store_id, product_id, 1)
+        await system.purchase_cart(cookie)
+        response = await system.send_payment(cookie, "", "")
+
+    try_again_response = await system.send_payment(cookie, "", "")
+    get_response = await system.get_store(store_id)
+    assert (
+            not response.succeeded()
+            and try_again_response.succeeded()
+            and get_response.object.ids_to_quantities[product_id] == 9
+    )
+
+
+@pytest.mark.asyncio
+@patch.multiple(ShoppingCart, interval_time=MagicMock(return_value=5))
+async def test_try_paying_first_time_incorrect_info_second_time_timer_over():
+    import time
+    with mock.patch.object(OutsideCashing, 'pay', return_value=False):
+        cookie, username, password, store_name, store_id = await _initialize_info(
+            _generate_username(), "aaa", _generate_store_name()
+        )
+        product_id, product_name, price, quantity = await _create_product(cookie, store_id, _generate_product_name(), 5.50,
+                                                                    10)
+        await system.save_product_in_cart(cookie, store_id, product_id, 1)
+        await system.purchase_cart(cookie)
+        response = await system.send_payment(cookie, "", "")
+
+    timer = threading.Timer(6, finish_test_try_paying_first_time_incorrect_info_second_time_timer_over(response, cookie, product_id, store_id))
+    timer.start()
+
+
+async def finish_test_try_paying_first_time_incorrect_info_second_time_timer_over(response, cookie, product_id, store_id):
+    try_again_response = await system.send_payment(cookie, "", "")
+    get_response = system.get_store(store_id).object.ids_to_quantities[product_id]
+    assert (
+            not response.succeeded()
+            and not try_again_response.succeeded()
+            and get_response == 10
+    )
+
+
 # 3.7 https://github.com/SeanPikulin/TradingSystem/blob/main/Documentation/Use%20Cases.md#37-Get-personal-purchase-history
 @pytest.mark.asyncio
+@patch.multiple(ShoppingCart, interval_time=MagicMock(return_value=5))
 async def test_get_purchase_history_success():
     cookie, username, password, store_name, store_id = await _initialize_info(
         _generate_username(), "aaa", _generate_store_name()
     )
-    card_number = "1234-1234-1234-1234"
-    card_expire = "12/34"
-    card_cvv = "123"
+
     product_id, product_name, price, quantity = await _create_product(cookie, store_id, _generate_product_name(), 5.50, 10)
     await system.save_product_in_cart(cookie, store_id, product_id, 1)
     await system.purchase_cart(cookie)
-    await system.send_payment(cookie, {}, {})
+    await system.send_payment(cookie, "", "")
     response = await system.get_purchase_history(cookie)
     assert (
         response.succeeded()
@@ -710,6 +825,7 @@ async def test_get_purchase_history_no_purchases_saved_to_cart_success():
 
 
 @pytest.mark.asyncio
+@patch.multiple(ShoppingCart, interval_time=MagicMock(return_value=5))
 async def test_get_purchase_history_no_payment_fail():
     cookie, username, password, store_name, store_id = await _initialize_info(
         _generate_username(), "aaa", _generate_store_name()
@@ -1329,14 +1445,12 @@ async def test_get_store_personnel_wrong_store_name_fail():
 
 
 # 4.11 https://github.com/SeanPikulin/TradingSystem/blob/main/Documentation/Use%20Cases.md#411-Get-store-purchase-history
+@patch.multiple(ShoppingCart, interval_time=MagicMock(return_value=5))
 @pytest.mark.asyncio
 async def test_get_store_purchase_history_success():
     cookie, username, password, store_name, store_id = await _initialize_info(
         _generate_username(), "aaa", _generate_store_name()
     )
-    card_number = "1234-1234-1234-1234"
-    card_expire = "12/34"
-    card_cvv = "123"
     product_id, product_name, price, quantity = await _create_product(cookie, store_id, _generate_product_name(), 5.50, 10)
     await system.save_product_in_cart(cookie, store_id, product_id, 1)
     await system.purchase_cart(cookie)
@@ -1361,7 +1475,6 @@ async def test_get_store_purchase_history_success():
 #     assert response.succeeded()
 # assumed empty list means failure
 
-
 @pytest.mark.asyncio
 async def test_get_store_purchase_history_no_purchases_saved_to_cart_success():
     cookie, username, password, store_name, store_id =await  _initialize_info(
@@ -1374,6 +1487,7 @@ async def test_get_store_purchase_history_no_purchases_saved_to_cart_success():
 
 
 @pytest.mark.asyncio
+@patch.multiple(ShoppingCart, interval_time=MagicMock(return_value=5))
 async def test_get_store_purchase_history_no_payment_success():
     cookie, username, password, store_name, store_id = await _initialize_info(
         _generate_username(), "aaa", _generate_store_name()
@@ -1397,6 +1511,7 @@ async def _get_admin() -> str:
 
 
 @pytest.mark.asyncio
+@patch.multiple(ShoppingCart, interval_time=MagicMock(return_value=5))
 async def test_admin_get_store_purchase_history_success():
     cookie, username, password, store_name, store_id = await _initialize_info(_generate_username(), "aaa", _generate_store_name())
     admin_cookie = await _get_admin()
@@ -1416,12 +1531,10 @@ async def test_admin_get_store_purchase_history_success():
 
 
 @pytest.mark.asyncio
+@patch.multiple(ShoppingCart, interval_time=MagicMock(return_value=5))
 async def test_admin_get_user_purchase_history_success():
     cookie, username, password, store_name, store_id = await _initialize_info(_generate_username(), "aaa", _generate_store_name())
     admin_cookie = await _get_admin()
-    card_number = "1234-1234-1234-1234"
-    card_expire = "12/34"
-    card_cvv = "123"
     product_id, product_name, price, quantity = await _create_product(cookie, store_id, _generate_product_name(), 5.50, 10)
     await system.save_product_in_cart(cookie, store_id, product_id, 1)
     await system.purchase_cart(cookie)
