@@ -4,7 +4,7 @@
 	"description": "Describe trading-system here",
 	"private": true,
 	"scripts": {
-		"postinstall": "cd ./Frontend && npm install && npm run-script build"
+		"postinstall": "cd ./Frontend && npm install && node proxy.js && npm run-script build"
 	},
 	"dependencies": {},
 	"devDependencies": {},
