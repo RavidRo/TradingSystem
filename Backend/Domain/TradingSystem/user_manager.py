@@ -1,5 +1,6 @@
 from typing import Callable
 import uuid
+import json
 
 from Backend.Domain.TradingSystem.store import Store
 from Backend.Domain.TradingSystem.Interfaces.IUser import IUser
@@ -13,9 +14,21 @@ from Backend.Domain.TradingSystem.Responsibilities.responsibility import Permiss
 from Backend.Domain.TradingSystem.user import User
 
 
+def at_least_one_admin():
+    with open("config.json", "r") as read_file:
+        data = json.load(read_file)
+        if "admins" not in data or len(data["admins"]) <= 0:
+            raise Exception(
+                "At least one admin should be at the system. Check config.json to add admins."
+            )
+
+
+at_least_one_admin()
+
+
 class UserManager:
-    cookie_user: dict[str, IUser] = {}
-    username_user: dict[str, IUser] = {}
+    __cookie_user: dict[str, IUser] = {}
+    __username_user: dict[str, IUser] = {}
 
     @staticmethod
     def __deligate_to_user(cookie, func):
@@ -26,15 +39,15 @@ class UserManager:
 
     @staticmethod
     def __get_user_by_cookie(cookie) -> IUser:
-        if cookie not in UserManager.cookie_user:
+        if cookie not in UserManager.__cookie_user:
             return None
-        return UserManager.cookie_user[cookie]
+        return UserManager.__cookie_user[cookie]
 
     @staticmethod
     def __get_user_by_username(username) -> IUser:
-        if username not in UserManager.username_user:
+        if username not in UserManager.__username_user:
             return None
-        return UserManager.username_user[username]
+        return UserManager.__username_user[username]
 
     @staticmethod
     def __create_cookie() -> str:
@@ -45,7 +58,7 @@ class UserManager:
     @staticmethod
     def enter_system() -> str:
         cookie = UserManager.__create_cookie()
-        UserManager.cookie_user[cookie] = IUser.create_user()
+        UserManager.__cookie_user[cookie] = IUser.create_user()
         return cookie
 
     # 2.3
@@ -54,7 +67,7 @@ class UserManager:
         def func(user: User):
             response = user.register(username, password)
             if response.succeeded():
-                UserManager.username_user[username] = user
+                UserManager.__username_user[username] = user
             return response
 
         return UserManager.__deligate_to_user(cookie, func)
@@ -67,15 +80,15 @@ class UserManager:
 
             # If response succeeded we want to connect the cookie to the username
             if response.succeeded():
-                for user_cookie in UserManager.cookie_user:
-                    old_user = UserManager.cookie_user[user_cookie]
+                for user_cookie in UserManager.__cookie_user:
+                    old_user = UserManager.__cookie_user[user_cookie]
                     response = old_user.get_username()
                     if (
                         response.succeeded()
                         and old_user != user
                         and response.get_obj().get_val() == username
                     ):
-                        UserManager.cookie_user[cookie] = old_user
+                        UserManager.__cookie_user[cookie] = old_user
             # *This action will delete the current cart but will restore the old one and other user details
 
             return response
@@ -275,3 +288,13 @@ class UserManager:
     @staticmethod
     def get_any_user_purchase_history(username: str) -> Response[ParsableList[PurchaseDetails]]:
         return UserManager.__get_user_by_username(username).get_purchase_history()
+
+    # For test purposes
+    # =====================
+    @staticmethod
+    def _get_cookie_user():
+        return UserManager.__cookie_user
+
+    @staticmethod
+    def _get_username_user():
+        return UserManager.__username_user
