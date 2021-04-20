@@ -125,6 +125,7 @@ class TradingSystem(object):
             TradingSystemManager.release_cart(cookie)
             return res
 
+    @sync_to_async
     @log.loging(to_hide=[1])
     def cancel_purchase(self, cookie: str):
         return TradingSystemManager.cancel_purchase(cookie)

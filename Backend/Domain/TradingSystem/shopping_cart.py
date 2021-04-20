@@ -188,3 +188,4 @@ class ShoppingCart(IShoppingCart):
         for bag in self.__shopping_bags.values():
             bag.send_back()
         self.__transaction_lock.release()
+        return Response(True, msg="Purchase was cacneled succesfully")
