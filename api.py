@@ -4,7 +4,6 @@ this class is responsible for calling the right methods in the login classes"""
 
 from Backend.Service.trading_system import TradingSystem
 from quart import Quart, render_template, websocket, redirect, request, url_for, send_from_directory
-import asyncio
 
 system = TradingSystem.getInstance()
 app = Quart(__name__, static_url_path="", static_folder="Frontend/dist")
