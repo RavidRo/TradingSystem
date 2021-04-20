@@ -1283,11 +1283,11 @@ __t1_response = __system.get_stores_details()   # getting a successful response
 __t2_response = __system.get_stores_details()
 
 
-def __get_product(cookie: str, store_id: str, product_id: str, thread: int) -> None:
+def __get_product(cookie: str, thread: int) -> None:
     if thread == 1:
-        __t1_response = __system.save_product_in_cart(cookie, store_id, product_id, quantity=1)
+        __t1_response = __system.purchase_cart(cookie)
     else:
-        __t2_response = __system.save_product_in_cart(cookie, store_id, product_id, quantity=1)
+        __t2_response = __system.purchase_cart(cookie)
 
 
 def test_buy_last_product_together_fail():
@@ -1295,8 +1295,10 @@ def test_buy_last_product_together_fail():
         cookie, username, password, store_name, store_id = __initialize_info(__generate_username(), "aaa", __generate_store_name())
         new_cookie, new_username, new_password_, _, _ = __initialize_info(__generate_username(), "aaa")
         product_id, product_name, price, quantity = __create_product(cookie, store_id, __generate_product_name(), 5.50, 1)
-        t1 = threading.Thread(target=lambda: __get_product(cookie, store_id, product_id, 1))
-        t2 = threading.Thread(target=lambda: __get_product(new_cookie, store_id, product_id, 2))
+        __system.save_product_in_cart(cookie, store_id, product_id, quantity=1)
+        __system.save_product_in_cart(new_cookie, store_id, product_id, quantity=1)
+        t1 = threading.Thread(target=lambda: __get_product(cookie, 1))
+        t2 = threading.Thread(target=lambda: __get_product(new_cookie, 2))
         t1.start()
         t2.start()
         t1.join()
@@ -1314,7 +1316,7 @@ def test_buy_delete_product():
         new_cookie, new_username, new_password_, _, _ = __initialize_info(__generate_username(), "aaa")
         product_id, product_name, price, quantity = __create_product(cookie, store_id, __generate_product_name(), 5.50, 1)
         t1 = threading.Thread(target=lambda: __remove_product(cookie, store_id, product_id))
-        t2 = threading.Thread(target=lambda: __get_product(new_cookie, store_id, product_id, 2))
+        t2 = threading.Thread(target=lambda: __get_product(new_cookie, 2))
         t1.start()
         t2.start()
         t1.join()
