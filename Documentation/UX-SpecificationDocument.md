@@ -54,7 +54,7 @@
 
 ---
 
-**SLO** - Content is easier to see and hear  
+**SLO** - Content is easier to see.  
 **SLI**
 
 -   When users resize text up to 400% or change text spacing, no information is lost.
