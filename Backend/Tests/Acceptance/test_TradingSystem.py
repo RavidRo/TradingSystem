@@ -635,7 +635,7 @@ async def test_send_payment_success():
     product_id, product_name, price, quantity = await _create_product(cookie, store_id, _generate_product_name(), 5.50, 10)
     await system.save_product_in_cart(cookie, store_id, product_id, 1)
     await system.purchase_cart(cookie)
-    response = await system.send_payment(cookie, {}, {})
+    response = await system.send_payment(cookie, "", "")
     res = await system.get_store(store_id)
     ids_to_quantity = res.object.ids_to_quantities[product_id]
     assert (
@@ -654,7 +654,7 @@ async def test_send_payment_before_purchase_cart_fail():
     card_cvv = "123"
     product_id, product_name, price, quantity = await _create_product(cookie, store_id, _generate_product_name(), 5.50, 10)
     await system.save_product_in_cart(cookie, store_id, product_id, 1)
-    res1 = await system.send_payment(cookie, {}, {})
+    res1 = await system.send_payment(cookie, "", "")
     res2 = await system.get_store(store_id)
     res2 = res2.object.ids_to_quantities[product_id]
     res3 = await system.get_cart_details(cookie)
@@ -677,7 +677,7 @@ async def test_get_purchase_history_success():
     product_id, product_name, price, quantity = await _create_product(cookie, store_id, _generate_product_name(), 5.50, 10)
     await system.save_product_in_cart(cookie, store_id, product_id, 1)
     await system.purchase_cart(cookie)
-    await system.send_payment(cookie, {}, {})
+    await system.send_payment(cookie, "", "")
     response = await system.get_purchase_history(cookie)
     assert (
         response.succeeded()
@@ -1340,7 +1340,7 @@ async def test_get_store_purchase_history_success():
     product_id, product_name, price, quantity = await _create_product(cookie, store_id, _generate_product_name(), 5.50, 10)
     await system.save_product_in_cart(cookie, store_id, product_id, 1)
     await system.purchase_cart(cookie)
-    await system.send_payment(cookie, {}, {})
+    await system.send_payment(cookie, "", "")
     response = await system.get_store_purchase_history(cookie, store_id)
     assert (
         response.succeeded()
@@ -1406,7 +1406,7 @@ async def test_admin_get_store_purchase_history_success():
     product_id, product_name, price, quantity =await  _create_product(cookie, store_id, _generate_product_name(), 5.50, 10)
     await system.save_product_in_cart(cookie, store_id, product_id, 1)
     await system.purchase_cart(cookie)
-    await system.send_payment(cookie, {}, {})
+    await system.send_payment(cookie, "", "")
     response = await system.get_any_store_purchase_history(admin_cookie, store_id)
     assert (
         response.succeeded()
@@ -1425,7 +1425,7 @@ async def test_admin_get_user_purchase_history_success():
     product_id, product_name, price, quantity = await _create_product(cookie, store_id, _generate_product_name(), 5.50, 10)
     await system.save_product_in_cart(cookie, store_id, product_id, 1)
     await system.purchase_cart(cookie)
-    await system.send_payment(cookie, {}, {})
+    await system.send_payment(cookie, "", "")
     response = await system.get_user_purchase_history(admin_cookie, username)
     assert response.succeeded()
 
