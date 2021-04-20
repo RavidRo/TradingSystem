@@ -59,14 +59,11 @@
 
 -   When users resize text up to 400% or change text spacing, no information is lost.
 -   Default foreground and background color combinations provide sufficient contrast.
--   Font size will be according to the [following guidelines](https://learnui.design/blog/mobile-desktop-website-font-size-guidelines.html)
-
----
-
-**SLO** - Users have enough time to read and use the content.  
-**SLI** - Postpone or suppress interruptions, except where necessary.
 
 ---
 
 **SLO** - Readable text without reading aids.  
-**SLI** - Width of the content will be limited to the screen's width.
+**SLI** 
+-   Width of the content will be limited to the screen's width.
+-   Font size will be according to the [following guidelines](https://learnui.design/blog/mobile-desktop-website-font-size-guidelines.html)
+
