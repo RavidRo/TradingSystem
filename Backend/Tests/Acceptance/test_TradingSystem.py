@@ -727,7 +727,6 @@ def test_try_paying_first_time_incorrect_info_second_time_timer_over():
     )
 
 
-
 # 3.7 https://github.com/SeanPikulin/TradingSystem/blob/main/Documentation/Use%20Cases.md#37-Get-personal-purchase-history
 @patch.multiple(ShoppingCart, interval_time=MagicMock(return_value=5))
 def test_get_purchase_history_success():
@@ -1431,7 +1430,7 @@ def test_admin_get_store_purchase_history_success():
 @patch.multiple(ShoppingCart, interval_time=MagicMock(return_value=5))
 def test_admin_get_user_purchase_history_success():
     cookie, username, password, store_name, store_id =  _initialize_info(_generate_username(), "aaa", _generate_store_name())
-    admin_cookie =  _get_admin()
+    admin_cookie = _get_admin()
     product_id, product_name, price, quantity =  _create_product(cookie, store_id, _generate_product_name(), 5.50, 10)
     system.save_product_in_cart(cookie, store_id, product_id, 1)
     system.purchase_cart(cookie)
@@ -1441,39 +1440,52 @@ def test_admin_get_user_purchase_history_success():
 
 
 # parallel testing
+_t_responses = []
 
-#
-# def __get_product(executor, cookie, loop) -> None:
-#     result =  loop.run_in_executor(executor, system.purchase_cart(cookie))
-#     print(result)
-#
-#
-# def test_buy_last_product_together_fail():
-#     # for i in range(100):
-#         cookie, username, password, store_name, store_id =  _initialize_info(_generate_username(), "aaa",_generate_store_name())
-#         new_cookie, new_username, new_password_, _, _ =  _initialize_info(_generate_username(), "aaa")
-#         product_id, product_name, price, quantity =  _create_product(cookie, store_id, _generate_product_name(), 5.50, 1)
-#         system.save_product_in_cart(cookie, store_id, product_id, quantity=1)
-#         system.save_product_in_cart(new_cookie, store_id, product_id, quantity=1)
-#
-#
-# def remove_product(cookie: str, store_id: str, product_id: str) -> None:
-#     t1_response = system.remove_product_from_store(cookie, store_id, product_id)
+def __get_product(cookie: str, thread: int) -> None:
+    global _t_responses
+    response = system.purchase_cart(cookie)
+    _t_responses.append((thread, response.succeeded()))
 
 
-#def test_buy_delete_product():
+@patch.multiple(ShoppingCart, interval_time=MagicMock(return_value=5))
+def test_buy_last_product_together_fail():
+    for i in range(100):
+        cookie, username, password, store_name, store_id = _initialize_info(_generate_username(), "aaa", _generate_store_name())
+        new_cookie, new_username, new_password_, _, _ = _initialize_info(_generate_username(), "aaa")
+        product_id, product_name, price, quantity = _create_product(cookie, store_id, _generate_product_name(), 5.50, 1)
+        system.save_product_in_cart(cookie, store_id, product_id, quantity=1)
+        system.save_product_in_cart(new_cookie, store_id, product_id, quantity=1)
+        t1 = threading.Thread(target=lambda: __get_product(cookie, 1))
+        t2 = threading.Thread(target=lambda: __get_product(new_cookie, 2))
+        t1.start()
+        t2.start()
+        t2.join()
+        t1.join()
+        print(_t_responses[i * 2], _t_responses[i * 2 + 1])
+        assert not (_t_responses[i * 2][1] and _t_responses[i * 2 + 1][1])
+
+
+def _remove_product(cookie: str, store_id: str, product_id: str, thread: str) -> None:
+    t1_response = system.remove_product_from_store(cookie, store_id, product_id)
+
+
+# def test_buy_delete_product():
+#     global _t_responses
+#     _t_responses = []
 #     for i in range(100):
-#         cookie, username, password, store_name, store_id = __initialize_info(__generate_username(), "aaa", __generate_store_name())
-#         new_cookie, new_username, new_password_, _, _ = __initialize_info(__generate_username(), "aaa")
-#         product_id, product_name, price, quantity = __create_product(cookie, store_id, __generate_product_name(), 5.50, 1)
-#         t1 = threading.Thread(target=lambda: __remove_product(cookie, store_id, product_id))
+#         cookie, username, password, store_name, store_id = _initialize_info(_generate_username(), "aaa", _generate_store_name())
+#         new_cookie, new_username, new_password_, _, _ = _initialize_info(_generate_username(), "aaa")
+#         product_id, product_name, price, quantity = _create_product(cookie, store_id, _generate_product_name(), 5.50, 1)
+#         system.save_product_in_cart(cookie, store_id, product_id, quantity=1)
+#         t1 = threading.Thread(target=lambda: _remove_product(cookie, store_id, product_id, "owner"))
 #         t2 = threading.Thread(target=lambda: __get_product(new_cookie, 2))
 #         t1.start()
 #         t2.start()
 #         t1.join()
 #         t2.join()
-#
-#
+
+
 #def __appoint_manager(cookie, store_id, username, thread: int):
 #     if thread == 1:
 #         __t1_response = __system.appoint_manager(cookie, store_id, username)
