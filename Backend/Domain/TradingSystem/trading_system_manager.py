@@ -120,7 +120,7 @@ class TradingSystemManager:
 
     # 4.1
     @staticmethod
-    def remove_product_from_store(cookie: str, store_id: str, product_id: str) -> Response[None]:
+    def remove_product_from_store(cookie: str, store_id: str, product_id: str) -> Response[PrimitiveParsable[int]]:
         return UserManager.remove_product_from_store(cookie, store_id, product_id)
 
     # 4.1

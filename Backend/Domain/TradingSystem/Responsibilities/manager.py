@@ -1,4 +1,4 @@
-from Backend.response import Response, ParsableList
+from Backend.response import Response, ParsableList, PrimitiveParsable
 
 from Backend.Domain.TradingSystem.Responsibilities.responsibility import Permission, Responsibility
 from Backend.Domain.TradingSystem.Responsibilities.owner import Owner
@@ -33,9 +33,9 @@ class Manager(Owner):
         return self.__create_no_permission_Response(Permission.MANAGE_PRODUCTS)
 
     # 4.1
-    def remove_product(self, product_id: str) -> Response[None]:
+    def remove_product(self, product_id: str) -> Response[PrimitiveParsable[int]]:
         if self.__permissions[Permission.MANAGE_PRODUCTS]:
-            return super().remove_product(product_id, product_id)
+            return super().remove_product(product_id)
 
         return self.__create_no_permission_Response(Permission.MANAGE_PRODUCTS)
 

@@ -3,7 +3,10 @@ import threading
 from unittest import mock
 from unittest.mock import patch, MagicMock
 from Backend.Domain.Payment.outside_cashing import OutsideCashing
+from Backend.Domain.TradingSystem.States.member import Member
 from Backend.Domain.TradingSystem.shopping_cart import ShoppingCart
+from Backend.Domain.TradingSystem.user import User
+from Backend.Domain.TradingSystem.user_manager import UserManager
 from Backend.Service.trading_system import TradingSystem
 
 system = TradingSystem.getInstance()
@@ -1467,24 +1470,38 @@ def test_buy_last_product_together_fail():
 
 
 def _remove_product(cookie: str, store_id: str, product_id: str, thread: str) -> None:
-    t1_response = system.remove_product_from_store(cookie, store_id, product_id)
+    global _t_responses
+    response = system.remove_product_from_store(cookie, store_id, product_id)
+    if response.succeeded():
+        _t_responses.append((thread, response.get_obj()))
+    else:
+        _t_responses.append((thread, False))
 
 
-# def test_buy_delete_product():
-#     global _t_responses
-#     _t_responses = []
-#     for i in range(100):
-#         cookie, username, password, store_name, store_id = _initialize_info(_generate_username(), "aaa", _generate_store_name())
-#         new_cookie, new_username, new_password_, _, _ = _initialize_info(_generate_username(), "aaa")
-#         product_id, product_name, price, quantity = _create_product(cookie, store_id, _generate_product_name(), 5.50, 1)
-#         system.save_product_in_cart(cookie, store_id, product_id, quantity=1)
-#         t1 = threading.Thread(target=lambda: _remove_product(cookie, store_id, product_id, "owner"))
-#         t2 = threading.Thread(target=lambda: __get_product(new_cookie, 2))
-#         t1.start()
-#         t2.start()
-#         t1.join()
-#         t2.join()
+@patch.multiple(ShoppingCart, interval_time=MagicMock(return_value=5))
+def test_buy_delete_product():
+    global _t_responses
+    _t_responses = []
+    for i in range(100):
+        cookie, username, password, store_name, store_id = _initialize_info(
+            _generate_username(), "aaa", _generate_store_name()
+        )
+        new_manager_cookie, new_manager_username, new_manager_password, _, _ = _initialize_info(
+            _generate_username(), "bbb"
+        )
+        system.appoint_manager(cookie, store_id, new_manager_username)
+        system.add_manager_permission(cookie, store_id, new_manager_username, "appoint_manager")
+        product_id, product_name, price, quantity = _create_product(new_manager_cookie, store_id, _generate_product_name(), 5.50, 3)
+        system.save_product_in_cart(cookie, store_id, product_id, quantity=1)
 
+        t1 = threading.Thread(target=lambda: _remove_product(new_manager_cookie, store_id, product_id, "owner"))
+        t2 = threading.Thread(target=lambda: __get_product(cookie, 2))
+        t2.start()
+        t1.start()
+        t2.join()
+        t1.join()
+        print(_t_responses[i * 2], _t_responses[i * 2 + 1])
+        # assert not (_t_responses[i * 2][1] and _t_responses[i * 2 + 1][1])
 
 #def __appoint_manager(cookie, store_id, username, thread: int):
 #     if thread == 1:

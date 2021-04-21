@@ -88,7 +88,7 @@ class User(IUser):
         return self.state.add_new_product(store_id, name, price, quantity)
 
     # 4.1
-    def remove_product_from_store(self, store_id: str, product_id: str) -> Response[None]:
+    def remove_product_from_store(self, store_id: str, product_id: str) -> Response[PrimitiveParsable[int]]:
         return self.state.remove_product(store_id, product_id)
 
     # 4.1
