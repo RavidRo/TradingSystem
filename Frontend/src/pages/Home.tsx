@@ -1,8 +1,8 @@
 import React, { FC, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 
-import '../styles/App.scss';
 import logo from '../logo.svg';
+import Navbar from './Navbar';
 
 type HomeProps = {};
 
@@ -18,6 +18,7 @@ const Home: FC<HomeProps> = () => {
 	}, []);
 	return (
 		<div className="App">
+			<Navbar/>
 			<header className="App-header">
 				<img src={logo} className="App-logo" alt="logo" />
 				<p>
