@@ -27,7 +27,7 @@ const Navbar: FC<NavBarProps> = () => {
 				<Link className="cartLink" to='/'>My Cart</Link>
 				{hoverCart?
 				<PopupCart
-					content={"hello!"}
+					content={"your cart is:"}
 				>
 				</PopupCart>
 				: null}

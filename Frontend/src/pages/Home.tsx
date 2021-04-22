@@ -1,8 +1,11 @@
+import { GridList, GridListTile } from '@material-ui/core';
 import React, { FC, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 
-import logo from '../logo.svg';
+import home from '../images/home.jpeg';
 import Navbar from './Navbar';
+import SearchBar from './SearchBar';
+import '../styles/Home.scss';
 
 type HomeProps = {};
 
@@ -16,19 +19,21 @@ const Home: FC<HomeProps> = () => {
 	useEffect(() => {
 		getCookie();
 	}, []);
+
 	return (
 		<div className="App">
 			<Navbar/>
 			<header className="App-header">
-				<img src={logo} className="App-logo" alt="logo" />
-				<p>
-					Edit <code>src/App.tsx</code> and save to reload.
-				</p>
-				<p>{cookie}</p>
-				<Link to="/cart" className="App-link">
-					My Cart
-				</Link>
+				<p>Cookie: {cookie}</p>
 			</header>
+			<SearchBar/>
+				
+			<div className="imgDiv">
+			<img 
+				className="photo" 
+				src={home} 
+			/>
+			</div>
 		</div>
 	);
 };

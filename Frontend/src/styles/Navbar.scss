@@ -33,13 +33,14 @@
     text-decoration: none;
     color: black;
     position: absolute;
-    bottom: 0;
+    bottom: 20%;
     margin-left: 15%;
 }
 .cartIcon{
     font-size: 30px;
     position: absolute;
-    bottom: 0;
+    bottom: 20%;
+    cursor: pointer;
 }
 .signInDiv{
     display: flex;
@@ -53,11 +54,13 @@
     text-decoration: none;
     color: black;
     position: absolute;
-    bottom: 0;
+    bottom: 20%;
     margin-left: 15%;
 }
 .signInIcon{
     font-size: 30px;
     position: absolute;
-    bottom: 0;
+    bottom: 20%;
+    cursor: pointer;
+
 }
