@@ -11,8 +11,9 @@ function App() {
 			<BrowserRouter>
 				<Navbar />
 				<Switch>
-					<Route path="/" exact component={Cart} />
-					<Route path="/cart" exact component={Home} />
+					<Route path="/" exact component={Home} />
+					<Route path="/cart" exact component={Cart} />
+					<Route path="/searchPage" exact component={Home} />
 				</Switch>
 			</BrowserRouter>
 		</>

@@ -1,21 +1,35 @@
-import React, { FC, useEffect, useState } from 'react';
+import React, { useState, FC} from 'react';
 import '../styles/SearchBar.scss';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faSearch } from '@fortawesome/free-solid-svg-icons';
+import { Link } from 'react-router-dom';
+import {createBrowserHistory} from "history";
+
 
 type SearchBarProps = {};
 
 const SearchBar: FC<SearchBarProps> = () => {
-	
+	const [searchProd, setSearch] = useState<string>("");
+    const history = createBrowserHistory();
+
+    const handleClickSearch  = ()=>{
+
+    }
 	return (
 		<div className="SearchBarDiv">
 			 <input 
                 className="searchInput"
                 key="random1"
                 placeholder={"search product"}
-                // onChange={(e) => setKeyword(e.target.value)}
+                value={searchProd}
+                onChange={(e) => setSearch(e.target.value)}
                 />
-            <FontAwesomeIcon className="searchIcon" icon={faSearch} />
+            <Link to={{
+                pathname: '/searchPage',
+                state: { search: searchProd }
+                }}>
+                 <FontAwesomeIcon className="searchIcon" icon={faSearch} />
+            </Link>
 
 		</div>
 	);

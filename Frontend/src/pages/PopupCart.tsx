@@ -10,7 +10,7 @@ type PopupCartProps = {
 };
 const PopupCart: FC<PopupCartProps> = ({content}: PopupCartProps) => {
 
-    let products = ['milk','coffee','shirt','milk','coffee','shirt','milk','coffee','shirt'];
+    let products = ['milk','coffee','shirt','suit'];
 
 	return (
 		
@@ -18,7 +18,7 @@ const PopupCart: FC<PopupCartProps> = ({content}: PopupCartProps) => {
             
             <TableContainer>
                 <Table  aria-label="simple table">
-                    <TableHead>
+                    <TableHead className="tableHead">
                     <TableRow>
                         <TableCell>Product</TableCell>
                         <TableCell>Quantity</TableCell>
@@ -26,12 +26,13 @@ const PopupCart: FC<PopupCartProps> = ({content}: PopupCartProps) => {
                     </TableRow>
                     </TableHead>
                     <TableBody>
-                    {products.map((p) => (
-                        <ProductPopup
-                        name={p}
-                        quantity = {1}
-                        />
-                    ))}
+                        {products.map((p) => (
+                            <ProductPopup
+                            name={p}
+                            quantity = {1}
+                            key={p}
+                            />
+                        ))}
                     </TableBody>
                 </Table>
             </TableContainer>
