@@ -1473,7 +1473,7 @@ def _remove_product(cookie: str, store_id: str, product_id: str, thread: str) ->
     global _t_responses
     response = system.remove_product_from_store(cookie, store_id, product_id)
     if response.succeeded():
-        _t_responses.append((thread, response.get_obj()))
+        _t_responses.append((thread, response.get_obj().get_val()))
     else:
         _t_responses.append((thread, False))
 
@@ -1491,34 +1491,48 @@ def test_buy_delete_product():
         )
         system.appoint_manager(cookie, store_id, new_manager_username)
         system.add_manager_permission(cookie, store_id, new_manager_username, "appoint_manager")
+        system.add_manager_permission(cookie, store_id, new_manager_username, "manage_products")
         product_id, product_name, price, quantity = _create_product(new_manager_cookie, store_id, _generate_product_name(), 5.50, 3)
         system.save_product_in_cart(cookie, store_id, product_id, quantity=1)
 
         t1 = threading.Thread(target=lambda: _remove_product(new_manager_cookie, store_id, product_id, "owner"))
         t2 = threading.Thread(target=lambda: __get_product(cookie, 2))
-        t2.start()
         t1.start()
+        t2.start()
         t2.join()
         t1.join()
         print(_t_responses[i * 2], _t_responses[i * 2 + 1])
         # assert not (_t_responses[i * 2][1] and _t_responses[i * 2 + 1][1])
+        if _t_responses[i * 2][1] and _t_responses[i * 2 + 1][1]:
+            assert _t_responses[i * 2][1] == quantity-1 or _t_responses[i * 2 + 1][1] == quantity-1
+        else:
+            assert _t_responses[i * 2][1] == quantity or _t_responses[i * 2 + 1][1] == quantity
 
-#def __appoint_manager(cookie, store_id, username, thread: int):
-#     if thread == 1:
-#         __t1_response = __system.appoint_manager(cookie, store_id, username)
-#     else:
-#         __t2_response = __system.appoint_manager(cookie, store_id, username)
-#
-#
-#def test_two_appointments():
-#     for i in range(100):
-#         cookie, username, password, store_name, store_id = __initialize_info(__generate_username(), "aaa", __generate_store_name())
-#         owner_cookie, owner_username, owner_password, _, _ = __initialize_info(__generate_username(), "aaa")
-#         __system.appoint_owner(cookie, store_id, owner_username)
-#         manager_cookie, manager_username, manager_password, _, _ = __initialize_info(__generate_username(), "aaa")
-#         t1 = threading.Thread(target=lambda: __appoint_manager(cookie, store_id, manager_username, 1))
-#         t2 = threading.Thread(target=lambda: __appoint_manager(owner_cookie, store_id, manager_username, 2))
-#         t1.start()
-#         t2.start()
-#         t1.join()
-#         t2.join()
+
+def __appoint_manager(cookie, store_id, username, thread: int):
+    global _t_responses
+    response = system.appoint_manager(cookie, store_id, username)
+    if response.succeeded():
+        _t_responses.append((thread, True))
+    else:
+        _t_responses.append((thread, False))
+
+
+def test_two_appointments():
+    global _t_responses
+    _t_responses = []
+    for i in range(100):
+        cookie, username, password, store_name, store_id = _initialize_info(_generate_username(), "aaa", _generate_store_name())
+        owner_cookie, owner_username, owner_password, _, _ = _initialize_info(_generate_username(), "aaa")
+        system.appoint_owner(cookie, store_id, owner_username)
+        manager_cookie, manager_username, manager_password, _, _ = _initialize_info(_generate_username(), "aaa")
+        t1 = threading.Thread(target=lambda: __appoint_manager(cookie, store_id, manager_username, 1))
+        t2 = threading.Thread(target=lambda: __appoint_manager(owner_cookie, store_id, manager_username, 2))
+        t1.start()
+        t2.start()
+        t1.join()
+        t2.join()
+        a = _t_responses[i * 2]
+        b = _t_responses[i * 2 + 1]
+        print(a, b)
+        assert (a[1] and not b[1]) or (not a[1] and b[1])   # exactly one to succeed
