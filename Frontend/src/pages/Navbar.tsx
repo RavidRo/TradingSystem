@@ -1,6 +1,5 @@
-import { AppBar, IconButton, Toolbar, Typography } from '@material-ui/core';
 import React, { FC, useState } from 'react';
-import { BrowserRouter, Switch, Route, Link } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import '../styles/Navbar.scss';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -27,11 +26,6 @@ const Navbar: FC<NavBarProps> = () => {
 						My Cart
 					</Link>
 					{hoverCart ? <PopupCart content={'your cart is:'} /> : null}
-					<FontAwesomeIcon className="cartIcon" icon={faShoppingCart} />
-					<Link className="cartLink" to="/">
-						My Cart
-					</Link>
-					{hoverCart ? <PopupCart content={'hello!'}></PopupCart> : null}
 				</div>
 				<div className="signInDiv">
 					<FontAwesomeIcon className="signInIcon" icon={faSignInAlt} />
