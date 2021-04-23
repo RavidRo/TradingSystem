@@ -1,4 +1,4 @@
-import { Button, Card, CardContent, CardHeader, Grid, Typography } from '@material-ui/core';
+import { Button, Card, CardContent, Typography } from '@material-ui/core';
 import React, { useState, FC} from 'react';
 import '../styles/SearchPage.scss';
 
@@ -19,14 +19,13 @@ const SearchPage: FC<SearchPageProps> = ({location}) => {
     for(var i=0; i<Math.ceil(PostsData.length/3); i++) {
         matrix[i] = new Array(3);
     }
-    for(var i=0; i<matrix.length; i++) {
+    for(i=0; i<matrix.length; i++) {
         for(var j=0; j<matrix[i].length; j++){
             matrix[i][j] = PostsData[(matrix[i].length)*i+j];
         }
         
     }
 
-    console.log(matrix);
       
 	return (
 		<div className="SearchPageDiv">
@@ -48,7 +47,9 @@ const SearchPage: FC<SearchPageProps> = ({location}) => {
                     <div className="cardsRow">
                         {row.map((cell)=>{
                             return (
-                                <Card className="prodCard">
+                                <Card 
+                                    className="prodCard"
+                                    key={cell}>
                                     <CardContent>
                                         <Typography variant="body2" color="textSecondary" component="p">
                                             {cell}
