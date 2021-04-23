@@ -1277,7 +1277,7 @@ async def test_get_store_personnel_success():
     response = await system.get_store_appointments(cookie, store_id)
     assert (
             response.succeeded()
-            and response.object._username == username
+            and response.object.username == username
             and response.object.role == "Founder"
     )
 
@@ -1295,7 +1295,7 @@ async def test_get_store_personnel_owner_success():
     assert (
             response.succeeded()
             and len(response.object.appointees) == 1
-            and response.object.appointees[0]._username == new_owner_username
+            and response.object.appointees[0].username == new_owner_username
             and response.object.appointees[0].role == "Owner"
     )
 
@@ -1313,7 +1313,7 @@ async def test_get_store_personnel_manager_success():
     assert (
             response.succeeded()
             and len(response.object.appointees) == 1
-            and response.object.appointees[0]._username == new_manager_username
+            and response.object.appointees[0].username == new_manager_username
             and response.object.appointees[0].role == "Manager"
     )
 

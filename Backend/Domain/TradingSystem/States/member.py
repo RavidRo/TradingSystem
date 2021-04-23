@@ -14,6 +14,12 @@ class Member(UserState):
     def add_responsibility(self, responsibility, store_id):
         self.__responsibilities[store_id] = responsibility
 
+    def get_purchase_details(self):
+        return self.__purchase_details
+
+    def get_responsibilities(self):
+        return self.__responsibilities
+
     def __init__(
         self, user, username, responsibilities=None, purchase_details=None, cart=None
     ):  # for DB

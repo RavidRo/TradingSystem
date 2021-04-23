@@ -190,7 +190,7 @@ def test_delete_after_purchase_delegated(guest_user):
 
 def test_delete_after_purchase_history_really_added(member_user_without_responsibility):
     member_user_without_responsibility.state.delete_products_after_purchase()
-    assert len(member_user_without_responsibility.state.__purchase_details) > 0
+    assert len(member_user_without_responsibility.state.get_purchase_details()) > 0
 
 
 # * Open Store (3.2)
@@ -210,8 +210,8 @@ def test_open_store_return_type(member_user_with_responsibility):
 def test_open_store_really_added(member_user_with_responsibility):
     response = member_user_with_responsibility.state.open_store("store_name")
     assert (
-            len(member_user_with_responsibility.state.__responsibilities) > 0
-            and member_user_with_responsibility.state.__responsibilities[response.object.get_id()]
+            len(member_user_with_responsibility.state.get_responsibilities()) > 0
+            and member_user_with_responsibility.state.get_responsibilities()[response.object.get_id()]
             is not None
     )
 
@@ -250,7 +250,7 @@ def test_member_need_responsibility_to_add_product(member_user_without_responsib
 
 def test_member_add_product_delegated(member_user_with_responsibility):
     member_user_with_responsibility.state.add_new_product("0", "productA", 4, 1)
-    assert member_user_with_responsibility.state.__responsibilities["0"].add_product_delegated
+    assert member_user_with_responsibility.state.get_responsibilities()["0"].add_product_delegated
 
 
 def test_guest_cannot_remove_product(guest_user):
@@ -265,7 +265,7 @@ def test_member_need_responsibility_to_remove_product(member_user_without_respon
 
 def test_member_remove_product_delegated(member_user_with_responsibility):
     member_user_with_responsibility.state.remove_product("0", "")
-    assert member_user_with_responsibility.state.__responsibilities["0"].remove_product_delegated
+    assert member_user_with_responsibility.state.get_responsibilities()["0"].remove_product_delegated
 
 
 def test_guest_cannot_change_product_quantity(guest_user):
@@ -280,7 +280,7 @@ def test_member_need_responsibility_to_change_quantity(member_user_without_respo
 
 def test_member_change_quantity_delegated(member_user_with_responsibility):
     member_user_with_responsibility.state.change_product_quantity_in_store("0", "", 0)
-    assert member_user_with_responsibility.state.__responsibilities[
+    assert member_user_with_responsibility.state.get_responsibilities()[
         "0"
     ].change_product_quantity_delegated
 
@@ -297,7 +297,7 @@ def test_member_need_responsibility_to_edit_details(member_user_without_responsi
 
 def test_member_edit_details_delegated(member_user_with_responsibility):
     member_user_with_responsibility.state.edit_product_details("0", "", "productB", 5)
-    assert member_user_with_responsibility.state.__responsibilities[
+    assert member_user_with_responsibility.state.get_responsibilities()[
         "0"
     ].edit_product_details_delegated
 
@@ -318,7 +318,7 @@ def test_member_need_responsibility_to_appoint_owner(member_user_without_respons
 
 def test_member_appoint_owner_delegated(member_user_with_responsibility):
     member_user_with_responsibility.state.appoint_new_store_owner("0", "")
-    assert member_user_with_responsibility.state.__responsibilities["0"].appoint_owner_delegated
+    assert member_user_with_responsibility.state.get_responsibilities()["0"].appoint_owner_delegated
 
 
 # * Appoint Manager (4.5)
@@ -337,7 +337,7 @@ def test_member_need_responsibility_to_appoint_manager(member_user_without_respo
 
 def test_member_appoint_manager_delegate(member_user_with_responsibility):
     member_user_with_responsibility.state.appoint_new_store_manager("0", "")
-    assert member_user_with_responsibility.state.__responsibilities["0"].appoint_manager_delegated
+    assert member_user_with_responsibility.state.get_responsibilities()["0"].appoint_manager_delegated
 
 
 # * Manage Permissions (4.6)
@@ -356,7 +356,7 @@ def test_member_need_responsibility_to_add_permission(member_user_without_respon
 
 def test_member_add_permission_delegated(member_user_with_responsibility):
     member_user_with_responsibility.state.add_manager_permission("0", "inon", 0)
-    assert member_user_with_responsibility.state.__responsibilities["0"].add_permission_delegated
+    assert member_user_with_responsibility.state.get_responsibilities()["0"].add_permission_delegated
 
 
 def test_guest_cannot_remove_permission(guest_user):
@@ -371,7 +371,7 @@ def test_member_need_responsibility_to_remove_permission(member_user_without_res
 
 def test_member_remove_permission_delegated(member_user_with_responsibility):
     member_user_with_responsibility.state.remove_manager_permission("0", "inon", 0)
-    assert member_user_with_responsibility.state.__responsibilities["0"].remove_permission_delegated
+    assert member_user_with_responsibility.state.get_responsibilities()["0"].remove_permission_delegated
 
 
 # * Dismiss Appointment (4.4, 4.7)
@@ -390,7 +390,7 @@ def test_member_need_responsibility_to_remove_appointment(member_user_without_re
 
 def test_member_remove_appointment_delegated(member_user_with_responsibility):
     member_user_with_responsibility.state.remove_appointment("0", "inon")
-    assert member_user_with_responsibility.state.__responsibilities["0"].dismiss_delegated
+    assert member_user_with_responsibility.state.get_responsibilities()["0"].dismiss_delegated
 
 
 # * Get Personnel Info (4.9)
@@ -409,7 +409,7 @@ def test_member_need_responsibility_to_get_personnel_info(member_user_without_re
 
 def test_member_get_personnel_info_delegated(member_user_with_responsibility):
     member_user_with_responsibility.state.get_store_personnel_info("0")
-    assert member_user_with_responsibility.state.__responsibilities["0"].get_personnel_info_delegated
+    assert member_user_with_responsibility.state.get_responsibilities()["0"].get_personnel_info_delegated
 
 
 # * Get Store Purchase History (4.11)
@@ -430,7 +430,7 @@ def test_member_need_responsibility_to_get_store_purchase_history(
 
 def test_member_get_store_purchase_history_delegated(member_user_with_responsibility):
     member_user_with_responsibility.state.get_store_purchase_history("0")
-    assert member_user_with_responsibility.state.__responsibilities[
+    assert member_user_with_responsibility.state.get_responsibilities()[
         "0"
     ].get_store_purchase_history_delegated
 
