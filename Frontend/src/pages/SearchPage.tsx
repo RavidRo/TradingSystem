@@ -1,4 +1,4 @@
-import { Button, Card, CardContent, Typography } from '@material-ui/core';
+import { Button, Card, CardContent } from '@material-ui/core';
 import React, { useState, FC} from 'react';
 import '../styles/SearchPage.scss';
 
@@ -42,20 +42,18 @@ const SearchPage: FC<SearchPageProps> = ({location}) => {
                 </button>
             </div>
 
-            {matrix.map((row)=>{
+            {matrix.map((row,row_i)=>{
                 return(
                     <div className="cardsRow">
-                        {row.map((cell)=>{
+                        {row.map((cell,cell_i)=>{
                             return (
                                 <Card 
                                     className="prodCard"
-                                    key={cell}>
-                                    <CardContent>
-                                        <Typography variant="body2" color="textSecondary" component="p">
+                                    key={cell_i}>
+                                    <CardContent className="cardContent">
                                             {cell}
-                                        </Typography>
                                     </CardContent>
-                                        <Button size="small" color="primary">
+                                        <Button >
                                         Learn More
                                         </Button>
                                 </Card>
@@ -65,27 +63,6 @@ const SearchPage: FC<SearchPageProps> = ({location}) => {
                 ) 
                 
             })}
-            {/* <div className="app-card-list" id="app-card-list">
-                <Grid container spacing={3} >
-                    {PostsData.map(key => {
-                        return (
-                            <Grid container item xs={12} spacing={3}>
-                                <Card >
-                                    <CardContent>
-                                        <Typography variant="body2" color="textSecondary" component="p">
-                                            Lizards are a widespread group of squamate reptiles, with over 6,000 species, ranging
-                                        </Typography>
-                                    </CardContent>
-                                        <Button size="small" color="primary">
-                                        Learn More
-                                        </Button>
-                                </Card>
-                            </Grid>
-                        )}
-                    )
-                    }
-                </Grid>
-            </div> */}
 
 		</div>
 	);
