@@ -1,0 +1,22 @@
+.SearchBarDiv{
+    padding: 1%;
+    position: relative;
+}
+
+.searchInput{
+    width: 60%;
+    height: 50px;
+    margin-left: 20%;
+    font-size: x-large;
+    align-self: center;
+}
+.searchInput::placeholder{
+    font-size:x-large;
+}
+.searchIcon{
+    font-size: 30px;
+    margin-left: 1%;
+    margin-top: 0.5%;
+    position: absolute;
+    cursor: pointer;
+}

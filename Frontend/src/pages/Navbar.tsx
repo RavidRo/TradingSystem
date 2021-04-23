@@ -14,13 +14,16 @@ const Navbar: FC<NavBarProps> = () => {
 	return (
 		<div className="navbar">
 			<nav>
-				<Link className="nameLink" to="/">
-					Shopping World!
-				</Link>
-				<div
-					className="cartDiv"
-					onMouseOver={() => setHoverCart(true)}
-					onMouseLeave={() => setHoverCart(false)}
+				<Link className="nameLink" to='/'>Shopping World!</Link>
+				<div className="cartDiv"
+					onMouseOver={()=>setHoverCart(true)}
+					onMouseLeave={()=>setHoverCart(false)}
+				>
+				<FontAwesomeIcon className="cartIcon" icon={faShoppingCart} />
+				<Link className="cartLink" to='/'>My Cart</Link>
+				{hoverCart?
+				<PopupCart
+					content={"your cart is:"}
 				>
 					<FontAwesomeIcon className="cartIcon" icon={faShoppingCart} />
 					<Link className="cartLink" to="/">
