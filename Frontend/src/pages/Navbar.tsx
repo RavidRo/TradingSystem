@@ -1,9 +1,10 @@
 import React, { FC, useState } from 'react';
 import { Link } from 'react-router-dom';
-import '../styles/Navbar.scss';
-
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faShoppingCart, faSignInAlt } from '@fortawesome/free-solid-svg-icons';
+
+import '../styles/Navbar.scss';
+import config from '../config';
 import PopupCart from './PopupCart';
 
 type NavBarProps = {};
@@ -14,7 +15,7 @@ const Navbar: FC<NavBarProps> = () => {
 		<div className="navbar">
 			<nav>
 				<Link className="nameLink" to="/">
-					Shopping World!
+					{config.website_name}!
 				</Link>
 				<div
 					className="cartDiv"
@@ -29,7 +30,7 @@ const Navbar: FC<NavBarProps> = () => {
 				</div>
 				<div className="signInDiv">
 					<FontAwesomeIcon className="signInIcon" icon={faSignInAlt} />
-					<Link className="signInLink" to="/">
+					<Link className="signInLink" to="/sign-in">
 						Sign In
 					</Link>
 				</div>
