@@ -35,17 +35,19 @@ const theme = createMuiTheme({
 function App() {
 	return (
 		<>
-			<BrowserRouter>
-				<Navbar />
-				<Switch>
-					<Route path="/" exact component={Home} />
-					<Route path="/cart" exact component={Cart} />
-					<Route path="/sign-in" exact component={SignIn} />
-					<Route path="/sign-up" exact component={SignUp} />
-					<Route path="/searchPage" exact component={SearchPage} />
-					<Route path="/my-stores" exact component={MyStores} />
-				</Switch>
-			</BrowserRouter>
+			<ThemeProvider theme={theme}>
+				<BrowserRouter>
+					<Navbar />
+					<Switch>
+						<Route path="/" exact component={Home} />
+						<Route path="/cart" exact component={Cart} />
+						<Route path="/sign-in" exact component={SignIn} />
+						<Route path="/sign-up" exact component={SignUp} />
+						<Route path="/searchPage" exact component={SearchPage} />
+						<Route path="/my-stores" exact component={MyStores} />
+					</Switch>
+				</BrowserRouter>
+			</ThemeProvider>
 		</>
 	);
 }
