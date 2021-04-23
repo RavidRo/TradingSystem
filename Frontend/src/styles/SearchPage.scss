@@ -1,0 +1,42 @@
+
+
+.SearchPageDiv{
+    display: flex;
+    flex-direction: column;
+    overflow-y: scroll;
+}
+.searchInputBtn{
+    display: flex;
+    flex-direction: row;  
+}
+.searchInput{
+    width: 50%;
+}
+.categoryBtn{
+    height: 60px;
+    width: 10%;
+    margin-left: 5%;
+    font-size: large;
+    background-color: blanchedalmond;
+}
+.cardsRow{
+    display: flex;
+    flex-direction: row;
+}
+.prodCard{
+    margin-left: 10%;
+    margin-top: 5%;
+    width: 30%;
+    height: 200px;
+    background-color: #1ef1e0;
+    
+}
+.prodCard Button{
+    color: rgba(44, 41, 255, 0.925);
+    padding: 5%;
+}
+.cardContent{
+    color: rgba(0, 0, 0, 0.925);
+    font-size:large;
+    font-weight: bold;
+}

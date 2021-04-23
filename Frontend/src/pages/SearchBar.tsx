@@ -3,18 +3,13 @@ import '../styles/SearchBar.scss';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faSearch } from '@fortawesome/free-solid-svg-icons';
 import { Link } from 'react-router-dom';
-import {createBrowserHistory} from "history";
 
 
 type SearchBarProps = {};
 
 const SearchBar: FC<SearchBarProps> = () => {
 	const [searchProd, setSearch] = useState<string>("");
-    const history = createBrowserHistory();
 
-    const handleClickSearch  = ()=>{
-
-    }
 	return (
 		<div className="SearchBarDiv">
 			 <input 
@@ -26,7 +21,9 @@ const SearchBar: FC<SearchBarProps> = () => {
                 />
             <Link to={{
                 pathname: '/searchPage',
-                state: { search: searchProd }
+                state: {
+                    product: searchProd
+                },
                 }}>
                  <FontAwesomeIcon className="searchIcon" icon={faSearch} />
             </Link>
