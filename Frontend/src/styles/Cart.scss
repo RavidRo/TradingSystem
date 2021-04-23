@@ -1,0 +1,58 @@
+body {
+	font-family: 'Montserrat', sans-serif;
+	// font-family: 'Roboto', sans-serif;
+}
+.page {
+	display: flex;
+	justify-content: center;
+	margin-top: 12%;
+}
+.order-cont {
+	flex: 0.4;
+	flex-direction: row;
+	display: flex;
+
+	.products-cont {
+		display: flex;
+		flex-direction: column;
+		flex: 0.75;
+		padding: 12px;
+	}
+
+	.product {
+		display: flex;
+		flex-direction: row;
+		flex: 1;
+		justify-content: space-between;
+		align-items: center;
+
+
+		p {
+			display: inline;
+		}
+	}
+
+}
+.summary-cont {
+	padding: 12px;
+	flex-direction: column;
+	display: flex;
+	flex: 0.25;
+
+	.total-price {
+		display: flex;
+		flex-direction: row;
+		flex: 1;
+		justify-content: space-between;
+		h4 {
+			display: inline;
+		}
+	}
+
+}
+
+.line {
+	width: 100%;
+	height: 10px;
+	border-top: 1px solid rgba(17, 17, 17, 0.21);
+}

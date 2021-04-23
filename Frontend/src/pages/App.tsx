@@ -8,8 +8,8 @@ function App() {
 	return (
 		<BrowserRouter>
 			<Switch>
-				<Route path="/cart" exact component={Cart} />
-				<Route path="/" exact component={Home} />
+				<Route path="/" exact component={Cart} />
+				<Route path="/cart" exact component={Home} />
 			</Switch>
 		</BrowserRouter>
 	);
