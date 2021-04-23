@@ -4,6 +4,8 @@ import { BrowserRouter, Switch, Route } from 'react-router-dom';
 import Home from './Home';
 import Cart from './Cart';
 import Navbar from './Navbar';
+import SignIn from './SignIn';
+import SignUp from './SignUp';
 
 function App() {
 	return (
@@ -13,7 +15,8 @@ function App() {
 				<Switch>
 					<Route path="/" exact component={Home} />
 					<Route path="/cart" exact component={Cart} />
-					<Route path="/searchPage" exact component={Home} />
+					<Route path="/sign-in" exact component={SignIn} />
+					<Route path="/sign-up" exact component={SignUp} />
 				</Switch>
 			</BrowserRouter>
 		</>
