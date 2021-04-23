@@ -16,6 +16,7 @@ const Navbar: FC<NavBarProps> = () => {
 
 	return (
 
+		
 		<div className="navbar">
 			<nav>
 			<Link className="nameLink" to='/'>Shopping World!</Link>
