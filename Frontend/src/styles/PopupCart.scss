@@ -3,8 +3,21 @@
     width: 100%;
     height: 100%;
     z-index: 10;
-    background-color: rgba(245, 88, 245, 0.8);
+    background-color: rgb(255, 248, 255);
     width: 400px;
     height: 700px;
     margin-top: 30%;
+    border: 4px solid black;
+    overflow-y: scroll;
+    
 }
+.cartTable{
+    // background-color: aqua;
+    font-size: large;
+}
+.cartTableHead{
+    font-size: x-large;
+    background-color: #4CAF50;
+    color: white;
+}
+

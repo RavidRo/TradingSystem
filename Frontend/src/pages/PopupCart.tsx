@@ -1,6 +1,8 @@
 
+import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@material-ui/core';
 import React ,{FC} from 'react';
 import '../styles/PopupCart.scss';
+import ProductPopup from './ProductPopup';
 
 type PopupCartProps = {
     content: string,
@@ -8,13 +10,32 @@ type PopupCartProps = {
 };
 const PopupCart: FC<PopupCartProps> = ({content}: PopupCartProps) => {
 
+    let products = ['milk','coffee','shirt','milk','coffee','shirt','milk','coffee','shirt'];
+
 	return (
 		
 		<div className="popupCart">
-            <div className="box">
-                <span className="close-icon"></span>
-                {content}
-            </div>
+            
+            <TableContainer>
+                <Table  aria-label="simple table">
+                    <TableHead>
+                    <TableRow>
+                        <TableCell>Product</TableCell>
+                        <TableCell>Quantity</TableCell>
+                        <TableCell></TableCell>
+                    </TableRow>
+                    </TableHead>
+                    <TableBody>
+                    {products.map((p) => (
+                        <ProductPopup
+                        name={p}
+                        quantity = {1}
+                        />
+                    ))}
+                    </TableBody>
+                </Table>
+            </TableContainer>
+            
 		</div>
 	);
 }
