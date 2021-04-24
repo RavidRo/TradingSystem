@@ -15,8 +15,8 @@ const [prod_quantity, setQuantity] = useState<number>(quantity);
 	return (
 		
         <TableRow >
-            <TableCell>{name}</TableCell>
-            <TableCell >{prod_quantity}</TableCell>
+            <TableCell align={'center'}>{name}</TableCell>
+            <TableCell align={'center'}>{prod_quantity}</TableCell>
             <TableCell className="buttonsCell" >
                 <button className="buttonP" onClick={()=>setQuantity(prod_quantity+1)}>
                     +
