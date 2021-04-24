@@ -1,10 +1,13 @@
 import React, { FC, useState } from 'react';
 
-import { List, ListItem, Divider, Typography, TextField, Button } from '@material-ui/core';
+import { ListItem } from '@material-ui/core';
 import ListItemText from '@material-ui/core/ListItemText';
 
 import '../styles/MyStores.scss';
 import { Store, Product } from '../types';
+import CreateStoreForm from '../components/CreateStoreForm';
+import ManageStore from '../components/ManageStore';
+import GenericList from '../components/GenericList';
 
 const init_stores: Store[] = [
 	{ id: '0', name: 'Tiffany&Stuff' },
@@ -44,32 +47,41 @@ const products_per_store: { [key: string]: Product[] } = {
 
 type MyStoresProps = {};
 
-const MyStores: FC<MyStoresProps> = (props) => {
-	const [stores, setStores] = useState<Store[]>(init_stores);
+const MyStores: FC<MyStoresProps> = () => {
 	const [selectedStore, setSelectedStore] = useState<string | null>(null);
-	const [products, setProducts] = useState<Product[]>([]);
-	const [creatingStore, setCreatingStore] = useState<boolean>(false);
+	const [stores, setStores] = useState<Store[]>(init_stores);
+	const [open, setOpen] = useState(false);
 
 	const setStore = (storeId: string) => {
-		setSelectedStore(storeId);
-		setProducts(products_per_store[storeId]);
+		setTab(storeId);
 	};
 
 	const openStoreForm = () => {
-		setCreatingStore(true);
-		setSelectedStore(null);
-		setProducts([]);
+		setTab(null);
+	};
+	const setTab = (selectedStore: string | null) => {
+		setOpen(false);
+		setTimeout(() => {
+			setSelectedStore(selectedStore);
+			setOpen(true);
+		}, 250);
+	};
+
+	const onNewStore = (newName: string) => {
+		const store: Store = { id: '4', name: newName };
+		setStores(stores.concat([store]));
 	};
 
 	return (
 		<div className="my-stores-page">
 			<div className="stores-list">
-				<List component="nav" aria-label="My Stores">
-					<ListItem>
-						<Typography className="header-item">My Stores</Typography>
-					</ListItem>
-					<Divider />
-					{stores.map((store) => (
+				<GenericList
+					data={stores}
+					onCreate={openStoreForm}
+					header="My Stores"
+					createTxt="+ Create a new store"
+				>
+					{(store) => (
 						<ListItem
 							key={store.id}
 							button
@@ -78,66 +90,16 @@ const MyStores: FC<MyStoresProps> = (props) => {
 						>
 							<ListItemText primary={store.name} />
 						</ListItem>
-					))}
-					<ListItem button onClick={openStoreForm}>
-						<ListItemText primary="+ Create a new store" />
-					</ListItem>
-				</List>
+					)}
+				</GenericList>
 			</div>
-			{selectedStore && (
-				<div className="selected-store">
-					<div className="products-list">
-						<List component="nav" aria-label="The store's products">
-							<ListItem>
-								<Typography className="header-item">Products</Typography>
-							</ListItem>
-							<Divider />
-							{products.map((product) => (
-								<ListItem key={product.id} button>
-									<ListItemText primary={product.name} className="product-name" />
-									<ListItemText primary={`in stock: ${product.quantity}`} />
-								</ListItem>
-							))}
-							<ListItem button>
-								<ListItemText primary="+ Add a new product" />
-							</ListItem>
-						</List>
-					</div>
-					<div>
-						<List component="nav" aria-label="The store's products">
-							<ListItem>
-								<Typography className="header-item">Appointees</Typography>
-							</ListItem>
-							<Divider />
-							<ListItem button>
-								<ListItemText primary="+ Appoint a new member" />
-							</ListItem>
-						</List>
-					</div>
-				</div>
-			)}
-			{creatingStore && !selectedStore && (
-				<div className="create-store-form-cont">
-					<h2>Creating a new store</h2>
-					<form
-						noValidate
-						autoComplete="off"
-						className="create-store-form"
-						onSubmit={console.log}
-					>
-						<TextField
-							required
-							margin="normal"
-							id="store-name"
-							fullWidth
-							label="Store's name"
-						/>
-						<Button type="submit" fullWidth variant="contained" color="primary">
-							Create Store!
-						</Button>
-					</form>
-				</div>
-			)}
+			<div className={'second-tab' + (open ? ' open' : '')}>
+				{selectedStore ? (
+					<ManageStore products={products_per_store[selectedStore]} />
+				) : (
+					<CreateStoreForm onSubmit={onNewStore} />
+				)}
+			</div>
 		</div>
 	);
 };

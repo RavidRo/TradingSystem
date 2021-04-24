@@ -7,8 +7,8 @@ import '../styles/Navbar.scss';
 import config from '../config';
 import PopupCart from './PopupCart';
 
-type NavBarProps = {};
-const Navbar: FC<NavBarProps> = () => {
+type NavBarProps = { signedIn: boolean };
+const Navbar: FC<NavBarProps> = ({ signedIn }) => {
 	const [hoverCart, setHoverCart] = useState<boolean>(false);
 
 	return (
@@ -30,9 +30,15 @@ const Navbar: FC<NavBarProps> = () => {
 				</div>
 				<div className="signInDiv">
 					<FontAwesomeIcon className="signInIcon" icon={faSignInAlt} />
-					<Link className="signInLink" to="/sign-in">
-						Sign In
-					</Link>
+					{signedIn ? (
+						<Link className="signInLink" to="/my-stores">
+							Account&Stores
+						</Link>
+					) : (
+						<Link className="signInLink" to="/sign-in">
+							Sign In
+						</Link>
+					)}
 				</div>
 			</nav>
 		</div>

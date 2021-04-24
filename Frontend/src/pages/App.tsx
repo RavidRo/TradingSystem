@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { BrowserRouter, Switch, Route } from 'react-router-dom';
 import { createMuiTheme, ThemeProvider } from '@material-ui/core';
 
@@ -33,15 +33,19 @@ const theme = createMuiTheme({
 });
 
 function App() {
+	const [signedIn, setSignedIn] = useState<boolean>(false);
+
 	return (
 		<>
 			<ThemeProvider theme={theme}>
 				<BrowserRouter>
-					<Navbar />
+					<Navbar signedIn={signedIn} />
 					<Switch>
 						<Route path="/" exact component={Home} />
 						<Route path="/cart" exact component={Cart} />
-						<Route path="/sign-in" exact component={SignIn} />
+						<Route path="/sign-in" exact>
+							{() => <SignIn onSignIn={() => setSignedIn(true)} />}
+						</Route>
 						<Route path="/sign-up" exact component={SignUp} />
 						<Route path="/searchPage" exact component={SearchPage} />
 						<Route path="/my-stores" exact component={MyStores} />

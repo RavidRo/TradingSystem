@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { FC, useState } from 'react';
 import Avatar from '@material-ui/core/Avatar';
 import Button from '@material-ui/core/Button';
 import CssBaseline from '@material-ui/core/CssBaseline';
@@ -35,8 +35,16 @@ const useStyles = makeStyles((theme) => ({
 	},
 }));
 
-export default function SignIn() {
+const SignIn: FC<{ onSignIn: () => void }> = ({ onSignIn }) => {
 	const classes = useStyles();
+
+	const [username, setUsername] = useState('');
+	const [password, setPassword] = useState('');
+
+	const handleSubmit = (event: any) => {
+		onSignIn();
+		event.preventDefault();
+	};
 
 	return (
 		<Container component="main" maxWidth="xs">
@@ -48,7 +56,7 @@ export default function SignIn() {
 				<Typography component="h1" variant="h5">
 					Sign in
 				</Typography>
-				<form className={classes.form} noValidate onSubmit={console.log}>
+				<form className={classes.form} noValidate onSubmit={handleSubmit}>
 					<TextField
 						variant="outlined"
 						margin="normal"
@@ -101,4 +109,6 @@ export default function SignIn() {
 			</Box>
 		</Container>
 	);
-}
+};
+
+export default SignIn;

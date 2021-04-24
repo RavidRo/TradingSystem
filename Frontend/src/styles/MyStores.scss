@@ -3,31 +3,52 @@
 	flex-direction: row;
 
 	.stores-list {
-		flex: 1;
+		width: 100%;
 		border-right: 1px solid black;
 		transition: flex 2s ;
 	}
 
-	.selected-store {
-		flex: 4;
+	.second-tab {
+		width: 0;
+		transition: width .25s ease;
+	}
+	.second-tab.open {
+		width: 400%;
+	}
+
+	.my-store-page{
+		display: flex;
+		flex-direction: row;
+	
+		.my-store-cont {
+			width: 400%;
+			border-right: 1px solid black;
+		}
+	
 		.products-list {
+
 			.product-name {
-				flex: 0.3
+				flex: 0.3;
+			}
+		}
+
+		.product-details {
+			padding: 20px;
+
+			.divider {
+				margin-bottom: 20px;
 			}
 		}
 	}
-
-	.header-item {
-		font-size: 1.3rem;
-		font-weight: 500;
-	}
-
-	.create-store-form-cont {
-		flex: 4;
-		padding: 20px;
-	}
-	.create-store-form {
-		max-width: 20%;
-		
-	}
 }
+
+// Create Store Form
+.create-store-form-cont {
+	width: 50%;
+	padding: 20px;
+}
+.create-store-form {
+	max-width: 50%;
+}
+
+// Create Product Form
