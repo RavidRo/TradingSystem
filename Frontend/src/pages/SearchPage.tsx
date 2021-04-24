@@ -1,6 +1,9 @@
 import { Button, Card, CardContent } from '@material-ui/core';
 import React, { useState, FC} from 'react';
 import '../styles/SearchPage.scss';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faCaretDown } from '@fortawesome/free-solid-svg-icons';
+
 
 type SearchPageProps = {
     location: any,
@@ -8,7 +11,12 @@ type SearchPageProps = {
 
 const SearchPage: FC<SearchPageProps> = ({location}) => {
     const [searchProduct, setSearchProduct] = useState<string>(location.state.product);
+    const [menuOpen, setMenuOpen] = useState<boolean>(false);
+    const [categoryName, setCategoryName] = useState<string>("Category");
 
+    const friendOptions = [
+        'one', 'two', 'three'
+      ]
     const PostsData = ["category","news","comedy",
                         "category","news","comedy",
                         "category","news","comedy",
@@ -37,9 +45,26 @@ const SearchPage: FC<SearchPageProps> = ({location}) => {
                     value={searchProduct}
                     onChange={(e) => setSearchProduct(e.target.value)}
                 />
-                <button className="categoryBtn">
-                    Category
-                </button>
+                <div className="categoryDiv" onClick={()=>setMenuOpen(!menuOpen)}>
+                    <button className="categoryBtn">
+                        {categoryName}
+                    <FontAwesomeIcon className="arrowIcon" icon={faCaretDown} />
+                    </button>
+                    {menuOpen?
+                        <ul className="categoryList">
+                            {PostsData.map((post)=>{
+                                return (
+                                    <button className="btn" onClick={()=>setCategoryName(post)}>
+                                        {post}
+                                    </button>
+                                )
+                            })}
+
+                        </ul>
+                    :null    
+                }
+                </div>
+                
             </div>
 
             {matrix.map((row,row_i)=>{
@@ -49,7 +74,7 @@ const SearchPage: FC<SearchPageProps> = ({location}) => {
                             return (
                                 <Card 
                                     className="prodCard"
-                                    key={cell_i}>
+                                    key={(row_i*matrix.length)+cell_i}>
                                     <CardContent className="cardContent">
                                             {cell}
                                     </CardContent>

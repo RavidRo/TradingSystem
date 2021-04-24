@@ -20,8 +20,8 @@ const PopupCart: FC<PopupCartProps> = ({content}: PopupCartProps) => {
                 <Table  aria-label="simple table">
                     <TableHead className="tableHead">
                     <TableRow>
-                        <TableCell>Product</TableCell>
-                        <TableCell>Quantity</TableCell>
+                        <TableCell align={'center'}>Product</TableCell>
+                        <TableCell align={'center'}>Quantity</TableCell>
                         <TableCell></TableCell>
                     </TableRow>
                     </TableHead>
