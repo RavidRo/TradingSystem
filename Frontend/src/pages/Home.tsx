@@ -3,18 +3,15 @@ import React, { FC, useEffect, useState } from 'react';
 import home from '../images/home.jpeg';
 import SearchBar from './SearchBar';
 import '../styles/Home.scss';
+import useAPI from '../hooks/useAPI';
 
 type HomeProps = {};
 
 const Home: FC<HomeProps> = () => {
-	const [cookie, setCookie] = useState<string>('');
-	const getCookie = async () => {
-		const response = await fetch('/cookie');
-		const newCookie = await response.text();
-		setCookie(newCookie);
-	};
+	const { request: getCookie, data: cookie } = useAPI('/cookie');
 	useEffect(() => {
 		getCookie();
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
 
 	return (
@@ -22,14 +19,10 @@ const Home: FC<HomeProps> = () => {
 			<header className="App-header">
 				<p>Cookie: {cookie}</p>
 			</header>
-				<SearchBar/>
-				<div className="imgDiv">
-				<img 
-					className="photo" 
-					src={home} 
-					alt=""
-				/>
-				</div>
+			<SearchBar />
+			<div className="imgDiv">
+				<img className="photo" src={home} alt="" />
+			</div>
 		</div>
 	);
 };
