@@ -1,0 +1,33 @@
+.my-stores-page {
+	display: flex;
+	flex-direction: row;
+
+	.stores-list {
+		flex: 1;
+		border-right: 1px solid black;
+		transition: flex 2s ;
+	}
+
+	.selected-store {
+		flex: 4;
+		.products-list {
+			.product-name {
+				flex: 0.3
+			}
+		}
+	}
+
+	.header-item {
+		font-size: 1.3rem;
+		font-weight: 500;
+	}
+
+	.create-store-form-cont {
+		flex: 4;
+		padding: 20px;
+	}
+	.create-store-form {
+		max-width: 20%;
+		
+	}
+}
