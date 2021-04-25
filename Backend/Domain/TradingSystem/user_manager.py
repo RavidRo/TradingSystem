@@ -145,6 +145,21 @@ class UserManager:
         func: Callable[[User], Response] = lambda user: user.get_cart_price()
         return UserManager.__deligate_to_user(cookie, func)
 
+    @staticmethod
+    def lock_cart(cookie):
+        func: Callable = lambda user: user.lock_cart()
+        return UserManager.__deligate_to_user(cookie, func)
+
+    @staticmethod
+    def release_cart(cookie):
+        func: Callable = lambda user: user.release_cart()
+        return UserManager.__deligate_to_user(cookie, func)
+
+    @staticmethod
+    def cancel_purchase(cookie):
+        func: Callable = lambda user: user.cancel_purchase()
+        return UserManager.__deligate_to_user(cookie, func)
+
     # Member
     # ===============================
 

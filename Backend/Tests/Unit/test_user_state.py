@@ -3,11 +3,11 @@ from typing import List
 import pytest
 from Backend.Domain.TradingSystem.States.member import Member
 from Backend.Domain.TradingSystem.store import Store
-from .stubs.store_stub import StoreStub
-from .stubs.authentication_stub import AuthenticationStub
-from .stubs.user_stub import UserStub
-from .stubs.cart_stub import CartStub
-from .stubs.responsibility_stub import ResponsibilityStub
+from Backend.Tests.stubs.authentication_stub import AuthenticationStub
+from Backend.Tests.stubs.cart_stub import CartStub
+from Backend.Tests.stubs.responsibility_stub import ResponsibilityStub
+from Backend.Tests.stubs.store_stub import StoreStub
+from Backend.Tests.stubs.user_stub import UserStub
 from Backend.response import ParsableList
 
 

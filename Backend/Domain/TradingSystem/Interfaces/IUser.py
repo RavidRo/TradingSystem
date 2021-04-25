@@ -13,7 +13,7 @@ class IUser:
 
     @staticmethod
     def create_user():
-        from Backend.Tests.Unit.stubs.user_stub import UserStub
+        from Backend.Tests.stubs.user_stub import UserStub
         from Backend.Domain.TradingSystem.user import User
 
         if IUser.use_mock:

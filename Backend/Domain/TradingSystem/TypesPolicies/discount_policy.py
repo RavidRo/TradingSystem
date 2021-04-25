@@ -11,9 +11,8 @@ class DiscountPolicy:
 class DefaultDiscountPolicy(DiscountPolicy):
     def __init__(self):
         from Backend.Domain.TradingSystem.TypesPolicies.discount_type import DefaultDiscountType
-
         super().__init__()
-        self.discount_type = DefaultDiscountType()
+        self.__discount_type = DefaultDiscountType()
 
     # def checkPolicy(self) -> Backend.DiscountType:
     #     return self.discount_type
@@ -23,4 +22,4 @@ class DefaultDiscountPolicy(DiscountPolicy):
     ) -> float:
         # discount_type = self.checkPolicy()
         # return discount_type.apply_discount(products_to_quantities)
-        return self.discount_type.apply_discount(products_to_quantities)
+        return self.__discount_type.apply_discount(products_to_quantities)
