@@ -1,7 +1,7 @@
 from Backend.Domain.TradingSystem.Responsibilities.responsibility import Permission, Responsibility
 from Backend.Domain.TradingSystem.Interfaces.IUser import IUser
 from Backend.Domain.TradingSystem.purchase_details import PurchaseDetails
-from Backend.response import Response, ParsableList
+from Backend.response import Response, ParsableList, PrimitiveParsable
 
 
 class Founder(Responsibility):
@@ -11,7 +11,7 @@ class Founder(Responsibility):
         return self._store.add_product(name, price, quantity)
 
     # 4.1
-    def remove_product(self, product_id: str) -> Response[None]:
+    def remove_product(self, product_id: str) -> Response[PrimitiveParsable[int]]:
         return self._store.remove_product(product_id)
 
     # 4.1

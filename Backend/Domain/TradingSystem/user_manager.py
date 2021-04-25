@@ -191,7 +191,7 @@ class UserManager:
 
     # 4.1
     @staticmethod
-    def remove_product_from_store(cookie: str, store_id: str, product_id: str) -> Response[None]:
+    def remove_product_from_store(cookie: str, store_id: str, product_id: str) -> Response[PrimitiveParsable[int]]:
         func: Callable[[User], Response] = lambda user: user.remove_product_from_store(
             store_id, product_id
         )

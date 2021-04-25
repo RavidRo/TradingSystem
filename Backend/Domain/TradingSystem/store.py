@@ -1,6 +1,6 @@
 import uuid
 
-from Backend.response import Response, ParsableList
+from Backend.response import Response, ParsableList, PrimitiveParsable
 from Backend.Domain.TradingSystem.product import Product
 from Backend.Service.DataObjects.store_data import StoreData
 from Backend.rw_lock import ReadWriteLock
@@ -103,7 +103,7 @@ class Store:
        ----------------------
        1. a product with product_id exists"""
 
-    def remove_product(self, product_id: str) -> Response[None]:
+    def remove_product(self, product_id: str) -> Response[PrimitiveParsable[int]]:
         self._products_lock.acquire_write()
         result = self._products_to_quantities.pop(product_id, None)
         if result is None:
@@ -112,9 +112,7 @@ class Store:
                 False, msg="The product " + product_id + "is already not in the inventory!"
             )
         self._products_lock.release_write()
-        return Response(
-            True, msg="Successfully removed product with product id: " + str(product_id)
-        )
+        return Response(True, obj=PrimitiveParsable(result[1]), msg="Successfully removed product with product id: " + str(product_id))
 
     """checks need to be made:
        ----------------------
