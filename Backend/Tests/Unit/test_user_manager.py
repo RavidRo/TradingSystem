@@ -27,7 +27,7 @@ def cookie2():
     return UserManager.enter_system()
 
 
-# * enter system tests - 2.1
+# * enter __system tests - 2.1
 # * ==============================================================
 def test_enter_system_registers_returned_cookie(cookie):
     cookie_registered = cookie in UserManager._get_cookie_user()

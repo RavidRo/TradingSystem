@@ -55,6 +55,17 @@ class User(IUser):
     def get_cart_price(self) -> Response[PrimitiveParsable[float]]:
         return self.state.get_cart_price()
 
+    # 2.9
+    def lock_cart(self):
+        return self.state.lock_cart()
+
+    #2.9
+    def release_cart(self):
+        return self.state.release_cart()
+
+    #2.9
+    def cancel_purchase(self):
+        return self.state.cancel_purchase()
     # Member
     # ===============================
 
@@ -77,7 +88,7 @@ class User(IUser):
         return self.state.add_new_product(store_id, name, price, quantity)
 
     # 4.1
-    def remove_product_from_store(self, store_id: str, product_id: str) -> Response[None]:
+    def remove_product_from_store(self, store_id: str, product_id: str) -> Response[PrimitiveParsable[int]]:
         return self.state.remove_product(store_id, product_id)
 
     # 4.1
@@ -153,3 +164,4 @@ class User(IUser):
 
     def get_appointment_lock(self) -> threading.Lock():
         return self.appointment_lock
+
