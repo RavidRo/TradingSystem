@@ -2,6 +2,7 @@
 from __future__ import annotations
 import threading
 from asgiref.sync import sync_to_async
+from Backend.Domain.Payment.payment_manager import PaymentManager
 
 
 
@@ -31,6 +32,7 @@ class TradingSystem(object):
             raise Exception("This class is a singleton!")
         else:
             TradingSystem.__instance = self
+            self.payment_manager = PaymentManager()
 
     # @logging
 
@@ -104,7 +106,7 @@ class TradingSystem(object):
         for bag in cart.bags:
             products_ids_to_quantity |= bag.product_ids_to_quantities
 
-        res = PaymentSystem.pay(price, payment_details, products_ids_to_quantity, address)
+        res = self.payment_manager.pay(price.get_obj(), payment_details, products_ids_to_quantity, address)
         if res.succeeded():
             TradingSystemManager.release_cart(cookie)
             return TradingSystemManager.purchase_completed(cookie)

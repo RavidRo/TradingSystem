@@ -7,11 +7,11 @@ class UserState(ABC):
     def __init__(self, user, cart=None):
         if cart is None:
             cart = ShoppingCart()
-        self.cart = cart
-        self.user = user
+        self._cart = cart
+        self._user = user
 
     def set_user(self, user):
-        self.user = user
+        self._user = user
 
     @abstractmethod
     def get_username(self):
@@ -26,22 +26,22 @@ class UserState(ABC):
         return Response(False, msg="Abstract Method")
 
     def save_product_in_cart(self, store_id, product_id, quantity):
-        return self.cart.add_product(store_id, product_id, quantity)
+        return self._cart.add_product(store_id, product_id, quantity)
 
     def show_cart(self):
-        return Response[ShoppingCart](True, obj=self.cart, msg="got cart successfully")
+        return Response[ShoppingCart](True, obj=self._cart, msg="got cart successfully")
 
     def delete_from_cart(self, store_id, product_id):
-        return self.cart.remove_product(store_id, product_id)
+        return self._cart.remove_product(store_id, product_id)
 
     def change_product_quantity_in_cart(self, store_id, product_id, new_amount):
-        return self.cart.change_product_quantity(store_id, product_id, new_amount)
+        return self._cart.change_product_quantity(store_id, product_id, new_amount)
 
     def buy_cart(self, current_user):
-        return self.cart.buy_products(current_user)
+        return self._cart.buy_products(current_user)
 
     def get_cart_price(self):
-        return self.cart.get_price()
+        return self._cart.get_price()
 
     @abstractmethod
     def delete_products_after_purchase(self):
@@ -112,10 +112,10 @@ class UserState(ABC):
         return Response(False, msg="Abstract Method")
 
     def lock_cart(self):
-        return self.cart.lock_cart()
+        return self._cart.lock_cart()
 
     def release_cart(self):
-        return self.cart.release_cart()
+        return self._cart.release_cart()
 
     def cancel_purchase(self):
-        return self.cart.cancel_purchase()
+        return self._cart.cancel_purchase()

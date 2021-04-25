@@ -36,18 +36,18 @@ class Guest(UserState):
         response = authentication.login(username, password)
         if response.succeeded():
             if is_username_admin(username):
-                self.user.change_state(
-                    Admin(self.user, username)
+                self._user.change_state(
+                    Admin(self._user, username)
                 )  # in later milestones, fetch data from DB
             else:
-                self.user.change_state(Member(self.user, username))
+                self._user.change_state(Member(self._user, username))
         return response
 
     def register(self, username, password):
         return authentication.register(username, password)
 
     def delete_products_after_purchase(self):
-        return self.cart.delete_products_after_purchase("guest")
+        return self._cart.delete_products_after_purchase("guest")
 
     def open_store(self, store_name):
         return Response(False, msg="A store cannot be opened by a guest")
