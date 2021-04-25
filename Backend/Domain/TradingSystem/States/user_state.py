@@ -112,10 +112,10 @@ class UserState(ABC):
         return Response(False, msg="Abstract Method")
 
     def lock_cart(self):
-        return self.cart.lock_cart()
+        return self._cart.lock_cart()
 
     def release_cart(self):
-        return self.cart.release_cart()
+        return self._cart.release_cart()
 
     def cancel_purchase(self):
-        return self.cart.cancel_purchase()
+        return self._cart.cancel_purchase()

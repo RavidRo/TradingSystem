@@ -11,8 +11,8 @@ class Store:
     from Backend.Domain.TradingSystem.purchase_details import PurchaseDetails
 
     def __init__(self, store_name: str):
-        from Backend.Domain.TradingSystem.PolicyTypes.discount_policy import DefaultDiscountPolicy
-        from Backend.Domain.TradingSystem.PolicyTypes.purchase_policy import DefaultPurchasePolicy
+        from Backend.Domain.TradingSystem.TypesPolicies.discount_policy import DefaultDiscountPolicy
+        from Backend.Domain.TradingSystem.TypesPolicies.purchase_policy import DefaultPurchasePolicy
 
         """Create a new store with it's specified info"""
         self.__id = self.id_generator()
