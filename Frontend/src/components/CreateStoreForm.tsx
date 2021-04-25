@@ -24,7 +24,13 @@ const CreateStoreForm: FC<CreateStoreFormProps> = ({ onSubmit }) => {
 					label="Store's name"
 					onChange={(event) => setName(event.currentTarget.value)}
 				/>
-				<Button type="submit" fullWidth variant="contained" color="primary">
+				<Button
+					type="submit"
+					className="create-store-btn"
+					variant="contained"
+					color="primary"
+					fullWidth
+				>
 					Create Store!
 				</Button>
 			</form>

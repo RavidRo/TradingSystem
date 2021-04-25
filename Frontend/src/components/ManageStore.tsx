@@ -1,4 +1,4 @@
-import React, { FC, useState } from 'react';
+import React, { FC, useEffect, useState } from 'react';
 
 import { ListItem, ListItemText } from '@material-ui/core';
 
@@ -15,6 +15,11 @@ const ManageStore: FC<ManageStoreProps> = ({ products }) => {
 	const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
 	const [open, setOpen] = useState<boolean>(false);
 
+	useEffect(() => {
+		setOpen(false);
+		setSelectedProduct(null);
+	}, [products]);
+
 	const onSelectProduct = (product: Product) => {
 		setTab(product);
 	};
@@ -27,7 +32,7 @@ const ManageStore: FC<ManageStoreProps> = ({ products }) => {
 		setTimeout(() => {
 			setSelectedProduct(product);
 			setOpen(true);
-		}, 250);
+		}, 300);
 	};
 
 	return (

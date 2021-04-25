@@ -64,7 +64,7 @@ const MyStores: FC<MyStoresProps> = () => {
 		setTimeout(() => {
 			setSelectedStore(selectedStore);
 			setOpen(true);
-		}, 250);
+		}, 300);
 	};
 
 	const onNewStore = (newName: string) => {

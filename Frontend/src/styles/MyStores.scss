@@ -46,9 +46,18 @@
 .create-store-form-cont {
 	width: 50%;
 	padding: 20px;
-}
-.create-store-form {
-	max-width: 50%;
+	min-width: 200px;
+	h2 {
+		white-space: nowrap;
+	}
+	.create-store-form {
+		max-width: 400px;
+		width: 100%;
+	}
+	.create-store-btn {
+		margin-top: 20px;
+		white-space: nowrap;
+	}
 }
 
 // Create Product Form
