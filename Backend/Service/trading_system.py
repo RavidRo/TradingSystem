@@ -2,10 +2,10 @@
 from __future__ import annotations
 import threading
 
+from Backend.Domain.Payment.payment_manager import PaymentManager
 from Backend.Service.DataObjects.shopping_cart_data import ShoppingCartData
 import Backend.Service.logs as log
 from Backend.Domain.TradingSystem.trading_system_manager import TradingSystemManager
-import Backend.Domain.Payment.payment_manager as PaymentSystem
 
 
 class TradingSystem(object):
