@@ -5,9 +5,9 @@ import '../styles/GenericList.scss';
 type GenericListProps = {
 	data: any[];
 	header: string;
-	createTxt: string;
-	onCreate: () => void;
 	children: (data: any) => JSX.Element;
+	createTxt?: string;
+	onCreate?: () => void;
 };
 
 const GenericList: FC<GenericListProps> = (props) => {
@@ -18,9 +18,11 @@ const GenericList: FC<GenericListProps> = (props) => {
 			</ListItem>
 			<Divider />
 			{props.data.map((current) => props.children(current))}
-			<ListItem button onClick={props.onCreate}>
-				<ListItemText primary={props.createTxt} />
-			</ListItem>
+			{props.onCreate && (
+				<ListItem button onClick={props.onCreate}>
+					<ListItemText primary={props.createTxt} />
+				</ListItem>
+			)}
 		</List>
 	);
 };
