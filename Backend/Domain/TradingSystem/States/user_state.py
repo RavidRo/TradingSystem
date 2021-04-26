@@ -56,7 +56,7 @@ class UserState(ABC):
         return Response(False, msg="Abstract Method")
 
     @abstractmethod
-    def add_new_product(self, store_id, product_name, product_price, quantity):
+    def add_new_product(self, store_id, product_name, category, product_price, quantity):
         return Response(False, msg="Abstract Method")
 
     @abstractmethod
@@ -68,7 +68,7 @@ class UserState(ABC):
         return Response(False, msg="Abstract Method")
 
     @abstractmethod
-    def edit_product_details(self, store_id, product_id, new_name, new_price):
+    def edit_product_details(self, store_id, product_id, new_name, new_category, new_price):
         return Response(False, msg="Abstract Method")
 
     @abstractmethod

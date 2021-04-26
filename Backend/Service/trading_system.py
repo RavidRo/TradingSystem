@@ -133,8 +133,8 @@ class TradingSystem(object):
     # =======================
 
     @log.loging(to_hide=[1])
-    def create_product(self, cookie: str, store_id: str, name: str, price: float, quantity: int):
-        return TradingSystemManager.create_product(cookie, store_id, name, price, quantity)
+    def create_product(self, cookie: str, store_id: str, name: str, category: str, price: float, quantity: int):
+        return TradingSystemManager.create_product(cookie, store_id, name, category, price, quantity)
 
     @log.loging(to_hide=[1])
     def remove_product_from_store(self, cookie: str, store_id: str, product_id: str):
@@ -155,10 +155,11 @@ class TradingSystem(object):
         store_id: str,
         product_id: str,
         new_name: str = None,
+        new_category: str = None,
         new_price: float = None,
     ):
         return TradingSystemManager.edit_product_details(
-            cookie, store_id, product_id, new_name, new_price
+            cookie, store_id, product_id, new_name, new_category, new_price
         )
 
     @log.loging(to_hide=[1])

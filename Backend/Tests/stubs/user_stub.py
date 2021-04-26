@@ -105,7 +105,7 @@ class UserStub(IUser):
         return Response(True)
 
     def create_product(
-        self, store_id: str, name: str, price: float, quantity: int
+        self, store_id: str, name: str, category: str, price: float, quantity: int
     ) -> Response[None]:
         self._create_product = True
         return Response(True)
@@ -117,7 +117,7 @@ class UserStub(IUser):
         return Response(True)
 
     def edit_product_details(
-        self, store_id: str, product_id: str, new_name: str, new_price: float
+        self, store_id: str, product_id: str, new_name: str, category: str, new_price: float
     ) -> Response[None]:
         self._edit_product_details = True
         return Response(True)
