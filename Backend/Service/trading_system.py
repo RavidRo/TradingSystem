@@ -62,13 +62,14 @@ class TradingSystem(object):
     # kwargs = You can search for a product by additional key words
     @log.loging()
     def search_products(
-        self, *keywords, product_name="", category=None, min_price=None, max_price=None
+        self, product_name="", category=None, min_price=None, max_price=None, search_by="name", *keywords
     ):
         return TradingSystemManager.search_products(
             product_name,
             category,
             min_price,
             max_price,
+            search_by,
             *keywords,
         )
 
