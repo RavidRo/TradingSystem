@@ -1,7 +1,7 @@
 import React, { FC, useEffect, useState } from 'react';
 
 import home from '../images/home.jpeg';
-import SearchBar from './SearchBar';
+import SearchBar from '../components/SearchBar';
 import '../styles/Home.scss';
 import useAPI from '../hooks/useAPI';
 

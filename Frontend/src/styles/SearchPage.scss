@@ -1,75 +1,27 @@
-
-
 .SearchPageDiv{
     display: flex;
     flex-direction: column;
-    overflow-y: scroll;
-    z-index: 5;
-}
-.searchInputBtn{
-    display: flex;
-    flex-direction: row;  
-}
-.searchInput{
-    width: 50%;
-}
-.categoryDiv{
-    width: 7%;
-}
-.categoryBtn{
-    height: 60px;
-    width: 100%;
-    font-size: large;
-    background-color: blanchedalmond;
-    cursor: pointer;
-
-}
-.categoryList{
-    padding: 0;
-    z-index: 10;
-    position: absolute;
-    border: 4px solid black;
-    overflow-y: scroll;
-    height: 30%;
-    width: 15%;
-    background-color: blanchedalmond;
-}
-.btn{
-    width: 100%;
-    align-self: center;
-    height: 20%;
-    background-color: #eff8f7;
-    cursor: pointer;
-    font-size: large;
-    &:hover {
-        font-weight: bold;
-        background-color: #f0c574;
-      }
-}
-.arrowIcon{
-    margin-left: 5%;
-    font-size: 20px;
-    cursor: pointer;
-
+    background-color: #f7ecd2;
 }
 .cardsRow{
     display: flex;
     flex-direction: row;
+    width: 100%;
 }
-.prodCard{
-    margin-left: 10%;
-    margin-top: 5%;
-    width: 30%;
-    height: 200px;
-    background-color: #1ef1e0;
-    
+
+.mainArea{
+    display: flex;
+    flex-direction: row;
 }
-.prodCard Button{
-    color: rgba(44, 41, 255, 0.925);
-    padding: 5%;
+.filterArea{
+    width: 20%;
+    margin-top: 10%;
+    margin-left: 3%;
 }
-.cardContent{
-    color: rgba(0, 0, 0, 0.925);
-    font-size:large;
-    font-weight: bold;
+.productCards{
+    width: 80%;
+}
+.price{
+    display: flex;
+    flex-direction: row;
 }

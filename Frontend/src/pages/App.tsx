@@ -4,7 +4,7 @@ import { createMuiTheme, ThemeProvider } from '@material-ui/core';
 
 import Home from './Home';
 import Cart from './Cart';
-import Navbar from './Navbar';
+import Navbar from '../components/Navbar';
 import SignIn from './SignIn';
 import SignUp from './SignUp';
 import MyStores from './MyStores';

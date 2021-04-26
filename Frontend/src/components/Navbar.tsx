@@ -5,7 +5,7 @@ import { faShoppingCart, faSignInAlt } from '@fortawesome/free-solid-svg-icons';
 
 import '../styles/Navbar.scss';
 import config from '../config';
-import PopupCart from './PopupCart';
+import PopupCart from '../components/PopupCart';
 
 type NavBarProps = { signedIn: boolean };
 const Navbar: FC<NavBarProps> = ({ signedIn }) => {

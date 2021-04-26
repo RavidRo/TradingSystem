@@ -2,7 +2,7 @@
 import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@material-ui/core';
 import React ,{FC} from 'react';
 import '../styles/PopupCart.scss';
-import ProductPopup from './ProductPopup';
+import ProductPopup from '../components/ProductPopup';
 
 type PopupCartProps = {
     content: string,
