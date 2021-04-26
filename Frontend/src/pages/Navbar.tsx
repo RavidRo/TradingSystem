@@ -23,7 +23,7 @@ const Navbar: FC<NavBarProps> = ({ signedIn }) => {
 					onMouseLeave={() => setHoverCart(false)}
 				>
 					<FontAwesomeIcon className="cartIcon" icon={faShoppingCart} />
-					<Link className="cartLink" to="/">
+					<Link className="cartLink" to="/cart">
 						My Cart
 					</Link>
 					{hoverCart ? <PopupCart content={'your cart is:'} /> : null}

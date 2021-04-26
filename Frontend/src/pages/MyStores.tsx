@@ -10,8 +10,8 @@ import ManageStore from '../components/ManageStore';
 import GenericList from '../components/GenericList';
 
 const init_stores: Store[] = [
-	{ id: '0', name: 'Tiffany&Stuff' },
-	{ id: '1', name: 'Fluffy My Puppy' },
+	{ id: '0', name: 'Tiffany&Stuff', role: 'Founder' },
+	{ id: '1', name: 'Fluffy My Puppy', role: 'Member' },
 ];
 
 const products_per_store: { [key: string]: Product[] } = {
@@ -68,7 +68,7 @@ const MyStores: FC<MyStoresProps> = () => {
 	};
 
 	const onNewStore = (newName: string) => {
-		const store: Store = { id: '4', name: newName };
+		const store: Store = { id: '4', name: newName, role: 'Founder' };
 		setStores(stores.concat([store]));
 	};
 
@@ -88,14 +88,14 @@ const MyStores: FC<MyStoresProps> = () => {
 							onClick={() => setStore(store.id)}
 							selected={store.id === selectedStore}
 						>
-							<ListItemText primary={store.name} />
+							<ListItemText primary={`${store.name} - ${store.role}`} />
 						</ListItem>
 					)}
 				</GenericList>
 			</div>
 			<div className={'second-tab' + (open ? ' open' : '')}>
 				{selectedStore ? (
-					<ManageStore products={products_per_store[selectedStore]} />
+					<ManageStore products={products_per_store[selectedStore] || []} />
 				) : (
 					<CreateStoreForm onSubmit={onNewStore} />
 				)}
