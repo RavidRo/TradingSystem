@@ -19,7 +19,7 @@ class IStore(Parsable):
     """4.1"""
 
     @abstractmethod
-    def add_product(self, product_name: str, price: float, quantity: int) -> Response[None]:
+    def add_product(self, product_name: str, category: str, price: float, quantity: int) -> Response[None]:
         """Add product with specified quantity to the store"""
         raise NotImplementedError
 
@@ -40,7 +40,7 @@ class IStore(Parsable):
 
     @abstractmethod
     def edit_product_details(
-        self, product_id: str, product_name: str, price: float
+        self, product_id: str, product_name: str, category: str, price: float
     ) -> Response[None]:
         """Edit product's details with received product_info"""
         raise NotImplementedError

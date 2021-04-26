@@ -75,15 +75,15 @@ def test_constructor_doing_the_same_for_all_subclasses(store, member):
 # * add product tests - #4.1
 # * ==========================================================================================
 def test_founder_add_product_calls_store_successfully(founder: Founder):
-    assert founder.add_product("", 0, 0).succeeded()
+    assert founder.add_product("", "", 0, 0).succeeded()
 
 
 def test_owner_add_product_calls_store_successfully(owner: Owner):
-    assert owner.add_product("", 0, 0).succeeded()
+    assert owner.add_product("", "", 0, 0).succeeded()
 
 
 def test_manager_add_product_prohibited_by_default(manager: Manager):
-    assert not manager.add_product("", 0, 0).succeeded()
+    assert not manager.add_product("", "", 0, 0).succeeded()
 
 
 # * remove product tests - #4.1
@@ -117,15 +117,15 @@ def test_manager_change_product_quantity_prohibited_by_default(manager: Manager)
 # * edit product details tests - #4.1
 # * ==========================================================================================
 def test_founder_edit_product_details_calls_store_successfully(founder: Founder):
-    assert founder.edit_product_details("0", "", 0).succeeded()
+    assert founder.edit_product_details("0", "", '', 0).succeeded()
 
 
 def test_owner_edit_product_details_calls_store_successfully(owner: Owner):
-    assert owner.edit_product_details("0", "", 0).succeeded()
+    assert owner.edit_product_details("0", "", '', 0).succeeded()
 
 
 def test_manager_edit_product_details_prohibited_by_default(manager: Manager):
-    assert not manager.edit_product_details("0", "", 0).succeeded()
+    assert not manager.edit_product_details("0", "", '', 0).succeeded()
 
 
 # * appoint owner tests - #4.3
@@ -229,7 +229,7 @@ def test_manager_gained_the_permission(store: StoreStub):
     owner.add_manager_permission(
         member2.get_username().get_obj().get_val(), Permission.MANAGE_PRODUCTS
     ).succeeded()
-    assert manager.add_product("", 0, 0).succeeded()
+    assert manager.add_product("", "", 0, 0).succeeded()
 
 
 def test_add_permission_fails_when_personal_never_appointed(founder):

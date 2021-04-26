@@ -174,48 +174,48 @@ def test_stores_names_are_not_unique(user_member: User):
 # * =================================================================
 def test_can_not_create_product_to_none_existent_store(member: User):
     store: Store = member.create_store("test_can_not_create_product_to_unassigned_store").get_obj()
-    assert not member.create_product("some_wrong_id", "new_product", 19.90, 5).succeeded()
+    assert not member.create_product("some_wrong_id", "new_product", "A", 19.90, 5).succeeded()
 
 
 def test_can_not_create_product_to_unassigned_store(member: User, user_member2: User):
     store: Store = member.create_store("test_can_not_create_product_to_unassigned_store").get_obj()
-    assert not user_member2.create_product(store.get_id(), "new_product", 19.90, 5).succeeded()
+    assert not user_member2.create_product(store.get_id(), "new_product", "A", 19.90, 5).succeeded()
 
 
 def test_adds_product_successfully(member: User):
     store: Store = member.create_store("test_adds_product_successfully").get_obj()
-    assert member.create_product(store.get_id(), "new_product", 19.90, 5).succeeded()
+    assert member.create_product(store.get_id(), "new_product", "A", 19.90, 5).succeeded()
 
 
 def test_cant_add_product_with_negative_quantity(member: User):
     store: Store = member.create_store("test_cant_add_product_with_negative_quantity").get_obj()
-    assert not member.create_product(store.get_id(), "new_product", 19.90, -5).succeeded()
+    assert not member.create_product(store.get_id(), "new_product", "A", 19.90, -5).succeeded()
 
 
 def test_cant_add_product_with_negative_price(member: User):
     store: Store = member.create_store("test_cant_add_product_with_negative_price").get_obj()
-    assert not member.create_product(store.get_id(), "new_product", -19.90, 5).succeeded()
+    assert not member.create_product(store.get_id(), "new_product", "A", -19.90, 5).succeeded()
 
 
 def test_cant_add_2_products_with_same_name(member: User):
     store: Store = member.create_store("store_name").get_obj()
-    member.create_product(store.get_id(), "new_product", 19.90, 3).succeeded()
-    assert not member.create_product(store.get_id(), "new_product", 19.90, 5).succeeded()
+    member.create_product(store.get_id(), "new_product", "A", 19.90, 3).succeeded()
+    assert not member.create_product(store.get_id(), "new_product", "A", 19.90, 5).succeeded()
 
 
 def test_can_add_products_free_price(member: User):
     store: Store = member.create_store("test_cant_add_product_with_negative_price").get_obj()
-    assert member.create_product(store.get_id(), "new_product", 0, 5).succeeded()
+    assert member.create_product(store.get_id(), "new_product", "A", 0, 5).succeeded()
 
 
 def test_can_add_products_with_zero_quantity(member: User):
     store: Store = member.create_store("test_cant_add_product_with_negative_price").get_obj()
-    assert member.create_product(store.get_id(), "new_product", 20.7, 0).succeeded()
+    assert member.create_product(store.get_id(), "new_product", "A", 20.7, 0).succeeded()
 
 
 def test_cant_add_products_with_empty_strings(member: User):
     store: Store = member.create_store("test_cant_add_products_with_empty_strings").get_obj()
-    assert not member.create_product(store.get_id(), "", 20.7, 30).succeeded()
+    assert not member.create_product(store.get_id(), "", "A", 20.7, 30).succeeded()
 
 
 # * remove_product_from_store
@@ -224,7 +224,7 @@ def test_can_not_remove_product_from_none_existent_store(member: User):
     store: Store = member.create_store(
         "test_can_not_remove_product_from_none_existent_store"
     ).get_obj()
-    product_id = member.create_product(store.get_id(), "new_product", 19.90, 5).get_obj()
+    product_id = member.create_product(store.get_id(), "new_product", "A", 19.90, 5).get_obj()
     assert not member.remove_product_from_store("some_wrong_id", product_id).succeeded()
 
 
@@ -232,13 +232,13 @@ def test_can_not_remove_product_from_unassigned_store(member: User, user_member2
     store: Store = user_member2.create_store(
         "test_can_not_remove_product_from_unassigned_store"
     ).get_obj()
-    product_id = user_member2.create_product(store.get_id(), "new_product", 19.90, 5).get_obj()
+    product_id = user_member2.create_product(store.get_id(), "new_product", "A", 19.90, 5).get_obj()
     assert not member.remove_product_from_store(store.get_id(), product_id).succeeded()
 
 
 def test_removes_product_successfully(member: User):
     store: Store = member.create_store("test_removes_product_successfully").get_obj()
-    product_id = member.create_product(store.get_id(), "new_product", 19.90, 5).get_obj()
+    product_id = member.create_product(store.get_id(), "new_product", "A", 19.90, 5).get_obj()
     assert member.remove_product_from_store(store.get_id(), product_id).succeeded()
 
 
@@ -246,13 +246,13 @@ def test_removes_product_successfully(member: User):
 # * =================================================================
 def test_can_not_change_product_of_none_existent_store(member: User):
     store: Store = member.create_store("store_name").get_obj()
-    product_id = member.create_product(store.get_id(), "new_product", 19.90, 5).get_obj()
+    product_id = member.create_product(store.get_id(), "new_product", "A", 19.90, 5).get_obj()
     assert not member.change_product_quantity_in_store("some_wrong_id", product_id, 24).succeeded()
 
 
 def test_can_not_change_product_of_none_existent_product(member: User):
     store: Store = member.create_store("store_name").get_obj()
-    product_id = member.create_product(store.get_id(), "new_product", 19.90, 5).get_obj()
+    product_id = member.create_product(store.get_id(), "new_product", "A", 19.90, 5).get_obj()
     assert not member.change_product_quantity_in_store(
         store.get_id(), "some_wrong_id", 24
     ).succeeded()
@@ -260,25 +260,25 @@ def test_can_not_change_product_of_none_existent_product(member: User):
 
 def test_can_not_change_product_of_unassigned_store(member: User, user_member2: User):
     store: Store = user_member2.create_store("store_name").get_obj()
-    product_id = user_member2.create_product(store.get_id(), "new_product", 19.90, 5).get_obj()
+    product_id = user_member2.create_product(store.get_id(), "new_product", "A", 19.90, 5).get_obj()
     assert not member.change_product_quantity_in_store(store.get_id(), product_id, 24).succeeded()
 
 
 def test_changes_product_quantity_in_store_successfully(member: User):
     store: Store = member.create_store("store_name").get_obj()
-    product_id = member.create_product(store.get_id(), "new_product", 19.90, 5).get_obj()
+    product_id = member.create_product(store.get_id(), "new_product", "A", 19.90, 5).get_obj()
     assert member.change_product_quantity_in_store(store.get_id(), product_id, 24).succeeded()
 
 
 def test_changes_product_quantity_in_store_to_0_successfully(member: User):
     store: Store = member.create_store("store_name").get_obj()
-    product_id = member.create_product(store.get_id(), "new_product", 19.90, 5).get_obj()
+    product_id = member.create_product(store.get_id(), "new_product", "A", 19.90, 5).get_obj()
     assert member.change_product_quantity_in_store(store.get_id(), product_id, 0).succeeded()
 
 
 def test_changes_product_quantity_in_store_to_negative_fails(member: User):
     store: Store = member.create_store("store_name").get_obj()
-    product_id = member.create_product(store.get_id(), "new_product", 19.90, 5).get_obj()
+    product_id = member.create_product(store.get_id(), "new_product", "A", 19.90, 5).get_obj()
     assert not member.change_product_quantity_in_store(store.get_id(), product_id, -1).succeeded()
 
 
@@ -286,52 +286,58 @@ def test_changes_product_quantity_in_store_to_negative_fails(member: User):
 # * =================================================================
 def test_can_not_edit_product_details_of_none_existent_store(member: User):
     store: Store = member.create_store("store_name").get_obj()
-    product_id = member.create_product(store.get_id(), "new_product", 19.90, 5).get_obj()
+    product_id = member.create_product(store.get_id(), "new_product", "A", 19.90, 5).get_obj()
     assert not member.edit_product_details(
-        "some_wrong_id", product_id, "product name", 123.90
+        "some_wrong_id", product_id, "product name", "B", 123.90
     ).succeeded()
 
 
 def test_can_not_edit_product_details_of_none_existent_product(member: User):
     store: Store = member.create_store("store_name").get_obj()
-    product_id = member.create_product(store.get_id(), "new_product", 19.90, 5).get_obj()
+    product_id = member.create_product(store.get_id(), "new_product", "A", 19.90, 5).get_obj()
     assert not member.edit_product_details(
-        store.get_id(), "some_wrong_id", "product name", 24.90
+        store.get_id(), "some_wrong_id", "product name", "B", 24.90
     ).succeeded()
 
 
 def test_can_not_edit_product_details_of_unassigned_store(member: User, user_member2: User):
     store: Store = user_member2.create_store("store_name").get_obj()
-    product_id = user_member2.create_product(store.get_id(), "new_product", 19.90, 5).get_obj()
+    product_id = user_member2.create_product(store.get_id(), "new_product", "A", 19.90, 5).get_obj()
     assert not member.edit_product_details(
-        store.get_id(), product_id, "product name", 24.90
+        store.get_id(), product_id, "product name", "B", 24.90
     ).succeeded()
 
 
 def test_changes_edit_product_details_of_store_successfully(member: User):
     store: Store = member.create_store("store_name").get_obj()
-    product_id = member.create_product(store.get_id(), "new_product", 19.90, 5).get_obj()
+    product_id = member.create_product(store.get_id(), "new_product", "A", 19.90, 5).get_obj()
     assert member.edit_product_details(
-        store.get_id(), product_id, "product name", 24.90
+        store.get_id(), product_id, "product name", "A", 24.90
     ).succeeded()
 
 
 def test_edit_product_price_in_store_to_0_successfully(member: User):
     store: Store = member.create_store("store_name").get_obj()
-    product_id = member.create_product(store.get_id(), "new_product", 19.90, 5).get_obj()
-    assert member.edit_product_details(store.get_id(), product_id, "new_product", 0).succeeded()
+    product_id = member.create_product(store.get_id(), "new_product", "A", 19.90, 5).get_obj()
+    assert member.edit_product_details(store.get_id(), product_id, "new_product", "B", 0).succeeded()
 
 
 def test_edit_product_name_in_store_to_empty_fails(member: User):
     store: Store = member.create_store("store_name").get_obj()
-    product_id = member.create_product(store.get_id(), "new_product", 19.90, 5).get_obj()
-    assert not member.edit_product_details(store.get_id(), product_id, "", 5.90).succeeded()
+    product_id = member.create_product(store.get_id(), "new_product", "A", 19.90, 5).get_obj()
+    assert not member.edit_product_details(store.get_id(), product_id, "", "B", 5.90).succeeded()
+
+
+def test_edit_product_category_in_store_to_empty_fails(member: User):
+    store: Store = member.create_store("store_name").get_obj()
+    product_id = member.create_product(store.get_id(), "new_product", "A", 19.90, 5).get_obj()
+    assert not member.edit_product_details(store.get_id(), product_id, "new_product", "", 5.90).succeeded()
 
 
 def test_edit_product_details_accepts_none_arguments(member: User):
     store: Store = member.create_store("store_name").get_obj()
-    product_id = member.create_product(store.get_id(), "new_product", 19.90, 5).get_obj()
-    assert member.edit_product_details(store.get_id(), product_id, None, None).succeeded()
+    product_id = member.create_product(store.get_id(), "new_product", "A", 19.90, 5).get_obj()
+    assert member.edit_product_details(store.get_id(), product_id, None, None, None).succeeded()
 
 
 # * appoint_owner
@@ -362,7 +368,7 @@ def test_founder_cant_appoint_some_one_twice_as_owner(member: User, member2: Use
 def test_appointed_owner_has_permissions_for_store(member: User, member2: User):
     store: Store = member.create_store("store_name").get_obj()
     member.appoint_owner(store.get_id(), member2)
-    result = member2.create_product(store.get_id(), "name", 5, 5)
+    result = member2.create_product(store.get_id(), "name", "A", 5, 5)
     assert result.succeeded(), result.get_msg()
 
 

@@ -1,4 +1,4 @@
-from Backend.response import Response, ParsableList
+from Backend.response import Response, ParsableList, PrimitiveParsable
 
 from Backend.Domain.TradingSystem.Responsibilities.responsibility import Permission, Responsibility
 from Backend.Domain.TradingSystem.Responsibilities.owner import Owner
@@ -26,16 +26,16 @@ class Manager(Owner):
 
     # 4.1
     # Creating a new product a the store
-    def add_product(self, name: str, price: float, quantity: int) -> Response[str]:
+    def add_product(self, name: str, category: str, price: float, quantity: int) -> Response[str]:
         if self.__permissions[Permission.MANAGE_PRODUCTS]:
-            return super().add_product(name, price, quantity)
+            return super().add_product(name, category, price, quantity)
 
         return self.__create_no_permission_Response(Permission.MANAGE_PRODUCTS)
 
     # 4.1
-    def remove_product(self, product_id: str) -> Response[None]:
+    def remove_product(self, product_id: str) -> Response[PrimitiveParsable[int]]:
         if self.__permissions[Permission.MANAGE_PRODUCTS]:
-            return super().remove_product(product_id, product_id)
+            return super().remove_product(product_id)
 
         return self.__create_no_permission_Response(Permission.MANAGE_PRODUCTS)
 
@@ -47,11 +47,9 @@ class Manager(Owner):
         return self.__create_no_permission_Response(Permission.MANAGE_PRODUCTS)
 
     # 4.1
-    def edit_product_details(
-        self, product_id: str, new_name: str, new_price: float
-    ) -> Response[None]:
+    def edit_product_details(self, product_id: str, new_name: str, new_category: str, new_price: float) -> Response[None]:
         if self.__permissions[Permission.MANAGE_PRODUCTS]:
-            return super().edit_product_details(product_id, new_name, new_price)
+            return super().edit_product_details(product_id, new_name, new_category, new_price)
 
         return self.__create_no_permission_Response(Permission.MANAGE_PRODUCTS)
 

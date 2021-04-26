@@ -27,7 +27,7 @@ def cookie2():
     return UserManager.enter_system()
 
 
-# * enter system tests - 2.1
+# * enter __system tests - 2.1
 # * ==============================================================
 def test_enter_system_registers_returned_cookie(cookie):
     cookie_registered = cookie in UserManager._get_cookie_user()
@@ -192,12 +192,12 @@ def test_get_purchase_history_fails_when_given_invalid_cookie():
 # * create product tests - 4.1
 # * ==============================================================
 def test_create_product_deligates_to_user_successfully(cookie):
-    UserManager.create_product(cookie, "", "", 0, 0)
+    UserManager.create_product(cookie, "", "", "", 0, 0)
     assert UserManager._get_cookie_user()[cookie]._create_product
 
 
 def test_create_product_fails_when_given_invalid_cookie():
-    assert not UserManager.create_product("boogie boogie", "", "", 0, 0).succeeded()
+    assert not UserManager.create_product("boogie boogie", "", "", "", 0, 0).succeeded()
 
 
 # * remove products tests - 4.1
@@ -225,12 +225,12 @@ def test_change_product_quantity_in_store_fails_when_given_invalid_cookie():
 # * edit product details tests - 4.1
 # * ==============================================================
 def test_edit_product_details_deligates_to_user_successfully(cookie):
-    UserManager.edit_product_details(cookie, "", "", "", 0)
+    UserManager.edit_product_details(cookie, "", "", "", "", 0)
     assert UserManager._get_cookie_user()[cookie]._edit_product_details
 
 
 def test_edit_product_details_fails_when_given_invalid_cookie():
-    assert not UserManager.edit_product_details("boogie boogie", "", "", "", 0).succeeded()
+    assert not UserManager.edit_product_details("boogie boogie", "", "", "", "", 0).succeeded()
 
 
 # * appoint owner tests - 4.3

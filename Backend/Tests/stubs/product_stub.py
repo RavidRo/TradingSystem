@@ -8,7 +8,7 @@ class ProductStub(Product):
         self.product_edited = False
         self.name = name
 
-    def edit_product_details(self, product_name: str, price: float):
+    def edit_product_details(self, product_name: str, category: str, price: float):
         self.product_edited = True
         return Response(True)
 

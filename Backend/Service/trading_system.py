@@ -1,7 +1,6 @@
-""" this class is responsible to communicate with the trading system manager"""
+""" this class is responsible to communicate with the trading __system manager"""
 from __future__ import annotations
 import threading
-
 
 from Backend.Service.DataObjects.shopping_cart_data import ShoppingCartData
 import Backend.Service.logs as log
@@ -29,6 +28,7 @@ class TradingSystem(object):
             raise Exception("This class is a singleton!")
         else:
             TradingSystem.__instance = self
+            self.payment_manager = PaymentManager()
 
     def enter_system(self):
         return TradingSystemManager.enter_system()
@@ -56,13 +56,20 @@ class TradingSystem(object):
     # kwargs = You can search for a product by additional key words
     @log.loging()
     def search_products(
-        self, *keywords, product_name="", category=None, min_price=None, max_price=None
+        self,
+        product_name="",
+        category=None,
+        min_price=None,
+        max_price=None,
+        search_by="name",
+        *keywords
     ):
         return TradingSystemManager.search_products(
             product_name,
             category,
             min_price,
             max_price,
+            search_by,
             *keywords,
         )
 
@@ -100,7 +107,9 @@ class TradingSystem(object):
         for bag in cart.bags:
             products_ids_to_quantity |= bag.product_ids_to_quantities
 
-        res = PaymentSystem.pay(price, payment_details, products_ids_to_quantity, address)
+        res = self.payment_manager.pay(
+            price.get_obj(), payment_details, products_ids_to_quantity, address
+        )
         if res.succeeded():
             TradingSystemManager.release_cart(cookie)
             return TradingSystemManager.purchase_completed(cookie)
@@ -127,8 +136,12 @@ class TradingSystem(object):
     # =======================
 
     @log.loging(to_hide=[1])
-    def create_product(self, cookie: str, store_id: str, name: str, price: float, quantity: int):
-        return TradingSystemManager.create_product(cookie, store_id, name, price, quantity)
+    def create_product(
+        self, cookie: str, store_id: str, name: str, category: str, price: float, quantity: int
+    ):
+        return TradingSystemManager.create_product(
+            cookie, store_id, name, category, price, quantity
+        )
 
     @log.loging(to_hide=[1])
     def remove_product_from_store(self, cookie: str, store_id: str, product_id: str):
@@ -149,10 +162,11 @@ class TradingSystem(object):
         store_id: str,
         product_id: str,
         new_name: str = None,
+        new_category: str = None,
         new_price: float = None,
     ):
         return TradingSystemManager.edit_product_details(
-            cookie, store_id, product_id, new_name, new_price
+            cookie, store_id, product_id, new_name, new_category, new_price
         )
 
     @log.loging(to_hide=[1])

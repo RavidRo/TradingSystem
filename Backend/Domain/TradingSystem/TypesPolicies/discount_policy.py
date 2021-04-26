@@ -18,7 +18,7 @@ class DefaultDiscountPolicy(DiscountPolicy):
     #     return self.discount_type
 
     def applyDiscount(
-        self, user, store, products_to_quantities: dict
+        self, store, products_to_quantities: dict
     ) -> float:
         # discount_type = self.checkPolicy()
         # return discount_type.apply_discount(products_to_quantities)
