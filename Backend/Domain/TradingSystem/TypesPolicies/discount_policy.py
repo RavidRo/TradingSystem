@@ -1,6 +1,6 @@
 from Backend.response import Response, PrimitiveParsable
 
-from .discount_type import DefaultDiscountType
+from .discounts import DefaultDiscountType
 
 
 class DiscountPolicy:
@@ -10,7 +10,7 @@ class DiscountPolicy:
 
 class DefaultDiscountPolicy(DiscountPolicy):
     def __init__(self):
-        from Backend.Domain.TradingSystem.TypesPolicies.discount_type import DefaultDiscountType
+        from Backend.Domain.TradingSystem.TypesPolicies.discounts import DefaultDiscountType
         super().__init__()
         self.__discount_type = DefaultDiscountType()
 
@@ -18,7 +18,7 @@ class DefaultDiscountPolicy(DiscountPolicy):
     #     return self.discount_type
 
     def applyDiscount(
-        self, user, store, products_to_quantities: dict
+        self, store, products_to_quantities: dict
     ) -> float:
         # discount_type = self.checkPolicy()
         # return discount_type.apply_discount(products_to_quantities)
