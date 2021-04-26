@@ -91,7 +91,7 @@ def test_get_purchase_history_deligates_to_state(user: User):
 # * create_product tests - 4.1
 # * ===========================================================
 def test_create_product_deligates_to_state(user: User):
-    result = user.create_product("", "", 0, 0)
+    result = user.create_product("", "", "", 0, 0)
     assert user.state._add_new_product and result
 
 
@@ -112,7 +112,7 @@ def test_change_product_quantity_in_store_deligates_to_state(user: User):
 # * edit_product_details tests - 4.1
 # * ===========================================================
 def test_edit_product_details_deligates_to_state(user: User):
-    result = user.edit_product_details("", "", "", 0)
+    result = user.edit_product_details("", "", "", "", 0)
     assert user.state._edit_product_details and result
 
 

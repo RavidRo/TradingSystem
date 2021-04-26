@@ -32,5 +32,5 @@ class SearchEngine:
 
             return True
 
-        filtered_products = filter(filter_predicate, all_products.values)
+        filtered_products = list(filter(filter_predicate, all_products.values))
         return Response(True, ParsableList(filtered_products))

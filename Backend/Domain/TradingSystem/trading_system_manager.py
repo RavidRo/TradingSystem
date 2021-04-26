@@ -114,9 +114,9 @@ class TradingSystemManager:
     # Creating a new product and returns its id
     @staticmethod
     def create_product(
-        cookie: str, store_id: str, name: str, price: float, quantity: int
+        cookie: str, store_id: str, name: str, category: str, price: float, quantity: int
     ) -> Response[str]:
-        return UserManager.create_product(cookie, store_id, name, price, quantity)
+        return UserManager.create_product(cookie, store_id, name, category, price, quantity)
 
     # 4.1
     @staticmethod
@@ -133,9 +133,9 @@ class TradingSystemManager:
     # 4.1
     @staticmethod
     def edit_product_details(
-        cookie: str, store_id: str, product_id: str, new_name: str, new_price: float
+        cookie: str, store_id: str, product_id: str, new_name: str, new_category, new_price: float
     ) -> Response[None]:
-        return UserManager.edit_product_details(cookie, store_id, product_id, new_name, new_price)
+        return UserManager.edit_product_details(cookie, store_id, product_id, new_name, new_category, new_price)
 
     # 4.3
     @staticmethod
