@@ -53,7 +53,7 @@ class DefaultPurchasePolicy(PurchasePolicy):
                 return self.__purchase_rules.add(AndCompositePurchaseRule(self.generate_id()), parent_id)
 
             elif logic_type == "conditional":
-                return self.__purchase_rules.add(ConditioningCompositePurchaseRule(self.generate_id()), parent_id)
+                return self.__purchase_rules.add(ConditioningCompositePurc haseRule(self.generate_id()), parent_id)
 
             else:
                 return Response(False, msg=f"invalid logic type: {logic_type}")
