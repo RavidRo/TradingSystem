@@ -2,6 +2,8 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 from typing import List
 
+from Backend.response import Response
+
 
 class PurchaseRule(ABC):
     """
@@ -10,11 +12,19 @@ class PurchaseRule(ABC):
     """
 
     @property
-    def parent(self) -> PurchaseRule:
+    def id(self) -> str:
+        return self._id
+
+    @property
+    def parent(self) -> CompositePurchaseRule:
         return self._parent
 
+    @id.setter
+    def id(self, id: str):
+        self._id = id
+
     @parent.setter
-    def parent(self, parent: PurchaseRule):
+    def parent(self, parent: CompositePurchaseRule):
         """
         Optionally, the base Component can declare an interface for setting and
         accessing a parent of the component in a tree structure. It can also
@@ -31,10 +41,10 @@ class PurchaseRule(ABC):
     the leaf-level components.
     """
 
-    def add(self, component: PurchaseRule) -> None:
+    def add(self, component: PurchaseRule, parent_id: str) -> Response[None]:
         pass
 
-    def remove(self, component: PurchaseRule) -> None:
+    def remove(self, component_id: str) -> Response[None]:
         pass
 
     def is_composite(self) -> bool:
@@ -68,6 +78,14 @@ class PurchaseLeaf(PurchaseRule):
     def operation(self, products_to_quantities: dict, user_age: int) -> bool:
         pass
 
+    def remove(self, component_id: str) -> bool:
+        if self.id == component_id:
+            self.parent.children.remove(self)
+            self.parent = None
+            return True
+        return False
+
+
 
 class CompositePurchaseRule(PurchaseRule):
     """
@@ -76,7 +94,7 @@ class CompositePurchaseRule(PurchaseRule):
     children and then "sum-up" the result.
     """
 
-    def __init__(self) -> None:
+    def __init__(self, identifier: str) -> None:
         self._children: List[PurchaseRule] = []
 
     """
@@ -88,13 +106,32 @@ class CompositePurchaseRule(PurchaseRule):
     def children(self):
         return self._children
 
-    def add(self, component: PurchaseRule) -> None:
-        self._children.append(component)
-        component.parent = self
+    def add(self, component: PurchaseRule, parent_id: str) -> Response[None]:
+        if self.id == parent_id:
+            self._children.append(component)
+            component.parent = self
+            return Response(True, msg="Rule was added successfully!")
 
-    def remove(self, component: PurchaseRule) -> None:
-        self._children.remove(component)
-        component.parent = None
+        else:
+            for child in self._children:
+                if child.is_composite():
+                    response = child.add(component, parent_id)
+                    if response.succeeded():
+                        return response
+            return Response(False, msg=f"Rule couldn't be added! Wrong parent_id: {parent_id}")
+
+    def remove(self, component_id: str) -> Response[None]:
+        if self.id == component_id:
+            self.parent._children.remove(self)
+            self.parent = None
+            return Response(True, msg="Rule was removed successfully!")
+
+        else:
+            for child in self._children:
+                response = child.remove(component_id)
+                if response.succeeded():
+                    return response
+            return Response(False, msg=f"Rule couldn't be removed! Wrong component_id: {component_id}")
 
     def is_composite(self) -> bool:
         return True

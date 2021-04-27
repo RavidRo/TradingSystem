@@ -20,8 +20,8 @@ class AndCompositePurchaseRule(CompositePurchaseRule):
 
 
 class ConditioningCompositePurchaseRule(CompositePurchaseRule):
-    def __init__(self):
-        super().__init__()
+    def __init__(self, identifier: str):
+        super().__init__(identifier)
         self._if_clause: PurchaseRule = True
         self._then_clause: PurchaseRule = True
 
