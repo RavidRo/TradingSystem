@@ -49,16 +49,15 @@ class ParsableList(Parsable, Generic[T]):
 In order to support map return objects, a parsable map wrapper is introduced (parse only values)
 """
 
-S = TypeVar("S")
+R = TypeVar("R", bound=Parsable)
 
 
-class ParsableMap(Parsable, Generic[S, T]):
-    def __init__(self, values: Dict[S, T]):
+class ParsableMap(Parsable, Generic[R, T]):
+    def __init__(self, values: Dict[R, T]):
         self.values = values
 
     def parse(self):
-        for value in self.values.values():
-            value.parse()
+        return {key.parse(): value.parse() for key, value in self.values.items()}
 
 
 # """

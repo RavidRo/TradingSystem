@@ -297,9 +297,12 @@ def test_product_search_no_args_success():
     product_id, product_name, category, price, quantity = _create_product(cookie, store_id, _generate_product_name(),
                                                                           "A", 5.50, 10)
     response = system.search_products(product_name=product_name)
+    num_of_products = 0
+    for store, products in response.object.items():
+        num_of_products += len(list(filter(lambda product: product.name == product_name, products.values)))
     assert (
             response.succeeded()
-            and len(list(filter(lambda product: product.name == product_name, response.object.values))) == 1
+            and num_of_products == 1
     ), response.get_msg()
 
 
@@ -312,9 +315,12 @@ def test_product_search_args_success():
     min_price = 5.0
     max_price = 6.0
     response = system.search_products(product_name, min_price=min_price, max_price=max_price)
+    num_of_products = 0
+    for store, products in response.object.items():
+        num_of_products += len(list(filter(lambda product: product.name == product_name, products.values)))
     assert (
             response.succeeded()
-            and len(list(filter(lambda product: product.name == product_name, response.object.values))) == 1
+            and num_of_products == 1
     ), response.get_msg()
 
 
