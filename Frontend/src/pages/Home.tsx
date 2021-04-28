@@ -1,4 +1,4 @@
-import React, { FC, useEffect, useState } from 'react';
+import React, { FC, useEffect } from 'react';
 
 import home from '../images/home.jpeg';
 import SearchBar from '../components/SearchBar';

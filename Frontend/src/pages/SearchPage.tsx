@@ -1,11 +1,10 @@
-import { Button, Card, CardContent } from '@material-ui/core';
 import React, { useState, FC} from 'react';
 import '../styles/SearchPage.scss';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faCaretDown } from '@fortawesome/free-solid-svg-icons';
 import ProductSearch from '../components/ProductSearch';
 import FilterMenu from '../components/FilterMenu';
 import SearchCategory from '../components/SearchCategory';
+import Keywards from '../components/Keywards';
+import storesToProducts from '../components/storesProductsMap';
 
 type SearchPageProps = {
     location: any,
@@ -14,6 +13,7 @@ type SearchPageProps = {
 type Product = {
     name:string,
     price: number,
+    quantity:number
 }
 
 const SearchPage: FC<SearchPageProps> = ({location,propsAddProduct}) => {
@@ -24,52 +24,20 @@ const SearchPage: FC<SearchPageProps> = ({location,propsAddProduct}) => {
     const [productRating, setProductRating] = useState<number >(0);
     const [storeRating, setStoreRating] = useState<number >(0);
 
-    const [productsToPresent,setProducts] = useState<Product[]>([]);
-    
     const PostsData = ["category","news","comedy",
                         "category","news","comedy",
                         "category","news","comedy",
                         "category","news","comedy",
                         "category","news","comedy",
                         "category","news"];
-    const products = [
-        {
-            name:'T-shirt',
-            price:200,
-        },
-        {
-            name:'T-shirt',
-            price:200,
-        },
-        {
-            name:'T-shirt',
-            price:200,
-        },
-        {
-            name:'T-shirt',
-            price:200,
-        },
-        {
-            name:'T-shirt',
-            price:200,
-            
-        },
-        {
-            name:'T-shirt',
-            price:200,
-           
-        },
-        {
-            name:'T-shirt',
-            price:200,
-            
-        },
-        {
-            name:'T-shirt',
-            price:200,
-        },
-    ]
     
+    let products:Product[] = [];
+    for(var i=0;i<Object.keys(storesToProducts).length;i++){
+        for(var prod=0; prod<Object.values(storesToProducts)[i].length; prod++){
+            products.push(Object.values(storesToProducts)[i][prod]);
+        }
+    }
+    const [productsToPresent,setProducts] = useState<Product[]>(products);
 
     const handleFilter = (from:number,to:number,prodRate:number,storeRate:number)=>{
         setFromInput(from);
@@ -81,18 +49,20 @@ const SearchPage: FC<SearchPageProps> = ({location,propsAddProduct}) => {
 
     const filterProducts = ()=>{
         // TODO: send request to the server for filtering products
-        return products.filter((product)=>
+        return productsToPresent.filter((product)=>
         product.price >= fromInput && 
         product.price <= toInput )
     }
     const handleSearch = (toSearch:string,categoryName:string)=>{
+        setSearchProduct(toSearch);
         // TODO: send request to server with toSearch and 
         // properties: category, prices, ratings
+        // TODO: get products from server
+        // setProducts(response)
+        
         let str = "product: "+toSearch+", category: "+categoryName+
         ", from: "+fromInput+", to: "+toInput;
         alert(str);
-        // TODO:
-        // setProducts(products from server)
     }
     const clickAddProduct = (key:number)=>{
         propsAddProduct(products[key]);
@@ -118,7 +88,8 @@ const SearchPage: FC<SearchPageProps> = ({location,propsAddProduct}) => {
                 categories={PostsData}
                 handleSearch={handleSearch}
             />
-
+            <Keywards></Keywards>
+            
             <div className="mainArea">
                 <div className="filterArea">
                    <FilterMenu
@@ -133,8 +104,9 @@ const SearchPage: FC<SearchPageProps> = ({location,propsAddProduct}) => {
                                     return (
                                         
                                         <ProductSearch
-                                            key={products.indexOf(cell)}
+                                            key={productsToPresent.indexOf(cell)}
                                             content={cell!==undefined?cell.name:""}
+                                            price={cell!==undefined?cell.price:0}
                                             clickAddProduct={()=>clickAddProduct(products.indexOf(cell))}
                                         >
                                         </ProductSearch>

@@ -9,6 +9,7 @@ import SignIn from './SignIn';
 import SignUp from './SignUp';
 import MyStores from './MyStores';
 import SearchPage from './SearchPage';
+import StoresView from '../pages/StoresView';
 
 const theme = createMuiTheme({
 	typography: {
@@ -76,6 +77,14 @@ function App() {
 								<SearchPage {...props} propsAddProduct={addProductToPopup} />
 							)}
 						/>
+						<Route 
+							path="/storesView" 
+							exact 							
+							render={(props) => (
+								<StoresView {...props} propsAddProduct={addProductToPopup} />
+							)}
+						/>
+
 						<Route path="/my-stores" exact component={MyStores} />
 					</Switch>
 				</BrowserRouter>

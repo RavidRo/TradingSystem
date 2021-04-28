@@ -1,0 +1,25 @@
+.keywards{
+    display: flex;
+    flex-direction: row;
+    overflow-x: scroll;
+    height: 100%;
+    width: 100%;
+}
+.keywordInput{
+    margin-left: 20%;
+    margin-top: 2%;
+    height: 30px;
+}
+.wardsDiv{
+    display: flex;
+    flex-direction: row;
+    margin-left: 10%;
+}
+.wardsDiv li{
+    display: inline;
+}
+.keyBtn{
+    height: 36px;
+    width: 8%;
+    margin-top: 2%;
+}

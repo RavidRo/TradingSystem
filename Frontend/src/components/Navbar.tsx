@@ -1,7 +1,7 @@
 import React, { FC, useState,useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faShoppingCart, faSignInAlt } from '@fortawesome/free-solid-svg-icons';
+import { faShoppingCart, faSignInAlt , faSearch} from '@fortawesome/free-solid-svg-icons';
 
 import '../styles/Navbar.scss';
 import config from '../config';
@@ -28,6 +28,7 @@ const Navbar: FC<NavBarProps> = ({ signedIn ,products,propHandleDelete}) => {
 				<Link className="nameLink" to="/">
 					{config.website_name}!
 				</Link>
+				
 				<div
 					className="cartDiv"
 					onMouseOver={() => setHoverCart(true)}
@@ -38,6 +39,12 @@ const Navbar: FC<NavBarProps> = ({ signedIn ,products,propHandleDelete}) => {
 						My Cart
 					</Link>
 					{hoverCart ? <PopupCart products={productsInCart} propHandleDelete={propHandleDelete} /> : null}
+				</div>
+				<div className="storesDiv">
+					<FontAwesomeIcon className="cartIcon" icon={faSearch} />
+					<Link className="storesLink" to="/storesView">
+						Stores
+					</Link>
 				</div>
 				<div className="signInDiv">
 					<FontAwesomeIcon className="signInIcon" icon={faSignInAlt} />

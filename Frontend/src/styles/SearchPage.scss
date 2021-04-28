@@ -2,11 +2,11 @@
     display: flex;
     flex-direction: column;
     background-color: #f7ecd2;
+    overflow-y: scroll;
 }
 .cardsRow{
     display: flex;
     flex-direction: row;
-    width: 100%;
 }
 
 .mainArea{
@@ -19,7 +19,7 @@
     margin-left: 3%;
 }
 .productCards{
-    width: 80%;
+    width: 100%;
 }
 .price{
     display: flex;

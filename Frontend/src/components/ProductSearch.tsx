@@ -1,15 +1,16 @@
-import { Button, Card, CardContent } from '@material-ui/core';
-import React, { useState, FC} from 'react';
+import { Button, Card, CardContent, Typography } from '@material-ui/core';
+import React, {FC} from 'react';
 import '../styles/ProductSearch.scss';
 
 
 
 type ProductSearchProps = {
     content:string,
+    price:number,
     clickAddProduct:()=>void,
 };
 
-const ProductSearch: FC<ProductSearchProps> = ({content,clickAddProduct}) => {
+const ProductSearch: FC<ProductSearchProps> = ({content,price,clickAddProduct}) => {
 
       
 	return (
@@ -25,12 +26,17 @@ const ProductSearch: FC<ProductSearchProps> = ({content,clickAddProduct}) => {
                     }}
                     >
                     <CardContent className="cardContent">
+                        <Typography style={{'fontSize':'large','fontWeight':'bold'}}>
                             {content}
+                        </Typography> 
+                        <Typography style={{'marginTop':'5%'}}>
+                            {price}$
+                        </Typography> 
                     </CardContent>
                         <Button 
                             style={{
                                 'color':'blue',
-                                'marginTop':'20%',
+                                'marginTop':'10%',
                                 'background':'#ffffff',
                             }}
                             onClick = {()=>clickAddProduct()}    
