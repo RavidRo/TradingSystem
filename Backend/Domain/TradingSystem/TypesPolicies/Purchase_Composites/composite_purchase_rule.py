@@ -1,4 +1,6 @@
 from __future__ import annotations
+
+import copy
 from abc import ABC, abstractmethod
 from typing import List
 
@@ -25,100 +27,68 @@ class PurchaseRule(ABC):
 
     @parent.setter
     def parent(self, parent: CompositePurchaseRule):
-        """
-        Optionally, the base Component can declare an interface for setting and
-        accessing a parent of the component in a tree structure. It can also
-        provide some default implementation for these methods.
-        """
-
         self._parent = parent
 
-    """
-    In some cases, it would be beneficial to define the child-management
-    operations right in the base Component class. This way, you won't need to
-    expose any concrete component classes to the client code, even during the
-    object tree assembly. The downside is that these methods will be empty for
-    the leaf-level components.
-    """
-
-    def add(self, component: PurchaseRule, parent_id: str) -> Response[None]:
+    def add(self, component: PurchaseRule, parent_id: str, clause: str = None) -> Response[None]:
         pass
 
     def remove(self, component_id: str) -> Response[None]:
         pass
 
-    def is_composite(self) -> bool:
-        """
-        You can provide a method that lets the client code figure out whether a
-        component can bear children.
-        """
+    def get_rule(self, rule_id: str) -> Response[PurchaseRule]:
+        pass
 
+    def check_validity(self, new_parent_id: str) -> Response[None]:
+        pass
+
+    def edit_rule(self, rule_id: str, component: PurchaseRule) -> Response[None]:
+        pass
+
+    def is_composite(self) -> bool:
         return False
 
     @abstractmethod
     def operation(self, products_to_quantities: dict, user_age: int) -> bool:
-        """
-        The base Component may implement some default behavior or leave it to
-        concrete classes (by declaring the method containing the behavior as
-        "abstract").
-        """
-
         pass
-
-
-class PurchaseLeaf(PurchaseRule):
-    """
-    The Leaf class represents the end objects of a composition. A leaf can't
-    have any children.
-
-    Usually, it's the Leaf objects that do the actual work, whereas Composite
-    objects only delegate to their sub-components.
-    """
-
-    def operation(self, products_to_quantities: dict, user_age: int) -> bool:
-        pass
-
-    def remove(self, component_id: str) -> bool:
-        if self.id == component_id:
-            self.parent.children.remove(self)
-            self.parent = None
-            return True
-        return False
-
 
 
 class CompositePurchaseRule(PurchaseRule):
     """
     The Composite class represents the complex components that may have
     children. Usually, the Composite objects delegate the actual work to their
-    children and then "sum-up" the result.
+    children.
     """
 
     def __init__(self, identifier: str) -> None:
+        self.id = identifier
         self._children: List[PurchaseRule] = []
-
-    """
-    A composite object can add or remove other components (both simple or
-    complex) to or from its child list.
-    """
 
     @property
     def children(self):
         return self._children
 
-    def add(self, component: PurchaseRule, parent_id: str) -> Response[None]:
+    @children.setter
+    def children(self, value):
+        self._children = value
+
+    def children_operation(self, func: callable, id: str, component: PurchaseRule = None) -> Response[None]:
+        for child in self._children:
+            if child.is_composite():
+                if component is None:
+                    response = func(child, id)
+                else:
+                    response = func(child, component, id)
+                if response.succeeded():
+                    return response
+        return Response(False, msg=f"Operation couldn't be performed! Wrong parent_id: {id}")
+
+    def add(self, component: PurchaseRule, parent_id: str, clause: str = None) -> Response[None]:
         if self.id == parent_id:
             self._children.append(component)
             component.parent = self
             return Response(True, msg="Rule was added successfully!")
 
-        else:
-            for child in self._children:
-                if child.is_composite():
-                    response = child.add(component, parent_id)
-                    if response.succeeded():
-                        return response
-            return Response(False, msg=f"Rule couldn't be added! Wrong parent_id: {parent_id}")
+        return self.children_operation(lambda child, rule, relevant_id: child.add(rule, relevant_id), parent_id, component)
 
     def remove(self, component_id: str) -> Response[None]:
         if self.id == component_id:
@@ -126,22 +96,43 @@ class CompositePurchaseRule(PurchaseRule):
             self.parent = None
             return Response(True, msg="Rule was removed successfully!")
 
+        return self.children_operation(lambda next_child, relevant_id: next_child.remove(relevant_id), component_id)
+
+    def edit_rule(self, rule_id: str, component: PurchaseRule) -> Response[None]:
+        if self.id == rule_id:
+            self.parent.children.remove(self)
+            self.parent.children.append(component)
+            component.parent = self.parent
+            self.parent = None
+            component.children = copy.deepcopy(self.children)
+            return Response(True, msg="rule was edited successfully!")
+
+        return self.children_operation(lambda child, rule, relevant_id: child.edit_rule(rule, relevant_id), rule_id, component)
+
+    def get_rule(self, rule_id: str) -> Response[PurchaseRule]:
+        if self.id == rule_id:
+            return Response(True, obj=self, msg="Here is the rule")
         else:
-            for child in self._children:
-                response = child.remove(component_id)
+            for child in self.children:
+                response = child.get_rule(rule_id)
                 if response.succeeded():
                     return response
-            return Response(False, msg=f"Rule couldn't be removed! Wrong component_id: {component_id}")
+            return Response(False, msg=f"No rule with id: {rule_id}")
 
     def is_composite(self) -> bool:
         return True
 
-    def operation(self, products_to_quantities: dict, user_age: int) -> bool:
-        """
-        The Composite executes its primary logic in a particular way. It
-        traverses recursively through all its children, collecting and summing
-        their results. Since the composite's children pass these calls to their
-        children and so forth, the whole object tree is traversed as a result.
-        """
+    def check_validity(self, new_parent_id: str) -> Response[None]:
+        if self.id == new_parent_id:
+            return Response(False, msg="Invalid move operation!")
+        for child in self.children:
+            response = child.check_validity(new_parent_id)
+            if not response.succeeded():
+                return response
+        return Response(True, msg="Valid move")
 
+    def parse(self):
+        pass
+
+    def operation(self, products_to_quantities: dict, user_age: int) -> bool:
         pass

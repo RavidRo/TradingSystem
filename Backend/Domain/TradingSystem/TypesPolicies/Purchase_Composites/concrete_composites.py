@@ -1,4 +1,6 @@
-from Backend.Domain.TradingSystem.TypesPolicies.Purchase_Composites.composite_purchase_rule import CompositePurchaseRule, PurchaseRule
+from Backend.Domain.TradingSystem.TypesPolicies.Purchase_Composites.composite_purchase_rule import \
+    CompositePurchaseRule, PurchaseRule
+from Backend.response import Response
 
 
 class OrCompositePurchaseRule(CompositePurchaseRule):
@@ -9,6 +11,12 @@ class OrCompositePurchaseRule(CompositePurchaseRule):
                 return True
         return False
 
+    def parse(self):
+        return {"id": self.id,
+                "operator": "or",
+                "children":
+                    [child.parse() for child in self.children]}
+
 
 class AndCompositePurchaseRule(CompositePurchaseRule):
 
@@ -18,20 +26,46 @@ class AndCompositePurchaseRule(CompositePurchaseRule):
                 return False
         return True
 
+    def parse(self):
+        return {"id": self.id,
+                "operator": "and",
+                "children":
+                    [child.parse() for child in self.children]}
+
+
+clauses = {'test': 0,
+           'then': 1}
+
 
 class ConditioningCompositePurchaseRule(CompositePurchaseRule):
     def __init__(self, identifier: str):
-        super().__init__(identifier)
-        self._if_clause: PurchaseRule = True
-        self._then_clause: PurchaseRule = True
+        super(ConditioningCompositePurchaseRule, self).__init__(identifier)
+        self.children = [None, None]
 
-    def add_if_clause(self, if_component: PurchaseRule):
-        self._if_clause = if_component
+    def add(self, component: PurchaseRule, parent_id: str, clause: str = None) -> Response[None]:
+        if self.id == parent_id:
+            if clause == 'test':
+                return self.add_to_clause(clauses['test'], component)
+            elif clause == "then":
+                return self.add_to_clause(clauses['then'], component)
+            else:
+                return Response(False, msg="There is an existing if clause for the condition")
 
-    def add_then_clause(self, then_component: PurchaseRule):
-        self._then_clause = then_component
+    def add_to_clause(self, index_of_clause: int, component: PurchaseRule) -> Response[None]:
+        if self.children[index_of_clause] is None:
+            self.children[index_of_clause] = component
+            component.parent = self
+            return Response(True, msg="Rule was added successfully!")
+        else:
+            return Response(False, msg="There is an existing if clause for the condition")
 
     def operation(self, products_to_quantities: dict, user_age: int) -> bool:
-        if not self._if_clause.operation(products_to_quantities, user_age):
+        if not self.children[clauses['test']].operation(products_to_quantities, user_age):
             return True
-        return self._then_clause.operation(products_to_quantities,user_age)
+        return self.children[clauses['then']].operation(products_to_quantities, user_age)
+
+    def parse(self):
+        return {"id": self.id,
+                "operator": "conditioning",
+                "test": self.children[clauses['test']].parse(),
+                "then": self.children[clauses['then']].parse()}

@@ -13,9 +13,10 @@ from Backend.Domain.TradingSystem.Responsibilities.responsibility import Permiss
 
 
 class User(IUser):
-    def __init__(self):
+    def __init__(self, age: int):
         self.state: UserState = IUserState.create_guest(self)
         self.appointment_lock = threading.Lock()
+        self.__age = age
 
     # 2.3
     def register(self, username: str, password: str) -> Response[None]:
@@ -164,4 +165,7 @@ class User(IUser):
 
     def get_appointment_lock(self) -> threading.Lock():
         return self.appointment_lock
+
+    def get_age(self):
+        return self.__age
 
