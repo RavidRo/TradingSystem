@@ -1,7 +1,7 @@
-
-from Backend.Domain.TradingSystem.TypesPolicies.Purchase_Composites.concrete_composites import AndCompositePurchaseRule,\
+from Backend.Domain.TradingSystem.TypesPolicies.Purchase_Composites.concrete_composites import AndCompositePurchaseRule, \
     OrCompositePurchaseRule, ConditioningCompositePurchaseRule
 from Backend.Domain.TradingSystem.TypesPolicies.Purchase_Composites.purchase_leaves import ConcreteLeaf
+from Backend.Domain.TradingSystem.user import User
 from Backend.response import Response
 
 
@@ -9,11 +9,13 @@ class PurchasePolicy:
     def __init__(self):
         pass
 
-#region data
+
+# region data
 
 logic_types = {"or": lambda self: OrCompositePurchaseRule(self.generate_id()),
                "and": lambda self: AndCompositePurchaseRule(self.generate_id()),
-               "conditioning": lambda self: ConditioningCompositePurchaseRule(self.generate_id())}
+               "conditional": lambda self: ConditioningCompositePurchaseRule(self.generate_id())}
+
 
 # endregion
 
@@ -44,13 +46,13 @@ class DefaultPurchasePolicy(PurchasePolicy):
     clause - only for conditional - valid values: if/then
     """
 
-    def add_purchase_rule(self, rule_details: dict, rule_type: str, parent_id: str, clause: str = None) -> Response[None]:
+    def add_purchase_rule(self, rule_details: dict, rule_type: str, parent_id: str, clause: str= None) -> Response[None]:
         if rule_type == "simple":
-            simple_rule = ConcreteLeaf(rule_details)
+            simple_rule = ConcreteLeaf(rule_details, self.generate_id())
             return self.__purchase_rules.add(simple_rule, parent_id, clause)
 
         elif rule_type == "complex":
-            logic_type = rule_details['logic_type']
+            logic_type = rule_details['operator']
             if logic_type in logic_types.keys():
                 return self.__purchase_rules.add(logic_types[logic_type](self), parent_id, clause)
             else:
@@ -89,9 +91,10 @@ class DefaultPurchasePolicy(PurchasePolicy):
                       }
         complex rule - {logic_type: conditional/or/and
                         } """
+
     def edit_purchase_rule(self, rule_details: dict, rule_id: str, rule_type: str):
         if rule_type == "simple":
-            simple_rule = ConcreteLeaf(rule_details)
+            simple_rule = ConcreteLeaf(rule_details, self.generate_id())
             self.__purchase_rules.edit_rule(rule_id, simple_rule)
 
         elif rule_type == "complex":
@@ -108,7 +111,5 @@ class DefaultPurchasePolicy(PurchasePolicy):
     def get_purchase_rules(self):
         return self.__purchase_rules
 
-    def checkPolicy(self,  purchase_type) -> Response:
-        return Response(True, msg="purchase type is approved by the policy")
-
-
+    def checkPolicy(self, products_to_quantities: dict, user_age: int) -> Response[None]:
+        return self.__purchase_rules.operation(products_to_quantities, user_age)

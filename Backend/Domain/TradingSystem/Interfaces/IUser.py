@@ -45,7 +45,7 @@ class IUser:
         raise NotImplementedError
 
     # 2.9
-    def purchase_cart(self) -> Response[PrimitiveParsable[float]]:
+    def purchase_cart(self, user_age: int) -> Response[PrimitiveParsable[float]]:
         raise NotImplementedError
 
     # 2.9

@@ -79,8 +79,8 @@ class TradingSystemManager:
 
     # 2.9
     @staticmethod
-    def purchase_cart(cookie: str) -> Response[PrimitiveParsable[float]]:
-        return UserManager.purchase_cart(cookie)
+    def purchase_cart(cookie: str, user_age: int) -> Response[PrimitiveParsable[float]]:
+        return UserManager.purchase_cart(cookie, user_age)
 
     # 2.9
     @staticmethod

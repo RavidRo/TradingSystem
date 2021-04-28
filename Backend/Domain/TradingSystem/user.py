@@ -13,10 +13,10 @@ from Backend.Domain.TradingSystem.Responsibilities.responsibility import Permiss
 
 
 class User(IUser):
-    def __init__(self, age: int):
+    def __init__(self):
         self.state: UserState = IUserState.create_guest(self)
         self.appointment_lock = threading.Lock()
-        self.__age = age
+
 
     # 2.3
     def register(self, username: str, password: str) -> Response[None]:
@@ -45,8 +45,8 @@ class User(IUser):
         return self.state.change_product_quantity_in_cart(store_id, product_id, new_amount)
 
     # 2.9
-    def purchase_cart(self) -> Response[PrimitiveParsable[float]]:
-        return self.state.buy_cart(self)
+    def purchase_cart(self, user_age: int) -> Response[PrimitiveParsable[float]]:
+        return self.state.buy_cart(self, user_age)
 
     # 2.9
     def purchase_completed(self) -> Response[None]:
@@ -165,7 +165,4 @@ class User(IUser):
 
     def get_appointment_lock(self) -> threading.Lock():
         return self.appointment_lock
-
-    def get_age(self):
-        return self.__age
 

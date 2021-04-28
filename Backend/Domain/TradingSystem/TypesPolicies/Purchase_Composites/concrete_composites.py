@@ -1,15 +1,19 @@
 from Backend.Domain.TradingSystem.TypesPolicies.Purchase_Composites.composite_purchase_rule import \
     CompositePurchaseRule, PurchaseRule
+from Backend.Domain.TradingSystem.user import User
 from Backend.response import Response
 
 
 class OrCompositePurchaseRule(CompositePurchaseRule):
 
-    def operation(self, products_to_quantities: dict, user_age: int) -> bool:
+    def operation(self, products_to_quantities: dict, user_age: int) -> Response[None]:
+        if len(self.children) == 0:
+            return Response(True, msg="Purchase is permitted!")
+
         for child in self.children:
             if child.operation(products_to_quantities, user_age):
-                return True
-        return False
+                return Response(True, msg="Purchase is permitted!")
+        return Response(False, msg="Purchase doesn't stand with the rules!")
 
     def parse(self):
         return {"id": self.id,
@@ -20,11 +24,11 @@ class OrCompositePurchaseRule(CompositePurchaseRule):
 
 class AndCompositePurchaseRule(CompositePurchaseRule):
 
-    def operation(self, products_to_quantities: dict, user_age: int) -> bool:
+    def operation(self, products_to_quantities: dict, user_age: int) -> Response[None]:
         for child in self.children:
             if not child.operation(products_to_quantities, user_age):
-                return False
-        return True
+                return Response(False, msg="Purchase doesn't stand with the rules!")
+        return Response(True, msg="Purchase is permitted!")
 
     def parse(self):
         return {"id": self.id,
@@ -46,7 +50,7 @@ class ConditioningCompositePurchaseRule(CompositePurchaseRule):
         if self.id == parent_id:
             if clause == 'test':
                 return self.add_to_clause(clauses['test'], component)
-            elif clause == "then":
+            elif clause == 'then':
                 return self.add_to_clause(clauses['then'], component)
             else:
                 return Response(False, msg="There is an existing if clause for the condition")
@@ -59,13 +63,13 @@ class ConditioningCompositePurchaseRule(CompositePurchaseRule):
         else:
             return Response(False, msg="There is an existing if clause for the condition")
 
-    def operation(self, products_to_quantities: dict, user_age: int) -> bool:
+    def operation(self, products_to_quantities: dict, user_age: int) -> Response[None]:
         if not self.children[clauses['test']].operation(products_to_quantities, user_age):
-            return True
+            return Response(True, msg="Purchase is permitted!")
         return self.children[clauses['then']].operation(products_to_quantities, user_age)
 
     def parse(self):
         return {"id": self.id,
-                "operator": "conditioning",
+                "operator": "conditional",
                 "test": self.children[clauses['test']].parse(),
                 "then": self.children[clauses['then']].parse()}

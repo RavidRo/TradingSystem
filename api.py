@@ -115,7 +115,8 @@ async def purchase_cart():
     cookie = request.args.get("cookie")
     if cookie is None:
         cookie = await system.enter_system()
-    answer = await system.purchase_cart(cookie)
+    user_age = request.args.get("user_age")
+    answer = await system.purchase_cart(cookie, user_age)
     return """<h1>Answer is: {}</h1>""".format(answer)
 
 

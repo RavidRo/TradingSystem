@@ -9,6 +9,7 @@ from Backend.rw_lock import ReadWriteLock
 class Store:
     from Backend.Domain.TradingSystem.Responsibilities.responsibility import Responsibility
     from Backend.Domain.TradingSystem.purchase_details import PurchaseDetails
+    from Backend.Domain.TradingSystem.Interfaces.IUser import IUser
 
     def __init__(self, store_name: str):
         from Backend.Domain.TradingSystem.TypesPolicies.discount_policy import DefaultDiscountPolicy
@@ -112,7 +113,8 @@ class Store:
                 False, msg="The product " + product_id + "is already not in the inventory!"
             )
         self._products_lock.release_write()
-        return Response(True, obj=PrimitiveParsable(result[1]), msg="Successfully removed product with product id: " + str(product_id))
+        return Response(True, obj=PrimitiveParsable(result[1]),
+                        msg="Successfully removed product with product id: " + str(product_id))
 
     """checks need to be made:
        ----------------------
@@ -194,7 +196,8 @@ class Store:
             if self._products_to_quantities.get(prod_id) is None:
                 self._products_to_quantities.update({prod_id: (product, quantity)})
             else:
-                self._products_to_quantities[prod_id] = (self._products_to_quantities[prod_id][0], self._products_to_quantities[prod_id][1] + quantity)
+                self._products_to_quantities[prod_id] = (
+                self._products_to_quantities[prod_id][0], self._products_to_quantities[prod_id][1] + quantity)
         self._products_lock.release_write()
 
     # This function checks for available products
@@ -206,7 +209,8 @@ class Store:
             if prod_to_current_quantity is None:
                 self.__restore_products(acquired_product_ids_to_quantities)
                 self._products_lock.release_write()
-                return Response(False, msg=f"The product with id: {prod_id} doesn't exist in the inventory of the store")
+                return Response(False,
+                                msg=f"The product with id: {prod_id} doesn't exist in the inventory of the store")
 
             elif prod_to_current_quantity[1] < quantity:
                 self.__restore_products(acquired_product_ids_to_quantities)
@@ -228,12 +232,10 @@ class Store:
     def __restore_products(self, acquires_product_ids_to_quantities: dict):
         for product_id, quantity in acquires_product_ids_to_quantities.items():
             prod, current_quantity = self._products_to_quantities.get(product_id)
-            self._products_to_quantities[product_id] = (prod, current_quantity  + quantity)
+            self._products_to_quantities[product_id] = (prod, current_quantity + quantity)
 
-
-    # this will be added in the future - maybe I will apply Default Policy for now
-    def check_purchase_types(self, products_info, user_info) -> Response[None]:
-        return Response(True, msg="all purchase types arew available")
+    def check_purchase(self, products_to_quantities: dict, user: IUser) -> Response[None]:
+        return self.__purchase_policy.checkPolicy(products_to_quantities, user)
 
     def apply_discounts(self, user_info, product_to_quantity: dict):
         return self.__discount_policy.applyDiscount(store=self,
@@ -245,7 +247,7 @@ class Store:
         self._products_lock.release_read()
         return prod
 
-    def product_exists(self, product_id,):
+    def product_exists(self, product_id, ):
         self._products_lock.acquire_read()
         product_quantity = self._products_to_quantities.get(product_id)
         if product_quantity is None:
@@ -262,3 +264,9 @@ class Store:
             return False
         self._products_lock.release_read()
         return True
+
+    def add_purchase_rule(self, rule_details: dict, rule_type: str, parent_id: str, clause: str = None):
+        return self.__purchase_policy.add_purchase_rule(rule_details, rule_type, parent_id, clause)
+
+    def get_purchase_policy(self):
+        return self.__purchase_policy

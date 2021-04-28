@@ -1,10 +1,6 @@
 from typing import Callable
 import uuid
 import json
-
-from Backend.Domain.TradingSystem.store import Store
-from Backend.Domain.TradingSystem.Interfaces.IUser import IUser
-from .user import User
 from Backend.response import Response, ParsableList, PrimitiveParsable
 from Backend.Domain.TradingSystem.Interfaces.IUser import IUser
 from Backend.Domain.TradingSystem.store import Store
@@ -129,8 +125,8 @@ class UserManager:
 
     # 2.9
     @staticmethod
-    def purchase_cart(cookie: str) -> Response[PrimitiveParsable[float]]:
-        func: Callable[[User], Response] = lambda user: user.purchase_cart()
+    def purchase_cart(cookie: str, user_age: int) -> Response[PrimitiveParsable[float]]:
+        func: Callable[[User], Response] = lambda user: user.purchase_cart(user_age)
         return UserManager.__deligate_to_user(cookie, func)
 
     # 2.9

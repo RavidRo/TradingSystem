@@ -92,8 +92,8 @@ class TradingSystem(object):
         )
 
     @log.loging(to_hide=[1])
-    def purchase_cart(self, cookie: str):
-        return TradingSystemManager.purchase_cart(cookie)
+    def purchase_cart(self, cookie: str, user_age: int):
+        return TradingSystemManager.purchase_cart(cookie, user_age)
 
     @log.loging(to_hide=[1])
     def send_payment(self, cookie, payment_details, address):
