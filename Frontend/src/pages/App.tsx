@@ -34,12 +34,34 @@ const theme = createMuiTheme({
 
 function App() {
 	const [signedIn, setSignedIn] = useState<boolean>(false);
+    const [productsInCart,setProducts] = useState<{name:string,price:number,quantity:number}[]>([]);
+
+	const addProductToPopup = (product:{name:string,price:number})=>{
+		let found  = false;
+		for(var i=0;i<Object.values(productsInCart).length;i++){
+			if(Object.values(productsInCart)[i].name === (product.name)){
+				Object.values(productsInCart)[i].quantity+=1;
+				found = true;
+			}
+		}
+		if(!found){
+			let newProduct = {
+				name:product.name,
+				price:product.price,
+				quantity:1,
+			};
+			setProducts((old)=>({...old,newProduct}));
+		}
+	}
+	const handleDeleteProduct = (product:{name:string,price:number})=>{
+		setProducts(Object.values(productsInCart).filter(item => (item.name !== product.name || item.price !== product.price)));
+	}
 
 	return (
 		<>
 			<ThemeProvider theme={theme}>
 				<BrowserRouter>
-					<Navbar signedIn={signedIn} />
+					<Navbar signedIn={signedIn} products={productsInCart} propHandleDelete={handleDeleteProduct}/>
 					<Switch>
 						<Route path="/" exact component={Home} />
 						<Route path="/cart" exact component={Cart} />
@@ -47,7 +69,13 @@ function App() {
 							{() => <SignIn onSignIn={() => setSignedIn(true)} />}
 						</Route>
 						<Route path="/sign-up" exact component={SignUp} />
-						<Route path="/searchPage" exact component={SearchPage} />
+						<Route 
+							path="/searchPage" 
+							exact 
+							render={(props) => (
+								<SearchPage {...props} propsAddProduct={addProductToPopup} />
+							)}
+						/>
 						<Route path="/my-stores" exact component={MyStores} />
 					</Switch>
 				</BrowserRouter>

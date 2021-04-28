@@ -6,9 +6,10 @@ import '../styles/ProductSearch.scss';
 
 type ProductSearchProps = {
     content:string,
+    clickAddProduct:()=>void,
 };
 
-const ProductSearch: FC<ProductSearchProps> = ({content}) => {
+const ProductSearch: FC<ProductSearchProps> = ({content,clickAddProduct}) => {
 
       
 	return (
@@ -26,8 +27,15 @@ const ProductSearch: FC<ProductSearchProps> = ({content}) => {
                     <CardContent className="cardContent">
                             {content}
                     </CardContent>
-                        <Button style={{'color':'blue'}}>
-                        Learn More
+                        <Button 
+                            style={{
+                                'color':'blue',
+                                'marginTop':'20%',
+                                'background':'#ffffff',
+                            }}
+                            onClick = {()=>clickAddProduct()}    
+                        >
+                        Add To Cart
                         </Button>
                 </Card>
             :null}

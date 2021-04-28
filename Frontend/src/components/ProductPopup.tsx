@@ -6,24 +6,34 @@ import '../styles/ProductPopup.scss';
 
 type ProductPopupProps = {
     name:string,
-    quantity: number
+    price:number,
+    quantity: number,
+    propHandleDelete:(product:{name:string,price:number})=>void,
    
 };
-const PopupCart: FC<ProductPopupProps> = ({name,quantity}: ProductPopupProps) => {
+const PopupCart: FC<ProductPopupProps> = ({name,price,quantity,propHandleDelete}: ProductPopupProps) => {
 const [prod_quantity, setQuantity] = useState<number>(quantity);
-
+const handleDelete = ()=>{
+    if(prod_quantity===1){
+        propHandleDelete({name:name,price:price});
+    }
+    setQuantity(prod_quantity-1);
+}
 	return (
 		
         <TableRow >
             <TableCell align={'center'}>{name}</TableCell>
+            <TableCell align={'center'}>{price*prod_quantity}</TableCell>
             <TableCell align={'center'}>{prod_quantity}</TableCell>
             <TableCell className="buttonsCell" >
-                <button className="buttonP" onClick={()=>setQuantity(prod_quantity+1)}>
-                    +
-                </button>
-                <button className="buttonM" onClick={()=>setQuantity(prod_quantity-1)}>
-                    -
-                </button>
+                <div className="buttons">
+                    <button className="buttonP" onClick={()=>setQuantity(prod_quantity+1)}>
+                        +
+                    </button>
+                    <button className="buttonM" onClick={()=>handleDelete()}>
+                        -
+                    </button>
+                </div>
             </TableCell>
         </TableRow>
 	);

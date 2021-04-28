@@ -9,9 +9,14 @@ import SearchCategory from '../components/SearchCategory';
 
 type SearchPageProps = {
     location: any,
+    propsAddProduct:(product:Product)=>void,
 };
+type Product = {
+    name:string,
+    price: number,
+}
 
-const SearchPage: FC<SearchPageProps> = ({location}) => {
+const SearchPage: FC<SearchPageProps> = ({location,propsAddProduct}) => {
     const [searchProduct, setSearchProduct] = useState<string>(location.state.product);
     
     const [fromInput, setFromInput] = useState<number>(0);
@@ -19,9 +24,8 @@ const SearchPage: FC<SearchPageProps> = ({location}) => {
     const [productRating, setProductRating] = useState<number >(0);
     const [storeRating, setStoreRating] = useState<number >(0);
 
-    const productType = {
-
-    }
+    const [productsToPresent,setProducts] = useState<Product[]>([]);
+    
     const PostsData = ["category","news","comedy",
                         "category","news","comedy",
                         "category","news","comedy",
@@ -32,50 +36,37 @@ const SearchPage: FC<SearchPageProps> = ({location}) => {
         {
             name:'T-shirt',
             price:200,
-            product_rating:5,
-            store_rating: 5
         },
         {
             name:'T-shirt',
             price:200,
-            product_rating:5,
-            store_rating: 5
         },
         {
             name:'T-shirt',
             price:200,
-            product_rating:5,
-            store_rating: 5
         },
         {
             name:'T-shirt',
             price:200,
-            product_rating:5,
-            store_rating: 5
         },
         {
             name:'T-shirt',
             price:200,
-            product_rating:5,
-            store_rating: 5
+            
         },
         {
             name:'T-shirt',
             price:200,
-            product_rating:5,
-            store_rating: 5
+           
         },
         {
             name:'T-shirt',
             price:200,
-            product_rating:5,
-            store_rating: 5
+            
         },
         {
             name:'T-shirt',
             price:200,
-            product_rating:5,
-            store_rating: 5
         },
     ]
     
@@ -89,11 +80,22 @@ const SearchPage: FC<SearchPageProps> = ({location}) => {
     }
 
     const filterProducts = ()=>{
+        // TODO: send request to the server for filtering products
         return products.filter((product)=>
         product.price >= fromInput && 
-        product.price <= toInput &&
-        product.product_rating >= productRating &&
-        product.store_rating >= storeRating)
+        product.price <= toInput )
+    }
+    const handleSearch = (toSearch:string,categoryName:string)=>{
+        // TODO: send request to server with toSearch and 
+        // properties: category, prices, ratings
+        let str = "product: "+toSearch+", category: "+categoryName+
+        ", from: "+fromInput+", to: "+toInput;
+        alert(str);
+        // TODO:
+        // setProducts(products from server)
+    }
+    const clickAddProduct = (key:number)=>{
+        propsAddProduct(products[key]);
     }
       
     let matrix_length = 3;
@@ -114,6 +116,7 @@ const SearchPage: FC<SearchPageProps> = ({location}) => {
             <SearchCategory
                 searchProduct = {searchProduct}
                 categories={PostsData}
+                handleSearch={handleSearch}
             />
 
             <div className="mainArea">
@@ -132,6 +135,7 @@ const SearchPage: FC<SearchPageProps> = ({location}) => {
                                         <ProductSearch
                                             key={products.indexOf(cell)}
                                             content={cell!==undefined?cell.name:""}
+                                            clickAddProduct={()=>clickAddProduct(products.indexOf(cell))}
                                         >
                                         </ProductSearch>
                                     )

@@ -44,3 +44,15 @@
     cursor: pointer;
 
 }
+.searchBtn{
+    width: 10%;
+    align-self: center;
+    height: 60px;
+    background-color: #44dfcd;
+    cursor: pointer;
+    font-size: large;
+    font-weight: bold;
+    &:hover {
+        background-color: #02faee;
+      }
+}

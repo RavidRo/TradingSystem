@@ -1,4 +1,4 @@
-import React, { FC, useState } from 'react';
+import React, { FC, useState,useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faShoppingCart, faSignInAlt } from '@fortawesome/free-solid-svg-icons';
@@ -7,9 +7,20 @@ import '../styles/Navbar.scss';
 import config from '../config';
 import PopupCart from '../components/PopupCart';
 
-type NavBarProps = { signedIn: boolean };
-const Navbar: FC<NavBarProps> = ({ signedIn }) => {
+type NavBarProps = {
+	 signedIn: boolean,
+	 products:{name:string,price:number,quantity:number}[],
+	 propHandleDelete:(product:{name:string,price:number})=>void,
+	};
+
+const Navbar: FC<NavBarProps> = ({ signedIn ,products,propHandleDelete}) => {
 	const [hoverCart, setHoverCart] = useState<boolean>(false);
+    const [productsInCart,setProducts] = useState<{name:string,price:number,quantity:number}[]>(products);
+
+	useEffect(()=>{
+        setProducts(products);
+    },[products]);
+
 
 	return (
 		<div className="navbar">
@@ -26,7 +37,7 @@ const Navbar: FC<NavBarProps> = ({ signedIn }) => {
 					<Link className="cartLink" to="/cart">
 						My Cart
 					</Link>
-					{hoverCart ? <PopupCart content={'your cart is:'} /> : null}
+					{hoverCart ? <PopupCart products={productsInCart} propHandleDelete={propHandleDelete} /> : null}
 				</div>
 				<div className="signInDiv">
 					<FontAwesomeIcon className="signInIcon" icon={faSignInAlt} />

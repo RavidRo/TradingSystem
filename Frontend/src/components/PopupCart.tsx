@@ -1,18 +1,24 @@
 
 import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@material-ui/core';
-import React ,{FC} from 'react';
+import React ,{FC, useEffect, useState} from 'react';
 import '../styles/PopupCart.scss';
 import ProductPopup from '../components/ProductPopup';
 
 type PopupCartProps = {
-    content: string,
+    products:{name:string,price:number,quantity:number}[],
+    propHandleDelete:(product:{name:string,price:number})=>void,
    
 };
-const PopupCart: FC<PopupCartProps> = ({content}: PopupCartProps) => {
+const PopupCart: FC<PopupCartProps> = ({products,propHandleDelete}: PopupCartProps) => {
 
-    let products = ['milk','coffee','shirt','suit'];
+    const [productsInCart,setProducts] = useState<{name:string,price:number,quantity:number}[]>(products);
+	
+    useEffect(()=>{
+        setProducts(products);
+    },[products]);
 
-	return (
+
+    return (
 		
 		<div className="popupCart">
             
@@ -21,16 +27,19 @@ const PopupCart: FC<PopupCartProps> = ({content}: PopupCartProps) => {
                     <TableHead className="tableHead">
                     <TableRow>
                         <TableCell align={'center'}>Product</TableCell>
+                        <TableCell align={'center'}>Price</TableCell>
                         <TableCell align={'center'}>Quantity</TableCell>
                         <TableCell></TableCell>
                     </TableRow>
                     </TableHead>
                     <TableBody>
-                        {products.map((p) => (
+                        {Object.values(productsInCart).map((p) => (
                             <ProductPopup
-                            name={p}
-                            quantity = {1}
-                            key={p}
+                            name={p.name}
+                            price={p.price}
+                            quantity = {p.quantity}
+                            propHandleDelete={propHandleDelete}
+                            key={Object.values(productsInCart).indexOf(p)}
                             />
                         ))}
                     </TableBody>

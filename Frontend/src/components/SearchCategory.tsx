@@ -7,9 +7,10 @@ import '../styles/SearchCategory.scss';
 type SearchCategoryProps = {
     searchProduct:string,
     categories:string[],
+    handleSearch:(toSearch:string,categoryName:string)=>void
 };
 
-const SearchCategory: FC<SearchCategoryProps> = ({searchProduct, categories}) => {
+const SearchCategory: FC<SearchCategoryProps> = ({searchProduct, categories,handleSearch}) => {
     const [toSearch, setToSearch] = useState<string>(searchProduct);
     const [menuOpen, setMenuOpen] = useState<boolean>(false);
     const [categoryName, setCategoryName] = useState<string>("Category");
@@ -42,8 +43,11 @@ const SearchCategory: FC<SearchCategoryProps> = ({searchProduct, categories}) =>
 
                     </ul>
                 :null    
-            }
+                }
             </div>
+            <button className="searchBtn" onClick={()=>handleSearch(toSearch,categoryName)}>
+                Search
+            </button>
             
         </div>
 	);
