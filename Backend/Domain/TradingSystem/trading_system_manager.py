@@ -1,3 +1,5 @@
+from typing import Callable
+
 from Backend.Domain.TradingSystem.stores_manager import StoresManager
 from Backend.Domain.TradingSystem.user_manager import UserManager
 from Backend.Domain.TradingSystem.search_engine import SearchEngine
@@ -18,6 +20,9 @@ class TradingSystemManager:
     @staticmethod
     def enter_system() -> str:
         return UserManager.enter_system()
+
+    def connect(self, cookie: str, communicate: Callable[[list[str]], bool]) -> Response[None]:
+        return UserManager.connect(cookie, communicate)
 
     # 2.3
     @staticmethod

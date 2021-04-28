@@ -1,5 +1,6 @@
 import uuid
 
+from Backend.Domain.Notifications.Publisher import Publisher
 from Backend.response import Response, ParsableList
 from Backend.Domain.TradingSystem.product import Product
 from Backend.Service.DataObjects.store_data import StoreData
@@ -25,6 +26,7 @@ class Store:
         self.__purchase_history = []
         self._products_lock = ReadWriteLock()
         self.__history_lock = ReadWriteLock()
+        self.__publisher: Publisher = Publisher()   # TODO: use publisher to publish messages
 
     def parse(self):
         id_to_quantity = {}
