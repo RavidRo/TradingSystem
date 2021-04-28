@@ -8,6 +8,7 @@ from .user_state import UserState
 
 
 class Member(UserState):
+
     def get_username(self):
         return Response(True, obj=PrimitiveParsable(self._username), msg="got username successfully")
 
@@ -99,6 +100,38 @@ class Member(UserState):
         if store_id not in self.__responsibilities:
             return Response(False, msg=f"this member do not own/manage store {store_id}")
         return self.__responsibilities[store_id].edit_product_details(product_id, new_name, new_category, new_price)
+
+    def add_discount(self, store_id: str, discount_data: dict, exist_id: str):
+        if store_id not in self.__responsibilities:
+            return Response(False, msg=f"this member do not own/manage store {store_id}")
+        return self.__responsibilities[store_id].add_discount(discount_data, exist_id)
+
+    def move_discount(self, store_id: str, src_id: str, dest_id: str):
+        if store_id not in self.__responsibilities:
+            return Response(False, msg=f"this member do not own/manage store {store_id}")
+        return self.__responsibilities[store_id].move_discount(src_id, dest_id)
+
+    def get_discounts(self, store_id: str):
+        if store_id not in self.__responsibilities:
+            return Response(False, msg=f"this member do not own/manage store {store_id}")
+        return self.__responsibilities[store_id].get_discounts()
+
+    def remove_discount(self, store_id: str, discount_id: str):
+        if store_id not in self.__responsibilities:
+            return Response(False, msg=f"this member do not own/manage store {store_id}")
+        return self.__responsibilities[store_id].remove_discount(discount_id)
+
+    def edit_simple_discount(self, store_id: str, discount_id: str, percentage: float = None,
+                             condition: dict = None, context: dict = None, duration=None):
+        if store_id not in self.__responsibilities:
+            return Response(False, msg=f"this member do not own/manage store {store_id}")
+        return self.__responsibilities[store_id].edit_simple_discount(discount_id, percentage, condition, context, duration)
+
+    def edit_complex_discount(self, store_id: str, discount_id: str, complex_type: str = None,
+                              decision_rule: str = None):
+        if store_id not in self.__responsibilities:
+            return Response(False, msg=f"this member do not own/manage store {store_id}")
+        return self.__responsibilities[store_id].edit_complex_discount(discount_id, complex_type, decision_rule)
 
     def appoint_new_store_owner(self, store_id, new_owner):
         if store_id not in self.__responsibilities:

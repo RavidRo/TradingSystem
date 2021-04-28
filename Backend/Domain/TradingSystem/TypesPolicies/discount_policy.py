@@ -39,8 +39,8 @@ class DefaultDiscountPolicy(DiscountPolicy):
         super().__init__()
         self.__discount: IDiscount = AddCompositeDiscount([])  # retrieve from DB in later milestones
 
-    def get_discounts(self):
-        return self.__discount
+    def get_discounts(self) -> Response[IDiscount]:
+        return Response[IDiscount](True, self.__discount)
 
     def add_discount(self, discount_data: dict, exist_id: str) -> Response[None]:
         discount_res = make_discount(discount_data)
@@ -82,8 +82,8 @@ class DefaultDiscountPolicy(DiscountPolicy):
     def remove_discount(self, discount_id: str) -> Response[None]:
         return self.__discount.remove_discount(discount_id)
 
-    def edit_simple_discount(self, discount_id, percentage=None, condition=None, context=None):
-        return self.__discount.edit_simple_discount(discount_id, percentage, condition, context)
+    def edit_simple_discount(self, discount_id, percentage=None, condition=None, context=None, duration=None):
+        return self.__discount.edit_simple_discount(discount_id, percentage, condition, context, duration)
 
     def edit_complex_discount(self, discount_id, complex_type=None, decision_rule=None):
         return self.__discount.edit_complex_discount(discount_id, complex_type, decision_rule)

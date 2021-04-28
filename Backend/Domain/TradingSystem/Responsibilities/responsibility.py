@@ -58,6 +58,25 @@ class Responsibility(Parsable):
     def edit_product_details(self, product_id: str, new_name: str, new_category: str, new_price: float) -> Response[None]:
         raise Exception(Responsibility.ERROR_MESSAGE)
 
+    # 4.2
+    def add_discount(self, discount_data: dict, exist_id: str):
+        raise Exception(Responsibility.ERROR_MESSAGE)
+
+    def move_discount(self, src_id: str, dest_id: str):
+        raise Exception(Responsibility.ERROR_MESSAGE)
+
+    def get_discounts(self):
+        raise Exception(Responsibility.ERROR_MESSAGE)
+
+    def remove_discount(self, discount_id: str):
+        raise Exception(Responsibility.ERROR_MESSAGE)
+
+    def edit_simple_discount(self, discount_id: str, percentage: float = None, condition: dict = None, context: dict = None, duration=None):
+        raise Exception(Responsibility.ERROR_MESSAGE)
+
+    def edit_complex_discount(self, discount_id: str, complex_type: str = None, decision_rule: str = None):
+        raise Exception(Responsibility.ERROR_MESSAGE)
+
     # 4.3
     def appoint_owner(self, user: IUser) -> Response[None]:
         raise Exception(Responsibility.ERROR_MESSAGE)

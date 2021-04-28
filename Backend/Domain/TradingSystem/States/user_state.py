@@ -72,6 +72,30 @@ class UserState(ABC):
         return Response(False, msg="Abstract Method")
 
     @abstractmethod
+    def add_discount(self, store_id: str, discount_data: dict, exist_id: str):
+        return Response(False, msg="Abstract Method")
+
+    @abstractmethod
+    def move_discount(self, store_id: str, src_id: str, dest_id: str):
+        return Response(False, msg="Abstract Method")
+
+    @abstractmethod
+    def get_discounts(self, store_id: str):
+        return Response(False, msg="Abstract Method")
+
+    @abstractmethod
+    def remove_discount(self, store_id: str, discount_id: str):
+        return Response(False, msg="Abstract Method")
+
+    @abstractmethod
+    def edit_simple_discount(self, store_id: str, discount_id: str, percentage: float = None, condition: dict = None, context: dict = None, duration=None):
+        return Response(False, msg="Abstract Method")
+
+    @abstractmethod
+    def edit_complex_discount(self, store_id: str, discount_id: str, complex_type: str = None, decision_rule: str = None):
+        return Response(False, msg="Abstract Method")
+
+    @abstractmethod
     def appoint_new_store_owner(self, store_id, new_owner):
         return Response(False, msg="Abstract Method")
 

@@ -137,6 +137,31 @@ class TradingSystemManager:
     ) -> Response[None]:
         return UserManager.edit_product_details(cookie, store_id, product_id, new_name, new_category, new_price)
 
+    # 4.2
+    @staticmethod
+    def add_discount(cookie: str, store_id: str, discount_data: dict, exist_id: str):
+        return UserManager.add_discount(cookie, store_id, discount_data, exist_id)
+
+    @staticmethod
+    def move_discount(cookie: str, store_id: str, src_id: str, dest_id: str):
+        return UserManager.move_discount(cookie, store_id, src_id, dest_id)
+
+    @staticmethod
+    def get_discounts(cookie: str, store_id: str):
+        return UserManager.get_discounts(cookie, store_id)
+
+    @staticmethod
+    def remove_discount(cookie: str, store_id: str, discount_id: str):
+        return UserManager.remove_discount(cookie, store_id, discount_id)
+
+    @staticmethod
+    def edit_simple_discount(cookie: str, store_id: str, discount_id: str, percentage: float = None, condition: dict = None, context: dict = None, duration=None):
+        return UserManager.edit_simple_discount(cookie, store_id, discount_id, percentage, condition, context, duration)
+
+    @staticmethod
+    def edit_complex_discount(cookie: str, store_id: str, discount_id: str, complex_type: str = None, decision_rule: str = None):
+        return UserManager.edit_complex_discount(cookie, store_id, discount_id, complex_type, decision_rule)
+
     # 4.3
     @staticmethod
     def appoint_owner(cookie: str, store_id: str, username: str) -> Response[None]:

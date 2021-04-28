@@ -215,6 +215,39 @@ class UserManager:
         func: Callable[[User], Response] = lambda user: user.edit_product_details(store_id, product_id, new_name, new_category, new_price)
         return UserManager.__deligate_to_user(cookie, func)
 
+    # 4.2
+    @staticmethod
+    def add_discount(cookie: str, store_id: str, discount_data: dict, exist_id: str):
+        func: Callable[[User], Response] = lambda user: user.add_discount(store_id, discount_data, exist_id, )
+        return UserManager.__deligate_to_user(cookie, func)
+
+    @staticmethod
+    def move_discount(cookie: str, store_id: str, src_id: str, dest_id: str):
+        func: Callable[[User], Response] = lambda user: user.move_discount(store_id, src_id, dest_id, )
+        return UserManager.__deligate_to_user(cookie, func)
+
+    @staticmethod
+    def get_discounts(cookie: str, store_id: str):
+        func: Callable[[User], Response] = lambda user: user.get_discounts(store_id)
+        return UserManager.__deligate_to_user(cookie, func)
+
+    @staticmethod
+    def remove_discount(cookie: str, store_id: str, discount_id: str):
+        func: Callable[[User], Response] = lambda user: user.remove_discount(store_id, discount_id)
+        return UserManager.__deligate_to_user(cookie, func)
+
+    @staticmethod
+    def edit_simple_discount(cookie: str, store_id: str, discount_id: str, percentage: float = None, condition: dict = None, context: dict = None, duration=None):
+        func: Callable[[User], Response] = lambda user: user.edit_simple_discount(store_id, discount_id, percentage, condition,
+                                                                                  context, duration)
+        return UserManager.__deligate_to_user(cookie, func)
+
+    @staticmethod
+    def edit_complex_discount(cookie: str, store_id: str, discount_id: str, complex_type: str = None, decision_rule: str = None):
+        func: Callable[[User], Response] = lambda user: user.edit_complex_discount(store_id, discount_id, complex_type,
+                                                                                   decision_rule)
+        return UserManager.__deligate_to_user(cookie, func)
+
     # 4.3
     @staticmethod
     def appoint_owner(cookie: str, store_id: str, username: str) -> Response[None]:

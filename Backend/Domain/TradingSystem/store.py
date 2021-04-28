@@ -148,6 +148,25 @@ class Store:
         self._products_lock.release_write()
         return Response(False, msg=f"The product with id: {product_id} isn't in the inventory!")
 
+    def add_discount(self, discount_data: dict, exist_id: str):
+        return self.__discount_policy.add_discount(discount_data, exist_id)
+
+    def move_discount(self, src_id: str, dest_id: str):
+        return self.__discount_policy.move_discount(src_id, dest_id)
+
+    def get_discounts(self):
+        return self.__discount_policy.get_discounts()
+
+    def remove_discount(self, discount_id: str):
+        return self.__discount_policy.remove_discount(discount_id)
+
+    def edit_simple_discount(self, discount_id: str, percentage: float = None, condition: dict = None,
+                             context: dict = None, duration=None):
+        return self.__discount_policy.edit_simple_discount(discount_id, percentage, condition, context, duration)
+
+    def edit_complex_discount(self, discount_id: str, complex_type: str = None, decision_rule: str = None):
+        return self.__discount_policy.edit_complex_discount(discount_id, complex_type, decision_rule)
+
     def get_personnel_info(self) -> Response[Responsibility]:
         from Backend.Domain.TradingSystem.Responsibilities.responsibility import Responsibility
 
