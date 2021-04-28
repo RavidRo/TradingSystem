@@ -235,9 +235,11 @@ class Store:
     def check_purchase_types(self, products_info, user_info) -> Response[None]:
         return Response(True, msg="all purchase types arew available")
 
-    def apply_discounts(self, user_info, product_to_quantity: dict):
-        return self.__discount_policy.applyDiscount(store=self,
+    def apply_discounts(self, product_to_quantity: dict):
+        non_discount_prices = [prod.get_price() * quantity for prod_id, (prod, quantity) in product_to_quantity.items()]
+        total_discount = self.__discount_policy.applyDiscount(
                                                     products_to_quantities=product_to_quantity)
+        return sum(non_discount_prices) - total_discount
 
     def get_product(self, product_id: str):
         self._products_lock.acquire_read()
