@@ -89,29 +89,6 @@ const PopupCart: FC<PopupCartProps> = ({products,propHandleDelete}: PopupCartPro
                 />)
                     
             })}
-            {/* <TableContainer>
-                <Table  aria-label="simple table">
-                    <TableHead className="tableHead">
-                    <TableRow>
-                        <TableCell align={'center'}>Product</TableCell>
-                        <TableCell align={'center'}>Price</TableCell>
-                        <TableCell align={'center'}>Quantity</TableCell>
-                        <TableCell></TableCell>
-                    </TableRow>
-                    </TableHead>
-                    <TableBody>
-                        {Object.values(productsInCart).map((p) => (
-                            <ProductPopup
-                            name={p.name}
-                            price={p.price}
-                            quantity = {p.quantity}
-                            propHandleDelete={propHandleDelete}
-                            key={Object.values(productsInCart).indexOf(p)}
-                            />
-                        ))}
-                    </TableBody>
-                </Table>
-            </TableContainer> */}
             
 		</div>
 	);

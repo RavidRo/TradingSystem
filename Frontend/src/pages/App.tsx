@@ -46,7 +46,7 @@ function App() {
 	const addProductToPopup = (product:{id:number,name:string,price:number})=>{
 		let found  = false;
 		for(var i=0;i<Object.values(productsInCart).length;i++){
-			if(Object.values(productsInCart)[i].name === (product.name)){
+			if(Object.values(productsInCart)[i].id === (product.id)){
 				Object.values(productsInCart)[i].quantity+=1;
 				found = true;
 			}
@@ -62,7 +62,7 @@ function App() {
 		}
 	}
 	const handleDeleteProduct = (product:{id:number,name:string,price:number})=>{
-		setProducts(Object.values(productsInCart).filter(item => (item.name !== product.name || item.price !== product.price)));
+		setProducts(Object.values(productsInCart).filter(item => item.id !== product.id));
 	}
 
 

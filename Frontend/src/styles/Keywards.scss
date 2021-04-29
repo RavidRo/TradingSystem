@@ -1,12 +1,12 @@
 .keywards{
     display: flex;
     flex-direction: row;
-    overflow-x: scroll;
     height: 100%;
     width: 100%;
+    align-items: center;
 }
 .keywordInput{
-    margin-left: 20%;
+    margin-left: 3%;
     margin-top: 2%;
     height: 30px;
 }
@@ -22,4 +22,10 @@
     height: 36px;
     width: 8%;
     margin-top: 2%;
+}
+.wordsP{
+    align-self: baseline;
+    margin-left: 10%;
+    margin-bottom: 0%;
+    padding: 0%;
 }

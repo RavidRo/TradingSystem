@@ -2,7 +2,6 @@
     display: flex;
     flex-direction: column;
     background-color: #f7ecd2;
-    overflow-y: scroll;
 }
 .cardsRow{
     display: flex;
@@ -16,10 +15,10 @@
 .filterArea{
     width: 20%;
     margin-top: 10%;
-    margin-left: 3%;
+    margin-left: 0.5%;
 }
 .productCards{
-    width: 100%;
+    width: 80%;
 }
 .price{
     display: flex;

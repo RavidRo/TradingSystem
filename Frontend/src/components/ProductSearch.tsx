@@ -25,9 +25,6 @@ const ProductSearch: FC<ProductSearchProps> = ({id,storeName,content,price,click
                     className="prodCard"
                     style={{
                         backgroundColor: "#83f1e8",
-                        width:'350px',
-                        height:'200px',
-                
                     }}
                     >
                     <CardContent className="cardContent">
@@ -37,16 +34,13 @@ const ProductSearch: FC<ProductSearchProps> = ({id,storeName,content,price,click
                         <Typography style={{'marginTop':'5%'}}>
                             {price}$
                         </Typography> 
-                        <Typography style={{'marginTop':'1%'}}>
-                            {storeName}
-                        </Typography> 
                     </CardContent>
                     <div className="buttonLink">
                         <Button 
                             style={{
                                 'color':'blue',
-                                'marginTop':'10%',
                                 'background':'#ffffff',
+                                'marginTop':'10%'
                             }}
                             onClick = {()=>clickAddProduct()}    
                         >
@@ -60,13 +54,8 @@ const ProductSearch: FC<ProductSearchProps> = ({id,storeName,content,price,click
                                 storeName:storeName
                             },
                             }}
-                            // style={{
-                            //     'color':'blue',
-                            //     'marginLeft':'25%',
-                            //     'marginTop':'200px'
-                            // }}
                         >
-                                Go To Store
+                                {storeName}
                         </Link>
                     </div>
                 </Card>

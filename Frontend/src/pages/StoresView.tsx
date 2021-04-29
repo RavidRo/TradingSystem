@@ -49,11 +49,11 @@ const StoresView: FC<StoresViewProps> = ({propsAddProduct,location}: StoresViewP
     return (
 		
 		<div className="StoresDiv">
-             <FormControl style={{'marginLeft':'20%','width':'50%','fontSize':'large'}}>
+             <FormControl style={{'marginLeft':'5%','width':'100%','fontSize':'large','height':'94%'}}>
                 <h3>Choose Store</h3>
                 <Select
                 value={store}
-                style={{'fontSize': '2rem'}}
+                style={{'fontSize': '2rem','width':'50%'}}
                 onChange={(e)=>handleChange(e)}
                 >
                    {Object.keys(storesToProducts).map((store)=>{
@@ -85,7 +85,10 @@ const StoresView: FC<StoresViewProps> = ({propsAddProduct,location}: StoresViewP
                         ) 
                         
                     })
-                  :null}
+                  :
+                  <div className="placeHolder">
+                    </div>
+                  }
                 </div>
       </FormControl>
             

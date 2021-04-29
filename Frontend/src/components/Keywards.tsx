@@ -17,6 +17,9 @@ const Keywards: FC<Keywordsprops> = () => {
     return (
 		
 		<div className="keywards">
+            <p className="wordsP" style={{'marginTop':'2%'}}>
+                Search by Key Words:
+            </p>
             <input 
                 className="keywordInput"
                 onChange={(e) => setCurrentKey(e.target.value)}

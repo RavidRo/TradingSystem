@@ -26,13 +26,14 @@ const PopupBag: FC<PopupBagProps> = ({storeName,products,propHandleDelete}:Popup
                 <TableContainer>
                     <Table  aria-label="simple table">
                         <TableHead className="tableHead">
-                        <TableRow>
-                            <TableCell align={'center'}>Product</TableCell>
-                            <TableCell align={'center'}>Price</TableCell>
-                            <TableCell align={'center'}>Quantity</TableCell>
-                            <TableCell></TableCell>
-                        </TableRow>
+                            <TableRow>
+                                <TableCell align={'center'}>Product</TableCell>
+                                <TableCell align={'center'}>Price</TableCell>
+                                <TableCell align={'center'}>Quantity</TableCell> 
+                                <TableCell></TableCell>
+                            </TableRow>
                         </TableHead>
+                        
                         <TableBody>
                             {Object.values(productsInCart).map((p) => (
                                 <ProductPopup

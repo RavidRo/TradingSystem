@@ -34,6 +34,7 @@ const SearchPage: FC<SearchPageProps> = ({location,propsAddProduct}) => {
                         "category","news"];
     
     let products:Product[] = [];
+    // TODO: get from server all products with 'searchProduct' name
     for(var i=0;i<Object.keys(storesToProducts).length;i++){
         for(var prod=0; prod<Object.values(storesToProducts)[i].length; prod++){
             products.push(Object.values(storesToProducts)[i][prod]);
@@ -118,7 +119,7 @@ const SearchPage: FC<SearchPageProps> = ({location,propsAddProduct}) => {
                                     return (
                                         
                                         <ProductSearch
-                                            key={productsToPresent.indexOf(cell)}
+                                            key={cell!==undefined?cell.id:-1}
                                             id={cell!==undefined?cell.id:-1}
                                             storeName={cell!==undefined?findBagByProductID(cell.id):""}
                                             content={cell!==undefined?cell.name:""}
