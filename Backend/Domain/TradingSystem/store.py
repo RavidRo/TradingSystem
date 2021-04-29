@@ -26,6 +26,9 @@ class Store:
         self._products_lock = ReadWriteLock()
         self.__history_lock = ReadWriteLock()
 
+    def get_discount_policy(self):
+        return self.__discount_policy
+
     def parse(self):
         id_to_quantity = {}
         for id, (_, quantity) in self._products_to_quantities.items():

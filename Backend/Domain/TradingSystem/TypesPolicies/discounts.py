@@ -1,13 +1,10 @@
 from abc import ABC
 
 from Backend.Domain.TradingSystem.Interfaces.IDiscount import IDiscount
-from Backend.response import Response
+from Backend.response import Response, ParsableList
 
 
 class SimpleDiscount(IDiscount):
-
-    def add_child(self, child: IDiscount) -> Response[None]:
-        return Response(False, msg="Cannot add new discount to simple discount")
 
     def __init__(self, discount_data, duration=None):  # Add duration in later milestones
         super().__init__(discount_data.get('condition'))
@@ -45,11 +42,10 @@ class SimpleDiscount(IDiscount):
         return False
 
     def parse(self):
-        discount = dict()
+        discount = super().parse()
         discount['percentage'] = self._multiplier * 100
-        discount['condition'] = self._condition.parse()
         discount['context'] = self._context
-        discount['id'] = self.get_id()
+        discount['discount_type'] = 'simple'
         return discount
 
     def edit_simple_discount(self, discount_id, percentage=None, condition=None, context=None, duration=None):
@@ -79,6 +75,15 @@ class SimpleDiscount(IDiscount):
             return Response(True)
         return Response(False, msg="discount to remove not found!")
 
+    def get_children(self) -> Response[ParsableList[list[IDiscount]]]:
+        return Response(False, msg="SimpleDiscount has no children")
+
+    def add_child(self, child: IDiscount) -> Response[None]:
+        return Response(False, msg="Cannot add new discount to simple discount")
+
+    def remove_child(self, child: IDiscount):
+        return Response(False, msg="Cannot remove discount to simple discount")
+
 
 class CompositeDiscount(IDiscount, ABC):
     def __init__(self, children: list[IDiscount] = None, condition=None):
@@ -96,10 +101,15 @@ class CompositeDiscount(IDiscount, ABC):
     def add_child(self, child: IDiscount):
         self._children.append(child)
         child.set_parent(self)
+        return Response(True)
 
-    def remove_child(self, child):
+    def remove_child(self, child: IDiscount):
         self._children.remove(child)
         child.set_parent(None)
+        return Response(True)
+
+    def get_children(self) -> Response[ParsableList[list[IDiscount]]]:
+        return Response(True, ParsableList(self._children))
 
     def is_composite(self) -> bool:
         return True
@@ -152,7 +162,9 @@ class CompositeDiscount(IDiscount, ABC):
         return Response(False, msg="discount to remove not found")
 
     def parse(self):
-        discounts = [child.parse() for child in self._children]
+        discounts = super().parse()
+        discounts['discounts'] = [child.parse() for child in self._children]
+        discounts['discount_type'] = 'complex'
         return discounts
 
 
@@ -169,8 +181,7 @@ class MaximumCompositeDiscount(CompositeDiscount):
         self.discount_func = discount_func
 
     def parse(self):
-        discounts = dict()
-        discounts['discounts'] = super().parse()
+        discounts = super().parse()
         discounts['merger'] = "max"
         return discounts
 
@@ -186,8 +197,7 @@ class AddCompositeDiscount(CompositeDiscount):
         self.discount_func = discount_func
 
     def parse(self):
-        discounts = dict()
-        discounts['discounts'] = super().parse()
+        discounts = super().parse()
         discounts['merger'] = "add"
         return discounts
 
@@ -208,8 +218,7 @@ class XorCompositeDiscount(CompositeDiscount):
         self.discount_func = discount_func
 
     def parse(self):
-        discounts = dict()
-        discounts['discounts'] = super().parse()
+        discounts = super().parse()
         discounts['merger'] = "xor"
         return discounts
 
@@ -225,8 +234,7 @@ class AndConditionDiscount(CompositeDiscount):
         return 0.0
 
     def parse(self):
-        discounts = dict()
-        discounts['discounts'] = super().parse()
+        discounts = super().parse()
         discounts['merger'] = "and"
         return discounts
 
@@ -242,8 +250,7 @@ class OrConditionDiscount(CompositeDiscount):
         return 0.0
 
     def parse(self):
-        discounts = dict()
-        discounts['discounts'] = super().parse()
+        discounts = super().parse()
         discounts['merger'] = "or"
         return discounts
 

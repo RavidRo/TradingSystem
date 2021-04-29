@@ -3,7 +3,7 @@ from __future__ import annotations      # for self type annotating
 import threading
 from abc import ABC, abstractmethod
 
-from Backend.response import Response, Parsable
+from Backend.response import Response, Parsable, ParsableList
 
 
 class IDiscount(Parsable, ABC):
@@ -16,7 +16,7 @@ class IDiscount(Parsable, ABC):
     def generate_id() -> str:
         with IDiscount.auto_id_lock:
             IDiscount.auto_id += 1
-            return str(IDiscount.auto_id)
+            return str(IDiscount.auto_id - 1)
 
     @abstractmethod
     def __init__(self, condition=None):
@@ -67,3 +67,17 @@ class IDiscount(Parsable, ABC):
     @abstractmethod
     def add_child(self, child: IDiscount) -> Response[None]:
         raise NotImplementedError
+
+    @abstractmethod
+    def remove_child(self, child: IDiscount):
+        raise NotImplementedError
+
+    @abstractmethod
+    def get_children(self) -> Response[ParsableList[list[IDiscount]]]:
+        raise NotImplementedError
+
+    def parse(self):
+        discount = dict()
+        discount['id'] = self._id
+        # discount['condition'] = self._condition.parse()
+        return discount
