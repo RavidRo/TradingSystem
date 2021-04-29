@@ -8,16 +8,25 @@ import storesToProducts from '../components/storesProductsMap';
 
 type StoresViewProps = {
    propsAddProduct:(product:Product)=>void,
+   location: any,
+
 };
 type Product = {
+    id:number,
    name:string,
    price: number,
    quantity: number,
 }
-const StoresView: FC<StoresViewProps> = ({propsAddProduct}: StoresViewProps) => {
+const StoresView: FC<StoresViewProps> = ({propsAddProduct,location}: StoresViewProps) => {
 
-	const [store, setStore] = useState<string>("");
-   const [presentProducts,setProducts] = useState<Product[]>([]);
+    const [store, setStore] = useState<string>(location.state!==undefined?location.state.storeName:"");
+   
+    const [presentProducts,setProducts] = useState<Product[]>(
+        location.state!==undefined?Object.values(storesToProducts)[
+            Object.keys(storesToProducts).indexOf(location.state.storeName)
+        ]
+        :[]
+    );
 
    const handleChange = (e:any)=>{
       setStore(e.target.value);
@@ -40,10 +49,11 @@ const StoresView: FC<StoresViewProps> = ({propsAddProduct}: StoresViewProps) => 
     return (
 		
 		<div className="StoresDiv">
-             <FormControl style={{'marginLeft':'20%','width':'50%'}}>
+             <FormControl style={{'marginLeft':'20%','width':'50%','fontSize':'large'}}>
                 <h3>Choose Store</h3>
                 <Select
                 value={store}
+                style={{'fontSize': '2rem'}}
                 onChange={(e)=>handleChange(e)}
                 >
                    {Object.keys(storesToProducts).map((store)=>{
@@ -62,6 +72,8 @@ const StoresView: FC<StoresViewProps> = ({propsAddProduct}: StoresViewProps) => 
                                         
                                         <ProductSearch
                                             key={presentProducts.indexOf(cell)}
+                                            id={cell!==undefined?cell.id:-1}
+                                            storeName={store}
                                             content={cell!==undefined?cell.name:""}
                                             price={cell!==undefined?cell.price:0}
                                             clickAddProduct={()=>propsAddProduct(cell)}

@@ -32,12 +32,18 @@ const theme = createMuiTheme({
 		secondary: { main: '#fee9b2' },
 	},
 });
-
+type Product = {
+	id:number,
+    name:string,
+    price: number,
+    quantity:number
+}
 function App() {
 	const [signedIn, setSignedIn] = useState<boolean>(false);
-    const [productsInCart,setProducts] = useState<{name:string,price:number,quantity:number}[]>([]);
+    const [productsInCart,setProducts] = useState<Product[]>([]);
+    const [storeName,setStoreName] = useState<string>("");
 
-	const addProductToPopup = (product:{name:string,price:number})=>{
+	const addProductToPopup = (product:{id:number,name:string,price:number})=>{
 		let found  = false;
 		for(var i=0;i<Object.values(productsInCart).length;i++){
 			if(Object.values(productsInCart)[i].name === (product.name)){
@@ -47,16 +53,18 @@ function App() {
 		}
 		if(!found){
 			let newProduct = {
+				id:product.id,
 				name:product.name,
 				price:product.price,
 				quantity:1,
 			};
-			setProducts((old)=>({...old,newProduct}));
+			setProducts(oldArray => [...oldArray, newProduct]);
 		}
 	}
-	const handleDeleteProduct = (product:{name:string,price:number})=>{
+	const handleDeleteProduct = (product:{id:number,name:string,price:number})=>{
 		setProducts(Object.values(productsInCart).filter(item => (item.name !== product.name || item.price !== product.price)));
 	}
+
 
 	return (
 		<>
@@ -81,7 +89,7 @@ function App() {
 							path="/storesView" 
 							exact 							
 							render={(props) => (
-								<StoresView {...props} propsAddProduct={addProductToPopup} />
+								<StoresView {...props} propsAddProduct={addProductToPopup}/>
 							)}
 						/>
 

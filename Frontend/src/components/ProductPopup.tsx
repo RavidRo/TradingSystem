@@ -5,17 +5,18 @@ import '../styles/ProductPopup.scss';
 
 
 type ProductPopupProps = {
+    id:number,
     name:string,
     price:number,
     quantity: number,
-    propHandleDelete:(product:{name:string,price:number})=>void,
+    propHandleDelete:(product:{id:number,name:string,price:number})=>void,
    
 };
-const PopupCart: FC<ProductPopupProps> = ({name,price,quantity,propHandleDelete}: ProductPopupProps) => {
+const PopupCart: FC<ProductPopupProps> = ({id,name,price,quantity,propHandleDelete}: ProductPopupProps) => {
 const [prod_quantity, setQuantity] = useState<number>(quantity);
 const handleDelete = ()=>{
     if(prod_quantity===1){
-        propHandleDelete({name:name,price:price});
+        propHandleDelete({id:id,name:name,price:price});
     }
     setQuantity(prod_quantity-1);
 }

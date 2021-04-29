@@ -14,3 +14,13 @@
 .cardContent{
     font-weight: bold;
 }
+
+.buttonLink{
+    display: flex;
+    flex-direction: row;
+    align-items: baseline;
+}
+.linkStore{
+    margin-left: 30%;
+    color: blue;
+}

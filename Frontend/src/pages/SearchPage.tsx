@@ -5,12 +5,14 @@ import FilterMenu from '../components/FilterMenu';
 import SearchCategory from '../components/SearchCategory';
 import Keywards from '../components/Keywards';
 import storesToProducts from '../components/storesProductsMap';
+import storesProductsMap from '../components/storesProductsMap';
 
 type SearchPageProps = {
     location: any,
     propsAddProduct:(product:Product)=>void,
 };
 type Product = {
+    id:number,
     name:string,
     price: number,
     quantity:number
@@ -81,6 +83,18 @@ const SearchPage: FC<SearchPageProps> = ({location,propsAddProduct}) => {
         }
         return matrix;
     }
+    const findBagByProductID = (id:number)=>{
+        for(var i=0; i<Object.keys(storesProductsMap).length;i++){
+            let productsArray = (Object.values(storesProductsMap)[i]);
+            for(var j=0; j<productsArray.length;j++){
+                if(productsArray[j].id===id){
+                    // return store name
+                    return Object.keys(storesProductsMap)[i];
+                }
+            }
+        }
+        return "";
+    }
 	return (
 		<div className="SearchPageDiv">
             <SearchCategory
@@ -105,6 +119,8 @@ const SearchPage: FC<SearchPageProps> = ({location,propsAddProduct}) => {
                                         
                                         <ProductSearch
                                             key={productsToPresent.indexOf(cell)}
+                                            id={cell!==undefined?cell.id:-1}
+                                            storeName={cell!==undefined?findBagByProductID(cell.id):""}
                                             content={cell!==undefined?cell.name:""}
                                             price={cell!==undefined?cell.price:0}
                                             clickAddProduct={()=>clickAddProduct(products.indexOf(cell))}

@@ -9,13 +9,13 @@ import PopupCart from '../components/PopupCart';
 
 type NavBarProps = {
 	 signedIn: boolean,
-	 products:{name:string,price:number,quantity:number}[],
-	 propHandleDelete:(product:{name:string,price:number})=>void,
+	 products:{id:number,name:string,price:number,quantity:number}[],
+	 propHandleDelete:(product:{id:number,name:string,price:number})=>void,
 	};
 
 const Navbar: FC<NavBarProps> = ({ signedIn ,products,propHandleDelete}) => {
 	const [hoverCart, setHoverCart] = useState<boolean>(false);
-    const [productsInCart,setProducts] = useState<{name:string,price:number,quantity:number}[]>(products);
+    const [productsInCart,setProducts] = useState<{id:number,name:string,price:number,quantity:number}[]>(products);
 
 	useEffect(()=>{
         setProducts(products);
