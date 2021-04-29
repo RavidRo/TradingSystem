@@ -1,4 +1,4 @@
-import { Chip, Paper } from '@material-ui/core';
+import { Chip } from '@material-ui/core';
 import React ,{FC, useState} from 'react';
 import '../styles/Keywards.scss';
 
@@ -28,8 +28,6 @@ const Keywards: FC<Keywordsprops> = () => {
             <button className="keyBtn" onClick={()=>setKeyWards(old=>[...old,currentKey])}>Add</button>
                 <div className="wardsDiv">
                     {keyWords.map((word) => {
-                        let icon;
-
                         return (
                         <li key={keyWords.indexOf(word)}>
                             <Chip

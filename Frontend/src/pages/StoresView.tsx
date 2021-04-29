@@ -12,7 +12,7 @@ type StoresViewProps = {
 
 };
 type Product = {
-    id:number,
+    id:string,
    name:string,
    price: number,
    quantity: number,

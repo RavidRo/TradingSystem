@@ -12,7 +12,7 @@ type SearchPageProps = {
     propsAddProduct:(product:Product)=>void,
 };
 type Product = {
-    id:number,
+    id:string,
     name:string,
     price: number,
     quantity:number
@@ -84,7 +84,7 @@ const SearchPage: FC<SearchPageProps> = ({location,propsAddProduct}) => {
         }
         return matrix;
     }
-    const findBagByProductID = (id:number)=>{
+    const findBagByProductID = (id:string)=>{
         for(var i=0; i<Object.keys(storesProductsMap).length;i++){
             let productsArray = (Object.values(storesProductsMap)[i]);
             for(var j=0; j<productsArray.length;j++){
@@ -112,14 +112,14 @@ const SearchPage: FC<SearchPageProps> = ({location,propsAddProduct}) => {
                    />
                 </div>
                 <div className="productCards">
-                    {setProductsInMatrix(filterProducts()).map((row,_)=>{
+                    {setProductsInMatrix(filterProducts()).map((row,i)=>{
                         return(
                             <div className="cardsRow">
-                                {row.map((cell,_)=>{
+                                {row.map((cell,j)=>{
                                     return (
                                         
                                         <ProductSearch
-                                            key={cell!==undefined?cell.id:-1}
+                                            key={i*matrix_length+j}
                                             id={cell!==undefined?cell.id:-1}
                                             storeName={cell!==undefined?findBagByProductID(cell.id):""}
                                             content={cell!==undefined?cell.name:""}

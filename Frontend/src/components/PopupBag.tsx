@@ -5,13 +5,13 @@ import ProductPopup from '../components/ProductPopup';
 
 type PopupBagProps = {
     storeName:string,
-    products:{id:number, name:string,price:number,quantity:number}[],
-    propHandleDelete:(product:{id:number,name:string,price:number})=>void,
+    products:{id:string, name:string,price:number,quantity:number}[],
+    propHandleDelete:(product:{id:string,name:string,price:number})=>void,
    
 };
 const PopupBag: FC<PopupBagProps> = ({storeName,products,propHandleDelete}:PopupBagProps) => {
 
-    const [productsInCart,setProducts] = useState<{id:number,name:string,price:number,quantity:number}[]>(products);
+    const [productsInCart,setProducts] = useState<{id:string,name:string,price:number,quantity:number}[]>(products);
 	
     useEffect(()=>{
         setProducts(products);

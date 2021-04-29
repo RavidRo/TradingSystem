@@ -17,11 +17,11 @@ const IncrementField: FC<IncrementFieldProps> = ({ value, onChange }) => {
 				aria-label="remove-one"
 				onClick={() => onChange(value - 1)}
 			>
-				<RemoveIcon className="icon" />
+				<RemoveIcon className="icon" style={{fontWeight:500,fontSize:20}}/>
 			</IconButton>
-			<InputLabel>{value}</InputLabel>
+			<InputLabel style={{fontWeight:500,fontSize:20}}>{value}</InputLabel>
 			<IconButton aria-label="add" onClick={() => onChange(value + 1)}>
-				<AddIcon className="icon" />
+				<AddIcon className="icon" style={{fontWeight:500,fontSize:20}}/>
 			</IconButton>
 		</Paper>
 	);

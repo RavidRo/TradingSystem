@@ -5,11 +5,11 @@ import '../styles/ProductPopup.scss';
 
 
 type ProductPopupProps = {
-    id:number,
+    id:string,
     name:string,
     price:number,
     quantity: number,
-    propHandleDelete:(product:{id:number,name:string,price:number})=>void,
+    propHandleDelete:(product:{id:string,name:string,price:number})=>void,
    
 };
 const PopupCart: FC<ProductPopupProps> = ({id,name,price,quantity,propHandleDelete}: ProductPopupProps) => {

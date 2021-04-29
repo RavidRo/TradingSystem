@@ -1,19 +1,17 @@
 
-import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@material-ui/core';
 import React ,{FC, useEffect, useState} from 'react';
 import '../styles/PopupCart.scss';
-import ProductPopup from '../components/ProductPopup';
 import storesProductsMap from '../components/storesProductsMap';
 import PopupBag from '../components/PopupBag';
 
 type PopupCartProps = {
-    products:{id:number,name:string,price:number,quantity:number}[],
-    propHandleDelete:(product:{id:number,name:string,price:number})=>void,
+    products:{id:string,name:string,price:number,quantity:number}[],
+    propHandleDelete:(product:{id:string,name:string,price:number})=>void,
    
 };
 const PopupCart: FC<PopupCartProps> = ({products,propHandleDelete}: PopupCartProps) => {
 
-    const findBagByProductID = (id:number)=>{
+    const findBagByProductID = (id:string)=>{
         for(var i=0; i<Object.keys(storesProductsMap).length;i++){
             let productsArray = (Object.values(storesProductsMap)[i]);
             for(var j=0; j<productsArray.length;j++){
@@ -64,7 +62,7 @@ const PopupCart: FC<PopupCartProps> = ({products,propHandleDelete}: PopupCartPro
 
     }
 
-    const [productsInCart,setProducts] = useState<{id:number,name:string,price:number,quantity:number}[]>(products);
+    const [productsInCart,setProducts] = useState<{id:string,name:string,price:number,quantity:number}[]>(products);
     const [bags,setBags] = useState<any[]>(setProductsInBags());
 
     useEffect(()=>{

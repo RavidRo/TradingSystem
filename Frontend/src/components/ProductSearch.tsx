@@ -1,7 +1,5 @@
 import { Button, Card, CardContent, Typography } from '@material-ui/core';
 import React, {FC} from 'react';
-import { Route } from 'react-router';
-import StoresView from '../pages/StoresView';
 import '../styles/ProductSearch.scss';
 import { Link } from 'react-router-dom';
 
@@ -10,7 +8,7 @@ import { Link } from 'react-router-dom';
 type ProductSearchProps = {
     content:string,
     price:number,
-    id:number,
+    id:string,
     storeName:string,
     clickAddProduct:()=>void,
 };

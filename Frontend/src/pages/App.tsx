@@ -10,6 +10,7 @@ import SignUp from './SignUp';
 import MyStores from './MyStores';
 import SearchPage from './SearchPage';
 import StoresView from '../pages/StoresView';
+import Purchase from '../pages/Purchase';
 
 const theme = createMuiTheme({
 	typography: {
@@ -33,7 +34,7 @@ const theme = createMuiTheme({
 	},
 });
 type Product = {
-	id:number,
+	id:string,
     name:string,
     price: number,
     quantity:number
@@ -41,9 +42,8 @@ type Product = {
 function App() {
 	const [signedIn, setSignedIn] = useState<boolean>(false);
     const [productsInCart,setProducts] = useState<Product[]>([]);
-    const [storeName,setStoreName] = useState<string>("");
 
-	const addProductToPopup = (product:{id:number,name:string,price:number})=>{
+	const addProductToPopup = (product:{id:string,name:string,price:number})=>{
 		let found  = false;
 		for(var i=0;i<Object.values(productsInCart).length;i++){
 			if(Object.values(productsInCart)[i].id === (product.id)){
@@ -61,10 +61,9 @@ function App() {
 			setProducts(oldArray => [...oldArray, newProduct]);
 		}
 	}
-	const handleDeleteProduct = (product:{id:number,name:string,price:number})=>{
+	const handleDeleteProduct = (product:{id:string,name:string,price:number})=>{
 		setProducts(Object.values(productsInCart).filter(item => item.id !== product.id));
 	}
-
 
 	return (
 		<>
@@ -73,7 +72,13 @@ function App() {
 					<Navbar signedIn={signedIn} products={productsInCart} propHandleDelete={handleDeleteProduct}/>
 					<Switch>
 						<Route path="/" exact component={Home} />
-						<Route path="/cart" exact component={Cart} />
+						<Route 
+							path="/cart" 
+							exact 
+							render={(props) => (
+								<Cart {...props} products={productsInCart} />
+							)}
+						/>
 						<Route path="/sign-in" exact>
 							{() => <SignIn onSignIn={() => setSignedIn(true)} />}
 						</Route>
@@ -94,6 +99,8 @@ function App() {
 						/>
 
 						<Route path="/my-stores" exact component={MyStores} />
+						<Route path="/Purchase" exact component={Purchase} />
+
 					</Switch>
 				</BrowserRouter>
 			</ThemeProvider>
