@@ -1,11 +1,11 @@
 import axios from 'axios';
 import { useState } from 'react';
 
-export default function useAPI(endPoint: string, params?: object) {
+export default function useAPI<Type>(endPoint: string, params?: object) {
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState(false);
 	const [errorMsg, setErrorMsg] = useState('');
-	const [data, setData] = useState(null);
+	const [data, setData] = useState<Type | null>(null);
 
 	const request = () =>
 		axios

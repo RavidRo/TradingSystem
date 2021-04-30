@@ -5,7 +5,7 @@ import React, { FC } from 'react';
 type GenericListProps = {
 	data: any[];
 	header?: string;
-	children: (data: any) => JSX.Element;
+	children: (data: any, index: number) => JSX.Element;
 	createTxt?: string;
 	onCreate?: () => void;
 	narrow?: boolean;
@@ -28,11 +28,11 @@ const GenericList: FC<GenericListProps> = ({
 					<ListItem>
 						<Typography>{header}</Typography>
 					</ListItem>
-					<Divider />{' '}
+					<Divider />
 				</>
 			)}
 			<div className={narrow ? 'narrow-list' : '' + (padRight ? 'list-padding' : '')}>
-				{data.map((current) => children(current))}
+				{data.map((current, index) => children(current, index))}
 				{onCreate && (
 					<ListItem button onClick={onCreate}>
 						<ListItemText primary={createTxt} />

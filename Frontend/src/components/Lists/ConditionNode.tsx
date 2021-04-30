@@ -14,7 +14,7 @@ import { ExpandLess, ExpandMore } from '@material-ui/icons';
 import {
 	Condition,
 	ConditionSimple,
-	isBasicOperator,
+	isBasicRule,
 	isConditionComplex,
 	isConditionSimple,
 	SimpleOperator,
@@ -24,6 +24,7 @@ import GenericList from './GenericList';
 
 type ConditionNodeProps = {
 	condition: Condition;
+	onCreate: () => void;
 };
 
 function conditionToString(condition: Condition): string {
@@ -59,7 +60,7 @@ function operatorToString(operator: SimpleOperator): string {
 	return mapToString[operator];
 }
 
-const ConditionNode: FC<ConditionNodeProps> = ({ condition }) => {
+const ConditionNode: FC<ConditionNodeProps> = ({ condition, onCreate }) => {
 	const [open, setOpen] = React.useState(true);
 	const handleClick = () => {
 		setOpen(!open);
@@ -82,15 +83,19 @@ const ConditionNode: FC<ConditionNodeProps> = ({ condition }) => {
 			</ListItem>
 			{isConditionComplex(condition.rule) && (
 				<Collapse in={open} timeout="auto">
-					{isBasicOperator(condition.rule) ? (
+					{isBasicRule(condition.rule) ? (
 						<GenericList
 							data={condition.rule.operands}
-							onCreate={() => {}}
+							onCreate={onCreate}
 							createTxt="+ Add condition"
 							padRight
 						>
 							{(condition) => (
-								<ConditionNode key={condition.id} condition={condition} />
+								<ConditionNode
+									key={condition.id}
+									condition={condition}
+									onCreate={onCreate}
+								/>
 							)}
 						</GenericList>
 					) : (
@@ -101,12 +106,10 @@ const ConditionNode: FC<ConditionNodeProps> = ({ condition }) => {
 									<ConditionNode
 										key={condition.id}
 										condition={condition.rule.then}
+										onCreate={onCreate}
 									/>
 								) : (
-									<ListItem
-										button
-										// onClick={onCreate}
-									>
+									<ListItem button onClick={onCreate}>
 										<ListItemText primary="+ Add condition" />
 									</ListItem>
 								)}
@@ -115,12 +118,10 @@ const ConditionNode: FC<ConditionNodeProps> = ({ condition }) => {
 									<ConditionNode
 										key={condition.id}
 										condition={condition.rule.test}
+										onCreate={onCreate}
 									/>
 								) : (
-									<ListItem
-										button
-										// onClick={onCreate}
-									>
+									<ListItem button onClick={onCreate}>
 										<ListItemText primary="+ Add condition" />
 									</ListItem>
 								)}

@@ -87,3 +87,11 @@
 }
 
 
+.enter-keywords {
+	width: 100%;
+	display: flex;
+	align-items: center;
+	.keyword-input {
+		flex: 1
+	}
+}

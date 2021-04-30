@@ -28,24 +28,36 @@ export type Appointee = {
 
 export type SimpleOperator = 'equals' | 'great-than' | 'less-than' | 'great-equals' | 'less-equals';
 
+export type ConditionObjectIdentifier = 'product' | 'category';
+export type ConditionObjectNoIdentifier = 'bag' | 'user';
+
+export type ConditionObject = ConditionObjectIdentifier | ConditionObjectNoIdentifier;
+
 export type ConditionSimple = {
-	context: { obj: 'product' | 'category'; identifier: string } | { obj: 'bag' | 'user' };
+	context:
+		| { obj: ConditionObjectIdentifier; identifier: string }
+		| { obj: ConditionObjectNoIdentifier };
 	operator: SimpleOperator;
 	target: number;
 };
 
-type Conditioning = { operator: 'conditioning'; test?: Condition; then?: Condition };
-type BasicOperator = { operator: 'and' | 'or'; operands: Condition[] };
+type ConditioningOperator = 'conditioning';
+type BasicOperator = 'and' | 'or';
 
-type ConditionComplex = Conditioning | BasicOperator;
+export type ComplexOperator = ConditioningOperator | BasicOperator;
+
+type Conditioning = { operator: ConditioningOperator; test?: Condition; then?: Condition };
+type BasicRule = { operator: BasicOperator; operands: Condition[] };
+
+export type ConditionComplex = Conditioning | BasicRule;
 
 export type Condition = { id: string; rule: ConditionSimple | ConditionComplex };
 
 export function isConditioning(rule: ConditionComplex): rule is Conditioning {
 	return (rule as Conditioning).operator === 'conditioning';
 }
-export function isBasicOperator(rule: ConditionComplex): rule is BasicOperator {
-	return (rule as BasicOperator).operands !== undefined;
+export function isBasicRule(rule: ConditionComplex): rule is BasicRule {
+	return (rule as BasicRule).operands !== undefined;
 }
 
 export function isConditionSimple(
@@ -56,7 +68,7 @@ export function isConditionSimple(
 export function isConditionComplex(
 	rule: ConditionSimple | ConditionComplex
 ): rule is ConditionComplex {
-	return isConditioning(rule as ConditionComplex) || isBasicOperator(rule as ConditionComplex);
+	return isConditioning(rule as ConditionComplex) || isBasicRule(rule as ConditionComplex);
 }
 
 // * Discount

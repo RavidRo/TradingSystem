@@ -12,6 +12,7 @@ import AppointeeNode from './Lists/AppointeeNode';
 import DiscountNode from './Lists/DiscountNode';
 import ConditionNode from './Lists/ConditionNode';
 import CreateDiscountForm from './FormWindows/CreateDiscountForm';
+import CreateConditionForm from './FormWindows/CreateConditionForm';
 
 type ManageStoreProps = {
 	products: Product[];
@@ -134,7 +135,11 @@ const ManageStore: FC<ManageStoreProps> = ({ products }) => {
 
 	const openProductForm = () => {
 		setSelectedItem('');
-		setTabAnimation(() => <CreateProductForm onSubmit={(name) => console.log(name)} />);
+		setTabAnimation(() => (
+			<CreateProductForm
+				onSubmit={(name, number, quantity, category, keywords) => console.log(name)}
+			/>
+		));
 	};
 
 	const openAppointeeForm = () => {
@@ -146,6 +151,13 @@ const ManageStore: FC<ManageStoreProps> = ({ products }) => {
 		setSelectedItem('');
 		setTabAnimation(() => (
 			<CreateDiscountForm onSubmit={(name) => console.log(name)} products={products} />
+		));
+	};
+
+	const openConditionForm = () => {
+		setSelectedItem('');
+		setTabAnimation(() => (
+			<CreateConditionForm onSubmit={(name) => console.log(name)} products={products} />
 		));
 	};
 
@@ -187,6 +199,7 @@ const ManageStore: FC<ManageStoreProps> = ({ products }) => {
 				>
 					{(appointee) => (
 						<AppointeeNode
+							key={appointee.id}
 							appointee={appointee}
 							isSelected={(appointee) => selectedItem === appointee.id}
 							onClick={(appointee) => onSelectAppointee(appointee)}
@@ -208,7 +221,9 @@ const ManageStore: FC<ManageStoreProps> = ({ products }) => {
 					)}
 				</GenericList>
 				<GenericList data={conditions} header="Users can buy products if" narrow>
-					{(condition: Condition) => <ConditionNode condition={condition} />}
+					{(condition: Condition) => (
+						<ConditionNode condition={condition} onCreate={openConditionForm} />
+					)}
 				</GenericList>
 			</div>
 			<div className={'second-tab' + (open ? ' open' : '')}>

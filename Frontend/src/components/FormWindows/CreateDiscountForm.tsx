@@ -41,7 +41,7 @@ const CreateDiscountForm: FC<CreateDiscountFormProps> = ({ onSubmit, products })
 
 	function handleSubmit() {
 		setPercentageError(+percentage < 0);
-		if (!setPercentage) {
+		if (!percentageError) {
 			if (simple && contextObject !== '') {
 				if (contextObject === 'store') {
 					onSubmit({
@@ -60,7 +60,24 @@ const CreateDiscountForm: FC<CreateDiscountFormProps> = ({ onSubmit, products })
 					});
 				}
 			} else {
-				// onSubmit();
+				if (operator === 'xor') {
+					if (decisionRule !== '') {
+						onSubmit({
+							type: {
+								operator,
+								decision_rule: decisionRule,
+							},
+							operands: [],
+						});
+					}
+				} else if (operator !== '') {
+					onSubmit({
+						type: {
+							operator,
+						},
+						operands: [],
+					});
+				}
 			}
 		}
 	}
@@ -80,7 +97,7 @@ const CreateDiscountForm: FC<CreateDiscountFormProps> = ({ onSubmit, products })
 
 	return (
 		<FormWindow handleSubmit={handleSubmit} createText="Add discount!" header="New discount">
-			<FormControl component="fieldset">
+			<FormControl component="fieldset" margin="normal">
 				<RadioGroup
 					row
 					aria-label="position"
@@ -116,7 +133,7 @@ const CreateDiscountForm: FC<CreateDiscountFormProps> = ({ onSubmit, products })
 							type="number"
 							error={percentageError}
 						/>
-						<FormControl fullWidth>
+						<FormControl fullWidth margin="normal">
 							<InputLabel id="object-label">Context</InputLabel>
 							<Select
 								labelId="object-label"
@@ -131,7 +148,7 @@ const CreateDiscountForm: FC<CreateDiscountFormProps> = ({ onSubmit, products })
 							</Select>
 						</FormControl>
 						{contextObject !== 'store' && contextObject !== '' && (
-							<FormControl fullWidth>
+							<FormControl fullWidth margin="normal">
 								<InputLabel id="identifier-label">Identifier</InputLabel>
 								<Select
 									labelId="identifier-label"
@@ -158,7 +175,7 @@ const CreateDiscountForm: FC<CreateDiscountFormProps> = ({ onSubmit, products })
 				</Fade>
 				<Fade in={!simple}>
 					<div style={simple ? { position: 'absolute' } : {}}>
-						<FormControl fullWidth>
+						<FormControl fullWidth margin="normal">
 							<InputLabel id="operator-label">Operator</InputLabel>
 							<Select
 								labelId="operator-label"
@@ -174,7 +191,7 @@ const CreateDiscountForm: FC<CreateDiscountFormProps> = ({ onSubmit, products })
 							</Select>
 						</FormControl>
 						{operator === 'xor' && (
-							<FormControl fullWidth>
+							<FormControl fullWidth margin="normal">
 								<InputLabel id="decision-rule-label">Decision rule</InputLabel>
 								<Select
 									labelId="decision-rule-label"

@@ -1,4 +1,4 @@
-import React, { FC, useState } from 'react';
+import React, { FC, useEffect, useState } from 'react';
 
 import { ListItem } from '@material-ui/core';
 import ListItemText from '@material-ui/core/ListItemText';
@@ -8,6 +8,7 @@ import { Store, Product } from '../types';
 import CreateStoreForm from '../components/FormWindows/CreateStoreForm';
 import ManageStore from '../components/ManageStore';
 import GenericList from '../components/Lists/GenericList';
+import useAPI from '../hooks/useAPI';
 
 const init_stores: Store[] = [
 	{ id: '0', name: 'Tiffany&Stuff', role: 'Founder' },
@@ -56,6 +57,11 @@ const products_per_store: { [key: string]: Product[] } = {
 type MyStoresProps = {};
 
 const MyStores: FC<MyStoresProps> = () => {
+	// const { request, data } = useAPI<Store[]>('/get_stores_details');
+	// useEffect(() => {
+	// 	request().then(() => setStores(data as Store[]));
+	// }, []);
+
 	const [stores, setStores] = useState<Store[]>(init_stores);
 	const [selectedStore, setSelectedStore] = useState<string>('');
 	const [open, setOpen] = useState<boolean>(false);

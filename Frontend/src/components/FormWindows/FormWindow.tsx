@@ -10,7 +10,7 @@ type FormWindowProps = {
 const FormWindow: FC<FormWindowProps> = ({ handleSubmit, createText, children, header }) => {
 	return (
 		<div className="form-cont">
-			<h2>{header}</h2>
+			<h3>{header}</h3>
 			<form
 				className="create-form"
 				onSubmit={(event: React.FormEvent) => {

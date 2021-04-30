@@ -31,7 +31,7 @@ const CreateAppointeeForm: FC<CreateAppointeeFormProps> = ({ onSubmit }) => {
 				label="Appointee's name"
 				onChange={(event) => setAppointeeUsername(event.currentTarget.value)}
 			/>
-			<FormControl fullWidth>
+			<FormControl fullWidth margin="normal">
 				<InputLabel id="role-label">Role</InputLabel>
 				<Select
 					labelId="role-label"
