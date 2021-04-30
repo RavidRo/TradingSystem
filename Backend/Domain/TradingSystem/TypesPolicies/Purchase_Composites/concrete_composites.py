@@ -11,7 +11,7 @@ class OrCompositePurchaseRule(CompositePurchaseRule):
             return Response(True, msg="Purchase is permitted!")
 
         for child in self.children:
-            if child.operation(products_to_quantities, user_age):
+            if child.operation(products_to_quantities, user_age).succeeded():
                 return Response(True, msg="Purchase is permitted!")
         return Response(False, msg="Purchase doesn't stand with the rules!")
 
