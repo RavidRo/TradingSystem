@@ -11,6 +11,7 @@ import MyStores from './MyStores';
 import SearchPage from './SearchPage';
 import StoresView from '../pages/StoresView';
 import Purchase from '../pages/Purchase';
+import {Product} from '../types';
 
 const theme = createMuiTheme({
 	typography: {
@@ -33,17 +34,12 @@ const theme = createMuiTheme({
 		secondary: { main: '#fee9b2' },
 	},
 });
-type Product = {
-	id:string,
-    name:string,
-    price: number,
-    quantity:number
-}
+
 function App() {
 	const [signedIn, setSignedIn] = useState<boolean>(false);
     const [productsInCart,setProducts] = useState<Product[]>([]);
 
-	const addProductToPopup = (product:{id:string,name:string,price:number})=>{
+	const addProductToPopup = (product:Product)=>{
 		let found  = false;
 		for(var i=0;i<Object.values(productsInCart).length;i++){
 			if(Object.values(productsInCart)[i].id === (product.id)){
@@ -57,11 +53,13 @@ function App() {
 				name:product.name,
 				price:product.price,
 				quantity:1,
+				category:product.category,
+				keywords:product.keywords
 			};
 			setProducts(oldArray => [...oldArray, newProduct]);
 		}
 	}
-	const handleDeleteProduct = (product:{id:string,name:string,price:number})=>{
+	const handleDeleteProduct = (product:Product)=>{
 		setProducts(Object.values(productsInCart).filter(item => item.id !== product.id));
 	}
 

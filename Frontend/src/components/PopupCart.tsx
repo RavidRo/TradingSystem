@@ -3,10 +3,11 @@ import React ,{FC, useEffect, useState} from 'react';
 import '../styles/PopupCart.scss';
 import storesProductsMap from '../components/storesProductsMap';
 import PopupBag from '../components/PopupBag';
+import {Product} from '../types';
 
 type PopupCartProps = {
-    products:{id:string,name:string,price:number,quantity:number}[],
-    propHandleDelete:(product:{id:string,name:string,price:number})=>void,
+    products:Product[],
+    propHandleDelete:(product:Product)=>void,
    
 };
 const PopupCart: FC<PopupCartProps> = ({products,propHandleDelete}: PopupCartProps) => {
@@ -62,7 +63,7 @@ const PopupCart: FC<PopupCartProps> = ({products,propHandleDelete}: PopupCartPro
 
     }
 
-    const [productsInCart,setProducts] = useState<{id:string,name:string,price:number,quantity:number}[]>(products);
+    const [productsInCart,setProducts] = useState<Product[]>(products);
     const [bags,setBags] = useState<any[]>(setProductsInBags());
 
     useEffect(()=>{

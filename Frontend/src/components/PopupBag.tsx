@@ -2,16 +2,17 @@
 import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@material-ui/core';
 import React ,{FC, useEffect, useState} from 'react';
 import ProductPopup from '../components/ProductPopup';
+import {Product} from '../types';
 
 type PopupBagProps = {
     storeName:string,
-    products:{id:string, name:string,price:number,quantity:number}[],
-    propHandleDelete:(product:{id:string,name:string,price:number})=>void,
+    products:Product[],
+    propHandleDelete:(product:Product)=>void,
    
 };
 const PopupBag: FC<PopupBagProps> = ({storeName,products,propHandleDelete}:PopupBagProps) => {
 
-    const [productsInCart,setProducts] = useState<{id:string,name:string,price:number,quantity:number}[]>(products);
+    const [productsInCart,setProducts] = useState<Product[]>(products);
 	
     useEffect(()=>{
         setProducts(products);
@@ -41,6 +42,8 @@ const PopupBag: FC<PopupBagProps> = ({storeName,products,propHandleDelete}:Popup
                                 name={p.name}
                                 price={p.price}
                                 quantity = {p.quantity}
+                                keywords={p.keywords}
+                                category={p.category}
                                 propHandleDelete={propHandleDelete}
                                 key={Object.values(productsInCart).indexOf(p)}
                                 />

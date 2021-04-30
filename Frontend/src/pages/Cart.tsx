@@ -1,22 +1,19 @@
 import React, { FC, useState , useEffect} from 'react';
 import '../styles/Cart.scss';
 import Bag from '../components/Bag';
-import storesProductsMap from '../components/storesProductsMap';
 import { Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, TextField } from '@material-ui/core';
 import { Link } from 'react-router-dom';
+import storesProductsMap from '../components/storesProductsMap';
+import {Product} from '../types';
+import useAPI from '../hooks/useAPI';
 
 type CartProps = {
-	products:{id:string,name:string,price:number,quantity:number}[],
+	products:Product[],
 
 };
-type Product = {
-	id:string,
-    name:string,
-    price: number,
-    quantity:number
-}
+
 const Cart: FC<CartProps> = ({products}) => {
-	const [productsInCart,setProducts] = useState<{id:string,name:string,price:number,quantity:number}[]>(products);
+	const [productsInCart,setProducts] = useState<Product[]>(products);
     const [open,setOpen] = useState<boolean>(false);
     const [age,setAge] = useState<number>(0);
     const [showPurchaseLink,setLink] = useState<boolean>(false);
@@ -96,12 +93,13 @@ const Cart: FC<CartProps> = ({products}) => {
 		});
         setTotalAmount(calculateTotal());
     }
-   
+    const {request, data} = useAPI<number>('/get_discount',{age:age});
+    useEffect(()=>{
+        request().then(()=>setTotalAmount(data as number));
+    },[showPurchaseLink]);
+    
     const handleOK = ()=>{
         setOpen(false);
-
-        // TODO: ask from server for discount with age
-        // setTotal(from server)
         setLink(true);
     }
     const handleClick = ()=>{

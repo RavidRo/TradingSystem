@@ -6,16 +6,17 @@ import { faShoppingCart, faSignInAlt , faSearch} from '@fortawesome/free-solid-s
 import '../styles/Navbar.scss';
 import config from '../config';
 import PopupCart from '../components/PopupCart';
+import {Product} from '../types';
 
 type NavBarProps = {
 	 signedIn: boolean,
-	 products:{id:string,name:string,price:number,quantity:number}[],
-	 propHandleDelete:(product:{id:string,name:string,price:number})=>void,
+	 products:Product[],
+	 propHandleDelete:(product:Product)=>void,
 	};
 
 const Navbar: FC<NavBarProps> = ({ signedIn ,products,propHandleDelete}) => {
 	const [hoverCart, setHoverCart] = useState<boolean>(false);
-    const [productsInCart,setProducts] = useState<{id:string,name:string,price:number,quantity:number}[]>(products);
+    const [productsInCart,setProducts] = useState<Product[]>(products);
 
 	useEffect(()=>{
         setProducts(products);

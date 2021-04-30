@@ -1,7 +1,8 @@
 import { Button, TextField } from '@material-ui/core';
-import React, { FC,useState} from 'react';
+import React, { FC,useState,useEffect} from 'react';
 import '../styles/Purchase.scss';
 import Timer from '../components/Timer';
+import useAPI from '../hooks/useAPI';
 
 type PurchaseProps = {
     location: any,
@@ -10,9 +11,15 @@ type PurchaseProps = {
 
 const Purchase: FC<PurchaseProps> = ({location}) => {
 	const [totalAmount,setTotal] = useState<number>(location.state!==undefined?location.state.totalAmount:0);
+    const [ready,setReady] = useState<boolean>(false);
+
+    const {request, data} = useAPI<number>('/purchase_cart');
+    useEffect(()=>{
+        request().then(()=>alert(data));
+    },[ready]);
+    
     const handlePurchase = ()=>{
         alert("Thank you for purchasing in Shopping World!");
-        // TODO: request server for purchase complete
     }
 
 	return (

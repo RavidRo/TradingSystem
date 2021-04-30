@@ -5,23 +5,19 @@ import CartProduct from '../components/CartProduct';
 import PurchaseIcon from '@material-ui/icons/LocalMall';
 import { Link } from 'react-router-dom';
 import '../styles/Bag.scss';
+import {Product} from '../types';
 
 type BagProps = {
     storeName:string,
-    products:{id:string, name:string,price:number,quantity:number}[],
+    products:Product[],
     propHandleDelete:(id:string)=>void,
 	changeQuantity:(id: string, newQuantity: number)=>void,
    
 };
-type Product = {
-	id:string,
-    name:string,
-    price: number,
-    quantity:number
-}
+
 const Bag: FC<BagProps> = ({storeName,products,propHandleDelete,changeQuantity}:BagProps) => {
 
-    const [productsInCart,setProducts] = useState<{id:string,name:string,price:number,quantity:number}[]>(products);
+    const [productsInCart,setProducts] = useState<Product[]>(products);
 
     useEffect(()=>{
         setProducts(products);

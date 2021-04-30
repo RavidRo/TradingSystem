@@ -1,4 +1,4 @@
-import React ,{FC, useState} from 'react';
+import React ,{FC, useEffect, useState} from 'react';
 import FormControl from '@material-ui/core/FormControl';
 import Select from '@material-ui/core/Select';
 import MenuItem from '@material-ui/core/MenuItem';
@@ -6,6 +6,7 @@ import '../styles/StoresView.scss';
 import ProductSearch from '../components/ProductSearch';
 import storesToProducts from '../components/storesProductsMap';
 import useAPI from '../hooks/useAPI';
+import {Product} from '../types';
 
 
 type StoresViewProps = {
@@ -13,23 +14,27 @@ type StoresViewProps = {
    location: any,
 
 };
-type Product = {
-    id:string,
-   name:string,
-   price: number,
-   quantity: number,
-}
+
 const StoresView: FC<StoresViewProps> = ({propsAddProduct,location}: StoresViewProps) => {
 
-    // let obj = useAPI("/getProductsByStore",{storeID:1})
-    const [store, setStore] = useState<string>(location.state!==undefined?location.state.storeName:"");
+    const [presentProducts,setProducts] = useState<Product[]>([]);
+    const [stores,setStores] = useState<string[]>([]);
+
+    const [store, setStore] = useState<string>(location.state!==undefined?location.state.storeID:"");
+    const {request:reqProd, data:dataProd} = useAPI<Product[]>('/get_products_of_store',{storeID:store});
+    useEffect(()=>{
+        reqProd().then(()=>setProducts(dataProd as Product[]));
+    },[store]);
+
+    const {request:reqStores, data:dataStores} = useAPI<string[]>('/get_stores');
+        useEffect(()=>{
+            setStores(['shein','amazon']);
+            // TODO: get out of comment
+            // reqStores().then(()=>setStores(dataStores as string[]));
+        },[]);
    
-    const [presentProducts,setProducts] = useState<Product[]>(
-        location.state!==undefined?Object.values(storesToProducts)[
-            Object.keys(storesToProducts).indexOf(location.state.storeName)
-        ]
-        :[]
-    );
+   
+   
 
    const handleChange = (e:any)=>{
       setStore(e.target.value);
@@ -60,7 +65,7 @@ const StoresView: FC<StoresViewProps> = ({propsAddProduct,location}: StoresViewP
                 style={{'fontSize': '2rem','width':'50%'}}
                 onChange={(e)=>handleChange(e)}
                 >
-                   {Object.keys(storesToProducts).map((store)=>{
+                   {stores.map((store)=>{
                       return(
                         <MenuItem value={store} key={Object.keys(storesToProducts).indexOf(store)}>{store}</MenuItem>
                       )
@@ -77,7 +82,7 @@ const StoresView: FC<StoresViewProps> = ({propsAddProduct,location}: StoresViewP
                                         <ProductSearch
                                             key={i*matrix_length+j}
                                             id={cell!==undefined?cell.id:-1}
-                                            storeName={store}
+                                            storeID={store}
                                             content={cell!==undefined?cell.name:""}
                                             price={cell!==undefined?cell.price:0}
                                             clickAddProduct={()=>propsAddProduct(cell)}

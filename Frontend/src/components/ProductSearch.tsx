@@ -9,11 +9,11 @@ type ProductSearchProps = {
     content:string,
     price:number,
     id:string,
-    storeName:string,
+    storeID:string,
     clickAddProduct:()=>void,
 };
 
-const ProductSearch: FC<ProductSearchProps> = ({id,storeName,content,price,clickAddProduct}) => {
+const ProductSearch: FC<ProductSearchProps> = ({id,storeID,content,price,clickAddProduct}) => {
 
       
 	return (
@@ -49,11 +49,11 @@ const ProductSearch: FC<ProductSearchProps> = ({id,storeName,content,price,click
                             to={{
                             pathname: '/storesView',
                             state: {
-                                storeName:storeName
+                                storeID:storeID
                             },
                             }}
                         >
-                                {storeName}
+                                {storeID}
                         </Link>
                     </div>
                 </Card>
