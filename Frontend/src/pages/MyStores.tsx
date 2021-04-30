@@ -5,13 +5,13 @@ import ListItemText from '@material-ui/core/ListItemText';
 
 import '../styles/MyStores.scss';
 import { Store, Product } from '../types';
-import CreateStoreForm from '../components/CreateStoreForm';
+import CreateStoreForm from '../components/FormWindows/CreateStoreForm';
 import ManageStore from '../components/ManageStore';
-import GenericList from '../components/GenericList';
+import GenericList from '../components/Lists/GenericList';
 
 const init_stores: Store[] = [
 	{ id: '0', name: 'Tiffany&Stuff', role: 'Founder' },
-	{ id: '1', name: 'Fluffy My Puppy', role: 'Member' },
+	{ id: '1', name: 'Fluffy My Puppy', role: 'Owner' },
 ];
 
 const products_per_store: { [key: string]: Product[] } = {
@@ -21,18 +21,24 @@ const products_per_store: { [key: string]: Product[] } = {
 			name: 'Milk',
 			price: 20,
 			quantity: 2,
+			keywords: [],
+			category: 'Food',
 		},
 		{
 			id: '1',
 			name: 'Bamba',
 			price: 3.2,
 			quantity: 2,
+			keywords: ['Food', 'Yummy'],
+			category: 'Snacks',
 		},
 		{
 			id: '2',
 			name: 'Tomato',
 			price: 2.34,
 			quantity: 5,
+			keywords: ['Vegetable', 'Red'],
+			category: 'Vegetables',
 		},
 	],
 	'1': [
@@ -41,6 +47,8 @@ const products_per_store: { [key: string]: Product[] } = {
 			name: 'Red paint',
 			price: 20,
 			quantity: 2,
+			keywords: ['Paint', 'Epic'],
+			category: 'Construction',
 		},
 	],
 };
@@ -48,21 +56,26 @@ const products_per_store: { [key: string]: Product[] } = {
 type MyStoresProps = {};
 
 const MyStores: FC<MyStoresProps> = () => {
-	const [selectedStore, setSelectedStore] = useState<string | null>(null);
 	const [stores, setStores] = useState<Store[]>(init_stores);
-	const [open, setOpen] = useState(false);
+	const [selectedStore, setSelectedStore] = useState<string>('');
+	const [open, setOpen] = useState<boolean>(false);
+	const [Tab, setTab] = useState<FC | null>(null);
 
-	const setStore = (storeId: string) => {
-		setTab(storeId);
+	const onSelectStore = (store: Store) => {
+		if (store.id !== selectedStore) {
+			setSelectedStore(store.id);
+			setTabAnimation(() => <ManageStore products={products_per_store[store.id] || []} />);
+		}
 	};
 
 	const openStoreForm = () => {
-		setTab(null);
+		setSelectedStore('');
+		setTabAnimation(() => <CreateStoreForm onSubmit={onNewStore} />);
 	};
-	const setTab = (selectedStore: string | null) => {
+	const setTabAnimation = (components: FC) => {
 		setOpen(false);
 		setTimeout(() => {
-			setSelectedStore(selectedStore);
+			setTab(() => components);
 			setOpen(true);
 		}, 300);
 	};
@@ -85,7 +98,7 @@ const MyStores: FC<MyStoresProps> = () => {
 						<ListItem
 							key={store.id}
 							button
-							onClick={() => setStore(store.id)}
+							onClick={() => onSelectStore(store)}
 							selected={store.id === selectedStore}
 						>
 							<ListItemText primary={`${store.name} - ${store.role}`} />
@@ -93,13 +106,7 @@ const MyStores: FC<MyStoresProps> = () => {
 					)}
 				</GenericList>
 			</div>
-			<div className={'second-tab' + (open ? ' open' : '')}>
-				{selectedStore ? (
-					<ManageStore products={products_per_store[selectedStore] || []} />
-				) : (
-					<CreateStoreForm onSubmit={onNewStore} />
-				)}
-			</div>
+			<div className={'second-tab' + (open ? ' open' : '')}>{Tab && <Tab />}</div>
 		</div>
 	);
 };

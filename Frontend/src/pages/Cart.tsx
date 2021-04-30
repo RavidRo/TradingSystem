@@ -7,26 +7,7 @@ import '../styles/Cart.scss';
 import CartProduct from '../components/CartProduct';
 import { Product } from '../types';
 
-const products_data: Product[] = [
-	{
-		id: '0',
-		name: 'Milk',
-		price: 5.4,
-		quantity: 3,
-	},
-	{
-		id: '1',
-		name: 'Bamba',
-		price: 3.2,
-		quantity: 2,
-	},
-	{
-		id: '2',
-		name: 'Tomato',
-		price: 2.34,
-		quantity: 5,
-	},
-];
+const products_data: Product[] = [];
 
 type CartProps = {};
 

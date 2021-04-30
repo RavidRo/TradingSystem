@@ -2,59 +2,151 @@ import React, { FC, useEffect, useState } from 'react';
 
 import { ListItem, ListItemText } from '@material-ui/core';
 
-import { Appointee, Product } from '../types';
-import GenericList from './GenericList';
-import CreateProductForm from './CreateProductForm';
-import ProductDetails from './ProductDetails';
-import AppointeeDetails from './AppointeeDetails';
-import CreateAppointeeForm from './CreateAppointeeForm';
-import AppointeeTree from './AppointeeTree';
+import { Appointee, Product, Discount, Condition } from '../types';
+import GenericList from './Lists/GenericList';
+import CreateProductForm from './FormWindows/CreateProductForm';
+import ProductDetails from './DetailsWindows/ProductDetails';
+import AppointeeDetails from './DetailsWindows/AppointeeDetails';
+import CreateAppointeeForm from './FormWindows/CreateAppointeeForm';
+import AppointeeNode from './Lists/AppointeeNode';
+import DiscountNode from './Lists/DiscountNode';
+import ConditionNode from './Lists/ConditionNode';
+import CreateDiscountForm from './FormWindows/CreateDiscountForm';
 
 type ManageStoreProps = {
 	products: Product[];
 };
 
-const appointees: Appointee[] = [
+const tree: Appointee[] = [
 	{
-		id: '0',
-		name: 'Tali',
-		role: 'Owner',
-		children: [],
+		id: '11',
+		name: 'Me',
+		role: 'Founder',
+		children: [
+			{
+				id: '12',
+				name: 'Sean',
+				role: 'Owner',
+				children: [
+					{
+						id: '10',
+						name: 'Tali',
+						role: 'Owner',
+						children: [],
+					},
+					{
+						id: '14',
+						name: 'Omer',
+						role: 'Manager',
+						permissions: {
+							appoint_manager: true,
+							get_appointments: false,
+							get_history: false,
+							manage_products: true,
+							remove_manager: true,
+						},
+						children: [],
+					},
+				],
+			},
+			{
+				id: '13',
+				name: 'Inon',
+				role: 'Manager',
+				children: [],
+				permissions: {
+					appoint_manager: true,
+					get_appointments: false,
+					get_history: false,
+					manage_products: true,
+					remove_manager: true,
+				},
+			},
+		],
 	},
+];
+
+const discounts: Discount[] = [
 	{
-		id: '1',
-		name: 'Sean',
-		role: 'Lover',
-		children: [],
+		id: '26',
+		rule: {
+			type: {
+				operator: 'xor',
+				decision_rule: 'max',
+			},
+			operands: [
+				{
+					id: '27',
+					rule: {
+						percentage: 20,
+						context: {
+							obj: 'store',
+						},
+					},
+				},
+			],
+		},
+	},
+];
+
+const conditions: Condition[] = [
+	{
+		id: '31',
+		rule: {
+			operator: 'conditioning',
+			test: {
+				id: '32',
+				rule: {
+					context: {
+						obj: 'user',
+					},
+					operator: 'great-equals',
+					target: 18,
+				},
+			},
+		},
 	},
 ];
 
 const ManageStore: FC<ManageStoreProps> = ({ products }) => {
-	const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
-	const [selectedAppointee, setSelectedAppointee] = useState<Appointee | null>(null);
+	const [selectedItem, setSelectedItem] = useState<string>('');
 	const [open, setOpen] = useState<boolean>(false);
 
 	const [Tab, setTab] = useState<FC | null>(null);
 
 	useEffect(() => {
 		setOpen(false);
-		setSelectedProduct(null);
 	}, [products]);
 
 	const onSelectProduct = (product: Product) => {
-		setTabAnimation(() => <ProductDetails product={product} />);
+		if (product.id !== selectedItem) {
+			setSelectedItem(product.id);
+			setTabAnimation(() => <ProductDetails product={product} />);
+		}
 	};
 
 	const onSelectAppointee = (appointee: Appointee) => {
-		setTabAnimation(() => <AppointeeDetails appointee={appointee} />);
+		if (appointee.id !== selectedItem) {
+			setSelectedItem(appointee.id);
+			setTabAnimation(() => <AppointeeDetails appointee={appointee} />);
+		}
 	};
 
 	const openProductForm = () => {
+		setSelectedItem('');
 		setTabAnimation(() => <CreateProductForm onSubmit={(name) => console.log(name)} />);
 	};
 
 	const openAppointeeForm = () => {
+		setSelectedItem('');
 		setTabAnimation(() => <CreateAppointeeForm onSubmit={(name) => console.log(name)} />);
+	};
+
+	const openDiscountForm = () => {
+		setSelectedItem('');
+		setTabAnimation(() => (
+			<CreateDiscountForm onSubmit={(name) => console.log(name)} products={products} />
+		));
 	};
 
 	const setTabAnimation = (components: FC) => {
@@ -68,54 +160,64 @@ const ManageStore: FC<ManageStoreProps> = ({ products }) => {
 	return (
 		<div className="my-store-page">
 			<div className="my-store-cont">
-				<div className="products-list">
-					<GenericList
-						data={products}
-						onCreate={openProductForm}
-						header="Products"
-						createTxt="+ Add a new product"
-					>
-						{(product) => (
-							<ListItem
-								key={product.id}
-								selected={selectedProduct?.id === product.id}
-								onClick={() => onSelectProduct(product)}
-								button
-							>
-								<ListItemText primary={product.name} className="first-field" />
-								<ListItemText primary={`in stock: ${product.quantity}`} />
-							</ListItem>
-						)}
-					</GenericList>
-				</div>
-				<div>
-					<GenericList
-						data={appointees}
-						onCreate={openAppointeeForm}
-						header="Appointees"
-						createTxt="+ Appoint a new member"
-					>
-						{(appointee) => (
-							<ListItem
-								key={appointee.id}
-								selected={selectedAppointee?.id === appointee.id}
-								onClick={() => onSelectAppointee(appointee)}
-								button
-								alignItems="flex-start"
-							>
-								<ListItemText
-									primary={`${appointee.name} - ${appointee.role}`}
-									className="first-field"
-								/>
-							</ListItem>
-						)}
-					</GenericList>
-				</div>
-				<div>
-					<AppointeeTree />
-				</div>
+				<GenericList
+					data={products}
+					onCreate={openProductForm}
+					header="Products"
+					createTxt="+ Add a new product"
+				>
+					{(product) => (
+						<ListItem
+							key={product.id}
+							selected={selectedItem === product.id}
+							onClick={() => onSelectProduct(product)}
+							button
+						>
+							<ListItemText primary={product.name} className="first-field" />
+							<ListItemText primary={`in stock: ${product.quantity}`} />
+						</ListItem>
+					)}
+				</GenericList>
+				<GenericList
+					data={tree[0].children}
+					onCreate={openAppointeeForm}
+					header="My appointees"
+					createTxt="+ Appoint a new member"
+					narrow
+				>
+					{(appointee) => (
+						<AppointeeNode
+							appointee={appointee}
+							isSelected={(appointee) => selectedItem === appointee.id}
+							onClick={(appointee) => onSelectAppointee(appointee)}
+						/>
+					)}
+				</GenericList>
+				<GenericList data={tree} header="Store's appointments" narrow>
+					{(appointee) => (
+						<AppointeeNode
+							appointee={appointee}
+							isSelected={(appointee) => selectedItem === appointee.id}
+							onClick={(appointee) => onSelectAppointee(appointee)}
+						/>
+					)}
+				</GenericList>
+				<GenericList data={discounts} header="Discounts" narrow>
+					{(discount: Discount) => (
+						<DiscountNode discount={discount} onCreate={openDiscountForm} />
+					)}
+				</GenericList>
+				<GenericList data={conditions} header="Users can buy products if" narrow>
+					{(condition: Condition) => <ConditionNode condition={condition} />}
+				</GenericList>
 			</div>
-			<div className={'second-tab' + (open ? ' open' : '')}>{Tab && <Tab />}</div>
+			<div className={'second-tab' + (open ? ' open' : '')}>
+				{Tab && (
+					<div className="stick-top">
+						<Tab />
+					</div>
+				)}
+			</div>
 		</div>
 	);
 };
