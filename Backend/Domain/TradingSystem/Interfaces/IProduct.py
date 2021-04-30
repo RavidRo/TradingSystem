@@ -10,6 +10,6 @@ class IProduct(Parsable):
         raise NotImplementedError
 
     @abstractmethod
-    def edit_product_details(self, product_name: str, category: str, price: float):
+    def edit_product_details(self, product_name: str, category: str, price: float, keywords: list[str]):
         """Edit product's details with received product_info"""
         raise NotImplementedError

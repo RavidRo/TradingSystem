@@ -17,24 +17,29 @@ def product1():
 # * add product
 # * ====================================================
 def test_add_product_valid(store: Store):
-    result = store.add_product("product", "A", 1.0, 1)
-    assert result.success == True
+    result = store.add_product("product", "A", 1.0, 1, ["Good", "Bad"])
+    assert result.success
 
 
 def test_add_product_negative_quantity(store: Store):
     result = store.add_product("product", "A", 1.0, -1)
-    assert result.success == False
+    assert not result.success
 
 
 def test_add_product_negative_price(store: Store):
     result = store.add_product("product", "A", -1.0, 1)
-    assert result.success == False
+    assert not result.success
 
 
 def test_add_product_existing_product(store: Store):
     store.add_product("product", "A", 1.0, 1)
     result = store.add_product("product", "A", 5.0, 5)
-    assert result.success == False
+    assert not result.success
+
+
+def test_add_product_with_empty_keywords_success(store: Store):
+    result = store.add_product("product", "A", 1.0, 1, [])
+    assert result.success
 
 
 # * remove product
@@ -90,6 +95,18 @@ def test_edit_product_details_not_existing(store: Store, product1: ProductStub):
         result = store.edit_product_details("111", "prod2", "B", 2.0)
         assert not result.success
         assert not product1.product_edited
+
+
+def test_edit_product_no_args_stays_the_same(store: Store, product1: ProductStub):
+    with patch.dict(store.get_products_to_quantities(), {"123": (product1, 1)}):
+        old_name = product1.get_name()
+        old_category = product1.get_category()
+        old_keywords = product1.get_keywords()
+        old_price = product1.get_price()
+        results = store.edit_product_details("123")
+        assert results.success
+        assert product1.get_name() == old_name and product1.get_price() == old_price and \
+               product1.get_category() == old_category and product1.get_keywords() == old_keywords
 
 
 # * change product quantity

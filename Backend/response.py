@@ -45,6 +45,14 @@ class ParsableList(Parsable, Generic[T]):
         return ParsableList(list(map(lambda value: value.parse(), self.values)))
 
 
+class ParsableTuple(Parsable, Generic[T]):
+    def __init__(self, values: tuple[T]):
+        self.values: tuple[T] = values
+
+    def parse(self):
+        return tuple(map(lambda value: value.parse(), self.values))
+
+
 """
 In order to support map return objects, a parsable map wrapper is introduced (parse only values)
 """
@@ -53,11 +61,11 @@ R = TypeVar("R", bound=Parsable)
 
 
 class ParsableMap(Parsable, Generic[R, T]):
-    def __init__(self, values: Dict[R, T]):
-        self.values = values
+    def __init__(self, dictionary: Dict[R, T]):
+        self.dictionary = dictionary
 
     def parse(self):
-        return {key.parse(): value.parse() for key, value in self.values.items()}
+        return {key.parse(): value.parse() for key, value in self.dictionary.items()}
 
 
 # """

@@ -47,10 +47,10 @@ class TradingSystemManager:
     # kwargs = You can search for a product by additional key words
     @staticmethod
     def search_products(
-        product_name, category, min_price, max_price, search_by, *keywords
+        search_phrase, min_price, max_price, search_by, keywords
     ) -> Response[ParsableList[ProductData]]:
         return SearchEngine.search_products(
-            product_name, category, min_price, max_price, search_by, *keywords
+            search_phrase, min_price, max_price, search_by, keywords
         ).parse()
 
     # 2.7
@@ -114,9 +114,9 @@ class TradingSystemManager:
     # Creating a new product and returns its id
     @staticmethod
     def create_product(
-        cookie: str, store_id: str, name: str, category: str, price: float, quantity: int
+        cookie: str, store_id: str, name: str, category: str, price: float, quantity: int, keywords: list[str] = None
     ) -> Response[str]:
-        return UserManager.create_product(cookie, store_id, name, category, price, quantity)
+        return UserManager.create_product(cookie, store_id, name, category, price, quantity, keywords)
 
     # 4.1
     @staticmethod
@@ -133,9 +133,9 @@ class TradingSystemManager:
     # 4.1
     @staticmethod
     def edit_product_details(
-        cookie: str, store_id: str, product_id: str, new_name: str, new_category, new_price: float
+        cookie: str, store_id: str, product_id: str, new_name: str, new_category, new_price: float, keywords: list[str] = None
     ) -> Response[None]:
-        return UserManager.edit_product_details(cookie, store_id, product_id, new_name, new_category, new_price)
+        return UserManager.edit_product_details(cookie, store_id, product_id, new_name, new_category, new_price, keywords)
 
     # 4.3
     @staticmethod

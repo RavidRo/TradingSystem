@@ -18,7 +18,7 @@ class ResponsibilityStub(Responsibility):
         self.get_personnel_info_delegated = False
         self.get_store_purchase_history_delegated = False
 
-    def add_product(self, name: str, category: str, price: float, quantity: int) -> Response[None]:
+    def add_product(self, name: str, category: str, price: float, quantity: int, keywords: list[str] = None) -> Response[None]:
         self.add_product_delegated = True
         return Response(True)
 
@@ -30,7 +30,7 @@ class ResponsibilityStub(Responsibility):
         self.change_product_quantity_delegated = True
         return Response(True)
 
-    def edit_product_details(self, product_id: str, new_name: str, new_category: str, new_price: float) -> Response[None]:
+    def edit_product_details(self, product_id: str, new_name: str, new_category: str, new_price: float, keywords: list[str] = None) -> Response[None]:
         self.edit_product_details_delegated = True
         return Response(True)
 

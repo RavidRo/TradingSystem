@@ -73,7 +73,7 @@ class IUser:
     # 4.1
     # Creating a new product a the store and setting its quantity to 0
     def create_product(
-        self, store_id: str, name: str, category: str, price: float, quantity: int
+        self, store_id: str, name: str, category: str, price: float, quantity: int, keywords: list[str]
     ) -> Response[None]:
         raise NotImplementedError
 
@@ -89,7 +89,7 @@ class IUser:
 
     # 4.1
     def edit_product_details(
-        self, store_id: str, product_id: str, new_name: str, new_category: str, new_price: float
+        self, store_id: str, product_id: str, new_name: str, new_category: str, new_price: float, keywords: list[str]
     ) -> Response[None]:
         raise NotImplementedError
 
