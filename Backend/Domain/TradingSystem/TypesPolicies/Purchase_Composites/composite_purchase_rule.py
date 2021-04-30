@@ -77,13 +77,15 @@ class CompositePurchaseRule(PurchaseRule):
 
     def children_operation(self, func: callable, id: str, component: PurchaseRule = None, clause: str = None) -> Response[None]:
         for child in self._children:
-            if child.is_composite():
-                if component is None:
-                    response = func(child, id, clause)
+            if component is None:
+                response = func(child, id)
+            else:
+                if clause is None:
+                    response = func(child, component, id)
                 else:
                     response = func(child, component, id, clause)
-                if response.succeeded():
-                    return response
+            if response.succeeded():
+                return response
         return Response(False, msg=f"Operation couldn't be performed! Wrong parent_id: {id}")
 
     def add(self, component: PurchaseRule, parent_id: str, clause: str = None) -> Response[None]:
@@ -91,10 +93,12 @@ class CompositePurchaseRule(PurchaseRule):
             self._children.append(component)
             component.parent = self
             return Response(True, msg="Rule was added successfully!")
+        if self.is_composite():
+            return self.children_operation(lambda child, rule, relevant_id, clause=None: child.add(rule, relevant_id, clause), parent_id, component, clause)
+        else:
+            return Response(False, msg=f"Operation couldn't be performed! Wrong parent_id: {id}")
 
-        return self.children_operation(lambda child, rule, relevant_id, clause: child.add(rule, relevant_id, clause), parent_id, component, clause)
-
-    def remove(self, component_id: str) -> Response[None]:
+    def remove(self, component_id: str, ) -> Response[None]:
         if self.id == component_id:
             self.parent._children.remove(self)
             self.parent = None
@@ -106,12 +110,10 @@ class CompositePurchaseRule(PurchaseRule):
         if self.id == rule_id:
             self.parent.children.remove(self)
             self.parent.children.append(component)
-            component.parent = self.parent
-            self.parent = None
             component.children = copy.deepcopy(self.children)
             return Response(True, msg="rule was edited successfully!")
 
-        return self.children_operation(lambda child, rule, relevant_id, clause: child.edit_rule(rule, relevant_id, clause), rule_id, component)
+        return self.children_operation(lambda child, relevant_id, rule: child.edit_rule(rule, relevant_id), rule_id, component)
 
     def get_rule(self, rule_id: str) -> Response[PurchaseRule]:
         if self.id == rule_id:

@@ -234,8 +234,8 @@ class Store:
             prod, current_quantity = self._products_to_quantities.get(product_id)
             self._products_to_quantities[product_id] = (prod, current_quantity + quantity)
 
-    def check_purchase(self, products_to_quantities: dict, user: IUser) -> Response[None]:
-        return self.__purchase_policy.checkPolicy(products_to_quantities, user)
+    def check_purchase(self, products_to_quantities: dict, user_age: int) -> Response[None]:
+        return self.__purchase_policy.checkPolicy(products_to_quantities, user_age)
 
     def apply_discounts(self, user_info, product_to_quantity: dict):
         return self.__discount_policy.applyDiscount(store=self,
@@ -268,5 +268,17 @@ class Store:
     def add_purchase_rule(self, rule_details: dict, rule_type: str, parent_id: str, clause: str = None):
         return self.__purchase_policy.add_purchase_rule(rule_details, rule_type, parent_id, clause)
 
+    def remove_purchase_rule(self, rule_id: str):
+        return self.__purchase_policy.remove_purchase_rule(rule_id)
+
+    def edit_purchase_rule(self, rule_details: dict, rule_id: str, rule_type: str):
+        return self.__purchase_policy.edit_purchase_rule(rule_details, rule_id, rule_type)
+
+    def move_purchase_rule(self, rule_id: str, new_parent_id: str):
+        return self.__purchase_policy.move_purchase_rule(rule_id, new_parent_id)
+
     def get_purchase_policy(self):
         return self.__purchase_policy
+
+    def parse_purchase_policiy(self):
+        return self.__purchase_policy.parse()

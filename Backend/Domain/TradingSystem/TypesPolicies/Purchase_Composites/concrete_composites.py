@@ -26,7 +26,7 @@ class AndCompositePurchaseRule(CompositePurchaseRule):
 
     def operation(self, products_to_quantities: dict, user_age: int) -> Response[None]:
         for child in self.children:
-            if not child.operation(products_to_quantities, user_age):
+            if not child.operation(products_to_quantities, user_age).succeeded():
                 return Response(False, msg="Purchase doesn't stand with the rules!")
         return Response(True, msg="Purchase is permitted!")
 
@@ -64,7 +64,7 @@ class ConditioningCompositePurchaseRule(CompositePurchaseRule):
             return Response(False, msg="There is an existing if clause for the condition")
 
     def operation(self, products_to_quantities: dict, user_age: int) -> Response[None]:
-        if not self.children[clauses['test']].operation(products_to_quantities, user_age):
+        if not self.children[clauses['test']].operation(products_to_quantities, user_age).succeeded():
             return Response(True, msg="Purchase is permitted!")
         return self.children[clauses['then']].operation(products_to_quantities, user_age)
 

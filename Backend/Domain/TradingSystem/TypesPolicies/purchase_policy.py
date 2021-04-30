@@ -63,10 +63,10 @@ class DefaultPurchasePolicy(PurchasePolicy):
     def remove_purchase_rule(self, rule_id: str):
         return self.__purchase_rules.remove(rule_id)
 
-    def move_purchase_rule(self, rule_id: str, new_parent_id: str):
+    def move_purchase_rule(self, rule_id: str, new_parent_id: str) -> Response[None]:
         rule_to_move_response = self.__purchase_rules.get_rule(rule_id)
         if not rule_to_move_response.succeeded():
-            return rule_to_move_response
+            return Response(False, msg=rule_to_move_response.get_msg())
         rule_to_move = rule_to_move_response.get_obj()
 
         new_parent_response = self.__purchase_rules.get_rule(new_parent_id)
@@ -79,6 +79,7 @@ class DefaultPurchasePolicy(PurchasePolicy):
         rule_to_move.parent.children.remove(rule_to_move)
         rule_to_move.parent = new_parent
         new_parent.children.append(rule_to_move)
+        return Response(True, msg="Move succeeded!")
 
     """rule_details json of relevant details.
     Options: 
@@ -95,10 +96,10 @@ class DefaultPurchasePolicy(PurchasePolicy):
     def edit_purchase_rule(self, rule_details: dict, rule_id: str, rule_type: str):
         if rule_type == "simple":
             simple_rule = ConcreteLeaf(rule_details, self.generate_id())
-            self.__purchase_rules.edit_rule(rule_id, simple_rule)
+            return self.__purchase_rules.edit_rule(rule_id, simple_rule)
 
         elif rule_type == "complex":
-            logic_type = rule_details['logic_type']
+            logic_type = rule_details['operator']
             if logic_type in logic_types.keys():
                 return self.__purchase_rules.edit_rule(rule_id, logic_types[logic_type](self))
 
@@ -113,3 +114,6 @@ class DefaultPurchasePolicy(PurchasePolicy):
 
     def checkPolicy(self, products_to_quantities: dict, user_age: int) -> Response[None]:
         return self.__purchase_rules.operation(products_to_quantities, user_age)
+
+    def parse(self):
+        return self.__purchase_rules.parse()

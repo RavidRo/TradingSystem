@@ -60,40 +60,47 @@ class ConcreteLeaf(PurchaseLeaf):
     # For now- there are 4 kinds - age/category/product/shopping-bag
     # For each kind there is one value on which there is a rule
     def operation(self, products_to_quantities: dict, user_age: int) -> Response[None]:
-        if self._context['obj'] == 'user' and objs_operations[self._context['obj']](self, user_age):
-            return Response(True, msg="Purchase is permitted!")
-
-        elif objs_operations[self._context['obj']](self, products_to_quantities):
-            return Response(True, msg="Purchase is permitted!")
-
-        return Response(False, msg="Purchase doesn't stand with the rules!")
+        if self._context['obj'] == 'user':
+            return objs_operations[self._context['obj']](self, user_age)
+        return objs_operations[self._context['obj']](self, products_to_quantities)
 
     # region operations
     def user_operation(self, user_age: int):
-        return ops[self._comparator](user_age, self._constraint)
+        if ops[self._comparator](user_age, self._constraint):
+            return Response(True, msg="Purchase is permitted!")
+        return Response(False,msg="Purchase is not permitted!")
 
     def category_operation(self, products_to_quantities: dict):
         category = self._context['identifier']
         amount_of_category = 0
-        for product_id, (product, quantity) in products_to_quantities:
+        for product_id,(product, quantity) in products_to_quantities.items():
             if product.get_category() == category:
                 amount_of_category += quantity
 
-        return ops[self._comparator](amount_of_category, self._constraint)
+        if ops[self._comparator](amount_of_category, self._constraint):
+            return Response(True, msg="Purchase is permitted!")
+        return Response(False, msg="Purchase is not permitted!")
 
     def product_operation(self, products_to_quantities: dict):
         prod_id = self._context['identifier']
         amount_of_prod = products_to_quantities.get(prod_id)[1]
-        return ops[self._comparator](amount_of_prod, self._constraint)
+        if ops[self._comparator](amount_of_prod, self._constraint):
+            return Response(True, msg="Purchase is permitted!")
+        return Response(False, msg="Purchase is not permitted!")
 
     # ~ price before discounts ~
     def bag_operation(self, products_to_quantities: dict):
         cart_price = 0
         for _, (product, quantity) in products_to_quantities:
             cart_price += quantity * product.get_price()
-        return ops[self._comparator](cart_price, self._constraint)
+        if ops[self._comparator](cart_price, self._constraint):
+            return Response(True, msg="Purchase is permitted!")
+        return Response(False, msg="Purchase is not permitted!")
 
     # endregion
+
+    def add(self, component: PurchaseRule, parent_id: str, clause: str = None):
+        return Response(False, msg="Rule can't be added as a leaf's child!")
 
     def remove(self, component_id: str) -> Response[None]:
         if self.id == component_id:
@@ -106,10 +113,14 @@ class ConcreteLeaf(PurchaseLeaf):
         if self.id == rule_id:
             self.parent.children.remove(self)
             self.parent.children.append(component)
-            component.parent = self.parent
-            self.parent = None
             return Response(True, msg="rule was edited successfully!")
         return Response(False, msg=f"rule couldn't be edited with id:{rule_id}")
+
+    def get_rule(self, rule_id):
+        if self.id == rule_id:
+            return Response(True, obj=self, msg="Here is the rule")
+        else:
+            return Response(False, msg=f"No rule with id: {rule_id}")
 
     def check_validity(self, new_parent_id: str) -> Response[None]:
         if self.id == new_parent_id:
