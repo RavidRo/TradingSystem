@@ -25,7 +25,7 @@ function permissionToString(permission: Permission) {
 const AppointeeDetails: FC<AppointeeDetailsProps> = ({ appointee }) => {
 	const details = [{ field: 'Role', value: appointee.role }];
 	return (
-		<DetailsWindow header={`${appointee.name} - ${appointee.id}`} details={details}>
+		<DetailsWindow header={`${appointee.username}`} details={details}>
 			{appointee.permissions && (
 				<>
 					<Typography>Permissions:</Typography>

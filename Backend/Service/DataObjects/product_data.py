@@ -7,3 +7,4 @@ class ProductData:
     name: str
     category: str
     price: float
+    keywords: list[str]

@@ -14,8 +14,8 @@ type CartProductProps = {
 const digitPointPrecision = 3;
 
 const CartProduct: FC<CartProductProps> = ({ product, onRemove, onChangeQuantity }) => {
-	const { id, name, price, quantity: initialQuantity } = product;
-	const [quantity, setQuantity] = useState<number>(initialQuantity);
+	const { id, name, price } = product;
+	const [quantity, setQuantity] = useState<number>(10);
 	return (
 		<div className="product">
 			<div className="product-fields">

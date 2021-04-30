@@ -1,10 +1,10 @@
 import { Chip } from '@material-ui/core';
 import React, { FC } from 'react';
-import { Product } from '../../types';
+import { ProductQuantity } from '../../types';
 import DetailsWindow from './DetailsWindow';
 
 type ProductDetailsProps = {
-	product: Product;
+	product: ProductQuantity;
 };
 
 const ProductDetails: FC<ProductDetailsProps> = ({ product }) => {

@@ -5,14 +5,14 @@ import React, { FC, useState } from 'react';
 
 import '../styles/Cart.scss';
 import CartProduct from '../components/CartProduct';
-import { Product } from '../types';
+import { ProductQuantity } from '../types';
 
-const products_data: Product[] = [];
+const products_data: ProductQuantity[] = [];
 
 type CartProps = {};
 
 const Cart: FC<CartProps> = (props) => {
-	const [products, setProducts] = useState<Product[]>(products_data);
+	const [products, setProducts] = useState<ProductQuantity[]>(products_data);
 	const onRemove = (id: string) => {
 		setProducts(products.filter((product) => product.id !== id));
 	};

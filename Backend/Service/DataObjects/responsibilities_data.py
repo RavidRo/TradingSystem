@@ -7,6 +7,7 @@ class ResponsibilitiesData:
     def __init__(
         self,
         store_id: str,
+        store_name: str,
         is_manager: bool,
         role: str,
         appointees: List[ResponsibilitiesData],
