@@ -9,7 +9,8 @@ import '../styles/Bag.scss';
 type BagProps = {
     storeName:string,
     products:{id:string, name:string,price:number,quantity:number}[],
-    propHandleDelete:(product:{id:string,name:string,price:number})=>void,
+    propHandleDelete:(id:string)=>void,
+	changeQuantity:(id: string, newQuantity: number)=>void,
    
 };
 type Product = {
@@ -18,7 +19,7 @@ type Product = {
     price: number,
     quantity:number
 }
-const Bag: FC<BagProps> = ({storeName,products,propHandleDelete}:BagProps) => {
+const Bag: FC<BagProps> = ({storeName,products,propHandleDelete,changeQuantity}:BagProps) => {
 
     const [productsInCart,setProducts] = useState<{id:string,name:string,price:number,quantity:number}[]>(products);
 
@@ -34,6 +35,7 @@ const Bag: FC<BagProps> = ({storeName,products,propHandleDelete}:BagProps) => {
 
 	const onRemove = (id: string) => {
 		setProducts(productsInCart.filter((product) => product.id !== id));
+		propHandleDelete(id);
 	}
     const onChangeQuantity = (id: string, newQuantity: number) => {
 		productsInCart.forEach((product) => {
@@ -45,6 +47,7 @@ const Bag: FC<BagProps> = ({storeName,products,propHandleDelete}:BagProps) => {
 			}
 		});
 		setTotal(calculateTotal());
+		changeQuantity(id,newQuantity);
 	}
 	
     return (

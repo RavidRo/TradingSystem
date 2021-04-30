@@ -29,7 +29,7 @@ const Home: FC<HomeProps> = () => {
 				<br/>
 				3. Explore all the stores in the website
 				<br/>
-				4. Sign in if your already have an account
+				4. Sign in if you already have an account
 				<br/>
 				<br/>
 				So... what are you waiting for ?

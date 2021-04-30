@@ -2,17 +2,31 @@ import React, { FC, useState , useEffect} from 'react';
 import '../styles/Cart.scss';
 import Bag from '../components/Bag';
 import storesProductsMap from '../components/storesProductsMap';
-import { Button } from '@material-ui/core';
+import { Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, TextField } from '@material-ui/core';
 import { Link } from 'react-router-dom';
-
 
 type CartProps = {
 	products:{id:string,name:string,price:number,quantity:number}[],
 
 };
-
+type Product = {
+	id:string,
+    name:string,
+    price: number,
+    quantity:number
+}
 const Cart: FC<CartProps> = ({products}) => {
 	const [productsInCart,setProducts] = useState<{id:string,name:string,price:number,quantity:number}[]>(products);
+    const [open,setOpen] = useState<boolean>(false);
+    const [age,setAge] = useState<number>(0);
+    const [showPurchaseLink,setLink] = useState<boolean>(false);
+
+    const calculateTotal = ()=>{
+		const reducer = (accumulator:number, currentValue:Product) => accumulator + (currentValue.price*currentValue.quantity);
+        return productsInCart.reduce(reducer,0);
+	}
+    const [totalAmount,setTotalAmount] = useState<number>(calculateTotal());
+
     const findBagByProductID = (id:string)=>{
         for(var i=0; i<Object.keys(storesProductsMap).length;i++){
             let productsArray = (Object.values(storesProductsMap)[i]);
@@ -70,10 +84,29 @@ const Cart: FC<CartProps> = ({products}) => {
     },[products]);
 	const [bags,setBags] = useState<any[]>(setProductsInBags());
 
-	const handleDeleteProduct = (product:{id:string,name:string,price:number})=>{
-
+	const handleDeleteProduct = (id:string)=>{
+		setProducts(productsInCart.filter((product) => product.id !== id));
+        setTotalAmount(calculateTotal());
 	}
+    const changeQuantity = (id: string, newQuantity: number)=>{
+        productsInCart.forEach((product) => {
+			if (product.id === id) {
+				product.quantity = newQuantity;
+			}
+		});
+        setTotalAmount(calculateTotal());
+    }
+   
+    const handleOK = ()=>{
+        setOpen(false);
 
+        // TODO: ask from server for discount with age
+        // setTotal(from server)
+        setLink(true);
+    }
+    const handleClick = ()=>{
+        setOpen(true);
+    }
 	return (
 		<div className="cart">
             <h3 className="cartTitle">
@@ -88,24 +121,73 @@ const Cart: FC<CartProps> = ({products}) => {
                 storeName={storeName}
                 products={bag[storeName]}
                 propHandleDelete={handleDeleteProduct}
+                changeQuantity={changeQuantity}
                 />)
                     
             })}
-             <Link 
-                className="link" 
-                to={{
-                pathname: '/Purchase',
-                state: {
-                   
-                },
-                }}>
-                <Button className="purchaseBtn" style={{background:'rgb(255, 229, 80)',height:'50px',fontWeight:'bold',fontSize:'large'}}>
-                    Purchase Cart
+                 <h3 className="totalAmount">
+                    Total amount : {totalAmount}
+                </h3>
+                <Button 
+                    className="purchaseBtn" 
+                    style={{
+                        height:'50px',
+                        fontWeight:'bold',
+                        fontSize:'large',
+                        border: '#00ffff',
+                        borderWidth: '4px',
+                        borderStyle:'solid'
+                    }}
+                    onClick={handleClick}
+                > 
+                Enter Your Age For Discount
                 </Button>
-            </Link>
+                <Dialog open={open} onClose={()=>setOpen(false)} aria-labelledby="form-dialog-title">
+                <DialogTitle  id="form-dialog-title">Enter Your Age</DialogTitle>
+                <DialogContent>
+                <DialogContentText style={{'fontSize':'20px','color':'black'}}>
+                    See if there is a discount available for you
+                </DialogContentText>
+                <TextField
+                    autoFocus
+                    margin="dense"
+                    id="age"
+                    label="Age"
+                    type="number"
+                    fullWidth
+                    onChange={(e)=>setAge(+e.target.value)}
+                />
+                </DialogContent>
+                <DialogActions>
+                <Button style={{'color':'blue'}} onClick={()=>setOpen(false)} >
+                    Cancel
+                </Button>
+                <Button style={{'color':'blue'}} onClick={()=>handleOK()}>
+                    OK
+                </Button>
+                </DialogActions>
+            </Dialog>
+            {showPurchaseLink?
+                <Link 
+                        className="link" 
+                        to={{
+                        pathname: '/Purchase',
+                        state: {
+                            totalAmount:totalAmount
+                        },
+                        }}
+                    >
+                    <button 
+                    className="purchaseBtn" 
+                    style={{background:'#7FFF00',height:'50px',fontWeight:'bold',fontSize:'large',marginTop:'40%',marginLeft:'20%'}}
+                    onClick={handleClick}
+                    > 
+                    Purchase
+                    </button>
+                </Link>   
+            :null}
+        </div> 
             
-            
-		</div>
 	);
 };
 

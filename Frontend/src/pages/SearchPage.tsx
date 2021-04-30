@@ -1,4 +1,4 @@
-import React, { useState, FC} from 'react';
+import React, { useState, FC, useEffect} from 'react';
 import '../styles/SearchPage.scss';
 import ProductSearch from '../components/ProductSearch';
 import FilterMenu from '../components/FilterMenu';
@@ -6,6 +6,7 @@ import SearchCategory from '../components/SearchCategory';
 import Keywards from '../components/Keywards';
 import storesToProducts from '../components/storesProductsMap';
 import storesProductsMap from '../components/storesProductsMap';
+import useAPI from '../hooks/useAPI';
 
 type SearchPageProps = {
     location: any,
@@ -20,7 +21,8 @@ type Product = {
 
 const SearchPage: FC<SearchPageProps> = ({location,propsAddProduct}) => {
     const [searchProduct, setSearchProduct] = useState<string>(location.state.product);
-    
+    const [category, setCategory] = useState<string>("");
+
     const [fromInput, setFromInput] = useState<number>(0);
     const [toInput, setToInput] = useState<number>(1000);
     const [productRating, setProductRating] = useState<number >(0);
@@ -40,13 +42,20 @@ const SearchPage: FC<SearchPageProps> = ({location,propsAddProduct}) => {
             products.push(Object.values(storesToProducts)[i][prod]);
         }
     }
+    const getProductFromServer = ()=>{
+        // let obj = useAPI("/getProduct",{productName:searchProduct,category:category,from:fromInput,to:toInput});
+        // return obj.data;
+    }
+
     const [productsToPresent,setProducts] = useState<Product[]>(products);
+//     const [productsToPresent,setProducts] = useState<Product[]>(getProductFromServer());
 
     const handleFilter = (from:number,to:number,prodRate:number,storeRate:number)=>{
         setFromInput(from);
         setToInput(to);
         setProductRating(prodRate);
         setStoreRating(storeRate);
+        // setProducts(getProductFromServer())
 
     }
 
@@ -55,13 +64,18 @@ const SearchPage: FC<SearchPageProps> = ({location,propsAddProduct}) => {
         return productsToPresent.filter((product)=>
         product.price >= fromInput && 
         product.price <= toInput )
+        // setProducts(getProductFromServer())
+        // return getProductFromServer()
     }
     const handleSearch = (toSearch:string,categoryName:string)=>{
         setSearchProduct(toSearch);
+        setCategory(categoryName);
         // TODO: send request to server with toSearch and 
         // properties: category, prices, ratings
         // TODO: get products from server
         // setProducts(response)
+
+        //  setProducts(getProductFromServer())
         
         let str = "product: "+toSearch+", category: "+categoryName+
         ", from: "+fromInput+", to: "+toInput;

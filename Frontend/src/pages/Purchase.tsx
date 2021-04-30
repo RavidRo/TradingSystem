@@ -1,41 +1,59 @@
-import { TextField } from '@material-ui/core';
-import React, { FC, useState , useEffect} from 'react';
+import { Button, TextField } from '@material-ui/core';
+import React, { FC,useState} from 'react';
 import '../styles/Purchase.scss';
+import Timer from '../components/Timer';
 
 type PurchaseProps = {
-
+    location: any,
 
 };
 
-const Purchase: FC<PurchaseProps> = () => {
-	
+const Purchase: FC<PurchaseProps> = ({location}) => {
+	const [totalAmount,setTotal] = useState<number>(location.state!==undefined?location.state.totalAmount:0);
+    const handlePurchase = ()=>{
+        alert("Thank you for purchasing in Shopping World!");
+        // TODO: request server for purchase complete
+    }
 
 	return (
-        <form  noValidate autoComplete="on">
-            <div className="formDiv">
-                <TextField 
-                    required 
-                    id="standard-required" 
-                    label="Credit Number" 
-                    defaultValue=""
-                />
-                <TextField 
-                    required 
-                    id="standard-required" 
-                    label="Address" 
-                    defaultValue=""
-                />
-                <TextField 
-                    required 
-                    id="standard-required" 
-                    label="Age" 
-                    defaultValue=""
-                />
-            </div>
-            <button>
-                Check
-            </button>
-        </form>
+        <div className="purchaseDiv">
+            <form  noValidate autoComplete="on">
+                <div className="formDiv">
+                    <TextField 
+                        required 
+                        id="standard-required" 
+                        label="Credit Number" 
+                        defaultValue=""
+                        style={{width:'50%'}}
+                    />
+                    <TextField 
+                        required 
+                        id="standard-required" 
+                        label="Address" 
+                        defaultValue=""
+                        style={{marginTop:'5%',width:'50%'}}
+                    />
+                    <TextField 
+                        required 
+                        id="standard-required" 
+                        label="Age" 
+                        defaultValue=""
+                        style={{marginTop:'5%',width:'50%'}}
+                    />
+                </div>
+                <h3 className="totalPurchase">
+                    Total amount : {totalAmount}
+                </h3>
+                <Button 
+                    className="purchaseBtn" 
+                    style={{background:'#7FFF00',height:'50px',fontWeight:'bold',fontSize:'large',alignSelf:'center',marginLeft:'48%'}}
+                    onClick={()=>handlePurchase()}
+                    > 
+                    Check
+                </Button>
+                <Timer/>
+            </form>
+        </div>
 	);
 };
 

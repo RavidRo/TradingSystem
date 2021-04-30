@@ -5,6 +5,8 @@ import MenuItem from '@material-ui/core/MenuItem';
 import '../styles/StoresView.scss';
 import ProductSearch from '../components/ProductSearch';
 import storesToProducts from '../components/storesProductsMap';
+import useAPI from '../hooks/useAPI';
+
 
 type StoresViewProps = {
    propsAddProduct:(product:Product)=>void,
@@ -19,6 +21,7 @@ type Product = {
 }
 const StoresView: FC<StoresViewProps> = ({propsAddProduct,location}: StoresViewProps) => {
 
+    // let obj = useAPI("/getProductsByStore",{storeID:1})
     const [store, setStore] = useState<string>(location.state!==undefined?location.state.storeName:"");
    
     const [presentProducts,setProducts] = useState<Product[]>(
@@ -32,6 +35,7 @@ const StoresView: FC<StoresViewProps> = ({propsAddProduct,location}: StoresViewP
       setStore(e.target.value);
       let indexOfStore = Object.keys(storesToProducts).indexOf(e.target.value);
       setProducts(Object.values(storesToProducts)[indexOfStore]);
+    //   TODO: request from server the products of this specific store
    }
    const matrix_length = 3;
    const setProductsInMatrix = ()=>{
@@ -64,14 +68,14 @@ const StoresView: FC<StoresViewProps> = ({propsAddProduct,location}: StoresViewP
                 </Select>
                 <div className="productCards">
                     {store!==""?
-                    setProductsInMatrix().map((row,_)=>{
+                    setProductsInMatrix().map((row,i)=>{
                         return(
                             <div className="cardsRow">
-                                {row.map((cell,_)=>{
+                                {row.map((cell,j)=>{
                                     return (
                                         
                                         <ProductSearch
-                                            key={presentProducts.indexOf(cell)}
+                                            key={i*matrix_length+j}
                                             id={cell!==undefined?cell.id:-1}
                                             storeName={store}
                                             content={cell!==undefined?cell.name:""}
