@@ -2,18 +2,39 @@ import React, { FC, useEffect, useState } from 'react';
 
 import { ListItem, ListItemText } from '@material-ui/core';
 
-import { Product } from '../types';
+import { Appointee, Product } from '../types';
 import GenericList from './GenericList';
 import CreateProductForm from './CreateProductForm';
 import ProductDetails from './ProductDetails';
+import AppointeeDetails from './AppointeeDetails';
+import CreateAppointeeForm from './CreateAppointeeForm';
+import AppointeeTree from './AppointeeTree';
 
 type ManageStoreProps = {
 	products: Product[];
 };
 
+const appointees: Appointee[] = [
+	{
+		id: '0',
+		name: 'Tali',
+		role: 'Owner',
+		children: [],
+	},
+	{
+		id: '1',
+		name: 'Sean',
+		role: 'Lover',
+		children: [],
+	},
+];
+
 const ManageStore: FC<ManageStoreProps> = ({ products }) => {
 	const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+	const [selectedAppointee, setSelectedAppointee] = useState<Appointee | null>(null);
 	const [open, setOpen] = useState<boolean>(false);
+
+	const [Tab, setTab] = useState<FC | null>(null);
 
 	useEffect(() => {
 		setOpen(false);
@@ -21,16 +42,25 @@ const ManageStore: FC<ManageStoreProps> = ({ products }) => {
 	}, [products]);
 
 	const onSelectProduct = (product: Product) => {
-		setTab(product);
+		setTabAnimation(() => <ProductDetails product={product} />);
 	};
 
-	const openStoreForm = () => {
-		setTab(null);
+	const onSelectAppointee = (appointee: Appointee) => {
+		setTabAnimation(() => <AppointeeDetails appointee={appointee} />);
 	};
-	const setTab = (product: Product | null) => {
+
+	const openProductForm = () => {
+		setTabAnimation(() => <CreateProductForm onSubmit={(name) => console.log(name)} />);
+	};
+
+	const openAppointeeForm = () => {
+		setTabAnimation(() => <CreateAppointeeForm onSubmit={(name) => console.log(name)} />);
+	};
+
+	const setTabAnimation = (components: FC) => {
 		setOpen(false);
 		setTimeout(() => {
-			setSelectedProduct(product);
+			setTab(() => components);
 			setOpen(true);
 		}, 300);
 	};
@@ -41,7 +71,7 @@ const ManageStore: FC<ManageStoreProps> = ({ products }) => {
 				<div className="products-list">
 					<GenericList
 						data={products}
-						onCreate={openStoreForm}
+						onCreate={openProductForm}
 						header="Products"
 						createTxt="+ Add a new product"
 					>
@@ -51,10 +81,8 @@ const ManageStore: FC<ManageStoreProps> = ({ products }) => {
 								selected={selectedProduct?.id === product.id}
 								onClick={() => onSelectProduct(product)}
 								button
-								// className="product-line"
-								alignItems="flex-start"
 							>
-								<ListItemText primary={product.name} className="product-name" />
+								<ListItemText primary={product.name} className="first-field" />
 								<ListItemText primary={`in stock: ${product.quantity}`} />
 							</ListItem>
 						)}
@@ -62,22 +90,32 @@ const ManageStore: FC<ManageStoreProps> = ({ products }) => {
 				</div>
 				<div>
 					<GenericList
-						data={[]}
-						onCreate={() => {}}
+						data={appointees}
+						onCreate={openAppointeeForm}
 						header="Appointees"
 						createTxt="+ Appoint a new member"
 					>
-						{(appointee) => <ListItemText primary="+ Appoint a new member" />}
+						{(appointee) => (
+							<ListItem
+								key={appointee.id}
+								selected={selectedAppointee?.id === appointee.id}
+								onClick={() => onSelectAppointee(appointee)}
+								button
+								alignItems="flex-start"
+							>
+								<ListItemText
+									primary={`${appointee.name} - ${appointee.role}`}
+									className="first-field"
+								/>
+							</ListItem>
+						)}
 					</GenericList>
 				</div>
+				<div>
+					<AppointeeTree />
+				</div>
 			</div>
-			<div className={'second-tab' + (open ? ' open' : '')}>
-				{selectedProduct ? (
-					<ProductDetails product={selectedProduct} />
-				) : (
-					<CreateProductForm onSubmit={(name) => console.log(name)} />
-				)}
-			</div>
+			<div className={'second-tab' + (open ? ' open' : '')}>{Tab && <Tab />}</div>
 		</div>
 	);
 };

@@ -27,13 +27,16 @@
 	
 		.products-list {
 
-			.product-name {
+			.first-field {
 				flex: 0.3;
 			}
 		}
 
-		.product-details {
-			padding: 20px;
+		.details-window {
+			.header, .grid{
+				padding-left: 20px;
+			}
+			
 
 			.divider {
 				margin-bottom: 20px;
