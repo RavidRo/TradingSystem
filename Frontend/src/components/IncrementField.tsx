@@ -13,7 +13,7 @@ const IncrementField: FC<IncrementFieldProps> = ({ value, onChange }) => {
 	return (
 		<Paper component="form" className="quantity">
 			<IconButton
-				disabled={value <= 0}
+				disabled={value <= 1}
 				aria-label="remove-one"
 				onClick={() => onChange(value - 1)}
 			>
