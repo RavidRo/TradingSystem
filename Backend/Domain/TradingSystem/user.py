@@ -31,7 +31,7 @@ class User(IUser):
 
     def connect(self, communicate: Callable[[list[str]], bool]) -> bool:
         self.__communicate = communicate
-        return self.__notify_self()
+        return self.__notify_self() # if the user has connected
 
     # 2.3
     def register(self, username: str, password: str) -> Response[None]:

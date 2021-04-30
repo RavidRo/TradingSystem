@@ -41,7 +41,8 @@ class TradingSystem(object):
     def enter_system(self):
         return TradingSystemManager.enter_system()
 
-    def connect(self, cookie: str, communicate: Callable[[list[str]], bool]) -> Response[None]:
+    @staticmethod
+    def connect(cookie: str, communicate: Callable[[list[str]], bool]) -> Response[None]:
         return TradingSystemManager.connect(cookie, communicate)
 
     @sync_to_async

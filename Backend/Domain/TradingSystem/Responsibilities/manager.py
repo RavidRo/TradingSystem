@@ -9,7 +9,7 @@ from Backend.Domain.TradingSystem.purchase_details import PurchaseDetails
 
 class Manager(Owner):
     def __init__(self, user_state: Member, store) -> None:
-        super().__init__(user_state, store)
+        super().__init__(user_state, store, None)
         self.__permissions = {
             Permission.MANAGE_PRODUCTS: False,
             Permission.GET_APPOINTMENTS: True,

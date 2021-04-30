@@ -21,7 +21,8 @@ class TradingSystemManager:
     def enter_system() -> str:
         return UserManager.enter_system()
 
-    def connect(self, cookie: str, communicate: Callable[[list[str]], bool]) -> Response[None]:
+    @staticmethod
+    def connect(cookie: str, communicate: Callable[[list[str]], bool]) -> Response[None]:
         return UserManager.connect(cookie, communicate)
 
     # 2.3

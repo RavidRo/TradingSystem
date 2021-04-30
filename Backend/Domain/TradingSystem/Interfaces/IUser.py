@@ -21,7 +21,7 @@ class IUser(Subscriber):
 
         if IUser.use_mock:
             return UserStub()
-        return User()   # TODO: this
+        return User()
 
     def get_communicate(self) -> Callable[[list[str]], bool]:
         raise NotImplementedError

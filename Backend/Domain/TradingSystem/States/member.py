@@ -62,7 +62,7 @@ class Member(UserState):
 
     def open_store(self, store_name):
         store = Store(store_name)
-        store.set_responsibility(Founder(self, store))
+        store.set_responsibility(Founder(self, store, self.user))
         return Response[Store](True, obj=store, msg="Store opened successfully")
 
     def get_purchase_history(self):

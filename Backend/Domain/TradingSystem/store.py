@@ -26,7 +26,7 @@ class Store:
         self.__purchase_history = []
         self._products_lock = ReadWriteLock()
         self.__history_lock = ReadWriteLock()
-        self.__publisher: Publisher = Publisher()   # TODO: use publisher to publish messages
+        self.__publisher: Publisher = Publisher()
 
     def parse(self):
         id_to_quantity = {}
@@ -41,6 +41,9 @@ class Store:
                 (product.get_id(), product.get_name(), product.get_price(), quantity)
             )
         return parsed_products
+
+    def subscribe(self, subscriber):
+        self.__publisher.subscribe(subscriber)
 
     def get_products(self) -> Response[ParsableList[Product]]:
         self._products_lock.acquire_read()
@@ -169,6 +172,8 @@ class Store:
         self.__history_lock.acquire_write()
         self.__purchase_history.append(purchase_details)
         self.__history_lock.release_write()
+        message = "A purchase has been made:\n"+str(purchase_details.__dict__)
+        self.__publisher.notify_all(message)
 
     @staticmethod
     def id_generator() -> str:
