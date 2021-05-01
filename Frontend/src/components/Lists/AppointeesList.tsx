@@ -28,6 +28,7 @@ const AppointeesList: FC<AppointeesListProps> = ({ selectedItem, storeId, onSele
 		<GenericList data={appointees} header="Store's appointments" narrow>
 			{(appointee) => (
 				<AppointeeNode
+					key={appointee.id}
 					appointee={appointee}
 					isSelected={(appointee) => selectedItem === appointee.username}
 					onClick={(appointee) => onSelectAppointee(appointee)}

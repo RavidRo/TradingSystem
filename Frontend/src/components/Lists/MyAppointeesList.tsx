@@ -86,6 +86,7 @@ const MyAppointeesList: FC<MyAppointeesListProps> = ({
 					appointee={appointee}
 					isSelected={(appointee) => selectedItem === appointee.username}
 					onClick={(appointee) => onSelectAppointee(appointee)}
+					onDelete={() => {}}
 				/>
 			)}
 		</GenericList>

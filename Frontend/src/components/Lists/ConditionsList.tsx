@@ -1,4 +1,5 @@
 import React, { FC, useEffect, useState } from 'react';
+
 import useAPI from '../../hooks/useAPI';
 import {
 	BasicRule,
@@ -8,7 +9,6 @@ import {
 	ProductQuantity,
 } from '../../types';
 import CreateConditionForm from '../FormWindows/CreateConditionForm';
-// import '../styles/ConditionsList.scss';
 import ConditionNode from './ConditionNode';
 import GenericList from './GenericList';
 
@@ -19,7 +19,7 @@ type ConditionsListProps = {
 };
 
 const ConditionsList: FC<ConditionsListProps> = ({ openTab, products, storeId }) => {
-	const getConditions = useAPI<Condition>('/get_conditions', { store_id: storeId });
+	const getConditionsAPI = useAPI<Condition>('/get_conditions', { store_id: storeId });
 	const addCondition = useAPI<{ cookie: string; condition_id: string }>(
 		'/add_condition',
 		{ store_id: storeId },
@@ -29,13 +29,16 @@ const ConditionsList: FC<ConditionsListProps> = ({ openTab, products, storeId })
 	const [rootId, setRootId] = useState<string>('');
 	const [conditions, setConditions] = useState<Condition[]>([]);
 
-	useEffect(() => {
-		getConditions.request().then((getConditions) => {
-			if (!getConditions.error && getConditions.data !== null) {
-				setRootId(getConditions.data.id);
-				setConditions((getConditions.data.rule as BasicRule).operands);
+	const getConditions = () =>
+		getConditionsAPI.request().then((getConditionsAPI) => {
+			if (!getConditionsAPI.error && getConditionsAPI.data !== null) {
+				setRootId(getConditionsAPI.data.id);
+				setConditions((getConditionsAPI.data.rule as BasicRule).operands);
 			}
 		});
+
+	useEffect(() => {
+		getConditions();
 	}, []);
 
 	const openConditionForm = (fatherId: string, conditioning?: 'test' | 'then' | undefined) => {
@@ -48,10 +51,7 @@ const ConditionsList: FC<ConditionsListProps> = ({ openTab, products, storeId })
 				})
 				.then((addCondition) => {
 					if (!addCondition.error && addCondition.data !== null) {
-						setConditions([
-							{ id: addCondition.data.condition_id, rule },
-							...conditions,
-						]);
+						getConditions();
 					}
 				});
 		};
@@ -65,6 +65,7 @@ const ConditionsList: FC<ConditionsListProps> = ({ openTab, products, storeId })
 					condition={condition}
 					onCreate={openConditionForm}
 					fatherId={rootId}
+					onDelete={() => {}}
 				/>
 			)}
 		</GenericList>

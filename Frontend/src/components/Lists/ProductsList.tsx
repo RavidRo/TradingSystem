@@ -1,5 +1,8 @@
-import { ListItem, ListItemText } from '@material-ui/core';
 import React, { FC } from 'react';
+
+import { IconButton, ListItem, ListItemSecondaryAction, ListItemText } from '@material-ui/core';
+import DeleteForeverOutlinedIcon from '@material-ui/icons/DeleteForeverOutlined';
+
 import useAPI from '../../hooks/useAPI';
 import { ProductQuantity } from '../../types';
 import ProductDetails from '../DetailsWindows/ProductDetails';
@@ -75,6 +78,7 @@ const ProductsList: FC<ProductsListProps> = ({
 			onCreate={openProductForm}
 			header="Products"
 			createTxt="+ Add a new product"
+			narrow
 		>
 			{(product) => (
 				<ListItem
@@ -85,6 +89,11 @@ const ProductsList: FC<ProductsListProps> = ({
 				>
 					<ListItemText primary={product.name} className="first-field" />
 					<ListItemText primary={`in stock: ${product.quantity}`} />
+					<ListItemSecondaryAction onClick={() => {}}>
+						<IconButton edge="end" aria-label="delete">
+							<DeleteForeverOutlinedIcon />
+						</IconButton>
+					</ListItemSecondaryAction>
 				</ListItem>
 			)}
 		</GenericList>
