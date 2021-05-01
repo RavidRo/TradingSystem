@@ -1653,11 +1653,16 @@ first_owner_queue = Queue()
 second_owner_queue = Queue()
 
 
+def apply(owner_queue, messages):
+    map(owner_queue.put, messages)
+    return True
+
 def _initialize_info_notifications(username: str, password: str, connect: bool, store_name: str = None, owner_queue = None) -> tuple[str, str, str, str, str]:
     store_id = ""
     cookie = system.enter_system()
+
     if connect:
-        system.connect(cookie, lambda self, messages: map(owner_queue.put, messages))
+        system.connect(cookie, lambda self, messages: apply(owner_queue, messages))
     system.register(cookie, username, password)
     system.login(cookie, username, password)
     if store_name:
@@ -1674,8 +1679,10 @@ def test_store_owner_notification_after_purchase():
     product_id, product_name, category, price, quantity = _create_product(cookie, store_id, _generate_product_name(),"A", 5.50, 10)
     system.save_product_in_cart(new_cookie, store_id, product_id, 1)
     user_age = 25
-    system.purchase_cart(new_cookie, user_age)
-    assert not first_owner_queue.empty() and system.empty_notifications(cookie)
+    price = system.purchase_cart(new_cookie, user_age)
+    system.send_payment(cookie, "", "")
+    stam= system.empty_notifications(cookie).succeeded()
+    assert not first_owner_queue.empty() and system.empty_notifications(cookie).succeeded()
 
 
 def test_store_owner_notification_after_purchase_owner_not_connected():
@@ -1686,7 +1693,8 @@ def test_store_owner_notification_after_purchase_owner_not_connected():
     system.save_product_in_cart(new_cookie, store_id, product_id, 1)
     user_age = 25
     system.purchase_cart(new_cookie, user_age)
-    assert first_owner_queue.empty() and not system.empty_notifications(cookie)
+    system.send_payment(cookie, "", "")
+    assert first_owner_queue.empty() and not system.empty_notifications(cookie).succeeded()
 
 
 def test_store_multiple_owners_notification_after_purchase_all_connected():
@@ -1698,17 +1706,18 @@ def test_store_multiple_owners_notification_after_purchase_all_connected():
         _generate_username(), "bbb"
     )
     system.appoint_owner(cookie, store_id, new_owner_username)
-    system.connect(new_owner_cookie, lambda self, messages: map(second_owner_queue.put, messages))
+    system.connect(new_owner_cookie, lambda self, messages: apply(first_owner_queue, messages))
     new_cookie, new_username, new_password_, _, _ = _initialize_info(_generate_username(), "bbb")
     product_id, product_name, category, price, quantity = _create_product(cookie, store_id, _generate_product_name(), "A", 5.50, 10)
     system.save_product_in_cart(new_cookie, store_id, product_id, 1)
     user_age = 25
     system.purchase_cart(new_cookie, user_age)
+    system.send_payment(cookie, "", "")
     assert(
     not first_owner_queue.empty()
     and not second_owner_queue.empty()
-    and system.empty_notifications(cookie)
-    and system.empty_notifications(new_owner_cookie)
+    and system.empty_notifications(cookie).succeeded()
+    and system.empty_notifications(new_owner_cookie).succeeded()
     )
 
 
@@ -1720,17 +1729,18 @@ def test_store_multiple_owners_notification_after_purchase_one_connected():
         _generate_username(), "bbb"
     )
     system.appoint_owner(cookie, store_id, new_owner_username)
-    system.connect(new_owner_cookie, lambda self, messages: map(second_owner_queue.put, messages))
+    system.connect(new_owner_cookie, lambda self, messages: apply(second_owner_queue, messages))
     new_cookie, new_username, new_password_, _, _ = _initialize_info(_generate_username(), "bbb")
     product_id, product_name, category, price, quantity = _create_product(cookie, store_id, _generate_product_name(), "A", 5.50, 10)
     system.save_product_in_cart(new_cookie, store_id, product_id, 1)
     user_age = 25
     system.purchase_cart(new_cookie, user_age)
+    system.send_payment(cookie, "", "")
     assert(
     not first_owner_queue.empty()
-    and not second_owner_queue.empty()
-    and system.empty_notifications(cookie)
-    and system.empty_notifications(new_owner_cookie)
+    and second_owner_queue.empty()
+    and system.empty_notifications(cookie).succeeded()
+    and system.empty_notifications(new_owner_cookie).succeeded()
     )
 
 
@@ -1744,9 +1754,10 @@ def test_connect_after_notification_sent():
     system.save_product_in_cart(new_cookie, store_id, product_id, 1)
     user_age = 25
     system.purchase_cart(new_cookie, user_age)
+    system.send_payment(cookie, "", "")
     first_queue_before_connect_empty = first_owner_queue.empty()
     pending_before_connect_empty = system.empty_notifications(cookie)
-    system.connect(cookie, lambda self, messages: map(first_owner_queue.put, messages))
+    system.connect(cookie, lambda self, messages: apply(first_owner_queue, messages))
     assert (
         first_queue_before_connect_empty
         and not pending_before_connect_empty
@@ -1781,7 +1792,7 @@ def test_connect_after_get_notification():
     system.remove_appointment(cookie, store_id, new_username)
     first_queue_before_connect_empty = first_owner_queue.empty()
     pending_before_connect_empty = system.empty_notifications(cookie)
-    system.connect(new_cookie, lambda self, messages: map(first_owner_queue.put, messages))
+    system.connect(new_cookie, lambda self, messages: apply(first_owner_queue, messages))
     assert (
             first_queue_before_connect_empty
             and not pending_before_connect_empty
@@ -1796,15 +1807,15 @@ def test_connect_after_get_notification():
 
 #region 4.2  purchase tests
 
-def test_add_simple_rule_success():
-    cookie, username, password, store_name, store_id = _initialize_info(_generate_username(), "aaa",
-                                                                        _generate_store_name())
-    parent_id = '1'
-    response_add = system.add_purchase_rule(cookie, store_id, _simple_rule_details_age(), 'simple', parent_id)
-    store_rules = system.get_purchase_policy(cookie, store_id)
-    added_rule = store_rules['children'][0]
-    del added_rule['id']
-    assert response_add.succeeded() and added_rule == _simple_rule_details_age()
+# def test_add_simple_rule_success():
+#     cookie, username, password, store_name, store_id = _initialize_info(_generate_username(), "aaa",
+#                                                                         _generate_store_name())
+#     parent_id = '1'
+#     response_add = system.add_purchase_rule(cookie, store_id, _simple_rule_details_age(), 'simple', parent_id)
+#     store_rules = system.get_purchase_policy(cookie, store_id)
+#     added_rule = store_rules['children'][0]
+#     del added_rule['id']
+#     assert response_add.succeeded() and added_rule == _simple_rule_details_age()
 
 
 # def test_add_complex_rule_success():

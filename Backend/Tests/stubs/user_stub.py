@@ -81,7 +81,7 @@ class UserStub(IUser):
         self._change_product_quantity_in_cart = True
         return Response(True)
 
-    def purchase_cart(self) -> Response[PrimitiveParsable[float]]:
+    def purchase_cart(self, age: int) -> Response[PrimitiveParsable[float]]:
         self._purchase_cart = True
         return Response(True)
 

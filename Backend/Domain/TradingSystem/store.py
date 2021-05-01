@@ -274,8 +274,8 @@ class Store(Parsable):
             self._products_to_quantities[product_id] = (prod, current_quantity + quantity)
 
     # this will be added in the future - maybe I will apply Default Policy for now
-    def check_purchase_types(self, products_info, user_info) -> Response[None]:
-        return Response(True, msg="all purchase types arew available")
+    def check_purchase(self, products_to_quantities: dict, user_age: int) -> Response[None]:
+        return self.__purchase_policy.checkPolicy(products_to_quantities, user_age)
 
     def apply_discounts(self, product_to_quantity: dict):
         return self.__discount_policy.applyDiscount(

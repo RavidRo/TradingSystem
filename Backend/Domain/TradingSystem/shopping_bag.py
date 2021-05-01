@@ -98,8 +98,7 @@ class ShoppingBag(IShoppingBag):
 
         """second step - check if the purchase_types are appropriate"""
         # since there are no purchase types for now- this checking isn't relevant
-        if products_info:
-            self.purchase_types_checks(user_age, products_info)
+        self.purchase_types_checks(user_age, self._products_to_quantity)
 
         """third step - check and apply the discount """
         self.discount_apply()

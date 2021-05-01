@@ -99,3 +99,23 @@ class Guest(UserState):
 
     def is_appointed(self, store_id):
         return Response(False, msg="Can't appoint guests to stores")
+
+    # 4.2
+    def add_purchase_rule(self, store_id: str, rule_details: dict, rule_type: str, parent_id: str, clause: str = None):
+        return Response(False, msg="Guests cannot add purchase rules")
+
+    # 4.2
+    def remove_purchase_rule(self, store_id: str, rule_id: str):
+        return Response(False, msg="Guests cannot remove purchase rules")
+
+    # 4.2
+    def edit_purchase_rule(self, store_id: str, rule_details: dict, rule_id: str, rule_type: str):
+        return Response(False, msg="Guests cannot edit purchase rules")
+
+    # 4.2
+    def move_purchase_rule(self, store_id: str, rule_id: str, new_parent_id: str):
+        return Response(False, msg="Guests cannot move purchase rule")
+
+    # 4.2
+    def get_purchase_policy(self, store_id):
+        return self.__responsibilities[store_id].get_purchase_policy()

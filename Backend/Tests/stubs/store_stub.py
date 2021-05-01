@@ -14,6 +14,7 @@ class StoreStub(Store):
         self.product_quantity_changed = False
         self.product_details_changed = False
         self._products_to_quantities: dict = products
+        self.__purchase_policy = None
 
     # 4.1
     # Creating a new product a the store

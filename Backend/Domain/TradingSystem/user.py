@@ -62,7 +62,7 @@ class User(IUser):
 
     # 2.9
     def purchase_cart(self, user_age: int) -> Response[PrimitiveParsable[float]]:
-        return self.state.buy_cart(self, user_age)
+        return self.state.buy_cart(user_age)
 
     # 2.9
     def purchase_completed(self) -> Response[None]:

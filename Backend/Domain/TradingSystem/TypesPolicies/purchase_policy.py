@@ -72,7 +72,7 @@ class DefaultPurchasePolicy(PurchasePolicy):
         if 'obj' not in context_dict:
             return Response(False, msg="Missing object in details!")
 
-        object = context_dict['object']
+        object = context_dict['obj']
         if object not in objects:
             return Response(False, msg=f"Invalid object {object} in details!")
 
@@ -84,7 +84,7 @@ class DefaultPurchasePolicy(PurchasePolicy):
         return Response(True, msg="No missing keys")
 
     def check_complex_rule_details_validity(self, rule_details: dict) -> Response[None]:
-        if 'type' not in rule_details.keys():
+        if 'operator' not in rule_details.keys():
             return Response(False, msg="Missing type in details!")
         return Response(True, msg="No missing keys")
 

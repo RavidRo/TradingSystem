@@ -61,7 +61,7 @@ def products_to_quantities():
 
 # region add_purchase_rule tests
 def test_add_simple_purchase_rule_success(store: Store):
-    rule_details = {'context': {'obj': 'age'},
+    rule_details = {'context': {'obj': 'user'},
                     'operator': 'great-equals',
                     'target': 18}
     rule_type = 'simple'
