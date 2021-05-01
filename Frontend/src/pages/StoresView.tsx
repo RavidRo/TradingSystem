@@ -21,20 +21,25 @@ const StoresView: FC<StoresViewProps> = ({propsAddProduct,location}: StoresViewP
     const [stores,setStores] = useState<string[]>([]);
 
     const [store, setStore] = useState<string>(location.state!==undefined?location.state.storeID:"");
-    const {request:reqProd, data:dataProd} = useAPI<Product[]>('/get_products_of_store',{storeID:store});
+    const productsObj = useAPI<Product[]>('/get_products_by_store',{storeID:store});
     useEffect(()=>{
-        reqProd().then(()=>setProducts(dataProd as Product[]));
+        productsObj.request().then(({data,error,errorMsg})=>{
+            if(!productsObj.error && productsObj.data!==null){
+                setProducts(productsObj.data);
+            }
+            
+        })
     },[store]);
 
-    const {request:reqStores, data:dataStores} = useAPI<string[]>('/get_stores');
-        useEffect(()=>{
-            setStores(['shein','amazon']);
-            // TODO: get out of comment
-            // reqStores().then(()=>setStores(dataStores as string[]));
-        },[]);
-   
-   
-   
+    const storesObj = useAPI<string[]>('/get_stores_details');
+    useEffect(()=>{
+        storesObj.request().then(({data,error,errorMsg})=>{
+            if(!storesObj.error && storesObj.data!==null){
+                setStores(storesObj.data);
+            }
+            
+        })
+    },[]);
 
    const handleChange = (e:any)=>{
       setStore(e.target.value);

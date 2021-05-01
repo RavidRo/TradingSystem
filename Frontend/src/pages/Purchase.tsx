@@ -13,9 +13,14 @@ const Purchase: FC<PurchaseProps> = ({location}) => {
 	const [totalAmount,setTotal] = useState<number>(location.state!==undefined?location.state.totalAmount:0);
     const [ready,setReady] = useState<boolean>(false);
 
-    const {request, data} = useAPI<number>('/purchase_cart');
+    const purchaseObj = useAPI<number>('/purchase_cart');
     useEffect(()=>{
-        request().then(()=>alert(data));
+        purchaseObj.request().then(({data,error,errorMsg})=>{
+            if(!purchaseObj.error && purchaseObj.data!==null){
+                alert(data);
+            }
+            
+        })
     },[ready]);
     
     const handlePurchase = ()=>{

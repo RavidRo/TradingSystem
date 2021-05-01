@@ -4,22 +4,23 @@ import Bag from '../components/Bag';
 import { Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, TextField } from '@material-ui/core';
 import { Link } from 'react-router-dom';
 import storesProductsMap from '../components/storesProductsMap';
-import {Product} from '../types';
+import {Product,ProductQuantity} from '../types';
 import useAPI from '../hooks/useAPI';
 
 type CartProps = {
-	products:Product[],
+	products:ProductQuantity[],
+    handleDeleteProduct:(product:Product|null)=>void,
 
 };
 
-const Cart: FC<CartProps> = ({products}) => {
-	const [productsInCart,setProducts] = useState<Product[]>(products);
+const Cart: FC<CartProps> = ({products,handleDeleteProduct}) => {
+	const [productsInCart,setProducts] = useState<ProductQuantity[]>(products);
     const [open,setOpen] = useState<boolean>(false);
     const [age,setAge] = useState<number>(0);
     const [showPurchaseLink,setLink] = useState<boolean>(false);
 
     const calculateTotal = ()=>{
-		const reducer = (accumulator:number, currentValue:Product) => accumulator + (currentValue.price*currentValue.quantity);
+		const reducer = (accumulator:number, currentValue:ProductQuantity) => accumulator + (currentValue.price*currentValue.quantity);
         return productsInCart.reduce(reducer,0);
 	}
     const [totalAmount,setTotalAmount] = useState<number>(calculateTotal());
@@ -81,10 +82,27 @@ const Cart: FC<CartProps> = ({products}) => {
     },[products]);
 	const [bags,setBags] = useState<any[]>(setProductsInBags());
 
-	const handleDeleteProduct = (id:string)=>{
+    const getProduct = (id:string)=>{
+        for(var i=0;i<productsInCart.length;i++){
+            if(productsInCart[i].id===id){
+                return {
+                    id:id,
+                    name:productsInCart[i].name,
+                    price:productsInCart[i].price,
+                    category:productsInCart[i].category,
+                    keywords:productsInCart[i].keywords
+                }
+            }
+        }
+        return null;
+    }
+
+	const handleDeleteProductMy = (id:string)=>{
 		setProducts(productsInCart.filter((product) => product.id !== id));
         setTotalAmount(calculateTotal());
+        handleDeleteProduct(getProduct(id));
 	}
+    const productUpdateObj = useAPI<Product[]>('/change_product_quantity_in_cart',{},'POST');
     const changeQuantity = (id: string, newQuantity: number)=>{
         productsInCart.forEach((product) => {
 			if (product.id === id) {
@@ -92,10 +110,21 @@ const Cart: FC<CartProps> = ({products}) => {
 			}
 		});
         setTotalAmount(calculateTotal());
+        productUpdateObj.request({store_id:findBagByProductID(id),product_id:id,quantity:newQuantity}).then(({data,error,errorMsg})=>{
+            if(!productUpdateObj.error && productUpdateObj.data!==null){
+                // do nothing
+                void(0);
+            }
+        })
     }
-    const {request, data} = useAPI<number>('/get_discount',{age:age});
+    const discountObj = useAPI<number>('/get_discount',{age:age});
     useEffect(()=>{
-        request().then(()=>setTotalAmount(data as number));
+        discountObj.request().then(({data,error,errorMsg})=>{
+            if(!discountObj.error && discountObj.data!==null){
+                setTotalAmount(discountObj.data);
+            }
+            
+        })
     },[showPurchaseLink]);
     
     const handleOK = ()=>{
@@ -118,7 +147,7 @@ const Cart: FC<CartProps> = ({products}) => {
                 key={index}
                 storeName={storeName}
                 products={bag[storeName]}
-                propHandleDelete={handleDeleteProduct}
+                propHandleDelete={handleDeleteProductMy}
                 changeQuantity={changeQuantity}
                 />)
                     

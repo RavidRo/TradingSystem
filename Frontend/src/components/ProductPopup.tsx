@@ -2,7 +2,7 @@
 import { TableCell, TableRow } from '@material-ui/core';
 import React ,{FC, useState} from 'react';
 import '../styles/ProductPopup.scss';
-import {Product} from '../types';
+import {Product,ProductQuantity} from '../types';
 
 type ProductPopupProps = {
     id:string,
@@ -11,7 +11,7 @@ type ProductPopupProps = {
     quantity: number,
     keywords:string[],
     category:string,
-    propHandleDelete:(product:Product)=>void,
+    propHandleDelete:(product:ProductQuantity)=>void,
    
 };
 const PopupCart: FC<ProductPopupProps> = ({id,name,price,quantity,keywords,category,propHandleDelete}: ProductPopupProps) => {

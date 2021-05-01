@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { BrowserRouter, Switch, Route, Redirect } from 'react-router-dom';
 import { createMuiTheme, ThemeProvider } from '@material-ui/core';
 
@@ -11,7 +11,7 @@ import MyStores from './MyStores';
 import SearchPage from './SearchPage';
 import StoresView from '../pages/StoresView';
 import Purchase from '../pages/Purchase';
-import {Product} from '../types';
+import {Product,ProductQuantity} from '../types';
 import useAPI from '../hooks/useAPI';
 import { CookieContext } from '../contexts';
 
@@ -41,13 +41,41 @@ function App() {
 	const [signedIn, setSignedIn] = useState<boolean>(false);
 	const { request } = useAPI<{ cookie: string }>('/get_cookie');
 	const [cookie, setCookie] = useState<string>('');
-    const [productsInCart,setProducts] = useState<Product[]>([]);
+    const [productsInCart,setProducts] = useState<ProductQuantity[]>([]);
+
+	type storesToProductsMapType = {
+		[key:string]:Product[]
+	}
+	
+	const storesToProducts = useRef<storesToProductsMapType>({});
+	const storesProducts = useAPI<storesToProductsMapType>('/get_stores_details');
+    useEffect(()=>{
+        storesProducts.request().then(({data,error,errorMsg})=>{
+            if(!storesProducts.error && storesProducts.data!==null){
+                storesToProducts.current = storesProducts.data;
+            }
+        })
+    },[]);
+
+	const getStoreByProductID = (id:string)=>{
+		for(var i=0;i<Object.keys(storesToProducts).length;i++){
+			for(var j=0;j<Object.values(storesToProducts)[i].length;j++){
+				if(Object.values(storesToProducts)[i][j].id === id){
+					return Object.keys(storesToProducts)[i];
+				}
+			}
+		}
+	}
+	const productObj = useAPI<Product[]>('/save_product_in_cart',{},'POST');
+	const productUpdateObj = useAPI<Product[]>('/change_product_quantity_in_cart',{},'POST');
 
 	const addProductToPopup = (product:Product)=>{
 		let found  = false;
+		let quantity = 1;
 		for(var i=0;i<Object.values(productsInCart).length;i++){
 			if(Object.values(productsInCart)[i].id === (product.id)){
 				Object.values(productsInCart)[i].quantity+=1;
+				quantity = productsInCart[i].quantity + 1;
 				found = true;
 			}
 		}
@@ -61,10 +89,43 @@ function App() {
 				keywords:product.keywords
 			};
 			setProducts(oldArray => [...oldArray, newProduct]);
+			productObj.request({store_id:getStoreByProductID(product.id),product_id:product.id,quantity:quantity}).then(({data,error,errorMsg})=>{
+				if(!productObj.error && productObj.data!==null){
+					// do nothing
+					void(0);
+				}
+			})
+		}
+		else{
+			productUpdateObj.request({store_id:getStoreByProductID(product.id),product_id:product.id,quantity:quantity}).then(({data,error,errorMsg})=>{
+				if(!productUpdateObj.error && productUpdateObj.data!==null){
+					// do nothing
+					void(0);
+				}
+			})
+		}
+		
+		
+	}
+	const getQuantityOfProduct = (productID:string)=>{
+		for(var i=0; i<productsInCart.length;i++){
+			if(productsInCart[i].id=== productID){
+				return productsInCart[i].quantity;
+			}
 		}
 	}
-	const handleDeleteProduct = (product:Product)=>{
-		setProducts(Object.values(productsInCart).filter(item => item.id !== product.id));
+
+	const productRemoveObj = useAPI<Product[]>('/remove_product_from_cart',{},'POST');
+	const handleDeleteProduct = (product:Product|null)=>{
+		if(product!==null){
+			productRemoveObj.request({product_id:product.id,quantity:getQuantityOfProduct(product.id)}).then(({data,error,errorMsg})=>{
+				if(!productRemoveObj.error && productRemoveObj.data!==null){
+					// do nothing
+					void(0);
+				}
+			})
+			setProducts(Object.values(productsInCart).filter(item => item.id !== product.id));
+		}
 	}
 
 	useEffect(() => {
@@ -86,7 +147,7 @@ function App() {
 							path="/cart" 
 							exact 
 							render={(props) => (
-								<Cart {...props} products={productsInCart} />
+								<Cart {...props} products={productsInCart} handleDeleteProduct={handleDeleteProduct}/>
 							)}
 						/>
 						<Route path="/sign-in" exact>

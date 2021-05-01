@@ -20,6 +20,7 @@ type storesToProductsMapType = {
 const SearchPage: FC<SearchPageProps> = ({location,propsAddProduct}) => {
     const [searchProduct, setSearchProduct] = useState<string>(location.state.product);
     const [category, setCategory] = useState<string>("");
+    const [keyWords, setKeyWards] = useState<string[]>([]);
 
     const categories = ['news','clothes','food','shows','makeUp','photos'];
     const [fromInput, setFromInput] = useState<number>(0);
@@ -30,14 +31,26 @@ const SearchPage: FC<SearchPageProps> = ({location,propsAddProduct}) => {
     const storesToProductsMap = useRef<storesToProductsMapType>({});
     const [productsToPresent,setProducts] = useState<Product[]>([]);
 
-    const {request:reqProd, data:dataProd} = useAPI<Product[]>('/search_product',{searchProduct:searchProduct,category:category,from:fromInput,to:toInput});
+    // TODO: find out exactly what is returning from server
+    // and parse it correctly
+    const productObj = useAPI<Product[]>('/search_products',{product_name:searchProduct,category:category,min_price:fromInput,max_price:toInput,kwargs:keyWords});
     useEffect(()=>{
-        reqProd().then(()=>setProducts(dataProd as Product[]));
+        productObj.request().then(({data,error,errorMsg})=>{
+            if(!productObj.error && productObj.data!==null){
+                setProducts(productObj.data);
+            }
+        })
     },[searchProduct,category,fromInput,toInput]);
-    const {request:storesProdReq, data:storesProdData} = useAPI<storesToProductsMapType>('/search_product',{searchProduct:searchProduct,category:category,from:fromInput,to:toInput});
+    
+    
+    const storesProductsObj = useAPI<storesToProductsMapType>('/search_product',{searchProduct:searchProduct,category:category,from:fromInput,to:toInput});
     useEffect(()=>{
-        storesProdReq().then(()=>storesToProductsMap.current = storesProdData as storesToProductsMapType);
-    },[]);
+        storesProductsObj.request().then(({data,error,errorMsg})=>{
+            if(!storesProductsObj.error && storesProductsObj.data!==null){
+                storesToProductsMap.current = storesProductsObj.data;
+            }
+        })
+    },[searchProduct,category,fromInput,toInput]);
 
     // let products:Product[] = [];
     // // TODO: get from server all products with 'searchProduct' name
@@ -63,7 +76,9 @@ const SearchPage: FC<SearchPageProps> = ({location,propsAddProduct}) => {
     const clickAddProduct = (key:number)=>{
         propsAddProduct(productsToPresent[key]);
     }
-      
+    const updateKeyWords = (keyWords:string[])=>{
+        setKeyWards(keyWords);
+    }
     let matrix_length = 3;
     const setProductsInMatrix = ()=>{
         var matrix = [];
@@ -96,7 +111,7 @@ const SearchPage: FC<SearchPageProps> = ({location,propsAddProduct}) => {
                 categories={categories}
                 handleSearch={handleSearch}
             />
-            <Keywards></Keywards>
+            <Keywards updateKeyWords={updateKeyWords}></Keywards>
             
             <div className="mainArea">
                 <div className="filterArea">

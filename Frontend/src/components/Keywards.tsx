@@ -3,16 +3,21 @@ import React ,{FC, useState} from 'react';
 import '../styles/Keywards.scss';
 
 type Keywordsprops = {
-  
+    updateKeyWords:(keywords:string[])=>void,
 };
 
-const Keywards: FC<Keywordsprops> = () => {
+const Keywards: FC<Keywordsprops> = ({updateKeyWords}) => {
 
     const [keyWords, setKeyWards] = useState<string[]>([]);
     const [currentKey, setCurrentKey] = useState<string>("");
 
     const handleDelete = (key:number)=>{
         setKeyWards(keyWords.filter((word)=>word!==keyWords[key]));
+        updateKeyWords(keyWords);
+    }
+    const handleAddWord = ()=>{
+        setKeyWards(old=>[...old,currentKey]);
+        updateKeyWords(keyWords);
     }
     return (
 		
@@ -25,7 +30,7 @@ const Keywards: FC<Keywordsprops> = () => {
                 onChange={(e) => setCurrentKey(e.target.value)}
             />
 
-            <button className="keyBtn" onClick={()=>setKeyWards(old=>[...old,currentKey])}>Add</button>
+            <button className="keyBtn" onClick={()=>handleAddWord()}>Add</button>
                 <div className="wardsDiv">
                     {keyWords.map((word) => {
                         return (

@@ -5,11 +5,11 @@ import CartProduct from '../components/CartProduct';
 import PurchaseIcon from '@material-ui/icons/LocalMall';
 import { Link } from 'react-router-dom';
 import '../styles/Bag.scss';
-import {Product} from '../types';
+import {Product,ProductQuantity} from '../types';
 
 type BagProps = {
     storeName:string,
-    products:Product[],
+    products:ProductQuantity[],
     propHandleDelete:(id:string)=>void,
 	changeQuantity:(id: string, newQuantity: number)=>void,
    
@@ -17,14 +17,14 @@ type BagProps = {
 
 const Bag: FC<BagProps> = ({storeName,products,propHandleDelete,changeQuantity}:BagProps) => {
 
-    const [productsInCart,setProducts] = useState<Product[]>(products);
+    const [productsInCart,setProducts] = useState<ProductQuantity[]>(products);
 
     useEffect(()=>{
         setProducts(products);
     },[products]);
 
 	const calculateTotal = ()=>{
-		const reducer = (accumulator:number, currentValue:Product) => accumulator + (currentValue.price*currentValue.quantity);
+		const reducer = (accumulator:number, currentValue:ProductQuantity) => accumulator + (currentValue.price*currentValue.quantity);
 		return productsInCart.reduce(reducer,0);
 	}
 	const [total,setTotal] = useState<number>(calculateTotal());
