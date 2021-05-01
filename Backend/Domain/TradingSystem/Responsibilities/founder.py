@@ -1,4 +1,5 @@
 from Backend.Domain.TradingSystem.Responsibilities.responsibility import Permission, Responsibility
+
 # from Backend.Domain.TradingSystem.Interfaces.IUser import IUser
 from Backend.Domain.TradingSystem.purchase_details import PurchaseDetails
 from Backend.Domain.TradingSystem.user import User
@@ -6,9 +7,10 @@ from Backend.response import Response, ParsableList, PrimitiveParsable
 
 
 class Founder(Responsibility):
-    def __init__(self, user_state, store, subscriber) -> None:
+    def __init__(self, user_state, store, subscriber=None) -> None:
         super().__init__(user_state, store, subscriber)
-        self._store.subscribe(subscriber)
+        if subscriber != None:
+            self._store.subscribe(subscriber)
 
     # 4.1
     # Creating a new product a the store
@@ -24,7 +26,9 @@ class Founder(Responsibility):
         return self._store.change_product_quantity(product_id, quantity)
 
     # 4.1
-    def edit_product_details(self, product_id: str, new_name: str, new_category: str, new_price: float) -> Response[None]:
+    def edit_product_details(
+        self, product_id: str, new_name: str, new_category: str, new_price: float
+    ) -> Response[None]:
         return self._store.edit_product_details(product_id, new_name, new_category, new_price)
 
     # 4.3

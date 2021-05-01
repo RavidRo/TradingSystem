@@ -3,13 +3,14 @@ from Backend.response import Response, ParsableList, PrimitiveParsable
 
 from Backend.Domain.TradingSystem.Responsibilities.responsibility import Permission, Responsibility
 from Backend.Domain.TradingSystem.Responsibilities.owner import Owner
+
 # from Backend.Domain.TradingSystem.States.member import Member
 from Backend.Domain.TradingSystem.Interfaces.IUser import IUser
 from Backend.Domain.TradingSystem.purchase_details import PurchaseDetails
 
 
 class Manager(Owner):
-    def __init__(self, user_state, store, subscriber) -> None:
+    def __init__(self, user_state, store, subscriber=None) -> None:
         super().__init__(user_state, store, subscriber)
         self.__permissions = {
             Permission.MANAGE_PRODUCTS: False,
@@ -48,7 +49,9 @@ class Manager(Owner):
         return self.__create_no_permission_Response(Permission.MANAGE_PRODUCTS)
 
     # 4.1
-    def edit_product_details(self, product_id: str, new_name: str, new_category: str, new_price: float) -> Response[None]:
+    def edit_product_details(
+        self, product_id: str, new_name: str, new_category: str, new_price: float
+    ) -> Response[None]:
         if self.__permissions[Permission.MANAGE_PRODUCTS]:
             return super().edit_product_details(product_id, new_name, new_category, new_price)
 
