@@ -1,19 +1,12 @@
-import React, { FC, useEffect } from 'react';
+import React, { FC } from 'react';
 
 import home from '../images/home.jpeg';
 import SearchBar from '../components/SearchBar';
 import '../styles/Home.scss';
-import useAPI from '../hooks/useAPI';
 
 type HomeProps = {};
 
 const Home: FC<HomeProps> = () => {
-	const { request: getCookie, data: cookie } = useAPI('/cookie');
-	useEffect(() => {
-		getCookie();
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, []);
-
 	return (
 		<div className="App">
 			<SearchBar />

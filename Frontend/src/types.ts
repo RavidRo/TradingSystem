@@ -2,11 +2,12 @@ export type Product = {
 	id: string;
 	name: string;
 	price: number;
-	quantity: number;
 	category: string;
 	keywords: string[];
 };
-export type Store = { id: string; name: string; role: string };
+export type ProductQuantity = Product & { quantity: number };
+
+export type Store = { id: string; name: string; ids_to_quantities: { [key: string]: number } };
 export type Permission =
 	| 'manage_products'
 	| 'get_appointments'
@@ -14,13 +15,23 @@ export type Permission =
 	| 'remove_manager'
 	| 'get_history';
 
+export const defaultPermissions = {
+	manage_products: false,
+	get_appointments: true,
+	appoint_manager: false,
+	remove_manager: false,
+	get_history: false,
+};
+
 export type Role = 'Founder' | 'Owner' | 'Manager';
 export type Appointee = {
-	id: string;
-	name: string;
+	store_id: string;
+	store_name: string;
+	username: string;
 	role: Role;
-	children: Appointee[];
-	permissions?: { [key in Permission]: boolean };
+	appointees: Appointee[];
+	permissions: { [key in Permission]: boolean };
+	isManager: boolean;
 };
 
 // * Condition
@@ -46,8 +57,8 @@ type BasicOperator = 'and' | 'or';
 
 export type ComplexOperator = ConditioningOperator | BasicOperator;
 
-type Conditioning = { operator: ConditioningOperator; test?: Condition; then?: Condition };
-type BasicRule = { operator: BasicOperator; operands: Condition[] };
+export type Conditioning = { operator: ConditioningOperator; test?: Condition; then?: Condition };
+export type BasicRule = { operator: BasicOperator; operands: Condition[] };
 
 export type ConditionComplex = Conditioning | BasicRule;
 

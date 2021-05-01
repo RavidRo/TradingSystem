@@ -2,6 +2,7 @@
 class IUserState:
     use_mock = False
 
+    @staticmethod
     def create_guest(user):
         from Backend.Tests.stubs.member_stub import MemberStub
         from Backend.Domain.TradingSystem.States.guest import Guest

@@ -1,6 +1,7 @@
 import uuid
 
-from Backend.response import Response, ParsableList, PrimitiveParsable
+from Backend.Domain.Notifications.Publisher import Publisher
+from Backend.response import PrimitiveParsable, Response, ParsableList
 from Backend.Domain.TradingSystem.product import Product
 from Backend.Service.DataObjects.store_data import StoreData
 from Backend.rw_lock import ReadWriteLock
@@ -25,6 +26,7 @@ class Store:
         self.__purchase_history = []
         self._products_lock = ReadWriteLock()
         self.__history_lock = ReadWriteLock()
+        self.__publisher: Publisher = Publisher()
 
     def parse(self):
         id_to_quantity = {}
@@ -39,6 +41,9 @@ class Store:
                 (product.get_id(), product.get_name(), product.get_price(), quantity)
             )
         return parsed_products
+
+    def subscribe(self, subscriber):
+        self.__publisher.subscribe(subscriber)
 
     def get_products(self) -> Response[ParsableList[Product]]:
         self._products_lock.acquire_read()
@@ -73,8 +78,11 @@ class Store:
        3. price >= 0
        4. a product with product_name exists"""
 
-    def add_product(self, product_name: str, category: str, price: float, quantity: int) -> Response[str]:
+    def add_product(
+        self, product_name: str, category: str, price: float, quantity: int
+    ) -> Response[str]:
         from Backend.Domain.TradingSystem.product import Product
+
         self._products_lock.acquire_write()
         if not product_name:
             self._products_lock.release_write()
@@ -112,20 +120,28 @@ class Store:
                 False, msg="The product " + product_id + "is already not in the inventory!"
             )
         self._products_lock.release_write()
-        return Response(True, obj=PrimitiveParsable(result[1]), msg="Successfully removed product with product id: " + str(product_id))
+        return Response(
+            True,
+            obj=PrimitiveParsable(result[1]),
+            msg="Successfully removed product with product id: " + str(product_id),
+        )
 
     """checks need to be made:
        ----------------------
        1. price > 0
        2. a product with product_id exists"""
 
-    def edit_product_details(self, product_id: str, product_name: str, category: str, price: float) -> Response[None]:
+    def edit_product_details(
+        self, product_id: str, product_name: str, category: str, price: float
+    ) -> Response[None]:
         self._products_lock.acquire_write()
         if product_id not in self._products_to_quantities:
             self._products_lock.release_write()
             return Response(False, msg="No such product in the store")
 
-        response = self._products_to_quantities[product_id][0].edit_product_details(product_name, category, price)
+        response = self._products_to_quantities[product_id][0].edit_product_details(
+            product_name, category, price
+        )
         self._products_lock.release_write()
         return response
 
@@ -165,6 +181,8 @@ class Store:
         self.__history_lock.acquire_write()
         self.__purchase_history.append(purchase_details)
         self.__history_lock.release_write()
+        message = "A purchase has been made:\n" + str(purchase_details.__dict__)
+        self.__publisher.notify_all(message)
 
     @staticmethod
     def id_generator() -> str:
@@ -194,7 +212,10 @@ class Store:
             if self._products_to_quantities.get(prod_id) is None:
                 self._products_to_quantities.update({prod_id: (product, quantity)})
             else:
-                self._products_to_quantities[prod_id] = (self._products_to_quantities[prod_id][0], self._products_to_quantities[prod_id][1] + quantity)
+                self._products_to_quantities[prod_id] = (
+                    self._products_to_quantities[prod_id][0],
+                    self._products_to_quantities[prod_id][1] + quantity,
+                )
         self._products_lock.release_write()
 
     # This function checks for available products
@@ -206,12 +227,18 @@ class Store:
             if prod_to_current_quantity is None:
                 self.__restore_products(acquired_product_ids_to_quantities)
                 self._products_lock.release_write()
-                return Response(False, msg=f"The product with id: {prod_id} doesn't exist in the inventory of the store")
+                return Response(
+                    False,
+                    msg=f"The product with id: {prod_id} doesn't exist in the inventory of the store",
+                )
 
             elif prod_to_current_quantity[1] < quantity:
                 self.__restore_products(acquired_product_ids_to_quantities)
                 self._products_lock.release_write()
-                return Response(False, msg=f"The store has less than {quantity} of product with id: {prod_id} left")
+                return Response(
+                    False,
+                    msg=f"The store has less than {quantity} of product with id: {prod_id} left",
+                )
 
             current_quantity = self._products_to_quantities.get(prod_id)[1]
             if current_quantity == quantity:
@@ -228,16 +255,16 @@ class Store:
     def __restore_products(self, acquires_product_ids_to_quantities: dict):
         for product_id, quantity in acquires_product_ids_to_quantities.items():
             prod, current_quantity = self._products_to_quantities.get(product_id)
-            self._products_to_quantities[product_id] = (prod, current_quantity  + quantity)
-
+            self._products_to_quantities[product_id] = (prod, current_quantity + quantity)
 
     # this will be added in the future - maybe I will apply Default Policy for now
     def check_purchase_types(self, products_info, user_info) -> Response[None]:
         return Response(True, msg="all purchase types arew available")
 
     def apply_discounts(self, user_info, product_to_quantity: dict):
-        return self.__discount_policy.applyDiscount(store=self,
-                                                    products_to_quantities=product_to_quantity)
+        return self.__discount_policy.applyDiscount(
+            store=self, products_to_quantities=product_to_quantity
+        )
 
     def get_product(self, product_id: str):
         self._products_lock.acquire_read()
@@ -245,7 +272,10 @@ class Store:
         self._products_lock.release_read()
         return prod
 
-    def product_exists(self, product_id,):
+    def product_exists(
+        self,
+        product_id,
+    ):
         self._products_lock.acquire_read()
         product_quantity = self._products_to_quantities.get(product_id)
         if product_quantity is None:

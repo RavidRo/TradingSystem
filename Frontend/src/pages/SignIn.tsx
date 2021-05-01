@@ -3,17 +3,16 @@ import Avatar from '@material-ui/core/Avatar';
 import Button from '@material-ui/core/Button';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import TextField from '@material-ui/core/TextField';
-import FormControlLabel from '@material-ui/core/FormControlLabel';
-import Checkbox from '@material-ui/core/Checkbox';
 import Grid from '@material-ui/core/Grid';
 import Box from '@material-ui/core/Box';
 import LockOutlinedIcon from '@material-ui/icons/LockOutlined';
 import Typography from '@material-ui/core/Typography';
 import { makeStyles } from '@material-ui/core/styles';
 import Container from '@material-ui/core/Container';
-import { Link } from 'react-router-dom';
+import { Link, useHistory } from 'react-router-dom';
 
 import Copyright from '../components/Copyright';
+import useAPI from '../hooks/useAPI';
 
 const useStyles = makeStyles((theme) => ({
 	paper: {
@@ -35,14 +34,27 @@ const useStyles = makeStyles((theme) => ({
 	},
 }));
 
-const SignIn: FC<{ onSignIn: () => void }> = ({ onSignIn }) => {
-	const classes = useStyles();
+type SignInProps = { onSignIn: () => void };
 
-	const [username, setUsername] = useState('');
-	const [password, setPassword] = useState('');
+const SignIn: FC<SignInProps> = ({ onSignIn }) => {
+	const classes = useStyles();
+	const history = useHistory();
+	const signUp = useAPI<{ cookie: string; answer: string; succeeded: boolean }>(
+		'/login',
+		{},
+		'POST'
+	);
+
+	const [username, setUsername] = useState<string>('');
+	const [password, setPassword] = useState<string>('');
 
 	const handleSubmit = (event: any) => {
-		onSignIn();
+		signUp.request({ username, password }, (data, error) => {
+			if (!error && data !== null && data.succeeded) {
+				onSignIn();
+				history.push('/');
+			}
+		});
 		event.preventDefault();
 	};
 
@@ -62,11 +74,12 @@ const SignIn: FC<{ onSignIn: () => void }> = ({ onSignIn }) => {
 						margin="normal"
 						required
 						fullWidth
-						id="email"
-						label="Email Address"
-						name="email"
-						autoComplete="email"
+						id="username"
+						label="Username"
+						name="username"
+						autoComplete="username"
 						autoFocus
+						onChange={(event) => setUsername(event.currentTarget.value)}
 					/>
 					<TextField
 						variant="outlined"
@@ -78,11 +91,12 @@ const SignIn: FC<{ onSignIn: () => void }> = ({ onSignIn }) => {
 						type="password"
 						id="password"
 						autoComplete="current-password"
+						onChange={(event) => setPassword(event.currentTarget.value)}
 					/>
-					<FormControlLabel
+					{/* <FormControlLabel
 						control={<Checkbox value="remember" color="primary" />}
 						label="Remember me"
-					/>
+					/> */}
 					<Button
 						type="submit"
 						fullWidth

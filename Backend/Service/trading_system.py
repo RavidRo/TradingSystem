@@ -1,11 +1,13 @@
 """ this class is responsible to communicate with the trading __system manager"""
 from __future__ import annotations
 import threading
+from typing import Callable
 
 from Backend.Domain.Payment.payment_manager import PaymentManager
 from Backend.Service.DataObjects.shopping_cart_data import ShoppingCartData
 import Backend.Service.logs as log
 from Backend.Domain.TradingSystem.trading_system_manager import TradingSystemManager
+from Backend.response import Response
 
 
 class TradingSystem(object):
@@ -33,8 +35,12 @@ class TradingSystem(object):
     def enter_system(self):
         return TradingSystemManager.enter_system()
 
+    @staticmethod
+    def connect(cookie: str, communicate: Callable[[list[str]], bool]) -> Response[None]:
+        return TradingSystemManager.connect(cookie, communicate)
+
     @log.loging(to_hide=[1, 3])
-    def register(self, cookie, username, password):
+    def register(self, cookie, username, password) -> Response[None]:
         return TradingSystemManager.register(cookie=cookie, username=username, password=password)
 
     @log.loging(to_hide=[1, 3])
@@ -194,6 +200,10 @@ class TradingSystem(object):
     @log.loging(to_hide=[1])
     def get_store_appointments(self, cookie: str, store_id: str):
         return TradingSystemManager.get_store_appointments(cookie, store_id)
+
+    @log.loging(to_hide=[1])
+    def get_my_appointees(self, cookie: str, store_id: str):
+        return TradingSystemManager.get_my_appointees(cookie, store_id)
 
     # 4.11
     @log.loging(to_hide=[1])

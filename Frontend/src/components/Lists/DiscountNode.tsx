@@ -11,7 +11,11 @@ import { ExpandLess, ExpandMore } from '@material-ui/icons';
 import { DecisionRule, Discount, isDiscountComplex, isDiscountSimple } from '../../types';
 import GenericList from './GenericList';
 
-type DiscountNodeProps = { discount: Discount; onCreate: () => void };
+type DiscountNodeProps = {
+	discount: Discount;
+	onCreate: (father_id: string) => void;
+	fatherId: string;
+};
 
 function discountToString(discount: Discount) {
 	const rule = discount.rule;
@@ -42,7 +46,7 @@ function decisionRuleToString(decisionRule: DecisionRule): string {
 	return ruleToString[decisionRule];
 }
 
-const DiscountNode: FC<DiscountNodeProps> = ({ discount, onCreate }) => {
+const DiscountNode: FC<DiscountNodeProps> = ({ discount, onCreate, fatherId }) => {
 	const [open, setOpen] = useState(false);
 	const handleClick = () => {
 		setOpen(!open);
@@ -67,7 +71,7 @@ const DiscountNode: FC<DiscountNodeProps> = ({ discount, onCreate }) => {
 				<Collapse in={open} timeout="auto">
 					<GenericList
 						data={discount.rule.operands}
-						onCreate={onCreate}
+						onCreate={() => onCreate(fatherId)}
 						createTxt="+ Add new discount"
 						padRight
 					>
@@ -76,6 +80,7 @@ const DiscountNode: FC<DiscountNodeProps> = ({ discount, onCreate }) => {
 								key={discount.id}
 								discount={discount}
 								onCreate={onCreate}
+								fatherId={discount.id}
 							/>
 						)}
 					</GenericList>

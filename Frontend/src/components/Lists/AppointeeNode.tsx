@@ -28,10 +28,10 @@ const AppointeeNode: FC<AppointeeNodeProps> = ({ appointee, isSelected, onClick 
 		<>
 			<ListItem button selected={isSelected(appointee)} onClick={() => onClick(appointee)}>
 				<ListItemText
-					primary={`${appointee.name} - ${appointee.role}`}
+					primary={`${appointee.username} - ${appointee.role}`}
 					// className="first-field"
 				/>
-				{appointee.children.length > 0 && (
+				{appointee.appointees.length > 0 && (
 					<ListItemSecondaryAction onClick={handleClick}>
 						<IconButton edge="start" aria-label="delete">
 							{open ? <ExpandLess /> : <ExpandMore />}
@@ -41,9 +41,9 @@ const AppointeeNode: FC<AppointeeNodeProps> = ({ appointee, isSelected, onClick 
 			</ListItem>
 			<Collapse in={open} timeout="auto">
 				<List component="div" disablePadding style={{ paddingLeft: '20px' }}>
-					{appointee.children.map((appointee) => (
+					{appointee.appointees.map((appointee) => (
 						<AppointeeNode
-							key={appointee.id}
+							key={appointee.username}
 							appointee={appointee}
 							isSelected={isSelected}
 							onClick={onClick}
