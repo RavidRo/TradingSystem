@@ -1,6 +1,6 @@
 from Backend.Domain.TradingSystem.Responsibilities.founder import Founder
 from Backend.Domain.TradingSystem.store import Store
-from Backend.Domain.TradingSystem.States.user_state import UserState
+# from Backend.Domain.TradingSystem.States.user_state import UserState
 from Backend.response import Response, ParsableList, PrimitiveParsable
 from Backend.Domain.TradingSystem.purchase_details import PurchaseDetails
 
@@ -70,7 +70,7 @@ class Member(UserState):
 
     def open_store(self, store_name):
         store = Store(store_name)
-        store.set_responsibility(Founder(self, store, self.user))
+        store.set_responsibility(Founder(self, store, self._user))
         return Response[Store](True, obj=store, msg="Store opened successfully")
 
     def get_purchase_history(self):

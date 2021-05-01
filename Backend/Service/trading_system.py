@@ -36,6 +36,7 @@ class TradingSystem(object):
         return TradingSystemManager.enter_system()
 
     @staticmethod
+    @log.loging(to_hide=[0])
     def connect(cookie: str, communicate: Callable[[list[str]], bool]) -> Response[None]:
         return TradingSystemManager.connect(cookie, communicate)
 

@@ -1,15 +1,16 @@
+from Backend.Domain.TradingSystem.user import User
 from Backend.response import Response, ParsableList, PrimitiveParsable
 
 from Backend.Domain.TradingSystem.Responsibilities.responsibility import Permission, Responsibility
 from Backend.Domain.TradingSystem.Responsibilities.owner import Owner
-from Backend.Domain.TradingSystem.States.member import Member
+# from Backend.Domain.TradingSystem.States.member import Member
 from Backend.Domain.TradingSystem.Interfaces.IUser import IUser
 from Backend.Domain.TradingSystem.purchase_details import PurchaseDetails
 
 
 class Manager(Owner):
-    def __init__(self, user_state: Member, store) -> None:
-        super().__init__(user_state, store, None)
+    def __init__(self, user_state, store, subscriber) -> None:
+        super().__init__(user_state, store, subscriber)
         self.__permissions = {
             Permission.MANAGE_PRODUCTS: False,
             Permission.GET_APPOINTMENTS: True,
@@ -58,7 +59,7 @@ class Manager(Owner):
         return Response(False, msg=f"Managers can't appoint owners")
 
     # 4.5
-    def appoint_manager(self, user: IUser) -> Response[None]:
+    def appoint_manager(self, user: User) -> Response[None]:
         if self.__permissions[Permission.APPOINT_MANAGER]:
             return super().appoint_manager(user)
 
