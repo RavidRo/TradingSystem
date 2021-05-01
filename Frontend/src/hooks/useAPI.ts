@@ -1,5 +1,6 @@
 import axios from 'axios';
-import { useState } from 'react';
+import { useContext, useState } from 'react';
+import { CookieContext } from '../contexts';
 
 export default function useAPI<Type>(
 	endPoint: string,
@@ -10,14 +11,18 @@ export default function useAPI<Type>(
 	const [error, setError] = useState(false);
 	const [errorMsg, setErrorMsg] = useState('');
 	const [data, setData] = useState<Type | null>(null);
+	const cookie = useContext(CookieContext);
+
+	const defaultParams = { cookie };
 
 	const request = (moreParams?: object) => {
 		const promise =
 			type === 'GET'
 				? axios.get(endPoint, {
-						params: { ...params, ...moreParams },
+						params: { ...defaultParams, ...params, ...moreParams },
 				  })
 				: axios.post(endPoint, {
+						...defaultParams,
 						...params,
 						...moreParams,
 				  });

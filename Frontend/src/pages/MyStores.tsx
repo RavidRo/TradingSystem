@@ -75,10 +75,10 @@ const MyStores: FC<MyStoresProps> = () => {
 	const [open, setOpen] = useState<boolean>(false);
 	const [Tab, setTab] = useState<FC | null>(null);
 
-	const onSelectStore = (store: Store) => {
-		if (store.id !== selectedStore) {
-			setSelectedStore(store.id);
-			setTabAnimation(() => <ManageStore store={store} />);
+	const onSelectStore = (storeId: string) => {
+		if (storeId !== selectedStore) {
+			setSelectedStore(storeId);
+			setTabAnimation(() => <ManageStore storeId={storeId} />);
 		}
 	};
 
@@ -114,11 +114,11 @@ const MyStores: FC<MyStoresProps> = () => {
 					header="My Stores"
 					createTxt="+ Create a new store"
 				>
-					{(store) => (
+					{(store: MyStore) => (
 						<ListItem
 							key={store.id}
 							button
-							onClick={() => onSelectStore(store)}
+							onClick={() => onSelectStore(store.id)}
 							selected={store.id === selectedStore}
 						>
 							<ListItemText primary={`${store.name} - ${store.role}`} />

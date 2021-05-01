@@ -101,27 +101,40 @@ import ConditionsList from './Lists/ConditionsList';
 // ];
 
 type ManageStoreProps = {
-	store: Store;
+	storeId: string;
 };
 
-const ManageStore: FC<ManageStoreProps> = ({ store }) => {
+const ManageStore: FC<ManageStoreProps> = ({ storeId }) => {
 	const [products, setProducts] = useState<ProductQuantity[]>([]);
+	const [store, setStore] = useState<Store | null>(null);
 
-	const { request: productsRequest, data: productsData, error: productsError } = useAPI<
-		Product[]
-	>('/get_products_by_store', {
-		store_id: store.id,
+	const getProductsByStore = useAPI<Product[]>('/get_products_by_store', {
+		store_id: storeId,
+	});
+
+	const getStore = useAPI<Store>('/get_store', {
+		store_id: storeId,
 	});
 
 	useEffect(() => {
-		productsRequest().then(() => {
-			if (!productsError && productsData !== null) {
+		Promise.all([getProductsByStore.request(), getStore.request()]).then(() => {
+			if (
+				!getProductsByStore.error &&
+				getProductsByStore.data !== null &&
+				!getStore.error &&
+				getStore.data !== null
+			) {
+				setStore(getStore.data);
 				setProducts(
-					productsData.map((product) => ({
+					getProductsByStore.data.map((product) => ({
 						...product,
-						quantity: store.ids_to_quantities[product.id],
+						quantity: (getStore.data as Store).ids_to_quantities[product.id],
 					}))
 				);
+			}
+		});
+		getProductsByStore.request().then(() => {
+			if (!getProductsByStore.error && getProductsByStore.data !== null) {
 			}
 		});
 	}, []);
@@ -156,27 +169,31 @@ const ManageStore: FC<ManageStoreProps> = ({ store }) => {
 	return (
 		<div className="my-store-page">
 			<div className="my-store-cont">
-				<ProductsList
-					openTab={openTab}
-					products={products}
-					selectedItem={selectedItem}
-					setProducts={setProducts}
-					store_id={store.id}
-				/>
-				<MyAppointeesList
-					onSelectAppointee={onSelectAppointee}
-					openTab={openTab}
-					selectedItem={selectedItem}
-					storeId={store.id}
-					store_name={store.name}
-				/>
-				<AppointeesList
-					onSelectAppointee={onSelectAppointee}
-					selectedItem={selectedItem}
-					store_id={store.id}
-				/>
-				<DiscountsList openTab={openTab} products={products} />
-				<ConditionsList openTab={openTab} products={products} />
+				{store && (
+					<>
+						<ProductsList
+							openTab={openTab}
+							products={products}
+							selectedItem={selectedItem}
+							setProducts={setProducts}
+							store_id={store.id}
+						/>
+						<MyAppointeesList
+							onSelectAppointee={onSelectAppointee}
+							openTab={openTab}
+							selectedItem={selectedItem}
+							storeId={store.id}
+							store_name={store.name}
+						/>
+						<AppointeesList
+							onSelectAppointee={onSelectAppointee}
+							selectedItem={selectedItem}
+							store_id={store.id}
+						/>
+						<DiscountsList openTab={openTab} products={products} />
+						<ConditionsList openTab={openTab} products={products} />{' '}
+					</>
+				)}
 			</div>
 			<div className={'second-tab' + (open ? ' open' : '')}>
 				{Tab && (

@@ -15,11 +15,17 @@ async def index():
     return await send_from_directory(app.static_folder, "index.html")
 
 
+@app.route("/cookie", methods=["GET"])
+async def get_cookie():
+    cookie = system.enter_system()
+    return json.dumps({"cookie": cookie})
+
+
 @app.websocket("/connect")
 def connect():
     cookie = request.args.get("cookie")
     if cookie is None:
-        cookie = await system.enter_system()
+        cookie = system.enter_system()
     answer = system.connect(cookie, lambda messages: websocket.send(messages))
     return json.dumps(
         {"cookie": cookie, "answer": answer.get_msg(), "succeeded": answer.succeeded()}
@@ -55,6 +61,13 @@ async def login():
 @app.route("/get_stores_details", methods=["HEAD"])
 async def get_stores_details():
     answer = await system.get_stores_details()
+    return json.dumps([ob.__dict__ for ob in answer.get_obj()])
+
+
+@app.route("/get_store", methods=["HEAD"])
+async def get_store():
+    store_id = request.args.get("store_id")
+    answer = await system.get_store(store_id)
     return json.dumps([ob.__dict__ for ob in answer.get_obj()])
 
 

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { BrowserRouter, Switch, Route } from 'react-router-dom';
 import { createMuiTheme, ThemeProvider } from '@material-ui/core';
 
@@ -9,6 +9,8 @@ import SignIn from './SignIn';
 import SignUp from './SignUp';
 import MyStores from './MyStores';
 import SearchPage from './SearchPage';
+import useAPI from '../hooks/useAPI';
+import { CookieContext } from '../contexts';
 
 const theme = createMuiTheme({
 	typography: {
@@ -34,23 +36,35 @@ const theme = createMuiTheme({
 
 function App() {
 	const [signedIn, setSignedIn] = useState<boolean>(false);
+	const getCookie = useAPI('/get_cookie');
+	const [cookie, setCookie] = useState<string>('');
+
+	useEffect(() => {
+		getCookie.request().then(() => {
+			if (!getCookie.error && getCookie.data !== null) {
+				setCookie(cookie);
+			}
+		});
+	}, []);
 
 	return (
 		<>
 			<ThemeProvider theme={theme}>
-				<BrowserRouter>
-					<Navbar signedIn={signedIn} />
-					<Switch>
-						<Route path="/" exact component={Home} />
-						<Route path="/cart" exact component={Cart} />
-						<Route path="/sign-in" exact>
-							{() => <SignIn onSignIn={() => setSignedIn(true)} />}
-						</Route>
-						<Route path="/sign-up" exact component={SignUp} />
-						<Route path="/searchPage" exact component={SearchPage} />
-						<Route path="/my-stores" exact component={MyStores} />
-					</Switch>
-				</BrowserRouter>
+				<CookieContext.Provider value={cookie}>
+					<BrowserRouter>
+						<Navbar signedIn={signedIn} />
+						<Switch>
+							<Route path="/" exact component={Home} />
+							<Route path="/cart" exact component={Cart} />
+							<Route path="/sign-in" exact>
+								{() => <SignIn onSignIn={() => setSignedIn(true)} />}
+							</Route>
+							<Route path="/sign-up" exact component={SignUp} />
+							<Route path="/searchPage" exact component={SearchPage} />
+							<Route path="/my-stores" exact component={MyStores} />
+						</Switch>
+					</BrowserRouter>
+				</CookieContext.Provider>
 			</ThemeProvider>
 		</>
 	);
