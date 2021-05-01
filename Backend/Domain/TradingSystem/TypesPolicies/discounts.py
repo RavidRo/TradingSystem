@@ -2,10 +2,13 @@ from abc import ABC
 from typing import Union
 
 from Backend.Domain.TradingSystem.Interfaces.IDiscount import IDiscount
-from Backend.response import Response, ParsableList
+from Backend.response import Response
 
 
 class SimpleDiscount(IDiscount):
+
+    def get_context(self):
+        return self._context
 
     def __init__(self, discount_data, duration=None):  # Add duration in later milestones
         super().__init__(discount_data.get('condition'))
@@ -15,19 +18,19 @@ class SimpleDiscount(IDiscount):
         self.duration = duration
 
         def discount_func(products_to_quantities) -> float:
-            if "product" in discount_data['context']:
+            if discount_data['context']['obj'] == 'product':
                 return sum(
                     [prod.get_price() * quantity * self._multiplier if prod_id == discount_data['context'][
-                        "product"] else 0
+                        "id"] else 0
                      for prod_id, (prod, quantity) in products_to_quantities.items()])
-            if "category" in discount_data['context']:
+            if discount_data['context']['obj'] == 'category':
                 return sum([
                     prod.get_price() * quantity * self._multiplier if prod.get_category() == discount_data['context'][
-                        "category"] else 0
-                    for prod_id, (prod, quantity) in products_to_quantities.items()])
-            if "store" in discount_data['context']:
+                        "id"] else 0
+                    for _, (prod, quantity) in products_to_quantities.items()])
+            if discount_data['context']['obj'] == 'store':
                 return sum([prod.get_price() * quantity * self._multiplier
-                            for prod_id, (prod, quantity) in
+                            for _, (prod, quantity) in
                             products_to_quantities.items()])
 
             raise RuntimeError("This shouldn't happen!")
@@ -118,6 +121,9 @@ class CompositeDiscount(IDiscount, ABC):
                 break
         [child.set_parent(self) for child in children]
 
+    def get_context(self):
+        return None
+
     def add_child(self, child: IDiscount):
         self._children.append(child)
         child.set_parent(self)
@@ -159,12 +165,13 @@ class CompositeDiscount(IDiscount, ABC):
                 msg += "complex_type must be one of the following: 'max', 'add', 'xor', 'and', 'or'\n"
             if self.get_parent() is None:
                 msg += "Cannot edit root discount!\n"
+            if complex_type == 'xor' and decision_rule is None and not isinstance(self, XorCompositeDiscount):
+                msg += "When editing to xor discount, one must supply decision_rule"
 
             if msg != "":
                 return Response(False, msg=msg)
             parent_children = self.get_parent().get_children()
-            parent_children[parent_children.index(self)].add_child(
-                CompositeDiscount.complex_type_generator.get(complex_type)(self._children, decision_rule))
+            parent_children[parent_children.index(self)] = CompositeDiscount.complex_type_generator.get(complex_type)(self._children, decision_rule)
             self._id = discount_id
             return Response(True)
 
@@ -236,6 +243,7 @@ class AddCompositeDiscount(CompositeDiscount):
 
 
 class XorCompositeDiscount(CompositeDiscount):
+
     decision_dict = {"first": lambda prices: prices[0] if len(prices) > 0 else 0.0,
                      "max": lambda prices: max(prices) if len(prices) > 0 else 0.0,
                      "min": lambda prices: min(prices) if len(prices) > 0 else 0.0

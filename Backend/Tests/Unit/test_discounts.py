@@ -2,6 +2,7 @@ import copy
 
 import pytest
 from Backend.Domain.TradingSystem.TypesPolicies.discounts import AddCompositeDiscount
+from Backend.Domain.TradingSystem.product import Product
 from Backend.Domain.TradingSystem.store import Store
 
 
@@ -21,6 +22,25 @@ def product_discount():
             'context': {
                 'obj': 'product',
                 'id': '123'
+            }}
+
+
+@pytest.fixture
+def category_discount():
+    return {'discount_type': 'simple',
+            'percentage': 75.0,
+            'context': {
+                'obj': 'category',
+                'id': 'A'
+            }}
+
+
+@pytest.fixture
+def store_discount():
+    return {'discount_type': 'simple',
+            'percentage': 75.0,
+            'context': {
+                'obj': 'store'
             }}
 
 
@@ -52,12 +72,19 @@ def complex_or_discount():
 def complex_xor_discount():
     return {'discount_type': 'complex',
             'type': 'xor',
-            'decision_rule': 1}
+            'decision_rule': "first"}
 
 
 @pytest.fixture
 def current_root_id(store):
     return store.get_discount_policy().get_discounts().get_obj().get_id()
+
+
+@pytest.fixture
+def products_to_quantity():
+    return {"123": (Product("milk", "A", 4), 4),
+            "456": (Product("cheese", "A", 8), 2),
+            "789": (Product("dog food", "B", 12), 1)}
 
 
 # * Tests
@@ -370,13 +397,146 @@ def test_edit_simple_invalid_context(store, product_discount, current_root_id):
 
 # edit complex discount tests
 
-# def test_edit_complex_discount_success(store, complex_max_discount, current_root_id):
-#     # assume add_discount works
-#     store.add_discount(complex_max_discount, current_root_id)
-#     res = store.edit_complex_discount(str(int(current_root_id) + 1), complex_type="and")
-#     expected = {'type': 'add', 'discount_type': 'complex', 'discounts': [], 'id': current_root_id}
-#     expected['discounts'].append(copy.copy(complex_max_discount))
-#     expected['discounts'][0]['type'] = 'and'
-#     expected['discounts'][0]['id'] = str(int(current_root_id) + 2)
-#     assert res.succeeded() and store.get_discounts().get_obj().parse() == expected
+def test_edit_complex_discount_success(store, complex_max_discount, current_root_id):
+    # assume add_discount works
+    store.add_discount(complex_max_discount, current_root_id)
+    res = store.edit_complex_discount(str(int(current_root_id) + 1), complex_type="and")
+    expected = {'type': 'add', 'discount_type': 'complex', 'discounts': [], 'id': current_root_id}
+    expected['discounts'].append(copy.copy(complex_max_discount))
+    expected['discounts'][0]['type'] = 'and'
+    expected['discounts'][0]['discounts'] = []
+    expected['discounts'][0]['id'] = str(int(current_root_id) + 2)
+    assert res.succeeded() and store.get_discounts().get_obj().parse() == expected
 
+
+def test_edit_complex_discount_invalid_type(store, complex_max_discount, current_root_id):
+    # assume add_discount works
+    store.add_discount(complex_max_discount, current_root_id)
+    res = store.edit_complex_discount(str(int(current_root_id) + 1), complex_type="abc")
+    expected = {'type': 'add', 'discount_type': 'complex', 'discounts': [], 'id': current_root_id}
+    expected['discounts'].append(copy.copy(complex_max_discount))
+    expected['discounts'][0]['discounts'] = []
+    expected['discounts'][0]['id'] = str(int(current_root_id) + 1)
+    assert not res.succeeded() and store.get_discounts().get_obj().parse() == expected
+
+
+def test_edit_complex_non_exist_discount_id(store, complex_max_discount, current_root_id):
+    # assume add_discount works
+    store.add_discount(complex_max_discount, current_root_id)
+    res = store.edit_complex_discount(str(int(current_root_id) + 3), complex_type="and")
+    assert not res.succeeded()
+
+
+def test_edit_complex_to_xor_without_decision_rule_fails(store, complex_or_discount, current_root_id):
+    # assume add_discount works
+    store.add_discount(complex_or_discount, current_root_id)
+    res = store.edit_complex_discount(str(int(current_root_id) + 1), complex_type="xor")
+    expected = {'type': 'add', 'discount_type': 'complex', 'discounts': [], 'id': current_root_id}
+    expected['discounts'].append(copy.copy(complex_or_discount))
+    expected['discounts'][0]['discounts'] = []
+    expected['discounts'][0]['id'] = str(int(current_root_id) + 1)
+    assert not res.succeeded() and store.get_discounts().get_obj().parse() == expected
+
+
+def test_edit_complex_on_simple_discount_fail(store, product_discount, current_root_id):
+    # assume add_discount_works
+    store.add_discount(product_discount, current_root_id)
+    res = store.edit_complex_discount(str(int(current_root_id) + 1), complex_type="add")
+    assert not res.succeeded()
+
+
+# apply_discount tests:
+
+def test_apply_discount_no_added_discounts_success(store, products_to_quantity):
+    price = store.apply_discounts(products_to_quantity)
+    assert price == 44
+
+
+def test_apply_discount_no_products(store):
+    price = store.apply_discounts({})
+    assert price == 0
+
+
+def test_apply_simple_discount_product(store, products_to_quantity, product_discount, current_root_id):
+    # assume add_discount works
+    store.add_discount(product_discount, current_root_id)
+    price = store.apply_discounts(products_to_quantity)
+    assert price == 32
+
+
+def test_apply_simple_discount_category(store, category_discount, products_to_quantity, current_root_id):
+    # assume add_discount works
+    store.add_discount(category_discount, current_root_id)
+    price = store.apply_discounts(products_to_quantity)
+    assert price == 20
+
+
+def test_apply_simple_discount_store(store, store_discount, products_to_quantity, current_root_id):
+    # assume add_discount works
+    store.add_discount(store_discount, current_root_id)
+    price = store.apply_discounts(products_to_quantity)
+    assert price == 11
+
+
+def test_apply_two_discounts_add_success(store, product_discount, category_discount, products_to_quantity, current_root_id):
+    # assume add_discount works
+    store.add_discount(product_discount, current_root_id)
+    store.add_discount(category_discount, current_root_id)
+    price = store.apply_discounts(products_to_quantity)
+    assert price == 8
+
+
+def test_apply_two_discount_overflow_success(store, store_discount, products_to_quantity, current_root_id):
+    # assume add_discount works
+    store.add_discount(store_discount, current_root_id)
+    store.add_discount(store_discount, current_root_id)
+    price = store.apply_discounts(products_to_quantity)
+    assert price == 0
+
+
+def test_apply_nested_discounts(store, complex_add_discount, product_discount, products_to_quantity, current_root_id):
+    # assume add_discount works
+    store.add_discount(complex_add_discount, current_root_id)
+    store.add_discount(product_discount, str(int(current_root_id) + 1))
+    store.add_discount(product_discount, str(int(current_root_id) + 1))
+    price = store.apply_discounts(products_to_quantity)
+    assert price == 20
+
+
+def test_apply_max(store, complex_max_discount, product_discount, category_discount, products_to_quantity, current_root_id):
+    # assume add_discount works
+    store.add_discount(complex_max_discount, current_root_id)
+    store.add_discount(product_discount, str(int(current_root_id) + 1))
+    store.add_discount(category_discount, str(int(current_root_id) + 1))
+    price = store.apply_discounts(products_to_quantity)
+    assert price == 20
+
+
+def test_apply_xor(store, complex_xor_discount, product_discount, category_discount, products_to_quantity, current_root_id):
+    # assume add_discount works
+    store.add_discount(complex_xor_discount, current_root_id)
+    store.add_discount(product_discount, str(int(current_root_id) + 1))
+    store.add_discount(category_discount, str(int(current_root_id) + 1))
+    price = store.apply_discounts(products_to_quantity)
+    assert price == 32
+
+
+def test_apply_xor_first_with_no_children(store, complex_xor_discount, product_discount, products_to_quantity, current_root_id):
+    # assume add_discount works
+    store.add_discount(complex_xor_discount, current_root_id)
+    price = store.apply_discounts(products_to_quantity)
+    assert price == 44
+
+
+def test_apply_complex_tree(store, complex_max_discount, complex_xor_discount, product_discount, category_discount, store_discount, products_to_quantity, current_root_id):
+    # assume add_discount works
+    store.add_discount(complex_max_discount, current_root_id)
+    store.add_discount(category_discount, str(int(current_root_id) + 1))
+    store.add_discount(product_discount, str(int(current_root_id) + 1))
+    store.add_discount(complex_xor_discount, current_root_id)
+    store.add_discount(product_discount, str(int(current_root_id) + 4))
+    store.add_discount(complex_xor_discount, str(int(current_root_id) + 5))
+    store.add_discount(category_discount, str(int(current_root_id) + 6))
+    store.add_discount(store_discount, str(int(current_root_id) + 6))
+    price = store.apply_discounts(products_to_quantity)
+    assert price == 8
