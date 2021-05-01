@@ -1,5 +1,6 @@
 from Backend.Domain.TradingSystem.Responsibilities.founder import Founder
 from Backend.Domain.TradingSystem.store import Store
+
 # from Backend.Domain.TradingSystem.States.user_state import UserState
 from Backend.response import Response, ParsableList, PrimitiveParsable
 from Backend.Domain.TradingSystem.purchase_details import PurchaseDetails
@@ -80,11 +81,13 @@ class Member(UserState):
             msg="Purchase history " "got successfully",
         )
 
-    def add_new_product(self, store_id, product_name, category, product_price, quantity):
+    def add_new_product(
+        self, store_id, product_name, category, product_price, quantity, keywords=None
+    ):
         if store_id not in self.__responsibilities:
             return Response(False, msg=f"this member do not own/manage store {store_id}")
         return self.__responsibilities[store_id].add_product(
-            product_name, category, product_price, quantity
+            product_name, category, product_price, quantity, keywords
         )
 
     def remove_product(self, store_id, product_id):
@@ -99,11 +102,13 @@ class Member(UserState):
             product_id, new_quantity
         )
 
-    def edit_product_details(self, store_id, product_id, new_name, new_category, new_price):
+    def edit_product_details(
+        self, store_id, product_id, new_name, new_category, new_price, keywords=None
+    ):
         if store_id not in self.__responsibilities:
             return Response(False, msg=f"this member do not own/manage store {store_id}")
         return self.__responsibilities[store_id].edit_product_details(
-            product_id, new_name, new_category, new_price
+            product_id, new_name, new_category, new_price, keywords
         )
 
     def appoint_new_store_owner(self, store_id, new_owner):

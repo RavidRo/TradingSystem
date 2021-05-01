@@ -64,20 +64,18 @@ class TradingSystem(object):
     @log.loging()
     def search_products(
         self,
-        product_name="",
-        category=None,
+        product_name: str = None,
+        product_category: str = None,
         min_price=None,
         max_price=None,
-        search_by="name",
-        *keywords
+        keywords=None,
     ):
         return TradingSystemManager.search_products(
             product_name,
-            category,
+            product_category,
             min_price,
             max_price,
-            search_by,
-            *keywords,
+            keywords,
         )
 
     @log.loging(to_hide=[1])
@@ -144,10 +142,17 @@ class TradingSystem(object):
 
     @log.loging(to_hide=[1])
     def create_product(
-        self, cookie: str, store_id: str, name: str, category: str, price: float, quantity: int
+        self,
+        cookie: str,
+        store_id: str,
+        name: str,
+        category: str,
+        price: float,
+        quantity: int,
+        keywords: list[str] = None,
     ):
         return TradingSystemManager.create_product(
-            cookie, store_id, name, category, price, quantity
+            cookie, store_id, name, category, price, quantity, keywords
         )
 
     @log.loging(to_hide=[1])
@@ -171,9 +176,10 @@ class TradingSystem(object):
         new_name: str = None,
         new_category: str = None,
         new_price: float = None,
+        keywords: list[str] = None,
     ):
         return TradingSystemManager.edit_product_details(
-            cookie, store_id, product_id, new_name, new_category, new_price
+            cookie, store_id, product_id, new_name, new_category, new_price, keywords
         )
 
     @log.loging(to_hide=[1])

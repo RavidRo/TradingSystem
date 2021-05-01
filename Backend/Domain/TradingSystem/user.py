@@ -100,9 +100,15 @@ class User(IUser):
     # 4.1
     # Creating a new product a the store and setting its quantity to 0
     def create_product(
-        self, store_id: str, name: str, category: str, price: float, quantity: int
+        self,
+        store_id: str,
+        name: str,
+        category: str,
+        price: float,
+        quantity: int,
+        keywords: list[str] = None,
     ) -> Response[str]:
-        return self.state.add_new_product(store_id, name, category, price, quantity)
+        return self.state.add_new_product(store_id, name, category, price, quantity, keywords)
 
     # 4.1
     def remove_product_from_store(
@@ -118,10 +124,16 @@ class User(IUser):
 
     # 4.1
     def edit_product_details(
-        self, store_id: str, product_id: str, new_name: str, new_category: str, new_price: float
+        self,
+        store_id: str,
+        product_id: str,
+        new_name: str,
+        new_category: str,
+        new_price: float,
+        keywords: list[str] = None,
     ) -> Response[None]:
         return self.state.edit_product_details(
-            store_id, product_id, new_name, new_category, new_price
+            store_id, product_id, new_name, new_category, new_price, keywords
         )
 
     # 4.3

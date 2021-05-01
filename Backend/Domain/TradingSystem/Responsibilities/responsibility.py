@@ -44,7 +44,9 @@ class Responsibility(Parsable):
 
     # 4.1
     # Creating a new product a the store
-    def add_product(self, name: str, category: str, price: float, quantity: int) -> Response[str]:
+    def add_product(
+        self, name: str, category: str, price: float, quantity: int, keywords: list[str] = None
+    ) -> Response[str]:
         raise Exception(Responsibility.ERROR_MESSAGE)
 
     # 4.1
@@ -57,7 +59,12 @@ class Responsibility(Parsable):
 
     # 4.1
     def edit_product_details(
-        self, product_id: str, new_name: str, new_category: str, new_price: float
+        self,
+        product_id: str,
+        new_name: str,
+        new_category: str,
+        new_price: float,
+        keywords: list[str] = None,
     ) -> Response[None]:
         raise Exception(Responsibility.ERROR_MESSAGE)
 

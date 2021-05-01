@@ -14,8 +14,10 @@ class Founder(Responsibility):
 
     # 4.1
     # Creating a new product a the store
-    def add_product(self, name: str, category: str, price: float, quantity: int) -> Response[str]:
-        return self._store.add_product(name, category, price, quantity)
+    def add_product(
+        self, name: str, category: str, price: float, quantity: int, keywords: list[str] = None
+    ) -> Response[str]:
+        return self._store.add_product(name, category, price, quantity, keywords)
 
     # 4.1
     def remove_product(self, product_id: str) -> Response[PrimitiveParsable[int]]:
@@ -27,9 +29,16 @@ class Founder(Responsibility):
 
     # 4.1
     def edit_product_details(
-        self, product_id: str, new_name: str, new_category: str, new_price: float
+        self,
+        product_id: str,
+        new_name: str,
+        new_category: str,
+        new_price: float,
+        keywords: list[str] = None,
     ) -> Response[None]:
-        return self._store.edit_product_details(product_id, new_name, new_category, new_price)
+        return self._store.edit_product_details(
+            product_id, new_name, new_category, new_price, keywords
+        )
 
     # 4.3
     def appoint_owner(self, user: User) -> Response[None]:
