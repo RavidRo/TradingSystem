@@ -67,5 +67,11 @@ class StoreStub(Store):
 
     def check_and_acquire_available_products(self, products_to_quantities: dict) -> Response[None]:
         for i in range(1, 4):
-            self._products_to_quantities[f"{i}"] = (self._products_to_quantities[f"{i}"][0], self._products_to_quantities[f"{i}"][1] - 1)
+            self._products_to_quantities[f"{i}"] = (
+                self._products_to_quantities[f"{i}"][0],
+                self._products_to_quantities[f"{i}"][1] - 1,
+            )
         return Response(True)
+
+    def subscribe(self, subscriber):
+        return True

@@ -1,7 +1,9 @@
 """ this class is responsible to communicate with the trading __system manager"""
 from __future__ import annotations
 import threading
-from asgiref.sync import sync_to_async
+from typing import Callable
+
+# from asgiref.sync import sync_to_async
 from Backend.Domain.Payment.payment_manager import PaymentManager
 
 
@@ -9,7 +11,8 @@ from Backend.Domain.Payment.payment_manager import PaymentManager
 from Backend.Service.DataObjects.shopping_cart_data import ShoppingCartData
 import Backend.Service.logs as log
 from Backend.Domain.TradingSystem.trading_system_manager import TradingSystemManager
-import Backend.Domain.Payment.payment_manager as PaymentSystem
+# import Backend.Domain.Payment.payment_manager as PaymentSystem
+from Backend.response import Response
 
 
 class TradingSystem(object):
@@ -39,8 +42,13 @@ class TradingSystem(object):
     def enter_system(self):
         return TradingSystemManager.enter_system()
 
+    @staticmethod
+    @log.loging(to_hide=[0])
+    def connect(cookie: str, communicate: Callable[[list[str]], bool]) -> Response[None]:
+        return TradingSystemManager.connect(cookie, communicate)
+
     @log.loging(to_hide=[1, 3])
-    def register(self, cookie, username, password):
+    def register(self, cookie, username, password) -> Response[None]:
         return TradingSystemManager.register(cookie=cookie, username=username, password=password)
 
     @log.loging(to_hide=[1, 3])

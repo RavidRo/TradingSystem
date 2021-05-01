@@ -82,7 +82,7 @@ def test_register_used_username_fail():
     assert not res.succeeded()
 
     # 2.4 https://github.com/SeanPikulin/TradingSystem/blob/main/Documentation/Use%20Cases.md#24-Login
-    # def test_login_success():
+def test_login_success():
     new_username = _generate_username()
     password = "aaa"
     cookie = system.enter_system()
@@ -111,22 +111,21 @@ def test_login_wrong_password_fail():
     assert not res.succeeded()
 
     # 3.2 https://github.com/SeanPikulin/TradingSystem/blob/main/Documentation/Use%20Cases.md#32-#Open-a-store
-    # def test_open_store_success():
-    cookie, username, password, _, _ = _initialize_info(_generate_username(), "aaa")
-    store_name = _generate_store_name()
-    res = system.create_store(cookie, store_name)
-    assert res.succeeded()
+    def test_open_store_success():
+        cookie, username, password, _, _ = _initialize_info(_generate_username(), "aaa")
+        store_name = _generate_store_name()
+        res = system.create_store(cookie, store_name)
+        assert res.succeeded()
 
 
-#
-def test_open_store_unsupported_character_fail():
+#def test_open_store_unsupported_character_fail():
     #     cookie, username, password, _ = _initialize_info(_generate_username(), "aaa")
     #     store_name = "stαrbucks"
     #     assert not system.create_store(cookie, store_name).succeeded()
     # not a fail condition
 
     # 2.5 https://github.com/SeanPikulin/TradingSystem/blob/main/Documentation/Use%20Cases.md#25-Getting-store-information
-    # def test_get_store_information_success():
+def test_get_store_information_success():
     store_details = system.get_stores_details()
     num_of_stores = len(store_details.object.values)
     cookie, username, password, store_name, store_id = _initialize_info(
@@ -139,14 +138,13 @@ def test_open_store_unsupported_character_fail():
     )
 
 
-#
-def test_get_store_information_no_stores_fail():
+#def test_get_store_information_no_stores_fail():
     #     cookie, username, password, _ = _initialize_info(_generate_username(), "aaa")
     #     assert not system.get_stores_details().succeeded()  # an empty list evaluates to false
     # assumed empty list means failure
 
     # 4.1 https://github.com/SeanPikulin/TradingSystem/blob/main/Documentation/Use%20Cases.md#41-Add-new-product
-    # def test_add_new_product_success():
+def test_add_new_product_success():
     cookie, username, password, store_name, store_id = _initialize_info(
         _generate_username(), "aaa", _generate_store_name()
     )
@@ -169,7 +167,7 @@ def test_add_new_product_negative_quantity_fail():
     res = system.create_product(cookie, store_id, product_name, category, price, quantity)
     assert not res.succeeded()
 
-    # def test_add_new_product_negative_price_fail():
+def test_add_new_product_negative_price_fail():
     cookie, username, password, store_name, store_id = _initialize_info(
         _generate_username(), "aaa", _generate_store_name()
     )
@@ -427,7 +425,7 @@ def test_products_by_store_wrong_store_fail():
     assert not response.succeeded()
 
     # # 2.7 https://github.com/SeanPikulin/TradingSystem/blob/main/Documentation/Use%20Cases.md#27-Save-products-in-shopping-bag
-    # def test_add_to_cart_success():
+def test_add_to_cart_success():
     cookie, username, password, store_name, store_id = _initialize_info(
         _generate_username(), "aaa", _generate_store_name()
     )
@@ -469,7 +467,7 @@ def test_add_to_cart_quantity_too_high_fail():
     assert not res.succeeded()
 
     # # 2.8 https://github.com/SeanPikulin/TradingSystem/blob/main/Documentation/Use%20Cases.md#28-Visit-cart
-    # def test_visit_cart_success():
+def test_visit_cart_success():
     cookie, username, password, store_name, store_id = _initialize_info(
         _generate_username(), "aaa", _generate_store_name()
     )
