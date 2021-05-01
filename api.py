@@ -11,7 +11,6 @@ import json
 system = TradingSystem.getInstance()
 pool = concurrent.futures.ThreadPoolExecutor(max_workers=10)
 app = Quart(__name__, static_url_path="", static_folder="Frontend/dist")
-loop = asyncio.get_event_loop()
 
 
 @app.route("/", methods=["GET"])
@@ -38,11 +37,13 @@ def connect():  # TODO: this
 
 @app.route("/register", methods=["POST"])
 async def register():
-    cookie = request.get_json()["cookie"]
+    cookie = (await request.get_json())["cookie"]
     if cookie is None:
+        loop = asyncio.get_event_loop()
         cookie = await loop.run_in_executor(pool, system.enter_system)
-    username = request.get_json()["username"]
-    password = request.get_json()["password"]
+    username = (await request.get_json())["username"]
+    password = (await request.get_json())["password"]
+    loop = asyncio.get_event_loop()
     answer = await loop.run_in_executor(pool, system.register, cookie, username, password)
     return json.dumps(
         {"cookie": cookie, "answer": answer.get_msg(), "succeeded": answer.succeeded()}
@@ -51,12 +52,14 @@ async def register():
 
 @app.route("/login", methods=["POST"])
 async def login():
-    cookie = request.get_json()["cookie"]
+    cookie = (await request.get_json())["cookie"]
     if cookie is None:
+        loop = asyncio.get_event_loop()
         cookie = await loop.run_in_executor(pool, system.enter_system)
-    username = request.get_json()["username"]
-    password = request.get_json()["password"]
-    answer = await loop.run_in_executor(pool, system.register, cookie, username, password)
+    username = (await request.get_json())["username"]
+    password = (await request.get_json())["password"]
+    loop = asyncio.get_event_loop()
+    answer = await loop.run_in_executor(pool, system.login, cookie, username, password)
     return json.dumps(
         {"cookie": cookie, "answer": answer.get_msg(), "succeeded": answer.succeeded()}
     )
@@ -64,14 +67,16 @@ async def login():
 
 @app.route("/get_stores_details", methods=["GET"])
 async def get_stores_details():
-    answer = await loop.run_in_executor(system.get_stores_details)
+    loop = asyncio.get_event_loop()
+    answer = await loop.run_in_executor(pool, system.get_stores_details)
     return json.dumps([ob.__dict__ for ob in answer.get_obj()])
 
 
 @app.route("/get_products_by_store", methods=["GET"])
 async def get_products_by_store():
     store_id = request.args.get("store_id")
-    answer = await loop.run_in_executor(system.get_products_by_store, store_id)
+    loop = asyncio.get_event_loop()
+    answer = await loop.run_in_executor(pool, system.get_products_by_store, store_id)
     return json.dumps([ob.__dict__ for ob in answer.get_obj()])
 
 
@@ -82,22 +87,25 @@ async def search_products():
     min_price = request.args.get("min_price")
     max_price = request.args.get("max_price")
     kwargs = request.args.get("kwargs")
+    loop = asyncio.get_event_loop()
     answer = await loop.run_in_executor(
-        system.search_products, product_name, category, min_price, max_price, **kwargs
+        pool, system.search_products, product_name, category, min_price, max_price, **kwargs
     )
     return json.dumps([ob.__dict__ for ob in answer.get_obj()])
 
 
 @app.route("/save_product_in_cart", methods=["POST"])
 async def save_product_in_cart():
-    cookie = request.get_json()["cookie"]
+    cookie = (await request.get_json())["cookie"]
     if cookie is None:
+        loop = asyncio.get_event_loop()
         cookie = await loop.run_in_executor(pool, system.enter_system)
-    store_id = request.get_json()["store_id"]
-    product_id = request.get_json()["product_id"]
-    quantity = request.get_json()["quantity"]
+    store_id = (await request.get_json())["store_id"]
+    product_id = (await request.get_json())["product_id"]
+    quantity = (await request.get_json())["quantity"]
+    loop = asyncio.get_event_loop()
     answer = await loop.run_in_executor(
-        system.save_product_in_cart, cookie, store_id, product_id, quantity
+        pool, system.save_product_in_cart, cookie, store_id, product_id, quantity
     )
     return json.dumps(
         {"cookie": cookie, "answer": answer.get_msg(), "succeeded": answer.succeeded()}
@@ -108,20 +116,24 @@ async def save_product_in_cart():
 async def get_cart_details():
     cookie = request.args.get("cookie")
     if cookie is None:
+        loop = asyncio.get_event_loop()
         cookie = await loop.run_in_executor(pool, system.enter_system)
-    answer = await loop.run_in_executor(system.get_cart_details, cookie)
+    loop = asyncio.get_event_loop()
+    answer = await loop.run_in_executor(pool, system.get_cart_details, cookie)
     return json.dumps({"cookie": cookie}.update([ob.__dict__ for ob in answer.get_obj()]))
 
 
 @app.route("/remove_product_from_cart", methods=["POST"])
 async def remove_product_from_cart():
-    cookie = request.get_json()["cookie"]
+    cookie = (await request.get_json())["cookie"]
     if cookie is None:
+        loop = asyncio.get_event_loop()
         cookie = await loop.run_in_executor(pool, system.enter_system)
-    product_id = request.get_json()["product_id"]
-    quantity = request.get_json()["quantity"]
+    product_id = (await request.get_json())["product_id"]
+    quantity = (await request.get_json())["quantity"]
+    loop = asyncio.get_event_loop()
     answer = await loop.run_in_executor(
-        system.remove_product_from_cart, cookie, product_id, quantity
+        pool, system.remove_product_from_cart, cookie, product_id, quantity
     )
     return json.dumps(
         {"cookie": cookie, "answer": answer.get_msg(), "succeeded": answer.succeeded()}
@@ -130,14 +142,16 @@ async def remove_product_from_cart():
 
 @app.route("/change_product_quantity_in_cart", methods=["POST"])
 async def change_product_quantity_in_cart():
-    cookie = request.get_json()["cookie"]
+    cookie = (await request.get_json())["cookie"]
     if cookie is None:
+        loop = asyncio.get_event_loop()
         cookie = await loop.run_in_executor(pool, system.enter_system)
-    store_id = request.get_json()["store_id"]
-    product_id = request.get_json()["product_id"]
-    quantity = request.get_json()["quantity"]
+    store_id = (await request.get_json())["store_id"]
+    product_id = (await request.get_json())["product_id"]
+    quantity = (await request.get_json())["quantity"]
+    loop = asyncio.get_event_loop()
     answer = await loop.run_in_executor(
-        system.remove_product_from_cart, cookie, store_id, product_id, quantity
+        pool, system.remove_product_from_cart, cookie, store_id, product_id, quantity
     )
     return json.dumps(
         {"cookie": cookie, "answer": answer.get_msg(), "succeeded": answer.succeeded()}
@@ -146,21 +160,24 @@ async def change_product_quantity_in_cart():
 
 @app.route("/purchase_cart", methods=["POST"])
 async def purchase_cart():
-    cookie = request.get_json()["cookie"]
+    cookie = (await request.get_json())["cookie"]
     if cookie is None:
+        loop = asyncio.get_event_loop()
         cookie = await loop.run_in_executor(pool, system.enter_system)
-    answer = await loop.run_in_executor(system.purchase_cart, cookie)
+    loop = asyncio.get_event_loop()
+    answer = await loop.run_in_executor(pool, system.purchase_cart, cookie)
     return json.dumps({"cookie": cookie, "price": answer.get_obj()})
 
 
 @app.route("/send_payment", methods=["POST"])
 async def send_payment():
-    cookie = request.get_json()["cookie"]
+    cookie = (await request.get_json())["cookie"]
     if cookie is None:
+        loop = asyncio.get_event_loop()
         cookie = await loop.run_in_executor(pool, system.enter_system)
-    payment_details = request.get_json()["payment_details"]
-    await loop.run_in_executor(system.purchase_cart, cookie, payment_details)
-    address = request.get_json()["address"]
+    payment_details = (await request.get_json())["payment_details"]
+    address = (await request.get_json())["address"]
+    loop = asyncio.get_event_loop()
     answer = await loop.run_in_executor(system.send_payment, cookie, payment_details, address)
     return json.dumps({"cookie": cookie, "price": answer.get_obj()})
 
@@ -171,11 +188,13 @@ async def send_payment():
 
 @app.route("/create_store", methods=["POST"])
 async def create_store():
-    cookie = request.get_json()["cookie"]
+    cookie = (await request.get_json())["cookie"]
     if cookie is None:
+        loop = asyncio.get_event_loop()
         cookie = await loop.run_in_executor(pool, system.enter_system)
-    name = request.get_json()["name"]
-    answer = await loop.run_in_executor(system.create_store, cookie, name)
+    name = (await request.get_json())["name"]
+    loop = asyncio.get_event_loop()
+    answer = await loop.run_in_executor(pool, system.create_store, cookie, name)
     return json.dumps({"cookie": cookie, "store_id": answer.get_obj()})
 
 
@@ -183,8 +202,10 @@ async def create_store():
 async def get_purchase_history():
     cookie = request.args.get("cookie")
     if cookie is None:
+        loop = asyncio.get_event_loop()
         cookie = await loop.run_in_executor(pool, system.enter_system)
-    answer = await loop.run_in_executor(system.get_purchase_history, cookie)
+    loop = asyncio.get_event_loop()
+    answer = await loop.run_in_executor(pool, system.get_purchase_history, cookie)
     return json.dumps({"cookie": cookie}.update([ob.__dict__ for ob in answer.get_obj()]))
 
 
@@ -194,28 +215,32 @@ async def get_purchase_history():
 
 @app.route("/create_product", methods=["POST"])
 async def create_product():
-    cookie = request.get_json()["cookie"]
+    cookie = (await request.get_json())["cookie"]
     if cookie is None:
+        loop = asyncio.get_event_loop()
         cookie = await loop.run_in_executor(pool, system.enter_system)
-    store_id = request.get_json()["store_id"]
-    name = request.get_json()["name"]
-    price = request.get_json()["price"]
-    quantity = request.get_json()["quantity"]
+    store_id = (await request.get_json())["store_id"]
+    name = (await request.get_json())["name"]
+    price = (await request.get_json())["price"]
+    quantity = (await request.get_json())["quantity"]
+    loop = asyncio.get_event_loop()
     answer = await loop.run_in_executor(
-        system.create_product, cookie, store_id, name, price, quantity
+        pool, system.create_product, cookie, store_id, name, price, quantity
     )
     return json.dumps({"cookie": cookie, "product_id": answer.get_obj()})
 
 
 @app.route("/remove_product_from_store", methods=["POST"])
 async def remove_products():
-    cookie = request.get_json()["cookie"]
+    cookie = (await request.get_json())["cookie"]
     if cookie is None:
+        loop = asyncio.get_event_loop()
         cookie = await loop.run_in_executor(pool, system.enter_system)
-    store_id = request.get_json()["store_id"]
-    product_id = request.get_json()["product_id"]
+    store_id = (await request.get_json())["store_id"]
+    product_id = (await request.get_json())["product_id"]
+    loop = asyncio.get_event_loop()
     answer = await loop.run_in_executor(
-        system.remove_product_from_store, cookie, store_id, product_id
+        pool, system.remove_product_from_store, cookie, store_id, product_id
     )
     return json.dumps(
         {"cookie": cookie, "answer": answer.get_msg(), "succeeded": answer.succeeded()}
@@ -224,14 +249,16 @@ async def remove_products():
 
 @app.route("/change_product_quantity", methods=["POST"])
 async def change_product_quantity():
-    cookie = request.get_json()["cookie"]
+    cookie = (await request.get_json())["cookie"]
     if cookie is None:
+        loop = asyncio.get_event_loop()
         cookie = await loop.run_in_executor(pool, system.enter_system)
-    store_id = request.get_json()["store_id"]
-    product_id = request.get_json()["product_id"]
-    quantity = request.get_json()["quantity"]
+    store_id = (await request.get_json())["store_id"]
+    product_id = (await request.get_json())["product_id"]
+    quantity = (await request.get_json())["quantity"]
+    loop = asyncio.get_event_loop()
     answer = await loop.run_in_executor(
-        system.change_product_quantity_in_store, cookie, store_id, product_id, quantity
+        pool, system.change_product_quantity_in_store, cookie, store_id, product_id, quantity
     )
     return json.dumps(
         {"cookie": cookie, "answer": answer.get_msg(), "succeeded": answer.succeeded()}
@@ -240,15 +267,17 @@ async def change_product_quantity():
 
 @app.route("/edit_product_details", methods=["POST"])
 async def edit_product_details():
-    cookie = request.get_json()["cookie"]
+    cookie = (await request.get_json())["cookie"]
     if cookie is None:
+        loop = asyncio.get_event_loop()
         cookie = await loop.run_in_executor(pool, system.enter_system)
-    store_id = request.get_json()["store_id"]
-    product_id = request.get_json()["product_id"]
-    new_name = request.get_json()["new_name"]
-    new_price = request.get_json()["new_price"]
+    store_id = (await request.get_json())["store_id"]
+    product_id = (await request.get_json())["product_id"]
+    new_name = (await request.get_json())["new_name"]
+    new_price = (await request.get_json())["new_price"]
+    loop = asyncio.get_event_loop()
     answer = await loop.run_in_executor(
-        system.edit_product_details, cookie, store_id, product_id, new_name, new_price
+        pool, system.edit_product_details, cookie, store_id, product_id, new_name, new_price
     )
     return json.dumps(
         {"cookie": cookie, "answer": answer.get_msg(), "succeeded": answer.succeeded()}
@@ -257,12 +286,14 @@ async def edit_product_details():
 
 @app.route("/appoint_owner", methods=["POST"])
 async def appoint_owner():
-    cookie = request.get_json()["cookie"]
+    cookie = (await request.get_json())["cookie"]
     if cookie is None:
+        loop = asyncio.get_event_loop()
         cookie = await loop.run_in_executor(pool, system.enter_system)
-    store_id = request.get_json()["store_id"]
-    username = request.get_json()["username"]
-    answer = await loop.run_in_executor(system.appoint_owner, cookie, store_id, username)
+    store_id = (await request.get_json())["store_id"]
+    username = (await request.get_json())["username"]
+    loop = asyncio.get_event_loop()
+    answer = await loop.run_in_executor(pool, system.appoint_owner, cookie, store_id, username)
     return json.dumps(
         {"cookie": cookie, "answer": answer.get_msg(), "succeeded": answer.succeeded()}
     )
@@ -270,12 +301,14 @@ async def appoint_owner():
 
 @app.route("/appoint_manager", methods=["POST"])
 async def appoint_manager():
-    cookie = request.get_json()["cookie"]
+    cookie = (await request.get_json())["cookie"]
     if cookie is None:
+        loop = asyncio.get_event_loop()
         cookie = await loop.run_in_executor(pool, system.enter_system)
-    store_id = request.get_json()["store_id"]
-    username = request.get_json()["username"]
-    answer = await loop.run_in_executor(system.appoint_manager, cookie, store_id, username)
+    store_id = (await request.get_json())["store_id"]
+    username = (await request.get_json())["username"]
+    loop = asyncio.get_event_loop()
+    answer = await loop.run_in_executor(pool, system.appoint_manager, cookie, store_id, username)
     return json.dumps(
         {"cookie": cookie, "answer": answer.get_msg(), "succeeded": answer.succeeded()}
     )
@@ -283,14 +316,16 @@ async def appoint_manager():
 
 @app.route("/add_manager_permission", methods=["POST"])
 async def add_manager_permission():
-    cookie = request.get_json()["cookie"]
+    cookie = (await request.get_json())["cookie"]
     if cookie is None:
+        loop = asyncio.get_event_loop()
         cookie = await loop.run_in_executor(pool, system.enter_system)
-    store_id = request.get_json()["store_id"]
-    username = request.get_json()["username"]
-    permission_number = request.get_json()["permission_number"]
+    store_id = (await request.get_json())["store_id"]
+    username = (await request.get_json())["username"]
+    permission_number = (await request.get_json())["permission_number"]
+    loop = asyncio.get_event_loop()
     answer = await loop.run_in_executor(
-        system.add_manager_permission, cookie, store_id, username, permission_number
+        pool, system.add_manager_permission, cookie, store_id, username, permission_number
     )
     return json.dumps(
         {"cookie": cookie, "answer": answer.get_msg(), "succeeded": answer.succeeded()}
@@ -299,14 +334,16 @@ async def add_manager_permission():
 
 @app.route("/remove_manager_permission", methods=["POST"])
 async def remove_manager_permission():
-    cookie = request.get_json()["cookie"]
+    cookie = (await request.get_json())["cookie"]
     if cookie is None:
+        loop = asyncio.get_event_loop()
         cookie = await loop.run_in_executor(pool, system.enter_system)
-    store_id = request.get_json()["store_id"]
-    username = request.get_json()["username"]
-    permission_number = request.get_json()["permission_number"]
+    store_id = (await request.get_json())["store_id"]
+    username = (await request.get_json())["username"]
+    permission_number = (await request.get_json())["permission_number"]
+    loop = asyncio.get_event_loop()
     answer = await loop.run_in_executor(
-        system.remove_manager_permission, cookie, store_id, username, permission_number
+        pool, system.remove_manager_permission, cookie, store_id, username, permission_number
     )
     return json.dumps(
         {"cookie": cookie, "answer": answer.get_msg(), "succeeded": answer.succeeded()}
@@ -315,12 +352,14 @@ async def remove_manager_permission():
 
 @app.route("/remove_appointment", methods=["POST"])
 async def remove_appointment():
-    cookie = request.get_json()["cookie"]
+    cookie = (await request.get_json())["cookie"]
     if cookie is None:
+        loop = asyncio.get_event_loop()
         cookie = await loop.run_in_executor(pool, system.enter_system)
-    store_id = request.get_json()["store_id"]
-    username = request.get_json()["username"]
-    answer = await loop.run_in_executor(system.remove_appointment, cookie, store_id, username)
+    store_id = (await request.get_json())["store_id"]
+    username = (await request.get_json())["username"]
+    loop = asyncio.get_event_loop()
+    answer = await loop.run_in_executor(pool, system.remove_appointment, cookie, store_id, username)
     return json.dumps(
         {"cookie": cookie, "answer": answer.get_msg(), "succeeded": answer.succeeded()}
     )
@@ -330,13 +369,19 @@ async def remove_appointment():
 async def get_store_appointments():
     cookie = request.args.get("cookie")
     if cookie is None:
+        loop = asyncio.get_event_loop()
         cookie = await loop.run_in_executor(pool, system.enter_system)
     store_id = request.args.get("store_id")
-    answer = await loop.run_in_executor(system.get_store_appointments, cookie, store_id)
+    loop = asyncio.get_event_loop()
+    answer = await loop.run_in_executor(pool, system.get_store_appointments, cookie, store_id)
+
     return json.dumps(
-        {"cookie": cookie, "answer": answer.get_msg(), "succeeded": answer.succeeded()}.update(
-            answer.get_obj().__dict__
-        )
+        {
+            "cookie": cookie,
+            "answer": answer.get_msg(),
+            "succeeded": answer.succeeded(),
+            "data": answer.get_obj().__dict__ if answer.get_obj() else None,
+        }
     )
 
 
@@ -344,13 +389,18 @@ async def get_store_appointments():
 async def get_my_appointees():
     cookie = request.args.get("cookie")
     if cookie is None:
+        loop = asyncio.get_event_loop()
         cookie = await loop.run_in_executor(pool, system.enter_system)
     store_id = request.args.get("store_id")
-    answer = await loop.run_in_executor(system.get_my_appointees, cookie, store_id)
+    loop = asyncio.get_event_loop()
+    answer = await loop.run_in_executor(pool, system.get_my_appointees, cookie, store_id)
     return json.dumps(
-        {"cookie": cookie, "answer": answer.get_msg(), "succeeded": answer.succeeded()}.update(
-            answer.get_obj().__dict__
-        )
+        {
+            "cookie": cookie,
+            "answer": answer.get_msg(),
+            "succeeded": answer.succeeded(),
+            "data": answer.get_obj().__dict__ if answer.succeeded() else None,
+        }
     )
 
 
@@ -358,9 +408,11 @@ async def get_my_appointees():
 async def get_store_purchases_history():
     cookie = request.args.get("cookie")
     if cookie is None:
+        loop = asyncio.get_event_loop()
         cookie = await loop.run_in_executor(pool, system.enter_system)
     store_id = request.args.get("store_id")
-    answer = await loop.run_in_executor(system.get_store_purchase_history, cookie, store_id)
+    loop = asyncio.get_event_loop()
+    answer = await loop.run_in_executor(pool, system.get_store_purchase_history, cookie, store_id)
     if answer.succeeded():
         return json.dumps(
             {"cookie": cookie, "answer": answer.get_msg(), "succeeded": answer.succeeded()}.update(
@@ -380,9 +432,11 @@ async def get_store_purchases_history():
 async def get_user_purchase_history():
     cookie = request.args.get("cookie")
     if cookie is None:
+        loop = asyncio.get_event_loop()
         cookie = await loop.run_in_executor(pool, system.enter_system)
     username = request.args.get("username")
-    answer = await loop.run_in_executor(system.get_user_purchase_history, cookie, username)
+    loop = asyncio.get_event_loop()
+    answer = await loop.run_in_executor(pool, system.get_user_purchase_history, cookie, username)
     if answer.succeeded():
         return json.dumps(
             {"cookie": cookie, "answer": answer.get_msg(), "succeeded": answer.succeeded()}.update(
@@ -398,9 +452,13 @@ async def get_user_purchase_history():
 async def get_any_store_purchase_history():
     cookie = request.args.get("cookie")
     if cookie is None:
+        loop = asyncio.get_event_loop()
         cookie = await loop.run_in_executor(pool, system.enter_system)
     store_id = request.args.get("store_id")
-    answer = await loop.run_in_executor(system.get_any_store_purchase_history, cookie, store_id)
+    loop = asyncio.get_event_loop()
+    answer = await loop.run_in_executor(
+        pool, system.get_any_store_purchase_history, cookie, store_id
+    )
     if answer.succeeded():
         return json.dumps(
             {"cookie": cookie, "answer": answer.get_msg(), "succeeded": answer.succeeded()}.update(

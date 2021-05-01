@@ -56,6 +56,7 @@ export default function useAPI<Type>(
 				setLoading(false);
 				setData(dataVar);
 				setErrorMsg(errorMsgVar);
+				console.log({ data: dataVar, error: errorMsgVar });
 			})
 			.then(() => {
 				callback && callback(dataVar, errorVar, errorMsgVar);

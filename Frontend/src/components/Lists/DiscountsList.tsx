@@ -37,6 +37,7 @@ const DiscountsList: FC<DiscountsListProps> = ({ openTab, products, storeId }) =
 
 	useEffect(() => {
 		getDiscounts();
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
 
 	const openDiscountForm = (fatherId: string) => {

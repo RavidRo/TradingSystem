@@ -148,7 +148,7 @@ class Responsibility(Parsable):
         return ResponsibilitiesData(
             self._store.get_id(),
             self._store.get_name(),
-            self._store.self._is_manager(),
+            self._is_manager(),
             self.__class__.__name__,
             [appointee.parse() for appointee in self._appointed],
             self._permissions(),

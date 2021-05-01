@@ -135,6 +135,7 @@ const ManageStore: FC<ManageStoreProps> = ({ storeId }) => {
 				}
 			}
 		);
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
 
 	const [selectedItem, setSelectedItem] = useState<string>('');

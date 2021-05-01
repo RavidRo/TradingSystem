@@ -43,6 +43,7 @@ const ConditionsList: FC<ConditionsListProps> = ({ openTab, products, storeId })
 
 	useEffect(() => {
 		getConditions();
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
 
 	const onDelete = (conditionId: string) => {

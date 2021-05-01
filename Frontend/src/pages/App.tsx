@@ -45,6 +45,7 @@ function App() {
 				setCookie(data.cookie);
 			}
 		});
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
 
 	return cookie !== '' ? (

@@ -53,6 +53,7 @@ const MyAppointeesList: FC<MyAppointeesListProps> = ({
 				setMyAppointees(getMyAppointees.data);
 			}
 		});
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
 
 	const onAppoint = (username: string, role: Role) => {
