@@ -47,10 +47,10 @@ class TradingSystemManager:
     # kwargs = You can search for a product by additional key words
     @staticmethod
     def search_products(
-        search_phrase, min_price, max_price, search_by, keywords
+        product_name: str, product_category: str, min_price, max_price, keywords
     ) -> Response[ParsableList[ProductData]]:
         return SearchEngine.search_products(
-            search_phrase, min_price, max_price, search_by, keywords
+            product_name, product_category, min_price, max_price, keywords
         ).parse()
 
     # 2.7

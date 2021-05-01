@@ -12,17 +12,10 @@ class SearchEngine:
     # kwargs = You can search for a product by additional key words
     @staticmethod
     def search_products(
-            search_phrase: str = None, min_price: float = 0,
-            max_price: float = float("inf"), search_by: Union[str, list[str]] = None, keywords: list[str] = None
+            product_name: str = None, product_category: str = None, min_price: float = 0,
+            max_price: float = float("inf"), keywords: list[str] = None
     ):
-        if keywords is None:
-            keywords = []
-        if isinstance(search_by, str):
-            search_by = [search_by]
-        search_by_name = "name" in search_by
-        search_by_category = "category" in search_by
-        search_by_keywords = "keywords" in search_by
-        if not (search_by_name or search_by_category or search_by_keywords):
+        if (not product_name) and (not product_category) and (not keywords):
             return Response(False, msg="You must search for at least one of the following: 'product', 'category', "
                                        "'keywords'")
         stores = StoresManager.get_stores_details().get_obj().values
@@ -39,7 +32,7 @@ class SearchEngine:
             if max_price and max_price < price:
                 return False
 
-            if search_by_keywords:
+            if keywords:
                 fit = True
                 for keyword in keywords:
                     if keyword not in product.get_keywords():
@@ -48,9 +41,9 @@ class SearchEngine:
                 if fit:
                     return True
 
-            if search_by_name and (name and search_phrase == name):
+            if product_name and product_name == name:
                 return True
-            if search_by_category and (category and search_phrase == category):
+            if product_category and product_category == category:
                 return True
 
             return False

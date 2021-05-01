@@ -296,7 +296,7 @@ def test_product_search_no_args_success():
     )
     product_id, product_name, category, price, quantity = _create_product(cookie, store_id, _generate_product_name(),
                                                                           "A", 5.50, 10)
-    response = system.search_products(search_phrase=product_name)
+    response = system.search_products(product_name)
     num_of_products = 0
     for store, products_to_quantities in response.get_obj().items():
         for product, quantity in products_to_quantities:
