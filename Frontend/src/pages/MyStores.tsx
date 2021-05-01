@@ -58,16 +58,16 @@ const MyStores: FC<MyStoresProps> = () => {
 	const myResponsibilities = useAPI<Appointee[]>('/get_my_responsibilities');
 	const openStore = useAPI<{ cookie: string; store_id: string }>('/create_store', {}, 'POST');
 	useEffect(() => {
-		if (!myResponsibilities.error) {
-			myResponsibilities.request().then(() => {
-				const myStores = (myResponsibilities.data as Appointee[]).map((responsibility) => ({
+		myResponsibilities.request().then(() => {
+			if (!myResponsibilities.error && myResponsibilities.data !== null) {
+				const myStores = myResponsibilities.data.map((responsibility) => ({
 					id: responsibility.store_id,
 					name: responsibility.store_name,
 					role: responsibility.role,
 				}));
 				setStores(myStores);
-			});
-		}
+			}
+		});
 	}, []);
 
 	const [stores, setStores] = useState<MyStore[]>([]);

@@ -15,6 +15,14 @@ export type Permission =
 	| 'remove_manager'
 	| 'get_history';
 
+export const defaultPermissions = {
+	manage_products: false,
+	get_appointments: true,
+	appoint_manager: false,
+	remove_manager: false,
+	get_history: false,
+};
+
 export type Role = 'Founder' | 'Owner' | 'Manager';
 export type Appointee = {
 	store_id: string;
