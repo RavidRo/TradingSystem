@@ -189,6 +189,26 @@ class TradingSystem(object):
     def get_store_appointments(self, cookie: str, store_id: str):
         return TradingSystemManager.get_store_appointments(cookie, store_id)
 
+    # 4.2
+    @log.loging(to_hide=[1])
+    def add_purchase_rule(self, cookie: str, store_id: str, rule_details: dict, rule_type: str, parent_id: str, clause: str = None):
+        return TradingSystemManager.add_purchase_rule(cookie, store_id, rule_details, rule_type, parent_id, clause)
+
+    # 4.2
+    @log.loging(to_hide=[1])
+    def remove_purchase_rule(self, cookie: str, store_id: str, rule_id: str):
+        return TradingSystemManager.remove_purchase_rule(cookie, store_id, rule_id)
+
+    # 4.2
+    @log.loging(to_hide=[1])
+    def edit_purchase_rule(self, cookie: str, store_id: str, rule_details: dict, rule_id: str, rule_type: str):
+        return TradingSystemManager.edit_purchase_rule(cookie, store_id, rule_details, rule_id, rule_type)
+
+    # 4.2
+    @log.loging(to_hide=[1])
+    def move_purchase_rule(self, cookie: str, store_id: str, rule_id: str, new_parent_id: str):
+        return TradingSystemManager.move_purchase_rule(cookie, store_id, rule_id, new_parent_id)
+
     # 4.11
 
     @log.loging(to_hide=[1])
@@ -205,3 +225,11 @@ class TradingSystem(object):
     @log.loging(to_hide=[1])
     def get_user_purchase_history(self, cookie: str, username: str):
         return TradingSystemManager.get_any_user_purchase_history_admin(cookie, username)
+
+    @log.loging(to_hide=[1])
+    def empty_notifications(self, cookie: str):
+        return TradingSystemManager.empty_notifications(cookie)
+
+    @log.loging(to_hide=[1])
+    def get_purchase_policy(self, cookie, store_id):
+        return TradingSystemManager.get_purchase_policy(cookie, store_id)

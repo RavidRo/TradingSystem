@@ -16,6 +16,7 @@ class Manager(Owner):
             Permission.APPOINT_MANAGER: False,
             Permission.REMOVE_MANAGER: False,
             Permission.GET_HISTORY: False,
+            Permission.MANAGE_PURCHASE_POLICY: False,
         }
 
     def __create_no_permission_Response(self, permission: Permission) -> Response:
@@ -47,11 +48,42 @@ class Manager(Owner):
         return self.__create_no_permission_Response(Permission.MANAGE_PRODUCTS)
 
     # 4.1
-    def edit_product_details(self, product_id: str, new_name: str, new_category: str, new_price: float) -> Response[None]:
+    def edit_product_details(self, product_id: str, new_name: str, new_category: str, new_price: float) -> Response[
+        None]:
         if self.__permissions[Permission.MANAGE_PRODUCTS]:
             return super().edit_product_details(product_id, new_name, new_category, new_price)
 
         return self.__create_no_permission_Response(Permission.MANAGE_PRODUCTS)
+
+    # 4.2
+    def add_purchase_rule(self, rule_details: dict, rule_type: str, parent_id: str, clause: str = None):
+        if self.__permissions[Permission.MANAGE_PURCHASE_POLICY]:
+            return super().add_purchase_rule(self, rule_details, rule_type, parent_id, clause)
+        return self.__create_no_permission_Response(Permission.MANAGE_PURCHASE_POLICY)
+
+    # 4.2
+    def remove_purchase_rule(self, rule_id: str):
+        if self.__permissions[Permission.MANAGE_PURCHASE_POLICY]:
+            return super().remove_purchase_rule(rule_id)
+        return self.__create_no_permission_Response(Permission.MANAGE_PURCHASE_POLICY)
+
+    # 4.2
+    def edit_purchase_rule(self, rule_details: dict, rule_id: str, rule_type: str):
+        if self.__permissions[Permission.MANAGE_PURCHASE_POLICY]:
+            return super().edit_purchase_rule(rule_details, rule_id, rule_type)
+        return self.__create_no_permission_Response(Permission.MANAGE_PURCHASE_POLICY)
+
+    # 4.2
+    def move_purchase_rule(self, rule_id: str, new_parent_id: str):
+        if self.__permissions[Permission.MANAGE_PURCHASE_POLICY]:
+            return super().move_purchase_rule(rule_id, new_parent_id)
+        return self.__create_no_permission_Response(Permission.MANAGE_PURCHASE_POLICY)
+
+    # 4.2
+    def get_purchase_policy(self):
+        if self.__permissions[Permission.MANAGE_PURCHASE_POLICY]:
+            return super().get_purchase_policy()
+        return self.__create_no_permission_Response(Permission.MANAGE_PURCHASE_POLICY)
 
     # 4.3
     def appoint_owner(self, user: IUser) -> Response[None]:

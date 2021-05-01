@@ -119,3 +119,29 @@ class UserState(ABC):
 
     def cancel_purchase(self):
         return self._cart.cancel_purchase()
+
+    # 4.2
+    @abstractmethod
+    def add_purchase_rule(self, store_id: str, rule_details: dict, rule_type: str, parent_id: str,
+                          clause: str = None):
+        return Response(False, msg="Abstract Method")
+
+    # 4.2
+    @abstractmethod
+    def remove_purchase_rule(self, store_id: str, rule_id: str):
+        return Response(False, msg="Abstract Method")
+
+    # 4.2
+    @abstractmethod
+    def edit_purchase_rule(self, store_id: str, rule_details: dict, rule_id: str, rule_type: str):
+        return Response(False, msg="Abstract Method")
+
+    # 4.2
+    @abstractmethod
+    def move_purchase_rule(self, store_id: str, rule_id: str, new_parent_id: str):
+        return Response(False, msg="Abstract Method")
+
+    # 4.2
+    @abstractmethod
+    def get_purchase_policy(self, store_id: str):
+        return Response(False, msg="Abstract Method")

@@ -22,6 +22,26 @@ class Founder(Responsibility):
     def edit_product_details(self, product_id: str, new_name: str, new_category: str, new_price: float) -> Response[None]:
         return self._store.edit_product_details(product_id, new_name, new_category, new_price)
 
+    # 4.2
+    def add_purchase_rule(self, rule_details: dict, rule_type: str, parent_id: str, clause: str = None):
+        return self._store.add_purchase_rule(rule_details, rule_type, parent_id, clause)
+
+    # 4.2
+    def remove_purchase_rule(self, rule_id: str):
+        return self._store.remove_purchase_rule(rule_id)
+
+    # 4.2
+    def edit_purchase_rule(self, rule_details: dict, rule_id: str, rule_type: str):
+        return self._store.edit_purchase_rule(rule_details, rule_id, rule_type)
+
+    # 4.2
+    def move_purchase_rule(self, rule_id: str, new_parent_id: str):
+        return self._store.move_purchase_rule(rule_id, new_parent_id)
+
+    # 4.2
+    def get_purchase_policy(self):
+        return self._store.get_purchase_policy()
+
     # 4.3
     def appoint_owner(self, user: IUser) -> Response[None]:
         # * The import is here to fix circular dependency problem

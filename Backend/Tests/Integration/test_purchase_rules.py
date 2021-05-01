@@ -358,14 +358,13 @@ def test_very_complex_fail_because_of_rule_under_and(store: Store, simple_rule_d
                            'target': 10}
     store.add_purchase_rule(simple_rule_under_and, 'simple', '7')
     user_age = 26
-    stam = store.check_purchase(products_to_quantities, user_age)
-    assert not stam.succeeded()
+    assert not store.check_purchase(products_to_quantities, user_age).succeeded()
 
 
 @patch.multiple(ProductStub, get_category=MagicMock(return_value='milk products'))
-def test_very_complex_fail_because_of_rule_under_and(store: Store, simple_rule_details_upper, simple_rule_details_down, products_to_quantities):
+def test_very_complex_fail_because_of_rule_false(store: Store, simple_rule_details_upper, simple_rule_details_down, products_to_quantities):
     store.add_purchase_rule({'operator': 'and'}, 'complex', '1')
-    store.add_purchase_rule({'operator': 'or'}, 'complex', '2')
+    store.add_purchase_rule({'operator': 'and'}, 'complex', '2')
     store.add_purchase_rule({'operator': 'or'}, 'complex', '2')
     simple_rule_result_true = {'context': {'obj': 'product', 'identifier': '1'}, 'operator': 'less-than', 'target': 10}
     simple_rule_result_false = {'context': {'obj': 'product', 'identifier': '1'}, 'operator': 'less-than', 'target': 8}
@@ -376,5 +375,4 @@ def test_very_complex_fail_because_of_rule_under_and(store: Store, simple_rule_d
                            'target': 9}
     store.add_purchase_rule(simple_rule_under_and, 'simple', '7')
     user_age = 26
-    stam = store.check_purchase(products_to_quantities, user_age)
-    assert not stam.succeeded()
+    assert not store.check_purchase(products_to_quantities, user_age).succeeded()

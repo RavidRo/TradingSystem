@@ -104,6 +104,26 @@ class User(IUser):
     ) -> Response[None]:
         return self.state.edit_product_details(store_id, product_id, new_name, new_category, new_price)
 
+    # 4.2
+    def add_purchase_rule(self, store_id: str, rule_details: dict, rule_type: str, parent_id: str, clause: str = None):
+        return self.state.add_purchase_rule(rule_details, rule_type, parent_id, clause)
+
+    # 4.2
+    def remove_purchase_rule(self, store_id: str, rule_id: str):
+        return self.state.remove_purchase_rule(store_id, rule_id)
+
+    # 4.2
+    def edit_purchase_rule(self, store_id: str,  rule_details: dict, rule_id: str, rule_type: str):
+        return self.state.edit_purchase_rule(store_id, rule_details, rule_id, rule_type)
+
+    # 4.2
+    def move_purchase_rule(self, store_id: str,  rule_id: str, new_parent_id: str):
+        return self.state.move_purchase_rule(store_id, rule_id, new_parent_id)
+
+    # 4.2
+    def get_purchase_policy(self, store_id: str):
+        return self.state.get_purchase_policy(store_id)
+
     # 4.3
     def appoint_owner(self, store_id: str, user: IUser) -> Response[None]:
         return self.state.appoint_new_store_owner(store_id, user)
@@ -166,3 +186,5 @@ class User(IUser):
     def get_appointment_lock(self) -> threading.Lock():
         return self.appointment_lock
 
+    def empty_notifications(self):
+        return len(self.__notifications == 0)

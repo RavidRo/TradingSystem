@@ -146,3 +146,23 @@ class Member(UserState):
 
     def is_appointed(self, store_id):
         return Response(True, store_id in self.__responsibilities)
+
+    # 4.2
+    def add_purchase_rule(self, store_id: str, rule_details: dict, rule_type: str, parent_id: str, clause: str = None):
+        return self.__responsibilities[store_id].add_purchase_rule(rule_details, rule_type, parent_id, clause)
+
+    # 4.2
+    def remove_purchase_rule(self, store_id: str, rule_id: str):
+        return self.__responsibilities[store_id].remove_purchase_rule(rule_id)
+
+    # 4.2
+    def edit_purchase_rule(self, store_id: str, rule_details: dict, rule_id: str, rule_type: str):
+        return self.__responsibilities[store_id].edit_purchase_rule(rule_details, rule_id, rule_type)
+
+    # 4.2
+    def move_purchase_rule(self, store_id: str, rule_id: str, new_parent_id: str):
+        return self.__responsibilities[store_id].move_purchase_rule(rule_id, new_parent_id)
+
+    # 4.2
+    def get_purchase_policy(self, store_id):
+        return self.__responsibilities[store_id].get_purchase_policy()

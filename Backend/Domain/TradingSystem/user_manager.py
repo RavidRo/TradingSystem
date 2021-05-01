@@ -211,6 +211,36 @@ class UserManager:
         func: Callable[[User], Response] = lambda user: user.edit_product_details(store_id, product_id, new_name, new_category, new_price)
         return UserManager.__deligate_to_user(cookie, func)
 
+    # 4.2
+    @staticmethod
+    def add_purchase_rule(cookie: str, store_id: str, rule_details: dict, rule_type: str, parent_id: str, clause: str = None):
+        func: Callable[[User], Response] = lambda user: user.add_purchase_rule(store_id, rule_details, rule_type, parent_id, clause)
+        return UserManager.__deligate_to_user(cookie, func)
+
+    # 4.2
+    @staticmethod
+    def remove_purchase_rule(cookie: str, store_id: str, rule_id: str):
+        func: Callable[[User], Response] = lambda user: user.remove_purchase_rule(store_id, rule_id)
+        return UserManager.__deligate_to_user(cookie, func)
+
+    # 4.2
+    @staticmethod
+    def edit_purchase_rule(cookie: str, store_id: str, rule_details: dict, rule_id: str, rule_type: str):
+        func: Callable[[User], Response] = lambda user: user.edit_purchase_rule(store_id, rule_details, rule_id, rule_type)
+        return UserManager.__deligate_to_user(cookie, func)
+
+    # 4.2
+    @staticmethod
+    def move_purchase_rule(cookie: str, store_id: str, rule_id: str, new_parent_id: str):
+        func: Callable[[User], Response] = lambda user: user.move_purchase_rule(store_id, rule_id, new_parent_id)
+        return UserManager.__deligate_to_user(cookie, func)
+
+    # 4.2
+    @staticmethod
+    def get_purchase_policy(cookie: str, store_id: str):
+        func: Callable[[User], Response] = lambda user: user.get_purchase_policy(store_id)
+        return UserManager.__deligate_to_user(cookie, func)
+
     # 4.3
     @staticmethod
     def appoint_owner(cookie: str, store_id: str, username: str) -> Response[None]:
@@ -307,3 +337,13 @@ class UserManager:
     @staticmethod
     def _get_username_user():
         return UserManager.__username_user
+
+    @staticmethod
+    def get_user_received_notifications(cookie: str) -> Response[ParsableList[PurchaseDetails]]:
+        func: Callable[[User], Response] = lambda user: user.get_user_received_notifications()
+        return UserManager.__deligate_to_user(cookie, func)
+
+    @staticmethod
+    def empty_notifications(cookie):
+        func: Callable[[User], bool] = lambda user: user.empty_notifications()
+        return UserManager.__deligate_to_user(cookie, func)

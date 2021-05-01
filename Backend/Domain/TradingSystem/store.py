@@ -278,7 +278,7 @@ class Store:
         return self.__purchase_policy.move_purchase_rule(rule_id, new_parent_id)
 
     def get_purchase_policy(self):
-        return self.__purchase_policy
+        return self.__purchase_policy.get_purchase_rules()
 
     def parse_purchase_policiy(self):
         return self.__purchase_policy.parse()

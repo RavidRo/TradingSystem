@@ -1,8 +1,10 @@
+import operator
+
 from Backend.Domain.TradingSystem.TypesPolicies.Purchase_Composites.concrete_composites import AndCompositePurchaseRule, \
     OrCompositePurchaseRule, ConditioningCompositePurchaseRule
 from Backend.Domain.TradingSystem.TypesPolicies.Purchase_Composites.purchase_leaves import ConcreteLeaf
 from Backend.Domain.TradingSystem.user import User
-from Backend.response import Response
+from Backend.response import Response, ParsableMap
 
 
 class PurchasePolicy:
@@ -16,6 +18,14 @@ logic_types = {"or": lambda self: OrCompositePurchaseRule(self.generate_id()),
                "and": lambda self: AndCompositePurchaseRule(self.generate_id()),
                "conditional": lambda self: ConditioningCompositePurchaseRule(self.generate_id())}
 
+
+objects = ['product', 'user', 'category', 'bag']
+objects_with_id = ['category', 'product']
+ops = {'great-than': operator.gt,
+       'less-than': operator.lt,
+       'great-equals': operator.ge,
+       'less-equals': operator.le,
+       'equals': operator.eq}
 
 # endregion
 
@@ -46,12 +56,51 @@ class DefaultPurchasePolicy(PurchasePolicy):
     clause - only for conditional - valid values: if/then
     """
 
+    def check_keys_in_rule_details(self, keys: list[str], rule_details: dict):
+        for key in keys:
+            if key not in rule_details.keys():
+                return Response(False, msg= f"Missing {key} in details!")
+        return Response(True, msg="all keys exist")
+
+    def check_simple_rule_details_validity(self, rule_details: dict) -> Response[None]:
+        keys = ['context', 'operator', 'target']
+        check_response = self.check_keys_in_rule_details(keys, rule_details)
+        if not check_response.succeeded():
+            return check_response
+
+        context_dict = rule_details['context']
+        if 'obj' not in context_dict:
+            return Response(False, msg="Missing object in details!")
+
+        object = context_dict['object']
+        if object not in objects:
+            return Response(False, msg=f"Invalid object {object} in details!")
+
+        if object in objects_with_id and 'identifier' not in context_dict:
+            return Response(False, msg="Missing identifier in details!")
+
+        if rule_details['operator'] not in ops.keys():
+            return Response(False, msg="Invalid operator!")
+        return Response(True, msg="No missing keys")
+
+    def check_complex_rule_details_validity(self, rule_details: dict) -> Response[None]:
+        if 'type' not in rule_details.keys():
+            return Response(False, msg="Missing type in details!")
+        return Response(True, msg="No missing keys")
+
+
     def add_purchase_rule(self, rule_details: dict, rule_type: str, parent_id: str, clause: str= None) -> Response[None]:
         if rule_type == "simple":
+            response_validity = self.check_simple_rule_details_validity(rule_details)
+            if not response_validity.succeeded():
+                return response_validity
             simple_rule = ConcreteLeaf(rule_details, self.generate_id())
             return self.__purchase_rules.add(simple_rule, parent_id, clause)
 
         elif rule_type == "complex":
+            response_validity = self.check_complex_rule_details_validity(rule_details)
+            if not response_validity.succeeded():
+                return response_validity
             logic_type = rule_details['operator']
             if logic_type in logic_types.keys():
                 return self.__purchase_rules.add(logic_types[logic_type](self), parent_id, clause)
@@ -59,6 +108,7 @@ class DefaultPurchasePolicy(PurchasePolicy):
                 return Response(False, msg=f"invalid logic type: {logic_type}")
         else:
             return Response(False, msg=f"invalid rule type: {rule_type}")
+
 
     def remove_purchase_rule(self, rule_id: str):
         return self.__purchase_rules.remove(rule_id)
@@ -71,7 +121,8 @@ class DefaultPurchasePolicy(PurchasePolicy):
 
         new_parent_response = self.__purchase_rules.get_rule(new_parent_id)
         if not new_parent_response.succeeded():
-            return new_parent_response
+            return Response(False, msg=new_parent_response.get_msg())
+
         new_parent = new_parent_response.get_obj()
         check_validity = rule_to_move.check_validity(new_parent_id)
         if not check_validity.succeeded():
@@ -95,10 +146,16 @@ class DefaultPurchasePolicy(PurchasePolicy):
 
     def edit_purchase_rule(self, rule_details: dict, rule_id: str, rule_type: str):
         if rule_type == "simple":
+            response_validity = self.check_simple_rule_details_validity(rule_details)
+            if not response_validity.succeeded():
+                return response_validity
             simple_rule = ConcreteLeaf(rule_details, self.generate_id())
             return self.__purchase_rules.edit_rule(rule_id, simple_rule)
 
         elif rule_type == "complex":
+            response_validity = self.check_complex_rule_details_validity(rule_details)
+            if not response_validity.succeeded():
+                return response_validity
             logic_type = rule_details['operator']
             if logic_type in logic_types.keys():
                 return self.__purchase_rules.edit_rule(rule_id, logic_types[logic_type](self))
@@ -110,7 +167,7 @@ class DefaultPurchasePolicy(PurchasePolicy):
             return Response(False, msg=f"invalid rule type: {rule_type}")
 
     def get_purchase_rules(self):
-        return self.__purchase_rules
+        return Response(True, obj= ParsableMap(self.parse()), msg="Here are the purchase rules")
 
     def checkPolicy(self, products_to_quantities: dict, user_age: int) -> Response[None]:
         return self.__purchase_rules.operation(products_to_quantities, user_age)
