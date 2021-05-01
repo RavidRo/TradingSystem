@@ -57,8 +57,8 @@ type BasicOperator = 'and' | 'or';
 
 export type ComplexOperator = ConditioningOperator | BasicOperator;
 
-type Conditioning = { operator: ConditioningOperator; test?: Condition; then?: Condition };
-type BasicRule = { operator: BasicOperator; operands: Condition[] };
+export type Conditioning = { operator: ConditioningOperator; test?: Condition; then?: Condition };
+export type BasicRule = { operator: BasicOperator; operands: Condition[] };
 
 export type ConditionComplex = Conditioning | BasicRule;
 

@@ -7,13 +7,13 @@ import GenericList from './GenericList';
 
 type AppointeesListProps = {
 	selectedItem: string;
-	store_id: string;
+	storeId: string;
 	onSelectAppointee: (appointee: Appointee) => void;
 };
 
-const AppointeesList: FC<AppointeesListProps> = ({ selectedItem, store_id, onSelectAppointee }) => {
+const AppointeesList: FC<AppointeesListProps> = ({ selectedItem, storeId, onSelectAppointee }) => {
 	const { request, data, error } = useAPI<Appointee[]>('/get_store_appointments', {
-		store_id: store_id,
+		store_id: storeId,
 	});
 	const [appointees, setAppointees] = useState<Appointee[]>([]);
 

@@ -12,7 +12,7 @@ type ProductsListProps = {
 	setProducts: (newProducts: ProductQuantity[]) => void;
 	openTab: (component: FC, selectedItem: string) => void;
 	selectedItem: string;
-	store_id: string;
+	storeId: string;
 };
 
 const ProductsList: FC<ProductsListProps> = ({
@@ -20,7 +20,7 @@ const ProductsList: FC<ProductsListProps> = ({
 	openTab,
 	selectedItem,
 	setProducts,
-	store_id,
+	storeId,
 }) => {
 	const createProduct = useAPI<{
 		cookie: string;
@@ -36,7 +36,7 @@ const ProductsList: FC<ProductsListProps> = ({
 	) => {
 		createProduct
 			.request({
-				store_id: store_id,
+				store_id: storeId,
 				name,
 				price,
 				quantity,

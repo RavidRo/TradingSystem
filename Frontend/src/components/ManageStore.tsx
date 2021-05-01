@@ -176,7 +176,7 @@ const ManageStore: FC<ManageStoreProps> = ({ storeId }) => {
 							products={products}
 							selectedItem={selectedItem}
 							setProducts={setProducts}
-							store_id={store.id}
+							storeId={store.id}
 						/>
 						<MyAppointeesList
 							onSelectAppointee={onSelectAppointee}
@@ -188,10 +188,10 @@ const ManageStore: FC<ManageStoreProps> = ({ storeId }) => {
 						<AppointeesList
 							onSelectAppointee={onSelectAppointee}
 							selectedItem={selectedItem}
-							store_id={store.id}
+							storeId={store.id}
 						/>
-						<DiscountsList openTab={openTab} products={products} />
-						<ConditionsList openTab={openTab} products={products} />{' '}
+						<DiscountsList openTab={openTab} products={products} storeId={store.id} />
+						<ConditionsList openTab={openTab} products={products} storeId={store.id} />
 					</>
 				)}
 			</div>

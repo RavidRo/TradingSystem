@@ -24,7 +24,8 @@ import GenericList from './GenericList';
 
 type ConditionNodeProps = {
 	condition: Condition;
-	onCreate: () => void;
+	onCreate: (fatherId: string, conditioning?: 'test' | 'then' | undefined) => void;
+	fatherId: string;
 };
 
 function conditionToString(condition: Condition): string {
@@ -60,7 +61,7 @@ function operatorToString(operator: SimpleOperator): string {
 	return mapToString[operator];
 }
 
-const ConditionNode: FC<ConditionNodeProps> = ({ condition, onCreate }) => {
+const ConditionNode: FC<ConditionNodeProps> = ({ condition, onCreate, fatherId }) => {
 	const [open, setOpen] = React.useState(true);
 	const handleClick = () => {
 		setOpen(!open);
@@ -86,7 +87,7 @@ const ConditionNode: FC<ConditionNodeProps> = ({ condition, onCreate }) => {
 					{isBasicRule(condition.rule) ? (
 						<GenericList
 							data={condition.rule.operands}
-							onCreate={onCreate}
+							onCreate={() => onCreate(fatherId)}
 							createTxt="+ Add condition"
 							padRight
 						>
@@ -95,6 +96,7 @@ const ConditionNode: FC<ConditionNodeProps> = ({ condition, onCreate }) => {
 									key={condition.id}
 									condition={condition}
 									onCreate={onCreate}
+									fatherId={condition.id}
 								/>
 							)}
 						</GenericList>
@@ -107,9 +109,10 @@ const ConditionNode: FC<ConditionNodeProps> = ({ condition, onCreate }) => {
 										key={condition.id}
 										condition={condition.rule.then}
 										onCreate={onCreate}
+										fatherId={condition.id}
 									/>
 								) : (
-									<ListItem button onClick={onCreate}>
+									<ListItem button onClick={() => onCreate(fatherId, 'then')}>
 										<ListItemText primary="+ Add condition" />
 									</ListItem>
 								)}
@@ -119,9 +122,10 @@ const ConditionNode: FC<ConditionNodeProps> = ({ condition, onCreate }) => {
 										key={condition.id}
 										condition={condition.rule.test}
 										onCreate={onCreate}
+										fatherId={condition.id}
 									/>
 								) : (
-									<ListItem button onClick={onCreate}>
+									<ListItem button onClick={() => onCreate(fatherId, 'test')}>
 										<ListItemText primary="+ Add condition" />
 									</ListItem>
 								)}
