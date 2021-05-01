@@ -12,7 +12,7 @@ class ResponsibilitiesData:
         role: str,
         appointees: List[ResponsibilitiesData],
         permissions: List[str],
-        username: str
+        username: str,
     ) -> None:
 
         self.store_id = store_id
@@ -21,3 +21,4 @@ class ResponsibilitiesData:
         self.appointees = appointees
         self.permissions = permissions
         self.username = username
+        self.store_name = store_name

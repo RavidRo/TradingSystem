@@ -185,6 +185,12 @@ class TradingSystemManager:
     def get_store_appointments(cookie: str, store_id: str) -> Response[ResponsibilitiesData]:
         return UserManager.get_store_appointments(cookie, store_id).parse()
 
+    
+    @staticmethod
+    def get_my_appointees(cookie: str, store_id: str) -> Response[ResponsibilitiesData]:
+        return UserManager.get_my_appointees(cookie, store_id).parse()
+
+
     # 4.11
     @staticmethod
     def get_store_purchase_history(

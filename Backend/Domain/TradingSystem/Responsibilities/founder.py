@@ -19,7 +19,9 @@ class Founder(Responsibility):
         return self._store.change_product_quantity(product_id, quantity)
 
     # 4.1
-    def edit_product_details(self, product_id: str, new_name: str, new_category: str, new_price: float) -> Response[None]:
+    def edit_product_details(
+        self, product_id: str, new_name: str, new_category: str, new_price: float
+    ) -> Response[None]:
         return self._store.edit_product_details(product_id, new_name, new_category, new_price)
 
     # 4.3
@@ -101,6 +103,9 @@ class Founder(Responsibility):
     # 4.9
     def get_store_appointments(self) -> Response[Responsibility]:
         return self._store.get_personnel_info()
+
+    def get_my_appointees(self) -> Response[ParsableList[Responsibility]]:
+        return self._appointed
 
     # 4.11
     def get_store_purchase_history(self) -> Response[ParsableList[PurchaseDetails]]:

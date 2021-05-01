@@ -55,7 +55,7 @@ type MyStoresProps = {};
 type MyStore = { id: string; name: string; role: string };
 
 const MyStores: FC<MyStoresProps> = () => {
-	const myResponsibilities = useAPI<Appointee[]>('/get_my_responsibilities');
+	const myResponsibilities = useAPI<Appointee[]>('/get_my_appointees');
 	const openStore = useAPI<{ cookie: string; store_id: string }>('/create_store', {}, 'POST');
 	useEffect(() => {
 		myResponsibilities.request().then(() => {

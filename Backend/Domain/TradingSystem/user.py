@@ -152,6 +152,9 @@ class User(IUser):
     def get_store_appointments(self, store_id: str) -> Response[Responsibility]:
         return self.state.get_store_personnel_info(store_id)
 
+    def get_my_appointees(self, store_id: str) -> Response[ParsableList[Responsibility]]:
+        return self.state.get_my_appointees(store_id)
+
     # 4.11
     def get_store_purchase_history(self, store_id: str) -> Response[ParsableList[PurchaseDetails]]:
         return self.state.get_store_purchase_history(store_id)

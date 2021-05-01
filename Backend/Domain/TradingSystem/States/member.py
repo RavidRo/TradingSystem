@@ -9,7 +9,9 @@ from .user_state import UserState
 
 class Member(UserState):
     def get_username(self):
-        return Response(True, obj=PrimitiveParsable(self._username), msg="got username successfully")
+        return Response(
+            True, obj=PrimitiveParsable(self._username), msg="got username successfully"
+        )
 
     def add_responsibility(self, responsibility, store_id):
         self.__responsibilities[store_id] = responsibility
@@ -81,7 +83,9 @@ class Member(UserState):
     def add_new_product(self, store_id, product_name, category, product_price, quantity):
         if store_id not in self.__responsibilities:
             return Response(False, msg=f"this member do not own/manage store {store_id}")
-        return self.__responsibilities[store_id].add_product(product_name, category, product_price, quantity)
+        return self.__responsibilities[store_id].add_product(
+            product_name, category, product_price, quantity
+        )
 
     def remove_product(self, store_id, product_id):
         if store_id not in self.__responsibilities:
@@ -98,7 +102,9 @@ class Member(UserState):
     def edit_product_details(self, store_id, product_id, new_name, new_category, new_price):
         if store_id not in self.__responsibilities:
             return Response(False, msg=f"this member do not own/manage store {store_id}")
-        return self.__responsibilities[store_id].edit_product_details(product_id, new_name, new_category, new_price)
+        return self.__responsibilities[store_id].edit_product_details(
+            product_id, new_name, new_category, new_price
+        )
 
     def appoint_new_store_owner(self, store_id, new_owner):
         if store_id not in self.__responsibilities:
@@ -132,6 +138,11 @@ class Member(UserState):
         if store_id not in self.__responsibilities:
             return Response(False, msg=f"this member do not own/manage store {store_id}")
         return self.__responsibilities[store_id].get_store_appointments()
+
+    def get_my_appointees(self, store_id):
+        if store_id not in self.__responsibilities:
+            return Response(False, msg=f"this member do not own/manage store {store_id}")
+        return self.__responsibilities[store_id].get_my_appointees()
 
     def get_store_purchase_history(self, store_id):
         if store_id not in self.__responsibilities:

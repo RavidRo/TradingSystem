@@ -201,6 +201,10 @@ class TradingSystem(object):
     def get_store_appointments(self, cookie: str, store_id: str):
         return TradingSystemManager.get_store_appointments(cookie, store_id)
 
+    @log.loging(to_hide=[1])
+    def get_my_appointees(self, cookie: str, store_id: str):
+        return TradingSystemManager.get_my_appointees(cookie, store_id)
+
     # 4.11
     @log.loging(to_hide=[1])
     def get_store_purchase_history(self, cookie: str, store_id: str):

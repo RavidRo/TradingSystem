@@ -21,7 +21,9 @@ def connect():
     if cookie is None:
         cookie = await system.enter_system()
     answer = system.connect(cookie, lambda messages: websocket.send(messages))
-    return json.dumps({"cookie": cookie, "answer": answer.get_msg(), "succeeded": answer.succeeded()})
+    return json.dumps(
+        {"cookie": cookie, "answer": answer.get_msg(), "succeeded": answer.succeeded()}
+    )
 
 
 @app.route("/register", methods=["POST"])
@@ -32,7 +34,9 @@ async def register():
     username = request.args.get("username")
     password = request.args.get("password")
     answer = system.register(cookie=int(cookie), username=username, password=password)
-    return json.dumps({"cookie": cookie, "answer": answer.get_msg(), "succeeded": answer.succeeded()})
+    return json.dumps(
+        {"cookie": cookie, "answer": answer.get_msg(), "succeeded": answer.succeeded()}
+    )
 
 
 @app.route("/login", methods=["POST"])
@@ -43,7 +47,9 @@ async def login():
     username = request.args.get("username")
     password = request.args.get("password")
     answer = await system.login(cookie=int(cookie), username=username, password=password)
-    return json.dumps({"cookie": cookie, "answer": answer.get_msg(), "succeeded": answer.succeeded()})
+    return json.dumps(
+        {"cookie": cookie, "answer": answer.get_msg(), "succeeded": answer.succeeded()}
+    )
 
 
 @app.route("/get_stores_details", methods=["HEAD"])
@@ -79,7 +85,9 @@ async def save_product_in_cart():
     product_id = request.args.get("product_id")
     quantity = request.args.get("quantity")
     answer = await system.save_product_in_cart(cookie, store_id, product_id, quantity)
-    return json.dumps({"cookie": cookie, "answer": answer.get_msg(), "succeeded": answer.succeeded()})
+    return json.dumps(
+        {"cookie": cookie, "answer": answer.get_msg(), "succeeded": answer.succeeded()}
+    )
 
 
 @app.route("/get_cart_details", methods=["HEAD"])
@@ -99,7 +107,9 @@ async def remove_product_from_cart():
     product_id = request.args.get("product_id")
     quantity = request.args.get("quantity")
     answer = await system.remove_product_from_cart(cookie, product_id, quantity)
-    return json.dumps({"cookie": cookie, "answer": answer.get_msg(), "succeeded": answer.succeeded()})
+    return json.dumps(
+        {"cookie": cookie, "answer": answer.get_msg(), "succeeded": answer.succeeded()}
+    )
 
 
 @app.route("/change_product_quantity_in_cart", methods=["POST"])
@@ -111,7 +121,9 @@ async def change_product_quantity_in_cart():
     product_id = request.args.get("product_id")
     quantity = request.args.get("quantity")
     answer = await system.remove_product_from_cart(cookie, store_id, product_id, quantity)
-    return json.dumps({"cookie": cookie, "answer": answer.get_msg(), "succeeded": answer.succeeded()})
+    return json.dumps(
+        {"cookie": cookie, "answer": answer.get_msg(), "succeeded": answer.succeeded()}
+    )
 
 
 @app.route("/purchase_cart", methods=["POST"])
@@ -183,7 +195,9 @@ async def remove_products():
     store_id = request.args.get("store_id")
     product_id = request.args.get("product_id")
     answer = await system.remove_product_from_store(cookie, store_id, product_id)
-    return json.dumps({"cookie": cookie, "answer": answer.get_msg(), "succeeded": answer.succeeded()})
+    return json.dumps(
+        {"cookie": cookie, "answer": answer.get_msg(), "succeeded": answer.succeeded()}
+    )
 
 
 @app.route("/change_product_quantity", methods=["POST"])
@@ -195,7 +209,9 @@ async def change_product_quantity():
     product_id = request.args.get("product_id")
     quantity = request.args.get("quantity")
     answer = await system.change_product_quantity_in_store(cookie, store_id, product_id, quantity)
-    return json.dumps({"cookie": cookie, "answer": answer.get_msg(), "succeeded": answer.succeeded()})
+    return json.dumps(
+        {"cookie": cookie, "answer": answer.get_msg(), "succeeded": answer.succeeded()}
+    )
 
 
 @app.route("/edit_product_details", methods=["POST"])
@@ -208,7 +224,9 @@ async def edit_product_details():
     new_name = request.args.get("new_name")
     new_price = request.args.get("new_price")
     answer = await system.edit_product_details(cookie, store_id, product_id, new_name, new_price)
-    return json.dumps({"cookie": cookie, "answer": answer.get_msg(), "succeeded": answer.succeeded()})
+    return json.dumps(
+        {"cookie": cookie, "answer": answer.get_msg(), "succeeded": answer.succeeded()}
+    )
 
 
 @app.route("/appoint_owner", methods=["POST"])
@@ -219,7 +237,9 @@ async def appoint_owner():
     store_id = request.args.get("store_id")
     username = request.args.get("username")
     answer = await system.appoint_owner(cookie, store_id, username)
-    return json.dumps({"cookie": cookie, "answer": answer.get_msg(), "succeeded": answer.succeeded()})
+    return json.dumps(
+        {"cookie": cookie, "answer": answer.get_msg(), "succeeded": answer.succeeded()}
+    )
 
 
 @app.route("/appoint_manager", methods=["POST"])
@@ -230,7 +250,9 @@ async def appoint_manager():
     store_id = request.args.get("store_id")
     username = request.args.get("username")
     answer = await system.appoint_manager(cookie, store_id, username)
-    return json.dumps({"cookie": cookie, "answer": answer.get_msg(), "succeeded": answer.succeeded()})
+    return json.dumps(
+        {"cookie": cookie, "answer": answer.get_msg(), "succeeded": answer.succeeded()}
+    )
 
 
 @app.route("/add_manager_permission", methods=["POST"])
@@ -242,7 +264,9 @@ async def add_manager_permission():
     username = request.args.get("username")
     permission_number = request.args.get("permission_number")
     answer = await system.add_manager_permission(cookie, store_id, username, permission_number)
-    return json.dumps({"cookie": cookie, "answer": answer.get_msg(), "succeeded": answer.succeeded()})
+    return json.dumps(
+        {"cookie": cookie, "answer": answer.get_msg(), "succeeded": answer.succeeded()}
+    )
 
 
 @app.route("/remove_manager_permission", methods=["POST"])
@@ -254,7 +278,9 @@ async def remove_manager_permission():
     username = request.args.get("username")
     permission_number = request.args.get("permission_number")
     answer = await system.remove_manager_permission(cookie, store_id, username, permission_number)
-    return json.dumps({"cookie": cookie, "answer": answer.get_msg(), "succeeded": answer.succeeded()})
+    return json.dumps(
+        {"cookie": cookie, "answer": answer.get_msg(), "succeeded": answer.succeeded()}
+    )
 
 
 @app.route("/remove_appointment", methods=["POST"])
@@ -265,7 +291,9 @@ async def remove_appointment():
     store_id = request.args.get("store_id")
     username = request.args.get("username")
     answer = await system.remove_appointment(cookie, store_id, username)
-    return json.dumps({"cookie": cookie, "answer": answer.get_msg(), "succeeded": answer.succeeded()})
+    return json.dumps(
+        {"cookie": cookie, "answer": answer.get_msg(), "succeeded": answer.succeeded()}
+    )
 
 
 @app.route("/get_store_appointments", methods=["GET"])
@@ -275,7 +303,25 @@ async def get_store_appointments():
         cookie = await system.enter_system()
     store_id = request.args.get("store_id")
     answer = await system.get_store_appointments(cookie, store_id)
-    return json.dumps({"cookie": cookie, "answer": answer.get_msg(), "succeeded": answer.succeeded()}.update(answer.get_obj().__dict__))
+    return json.dumps(
+        {"cookie": cookie, "answer": answer.get_msg(), "succeeded": answer.succeeded()}.update(
+            answer.get_obj().__dict__
+        )
+    )
+
+
+@app.route("/get_my_appointees", methods=["GET"])
+async def get_my_appointees():
+    cookie = request.args.get("cookie")
+    if cookie is None:
+        cookie = await system.enter_system()
+    store_id = request.args.get("store_id")
+    answer = await system.get_my_appointees(cookie, store_id)
+    return json.dumps(
+        {"cookie": cookie, "answer": answer.get_msg(), "succeeded": answer.succeeded()}.update(
+            answer.get_obj().__dict__
+        )
+    )
 
 
 @app.route("/get_store_purchase_history", methods=["GET"])
@@ -286,9 +332,15 @@ async def get_store_purchases_history():
     store_id = request.args.get("store_id")
     answer = await system.get_store_purchase_history(cookie, store_id)
     if answer.succeeded():
-        return json.dumps({"cookie": cookie, "answer": answer.get_msg(), "succeeded": answer.succeeded()}.update(
-            [ob.__dict__ for ob in answer.get_obj()]))
-    return json.dumps({"cookie": cookie, "answer": answer.get_msg(), "succeeded": answer.succeeded()})
+        return json.dumps(
+            {"cookie": cookie, "answer": answer.get_msg(), "succeeded": answer.succeeded()}.update(
+                [ob.__dict__ for ob in answer.get_obj()]
+            )
+        )
+    return json.dumps(
+        {"cookie": cookie, "answer": answer.get_msg(), "succeeded": answer.succeeded()}
+    )
+
 
 # System Manager
 # ====================
@@ -302,9 +354,14 @@ async def get_user_purchase_history():
     username = request.args.get("username")
     answer = await system.get_user_purchase_history(cookie, username)
     if answer.succeeded():
-        return json.dumps({"cookie": cookie, "answer": answer.get_msg(), "succeeded": answer.succeeded()}.update(
-            [ob.__dict__ for ob in answer.get_obj()]))
-    return json.dumps({"cookie": cookie, "answer": answer.get_msg(), "succeeded": answer.succeeded()})
+        return json.dumps(
+            {"cookie": cookie, "answer": answer.get_msg(), "succeeded": answer.succeeded()}.update(
+                [ob.__dict__ for ob in answer.get_obj()]
+            )
+        )
+    return json.dumps(
+        {"cookie": cookie, "answer": answer.get_msg(), "succeeded": answer.succeeded()}
+    )
 
 
 @app.route("/get_any_store_purchase_history", methods=["GET"])
@@ -315,9 +372,14 @@ async def get_any_store_purchase_history():
     store_id = request.args.get("store_id")
     answer = await system.get_any_store_purchase_history(cookie, store_id)
     if answer.succeeded():
-        return json.dumps({"cookie": cookie, "answer": answer.get_msg(), "succeeded": answer.succeeded()}.update(
-            [ob.__dict__ for ob in answer.get_obj()]))
-    return json.dumps({"cookie": cookie, "answer": answer.get_msg(), "succeeded": answer.succeeded()})
+        return json.dumps(
+            {"cookie": cookie, "answer": answer.get_msg(), "succeeded": answer.succeeded()}.update(
+                [ob.__dict__ for ob in answer.get_obj()]
+            )
+        )
+    return json.dumps(
+        {"cookie": cookie, "answer": answer.get_msg(), "succeeded": answer.succeeded()}
+    )
 
 
 @app.errorhandler(404)

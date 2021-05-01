@@ -96,6 +96,10 @@ class UserState(ABC):
         return Response(False, msg="Abstract Method")
 
     @abstractmethod
+    def get_my_appointees(self, store_id):
+        return Response(False, msg="Abstract Method")
+
+    @abstractmethod
     def get_store_purchase_history(self, store_id):
         return Response(False, msg="Abstract Method")
 
