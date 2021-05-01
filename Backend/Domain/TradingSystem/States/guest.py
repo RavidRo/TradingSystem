@@ -55,7 +55,7 @@ class Guest(UserState):
     def get_purchase_history(self):
         return Response(False, msg="Guests don't have purchase history")
 
-    def add_new_product(self, store_id, product_name, category, product_price, quantity):
+    def add_new_product(self, store_id, product_name, category, product_price, quantity, keywords=None):
         return Response(False, msg="Guests cannot add products to stores")
 
     def remove_product(self, store_id, product_id):
@@ -64,7 +64,7 @@ class Guest(UserState):
     def change_product_quantity_in_store(self, store_id, product_id, new_quantity):
         return Response(False, msg="Guests cannot change store product's quantity")
 
-    def edit_product_details(self, store_id, product_id, new_name, new_category, new_price):
+    def edit_product_details(self, store_id, product_id, new_name, new_category, new_price, keywords=None):
         return Response(False, msg="Guests cannot edit store product's details")
 
     def appoint_new_store_owner(self, store_id, new_owner):
@@ -83,6 +83,9 @@ class Guest(UserState):
         return Response(False, msg="Guests cannot dismiss managers")
 
     def get_store_personnel_info(self, store_id):
+        return Response(False, msg="Guests cannot get store personnel information")
+
+    def get_my_appointees(self, store_id):
         return Response(False, msg="Guests cannot get store personnel information")
 
     def get_store_purchase_history(self, store_id):

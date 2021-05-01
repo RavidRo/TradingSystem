@@ -34,13 +34,13 @@ class UserManager:
         return func(user)
 
     @staticmethod
-    def __get_user_by_cookie(cookie) -> IUser:
+    def __get_user_by_cookie(cookie) -> IUser or None:
         if cookie not in UserManager.__cookie_user:
             return None
         return UserManager.__cookie_user[cookie]
 
     @staticmethod
-    def __get_user_by_username(username) -> IUser:
+    def __get_user_by_username(username) -> IUser or None:
         if username not in UserManager.__username_user:
             return None
         return UserManager.__username_user[username]
@@ -56,6 +56,11 @@ class UserManager:
         cookie = UserManager.__create_cookie()
         UserManager.__cookie_user[cookie] = IUser.create_user()
         return cookie
+
+    @staticmethod
+    def connect(cookie: str, communicate: Callable[[list[str]], bool]) -> Response[None]:
+        func: Callable[[User], Response] = lambda user: user.connect(communicate)
+        return UserManager.__deligate_to_user(cookie, func)
 
     # 2.3
     @staticmethod
@@ -85,6 +90,7 @@ class UserManager:
                         and response.get_obj().get_val() == username
                     ):
                         UserManager.__cookie_user[cookie] = old_user
+                        old_user.connect(user.get_communicate())
             # *This action will delete the current cart but will restore the old one and other user details
 
             return response
@@ -178,16 +184,24 @@ class UserManager:
     # Creating a new product a the store and setting its quantity to 0
     @staticmethod
     def create_product(
-        cookie: str, store_id: str, name: str, category: str, price: float, quantity: int
+        cookie: str,
+        store_id: str,
+        name: str,
+        category: str,
+        price: float,
+        quantity: int,
+        keywords: list[str] = None,
     ) -> Response[str]:
         func: Callable[[User], Response] = lambda user: user.create_product(
-            store_id, name, category, price, quantity
+            store_id, name, category, price, quantity, keywords
         )
         return UserManager.__deligate_to_user(cookie, func)
 
     # 4.1
     @staticmethod
-    def remove_product_from_store(cookie: str, store_id: str, product_id: str) -> Response[PrimitiveParsable[int]]:
+    def remove_product_from_store(
+        cookie: str, store_id: str, product_id: str
+    ) -> Response[PrimitiveParsable[int]]:
         func: Callable[[User], Response] = lambda user: user.remove_product_from_store(
             store_id, product_id
         )
@@ -206,9 +220,17 @@ class UserManager:
     # 4.1
     @staticmethod
     def edit_product_details(
-        cookie: str, store_id: str, product_id: str, new_name: str, new_category: str, new_price: float
+        cookie: str,
+        store_id: str,
+        product_id: str,
+        new_name: str,
+        new_category: str,
+        new_price: float,
+        keywords: list[str] = None,
     ) -> Response[None]:
-        func: Callable[[User], Response] = lambda user: user.edit_product_details(store_id, product_id, new_name, new_category, new_price)
+        func: Callable[[User], Response] = lambda user: user.edit_product_details(
+            store_id, product_id, new_name, new_category, new_price, keywords
+        )
         return UserManager.__deligate_to_user(cookie, func)
 
     # 4.2
@@ -287,6 +309,11 @@ class UserManager:
     @staticmethod
     def get_store_appointments(cookie: str, store_id: str) -> Response[Responsibility]:
         func: Callable[[User], Response] = lambda user: user.get_store_appointments(store_id)
+        return UserManager.__deligate_to_user(cookie, func)
+
+    @staticmethod
+    def get_my_appointees(cookie: str, store_id: str) -> Response[ParsableList[Responsibility]]:
+        func: Callable[[User], Response] = lambda user: user.get_my_appointees(store_id)
         return UserManager.__deligate_to_user(cookie, func)
 
     # 4.11

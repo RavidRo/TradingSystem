@@ -1,12 +1,15 @@
 from __future__ import annotations
 
+from typing import Callable
+
+from Backend.Domain.TradingSystem.Interfaces.Subscriber import Subscriber
 from Backend.response import Response, ParsableList, PrimitiveParsable
 from Backend.Domain.TradingSystem.shopping_cart import ShoppingCart
 from Backend.Domain.TradingSystem.purchase_details import PurchaseDetails
 from Backend.Domain.TradingSystem.States.user_state import UserState
 
 
-class IUser:
+class IUser(Subscriber):
 
     # Used for testing purposes
     use_mock = False
@@ -20,8 +23,14 @@ class IUser:
             return UserStub()
         return User()
 
+    def get_communicate(self) -> Callable[[list[str]], bool]:
+        raise NotImplementedError
+
     # 2.3
     def register(self, username: str, password: str) -> Response[None]:
+        raise NotImplementedError
+
+    def connect(self, communicate: Callable[[list[str]], bool]) -> bool:
         raise NotImplementedError
 
     # 2.4
@@ -73,12 +82,12 @@ class IUser:
     # 4.1
     # Creating a new product a the store and setting its quantity to 0
     def create_product(
-        self, store_id: str, name: str, category: str, price: float, quantity: int
+        self, store_id: str, name: str, category: str, price: float, quantity: int, keywords: list[str]
     ) -> Response[None]:
         raise NotImplementedError
 
     # 4.1
-    def remove_products(self, store_id: str, product_id: str) -> Response[None]:
+    def remove_product_from_store(self, store_id: str, product_id: str) -> Response[None]:
         raise NotImplementedError
 
     # 4.1
@@ -89,7 +98,7 @@ class IUser:
 
     # 4.1
     def edit_product_details(
-        self, store_id: str, product_id: str, new_name: str, new_category: str, new_price: float
+        self, store_id: str, product_id: str, new_name: str, new_category: str, new_price: float, keywords: list[str]
     ) -> Response[None]:
         raise NotImplementedError
 
@@ -118,20 +127,20 @@ class IUser:
         raise NotImplementedError
 
     # 4.11
-    def get_store_purchases_history(self, store_id: str) -> Response[ParsableList[PurchaseDetails]]:
+    def get_store_purchase_history(self, store_id: str) -> Response[ParsableList[PurchaseDetails]]:
         raise NotImplementedError
 
     # System Manager
     # ====================
 
     # 6.4
-    def get_any_user_purchase_history(
+    def get_any_user_purchase_history_admin(
         self, username: str
     ) -> Response[ParsableList[PurchaseDetails]]:
         raise NotImplementedError
 
     # 6.4
-    def get_any_store_purchase_history(
+    def get_any_store_purchase_history_admin(
         self, store_id: str
     ) -> Response[ParsableList[PurchaseDetails]]:
         raise NotImplementedError
@@ -149,4 +158,7 @@ class IUser:
         raise NotImplementedError
 
     def get_appointment_lock(self):
+        raise NotImplementedError
+
+    def notify(self, message: str) -> bool:
         raise NotImplementedError

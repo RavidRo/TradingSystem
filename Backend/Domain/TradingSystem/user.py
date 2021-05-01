@@ -1,5 +1,6 @@
 from __future__ import annotations
 import threading
+from typing import Callable
 
 from Backend.response import Response, ParsableList, PrimitiveParsable
 
@@ -16,6 +17,21 @@ class User(IUser):
     def __init__(self):
         self.state: UserState = IUserState.create_guest(self)
         self.appointment_lock = threading.Lock()
+        self.__notifications: list[str] = []
+        self.__communicate: Callable[[list[str]], bool] = lambda msgs: False
+
+    def __notify_self(self) -> bool:
+        answer = self.__communicate(self.__notifications)
+        if answer:
+            self.__notifications = []
+        return answer
+
+    def get_communicate(self) -> Callable[[list[str]], bool]:
+        return self.__communicate
+
+    def connect(self, communicate: Callable[[list[str]], bool]) -> bool:
+        self.__communicate = communicate
+        return self.__notify_self()  # if the user has connected
 
 
     # 2.3
@@ -60,13 +76,14 @@ class User(IUser):
     def lock_cart(self):
         return self.state.lock_cart()
 
-    #2.9
+    # 2.9
     def release_cart(self):
         return self.state.release_cart()
 
-    #2.9
+    # 2.9
     def cancel_purchase(self):
         return self.state.cancel_purchase()
+
     # Member
     # ===============================
 
@@ -84,12 +101,20 @@ class User(IUser):
     # 4.1
     # Creating a new product a the store and setting its quantity to 0
     def create_product(
-        self, store_id: str, name: str, category: str, price: float, quantity: int
+        self,
+        store_id: str,
+        name: str,
+        category: str,
+        price: float,
+        quantity: int,
+        keywords: list[str] = None,
     ) -> Response[str]:
-        return self.state.add_new_product(store_id, name, category, price, quantity)
+        return self.state.add_new_product(store_id, name, category, price, quantity, keywords)
 
     # 4.1
-    def remove_product_from_store(self, store_id: str, product_id: str) -> Response[PrimitiveParsable[int]]:
+    def remove_product_from_store(
+        self, store_id: str, product_id: str
+    ) -> Response[PrimitiveParsable[int]]:
         return self.state.remove_product(store_id, product_id)
 
     # 4.1
@@ -100,9 +125,17 @@ class User(IUser):
 
     # 4.1
     def edit_product_details(
-        self, store_id: str, product_id: str, new_name: str, new_category: str, new_price: float
+        self,
+        store_id: str,
+        product_id: str,
+        new_name: str,
+        new_category: str,
+        new_price: float,
+        keywords: list[str] = None,
     ) -> Response[None]:
-        return self.state.edit_product_details(store_id, product_id, new_name, new_category, new_price)
+        return self.state.edit_product_details(
+            store_id, product_id, new_name, new_category, new_price, keywords
+        )
 
     # 4.2
     def add_purchase_rule(self, store_id: str, rule_details: dict, rule_type: str, parent_id: str, clause: str = None):
@@ -152,6 +185,9 @@ class User(IUser):
     def get_store_appointments(self, store_id: str) -> Response[Responsibility]:
         return self.state.get_store_personnel_info(store_id)
 
+    def get_my_appointees(self, store_id: str) -> Response[ParsableList[Responsibility]]:
+        return self.state.get_my_appointees(store_id)
+
     # 4.11
     def get_store_purchase_history(self, store_id: str) -> Response[ParsableList[PurchaseDetails]]:
         return self.state.get_store_purchase_history(store_id)
@@ -188,3 +224,6 @@ class User(IUser):
 
     def empty_notifications(self):
         return len(self.__notifications == 0)
+    def notify(self, message: str) -> bool:
+        self.__notifications.append(message)
+        return self.__notify_self()

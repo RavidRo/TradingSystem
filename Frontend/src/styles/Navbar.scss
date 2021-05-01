@@ -1,0 +1,49 @@
+.navbar nav{
+    background-color: #f9fce1;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+.nameLink{
+    font-size: 60px;
+    text-decoration: none;
+    color: black;
+    flex: 1;
+}
+.appName:hover {
+    font-weight: bold;
+}
+
+.cartDiv{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+.cartLink{
+    font-size: 30px;
+    text-decoration: none;
+    color: black;
+    margin-left: 10px;
+}
+.cartIcon{
+    font-size: 30px;
+    cursor: pointer;
+}
+.signInDiv{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    margin: 0 30px;
+
+}
+.signInLink{
+    font-size: 30px;
+    text-decoration: none;
+    color: black;
+}
+.signInIcon{
+    font-size: 30px;
+    cursor: pointer;
+    margin-right: 10px;
+}

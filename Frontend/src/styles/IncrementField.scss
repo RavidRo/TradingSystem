@@ -1,0 +1,15 @@
+.quantity {
+	display: flex;
+	align-items: center;
+	height: 30px;
+	overflow: hidden;
+	justify-content: center;
+
+	.divider {
+		height: 28px;
+		margin: 4px;
+	}
+	.icon {
+		font-size: 10px;
+	}
+}

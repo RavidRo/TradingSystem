@@ -239,17 +239,17 @@ def test_get_personal_history_return_type(member_user_with_responsibility):
 
 
 def test_guest_cannot_add_product(guest_user):
-    response = guest_user.state.add_new_product("0", "productA", '', 1, 4)
+    response = guest_user.state.add_new_product("0", "productA", '', 1, 4, None)
     assert not response.succeeded()
 
 
 def test_member_need_responsibility_to_add_product(member_user_without_responsibility):
-    response = member_user_without_responsibility.state.add_new_product("0", "productA", '', 1, 4)
+    response = member_user_without_responsibility.state.add_new_product("0", "productA", '', 1, 4, None)
     assert not response.succeeded()
 
 
 def test_member_add_product_delegated(member_user_with_responsibility):
-    member_user_with_responsibility.state.add_new_product("0", "productA", 'CategoryA', 1, 4)
+    member_user_with_responsibility.state.add_new_product("0", "productA", 'CategoryA', 1, 4, None)
     assert member_user_with_responsibility.state.get_responsibilities()["0"].add_product_delegated
 
 
@@ -286,17 +286,17 @@ def test_member_change_quantity_delegated(member_user_with_responsibility):
 
 
 def test_guest_cannot_edit_product_details(guest_user):
-    response = guest_user.state.edit_product_details("0", "", "productB", 'CategoryB', "")
+    response = guest_user.state.edit_product_details("0", "", "productB", 'CategoryB', "", None)
     assert not response.succeeded()
 
 
 def test_member_need_responsibility_to_edit_details(member_user_without_responsibility):
-    response = member_user_without_responsibility.state.edit_product_details("0", "", "productB", '', "")
+    response = member_user_without_responsibility.state.edit_product_details("0", "", "productB", '', "", None)
     assert not response.succeeded()
 
 
 def test_member_edit_details_delegated(member_user_with_responsibility):
-    member_user_with_responsibility.state.edit_product_details("0", "", "productB", '', "")
+    member_user_with_responsibility.state.edit_product_details("0", "", "productB", '', "", None)
     assert member_user_with_responsibility.state.get_responsibilities()[
         "0"
     ].edit_product_details_delegated

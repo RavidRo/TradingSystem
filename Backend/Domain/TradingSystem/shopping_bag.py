@@ -99,19 +99,17 @@ class ShoppingBag(IShoppingBag):
         """second step - check if the purchase_types are appropriate"""
         # since there are no purchase types for now- this checking isn't relevant
         if products_info:
-            self.purchase_checks(user_age, products_info)
+            self.purchase_types_checks(user_age, products_info)
 
         """third step - check and apply the discount """
-        # TODO: take what Inon did here
+        self.discount_apply()
+        return Response[PrimitiveParsable[float]](
+            True,
+            PrimitiveParsable(self.__pending_price),
+            msg="All the details are good! here comes the price",
+        )
 
-        # self.discount_apply(user_info)
-        # return Response[PrimitiveParsable[float]](
-        #     True,
-        #     PrimitiveParsable(self.__pending_price),
-        #     msg="All the details are good! here comes the price",
-        # )
-
-    def purchase_checks(self, user_info, products_info=None):
+    def purchase_types_checks(self, user_info, products_info=None):
         if products_info is None:
             products_info = {}
         purchase_types_check = self.__store.check_purchase(products_info, user_info)
@@ -119,8 +117,8 @@ class ShoppingBag(IShoppingBag):
             self.__store.send_back(self._products_to_quantity)
             return purchase_types_check
 
-    def discount_apply(self, user_info):
-        self.__pending_price = self.__store.apply_discounts(user_info, self._products_to_quantity)
+    def discount_apply(self):
+        self.__pending_price = self.__store.apply_discounts(self._products_to_quantity)
         # for now it's a copy- all of the products purchased regularly so they all passed to pending
         if not bool(self._products_to_quantity):
             self.send_back()
@@ -167,3 +165,4 @@ class ShoppingBag(IShoppingBag):
 
     def get_store_ID(self) -> str:
         return self.__store.get_id()
+

@@ -1,0 +1,14 @@
+{
+	"name": "trading-system",
+	"version": "1.0.0",
+	"description": "Describe trading-system here",
+	"private": true,
+	"scripts": {
+		"postinstall": "cd ./Frontend && npm install && node proxy.js && npm run-script build"
+	},
+	"dependencies": {},
+	"devDependencies": {},
+	"author": "",
+	"license": "MIT",
+	"repository": ""
+}
