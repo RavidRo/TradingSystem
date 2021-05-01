@@ -85,6 +85,9 @@ class Guest(UserState):
     def get_store_personnel_info(self, store_id):
         return Response(False, msg="Guests cannot get store personnel information")
 
+    def get_my_appointees(self, store_id):
+        return Response(False, msg="Guests cannot get store personnel information")
+
     def get_store_purchase_history(self, store_id):
         return Response(False, msg="Guests cannot get store's purchase history")
 

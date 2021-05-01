@@ -1,0 +1,28 @@
+.Navbar{
+    height: 30%;
+}
+.photo{
+    margin-left:40%;
+    width:550px;
+    height:1000px;
+    margin-top: 2%;
+}
+.App {
+    height: 100%;
+    margin: 0;
+	background: linear-gradient(-45deg, #f780ed, #fbd1b7, #f9fce1, #fee9b2);
+	background-size: 400% 400%;
+	animation: gradient 15s ease infinite;
+}
+
+@keyframes gradient {
+	0% {
+		background-position: 0% 50%;
+	}
+	50% {
+		background-position: 100% 50%;
+	}
+	100% {
+		background-position: 0% 50%;
+	}
+}

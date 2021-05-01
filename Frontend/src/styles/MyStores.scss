@@ -1,0 +1,97 @@
+.my-stores-page {
+	display: flex;
+	flex-direction: row;
+	min-height: 100%;
+
+	.stores-list {
+		width: 100%;
+		border-right: 1px solid black;
+		transition: flex 2s ;
+	}
+
+	.second-tab {
+		width: 0;
+		transition: width .25s ease;
+	}
+	.second-tab.open {
+		width: 400%;
+	}
+	
+	.stick-top {
+		position: sticky;
+		top:0
+	}
+
+	.my-store-page{
+		display: flex;
+		flex-direction: row;
+	
+		.my-store-cont {
+			width: 400%;
+			border-right: 1px solid black;
+			padding-bottom: 150px;
+		}
+
+		.narrow-list {
+			max-width: 700px;
+		}
+		.list-padding {
+			padding-left: 20px;
+		}
+		
+		.first-field {
+			flex: 0.3;
+		}
+		.details-window {
+			.divider {
+				margin-bottom: 20px;
+			}
+
+			.details {
+
+				padding-left: 20px;
+				.grid{
+					margin-bottom: 20px;
+				}
+				
+				.chip {
+					margin-right: 10px;
+				}
+			}
+			.permissions-divider {
+				margin-bottom: 10px;
+				width: 50%;
+			}
+			
+
+		}
+	}
+}
+
+// Forms
+.form-cont {
+	width: 50%;
+	padding: 20px;
+	min-width: 200px;
+	h2 {
+		white-space: nowrap;
+	}
+	.create-form {
+		max-width: 400px;
+		width: 100%;
+	}
+	.create-btn {
+		margin-top: 20px;
+		white-space: nowrap;
+	}
+}
+
+
+.enter-keywords {
+	width: 100%;
+	display: flex;
+	align-items: center;
+	.keyword-input {
+		flex: 1
+	}
+}

@@ -44,7 +44,9 @@ class Responsibility(Parsable):
 
     # 4.1
     # Creating a new product a the store
-    def add_product(self, name: str, category: str, price: float, quantity: int, keywords: list[str] = None) -> Response[str]:
+    def add_product(
+        self, name: str, category: str, price: float, quantity: int, keywords: list[str] = None
+    ) -> Response[str]:
         raise Exception(Responsibility.ERROR_MESSAGE)
 
     # 4.1
@@ -56,7 +58,14 @@ class Responsibility(Parsable):
         raise Exception(Responsibility.ERROR_MESSAGE)
 
     # 4.1
-    def edit_product_details(self, product_id: str, new_name: str, new_category: str, new_price: float, keywords: list[str] = None) -> Response[None]:
+    def edit_product_details(
+        self,
+        product_id: str,
+        new_name: str,
+        new_category: str,
+        new_price: float,
+        keywords: list[str] = None,
+    ) -> Response[None]:
         raise Exception(Responsibility.ERROR_MESSAGE)
 
     # 4.3
@@ -82,6 +91,9 @@ class Responsibility(Parsable):
 
     # 4.9
     def get_store_appointments(self) -> Response[Responsibility]:
+        raise Exception(Responsibility.ERROR_MESSAGE)
+
+    def get_my_appointees(self) -> Response[ParsableList[Responsibility]]:
         raise Exception(Responsibility.ERROR_MESSAGE)
 
     # 4.11
@@ -135,6 +147,7 @@ class Responsibility(Parsable):
     def parse(self) -> ResponsibilitiesData:
         return ResponsibilitiesData(
             self._store.get_id(),
+            self._store.get_name(),
             self._is_manager(),
             self.__class__.__name__,
             [appointee.parse() for appointee in self._appointed],

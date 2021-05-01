@@ -1,5 +1,6 @@
 from Backend.Domain.TradingSystem.Responsibilities.founder import Founder
 from Backend.Domain.TradingSystem.store import Store
+
 # from Backend.Domain.TradingSystem.States.user_state import UserState
 from Backend.response import Response, ParsableList, PrimitiveParsable
 from Backend.Domain.TradingSystem.purchase_details import PurchaseDetails
@@ -9,7 +10,9 @@ from .user_state import UserState
 
 class Member(UserState):
     def get_username(self):
-        return Response(True, obj=PrimitiveParsable(self._username), msg="got username successfully")
+        return Response(
+            True, obj=PrimitiveParsable(self._username), msg="got username successfully"
+        )
 
     def add_responsibility(self, responsibility, store_id):
         self.__responsibilities[store_id] = responsibility
@@ -78,10 +81,14 @@ class Member(UserState):
             msg="Purchase history " "got successfully",
         )
 
-    def add_new_product(self, store_id, product_name, category, product_price, quantity, keywords=None):
+    def add_new_product(
+        self, store_id, product_name, category, product_price, quantity, keywords=None
+    ):
         if store_id not in self.__responsibilities:
             return Response(False, msg=f"this member do not own/manage store {store_id}")
-        return self.__responsibilities[store_id].add_product(product_name, category, product_price, quantity, keywords)
+        return self.__responsibilities[store_id].add_product(
+            product_name, category, product_price, quantity, keywords
+        )
 
     def remove_product(self, store_id, product_id):
         if store_id not in self.__responsibilities:
@@ -95,11 +102,14 @@ class Member(UserState):
             product_id, new_quantity
         )
 
-    def edit_product_details(self, store_id, product_id, new_name, new_category, new_price, keywords=None):
+    def edit_product_details(
+        self, store_id, product_id, new_name, new_category, new_price, keywords=None
+    ):
         if store_id not in self.__responsibilities:
             return Response(False, msg=f"this member do not own/manage store {store_id}")
-        return self.__responsibilities[store_id].edit_product_details(product_id, new_name, new_category, new_price,
-                                                                      keywords)
+        return self.__responsibilities[store_id].edit_product_details(
+            product_id, new_name, new_category, new_price, keywords
+        )
 
     def appoint_new_store_owner(self, store_id, new_owner):
         if store_id not in self.__responsibilities:
@@ -133,6 +143,11 @@ class Member(UserState):
         if store_id not in self.__responsibilities:
             return Response(False, msg=f"this member do not own/manage store {store_id}")
         return self.__responsibilities[store_id].get_store_appointments()
+
+    def get_my_appointees(self, store_id):
+        if store_id not in self.__responsibilities:
+            return Response(False, msg=f"this member do not own/manage store {store_id}")
+        return self.__responsibilities[store_id].get_my_appointees()
 
     def get_store_purchase_history(self, store_id):
         if store_id not in self.__responsibilities:

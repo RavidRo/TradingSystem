@@ -31,7 +31,7 @@ class User(IUser):
 
     def connect(self, communicate: Callable[[list[str]], bool]) -> bool:
         self.__communicate = communicate
-        return self.__notify_self() # if the user has connected
+        return self.__notify_self()  # if the user has connected
 
     # 2.3
     def register(self, username: str, password: str) -> Response[None]:
@@ -55,7 +55,7 @@ class User(IUser):
 
     # 2.8
     def change_product_quantity_in_cart(
-            self, store_id: str, product_id: str, new_amount: int
+        self, store_id: str, product_id: str, new_amount: int
     ) -> Response[None]:
         return self.state.change_product_quantity_in_cart(store_id, product_id, new_amount)
 
@@ -100,25 +100,41 @@ class User(IUser):
     # 4.1
     # Creating a new product a the store and setting its quantity to 0
     def create_product(
-        self, store_id: str, name: str, category: str, price: float, quantity: int, keywords: list[str] = None
+        self,
+        store_id: str,
+        name: str,
+        category: str,
+        price: float,
+        quantity: int,
+        keywords: list[str] = None,
     ) -> Response[str]:
         return self.state.add_new_product(store_id, name, category, price, quantity, keywords)
 
     # 4.1
-    def remove_product_from_store(self, store_id: str, product_id: str) -> Response[PrimitiveParsable[int]]:
+    def remove_product_from_store(
+        self, store_id: str, product_id: str
+    ) -> Response[PrimitiveParsable[int]]:
         return self.state.remove_product(store_id, product_id)
 
     # 4.1
     def change_product_quantity_in_store(
-            self, store_id: str, product_id: str, new_quantity: int
+        self, store_id: str, product_id: str, new_quantity: int
     ) -> Response[None]:
         return self.state.change_product_quantity_in_store(store_id, product_id, new_quantity)
 
     # 4.1
     def edit_product_details(
-        self, store_id: str, product_id: str, new_name: str, new_category: str, new_price: float, keywords: list[str] = None
+        self,
+        store_id: str,
+        product_id: str,
+        new_name: str,
+        new_category: str,
+        new_price: float,
+        keywords: list[str] = None,
     ) -> Response[None]:
-        return self.state.edit_product_details(store_id, product_id, new_name, new_category, new_price, keywords)
+        return self.state.edit_product_details(
+            store_id, product_id, new_name, new_category, new_price, keywords
+        )
 
     # 4.3
     def appoint_owner(self, store_id: str, user: IUser) -> Response[None]:
@@ -130,13 +146,13 @@ class User(IUser):
 
     # 4.6
     def add_manager_permission(
-            self, store_id: str, username: str, permission: Permission
+        self, store_id: str, username: str, permission: Permission
     ) -> Response[None]:
         return self.state.add_manager_permission(store_id, username, permission)
 
     # 4.6
     def remove_manager_permission(
-            self, store_id: str, username: str, permission: Permission
+        self, store_id: str, username: str, permission: Permission
     ) -> Response[None]:
         return self.state.remove_manager_permission(store_id, username, permission)
 
@@ -148,6 +164,9 @@ class User(IUser):
     def get_store_appointments(self, store_id: str) -> Response[Responsibility]:
         return self.state.get_store_personnel_info(store_id)
 
+    def get_my_appointees(self, store_id: str) -> Response[ParsableList[Responsibility]]:
+        return self.state.get_my_appointees(store_id)
+
     # 4.11
     def get_store_purchase_history(self, store_id: str) -> Response[ParsableList[PurchaseDetails]]:
         return self.state.get_store_purchase_history(store_id)
@@ -157,13 +176,13 @@ class User(IUser):
 
     # 6.4
     def get_any_user_purchase_history_admin(
-            self, username: str
+        self, username: str
     ) -> Response[ParsableList[PurchaseDetails]]:
         return self.state.get_user_purchase_history_admin(username)
 
     # 6.4
     def get_any_store_purchase_history_admin(
-            self, store_id: str
+        self, store_id: str
     ) -> Response[ParsableList[PurchaseDetails]]:
         return self.state.get_any_store_purchase_history_admin(store_id)
 

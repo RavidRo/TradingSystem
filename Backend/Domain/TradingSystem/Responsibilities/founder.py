@@ -14,7 +14,9 @@ class Founder(Responsibility):
 
     # 4.1
     # Creating a new product a the store
-    def add_product(self, name: str, category: str, price: float, quantity: int, keywords: list[str] = None) -> Response[str]:
+    def add_product(
+        self, name: str, category: str, price: float, quantity: int, keywords: list[str] = None
+    ) -> Response[str]:
         return self._store.add_product(name, category, price, quantity, keywords)
 
     # 4.1
@@ -26,8 +28,17 @@ class Founder(Responsibility):
         return self._store.change_product_quantity(product_id, quantity)
 
     # 4.1
-    def edit_product_details(self, product_id: str, new_name: str, new_category: str, new_price: float, keywords: list[str] = None) -> Response[None]:
-        return self._store.edit_product_details(product_id, new_name, new_category, new_price, keywords)
+    def edit_product_details(
+        self,
+        product_id: str,
+        new_name: str,
+        new_category: str,
+        new_price: float,
+        keywords: list[str] = None,
+    ) -> Response[None]:
+        return self._store.edit_product_details(
+            product_id, new_name, new_category, new_price, keywords
+        )
 
     # 4.3
     def appoint_owner(self, user: User) -> Response[None]:
@@ -108,6 +119,9 @@ class Founder(Responsibility):
     # 4.9
     def get_store_appointments(self) -> Response[Responsibility]:
         return self._store.get_personnel_info()
+
+    def get_my_appointees(self) -> Response[ParsableList[Responsibility]]:
+        return Response(True, ParsableList(self._appointed))
 
     # 4.11
     def get_store_purchase_history(self) -> Response[ParsableList[PurchaseDetails]]:

@@ -188,7 +188,13 @@ class UserManager:
     # Creating a new product a the store and setting its quantity to 0
     @staticmethod
     def create_product(
-        cookie: str, store_id: str, name: str, category: str, price: float, quantity: int, keywords: list[str] = None
+        cookie: str,
+        store_id: str,
+        name: str,
+        category: str,
+        price: float,
+        quantity: int,
+        keywords: list[str] = None,
     ) -> Response[str]:
         func: Callable[[User], Response] = lambda user: user.create_product(
             store_id, name, category, price, quantity, keywords
@@ -197,7 +203,9 @@ class UserManager:
 
     # 4.1
     @staticmethod
-    def remove_product_from_store(cookie: str, store_id: str, product_id: str) -> Response[PrimitiveParsable[int]]:
+    def remove_product_from_store(
+        cookie: str, store_id: str, product_id: str
+    ) -> Response[PrimitiveParsable[int]]:
         func: Callable[[User], Response] = lambda user: user.remove_product_from_store(
             store_id, product_id
         )
@@ -216,10 +224,17 @@ class UserManager:
     # 4.1
     @staticmethod
     def edit_product_details(
-        cookie: str, store_id: str, product_id: str, new_name: str, new_category: str, new_price: float, keywords: list[str] = None
+        cookie: str,
+        store_id: str,
+        product_id: str,
+        new_name: str,
+        new_category: str,
+        new_price: float,
+        keywords: list[str] = None,
     ) -> Response[None]:
-        func: Callable[[User], Response] = lambda user: user.edit_product_details(store_id, product_id, new_name,
-                                                                                  new_category, new_price, keywords)
+        func: Callable[[User], Response] = lambda user: user.edit_product_details(
+            store_id, product_id, new_name, new_category, new_price, keywords
+        )
         return UserManager.__deligate_to_user(cookie, func)
 
     # 4.3
@@ -268,6 +283,11 @@ class UserManager:
     @staticmethod
     def get_store_appointments(cookie: str, store_id: str) -> Response[Responsibility]:
         func: Callable[[User], Response] = lambda user: user.get_store_appointments(store_id)
+        return UserManager.__deligate_to_user(cookie, func)
+
+    @staticmethod
+    def get_my_appointees(cookie: str, store_id: str) -> Response[ParsableList[Responsibility]]:
+        func: Callable[[User], Response] = lambda user: user.get_my_appointees(store_id)
         return UserManager.__deligate_to_user(cookie, func)
 
     # 4.11

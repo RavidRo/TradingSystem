@@ -28,7 +28,9 @@ class Manager(Owner):
 
     # 4.1
     # Creating a new product a the store
-    def add_product(self, name: str, category: str, price: float, quantity: int, keywords: list[str] = None) -> Response[str]:
+    def add_product(
+        self, name: str, category: str, price: float, quantity: int, keywords: list[str] = None
+    ) -> Response[str]:
         if self.__permissions[Permission.MANAGE_PRODUCTS]:
             return super().add_product(name, category, price, quantity, keywords)
 
@@ -49,9 +51,18 @@ class Manager(Owner):
         return self.__create_no_permission_Response(Permission.MANAGE_PRODUCTS)
 
     # 4.1
-    def edit_product_details(self, product_id: str, new_name: str, new_category: str, new_price: float, keywords: list[str] = None) -> Response[None]:
+    def edit_product_details(
+        self,
+        product_id: str,
+        new_name: str,
+        new_category: str,
+        new_price: float,
+        keywords: list[str] = None,
+    ) -> Response[None]:
         if self.__permissions[Permission.MANAGE_PRODUCTS]:
-            return super().edit_product_details(product_id, new_name, new_category, new_price, keywords)
+            return super().edit_product_details(
+                product_id, new_name, new_category, new_price, keywords
+            )
 
         return self.__create_no_permission_Response(Permission.MANAGE_PRODUCTS)
 

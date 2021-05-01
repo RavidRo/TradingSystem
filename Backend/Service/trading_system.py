@@ -3,15 +3,10 @@ from __future__ import annotations
 import threading
 from typing import Callable
 
-# from asgiref.sync import sync_to_async
 from Backend.Domain.Payment.payment_manager import PaymentManager
-
-
-
 from Backend.Service.DataObjects.shopping_cart_data import ShoppingCartData
 import Backend.Service.logs as log
 from Backend.Domain.TradingSystem.trading_system_manager import TradingSystemManager
-# import Backend.Domain.Payment.payment_manager as PaymentSystem
 from Backend.response import Response
 
 
@@ -36,8 +31,6 @@ class TradingSystem(object):
         else:
             TradingSystem.__instance = self
             self.payment_manager = PaymentManager()
-
-    # @logging
 
     def enter_system(self):
         return TradingSystemManager.enter_system()
@@ -70,7 +63,12 @@ class TradingSystem(object):
     # kwargs = You can search for a product by additional key words
     @log.loging()
     def search_products(
-        self, product_name: str = None, product_category: str = None, min_price=None, max_price=None, keywords=None
+        self,
+        product_name: str = None,
+        product_category: str = None,
+        min_price=None,
+        max_price=None,
+        keywords=None,
     ):
         return TradingSystemManager.search_products(
             product_name,
@@ -114,7 +112,9 @@ class TradingSystem(object):
         for bag in cart.bags:
             products_ids_to_quantity |= bag.product_ids_to_quantities
 
-        res = self.payment_manager.pay(price.get_obj(), payment_details, products_ids_to_quantity, address)
+        res = self.payment_manager.pay(
+            price.get_obj(), payment_details, products_ids_to_quantity, address
+        )
         if res.succeeded():
             TradingSystemManager.release_cart(cookie)
             return TradingSystemManager.purchase_completed(cookie)
@@ -141,8 +141,19 @@ class TradingSystem(object):
     # =======================
 
     @log.loging(to_hide=[1])
-    def create_product(self, cookie: str, store_id: str, name: str, category: str, price: float, quantity: int, keywords: list[str] = None):
-        return TradingSystemManager.create_product(cookie, store_id, name, category, price, quantity, keywords)
+    def create_product(
+        self,
+        cookie: str,
+        store_id: str,
+        name: str,
+        category: str,
+        price: float,
+        quantity: int,
+        keywords: list[str] = None,
+    ):
+        return TradingSystemManager.create_product(
+            cookie, store_id, name, category, price, quantity, keywords
+        )
 
     @log.loging(to_hide=[1])
     def remove_product_from_store(self, cookie: str, store_id: str, product_id: str):
@@ -197,8 +208,11 @@ class TradingSystem(object):
     def get_store_appointments(self, cookie: str, store_id: str):
         return TradingSystemManager.get_store_appointments(cookie, store_id)
 
-    # 4.11
+    @log.loging(to_hide=[1])
+    def get_my_appointees(self, cookie: str, store_id: str):
+        return TradingSystemManager.get_my_appointees(cookie, store_id)
 
+    # 4.11
     @log.loging(to_hide=[1])
     def get_store_purchase_history(self, cookie: str, store_id: str):
         return TradingSystemManager.get_store_purchase_history(cookie, store_id)

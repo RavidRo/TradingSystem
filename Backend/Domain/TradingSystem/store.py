@@ -1,8 +1,7 @@
 import uuid
 
 from Backend.Domain.Notifications.Publisher import Publisher
-from Backend.response import Response, ParsableList, PrimitiveParsable, Parsable
-from Backend.response import Response, ParsableList, PrimitiveParsable
+from Backend.response import PrimitiveParsable, Response, ParsableList, Parsable
 from Backend.Domain.TradingSystem.product import Product
 from Backend.Service.DataObjects.store_data import StoreData
 from Backend.rw_lock import ReadWriteLock
@@ -82,8 +81,16 @@ class Store(Parsable):
        3. price >= 0
        4. a product with product_name exists"""
 
-    def add_product(self, product_name: str, category: str, price: float, quantity: int, keywords: list[str] = None) -> Response[str]:
+    def add_product(
+        self,
+        product_name: str,
+        category: str,
+        price: float,
+        quantity: int,
+        keywords: list[str] = None,
+    ) -> Response[str]:
         from Backend.Domain.TradingSystem.product import Product
+
         self._products_lock.acquire_write()
         if not product_name:
             self._products_lock.release_write()
@@ -102,7 +109,9 @@ class Store(Parsable):
             self._products_lock.release_write()
             return Response(False, msg="This product is already in the store's inventory")
 
-        product = Product(product_name=product_name, category=category, price=price, keywords=keywords)
+        product = Product(
+            product_name=product_name, category=category, price=price, keywords=keywords
+        )
         product_id = product.get_id()
         self._products_to_quantities[product_id] = (product, quantity)
         self._products_lock.release_write()
@@ -121,20 +130,33 @@ class Store(Parsable):
                 False, msg="The product " + product_id + "is already not in the inventory!"
             )
         self._products_lock.release_write()
-        return Response(True, obj=PrimitiveParsable(result[1]), msg="Successfully removed product with product id: " + str(product_id))
+        return Response(
+            True,
+            obj=PrimitiveParsable(result[1]),
+            msg="Successfully removed product with product id: " + str(product_id),
+        )
 
     """checks need to be made:
        ----------------------
        1. price > 0
        2. a product with product_id exists"""
 
-    def edit_product_details(self, product_id: str, product_name: str = None, category: str = None, price: float = None, keywords: list[str] = None) -> Response[None]:
+    def edit_product_details(
+        self,
+        product_id: str,
+        product_name: str = None,
+        category: str = None,
+        price: float = None,
+        keywords: list[str] = None,
+    ) -> Response[None]:
         self._products_lock.acquire_write()
         if product_id not in self._products_to_quantities:
             self._products_lock.release_write()
             return Response(False, msg="No such product in the store")
 
-        response = self._products_to_quantities[product_id][0].edit_product_details(product_name, category, price, keywords)
+        response = self._products_to_quantities[product_id][0].edit_product_details(
+            product_name, category, price, keywords
+        )
         self._products_lock.release_write()
         return response
 
@@ -174,7 +196,7 @@ class Store(Parsable):
         self.__history_lock.acquire_write()
         self.__purchase_history.append(purchase_details)
         self.__history_lock.release_write()
-        message = "A purchase has been made:\n"+str(purchase_details.__dict__)
+        message = "A purchase has been made:\n" + str(purchase_details.__dict__)
         self.__publisher.notify_all(message)
 
     @staticmethod
@@ -205,7 +227,10 @@ class Store(Parsable):
             if self._products_to_quantities.get(prod_id) is None:
                 self._products_to_quantities.update({prod_id: (product, quantity)})
             else:
-                self._products_to_quantities[prod_id] = (self._products_to_quantities[prod_id][0], self._products_to_quantities[prod_id][1] + quantity)
+                self._products_to_quantities[prod_id] = (
+                    self._products_to_quantities[prod_id][0],
+                    self._products_to_quantities[prod_id][1] + quantity,
+                )
         self._products_lock.release_write()
 
     # This function checks for available products
@@ -217,12 +242,18 @@ class Store(Parsable):
             if prod_to_current_quantity is None:
                 self.__restore_products(acquired_product_ids_to_quantities)
                 self._products_lock.release_write()
-                return Response(False, msg=f"The product with id: {prod_id} doesn't exist in the inventory of the store")
+                return Response(
+                    False,
+                    msg=f"The product with id: {prod_id} doesn't exist in the inventory of the store",
+                )
 
             elif prod_to_current_quantity[1] < quantity:
                 self.__restore_products(acquired_product_ids_to_quantities)
                 self._products_lock.release_write()
-                return Response(False, msg=f"The store has less than {quantity} of product with id: {prod_id} left")
+                return Response(
+                    False,
+                    msg=f"The store has less than {quantity} of product with id: {prod_id} left",
+                )
 
             current_quantity = self._products_to_quantities.get(prod_id)[1]
             if current_quantity == quantity:
@@ -239,8 +270,7 @@ class Store(Parsable):
     def __restore_products(self, acquires_product_ids_to_quantities: dict):
         for product_id, quantity in acquires_product_ids_to_quantities.items():
             prod, current_quantity = self._products_to_quantities.get(product_id)
-            self._products_to_quantities[product_id] = (prod, current_quantity  + quantity)
-
+            self._products_to_quantities[product_id] = (prod, current_quantity + quantity)
 
     # this will be added in the future - maybe I will apply Default Policy for now
     def check_purchase_types(self, products_info, user_info) -> Response[None]:
@@ -257,7 +287,10 @@ class Store(Parsable):
         self._products_lock.release_read()
         return prod
 
-    def product_exists(self, product_id,):
+    def product_exists(
+        self,
+        product_id,
+    ):
         self._products_lock.acquire_read()
         product_quantity = self._products_to_quantities.get(product_id)
         if product_quantity is None:
