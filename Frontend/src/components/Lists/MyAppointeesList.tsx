@@ -24,15 +24,22 @@ const MyAppointeesList: FC<MyAppointeesListProps> = ({
 	const getMyAppointees = useAPI<Appointee[]>('/get_my_appointees', {
 		store_id: storeId,
 	});
-	const appointManager = useAPI<{ cookie: string; answer: boolean }>(
+	const appointManager = useAPI<{ cookie: string; answer: string; succeeded: boolean }>(
 		'/appoint_manager',
 		{
 			store_id: storeId,
 		},
 		'POST'
 	);
-	const appointOwner = useAPI<{ cookie: string; answer: boolean }>(
+	const appointOwner = useAPI<{ cookie: string; answer: string; succeeded: boolean }>(
 		'/appoint_manager',
+		{
+			store_id: storeId,
+		},
+		'POST'
+	);
+	const removeAppointment = useAPI<{ cookie: string; answer: string; succeeded: boolean }>(
+		'/remove_appointment',
 		{
 			store_id: storeId,
 		},
@@ -72,6 +79,16 @@ const MyAppointeesList: FC<MyAppointeesListProps> = ({
 		openTab(() => <CreateAppointeeForm onSubmit={onAppoint} />, '');
 	};
 
+	const onDelete = (appointeeUsername: string) => {
+		removeAppointment.request({ username: appointeeUsername }, (data, error) => {
+			if (!error && data !== null) {
+				setMyAppointees((myAppointees) =>
+					myAppointees.filter((myAppointee) => myAppointee.username !== appointeeUsername)
+				);
+			}
+		});
+	};
+
 	return (
 		<GenericList
 			data={myAppointees}
@@ -86,7 +103,7 @@ const MyAppointeesList: FC<MyAppointeesListProps> = ({
 					appointee={appointee}
 					isSelected={(appointee) => selectedItem === appointee.username}
 					onClick={(appointee) => onSelectAppointee(appointee)}
-					onDelete={() => {}}
+					onDelete={onDelete}
 				/>
 			)}
 		</GenericList>

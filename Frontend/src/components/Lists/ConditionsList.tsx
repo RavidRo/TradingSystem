@@ -25,7 +25,11 @@ const ConditionsList: FC<ConditionsListProps> = ({ openTab, products, storeId })
 		{ store_id: storeId },
 		'POST'
 	);
-
+	const removeConditionAPI = useAPI<{ cookie: string; answer: string; succeeded: boolean }>(
+		'/remove_condition',
+		{ store_id: storeId },
+		'POST'
+	);
 	const [rootId, setRootId] = useState<string>('');
 	const [conditions, setConditions] = useState<Condition[]>([]);
 
@@ -40,6 +44,14 @@ const ConditionsList: FC<ConditionsListProps> = ({ openTab, products, storeId })
 	useEffect(() => {
 		getConditions();
 	}, []);
+
+	const onDelete = (conditionId: string) => {
+		removeConditionAPI.request({ condition_id: conditionId }, (data, error) => {
+			if (!error && data !== null && data.succeeded) {
+				getConditions();
+			}
+		});
+	};
 
 	const openConditionForm = (fatherId: string, conditioning?: 'test' | 'then' | undefined) => {
 		const onAddCondition = (rule: ConditionSimple | ConditionComplex): void => {
@@ -65,7 +77,7 @@ const ConditionsList: FC<ConditionsListProps> = ({ openTab, products, storeId })
 					condition={condition}
 					onCreate={openConditionForm}
 					fatherId={rootId}
-					onDelete={() => {}}
+					onDelete={onDelete}
 				/>
 			)}
 		</GenericList>

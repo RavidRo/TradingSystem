@@ -18,7 +18,7 @@ type AppointeeNodeProps = {
 	appointee: Appointee;
 	isSelected: (appointee: Appointee) => boolean;
 	onClick: (appointee: Appointee) => void;
-	onDelete?: (appointeeId: string) => void;
+	onDelete?: (appointeeUsername: string) => void;
 };
 
 const AppointeeNode: FC<AppointeeNodeProps> = ({ appointee, isSelected, onClick, onDelete }) => {
@@ -36,7 +36,7 @@ const AppointeeNode: FC<AppointeeNodeProps> = ({ appointee, isSelected, onClick,
 					// className="first-field"
 				/>
 				{onDelete && (
-					<ListItemSecondaryAction onClick={onDelete}>
+					<ListItemSecondaryAction onClick={() => onDelete(appointee.username)}>
 						<IconButton edge="end" aria-label="delete">
 							<DeleteForeverOutlinedIcon />
 						</IconButton>

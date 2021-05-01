@@ -30,6 +30,12 @@ const ProductsList: FC<ProductsListProps> = ({
 		product_id: string;
 	}>('/create_product', {}, 'POST');
 
+	const deleteProductAPI = useAPI<{ cookie: string; answer: string; succeeded: boolean }>(
+		'/remove_product_from_store',
+		{ store_id: storeId },
+		'POST'
+	);
+
 	const handleCreateProduct = (
 		name: string,
 		price: number,
@@ -72,6 +78,15 @@ const ProductsList: FC<ProductsListProps> = ({
 			openTab(() => <ProductDetails product={product} />, product.id);
 		}
 	};
+
+	const onDelete = (productId: string) => {
+		deleteProductAPI.request({ product_id: productId }, (data, error) => {
+			if (!error && data !== null) {
+				setProducts(products.filter((product) => product.id !== productId));
+			}
+		});
+	};
+
 	return (
 		<GenericList
 			data={products}
@@ -89,7 +104,7 @@ const ProductsList: FC<ProductsListProps> = ({
 				>
 					<ListItemText primary={product.name} className="first-field" />
 					<ListItemText primary={`in stock: ${product.quantity}`} />
-					<ListItemSecondaryAction onClick={() => {}}>
+					<ListItemSecondaryAction onClick={() => onDelete(product.id)}>
 						<IconButton edge="end" aria-label="delete">
 							<DeleteForeverOutlinedIcon />
 						</IconButton>

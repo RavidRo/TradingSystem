@@ -19,6 +19,11 @@ const DiscountsList: FC<DiscountsListProps> = ({ openTab, products, storeId }) =
 		{ store_id: storeId },
 		'POST'
 	);
+	const removeDiscountAPI = useAPI<{ cookie: string; answer: string; succeeded: boolean }>(
+		'/remove_discount',
+		{ store_id: storeId },
+		'POST'
+	);
 	const [discounts, setDiscounts] = useState<Discount[]>([]);
 	const [rootId, setRootId] = useState<string>('');
 
@@ -51,6 +56,14 @@ const DiscountsList: FC<DiscountsListProps> = ({ openTab, products, storeId }) =
 		openTab(() => <CreateDiscountForm onSubmit={onAddDiscount} products={products} />, '');
 	};
 
+	const onDelete = (discountId: string) => {
+		removeDiscountAPI.request({ discount_id: discountId }, (data, error) => {
+			if (!error && data !== null && data.succeeded) {
+				getDiscounts();
+			}
+		});
+	};
+
 	return (
 		<GenericList data={discounts} header="Discounts" narrow>
 			{(discount: Discount) => (
@@ -58,7 +71,7 @@ const DiscountsList: FC<DiscountsListProps> = ({ openTab, products, storeId }) =
 					discount={discount}
 					onCreate={openDiscountForm}
 					fatherId={rootId}
-					onDelete={() => {}}
+					onDelete={onDelete}
 				/>
 			)}
 		</GenericList>
