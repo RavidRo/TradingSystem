@@ -23,7 +23,7 @@ const DiscountsList: FC<DiscountsListProps> = ({ openTab, products, storeId }) =
 	const [rootId, setRootId] = useState<string>('');
 
 	useEffect(() => {
-		getDiscounts.request().then(() => {
+		getDiscounts.request().then((getDiscounts) => {
 			if (!getDiscounts.error && getDiscounts.data !== null) {
 				setRootId(getDiscounts.data.id);
 				setDiscounts((getDiscounts.data.rule as DiscountComplex).operands);
@@ -38,7 +38,7 @@ const DiscountsList: FC<DiscountsListProps> = ({ openTab, products, storeId }) =
 					fatherId,
 					rule,
 				})
-				.then(() => {
+				.then((addDiscount) => {
 					if (!addDiscount.error && addDiscount.data !== null) {
 						setDiscounts([{ id: addDiscount.data.discount_id, rule }, ...discounts]);
 					}

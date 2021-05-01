@@ -12,13 +12,13 @@ type AppointeesListProps = {
 };
 
 const AppointeesList: FC<AppointeesListProps> = ({ selectedItem, storeId, onSelectAppointee }) => {
-	const { request, data, error } = useAPI<Appointee[]>('/get_store_appointments', {
+	const { request } = useAPI<Appointee[]>('/get_store_appointments', {
 		store_id: storeId,
 	});
 	const [appointees, setAppointees] = useState<Appointee[]>([]);
 
 	useEffect(() => {
-		request().then(() => {
+		request().then(({ data, error }) => {
 			if (!error && data !== null) {
 				setAppointees(data);
 			}

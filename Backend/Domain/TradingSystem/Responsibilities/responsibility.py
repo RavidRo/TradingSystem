@@ -1,4 +1,3 @@
-from Backend.Domain.TradingSystem.store import Store
 from __future__ import annotations
 import enum
 
@@ -36,7 +35,7 @@ name_to_permission: dict[str, Permission] = {
 class Responsibility(Parsable):
     ERROR_MESSAGE = "Responsibility is an interface, function not implemented"
 
-    def __init__(self, user_state, store: Store, subscriber) -> None:
+    def __init__(self, user_state, store, subscriber) -> None:
         self._user_state = user_state
         user_state.add_responsibility(self, store.get_id())
         self._store = store

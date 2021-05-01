@@ -30,7 +30,7 @@ const ConditionsList: FC<ConditionsListProps> = ({ openTab, products, storeId })
 	const [conditions, setConditions] = useState<Condition[]>([]);
 
 	useEffect(() => {
-		getConditions.request().then(() => {
+		getConditions.request().then((getConditions) => {
 			if (!getConditions.error && getConditions.data !== null) {
 				setRootId(getConditions.data.id);
 				setConditions((getConditions.data.rule as BasicRule).operands);
@@ -46,7 +46,7 @@ const ConditionsList: FC<ConditionsListProps> = ({ openTab, products, storeId })
 					rule,
 					conditioning,
 				})
-				.then(() => {
+				.then((addCondition) => {
 					if (!addCondition.error && addCondition.data !== null) {
 						setConditions([
 							{ id: addCondition.data.condition_id, rule },

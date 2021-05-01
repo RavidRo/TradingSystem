@@ -117,26 +117,24 @@ const ManageStore: FC<ManageStoreProps> = ({ storeId }) => {
 	});
 
 	useEffect(() => {
-		Promise.all([getProductsByStore.request(), getStore.request()]).then(() => {
-			if (
-				!getProductsByStore.error &&
-				getProductsByStore.data !== null &&
-				!getStore.error &&
-				getStore.data !== null
-			) {
-				setStore(getStore.data);
-				setProducts(
-					getProductsByStore.data.map((product) => ({
-						...product,
-						quantity: (getStore.data as Store).ids_to_quantities[product.id],
-					}))
-				);
+		Promise.all([getProductsByStore.request(), getStore.request()]).then(
+			([getProductsByStore, getStore]) => {
+				if (
+					!getProductsByStore.error &&
+					getProductsByStore.data !== null &&
+					!getStore.error &&
+					getStore.data !== null
+				) {
+					setStore(getStore.data);
+					setProducts(
+						getProductsByStore.data.map((product) => ({
+							...product,
+							quantity: (getStore.data as Store).ids_to_quantities[product.id],
+						}))
+					);
+				}
 			}
-		});
-		getProductsByStore.request().then(() => {
-			if (!getProductsByStore.error && getProductsByStore.data !== null) {
-			}
-		});
+		);
 	}, []);
 
 	const [selectedItem, setSelectedItem] = useState<string>('');

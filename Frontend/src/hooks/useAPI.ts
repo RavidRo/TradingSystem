@@ -4,43 +4,62 @@ import { CookieContext } from '../contexts';
 
 export default function useAPI<Type>(
 	endPoint: string,
-	params?: object,
+	dynamicParams?: object,
 	type: 'GET' | 'POST' = 'GET'
 ) {
-	const [loading, setLoading] = useState(true);
-	const [error, setError] = useState(false);
-	const [errorMsg, setErrorMsg] = useState('');
+	const [loading, setLoading] = useState<boolean>(true);
+	const [error, setError] = useState<boolean>(false);
+	const [errorMsg, setErrorMsg] = useState<string>('');
 	const [data, setData] = useState<Type | null>(null);
 	const cookie = useContext(CookieContext);
 
 	const defaultParams = { cookie };
 
-	const request = (moreParams?: object) => {
+	const request = (
+		moreParams?: object,
+		callback?: (data: Type | null, error: boolean, errorMsg: string) => void
+	) => {
+		setLoading(true);
+		setError(false);
+		setErrorMsg('');
+		setData(null);
+
+		const params = { ...defaultParams, ...dynamicParams, ...moreParams };
+		console.log(params);
+
 		const promise =
 			type === 'GET'
 				? axios.get(endPoint, {
-						params: { ...defaultParams, ...params, ...moreParams },
+						params,
 				  })
-				: axios.post(endPoint, {
-						...defaultParams,
-						...params,
-						...moreParams,
-				  });
+				: axios.post(endPoint, params);
+
+		let dataVar = data;
+		let errorVar = error;
+		let errorMsgVar = errorMsg;
 
 		return promise
 			.then((response) => {
 				if (response.status === 200) {
-					setData(response.data);
+					dataVar = response.data;
 				} else {
-					setErrorMsg(response.statusText);
+					errorVar = true;
+					errorMsgVar = response.statusText;
 				}
 			})
 			.catch((error) => {
-				setError(true);
-				setErrorMsg(error);
+				errorVar = true;
+				errorMsgVar = error;
 			})
 			.finally(() => {
+				setError(errorVar);
 				setLoading(false);
+				setData(dataVar);
+				setErrorMsg(errorMsgVar);
+			})
+			.then(() => {
+				callback && callback(dataVar, errorVar, errorMsgVar);
+				return { data: dataVar, error: errorVar, errorMsg: errorMsgVar };
 			});
 	};
 

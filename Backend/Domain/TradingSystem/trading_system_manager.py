@@ -46,7 +46,7 @@ class TradingSystemManager:
         return StoresManager.get_products_by_store(store_id).parse()
 
     @staticmethod
-    def get_store(store_id : str) -> Response[StoreData]:
+    def get_store(store_id: str) -> Response[StoreData]:
         return StoresManager.get_store(store_id).parse()
 
     # 2.6
@@ -81,7 +81,9 @@ class TradingSystemManager:
     def change_product_quantity_in_cart(
         cookie: str, store_id: str, product_id: str, new_quantity: int
     ) -> Response[None]:
-        return UserManager.change_product_quantity_in_cart(cookie, store_id, product_id, new_quantity)
+        return UserManager.change_product_quantity_in_cart(
+            cookie, store_id, product_id, new_quantity
+        )
 
     # 2.9
     @staticmethod
@@ -126,7 +128,9 @@ class TradingSystemManager:
 
     # 4.1
     @staticmethod
-    def remove_product_from_store(cookie: str, store_id: str, product_id: str) -> Response[PrimitiveParsable[int]]:
+    def remove_product_from_store(
+        cookie: str, store_id: str, product_id: str
+    ) -> Response[PrimitiveParsable[int]]:
         return UserManager.remove_product_from_store(cookie, store_id, product_id)
 
     # 4.1
@@ -141,7 +145,9 @@ class TradingSystemManager:
     def edit_product_details(
         cookie: str, store_id: str, product_id: str, new_name: str, new_category, new_price: float
     ) -> Response[None]:
-        return UserManager.edit_product_details(cookie, store_id, product_id, new_name, new_category, new_price)
+        return UserManager.edit_product_details(
+            cookie, store_id, product_id, new_name, new_category, new_price
+        )
 
     # 4.3
     @staticmethod
@@ -185,11 +191,11 @@ class TradingSystemManager:
     def get_store_appointments(cookie: str, store_id: str) -> Response[ResponsibilitiesData]:
         return UserManager.get_store_appointments(cookie, store_id).parse()
 
-    
     @staticmethod
-    def get_my_appointees(cookie: str, store_id: str) -> Response[ResponsibilitiesData]:
+    def get_my_appointees(
+        cookie: str, store_id: str
+    ) -> Response[ParsableList[ResponsibilitiesData]]:
         return UserManager.get_my_appointees(cookie, store_id).parse()
-
 
     # 4.11
     @staticmethod

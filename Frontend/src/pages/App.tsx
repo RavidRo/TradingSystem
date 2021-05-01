@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { BrowserRouter, Switch, Route } from 'react-router-dom';
+import { BrowserRouter, Switch, Route, Redirect } from 'react-router-dom';
 import { createMuiTheme, ThemeProvider } from '@material-ui/core';
 
 import Home from './Home';
@@ -36,37 +36,42 @@ const theme = createMuiTheme({
 
 function App() {
 	const [signedIn, setSignedIn] = useState<boolean>(false);
-	const getCookie = useAPI('/get_cookie');
+	const { request } = useAPI<{ cookie: string }>('/get_cookie');
 	const [cookie, setCookie] = useState<string>('');
 
 	useEffect(() => {
-		getCookie.request().then(() => {
-			if (!getCookie.error && getCookie.data !== null) {
-				setCookie(cookie);
+		request({}, (data, error) => {
+			if (!error && data !== null) {
+				setCookie(data.cookie);
 			}
 		});
 	}, []);
 
-	return (
-		<>
-			<ThemeProvider theme={theme}>
-				<CookieContext.Provider value={cookie}>
-					<BrowserRouter>
-						<Navbar signedIn={signedIn} />
-						<Switch>
-							<Route path="/" exact component={Home} />
-							<Route path="/cart" exact component={Cart} />
-							<Route path="/sign-in" exact>
-								{() => <SignIn onSignIn={() => setSignedIn(true)} />}
-							</Route>
-							<Route path="/sign-up" exact component={SignUp} />
-							<Route path="/searchPage" exact component={SearchPage} />
+	return cookie !== '' ? (
+		<ThemeProvider theme={theme}>
+			<CookieContext.Provider value={cookie}>
+				<BrowserRouter>
+					<Navbar signedIn={signedIn} />
+					<Switch>
+						<Route path="/" exact component={Home} />
+						<Route path="/cart" exact component={Cart} />
+						<Route path="/sign-in" exact>
+							{() => <SignIn onSignIn={() => setSignedIn(true)} />}
+						</Route>
+						<Route path="/sign-up" exact component={SignUp} />
+						<Route path="/searchPage" exact component={SearchPage} />
+						{signedIn ? (
 							<Route path="/my-stores" exact component={MyStores} />
-						</Switch>
-					</BrowserRouter>
-				</CookieContext.Provider>
-			</ThemeProvider>
-		</>
+						) : (
+							<Redirect to="/" />
+						)}
+						<Route render={() => <h1>404: page not found</h1>} />
+					</Switch>
+				</BrowserRouter>
+			</CookieContext.Provider>
+		</ThemeProvider>
+	) : (
+		<h1>LOADING</h1>
 	);
 }
 

@@ -41,7 +41,7 @@ const MyAppointeesList: FC<MyAppointeesListProps> = ({
 	const [myAppointees, setMyAppointees] = useState<Appointee[]>([]);
 
 	useEffect(() => {
-		getMyAppointees.request().then(() => {
+		getMyAppointees.request().then((getMyAppointees) => {
 			if (!getMyAppointees.error && getMyAppointees.data !== null) {
 				setMyAppointees(getMyAppointees.data);
 			}
@@ -50,7 +50,7 @@ const MyAppointeesList: FC<MyAppointeesListProps> = ({
 
 	const onAppoint = (username: string, role: Role) => {
 		const request = role === 'Manager' ? appointManager : appointOwner;
-		request.request().then(() => {
+		request.request().then((request) => {
 			if (!request.error && request.data !== null && request.data.answer) {
 				setMyAppointees([
 					{

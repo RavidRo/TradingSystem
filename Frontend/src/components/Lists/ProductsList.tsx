@@ -43,7 +43,7 @@ const ProductsList: FC<ProductsListProps> = ({
 				category,
 				keywords,
 			})
-			.then(() => {
+			.then((createProduct) => {
 				if (!createProduct.error && createProduct.data !== null) {
 					setProducts([
 						{

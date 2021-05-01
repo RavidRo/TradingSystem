@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { FC, useState } from 'react';
 import Avatar from '@material-ui/core/Avatar';
 import Button from '@material-ui/core/Button';
 import CssBaseline from '@material-ui/core/CssBaseline';
@@ -11,9 +11,10 @@ import LockOutlinedIcon from '@material-ui/icons/LockOutlined';
 import Typography from '@material-ui/core/Typography';
 import { makeStyles } from '@material-ui/core/styles';
 import Container from '@material-ui/core/Container';
-import { Link } from 'react-router-dom';
+import { Link, useHistory } from 'react-router-dom';
 
 import Copyright from '../components/Copyright';
+import useAPI from '../hooks/useAPI';
 
 const useStyles = makeStyles((theme) => ({
 	paper: {
@@ -35,8 +36,30 @@ const useStyles = makeStyles((theme) => ({
 	},
 }));
 
-export default function SignUp() {
+const SignUp: FC<{}> = (props) => {
 	const classes = useStyles();
+	const history = useHistory();
+	const signUp = useAPI<{ cookie: string; answer: string; succeeded: boolean }>(
+		'/register',
+		{},
+		'POST'
+	);
+
+	const [username, setUsername] = useState<string>('');
+	const [password, setPassword] = useState<string>('');
+
+	const handleSubmit = (event: any) => {
+		console.log({ username, password });
+		signUp.request({ username, password }, (data, error) => {
+			if (!error && data !== null && data.succeeded) {
+				history.push('/sign-in');
+				console.log(data, error);
+			} else {
+				console.log(data, error);
+			}
+		});
+		event.preventDefault();
+	};
 
 	return (
 		<Container component="main" maxWidth="xs">
@@ -48,9 +71,9 @@ export default function SignUp() {
 				<Typography component="h1" variant="h5">
 					Sign up
 				</Typography>
-				<form className={classes.form} noValidate>
+				<form className={classes.form} onSubmit={handleSubmit}>
 					<Grid container spacing={2}>
-						<Grid item xs={12} sm={6}>
+						{/* <Grid item xs={12} sm={6}>
 							<TextField
 								autoComplete="fname"
 								name="firstName"
@@ -72,16 +95,18 @@ export default function SignUp() {
 								name="lastName"
 								autoComplete="lname"
 							/>
-						</Grid>
+						</Grid> */}
 						<Grid item xs={12}>
 							<TextField
 								variant="outlined"
 								required
 								fullWidth
-								id="email"
-								label="Email Address"
-								name="email"
-								autoComplete="email"
+								id="username"
+								label="Username"
+								name="username"
+								autoComplete="username"
+								onChange={(event) => setUsername(event.currentTarget.value)}
+								autoFocus
 							/>
 						</Grid>
 						<Grid item xs={12}>
@@ -94,6 +119,7 @@ export default function SignUp() {
 								type="password"
 								id="password"
 								autoComplete="current-password"
+								onChange={(event) => setPassword(event.currentTarget.value)}
 							/>
 						</Grid>
 						{/* <Grid item xs={12}>
@@ -124,4 +150,6 @@ export default function SignUp() {
 			</Box>
 		</Container>
 	);
-}
+};
+
+export default SignUp;
