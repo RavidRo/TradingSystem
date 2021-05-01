@@ -77,6 +77,10 @@ class TradingSystemManager:
     ) -> Response[None]:
         return UserManager.change_product_quantity_in_cart(cookie, store_id, product_id, new_quantity)
 
+    @staticmethod
+    def get_discounted_current_cart_price(cookie: str):
+        return UserManager.get_discounted_current_cart_price(cookie)
+
     # 2.9
     @staticmethod
     def purchase_cart(cookie: str) -> Response[PrimitiveParsable[float]]:

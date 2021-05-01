@@ -92,6 +92,10 @@ class TradingSystem(object):
         )
 
     @log.loging(to_hide=[1])
+    def get_discounted_current_cart_price(self, cookie: str):
+        return TradingSystemManager.get_discounted_current_cart_price(cookie)
+
+    @log.loging(to_hide=[1])
     def purchase_cart(self, cookie: str):
         return TradingSystemManager.purchase_cart(cookie)
 

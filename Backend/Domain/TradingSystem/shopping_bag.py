@@ -147,6 +147,9 @@ class ShoppingBag(IShoppingBag):
         )
         return Response(True, msg="amount changed successfully")
 
+    def get_discounted_current_cart_price(self):
+        return self.__store.apply_discounts(self._products_to_quantity)
+
     def delete_products_after_purchase(self, user_name="guest") -> PurchaseDetails:
         # for now this function will only return details, in the future there will be specific deletion
         product_names = [

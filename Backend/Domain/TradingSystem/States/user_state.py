@@ -37,6 +37,9 @@ class UserState(ABC):
     def change_product_quantity_in_cart(self, store_id, product_id, new_amount):
         return self._cart.change_product_quantity(store_id, product_id, new_amount)
 
+    def get_discounted_current_cart_price(self):
+        return self._cart.get_discounted_current_cart_price()
+
     def buy_cart(self, current_user):
         return self._cart.buy_products(current_user)
 

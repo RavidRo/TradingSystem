@@ -43,6 +43,9 @@ class User(IUser):
     ) -> Response[None]:
         return self.state.change_product_quantity_in_cart(store_id, product_id, new_amount)
 
+    def get_discounted_current_cart_price(self):
+        return self.state.get_discounted_current_cart_price()
+
     # 2.9
     def purchase_cart(self) -> Response[PrimitiveParsable[float]]:
         return self.state.buy_cart(self)

@@ -44,6 +44,9 @@ class IUser:
     def change_product_quantity_in_cart(self, store_id, product_id, new_amount) -> Response[None]:
         raise NotImplementedError
 
+    def get_discounted_current_cart_price(self):
+        raise NotImplementedError
+
     # 2.9
     def purchase_cart(self) -> Response[PrimitiveParsable[float]]:
         raise NotImplementedError
