@@ -96,6 +96,10 @@ class TradingSystem(object):
         )
 
     @log.loging(to_hide=[1])
+    def get_discounted_current_cart_price(self, cookie: str):
+        return TradingSystemManager.get_discounted_current_cart_price(cookie)
+
+    @log.loging(to_hide=[1])
     def purchase_cart(self, cookie: str, user_age: int):
         return TradingSystemManager.purchase_cart(cookie, user_age)
 
@@ -180,6 +184,30 @@ class TradingSystem(object):
         return TradingSystemManager.edit_product_details(
             cookie, store_id, product_id, new_name, new_category, new_price, keywords
         )
+
+    @log.loging(to_hide=[1])
+    def add_discount(self, cookie: str, store_id: str, discount_data: dict, exist_id: str):
+        return TradingSystemManager.add_discount(cookie, store_id, discount_data, exist_id)
+
+    @log.loging(to_hide=[1])
+    def move_discount(self, cookie: str, store_id: str, src_id: str, dest_id: str):
+        return TradingSystemManager.move_discount(cookie, store_id, src_id, dest_id)
+
+    @log.loging(to_hide=[1])
+    def get_discounts(self, cookie: str, store_id: str):
+        return TradingSystemManager.get_discounts(cookie, store_id)
+
+    @log.loging(to_hide=[1])
+    def remove_discount(self, cookie: str, store_id: str, discount_id: str):
+        return TradingSystemManager.remove_discount(cookie, store_id, discount_id)
+
+    @log.loging(to_hide=[1])
+    def edit_simple_discount(self, cookie: str, store_id: str, discount_id: str, percentage: float = None, condition: dict = None, context: dict = None, duration=None):
+        return TradingSystemManager.edit_simple_discount(cookie, store_id, discount_id, percentage, condition, context, duration)
+
+    @log.loging(to_hide=[1])
+    def edit_complex_discount(self, cookie: str, store_id: str, discount_id: str, complex_type: str = None, decision_rule: str = None):
+        return TradingSystemManager.edit_complex_discount(cookie, store_id, discount_id, complex_type, decision_rule)
 
     @log.loging(to_hide=[1])
     def appoint_owner(self, cookie: str, store_id: str, username: str):

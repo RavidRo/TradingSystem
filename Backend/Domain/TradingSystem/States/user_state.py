@@ -37,6 +37,9 @@ class UserState(ABC):
     def change_product_quantity_in_cart(self, store_id, product_id, new_amount):
         return self._cart.change_product_quantity(store_id, product_id, new_amount)
 
+    def get_discounted_current_cart_price(self):
+        return self._cart.get_discounted_current_cart_price()
+
     def buy_cart(self, user_age: int):
         return self._cart.buy_products(user_age)
 
@@ -69,6 +72,32 @@ class UserState(ABC):
 
     @abstractmethod
     def edit_product_details(self, store_id, product_id, new_name, new_category, new_price, keywords = None):
+        return Response(False, msg="Abstract Method")
+
+    @abstractmethod
+    def add_discount(self, store_id: str, discount_data: dict, exist_id: str):
+        return Response(False, msg="Abstract Method")
+
+    @abstractmethod
+    def move_discount(self, store_id: str, src_id: str, dest_id: str):
+        return Response(False, msg="Abstract Method")
+
+    @abstractmethod
+    def get_discounts(self, store_id: str):
+        return Response(False, msg="Abstract Method")
+
+    @abstractmethod
+    def remove_discount(self, store_id: str, discount_id: str):
+        return Response(False, msg="Abstract Method")
+
+    @abstractmethod
+    def edit_simple_discount(self, store_id: str, discount_id: str, percentage: float = None, condition: dict = None,
+                             context: dict = None, duration=None):
+        return Response(False, msg="Abstract Method")
+
+    @abstractmethod
+    def edit_complex_discount(self, store_id: str, discount_id: str, complex_type: str = None,
+                              decision_rule: str = None):
         return Response(False, msg="Abstract Method")
 
     @abstractmethod
