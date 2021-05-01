@@ -6,14 +6,17 @@ from Backend.Domain.TradingSystem.Interfaces.IProduct import IProduct
 
 
 class Product(IProduct):
-    def __init__(self, product_name: str, category: str, price: float):
+    def __init__(self, product_name: str, category: str, price: float, keywords=None):
+        if keywords is None:
+            keywords = []
         self.__product_name = product_name
         self.__category = category
         self.__price = price
         self.__id = str(self.id_generator())
+        self.__keywords = keywords
 
     def parse(self):
-        return ProductData(self.__id, self.__product_name, self.__category, self.__price)
+        return ProductData(self.__id, self.__product_name, self.__category, self.__price, self.__keywords)
 
     def set_product_name(self, new_name):
         self.__product_name = new_name
@@ -30,10 +33,13 @@ class Product(IProduct):
     def get_category(self):
         return self.__category
 
+    def get_keywords(self):
+        return self.__keywords
+
     def id_generator(self):
         return uuid.uuid4()
 
-    def edit_product_details(self, product_name: str, category: str, price: float):
+    def edit_product_details(self, product_name: str, category: str, price: float, keywords: list[str] = None):
         if price is not None:
             if price < 0:
                 return Response(False, msg="Product's price must pe none negative!")
@@ -48,5 +54,8 @@ class Product(IProduct):
             if category == "":
                 return Response(False, msg="Category name cannot be an empty string!")
             self.__category = category
+
+        if keywords is not None:
+            self.__keywords = keywords
 
         return Response(True, msg=f"Successfully edited product with product id: {self.__id}")

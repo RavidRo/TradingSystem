@@ -8,7 +8,7 @@ class ProductStub(Product):
         self.product_edited = False
         self.name = name
 
-    def edit_product_details(self, product_name: str, category: str, price: float):
+    def edit_product_details(self, product_name: str, category: str, price: float, keywords: list[str] = None):
         self.product_edited = True
         return Response(True)
 
@@ -20,3 +20,9 @@ class ProductStub(Product):
 
     def get_price(self):
         return 1.0
+
+    def get_category(self):
+        return "A"
+
+    def get_keywords(self):
+        return ["white"]

@@ -294,10 +294,14 @@ def test_product_search_no_args_success():
     )
     product_id, product_name, category, price, quantity = _create_product(cookie, store_id, _generate_product_name(),
                                                                           "A", 5.50, 10)
-    response = system.search_products(product_name=product_name)
+    response = system.search_products(product_name)
+    num_of_products = 0
+    for store, products_to_quantities in response.get_obj().items():
+        for product, quantity in products_to_quantities:
+            num_of_products += quantity
     assert (
             response.succeeded()
-            and len(list(filter(lambda product: product.name == product_name, response.object.values))) == 1
+            and num_of_products == 10
     ), response.get_msg()
 
 
@@ -310,74 +314,90 @@ def test_product_search_args_success():
     min_price = 5.0
     max_price = 6.0
     response = system.search_products(product_name, min_price=min_price, max_price=max_price)
+    num_of_products = 0
+    for store, products_to_quantities in response.get_obj().items():
+        for product, quantity in products_to_quantities:
+            num_of_products += quantity
     assert (
             response.succeeded()
-            and len(list(filter(lambda product: product.name == product_name, response.object.values))) == 1
+            and num_of_products == 10
     ), response.get_msg()
 
 
-# def test_product_search_wrong_product_no_args_fail():
-#     cookie, username, password, store_name, store_id = _initialize_info(
-#         _generate_username(), "aaa", _generate_store_name()
-#     )
-#     product_name = _generate_product_name()
-#     category = "A"
-#     wrong_product = "cofee"
-#     price = 5.50
-#     quantity = 10
-#     system.create_product(cookie, store_name, product_name, category, price, quantity)
-#     response = system.search_products(wrong_product)
-#     assert not response.succeeded()
-# assumed empty list means failure
+def test_product_search_wrong_product_no_args_cant_find():
+    cookie, username, password, store_name, store_id = _initialize_info(
+        _generate_username(), "aaa", _generate_store_name()
+    )
+    product_name = _generate_product_name()
+    category = "A"
+    wrong_product = "cofee"
+    price = 5.50
+    quantity = 10
+    system.create_product(cookie, store_name, product_name, category, price, quantity)
+    response = system.search_products(wrong_product)
+    num_of_products = 0
+    for store, products_to_quantities in response.get_obj().items():
+        for product, quantity in products_to_quantities:
+            num_of_products += quantity
+    assert response.succeeded() and num_of_products == 0
 
 
-# def test_product_search_wrong_product_args_fail():
-#     cookie, username, password, store_name, store_id = _initialize_info(
-#         _generate_username(), "aaa", _generate_store_name()
-#     )
-#     product_name = _generate_product_name()
-#     category = "A"
-#     wrong_product = "cofee"
-#     price = 5.50
-#     quantity = 10
-#     min_price = 5.0
-#     max_price = 6.0
-#     system.create_product(cookie, store_name, product_name, category, price, quantity)
-#     response = system.search_products(wrong_product, min_price=min_price, max_price=max_price)
-#     assert not response.succeeded()
-# assumed empty list means failure
+def test_product_search_wrong_product_args_cant_find():
+    cookie, username, password, store_name, store_id = _initialize_info(
+        _generate_username(), "aaa", _generate_store_name()
+    )
+    product_name = _generate_product_name()
+    category = "A"
+    wrong_product = "cofee"
+    price = 5.50
+    quantity = 10
+    min_price = 5.0
+    max_price = 6.0
+    system.create_product(cookie, store_name, product_name, category, price, quantity)
+    response = system.search_products(wrong_product, min_price=min_price, max_price=max_price)
+    num_of_products = 0
+    for store, products_to_quantities in response.get_obj().items():
+        for product, quantity in products_to_quantities:
+            num_of_products += quantity
+    assert response.succeeded() and num_of_products == 0
 
 
-# def test_product_search_wrong_args_min_fail():
-#     cookie, username, password, store_name, store_id = _initialize_info(
-#         _generate_username(), "aaa", _generate_store_name()
-#     )
-#     product_name = _generate_product_name()
-#     category = "A"
-#     price = 5.50
-#     quantity = 10
-#     min_price = 6.0
-#     max_price = 7.0
-#     system.create_product(cookie, store_name, product_name, category, price, quantity)
-#     response = system.search_products(product_name, min_price=min_price, max_price=max_price)
-#     assert not response.succeeded()
-# assumed empty list means failure
+def test_product_search_wrong_args_min_cant_find():
+    cookie, username, password, store_name, store_id = _initialize_info(
+        _generate_username(), "aaa", _generate_store_name()
+    )
+    product_name = _generate_product_name()
+    category = "A"
+    price = 5.50
+    quantity = 10
+    min_price = 6.0
+    max_price = 7.0
+    system.create_product(cookie, store_name, product_name, category, price, quantity)
+    response = system.search_products(product_name, min_price=min_price, max_price=max_price)
+    num_of_products = 0
+    for store, products_to_quantities in response.get_obj().items():
+        for product, quantity in products_to_quantities:
+            num_of_products += quantity
+    assert response.succeeded() and num_of_products == 0
 
 
-# def test_product_search_wrong_args_max_fail():
-#     cookie, username, password, store_name, store_id = _initialize_info(
-#         _generate_username(), "aaa", _generate_store_name()
-#     )
-#     product_name = _generate_product_name()
-#     category = "A"
-#     price = 5.50
-#     quantity = 10
-#     min_price = 4.0
-#     max_price = 5.0
-#     system.create_product(cookie, store_name, product_name, category, price, quantity)
-#     response = system.search_products(product_name, min_price=min_price, max_price=max_price)
-#     assert not response.succeeded()
-# assumed empty list means failure
+def test_product_search_wrong_args_max_cant_find():
+    cookie, username, password, store_name, store_id = _initialize_info(
+        _generate_username(), "aaa", _generate_store_name()
+    )
+    product_name = _generate_product_name()
+    category = "A"
+    price = 5.50
+    quantity = 10
+    min_price = 4.0
+    max_price = 5.0
+    system.create_product(cookie, store_name, product_name, category, price, quantity)
+    response = system.search_products(product_name, min_price=min_price, max_price=max_price)
+    num_of_products = 0
+    for store, products_to_quantities in response.get_obj().items():
+        for product, quantity in products_to_quantities:
+            num_of_products += quantity
+    assert response.succeeded() and num_of_products == 0
 
 
 def test_products_by_store_success():

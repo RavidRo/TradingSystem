@@ -188,10 +188,10 @@ class UserManager:
     # Creating a new product a the store and setting its quantity to 0
     @staticmethod
     def create_product(
-        cookie: str, store_id: str, name: str, category: str, price: float, quantity: int
+        cookie: str, store_id: str, name: str, category: str, price: float, quantity: int, keywords: list[str] = None
     ) -> Response[str]:
         func: Callable[[User], Response] = lambda user: user.create_product(
-            store_id, name, category, price, quantity
+            store_id, name, category, price, quantity, keywords
         )
         return UserManager.__deligate_to_user(cookie, func)
 
@@ -216,9 +216,10 @@ class UserManager:
     # 4.1
     @staticmethod
     def edit_product_details(
-        cookie: str, store_id: str, product_id: str, new_name: str, new_category: str, new_price: float
+        cookie: str, store_id: str, product_id: str, new_name: str, new_category: str, new_price: float, keywords: list[str] = None
     ) -> Response[None]:
-        func: Callable[[User], Response] = lambda user: user.edit_product_details(store_id, product_id, new_name, new_category, new_price)
+        func: Callable[[User], Response] = lambda user: user.edit_product_details(store_id, product_id, new_name,
+                                                                                  new_category, new_price, keywords)
         return UserManager.__deligate_to_user(cookie, func)
 
     # 4.3
