@@ -102,7 +102,7 @@ class ShoppingBag(IShoppingBag):
             self.purchase_types_checks(user_info, products_info)
 
         """third step - check and apply the discount """
-        self.discount_apply(user_info)
+        self.discount_apply()
         return Response[PrimitiveParsable[float]](
             True,
             PrimitiveParsable(self.__pending_price),
@@ -117,8 +117,8 @@ class ShoppingBag(IShoppingBag):
             self.__store.send_back(self._products_to_quantity)
             return purchase_types_check
 
-    def discount_apply(self, user_info):
-        self.__pending_price = self.__store.apply_discounts(user_info, self._products_to_quantity)
+    def discount_apply(self):
+        self.__pending_price = self.__store.apply_discounts(self._products_to_quantity)
         # for now it's a copy- all of the products purchased regularly so they all passed to pending
         if not bool(self._products_to_quantity):
             self.send_back()

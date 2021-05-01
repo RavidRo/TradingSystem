@@ -51,6 +51,9 @@ class Store:
         self._products_lock.release_read()
         return Response(True, ParsableList(products))
 
+    def get_name(self):
+        return self.__name
+
     def get_products_to_quantities(self):
         return self._products_to_quantities
 
@@ -242,9 +245,9 @@ class Store:
     def check_purchase_types(self, products_info, user_info) -> Response[None]:
         return Response(True, msg="all purchase types arew available")
 
-    def apply_discounts(self, user_info, product_to_quantity: dict):
+    def apply_discounts(self, product_to_quantity: dict):
         return self.__discount_policy.applyDiscount(
-            user=user_info, store=self, products_to_quantities=product_to_quantity
+            store=self, products_to_quantities=product_to_quantity
         )
 
     def get_product(self, product_id: str):

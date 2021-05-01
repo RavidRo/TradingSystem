@@ -2,9 +2,9 @@ from typing import Callable
 import uuid
 import json
 
-from Backend.Domain.TradingSystem.store import Store
-from Backend.Domain.TradingSystem.Interfaces.IUser import IUser
-from .user import User
+# from Backend.Domain.TradingSystem.store import Store
+# from Backend.Domain.TradingSystem.Interfaces.IUser import IUser
+# from .user import User
 from Backend.response import Response, ParsableList, PrimitiveParsable
 from Backend.Domain.TradingSystem.Interfaces.IUser import IUser
 from Backend.Domain.TradingSystem.store import Store
@@ -38,13 +38,13 @@ class UserManager:
         return func(user)
 
     @staticmethod
-    def __get_user_by_cookie(cookie) -> IUser:
+    def __get_user_by_cookie(cookie) -> IUser or None:
         if cookie not in UserManager.__cookie_user:
             return None
         return UserManager.__cookie_user[cookie]
 
     @staticmethod
-    def __get_user_by_username(username) -> IUser:
+    def __get_user_by_username(username) -> IUser or None:
         if username not in UserManager.__username_user:
             return None
         return UserManager.__username_user[username]
