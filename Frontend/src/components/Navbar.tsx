@@ -1,20 +1,22 @@
 import React, { FC, useState,useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faShoppingCart, faSignInAlt , faSearch} from '@fortawesome/free-solid-svg-icons';
+import { faShoppingCart, faSignInAlt , faSearch, faBell} from '@fortawesome/free-solid-svg-icons';
 
 import '../styles/Navbar.scss';
 import config from '../config';
 import PopupCart from '../components/PopupCart';
 import {Product} from '../types';
+import { Badge } from '@material-ui/core';
 
 type NavBarProps = {
 	 signedIn: boolean,
 	 products:Product[],
 	 propHandleDelete:(product:Product)=>void,
+	 notification:string[],
 	};
 
-const Navbar: FC<NavBarProps> = ({ signedIn ,products,propHandleDelete}) => {
+const Navbar: FC<NavBarProps> = ({ signedIn ,products,propHandleDelete,notification}) => {
 	const [hoverCart, setHoverCart] = useState<boolean>(false);
     const [productsInCart,setProducts] = useState<Product[]>(products);
 
@@ -58,6 +60,13 @@ const Navbar: FC<NavBarProps> = ({ signedIn ,products,propHandleDelete}) => {
 							Sign In
 						</Link>
 					)}
+				</div>
+				<div className="notifictionDiv">
+					<Badge badgeContent={notification.length} showZero color="primary">
+						<FontAwesomeIcon className="signInIcon" icon={faBell} />
+					</Badge>
+						<Link className="notifyLink" to="/">
+						</Link>
 				</div>
 			</nav>
 		</div>

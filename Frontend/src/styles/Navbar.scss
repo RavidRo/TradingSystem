@@ -63,3 +63,19 @@
     font-size: 30px;
     cursor: pointer;
 }
+.notifictionDiv{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    width: 3.5%;
+}
+.notifyLink{
+    font-size: 30px;
+    text-decoration: none;
+    color: black;
+    margin-left: 5%;
+}
+.notifyIcon{
+    font-size: 30px;
+    cursor: pointer;
+}

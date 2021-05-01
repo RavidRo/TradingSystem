@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { BrowserRouter, Switch, Route, Redirect } from 'react-router-dom';
 import { createMuiTheme, ThemeProvider } from '@material-ui/core';
+import { w3cwebsocket as W3CWebSocket } from "websocket";
 
 import Home from './Home';
 import Cart from './Cart';
@@ -38,18 +39,32 @@ const theme = createMuiTheme({
 });
 
 function App() {
+
+
+
 	const [signedIn, setSignedIn] = useState<boolean>(false);
 	const { request } = useAPI<{ cookie: string }>('/get_cookie');
 	const [cookie, setCookie] = useState<string>('');
     const [productsInCart,setProducts] = useState<ProductQuantity[]>([]);
+
+	const [notification,setNotification] = useState<string[]>([]);
 
 	type storesToProductsMapType = {
 		[key:string]:Product[]
 	}
 	
 	const storesToProducts = useRef<storesToProductsMapType>({});
-	const storesProducts = useAPI<storesToProductsMapType>('/get_stores_details');
+	const storesProducts = useAPI<storesToProductsMapType>('/search_product',{});
     useEffect(()=>{
+		const client = new W3CWebSocket('ws://127.0.0.1:8000');
+		client.onopen = () => {
+			console.log('WebSocket Client Connected');
+		  };
+		  client.onmessage = (message) => {
+			setNotification(old=>[...old,JSON.stringify(message)]);
+		  };
+
+
         storesProducts.request().then(({data,error,errorMsg})=>{
             if(!storesProducts.error && storesProducts.data!==null){
                 storesToProducts.current = storesProducts.data;
@@ -140,7 +155,7 @@ function App() {
 		<ThemeProvider theme={theme}>
 			<CookieContext.Provider value={cookie}>
 				<BrowserRouter>
-					<Navbar signedIn={signedIn} products={productsInCart} propHandleDelete={handleDeleteProduct}/>
+					<Navbar signedIn={signedIn} products={productsInCart} propHandleDelete={handleDeleteProduct} notification={notification}/>
 					<Switch>
 						<Route path="/" exact component={Home} />
 						<Route 
