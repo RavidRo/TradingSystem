@@ -61,6 +61,11 @@ class UserManager:
         UserManager.__cookie_user[cookie] = IUser.create_user()
         return cookie
 
+    @staticmethod
+    def connect(cookie: str, communicate: Callable[[list[str]], bool]) -> Response[None]:
+        func: Callable[[User], Response] = lambda user: user.connect(communicate)
+        return UserManager.__deligate_to_user(cookie, func)
+
     # 2.3
     @staticmethod
     def register(username: str, password: str, cookie: str) -> Response[None]:
@@ -89,6 +94,7 @@ class UserManager:
                         and response.get_obj().get_val() == username
                     ):
                         UserManager.__cookie_user[cookie] = old_user
+                        old_user.connect(user.get_communicate())
             # *This action will delete the current cart but will restore the old one and other user details
 
             return response

@@ -40,7 +40,7 @@ class Founder(Responsibility):
             else:
                 #! I am guessing that user.state is of type member because at user_manager, with a given username he found a user object
                 #! (guest does not hae a username)
-                newResponsibility = Owner(user.state, self._store)
+                newResponsibility = Owner(user.state, self._store, user)
                 self._appointed.append(newResponsibility)
                 result = Response(True)
 
@@ -64,7 +64,7 @@ class Founder(Responsibility):
             else:
                 #! I am guessing that user.state is of type member because at user_manager, with a given username he found a user object
                 #! (guest does not hae a username)
-                newResponsibility = Manager(user.state, self._store)
+                newResponsibility = Manager(user.state, self._store, user)
                 self._appointed.append(newResponsibility)
                 result = Response(True)
 
