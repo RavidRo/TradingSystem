@@ -1,5 +1,6 @@
 import uuid
 
+from Backend.Domain.Notifications.Publisher import Publisher
 from Backend.response import Response, ParsableList, PrimitiveParsable, Parsable
 from Backend.response import Response, ParsableList, PrimitiveParsable
 from Backend.Domain.TradingSystem.product import Product
