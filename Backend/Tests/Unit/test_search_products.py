@@ -40,7 +40,7 @@ def test_search_no_products_success():
         assert res.succeeded() and len(res.get_obj().parse()) == 3 and num_of_products == 0
 
 
-def test_search_single_search_by_name_success(store_a, store_b):
+def test_search_search_by_name_success(store_a, store_b):
     with mock.patch.object(Store, 'get_products_to_quantities', return_value={"1": (Product("name", "A", 2), 5), "2": (Product("B", "A", 3), 7)}):
         with mock.patch.object(StoresManager, 'get_stores_details',
                                return_value=Response(True, ParsableList([store_a, store_b]))):
@@ -52,7 +52,7 @@ def test_search_single_search_by_name_success(store_a, store_b):
             assert res.succeeded() and len(res.get_obj().parse()) == 2 and num_of_products == 10
 
 
-def test_search_single_search_by_category_success(store_a, store_b):
+def test_search_search_by_category_success(store_a, store_b):
     with mock.patch.object(Store, 'get_products_to_quantities', return_value={"1": (Product("name", "category", 2), 5), "2": (Product("B", "A", 3), 7)}):
         with mock.patch.object(StoresManager, 'get_stores_details',
                                return_value=Response(True, ParsableList([store_a, store_b]))):
