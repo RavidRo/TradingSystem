@@ -19,6 +19,7 @@ class Manager(Owner):
             Permission.REMOVE_MANAGER: False,
             Permission.GET_HISTORY: False,
             Permission.MANAGE_PURCHASE_POLICY: False,
+            Permission.MANAGE_DISCOUNT_POLICY: False
         }
 
     def __create_no_permission_Response(self, permission: Permission) -> Response:
@@ -70,51 +71,51 @@ class Manager(Owner):
         # 4.2
 
     def add_discount(self, discount_data: dict, exist_id: str):
-        if self.__permissions[Permission.MANAGE_PRODUCTS]:
+        if self.__permissions[Permission.MANAGE_DISCOUNT_POLICY]:
             return super().add_discount(discount_data, exist_id)
 
-        return self.__create_no_permission_Response(Permission.MANAGE_PRODUCTS)
+        return self.__create_no_permission_Response(Permission.MANAGE_DISCOUNT_POLICY)
 
         # 4.2
 
     def move_discount(self, src_id: str, dest_id: str):
-        if self.__permissions[Permission.MANAGE_PRODUCTS]:
+        if self.__permissions[Permission.MANAGE_DISCOUNT_POLICY]:
             return super().move_discount(src_id, dest_id)
 
-        return self.__create_no_permission_Response(Permission.MANAGE_PRODUCTS)
+        return self.__create_no_permission_Response(Permission.MANAGE_DISCOUNT_POLICY)
 
         # 4.2
 
     def get_discounts(self):
-        if self.__permissions[Permission.MANAGE_PRODUCTS]:
+        if self.__permissions[Permission.MANAGE_DISCOUNT_POLICY]:
             return super().get_discounts()
 
-        return self.__create_no_permission_Response(Permission.MANAGE_PRODUCTS)
+        return self.__create_no_permission_Response(Permission.MANAGE_DISCOUNT_POLICY)
 
         # 4.2
 
     def remove_discount(self, discount_id: str):
-        if self.__permissions[Permission.MANAGE_PRODUCTS]:
+        if self.__permissions[Permission.MANAGE_DISCOUNT_POLICY]:
             return super().remove_discount(discount_id)
 
-        return self.__create_no_permission_Response(Permission.MANAGE_PRODUCTS)
+        return self.__create_no_permission_Response(Permission.MANAGE_DISCOUNT_POLICY)
 
         # 4.2
 
     def edit_simple_discount(self, discount_id: str, percentage: float = None, condition: dict = None,
                              context: dict = None, duration=None):
-        if self.__permissions[Permission.MANAGE_PRODUCTS]:
+        if self.__permissions[Permission.MANAGE_DISCOUNT_POLICY]:
             return super().edit_simple_discount(discount_id, percentage, condition, context, duration)
 
-        return self.__create_no_permission_Response(Permission.MANAGE_PRODUCTS)
+        return self.__create_no_permission_Response(Permission.MANAGE_DISCOUNT_POLICY)
 
         # 4.2
 
     def edit_complex_discount(self, discount_id: str, complex_type: str = None, decision_rule: str = None):
-        if self.__permissions[Permission.MANAGE_PRODUCTS]:
+        if self.__permissions[Permission.MANAGE_DISCOUNT_POLICY]:
             return super().edit_complex_discount(discount_id, complex_type, decision_rule)
 
-        return self.__create_no_permission_Response(Permission.MANAGE_PRODUCTS)
+        return self.__create_no_permission_Response(Permission.MANAGE_DISCOUNT_POLICY)
 
     # 4.2
     def add_purchase_rule(self, rule_details: dict, rule_type: str, parent_id: str, clause: str = None):

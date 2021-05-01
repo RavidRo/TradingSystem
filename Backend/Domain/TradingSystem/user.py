@@ -249,7 +249,8 @@ class User(IUser):
         return self.appointment_lock
 
     def empty_notifications(self):
-        return len(self.__notifications == 0)
+        return len(self.__notifications) == 0
+
     def notify(self, message: str) -> bool:
         self.__notifications.append(message)
         return self.__notify_self()

@@ -22,6 +22,8 @@ Permission = enum.Enum(
         ("GET_HISTORY", 5),
         ("manage_purchase_policy", 6),
         ("MANAGE_PURCHASE_POLICY", 6),
+        ("manage_discount_policy", 7),
+        ("MANAGE_DISCOUNT_POLICY", 7),
     ],
 )
 
@@ -31,7 +33,8 @@ name_to_permission: dict[str, Permission] = {
     "appoint_manager": Permission.APPOINT_MANAGER,
     "remove_manager": Permission.REMOVE_MANAGER,
     "get_history": Permission.GET_HISTORY,
-    "manage_purchase_policy": Permission.MANAGE_PURCHASE_POLICY
+    "manage_purchase_policy": Permission.MANAGE_PURCHASE_POLICY,
+    "manage_discount_policy": Permission.MANAGE_DISCOUNT_POLICY
 }
 
 
