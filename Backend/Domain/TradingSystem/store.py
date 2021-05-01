@@ -1,5 +1,6 @@
 import uuid
 
+from Backend.Domain.Notifications.Publisher import Publisher
 from Backend.response import Response, ParsableList, PrimitiveParsable
 from Backend.Domain.TradingSystem.product import Product
 from Backend.Service.DataObjects.store_data import StoreData
@@ -25,6 +26,7 @@ class Store:
         self.__purchase_history = []
         self._products_lock = ReadWriteLock()
         self.__history_lock = ReadWriteLock()
+        self.__publisher: Publisher = Publisher()
 
     def parse(self):
         id_to_quantity = {}
@@ -40,11 +42,17 @@ class Store:
             )
         return parsed_products
 
+    def subscribe(self, subscriber):
+        self.__publisher.subscribe(subscriber)
+
     def get_products(self) -> Response[ParsableList[Product]]:
         self._products_lock.acquire_read()
         products = [product for product, _ in self._products_to_quantities.values()]
         self._products_lock.release_read()
         return Response(True, ParsableList(products))
+
+    def get_name(self):
+        return self.__name
 
     def get_products_to_quantities(self):
         return self._products_to_quantities
@@ -165,6 +173,8 @@ class Store:
         self.__history_lock.acquire_write()
         self.__purchase_history.append(purchase_details)
         self.__history_lock.release_write()
+        message = "A purchase has been made:\n"+str(purchase_details.__dict__)
+        self.__publisher.notify_all(message)
 
     @staticmethod
     def id_generator() -> str:
@@ -235,9 +245,10 @@ class Store:
     def check_purchase_types(self, products_info, user_info) -> Response[None]:
         return Response(True, msg="all purchase types arew available")
 
-    def apply_discounts(self, user_info, product_to_quantity: dict):
-        return self.__discount_policy.applyDiscount(store=self,
-                                                    products_to_quantities=product_to_quantity)
+    def apply_discounts(self, product_to_quantity: dict):
+        return self.__discount_policy.applyDiscount(
+            store=self, products_to_quantities=product_to_quantity
+        )
 
     def get_product(self, product_id: str):
         self._products_lock.acquire_read()

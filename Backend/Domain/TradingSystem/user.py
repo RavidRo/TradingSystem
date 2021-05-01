@@ -1,5 +1,6 @@
 from __future__ import annotations
 import threading
+from typing import Callable
 
 from Backend.response import Response, ParsableList, PrimitiveParsable
 
@@ -16,6 +17,21 @@ class User(IUser):
     def __init__(self):
         self.state: UserState = IUserState.create_guest(self)
         self.appointment_lock = threading.Lock()
+        self.__notifications: list[str] = []
+        self.__communicate: Callable[[list[str]], bool] = lambda msgs: False
+
+    def __notify_self(self) -> bool:
+        answer = self.__communicate(self.__notifications)
+        if answer:
+            self.__notifications = []
+        return answer
+
+    def get_communicate(self) -> Callable[[list[str]], bool]:
+        return self.__communicate
+
+    def connect(self, communicate: Callable[[list[str]], bool]) -> bool:
+        self.__communicate = communicate
+        return self.__notify_self() # if the user has connected
 
     # 2.3
     def register(self, username: str, password: str) -> Response[None]:
@@ -39,7 +55,7 @@ class User(IUser):
 
     # 2.8
     def change_product_quantity_in_cart(
-        self, store_id: str, product_id: str, new_amount: int
+            self, store_id: str, product_id: str, new_amount: int
     ) -> Response[None]:
         return self.state.change_product_quantity_in_cart(store_id, product_id, new_amount)
 
@@ -59,13 +75,14 @@ class User(IUser):
     def lock_cart(self):
         return self.state.lock_cart()
 
-    #2.9
+    # 2.9
     def release_cart(self):
         return self.state.release_cart()
 
-    #2.9
+    # 2.9
     def cancel_purchase(self):
         return self.state.cancel_purchase()
+
     # Member
     # ===============================
 
@@ -93,7 +110,7 @@ class User(IUser):
 
     # 4.1
     def change_product_quantity_in_store(
-        self, store_id: str, product_id: str, new_quantity: int
+            self, store_id: str, product_id: str, new_quantity: int
     ) -> Response[None]:
         return self.state.change_product_quantity_in_store(store_id, product_id, new_quantity)
 
@@ -113,13 +130,13 @@ class User(IUser):
 
     # 4.6
     def add_manager_permission(
-        self, store_id: str, username: str, permission: Permission
+            self, store_id: str, username: str, permission: Permission
     ) -> Response[None]:
         return self.state.add_manager_permission(store_id, username, permission)
 
     # 4.6
     def remove_manager_permission(
-        self, store_id: str, username: str, permission: Permission
+            self, store_id: str, username: str, permission: Permission
     ) -> Response[None]:
         return self.state.remove_manager_permission(store_id, username, permission)
 
@@ -140,13 +157,13 @@ class User(IUser):
 
     # 6.4
     def get_any_user_purchase_history_admin(
-        self, username: str
+            self, username: str
     ) -> Response[ParsableList[PurchaseDetails]]:
         return self.state.get_user_purchase_history_admin(username)
 
     # 6.4
     def get_any_store_purchase_history_admin(
-        self, store_id: str
+            self, store_id: str
     ) -> Response[ParsableList[PurchaseDetails]]:
         return self.state.get_any_store_purchase_history_admin(store_id)
 
@@ -165,3 +182,6 @@ class User(IUser):
     def get_appointment_lock(self) -> threading.Lock():
         return self.appointment_lock
 
+    def notify(self, message: str) -> bool:
+        self.__notifications.append(message)
+        return self.__notify_self()

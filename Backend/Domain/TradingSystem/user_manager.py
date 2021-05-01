@@ -2,9 +2,9 @@ from typing import Callable
 import uuid
 import json
 
-from Backend.Domain.TradingSystem.store import Store
-from Backend.Domain.TradingSystem.Interfaces.IUser import IUser
-from .user import User
+# from Backend.Domain.TradingSystem.store import Store
+# from Backend.Domain.TradingSystem.Interfaces.IUser import IUser
+# from .user import User
 from Backend.response import Response, ParsableList, PrimitiveParsable
 from Backend.Domain.TradingSystem.Interfaces.IUser import IUser
 from Backend.Domain.TradingSystem.store import Store
@@ -38,13 +38,13 @@ class UserManager:
         return func(user)
 
     @staticmethod
-    def __get_user_by_cookie(cookie) -> IUser:
+    def __get_user_by_cookie(cookie) -> IUser or None:
         if cookie not in UserManager.__cookie_user:
             return None
         return UserManager.__cookie_user[cookie]
 
     @staticmethod
-    def __get_user_by_username(username) -> IUser:
+    def __get_user_by_username(username) -> IUser or None:
         if username not in UserManager.__username_user:
             return None
         return UserManager.__username_user[username]
@@ -60,6 +60,11 @@ class UserManager:
         cookie = UserManager.__create_cookie()
         UserManager.__cookie_user[cookie] = IUser.create_user()
         return cookie
+
+    @staticmethod
+    def connect(cookie: str, communicate: Callable[[list[str]], bool]) -> Response[None]:
+        func: Callable[[User], Response] = lambda user: user.connect(communicate)
+        return UserManager.__deligate_to_user(cookie, func)
 
     # 2.3
     @staticmethod
@@ -89,6 +94,7 @@ class UserManager:
                         and response.get_obj().get_val() == username
                     ):
                         UserManager.__cookie_user[cookie] = old_user
+                        old_user.connect(user.get_communicate())
             # *This action will delete the current cart but will restore the old one and other user details
 
             return response
