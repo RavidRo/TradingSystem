@@ -1,7 +1,7 @@
 import uuid
 
 from Backend.Domain.Notifications.Publisher import Publisher
-from Backend.response import Response, ParsableList
+from Backend.response import Response, ParsableList, PrimitiveParsable
 from Backend.Domain.TradingSystem.product import Product
 from Backend.Service.DataObjects.store_data import StoreData
 from Backend.rw_lock import ReadWriteLock
@@ -78,7 +78,7 @@ class Store:
        3. price >= 0
        4. a product with product_name exists"""
 
-    def add_product(self, product_name: str, price: float, quantity: int) -> Response[str]:
+    def add_product(self, product_name: str, category: str, price: float, quantity: int) -> Response[str]:
         from Backend.Domain.TradingSystem.product import Product
         self._products_lock.acquire_write()
         if not product_name:
@@ -98,7 +98,7 @@ class Store:
             self._products_lock.release_write()
             return Response(False, msg="This product is already in the store's inventory")
 
-        product = Product(product_name=product_name, price=price)
+        product = Product(product_name=product_name, category=category, price=price)
         product_id = product.get_id()
         self._products_to_quantities[product_id] = (product, quantity)
         self._products_lock.release_write()
@@ -108,7 +108,7 @@ class Store:
        ----------------------
        1. a product with product_id exists"""
 
-    def remove_product(self, product_id: str) -> Response[None]:
+    def remove_product(self, product_id: str) -> Response[PrimitiveParsable[int]]:
         self._products_lock.acquire_write()
         result = self._products_to_quantities.pop(product_id, None)
         if result is None:
@@ -117,22 +117,20 @@ class Store:
                 False, msg="The product " + product_id + "is already not in the inventory!"
             )
         self._products_lock.release_write()
-        return Response(
-            True, msg="Successfully removed product with product id: " + str(product_id)
-        )
+        return Response(True, obj=PrimitiveParsable(result[1]), msg="Successfully removed product with product id: " + str(product_id))
 
     """checks need to be made:
        ----------------------
        1. price > 0
        2. a product with product_id exists"""
 
-    def edit_product_details(self, product_id: str, product_name: str, price: float) -> Response[None]:
+    def edit_product_details(self, product_id: str, product_name: str, category: str, price: float) -> Response[None]:
         self._products_lock.acquire_write()
         if product_id not in self._products_to_quantities:
             self._products_lock.release_write()
             return Response(False, msg="No such product in the store")
 
-        response = self._products_to_quantities[product_id][0].edit_product_details(product_name, price)
+        response = self._products_to_quantities[product_id][0].edit_product_details(product_name, category, price)
         self._products_lock.release_write()
         return response
 

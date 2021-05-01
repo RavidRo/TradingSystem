@@ -1,17 +1,17 @@
 from Backend.Domain.TradingSystem.Responsibilities.responsibility import Permission, Responsibility
 from Backend.Domain.TradingSystem.Interfaces.IUser import IUser
 from Backend.Domain.TradingSystem.purchase_details import PurchaseDetails
-from Backend.response import Response, ParsableList
+from Backend.response import Response, ParsableList, PrimitiveParsable
 
 
 class Founder(Responsibility):
     # 4.1
     # Creating a new product a the store
-    def add_product(self, name: str, price: float, quantity: int) -> Response[str]:
-        return self._store.add_product(name, price, quantity)
+    def add_product(self, name: str, category: str, price: float, quantity: int) -> Response[str]:
+        return self._store.add_product(name, category, price, quantity)
 
     # 4.1
-    def remove_product(self, product_id: str) -> Response[None]:
+    def remove_product(self, product_id: str) -> Response[PrimitiveParsable[int]]:
         return self._store.remove_product(product_id)
 
     # 4.1
@@ -19,14 +19,12 @@ class Founder(Responsibility):
         return self._store.change_product_quantity(product_id, quantity)
 
     # 4.1
-    def edit_product_details(
-        self, product_id: str, new_name: str, new_price: float
-    ) -> Response[None]:
-        return self._store.edit_product_details(product_id, new_name, new_price)
+    def edit_product_details(self, product_id: str, new_name: str, new_category: str, new_price: float) -> Response[None]:
+        return self._store.edit_product_details(product_id, new_name, new_category, new_price)
 
     # 4.3
     def appoint_owner(self, user: IUser) -> Response[None]:
-        # * The import is here to fix circular depandency problem
+        # * The import is here to fix circular dependency problem
         from Backend.Domain.TradingSystem.Responsibilities.owner import Owner
 
         # We don't to appoint a user to the same store twice

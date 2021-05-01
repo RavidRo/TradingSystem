@@ -36,18 +36,18 @@ class Guest(UserState):
         response = authentication.login(username, password)
         if response.succeeded():
             if is_username_admin(username):
-                self.user.change_state(
-                    Admin(self.user, username)
+                self._user.change_state(
+                    Admin(self._user, username)
                 )  # in later milestones, fetch data from DB
             else:
-                self.user.change_state(Member(self.user, username))
+                self._user.change_state(Member(self._user, username))
         return response
 
     def register(self, username, password):
         return authentication.register(username, password)
 
     def delete_products_after_purchase(self):
-        return self.cart.delete_products_after_purchase("guest")
+        return self._cart.delete_products_after_purchase("guest")
 
     def open_store(self, store_name):
         return Response(False, msg="A store cannot be opened by a guest")
@@ -55,7 +55,7 @@ class Guest(UserState):
     def get_purchase_history(self):
         return Response(False, msg="Guests don't have purchase history")
 
-    def add_new_product(self, store_id, product_name, product_price, quantity):
+    def add_new_product(self, store_id, product_name, category, product_price, quantity):
         return Response(False, msg="Guests cannot add products to stores")
 
     def remove_product(self, store_id, product_id):
@@ -64,7 +64,7 @@ class Guest(UserState):
     def change_product_quantity_in_store(self, store_id, product_id, new_quantity):
         return Response(False, msg="Guests cannot change store product's quantity")
 
-    def edit_product_details(self, store_id, product_id, new_name, new_price):
+    def edit_product_details(self, store_id, product_id, new_name, new_category, new_price):
         return Response(False, msg="Guests cannot edit store product's details")
 
     def appoint_new_store_owner(self, store_id, new_owner):

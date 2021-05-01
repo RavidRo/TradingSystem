@@ -123,7 +123,7 @@ class ShoppingCart(IShoppingCart):
                 return result
             succeeded_bags.append(self.__shopping_bags[store_id])
             sum_amount += result.object.value
-            self.price = sum_amount
+            self.__price = sum_amount
 
         self.__purchase_time_passed = False
         if self.__timer is not None:
@@ -137,8 +137,8 @@ class ShoppingCart(IShoppingCart):
         )
 
     def get_price(self):
-        if self.price is not None:
-            return Response(True, self.price)
+        if self.__price is not None:
+            return Response(True, self.__price)
         return Response(False, msg="Can't get price when not in purchase state")
 
     """notice: For now - the bag will be deleted since only regular purchase type enabled!"""
@@ -147,7 +147,7 @@ class ShoppingCart(IShoppingCart):
         self.__timer.cancel()
         self.__pending_purchase = False
         self.__timer = None
-        self.price = None
+        self.__price = None
         purchase_cart_details = []
         for store_id in self.__shopping_bags:
             purchase_cart_details.append(
@@ -162,7 +162,7 @@ class ShoppingCart(IShoppingCart):
     def send_back(self) -> Response[None]:
         self.__transaction_lock.acquire()
         if self.__pending_purchase:
-            self.price = None
+            self.__price = None
             self.__purchase_time_passed = True
             for bag in self.__shopping_bags.values():
                 bag.send_back()
@@ -184,7 +184,7 @@ class ShoppingCart(IShoppingCart):
             self.__timer.cancel()
         self.__timer = None
         self.__pending_purchase = False
-        self.price = None
+        self.__price = None
         for bag in self.__shopping_bags.values():
             bag.send_back()
         self.__transaction_lock.release()
