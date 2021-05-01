@@ -73,7 +73,7 @@ class IDiscount(Parsable, ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def get_children(self) -> Response[ParsableList[list[IDiscount]]]:
+    def get_children(self) -> list[IDiscount]:
         raise NotImplementedError
 
     def parse(self):

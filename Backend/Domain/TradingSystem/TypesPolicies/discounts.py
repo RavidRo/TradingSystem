@@ -1,4 +1,5 @@
 from abc import ABC
+from typing import Union
 
 from Backend.Domain.TradingSystem.Interfaces.IDiscount import IDiscount
 from Backend.response import Response, ParsableList
@@ -52,6 +53,25 @@ class SimpleDiscount(IDiscount):
         if self.get_id() != discount_id:
             return Response(False, msg="The ID provided is not found!")
 
+        msg = ""
+
+        if percentage is not None and (percentage < 0 or percentage > 100):
+            msg += "Percentage parameter must be at range 0-100\n"
+
+        if context is not None:
+            if 'obj' not in context:
+                msg += "context must include 'obj' key\n"
+            else:
+                if context['obj'] not in ("product", "category", "store"):
+                    msg += "context object must be one of the following: 'product', 'category', 'store'\n"
+            if 'id' not in context:
+                msg += "context must include 'id' key\n"
+
+        # add conditions on duration in later milestones
+
+        if msg != "":
+            return Response(False, msg=msg)
+
         if percentage is not None:
             self._multiplier = percentage / 100
         if condition is not None:
@@ -70,13 +90,13 @@ class SimpleDiscount(IDiscount):
     def remove_discount(self, discount_id: str) -> Response[None]:
         # assuming it has a parent
         if self._id == discount_id:
-            self.get_parent().remove_discount(self._id)
+            self.get_parent().remove_child(self)
             self.set_parent(None)  # kinda redundant
             return Response(True)
         return Response(False, msg="discount to remove not found!")
 
-    def get_children(self) -> Response[ParsableList[list[IDiscount]]]:
-        return Response(False, msg="SimpleDiscount has no children")
+    def get_children(self) -> Union[list[IDiscount], None]:
+        return None
 
     def add_child(self, child: IDiscount) -> Response[None]:
         return Response(False, msg="Cannot add new discount to simple discount")
@@ -108,8 +128,8 @@ class CompositeDiscount(IDiscount, ABC):
         child.set_parent(None)
         return Response(True)
 
-    def get_children(self) -> Response[ParsableList[list[IDiscount]]]:
-        return Response(True, ParsableList(self._children))
+    def get_children(self) -> list[IDiscount]:
+        return self._children
 
     def is_composite(self) -> bool:
         return True
@@ -132,9 +152,20 @@ class CompositeDiscount(IDiscount, ABC):
     }
 
     def edit_complex_discount(self, discount_id: str, complex_type: str = None, decision_rule: str = None):
+
         if self.get_id() == discount_id:
-            self.get_parent().add_child(CompositeDiscount.complex_type_generator.get(complex_type)(self._children, decision_rule))
-            self.get_parent().remove_child(self.get_id())
+            msg = ""
+            if complex_type is not None and complex_type not in ('max', 'add', 'xor', 'and', 'or'):
+                msg += "complex_type must be one of the following: 'max', 'add', 'xor', 'and', 'or'\n"
+            if self.get_parent() is None:
+                msg += "Cannot edit root discount!\n"
+
+            if msg != "":
+                return Response(False, msg=msg)
+            parent_children = self.get_parent().get_children()
+            parent_children[parent_children.index(self)].add_child(
+                CompositeDiscount.complex_type_generator.get(complex_type)(self._children, decision_rule))
+            self._id = discount_id
             return Response(True)
 
         for child in self._children:
@@ -152,6 +183,8 @@ class CompositeDiscount(IDiscount, ABC):
 
     def remove_discount(self, discount_id: str) -> Response[None]:
         if self._id == discount_id:
+            if self.get_parent() is None:
+                return Response(False, msg="Tries to remove hidden root!")
             self.get_parent().remove_child(self)
             self.set_parent(None)  # kinda redundant
             return Response(True)
@@ -182,7 +215,7 @@ class MaximumCompositeDiscount(CompositeDiscount):
 
     def parse(self):
         discounts = super().parse()
-        discounts['merger'] = "max"
+        discounts['type'] = "max"
         return discounts
 
 
@@ -198,7 +231,7 @@ class AddCompositeDiscount(CompositeDiscount):
 
     def parse(self):
         discounts = super().parse()
-        discounts['merger'] = "add"
+        discounts['type'] = "add"
         return discounts
 
 
@@ -219,7 +252,7 @@ class XorCompositeDiscount(CompositeDiscount):
 
     def parse(self):
         discounts = super().parse()
-        discounts['merger'] = "xor"
+        discounts['type'] = "xor"
         return discounts
 
 
@@ -235,7 +268,7 @@ class AndConditionDiscount(CompositeDiscount):
 
     def parse(self):
         discounts = super().parse()
-        discounts['merger'] = "and"
+        discounts['type'] = "and"
         return discounts
 
 
@@ -251,7 +284,7 @@ class OrConditionDiscount(CompositeDiscount):
 
     def parse(self):
         discounts = super().parse()
-        discounts['merger'] = "or"
+        discounts['type'] = "or"
         return discounts
 
 

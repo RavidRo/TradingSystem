@@ -11,8 +11,18 @@ class DiscountPolicy:
 
 
 def make_discount(discount_data):
-    if discount_data['context']['obj'] not in ('product', 'category', 'store'):
-        return Response(False, msg="Discount context is not 'product', 'context', or 'store'!")
+    if 'discount_type' not in discount_data or discount_data['discount_type'] not in ('simple', 'complex'):
+        return Response(False, msg="discount must have discount_type from ('simple', 'complex')")
+    if discount_data['discount_type'] == 'simple':
+        if discount_data['context']['obj'] not in ('product', 'category', 'store'):
+            return Response(False, msg="Discount context is not 'product', 'context', or 'store'!")
+        if 'percentage' in discount_data and (discount_data['percentage'] < 0.0 or discount_data['percentage'] > 100.0):
+            return Response(False, msg="Percentage of discount must be between 0 and 100")
+    else:
+        if 'type' in discount_data and discount_data['type'] not in ('max', 'add', 'and', 'or', 'xor'):
+            return Response(False, msg="Invalid type value for complex discount")
+        if 'type' in discount_data and discount_data['type'] == 'xor' and 'decision_rule' not in discount_data:
+            return Response(False, msg="Xor discount must have decision_rule")
     discount = DefaultDiscountPolicy.discounts_generator[discount_data['discount_type']](discount_data)
     if discount is not None:
         return Response(True, discount)
@@ -70,12 +80,11 @@ class DefaultDiscountPolicy(DiscountPolicy):
         if dest_discount is None:
             return Response(False, msg="Destination discount cannot be found")
 
-        # TODO: check with Ravid if add src_discount as child of dest_discount or as it's sibling.
         if not dest_discount.is_composite():
             return Response(False, msg="Tries to add child to simple discount! please create the composite discount "
                                        "first!")
 
-        src_discount.get_parent().remove_discount(src_id)
+        src_discount.get_parent().remove_child(src_discount)
         dest_discount.add_child(src_discount)
         return Response(True)
 

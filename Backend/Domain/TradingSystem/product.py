@@ -34,19 +34,24 @@ class Product(IProduct):
         return uuid.uuid4()
 
     def edit_product_details(self, product_name: str, category: str, price: float):
+        msg = ""
+        if price is not None and price < 0:
+            msg += "Product's price must pe none negative!\n"
+        if product_name is not None and product_name == "":
+            msg += "Product's name cannot be an empty string!\n"
+        if category is not None and category == "":
+            msg += "Category name cannot be an empty string!\n"
+
+        if msg != "":
+            return Response(False, msg=msg)
+
         if price is not None:
-            if price < 0:
-                return Response(False, msg="Product's price must pe none negative!")
             self.__price = price
 
         if product_name is not None:
-            if product_name == "":
-                return Response(False, msg="Product's name cannot be an empty string!")
             self.__product_name = product_name
 
         if category is not None:
-            if category == "":
-                return Response(False, msg="Category name cannot be an empty string!")
             self.__category = category
 
         return Response(True, msg=f"Successfully edited product with product id: {self.__id}")
