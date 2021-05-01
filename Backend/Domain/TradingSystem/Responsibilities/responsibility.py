@@ -35,7 +35,7 @@ name_to_permission: dict[str, Permission] = {
 class Responsibility(Parsable):
     ERROR_MESSAGE = "Responsibility is an interface, function not implemented"
 
-    def __init__(self, user_state, store, subscriber) -> None:
+    def __init__(self, user_state, store, subscriber=None) -> None:
         self._user_state = user_state
         user_state.add_responsibility(self, store.get_id())
         self._store = store
@@ -132,7 +132,8 @@ class Responsibility(Parsable):
         for appointment in self._appointed:
             appointment.__dismiss_from_store(store_id)
         message = f'You have been dismissed from store "{self._store.get_name()}"'
-        self.__subscriber.notify(message)
+        if self.__subscriber:
+            self.__subscriber.notify(message)
         self._user_state.dismiss_from_store(store_id)
 
     # Parsing the object for user representation

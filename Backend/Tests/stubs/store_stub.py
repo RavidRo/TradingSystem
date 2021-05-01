@@ -12,6 +12,7 @@ class StoreStub(Store):
         self.product_quantity_changed = False
         self.product_details_changed = False
         self._products_to_quantities: dict = products
+
     # 4.1
     # Creating a new product a the store
     def add_product(self, name: str, category: str, price: float, quantity: int) -> Response[None]:
@@ -64,5 +65,11 @@ class StoreStub(Store):
 
     def check_and_acquire_available_products(self, products_to_quantities: dict) -> Response[None]:
         for i in range(1, 4):
-            self._products_to_quantities[f"{i}"] = (self._products_to_quantities[f"{i}"][0], self._products_to_quantities[f"{i}"][1] - 1)
+            self._products_to_quantities[f"{i}"] = (
+                self._products_to_quantities[f"{i}"][0],
+                self._products_to_quantities[f"{i}"][1] - 1,
+            )
         return Response(True)
+
+    def subscribe(self, subscriber):
+        return True
