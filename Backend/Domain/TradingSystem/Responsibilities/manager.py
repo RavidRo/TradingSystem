@@ -133,7 +133,7 @@ class Manager(Owner):
         self, rule_details: dict, rule_type: str, parent_id: str, clause: str = None
     ):
         if self.__permissions[Permission.MANAGE_PURCHASE_POLICY]:
-            return super().add_purchase_rule(self, rule_details, rule_type, parent_id, clause)
+            return super().add_purchase_rule(rule_details, rule_type, parent_id, clause)
         return self.__create_no_permission_Response(Permission.MANAGE_PURCHASE_POLICY)
 
     # 4.2
