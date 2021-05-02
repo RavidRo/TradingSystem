@@ -34,7 +34,7 @@ const useStyles = makeStyles((theme) => ({
 	},
 }));
 
-type SignInProps = { onSignIn: () => void };
+type SignInProps = { onSignIn: (username: string) => void };
 
 const SignIn: FC<SignInProps> = ({ onSignIn }) => {
 	const classes = useStyles();
@@ -50,9 +50,13 @@ const SignIn: FC<SignInProps> = ({ onSignIn }) => {
 
 	const handleSubmit = (event: any) => {
 		signUp.request({ username, password }, (data, error) => {
+			// console.log('REQUESTEDDDDDDDD');
 			if (!error && data !== null && data.succeeded) {
-				onSignIn();
+				// console.log('SUCESSSSSSSSSSSSSSSSSSSSSS');
+				onSignIn(username);
 				history.push('/');
+			} else {
+				// console.log('FAILLLLLLLLLLLLLLLLLLLLLLL');
 			}
 		});
 		event.preventDefault();

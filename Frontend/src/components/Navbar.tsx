@@ -1,29 +1,41 @@
-import React, { FC, useState,useEffect } from 'react';
+import React, { FC, useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faShoppingCart, faSignInAlt , faSearch, faBell} from '@fortawesome/free-solid-svg-icons';
+import {
+	faShoppingCart,
+	faSignInAlt,
+	faSearch,
+	faBell,
+	faSignOutAlt,
+} from '@fortawesome/free-solid-svg-icons';
 
 import '../styles/Navbar.scss';
 import config from '../config';
 import PopupCart from '../components/PopupCart';
-import {Product} from '../types';
+import { Product } from '../types';
 import { Badge } from '@material-ui/core';
 
 type NavBarProps = {
-	 signedIn: boolean,
-	 products:Product[],
-	 propHandleDelete:(product:Product)=>void,
-	 notification:string[],
-	};
+	signedIn: boolean;
+	products: Product[];
+	propHandleDelete: (product: Product) => void;
+	notification: string[];
+	logout: () => void;
+};
 
-const Navbar: FC<NavBarProps> = ({ signedIn ,products,propHandleDelete,notification}) => {
+const Navbar: FC<NavBarProps> = ({
+	signedIn,
+	products,
+	propHandleDelete,
+	notification,
+	logout,
+}) => {
 	const [hoverCart, setHoverCart] = useState<boolean>(false);
-    const [productsInCart,setProducts] = useState<Product[]>(products);
+	const [productsInCart, setProducts] = useState<Product[]>(products);
 
-	useEffect(()=>{
-        setProducts(products);
-    },[products]);
-
+	useEffect(() => {
+		setProducts(products);
+	}, [products]);
 
 	return (
 		<div className="navbar">
@@ -31,42 +43,51 @@ const Navbar: FC<NavBarProps> = ({ signedIn ,products,propHandleDelete,notificat
 				<Link className="nameLink" to="/">
 					{config.website_name}!
 				</Link>
-				
+
 				<div
-					className="cartDiv"
+					className="navbar-item"
 					onMouseOver={() => setHoverCart(true)}
 					onMouseLeave={() => setHoverCart(false)}
 				>
-					<FontAwesomeIcon className="cartIcon" icon={faShoppingCart} />
-					<Link className="cartLink" to="/cart">
+					<FontAwesomeIcon className="item-icon" icon={faShoppingCart} />
+					<Link className="item-link" to="/cart">
 						My Cart
 					</Link>
-					{hoverCart ? <PopupCart products={productsInCart} propHandleDelete={propHandleDelete} /> : null}
+					{hoverCart ? (
+						<PopupCart products={productsInCart} propHandleDelete={propHandleDelete} />
+					) : null}
 				</div>
-				<div className="storesDiv">
-					<FontAwesomeIcon className="cartIcon" icon={faSearch} />
-					<Link className="storesLink" to="/storesView">
+				<div className="navbar-item">
+					<FontAwesomeIcon className="item-icon" icon={faSearch} />
+					<Link className="item-link" to="/storesView">
 						Stores
 					</Link>
 				</div>
-				<div className="signInDiv">
-					<FontAwesomeIcon className="signInIcon" icon={faSignInAlt} />
+				{signedIn && (
+					<div className="navbar-item">
+						<FontAwesomeIcon className="item-icon" icon={faSignOutAlt} />
+						<Link className="item-link" to="/" onClick={() => logout()}>
+							Logout
+						</Link>
+					</div>
+				)}
+				<div className="navbar-item">
+					<FontAwesomeIcon className="item-icon" icon={faSignInAlt} />
 					{signedIn ? (
-						<Link className="signInLink" to="/my-stores">
+						<Link className="item-link" to="/my-stores">
 							Account&Stores
 						</Link>
 					) : (
-						<Link className="signInLink" to="/sign-in">
+						<Link className="item-link" to="/sign-in">
 							Sign In
 						</Link>
 					)}
 				</div>
-				<div className="notifictionDiv">
+				<div className="navbar-item">
 					<Badge badgeContent={notification.length} showZero color="primary">
-						<FontAwesomeIcon className="signInIcon" icon={faBell} />
+						<FontAwesomeIcon className="item-icon" icon={faBell} />
 					</Badge>
-						<Link className="notifyLink" to="/">
-						</Link>
+					<Link className="item-link" to="/"></Link>
 				</div>
 			</nav>
 		</div>

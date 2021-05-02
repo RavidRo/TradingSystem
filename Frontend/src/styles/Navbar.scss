@@ -7,6 +7,7 @@
     display: flex;
     flex-direction: row;
     align-items: center;
+    padding: 0 20px;
 }
 
 .nameLink{
@@ -20,62 +21,21 @@
     font-weight: bold;
 }
 
-.cartDiv{
+.navbar-item {
     display: flex;
     flex-direction: row;
     align-items: center;
-    width: 10%;
-}
-.cartLink{
-    font-size: 30px;
-    text-decoration: none;
-    color: black;
-    margin-left: 5%;
-}
-.cartIcon{
-    font-size: 30px;
-    cursor: pointer;
-}
-.storesDiv{
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    width: 8%;
-}
-.storesLink{
-    font-size: 30px;
-    text-decoration: none;
-    color: black;
-}
-.signInDiv{
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    width: 8%;
-}
-.signInLink{
-    font-size: 30px;
-    text-decoration: none;
-    color: black;
-    margin-left: 5%;
-}
-.signInIcon{
-    font-size: 30px;
-    cursor: pointer;
-}
-.notifictionDiv{
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    width: 3.5%;
-}
-.notifyLink{
-    font-size: 30px;
-    text-decoration: none;
-    color: black;
-    margin-left: 5%;
-}
-.notifyIcon{
-    font-size: 30px;
-    cursor: pointer;
+    white-space: nowrap;
+    margin-left: 20px;
+
+    .item-icon {
+        font-size: 30px;
+    }
+
+    .item-link {
+        font-size: 30px;
+        text-decoration: none;
+        color: black;
+        margin-left: 5%;
+    }
 }

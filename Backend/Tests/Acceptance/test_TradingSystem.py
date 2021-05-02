@@ -872,7 +872,7 @@ def test_get_purchase_history_no_payment_fail():
     assert len(response.object.values) == 0
 
     # 4.3 https://github.com/SeanPikulin/TradingSystem/blob/main/Documentation/Use%20Cases.md#43-Appoint-new-store-owner
-    # def test_appoint_store_owner_success():
+def test_appoint_store_owner_success():
     cookie, username, password, store_name, store_id = _initialize_info(
         _generate_username(), "aaa", _generate_store_name()
     )
@@ -953,7 +953,7 @@ def test_appoint_store_owner_circular_fail():
     assert not res.succeeded()
 
     # 4.5 https://github.com/SeanPikulin/TradingSystem/blob/main/Documentation/Use%20Cases.md#45-Appoint-new-store-manager
-    # def test_appoint_store_manager_success():
+def test_appoint_store_manager_success():
     cookie, username, password, store_name, store_id = _initialize_info(
         _generate_username(), "aaa", _generate_store_name()
     )

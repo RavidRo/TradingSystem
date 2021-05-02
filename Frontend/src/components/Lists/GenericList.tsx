@@ -34,7 +34,7 @@ const GenericList: FC<GenericListProps> = ({
 			<div className={narrow ? 'narrow-list' : '' + (padRight ? 'list-padding' : '')}>
 				{data.map((current, index) => children(current, index))}
 				{onCreate && (
-					<ListItem button onClick={onCreate}>
+					<ListItem key={'random_key'} button onClick={onCreate}>
 						<ListItemText primary={createTxt} />
 					</ListItem>
 				)}

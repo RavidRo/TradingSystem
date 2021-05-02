@@ -49,6 +49,9 @@ class Store(Parsable):
     def subscribe(self, subscriber):
         self.__publisher.subscribe(subscriber)
 
+    def unsubscribe(self, subscriber):
+        self.__publisher.remove_subscriber(subscriber)
+
     def get_products(self) -> Response[ParsableList[Product]]:
         self._products_lock.acquire_read()
         products = [product for product, _ in self._products_to_quantities.values()]

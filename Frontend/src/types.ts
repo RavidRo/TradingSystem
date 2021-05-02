@@ -14,19 +14,25 @@ export type ShoppingBag = {storeID:string, storeName:string,prodQuantities:Produ
 
 
 export type Permission =
-	| 'manage_products'
-	| 'get_appointments'
-	| 'appoint_manager'
-	| 'remove_manager'
-	| 'get_history';
+	| 'manage products'
+	| 'get appointments'
+	| 'appoint manager'
+	| 'remove manager'
+	| 'get history'
+	| 'manage purchase policy'
+	| 'manage discount policy';
 
-export const defaultPermissions = {
-	manage_products: false,
-	get_appointments: true,
-	appoint_manager: false,
-	remove_manager: false,
-	get_history: false,
-};
+export const defaultPermissions: Permission[] = ['get appointments'];
+
+export const allPermissions: Permission[] = [
+	'manage products',
+	'get appointments',
+	'appoint manager',
+	'remove manager',
+	'get history',
+	'manage purchase policy',
+	'manage discount policy',
+];
 
 export type Role = 'Founder' | 'Owner' | 'Manager';
 export type Appointee = {
@@ -35,7 +41,7 @@ export type Appointee = {
 	username: string;
 	role: Role;
 	appointees: Appointee[];
-	permissions: { [key in Permission]: boolean };
+	permissions: Permission[];
 	isManager: boolean;
 };
 
