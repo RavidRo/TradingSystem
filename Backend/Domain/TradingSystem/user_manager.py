@@ -136,11 +136,6 @@ class UserManager:
         )
         return UserManager.__deligate_to_user(cookie, func)
 
-    @staticmethod
-    def get_discounted_current_cart_price(cookie: str):
-        func: Callable[[User], Response] = lambda user: user.get_discounted_current_cart_price()
-        return UserManager.__deligate_to_user(cookie, func)
-
     # 2.9
     @staticmethod
     def purchase_cart(cookie: str, user_age: int) -> Response[PrimitiveParsable[float]]:

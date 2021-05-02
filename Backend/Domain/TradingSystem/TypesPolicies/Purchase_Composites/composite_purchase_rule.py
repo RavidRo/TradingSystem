@@ -98,8 +98,10 @@ class CompositePurchaseRule(PurchaseRule):
         else:
             return Response(False, msg=f"Operation couldn't be performed! Wrong parent_id: {id}")
 
-    def remove(self, component_id: str, ) -> Response[None]:
+    def remove(self, component_id: str) -> Response[None]:
         if self.id == component_id:
+            if self.parent is None:
+                return Response(False, msg="Root can't be removed!")
             self.parent._children.remove(self)
             self.parent = None
             return Response(True, msg="Rule was removed successfully!")

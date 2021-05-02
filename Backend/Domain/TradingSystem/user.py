@@ -59,9 +59,6 @@ class User(IUser):
     ) -> Response[None]:
         return self.state.change_product_quantity_in_cart(store_id, product_id, new_amount)
 
-    def get_discounted_current_cart_price(self):
-        return self.state.get_discounted_current_cart_price()
-
     # 2.9
     def purchase_cart(self, user_age: int) -> Response[PrimitiveParsable[float]]:
         return self.state.buy_cart(user_age)
@@ -174,7 +171,7 @@ class User(IUser):
     def add_purchase_rule(
         self, store_id: str, rule_details: dict, rule_type: str, parent_id: str, clause: str = None
     ):
-        return self.state.add_purchase_rule(rule_details, rule_type, parent_id, clause)
+        return self.state.add_purchase_rule(store_id, rule_details, rule_type, parent_id, clause)
 
     # 4.2
     def remove_purchase_rule(self, store_id: str, rule_id: str):
