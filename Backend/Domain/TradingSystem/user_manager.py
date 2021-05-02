@@ -83,11 +83,11 @@ class UserManager:
             if response.succeeded():
                 for user_cookie in UserManager.__cookie_user:
                     old_user = UserManager.__cookie_user[user_cookie]
-                    response = old_user.get_username()
+                    response_username = old_user.get_username()
                     if (
-                        response.succeeded()
+                        response_username.succeeded()
                         and old_user != user
-                        and response.get_obj().get_val() == username
+                        and response_username.get_obj().get_val() == username
                     ):
                         UserManager.__cookie_user[cookie] = old_user
                         old_user.connect(user.get_communicate())
@@ -241,12 +241,20 @@ class UserManager:
     # 4.2
     @staticmethod
     def add_discount(cookie: str, store_id: str, discount_data: dict, exist_id: str):
-        func: Callable[[User], Response] = lambda user: user.add_discount(store_id, discount_data, exist_id, )
+        func: Callable[[User], Response] = lambda user: user.add_discount(
+            store_id,
+            discount_data,
+            exist_id,
+        )
         return UserManager.__deligate_to_user(cookie, func)
 
     @staticmethod
     def move_discount(cookie: str, store_id: str, src_id: str, dest_id: str):
-        func: Callable[[User], Response] = lambda user: user.move_discount(store_id, src_id, dest_id, )
+        func: Callable[[User], Response] = lambda user: user.move_discount(
+            store_id,
+            src_id,
+            dest_id,
+        )
         return UserManager.__deligate_to_user(cookie, func)
 
     @staticmethod
@@ -260,25 +268,45 @@ class UserManager:
         return UserManager.__deligate_to_user(cookie, func)
 
     @staticmethod
-    def edit_simple_discount(cookie: str, store_id: str, discount_id: str, percentage: float = None,
-                             condition: dict = None, context: dict = None, duration=None):
-        func: Callable[[User], Response] = lambda user: user.edit_simple_discount(store_id, discount_id, percentage,
-                                                                                  condition,
-                                                                                  context, duration)
+    def edit_simple_discount(
+        cookie: str,
+        store_id: str,
+        discount_id: str,
+        percentage: float = None,
+        condition: dict = None,
+        context: dict = None,
+        duration=None,
+    ):
+        func: Callable[[User], Response] = lambda user: user.edit_simple_discount(
+            store_id, discount_id, percentage, condition, context, duration
+        )
         return UserManager.__deligate_to_user(cookie, func)
 
     @staticmethod
-    def edit_complex_discount(cookie: str, store_id: str, discount_id: str, complex_type: str = None,
-                              decision_rule: str = None):
-        func: Callable[[User], Response] = lambda user: user.edit_complex_discount(store_id, discount_id,
-                                                                                   complex_type,
-                                                                                   decision_rule)
-
+    def edit_complex_discount(
+        cookie: str,
+        store_id: str,
+        discount_id: str,
+        complex_type: str = None,
+        decision_rule: str = None,
+    ):
+        func: Callable[[User], Response] = lambda user: user.edit_complex_discount(
+            store_id, discount_id, complex_type, decision_rule
+        )
 
     # 4.2
     @staticmethod
-    def add_purchase_rule(cookie: str, store_id: str, rule_details: dict, rule_type: str, parent_id: str, clause: str = None):
-        func: Callable[[User], Response] = lambda user: user.add_purchase_rule(store_id, rule_details, rule_type, parent_id, clause)
+    def add_purchase_rule(
+        cookie: str,
+        store_id: str,
+        rule_details: dict,
+        rule_type: str,
+        parent_id: str,
+        clause: str = None,
+    ):
+        func: Callable[[User], Response] = lambda user: user.add_purchase_rule(
+            store_id, rule_details, rule_type, parent_id, clause
+        )
         return UserManager.__deligate_to_user(cookie, func)
 
     # 4.2
@@ -289,14 +317,20 @@ class UserManager:
 
     # 4.2
     @staticmethod
-    def edit_purchase_rule(cookie: str, store_id: str, rule_details: dict, rule_id: str, rule_type: str):
-        func: Callable[[User], Response] = lambda user: user.edit_purchase_rule(store_id, rule_details, rule_id, rule_type)
+    def edit_purchase_rule(
+        cookie: str, store_id: str, rule_details: dict, rule_id: str, rule_type: str
+    ):
+        func: Callable[[User], Response] = lambda user: user.edit_purchase_rule(
+            store_id, rule_details, rule_id, rule_type
+        )
         return UserManager.__deligate_to_user(cookie, func)
 
     # 4.2
     @staticmethod
     def move_purchase_rule(cookie: str, store_id: str, rule_id: str, new_parent_id: str):
-        func: Callable[[User], Response] = lambda user: user.move_purchase_rule(store_id, rule_id, new_parent_id)
+        func: Callable[[User], Response] = lambda user: user.move_purchase_rule(
+            store_id, rule_id, new_parent_id
+        )
         return UserManager.__deligate_to_user(cookie, func)
 
     # 4.2
