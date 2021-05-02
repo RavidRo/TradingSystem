@@ -63,7 +63,7 @@ def test_change_product_quantity_deligates_in_cart_to_state(user: User):
 # * purchase_cart tests - 2.9
 # * ===========================================================
 def test_purchase_cart_deligates_to_state(user: User):
-    result = user.purchase_cart()
+    result = user.purchase_cart(25)
     assert user.state._buy_cart and result
 
 

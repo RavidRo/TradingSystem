@@ -67,6 +67,26 @@ class Guest(UserState):
     def edit_product_details(self, store_id, product_id, new_name, new_category, new_price, keywords=None):
         return Response(False, msg="Guests cannot edit store product's details")
 
+    def add_discount(self, store_id: str, discount_data: dict, exist_id: str):
+        return Response(False, msg="Guests cannot add new discount to store")
+
+    def move_discount(self, store_id: str, src_id: str, dest_id: str):
+        return Response(False, msg="Guests cannot modify store's discount tree")
+
+    def get_discounts(self, store_id: str):
+        return Response(False, msg="Guests cannot get store's discount tree")
+
+    def remove_discount(self, store_id: str, discount_id: str):
+        return Response(False, msg="Guests cannot remove discount from store's discount tree")
+
+    def edit_simple_discount(self, store_id: str, discount_id: str, percentage: float = None,
+                             condition: dict = None, context: dict = None, duration=None):
+        return Response(False, msg="Guests cannot edit discounts")
+
+    def edit_complex_discount(self, store_id: str, discount_id: str, complex_type: str = None,
+                              decision_rule: str = None):
+        return Response(False, msg="Guests cannot edit discounts")
+
     def appoint_new_store_owner(self, store_id, new_owner):
         return Response(False, msg="Guests cannot appoint new store owners")
 
@@ -99,3 +119,23 @@ class Guest(UserState):
 
     def is_appointed(self, store_id):
         return Response(False, msg="Can't appoint guests to stores")
+
+    # 4.2
+    def add_purchase_rule(self, store_id: str, rule_details: dict, rule_type: str, parent_id: str, clause: str = None):
+        return Response(False, msg="Guests cannot add purchase rules")
+
+    # 4.2
+    def remove_purchase_rule(self, store_id: str, rule_id: str):
+        return Response(False, msg="Guests cannot remove purchase rules")
+
+    # 4.2
+    def edit_purchase_rule(self, store_id: str, rule_details: dict, rule_id: str, rule_type: str):
+        return Response(False, msg="Guests cannot edit purchase rules")
+
+    # 4.2
+    def move_purchase_rule(self, store_id: str, rule_id: str, new_parent_id: str):
+        return Response(False, msg="Guests cannot move purchase rule")
+
+    # 4.2
+    def get_purchase_policy(self, store_id):
+        return self.__responsibilities[store_id].get_purchase_policy()

@@ -1,3 +1,4 @@
+from Backend.Domain.TradingSystem.Interfaces.IUser import IUser
 from Backend.Domain.TradingSystem.Responsibilities.responsibility import Permission, Responsibility
 
 # from Backend.Domain.TradingSystem.Interfaces.IUser import IUser
@@ -40,8 +41,53 @@ class Founder(Responsibility):
             product_id, new_name, new_category, new_price, keywords
         )
 
+    # 4.2
+    def add_purchase_rule(self, rule_details: dict, rule_type: str, parent_id: str, clause: str = None):
+        return self._store.add_purchase_rule(rule_details, rule_type, parent_id, clause)
+
+    # 4.2
+    def remove_purchase_rule(self, rule_id: str):
+        return self._store.remove_purchase_rule(rule_id)
+
+    # 4.2
+    def edit_purchase_rule(self, rule_details: dict, rule_id: str, rule_type: str):
+        return self._store.edit_purchase_rule(rule_details, rule_id, rule_type)
+
+    # 4.2
+    def move_purchase_rule(self, rule_id: str, new_parent_id: str):
+        return self._store.move_purchase_rule(rule_id, new_parent_id)
+
+    # 4.2
+    def get_purchase_policy(self):
+        return self._store.get_purchase_policy()
+
+    # 4.2
+    def add_discount(self, discount_data: dict, exist_id: str):
+        return self._store.add_discount(discount_data, exist_id)
+
+    # 4.2
+    def move_discount(self, src_id: str, dest_id: str):
+        return self._store.move_discount(src_id, dest_id)
+
+    # 4.2
+    def get_discounts(self):
+        return self._store.get_discounts()
+
+    # 4.2
+    def remove_discount(self, discount_id: str):
+        return self._store.remove_discount(discount_id)
+
+    # 4.2
+    def edit_simple_discount(self, discount_id: str, percentage: float = None, condition: dict = None,
+                             context: dict = None, duration=None):
+        return self._store.edit_simple_discount(discount_id, percentage, condition, context, duration)
+
+    # 4.2
+    def edit_complex_discount(self, discount_id: str, complex_type: str = None, decision_rule: str = None):
+        return self._store.edit_complex_discount(discount_id, complex_type, decision_rule)
+
     # 4.3
-    def appoint_owner(self, user: User) -> Response[None]:
+    def appoint_owner(self, user: IUser) -> Response[None]:
         # * The import is here to fix circular dependency problem
         from Backend.Domain.TradingSystem.Responsibilities.owner import Owner
 
@@ -82,7 +128,7 @@ class Founder(Responsibility):
             else:
                 #! I am guessing that user.state is of type member because at user_manager, with a given username he found a user object
                 #! (guest does not hae a username)
-                newResponsibility = Manager(user.state, self._store)
+                newResponsibility = Manager(user.state, self._store, user)
                 self._appointed.append(newResponsibility)
                 result = Response(True)
 
