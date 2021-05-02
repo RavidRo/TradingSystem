@@ -75,7 +75,7 @@ class Responsibility(Parsable):
         raise Exception(Responsibility.ERROR_MESSAGE)
 
     # 4.2
-    def add_discount(self, discount_data: dict, exist_id: str):
+    def add_discount(self, discount_data: dict, exist_id: str, condition_type: str = None):
         raise Exception(Responsibility.ERROR_MESSAGE)
 
     def move_discount(self, src_id: str, dest_id: str):
@@ -87,7 +87,7 @@ class Responsibility(Parsable):
     def remove_discount(self, discount_id: str):
         raise Exception(Responsibility.ERROR_MESSAGE)
 
-    def edit_simple_discount(self, discount_id: str, percentage: float = None, condition: dict = None,
+    def edit_simple_discount(self, discount_id: str, percentage: float = None,
                              context: dict = None, duration=None):
         raise Exception(Responsibility.ERROR_MESSAGE)
 

@@ -112,10 +112,10 @@ class Member(UserState):
             product_id, new_name, new_category, new_price, keywords
         )
 
-    def add_discount(self, store_id: str, discount_data: dict, exist_id: str):
+    def add_discount(self, store_id: str, discount_data: dict, exist_id: str, condition_type: str = None):
         if store_id not in self.__responsibilities:
             return Response(False, msg=f"this member do not own/manage store {store_id}")
-        return self.__responsibilities[store_id].add_discount(discount_data, exist_id)
+        return self.__responsibilities[store_id].add_discount(discount_data, exist_id, condition_type)
 
     def move_discount(self, store_id: str, src_id: str, dest_id: str):
         if store_id not in self.__responsibilities:
@@ -133,10 +133,10 @@ class Member(UserState):
         return self.__responsibilities[store_id].remove_discount(discount_id)
 
     def edit_simple_discount(self, store_id: str, discount_id: str, percentage: float = None,
-                             condition: dict = None, context: dict = None, duration=None):
+                             context: dict = None, duration=None):
         if store_id not in self.__responsibilities:
             return Response(False, msg=f"this member do not own/manage store {store_id}")
-        return self.__responsibilities[store_id].edit_simple_discount(discount_id, percentage, condition, context,
+        return self.__responsibilities[store_id].edit_simple_discount(discount_id, percentage, context,
                                                                       duration)
 
     def edit_complex_discount(self, store_id: str, discount_id: str, complex_type: str = None,

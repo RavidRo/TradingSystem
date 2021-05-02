@@ -183,8 +183,8 @@ class Store(Parsable):
         self._products_lock.release_write()
         return Response(False, msg=f"The product with id: {product_id} isn't in the inventory!")
 
-    def add_discount(self, discount_data: dict, exist_id: str):
-        return self.__discount_policy.add_discount(discount_data, exist_id)
+    def add_discount(self, discount_data: dict, exist_id: str, condition_type: str = None):
+        return self.__discount_policy.add_discount(discount_data, exist_id, condition_type)
 
     def move_discount(self, src_id: str, dest_id: str):
         return self.__discount_policy.move_discount(src_id, dest_id)

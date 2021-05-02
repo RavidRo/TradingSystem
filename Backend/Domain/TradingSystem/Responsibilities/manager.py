@@ -70,9 +70,9 @@ class Manager(Owner):
 
         # 4.2
 
-    def add_discount(self, discount_data: dict, exist_id: str):
+    def add_discount(self, discount_data: dict, exist_id: str, condition_type: str = None):
         if self.__permissions[Permission.MANAGE_DISCOUNT_POLICY]:
-            return super().add_discount(discount_data, exist_id)
+            return super().add_discount(discount_data, exist_id, condition_type)
 
         return self.__create_no_permission_Response(Permission.MANAGE_DISCOUNT_POLICY)
 
@@ -102,10 +102,10 @@ class Manager(Owner):
 
         # 4.2
 
-    def edit_simple_discount(self, discount_id: str, percentage: float = None, condition: dict = None,
+    def edit_simple_discount(self, discount_id: str, percentage: float = None,
                              context: dict = None, duration=None):
         if self.__permissions[Permission.MANAGE_DISCOUNT_POLICY]:
-            return super().edit_simple_discount(discount_id, percentage, condition, context, duration)
+            return super().edit_simple_discount(discount_id, percentage, context, duration)
 
         return self.__create_no_permission_Response(Permission.MANAGE_DISCOUNT_POLICY)
 

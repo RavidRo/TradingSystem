@@ -77,7 +77,7 @@ def complex_xor_discount():
 
 @pytest.fixture
 def current_root_id(store):
-    return store.get_discount_policy().get_discounts().get_obj().get_id()
+    return "1"
 
 
 @pytest.fixture
@@ -400,7 +400,7 @@ def test_edit_simple_invalid_context(store, product_discount, current_root_id):
 def test_edit_complex_discount_success(store, complex_max_discount, current_root_id):
     # assume add_discount works
     store.add_discount(complex_max_discount, current_root_id)
-    res = store.edit_complex_discount(str(int(current_root_id) + 1), complex_type="and")
+    res = store.edit_complex_discount(str(int(current_root_id) + 1), "and")
     expected = {'type': 'add', 'discount_type': 'complex', 'discounts': [], 'id': current_root_id}
     expected['discounts'].append(copy.copy(complex_max_discount))
     expected['discounts'][0]['type'] = 'and'
