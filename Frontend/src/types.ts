@@ -58,23 +58,23 @@ export type ConditionSimple = {
 	target: number;
 };
 
-type ConditioningOperator = 'conditioning';
+type ConditioningOperator = 'conditional';
 type BasicOperator = 'and' | 'or';
 
 export type ComplexOperator = ConditioningOperator | BasicOperator;
 
 export type Conditioning = { operator: ConditioningOperator; test?: Condition; then?: Condition };
-export type BasicRule = { operator: BasicOperator; operands: Condition[] };
+export type BasicRule = { operator: BasicOperator; children: Condition[] };
 
 export type ConditionComplex = Conditioning | BasicRule;
 
-export type Condition = { id: string; rule: ConditionSimple | ConditionComplex };
+export type Condition = { id: string } & (ConditionSimple | ConditionComplex);
 
 export function isConditioning(rule: ConditionComplex): rule is Conditioning {
-	return (rule as Conditioning).operator === 'conditioning';
+	return (rule as Conditioning).operator === 'conditional';
 }
 export function isBasicRule(rule: ConditionComplex): rule is BasicRule {
-	return (rule as BasicRule).operands !== undefined;
+	return (rule as BasicRule).children !== undefined;
 }
 
 export function isConditionSimple(

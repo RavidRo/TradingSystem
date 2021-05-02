@@ -83,7 +83,9 @@ const MyAppointeesList: FC<MyAppointeesListProps> = ({
 	return (
 		<GenericList
 			data={myAppointees}
-			onCreate={openAppointeeForm}
+			onCreate={
+				appointment.permissions.includes('appoint manager') ? openAppointeeForm : undefined
+			}
 			header="My appointees"
 			createTxt="+ Appoint a new member"
 			narrow
@@ -94,7 +96,9 @@ const MyAppointeesList: FC<MyAppointeesListProps> = ({
 					appointee={appointee}
 					isSelected={(appointee) => selectedItem === appointee.username}
 					onClick={(appointee) => onSelectAppointee(appointee)}
-					onDelete={onDelete}
+					onDelete={
+						appointment.permissions.includes('remove manager') ? onDelete : undefined
+					}
 				/>
 			)}
 		</GenericList>

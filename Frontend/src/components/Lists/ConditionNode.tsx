@@ -26,32 +26,10 @@ import GenericList from './GenericList';
 type ConditionNodeProps = {
 	condition: Condition;
 	onCreate: (fatherId: string, conditioning?: 'test' | 'then' | undefined) => void;
-	fatherId: string;
 	onDelete?: (conditionId: string) => void;
+	productIdToName: (productId: string) => string;
 };
 
-function conditionToString(condition: Condition): string {
-	const rule = condition.rule;
-	if (isConditionSimple(rule)) {
-		return `${conditionSimpleContextToString(rule)} ${operatorToString(rule.operator)} ${
-			rule.target
-		}`;
-	} else {
-		return rule.operator.toUpperCase();
-	}
-}
-
-function conditionSimpleContextToString(rule: ConditionSimple): string {
-	return rule.context.obj === 'bag'
-		? 'Number of products in bag'
-		: rule.context.obj === 'user'
-		? 'The user age'
-		: rule.context.obj === 'category'
-		? `The number of product in the category "${rule.context.identifier}"`
-		: rule.context.obj === 'product'
-		? `The number of product of type ${rule.context.identifier}`
-		: '';
-}
 function operatorToString(operator: SimpleOperator): string {
 	const mapToString: { [key in SimpleOperator]: string } = {
 		'great-equals': '>=',
@@ -63,20 +41,46 @@ function operatorToString(operator: SimpleOperator): string {
 	return mapToString[operator];
 }
 
-const ConditionNode: FC<ConditionNodeProps> = ({ condition, onCreate, fatherId, onDelete }) => {
+const ConditionNode: FC<ConditionNodeProps> = ({
+	condition,
+	onCreate,
+	onDelete,
+	productIdToName,
+}) => {
 	const [open, setOpen] = React.useState(true);
 	const handleClick = () => {
 		setOpen(!open);
 	};
+
+	const conditionSimpleContextToString = (rule: ConditionSimple): string => {
+		return rule.context.obj === 'bag'
+			? 'Number of products in bag'
+			: rule.context.obj === 'user'
+			? 'The user age'
+			: rule.context.obj === 'category'
+			? `The number of product in the category "${rule.context.identifier}"`
+			: rule.context.obj === 'product'
+			? `The number of product of type ${productIdToName(rule.context.identifier)}`
+			: '';
+	};
+
+	const conditionToString = (condition: Condition): string => {
+		if (isConditionSimple(condition)) {
+			return `${conditionSimpleContextToString(condition)} ${operatorToString(
+				condition.operator
+			)} ${condition.target}`;
+		} else {
+			return condition.operator.toUpperCase();
+		}
+	};
+
 	return (
 		<>
 			<ListItem button onClick={handleClick}>
-				{isConditionComplex(condition.rule) && (
-					<ListItemSecondaryAction onClick={handleClick}>
-						<IconButton edge="start" aria-label="delete">
-							{open ? <ExpandLess /> : <ExpandMore />}
-						</IconButton>
-					</ListItemSecondaryAction>
+				{isConditionComplex(condition) && (
+					<IconButton edge="start" aria-label="delete">
+						{open ? <ExpandLess /> : <ExpandMore />}
+					</IconButton>
 				)}
 				<ListItemText primary={conditionToString(condition)} />
 				{onDelete && (
@@ -87,22 +91,22 @@ const ConditionNode: FC<ConditionNodeProps> = ({ condition, onCreate, fatherId, 
 					</ListItemSecondaryAction>
 				)}
 			</ListItem>
-			{isConditionComplex(condition.rule) && (
+			{isConditionComplex(condition) && (
 				<Collapse in={open} timeout="auto">
-					{isBasicRule(condition.rule) ? (
+					{isBasicRule(condition) ? (
 						<GenericList
-							data={condition.rule.operands}
-							onCreate={() => onCreate(fatherId)}
+							data={condition.children}
+							onCreate={() => onCreate(condition.id)}
 							createTxt="+ Add condition"
 							padRight
 						>
-							{(condition) => (
+							{(currentCondition) => (
 								<ConditionNode
-									key={condition.id}
-									condition={condition}
+									key={currentCondition.id}
+									condition={currentCondition}
 									onCreate={onCreate}
-									fatherId={condition.id}
 									onDelete={onDelete}
+									productIdToName={productIdToName}
 								/>
 							)}
 						</GenericList>
@@ -110,30 +114,30 @@ const ConditionNode: FC<ConditionNodeProps> = ({ condition, onCreate, fatherId, 
 						<div className="list-padding">
 							<List>
 								<ListSubheader>You can buy...</ListSubheader>
-								{condition.rule.then ? (
+								{condition.then ? (
 									<ConditionNode
-										key={condition.id}
-										condition={condition.rule.then}
+										key={condition.then.id}
+										condition={condition.then}
 										onCreate={onCreate}
-										fatherId={condition.id}
 										onDelete={onDelete}
+										productIdToName={productIdToName}
 									/>
 								) : (
-									<ListItem button onClick={() => onCreate(fatherId, 'then')}>
+									<ListItem button onClick={() => onCreate(condition.id, 'then')}>
 										<ListItemText primary="+ Add condition" />
 									</ListItem>
 								)}
 								<ListSubheader>Only if...</ListSubheader>
-								{condition.rule.test ? (
+								{condition.test ? (
 									<ConditionNode
-										key={condition.id}
-										condition={condition.rule.test}
+										key={condition.test.id}
+										condition={condition.test}
 										onCreate={onCreate}
-										fatherId={condition.id}
 										onDelete={onDelete}
+										productIdToName={productIdToName}
 									/>
 								) : (
-									<ListItem button onClick={() => onCreate(fatherId, 'test')}>
+									<ListItem button onClick={() => onCreate(condition.id, 'test')}>
 										<ListItemText primary="+ Add condition" />
 									</ListItem>
 								)}

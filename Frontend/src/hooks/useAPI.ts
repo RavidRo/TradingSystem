@@ -66,7 +66,7 @@ export default function useAPI<Type>(
 				setData(dataVar);
 				errorMsgVar = dataVar?.error_msg ? dataVar?.error_msg : errorMsgVar;
 				setErrorMsg(errorMsgVar);
-				console.log({ data: dataVar, error: errorVar, errorMsg: errorMsgVar });
+				console.log({ endPoint, data: dataVar, error: errorVar, errorMsg: errorMsgVar });
 			})
 			.then(() => {
 				callback && callback(dataVar, errorVar, errorMsgVar);

@@ -6,6 +6,7 @@ import {
 	Condition,
 	ConditionComplex,
 	ConditionSimple,
+	isConditionComplex,
 	ProductQuantity,
 } from '../../types';
 import CreateConditionForm from '../FormWindows/CreateConditionForm';
@@ -19,25 +20,34 @@ type ConditionsListProps = {
 };
 
 const ConditionsList: FC<ConditionsListProps> = ({ openTab, products, storeId }) => {
-	const getConditionsAPI = useAPI<Condition>('/get_conditions', { store_id: storeId });
+	const getConditionsAPI = useAPI<Condition>('/get_purchase_policy', { store_id: storeId });
 	const addCondition = useAPI<{ cookie: string; condition_id: string }>(
-		'/add_condition',
+		'/add_purchase_rule',
 		{ store_id: storeId },
 		'POST'
 	);
 	const removeConditionAPI = useAPI<{ cookie: string; answer: string; succeeded: boolean }>(
-		'/remove_condition',
+		'/remove_purchase_rule',
 		{ store_id: storeId },
 		'POST'
 	);
 	const [rootId, setRootId] = useState<string>('');
 	const [conditions, setConditions] = useState<Condition[]>([]);
 
+	const productIdToString = (productId: string) => {
+		for (const product of products) {
+			if (product.id === productId) {
+				return product.name;
+			}
+		}
+		return '';
+	};
+
 	const getConditions = () =>
 		getConditionsAPI.request().then((getConditionsAPI) => {
 			if (!getConditionsAPI.error && getConditionsAPI.data !== null) {
 				setRootId(getConditionsAPI.data.data.id);
-				setConditions((getConditionsAPI.data.data.rule as BasicRule).operands);
+				setConditions((getConditionsAPI.data.data as BasicRule).children);
 			}
 		});
 
@@ -47,7 +57,7 @@ const ConditionsList: FC<ConditionsListProps> = ({ openTab, products, storeId })
 	}, []);
 
 	const onDelete = (conditionId: string) => {
-		removeConditionAPI.request({ condition_id: conditionId }, (data, error) => {
+		removeConditionAPI.request({ rule_id: conditionId }, (data, error) => {
 			if (!error && data !== null && data.succeeded) {
 				getConditions();
 			}
@@ -58,9 +68,10 @@ const ConditionsList: FC<ConditionsListProps> = ({ openTab, products, storeId })
 		const onAddCondition = (rule: ConditionSimple | ConditionComplex): void => {
 			addCondition
 				.request({
-					father_id: fatherId,
-					rule,
-					conditioning,
+					parent_id: fatherId,
+					rule_details: rule,
+					clause: conditioning,
+					rule_type: isConditionComplex(rule) ? 'complex' : 'simple',
 				})
 				.then((addCondition) => {
 					if (!addCondition.error && addCondition.data !== null) {
@@ -72,13 +83,19 @@ const ConditionsList: FC<ConditionsListProps> = ({ openTab, products, storeId })
 	};
 
 	return (
-		<GenericList data={conditions} header="Users can buy products if" narrow>
+		<GenericList
+			data={conditions}
+			header="Users can buy products if:"
+			narrow
+			onCreate={() => openConditionForm(rootId)}
+			createTxt="+ Add condition"
+		>
 			{(condition: Condition) => (
 				<ConditionNode
 					condition={condition}
 					onCreate={openConditionForm}
-					fatherId={rootId}
 					onDelete={onDelete}
+					productIdToName={productIdToString}
 				/>
 			)}
 		</GenericList>

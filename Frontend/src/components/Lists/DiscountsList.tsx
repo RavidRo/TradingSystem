@@ -44,8 +44,8 @@ const DiscountsList: FC<DiscountsListProps> = ({ openTab, products, storeId }) =
 		const onAddDiscount = (rule: DiscountSimple | DiscountComplex): void => {
 			addDiscount
 				.request({
-					fatherId,
-					rule,
+					exist_id: fatherId,
+					discount_data: rule,
 				})
 				.then((addDiscount) => {
 					if (!addDiscount.error && addDiscount.data !== null) {

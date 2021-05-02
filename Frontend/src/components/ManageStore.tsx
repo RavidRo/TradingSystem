@@ -171,13 +171,15 @@ const ManageStore: FC<ManageStoreProps> = ({ storeId, appointment }) => {
 			<div className="my-store-cont">
 				{store && (
 					<>
-						<ProductsList
-							openTab={openTab}
-							products={products}
-							selectedItem={selectedItem}
-							setProducts={setProducts}
-							storeId={store.id}
-						/>
+						{appointment.permissions.includes('manage products') && (
+							<ProductsList
+								openTab={openTab}
+								products={products}
+								selectedItem={selectedItem}
+								setProducts={setProducts}
+								storeId={store.id}
+							/>
+						)}
 						<MyAppointeesList
 							onSelectAppointee={onSelectAppointee}
 							openTab={openTab}
@@ -186,13 +188,27 @@ const ManageStore: FC<ManageStoreProps> = ({ storeId, appointment }) => {
 							store_name={store.name}
 							appointment={appointment}
 						/>
-						<AppointeesList
-							onSelectAppointee={onSelectAppointee}
-							selectedItem={selectedItem}
-							storeId={store.id}
-						/>
-						{/* <DiscountsList openTab={openTab} products={products} storeId={store.id} />
-						<ConditionsList openTab={openTab} products={products} storeId={store.id} /> */}
+						{appointment.permissions.includes('get appointments') && (
+							<AppointeesList
+								onSelectAppointee={onSelectAppointee}
+								selectedItem={selectedItem}
+								storeId={store.id}
+							/>
+						)}
+						{appointment.permissions.includes('manage discount policy') && (
+							<DiscountsList
+								openTab={openTab}
+								products={products}
+								storeId={store.id}
+							/>
+						)}
+						{appointment.permissions.includes('manage purchase policy') && (
+							<ConditionsList
+								openTab={openTab}
+								products={products}
+								storeId={store.id}
+							/>
+						)}
 					</>
 				)}
 			</div>
