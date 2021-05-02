@@ -7,6 +7,13 @@ export default function useAPI<Type>(
 	dynamicParams?: object,
 	type: 'GET' | 'POST' = 'GET'
 ) {
+	// type APIResponse = {
+	// 	cookie: string;
+	// 	error_msg: string;
+	// 	succeeded: boolean;
+	// 	data: Type;
+	// };
+
 	const [loading, setLoading] = useState<boolean>(true);
 	const [error, setError] = useState<boolean>(false);
 	const [errorMsg, setErrorMsg] = useState<string>('');
@@ -56,6 +63,7 @@ export default function useAPI<Type>(
 				setLoading(false);
 				setData(dataVar);
 				setErrorMsg(errorMsgVar);
+				console.log({ data: dataVar, error: errorMsgVar });
 			})
 			.then(() => {
 				callback && callback(dataVar, errorVar, errorMsgVar);

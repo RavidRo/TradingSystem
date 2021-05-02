@@ -1,13 +1,13 @@
 import uuid
 
 from Backend.Domain.Notifications.Publisher import Publisher
-from Backend.response import PrimitiveParsable, Response, ParsableList
+from Backend.response import PrimitiveParsable, Response, ParsableList, Parsable
 from Backend.Domain.TradingSystem.product import Product
 from Backend.Service.DataObjects.store_data import StoreData
 from Backend.rw_lock import ReadWriteLock
 
 
-class Store:
+class Store(Parsable):
     from Backend.Domain.TradingSystem.Responsibilities.responsibility import Responsibility
     from Backend.Domain.TradingSystem.purchase_details import PurchaseDetails
 
@@ -51,6 +51,9 @@ class Store:
         self._products_lock.release_read()
         return Response(True, ParsableList(products))
 
+    def get_name(self):
+        return self.__name
+
     def get_products_to_quantities(self):
         return self._products_to_quantities
 
@@ -79,7 +82,12 @@ class Store:
        4. a product with product_name exists"""
 
     def add_product(
-        self, product_name: str, category: str, price: float, quantity: int
+        self,
+        product_name: str,
+        category: str,
+        price: float,
+        quantity: int,
+        keywords: list[str] = None,
     ) -> Response[str]:
         from Backend.Domain.TradingSystem.product import Product
 
@@ -101,7 +109,9 @@ class Store:
             self._products_lock.release_write()
             return Response(False, msg="This product is already in the store's inventory")
 
-        product = Product(product_name=product_name, category=category, price=price)
+        product = Product(
+            product_name=product_name, category=category, price=price, keywords=keywords
+        )
         product_id = product.get_id()
         self._products_to_quantities[product_id] = (product, quantity)
         self._products_lock.release_write()
@@ -132,7 +142,12 @@ class Store:
        2. a product with product_id exists"""
 
     def edit_product_details(
-        self, product_id: str, product_name: str, category: str, price: float
+        self,
+        product_id: str,
+        product_name: str = None,
+        category: str = None,
+        price: float = None,
+        keywords: list[str] = None,
     ) -> Response[None]:
         self._products_lock.acquire_write()
         if product_id not in self._products_to_quantities:
@@ -140,7 +155,7 @@ class Store:
             return Response(False, msg="No such product in the store")
 
         response = self._products_to_quantities[product_id][0].edit_product_details(
-            product_name, category, price
+            product_name, category, price, keywords
         )
         self._products_lock.release_write()
         return response
@@ -261,7 +276,7 @@ class Store:
     def check_purchase_types(self, products_info, user_info) -> Response[None]:
         return Response(True, msg="all purchase types arew available")
 
-    def apply_discounts(self, user_info, product_to_quantity: dict):
+    def apply_discounts(self, product_to_quantity: dict):
         return self.__discount_policy.applyDiscount(
             store=self, products_to_quantities=product_to_quantity
         )

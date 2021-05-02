@@ -1,14 +1,23 @@
 from Backend.Domain.TradingSystem.Responsibilities.responsibility import Permission, Responsibility
-from Backend.Domain.TradingSystem.Interfaces.IUser import IUser
+
+# from Backend.Domain.TradingSystem.Interfaces.IUser import IUser
 from Backend.Domain.TradingSystem.purchase_details import PurchaseDetails
+from Backend.Domain.TradingSystem.user import User
 from Backend.response import Response, ParsableList, PrimitiveParsable
 
 
 class Founder(Responsibility):
+    def __init__(self, user_state, store, subscriber=None) -> None:
+        super().__init__(user_state, store, subscriber)
+        if subscriber != None:
+            self._store.subscribe(subscriber)
+
     # 4.1
     # Creating a new product a the store
-    def add_product(self, name: str, category: str, price: float, quantity: int) -> Response[str]:
-        return self._store.add_product(name, category, price, quantity)
+    def add_product(
+        self, name: str, category: str, price: float, quantity: int, keywords: list[str] = None
+    ) -> Response[str]:
+        return self._store.add_product(name, category, price, quantity, keywords)
 
     # 4.1
     def remove_product(self, product_id: str) -> Response[PrimitiveParsable[int]]:
@@ -20,12 +29,19 @@ class Founder(Responsibility):
 
     # 4.1
     def edit_product_details(
-        self, product_id: str, new_name: str, new_category: str, new_price: float
+        self,
+        product_id: str,
+        new_name: str,
+        new_category: str,
+        new_price: float,
+        keywords: list[str] = None,
     ) -> Response[None]:
-        return self._store.edit_product_details(product_id, new_name, new_category, new_price)
+        return self._store.edit_product_details(
+            product_id, new_name, new_category, new_price, keywords
+        )
 
     # 4.3
-    def appoint_owner(self, user: IUser) -> Response[None]:
+    def appoint_owner(self, user: User) -> Response[None]:
         # * The import is here to fix circular dependency problem
         from Backend.Domain.TradingSystem.Responsibilities.owner import Owner
 
@@ -49,7 +65,7 @@ class Founder(Responsibility):
         return result
 
     # 4.5
-    def appoint_manager(self, user: IUser) -> Response[None]:
+    def appoint_manager(self, user: User) -> Response[None]:
         # * The import is here to fix circular depandency problem
         from Backend.Domain.TradingSystem.Responsibilities.manager import Manager
 
@@ -66,7 +82,7 @@ class Founder(Responsibility):
             else:
                 #! I am guessing that user.state is of type member because at user_manager, with a given username he found a user object
                 #! (guest does not hae a username)
-                newResponsibility = Manager(user.state, self._store, user)
+                newResponsibility = Manager(user.state, self._store)
                 self._appointed.append(newResponsibility)
                 result = Response(True)
 

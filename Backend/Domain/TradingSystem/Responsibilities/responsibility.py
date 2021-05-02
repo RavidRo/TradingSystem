@@ -35,18 +35,18 @@ name_to_permission: dict[str, Permission] = {
 class Responsibility(Parsable):
     ERROR_MESSAGE = "Responsibility is an interface, function not implemented"
 
-    def __init__(self, user_state, store, subscriber) -> None:
+    def __init__(self, user_state, store, subscriber=None) -> None:
         self._user_state = user_state
         user_state.add_responsibility(self, store.get_id())
         self._store = store
-        if subscriber:
-            store.subscribe(subscriber)
-            self.__subscriber = subscriber
+        self.__subscriber = subscriber
         self._appointed: list[Responsibility] = []
 
     # 4.1
     # Creating a new product a the store
-    def add_product(self, name: str, category: str, price: float, quantity: int) -> Response[str]:
+    def add_product(
+        self, name: str, category: str, price: float, quantity: int, keywords: list[str] = None
+    ) -> Response[str]:
         raise Exception(Responsibility.ERROR_MESSAGE)
 
     # 4.1
@@ -59,7 +59,12 @@ class Responsibility(Parsable):
 
     # 4.1
     def edit_product_details(
-        self, product_id: str, new_name: str, new_category: str, new_price: float
+        self,
+        product_id: str,
+        new_name: str,
+        new_category: str,
+        new_price: float,
+        keywords: list[str] = None,
     ) -> Response[None]:
         raise Exception(Responsibility.ERROR_MESSAGE)
 
@@ -133,9 +138,9 @@ class Responsibility(Parsable):
     def __dismiss_from_store(self, store_id: str) -> None:
         for appointment in self._appointed:
             appointment.__dismiss_from_store(store_id)
-        self.__subscriber.notify(
-            'You have been dismissed from store "{store}"'.format(store=self._store.get_id())
-        )
+        message = f'You have been dismissed from store "{self._store.get_name()}"'
+        if self.__subscriber:
+            self.__subscriber.notify(message)
         self._user_state.dismiss_from_store(store_id)
 
     # Parsing the object for user representation
@@ -143,7 +148,7 @@ class Responsibility(Parsable):
         return ResponsibilitiesData(
             self._store.get_id(),
             self._store.get_name(),
-            self._store.self._is_manager(),
+            self._is_manager(),
             self.__class__.__name__,
             [appointee.parse() for appointee in self._appointed],
             self._permissions(),

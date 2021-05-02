@@ -1,5 +1,7 @@
-from Backend.response import Response
-from Backend.response import ParsableList
+from typing import Union
+
+from Backend.response import Response, ParsableTuple, PrimitiveParsable
+from Backend.response import ParsableMap
 from Backend.Domain.TradingSystem.stores_manager import StoresManager
 from Backend.Domain.TradingSystem.Interfaces.IProduct import IProduct as product
 
@@ -10,19 +12,17 @@ class SearchEngine:
     # kwargs = You can search for a product by additional key words
     @staticmethod
     def search_products(
-        product_name: str, product_category: str, min_price: float, max_price: float, search_by, *keywords
-    ) -> Response[ParsableList[product]]:
-        # For now we don't have keywords and categories fo the products
-        valid_search_by_values = ("name", "category")
-        if search_by not in valid_search_by_values:
-            return Response(False, msg="search by is not valid")
-        response = StoresManager.get_products()
-        if not response.succeeded():
-            return response
+            product_name: str = None, product_category: str = None, min_price: float = 0,
+            max_price: float = float("inf"), keywords: list[str] = None
+    ):
+        if (not product_name) and (not product_category) and (not keywords):
+            return Response(False, msg="You must search for at least one of the following: 'product', 'category', "
+                                       "'keywords'")
+        stores = StoresManager.get_stores_details().get_obj().values
+        store_to_products = dict({store: store.get_products_to_quantities().values() for store in stores})
 
-        all_products = response.get_obj()
-
-        def filter_predicate(product: product) -> bool:
+        def filter_predicate(product_to_quantity) -> bool:
+            product = product_to_quantity[0]
             price = product.get_price()
             name = product.get_name()
             category = product.get_category()
@@ -32,12 +32,22 @@ class SearchEngine:
             if max_price and max_price < price:
                 return False
 
-            if search_by == "name":
-                return product_name == name
-            elif search_by == "category":
-                return product_category == category
-            else:
-                return False
+            if keywords:
+                fit = True
+                for keyword in keywords:
+                    if keyword not in product.get_keywords():
+                        fit = False
+                        break
+                if fit:
+                    return True
 
-        filtered_products = list(filter(filter_predicate, all_products.values))
-        return Response(True, ParsableList(filtered_products))
+            if product_name and product_name == name:
+                return True
+            if product_category and product_category == category:
+                return True
+
+            return False
+
+        for store in store_to_products:
+            store_to_products[store] = ParsableTuple(tuple(map(lambda product_to_quantity: ParsableTuple((product_to_quantity[0], PrimitiveParsable(product_to_quantity[1]))), tuple(filter(filter_predicate, store_to_products[store])))))
+        return Response(True, ParsableMap(store_to_products))

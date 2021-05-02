@@ -2,9 +2,9 @@ from typing import Callable
 import uuid
 import json
 
-from Backend.Domain.TradingSystem.store import Store
-from Backend.Domain.TradingSystem.Interfaces.IUser import IUser
-from .user import User
+# from Backend.Domain.TradingSystem.store import Store
+# from Backend.Domain.TradingSystem.Interfaces.IUser import IUser
+# from .user import User
 from Backend.response import Response, ParsableList, PrimitiveParsable
 from Backend.Domain.TradingSystem.Interfaces.IUser import IUser
 from Backend.Domain.TradingSystem.store import Store
@@ -38,13 +38,13 @@ class UserManager:
         return func(user)
 
     @staticmethod
-    def __get_user_by_cookie(cookie) -> IUser:
+    def __get_user_by_cookie(cookie) -> IUser or None:
         if cookie not in UserManager.__cookie_user:
             return None
         return UserManager.__cookie_user[cookie]
 
     @staticmethod
-    def __get_user_by_username(username) -> IUser:
+    def __get_user_by_username(username) -> IUser or None:
         if username not in UserManager.__username_user:
             return None
         return UserManager.__username_user[username]
@@ -188,10 +188,16 @@ class UserManager:
     # Creating a new product a the store and setting its quantity to 0
     @staticmethod
     def create_product(
-        cookie: str, store_id: str, name: str, category: str, price: float, quantity: int
+        cookie: str,
+        store_id: str,
+        name: str,
+        category: str,
+        price: float,
+        quantity: int,
+        keywords: list[str] = None,
     ) -> Response[str]:
         func: Callable[[User], Response] = lambda user: user.create_product(
-            store_id, name, category, price, quantity
+            store_id, name, category, price, quantity, keywords
         )
         return UserManager.__deligate_to_user(cookie, func)
 
@@ -224,9 +230,10 @@ class UserManager:
         new_name: str,
         new_category: str,
         new_price: float,
+        keywords: list[str] = None,
     ) -> Response[None]:
         func: Callable[[User], Response] = lambda user: user.edit_product_details(
-            store_id, product_id, new_name, new_category, new_price
+            store_id, product_id, new_name, new_category, new_price, keywords
         )
         return UserManager.__deligate_to_user(cookie, func)
 

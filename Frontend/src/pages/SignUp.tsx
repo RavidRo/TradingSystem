@@ -53,9 +53,7 @@ const SignUp: FC<{}> = (props) => {
 		signUp.request({ username, password }, (data, error) => {
 			if (!error && data !== null && data.succeeded) {
 				history.push('/sign-in');
-				console.log(data, error);
 			} else {
-				console.log(data, error);
 			}
 		});
 		event.preventDefault();

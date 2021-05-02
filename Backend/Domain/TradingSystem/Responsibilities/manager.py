@@ -1,15 +1,17 @@
+from Backend.Domain.TradingSystem.user import User
 from Backend.response import Response, ParsableList, PrimitiveParsable
 
 from Backend.Domain.TradingSystem.Responsibilities.responsibility import Permission, Responsibility
 from Backend.Domain.TradingSystem.Responsibilities.owner import Owner
-from Backend.Domain.TradingSystem.States.member import Member
+
+# from Backend.Domain.TradingSystem.States.member import Member
 from Backend.Domain.TradingSystem.Interfaces.IUser import IUser
 from Backend.Domain.TradingSystem.purchase_details import PurchaseDetails
 
 
 class Manager(Owner):
-    def __init__(self, user_state: Member, store) -> None:
-        super().__init__(user_state, store, None)
+    def __init__(self, user_state, store, subscriber=None) -> None:
+        super().__init__(user_state, store, subscriber)
         self.__permissions = {
             Permission.MANAGE_PRODUCTS: False,
             Permission.GET_APPOINTMENTS: True,
@@ -26,9 +28,11 @@ class Manager(Owner):
 
     # 4.1
     # Creating a new product a the store
-    def add_product(self, name: str, category: str, price: float, quantity: int) -> Response[str]:
+    def add_product(
+        self, name: str, category: str, price: float, quantity: int, keywords: list[str] = None
+    ) -> Response[str]:
         if self.__permissions[Permission.MANAGE_PRODUCTS]:
-            return super().add_product(name, category, price, quantity)
+            return super().add_product(name, category, price, quantity, keywords)
 
         return self.__create_no_permission_Response(Permission.MANAGE_PRODUCTS)
 
@@ -47,9 +51,18 @@ class Manager(Owner):
         return self.__create_no_permission_Response(Permission.MANAGE_PRODUCTS)
 
     # 4.1
-    def edit_product_details(self, product_id: str, new_name: str, new_category: str, new_price: float) -> Response[None]:
+    def edit_product_details(
+        self,
+        product_id: str,
+        new_name: str,
+        new_category: str,
+        new_price: float,
+        keywords: list[str] = None,
+    ) -> Response[None]:
         if self.__permissions[Permission.MANAGE_PRODUCTS]:
-            return super().edit_product_details(product_id, new_name, new_category, new_price)
+            return super().edit_product_details(
+                product_id, new_name, new_category, new_price, keywords
+            )
 
         return self.__create_no_permission_Response(Permission.MANAGE_PRODUCTS)
 
@@ -58,7 +71,7 @@ class Manager(Owner):
         return Response(False, msg=f"Managers can't appoint owners")
 
     # 4.5
-    def appoint_manager(self, user: IUser) -> Response[None]:
+    def appoint_manager(self, user: User) -> Response[None]:
         if self.__permissions[Permission.APPOINT_MANAGER]:
             return super().appoint_manager(user)
 

@@ -4,7 +4,7 @@ import { ListItem } from '@material-ui/core';
 import ListItemText from '@material-ui/core/ListItemText';
 
 import '../styles/MyStores.scss';
-import { Store, Appointee } from '../types';
+import { Appointee } from '../types';
 import CreateStoreForm from '../components/FormWindows/CreateStoreForm';
 import ManageStore from '../components/ManageStore';
 import GenericList from '../components/Lists/GenericList';
@@ -68,6 +68,7 @@ const MyStores: FC<MyStoresProps> = () => {
 				setStores(myStores);
 			}
 		});
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
 
 	const [stores, setStores] = useState<MyStore[]>([]);

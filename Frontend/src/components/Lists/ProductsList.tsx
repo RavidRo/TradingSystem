@@ -1,5 +1,8 @@
-import { ListItem, ListItemText } from '@material-ui/core';
 import React, { FC } from 'react';
+
+import { IconButton, ListItem, ListItemSecondaryAction, ListItemText } from '@material-ui/core';
+import DeleteForeverOutlinedIcon from '@material-ui/icons/DeleteForeverOutlined';
+
 import useAPI from '../../hooks/useAPI';
 import { ProductQuantity } from '../../types';
 import ProductDetails from '../DetailsWindows/ProductDetails';
@@ -26,6 +29,12 @@ const ProductsList: FC<ProductsListProps> = ({
 		cookie: string;
 		product_id: string;
 	}>('/create_product', {}, 'POST');
+
+	const deleteProductAPI = useAPI<{ cookie: string; answer: string; succeeded: boolean }>(
+		'/remove_product_from_store',
+		{ store_id: storeId },
+		'POST'
+	);
 
 	const handleCreateProduct = (
 		name: string,
@@ -69,12 +78,22 @@ const ProductsList: FC<ProductsListProps> = ({
 			openTab(() => <ProductDetails product={product} />, product.id);
 		}
 	};
+
+	const onDelete = (productId: string) => {
+		deleteProductAPI.request({ product_id: productId }, (data, error) => {
+			if (!error && data !== null) {
+				setProducts(products.filter((product) => product.id !== productId));
+			}
+		});
+	};
+
 	return (
 		<GenericList
 			data={products}
 			onCreate={openProductForm}
 			header="Products"
 			createTxt="+ Add a new product"
+			narrow
 		>
 			{(product) => (
 				<ListItem
@@ -85,6 +104,11 @@ const ProductsList: FC<ProductsListProps> = ({
 				>
 					<ListItemText primary={product.name} className="first-field" />
 					<ListItemText primary={`in stock: ${product.quantity}`} />
+					<ListItemSecondaryAction onClick={() => onDelete(product.id)}>
+						<IconButton edge="end" aria-label="delete">
+							<DeleteForeverOutlinedIcon />
+						</IconButton>
+					</ListItemSecondaryAction>
 				</ListItem>
 			)}
 		</GenericList>

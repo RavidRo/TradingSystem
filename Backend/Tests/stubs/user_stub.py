@@ -1,4 +1,5 @@
 import threading
+from typing import Callable
 
 from Backend.Domain.TradingSystem.purchase_details import PurchaseDetails
 from Backend.Domain.TradingSystem.shopping_cart import ShoppingCart
@@ -105,7 +106,7 @@ class UserStub(IUser):
         return Response(True)
 
     def create_product(
-        self, store_id: str, name: str, category: str, price: float, quantity: int
+        self, store_id: str, name: str, category: str, price: float, quantity: int, keywords: list[str]
     ) -> Response[None]:
         self._create_product = True
         return Response(True)
@@ -117,7 +118,7 @@ class UserStub(IUser):
         return Response(True)
 
     def edit_product_details(
-        self, store_id: str, product_id: str, new_name: str, category: str, new_price: float
+        self, store_id: str, product_id: str, new_name: str, category: str, new_price: float, keywords: list[str]
     ) -> Response[None]:
         self._edit_product_details = True
         return Response(True)
@@ -125,6 +126,14 @@ class UserStub(IUser):
     def appoint_owner(self, store_id: str, user: IUser) -> Response[None]:
         self._appoint_owner = True
         return Response(True)
+
+    def get_communicate(self) -> Callable[[list[str]], bool]:
+        self._get_communicate = True
+        return lambda _: True
+
+    def connect(self, communicate: Callable[[list[str]], bool]) -> bool:
+        self._connect = True
+        return lambda _: True
 
     def appoint_manager(self, store_id: str, user: IUser) -> Response[None]:
         self._appoint_manager = True

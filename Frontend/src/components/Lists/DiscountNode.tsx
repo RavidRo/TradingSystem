@@ -7,6 +7,7 @@ import {
 	ListItemText,
 } from '@material-ui/core';
 import { ExpandLess, ExpandMore } from '@material-ui/icons';
+import DeleteForeverOutlinedIcon from '@material-ui/icons/DeleteForeverOutlined';
 
 import { DecisionRule, Discount, isDiscountComplex, isDiscountSimple } from '../../types';
 import GenericList from './GenericList';
@@ -15,6 +16,7 @@ type DiscountNodeProps = {
 	discount: Discount;
 	onCreate: (father_id: string) => void;
 	fatherId: string;
+	onDelete?: (discountId: string) => void;
 };
 
 function discountToString(discount: Discount) {
@@ -46,23 +48,24 @@ function decisionRuleToString(decisionRule: DecisionRule): string {
 	return ruleToString[decisionRule];
 }
 
-const DiscountNode: FC<DiscountNodeProps> = ({ discount, onCreate, fatherId }) => {
+const DiscountNode: FC<DiscountNodeProps> = ({ discount, onCreate, fatherId, onDelete }) => {
 	const [open, setOpen] = useState(false);
 	const handleClick = () => {
 		setOpen(!open);
 	};
 	return (
 		<>
-			<ListItem
-				button
-				// selected={isSelected(appointee)}
-				// onClick={() => onClick(appointee)}
-			>
-				<ListItemText primary={discountToString(discount)} />
+			<ListItem button onClick={handleClick}>
 				{isDiscountComplex(discount.rule) && (
-					<ListItemSecondaryAction onClick={handleClick}>
-						<IconButton edge="start" aria-label="delete">
-							{open ? <ExpandLess /> : <ExpandMore />}
+					<IconButton edge="start" aria-label="delete">
+						{open ? <ExpandLess /> : <ExpandMore />}
+					</IconButton>
+				)}
+				<ListItemText primary={discountToString(discount)} />
+				{onDelete && (
+					<ListItemSecondaryAction onClick={() => onDelete(discount.id)}>
+						<IconButton edge="end" aria-label="delete">
+							<DeleteForeverOutlinedIcon />
 						</IconButton>
 					</ListItemSecondaryAction>
 				)}
@@ -81,6 +84,7 @@ const DiscountNode: FC<DiscountNodeProps> = ({ discount, onCreate, fatherId }) =
 								discount={discount}
 								onCreate={onCreate}
 								fatherId={discount.id}
+								onDelete={onDelete}
 							/>
 						)}
 					</GenericList>

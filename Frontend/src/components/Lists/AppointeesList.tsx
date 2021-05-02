@@ -23,11 +23,13 @@ const AppointeesList: FC<AppointeesListProps> = ({ selectedItem, storeId, onSele
 				setAppointees(data);
 			}
 		});
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
 	return (
 		<GenericList data={appointees} header="Store's appointments" narrow>
 			{(appointee) => (
 				<AppointeeNode
+					key={appointee.id}
 					appointee={appointee}
 					isSelected={(appointee) => selectedItem === appointee.username}
 					onClick={(appointee) => onSelectAppointee(appointee)}
