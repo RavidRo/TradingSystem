@@ -25,6 +25,7 @@ const StoresView: FC<StoresViewProps> = ({propsAddProduct,location}: StoresViewP
     useEffect(()=>{
         productsObj.request().then(({data,error,errorMsg})=>{
             if(!productsObj.error && productsObj.data!==null){
+                console.log(productsObj.data);
                 setProducts(productsObj.data);
             }
             
