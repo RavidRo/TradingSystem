@@ -32,8 +32,14 @@
 -   [4.2. Get discount types and policies](#42-Get-discount-types-and-policies)
 -   [4.2. Edit purchase types](#42-Edit-purchase-types)
 -   [4.2. Edit discount types](#42-Edit-discount-types)
+-   [4.2. Add purchase policy](#42-Add-purchase-policy)
 -   [4.2. Edit purchase policy](#42-Edit-purchase-policy)
+-   [4.2. Remove purchase policy](#42-Remove-purchase-policy)
+-   [4.2. Move purchase policy](#42-Move-purchase-policy)
+-   [4.2. Add discount policy](#42-Add-discount-policy)
 -   [4.2. Edit discount policy](#42-Edit-discount-policy)
+-   [4.2. Remove discount policy](#42-Remove-discount-policy)
+-   [4.2. Move discount policy](#42-Move-discount-policy)
 -   [4.3. Appoint new store owner](#43-Appoint-new-store-owner)
 -   [4.5. Appoint new store manager](#45-Appoint-new-store-manager)
 -   [4.6. Edit manager’s responsibilities](#46-Edit-manager’s-responsibilities)
@@ -561,7 +567,7 @@
 -   <ins>_Happy Path_</ins>: A store owner chooses to edit the policy and enters a valid policy.
 -   <ins>_Sad Path_</ins>: A guest tries to edit policy and the system generates error message.
 
-### 4.2. remove purchase policy
+### 4.2. Remove purchase policy
 
 **Actors**: Store personnel, enter store  
 **Parameters**: \_policy_id, \_store  
@@ -582,7 +588,7 @@
 -   <ins>_Happy Path_</ins>: A store owner chooses to remove a policy and enters a valid policy id.
 -   <ins>_Sad Path_</ins>: A guest tries to remove a policy and the system generates an error message.
 
-### 4.2. move purchase policy
+### 4.2. Move purchase policy
 
 **Actors**: Store personnel, enter store  
 **Parameters**: \_policy_id, \_parent_policy, \_store  
@@ -645,7 +651,7 @@
 -   <ins>_Happy Path_</ins>: A store owner chooses to edit the discount and enters a valid policy.
 -   <ins>_Sad Path_</ins>: A guest tries to edit discount and the system generates error message.
 
-### 4.2. remove discount policy
+### 4.2. Remove discount policy
 
 **Actors**: Store personnel, enter store  
 **Parameters**: \_policy_id, \_store  
@@ -666,7 +672,7 @@
 -   <ins>_Happy Path_</ins>: A store owner chooses to remove a policy and enters a valid policy id.
 -   <ins>_Sad Path_</ins>: A guest tries to remove a policy and the system generates an error message.
 
-### 4.2. move discount policy
+### 4.2. Move discount policy
 
 **Actors**: Store personnel, enter store  
 **Parameters**: \_policy_id, \_parent_policy, \_store  
