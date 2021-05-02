@@ -253,14 +253,15 @@ async def send_payment():
     answer = await __async_call(system.send_payment, cookie, payment_details, address)
     return __responseToJson(cookie, answer)
 
+
 @app.route("/cancel_purchase", methods=["POST"])
-async def send_payment():
+async def cancel_purchase():
     request_json = await request.get_json()
     if "cookie" not in request_json:
         cookie = await __async_call(system.enter_system)
     else:
         cookie = request_json["cookie"]
-    answer = await __async_call(system.send_payment, cookie)
+    answer = await __async_call(system.cancel_purchase, cookie)
     return __responseToJson(cookie, answer)
 
 
@@ -406,7 +407,14 @@ async def edit_product_details():
     new_price = request_json["new_price"]
     keywords = request_json["keywords"]
     answer = await __async_call(
-        system.edit_product_details, cookie, store_id, product_id, new_name, new_category, new_price, keywords
+        system.edit_product_details,
+        cookie,
+        store_id,
+        product_id,
+        new_name,
+        new_category,
+        new_price,
+        keywords,
     )
     return __responseToJson(cookie, answer)
 
@@ -430,9 +438,7 @@ async def add_discount():
     store_id = request_json["store_id"]
     discount_data = request_json["discount_data"]
     exist_id = request_json["exist_id"]
-    answer = await __async_call(
-        system.add_discount, cookie, store_id, discount_data, exist_id
-    )
+    answer = await __async_call(system.add_discount, cookie, store_id, discount_data, exist_id)
     return __responseToJson(cookie, answer)
 
 
@@ -455,9 +461,7 @@ async def move_discount():
     store_id = request_json["store_id"]
     src_id = request_json["src_id"]
     dest_id = request_json["dest_id"]
-    answer = await __async_call(
-        system.move_discount, cookie, store_id, src_id, dest_id
-    )
+    answer = await __async_call(system.move_discount, cookie, store_id, src_id, dest_id)
     return __responseToJson(cookie, answer)
 
 
@@ -474,9 +478,7 @@ async def get_discounts():
     if missing_args != "":
         return __missing_args(cookie, missing_args)
     store_id = request_json["store_id"]
-    answer = await __async_call(
-        system.get_discounts, cookie, store_id
-    )
+    answer = await __async_call(system.get_discounts, cookie, store_id)
     return __responseToJson(cookie, answer)
 
 
@@ -496,9 +498,7 @@ async def remove_discount():
         return __missing_args(cookie, missing_args)
     store_id = request_json["store_id"]
     discount_id = request_json["discount_id"]
-    answer = await __async_call(
-        system.remove_discount, cookie, store_id, discount_id
-    )
+    answer = await __async_call(system.remove_discount, cookie, store_id, discount_id)
     return __responseToJson(cookie, answer)
 
 
@@ -531,7 +531,14 @@ async def edit_simple_discount():
     context = request_json["context"]
     duration = request_json["duration"]
     answer = await __async_call(
-        system.edit_simple_discount, cookie, store_id, discount_id, percentage, condition, context, duration
+        system.edit_simple_discount,
+        cookie,
+        store_id,
+        discount_id,
+        percentage,
+        condition,
+        context,
+        duration,
     )
     return __responseToJson(cookie, answer)
 
@@ -741,9 +748,7 @@ async def remove_purchase_rule():
         return __missing_args(cookie, missing_args)
     store_id = request_json["store_id"]
     rule_id = request_json["rule_id"]
-    answer = await __async_call(
-        system.remove_purchase_rule, cookie, store_id, rule_id
-    )
+    answer = await __async_call(system.remove_purchase_rule, cookie, store_id, rule_id)
     return __responseToJson(cookie, answer)
 
 
@@ -794,9 +799,7 @@ async def move_purchase_rule():
     store_id = request_json["store_id"]
     rule_id = request_json["rule_id"]
     new_parent_id = request_json["new_parent_id"]
-    answer = await __async_call(
-        system.move_purchase_rule, cookie, store_id, rule_id, new_parent_id
-    )
+    answer = await __async_call(system.move_purchase_rule, cookie, store_id, rule_id, new_parent_id)
     return __responseToJson(cookie, answer)
 
 
@@ -858,9 +861,7 @@ async def get_purchase_policy():
     if missing_args != "":
         return __missing_args(cookie, missing_args)
     store_id = request_json["store_id"]
-    answer = await __async_call(
-        system.get_purchase_policy, cookie, store_id
-    )
+    answer = await __async_call(system.get_purchase_policy, cookie, store_id)
     return __responseToJson(cookie, answer)
 
 
