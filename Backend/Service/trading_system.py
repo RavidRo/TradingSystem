@@ -2,7 +2,6 @@
 from __future__ import annotations
 import threading
 from typing import Callable
-
 from Backend.Domain.Payment.payment_manager import PaymentManager
 from Backend.Service.DataObjects.shopping_cart_data import ShoppingCartData
 import Backend.Service.logs as log
@@ -97,8 +96,8 @@ class TradingSystem(object):
         )
 
     @log.loging(to_hide=[1])
-    def purchase_cart(self, cookie: str):
-        return TradingSystemManager.purchase_cart(cookie)
+    def purchase_cart(self, cookie: str, user_age: int):
+        return TradingSystemManager.purchase_cart(cookie, user_age)
 
     @log.loging(to_hide=[1])
     def send_payment(self, cookie, payment_details, address):
@@ -183,6 +182,30 @@ class TradingSystem(object):
         )
 
     @log.loging(to_hide=[1])
+    def add_discount(self, cookie: str, store_id: str, discount_data: dict, exist_id: str, condition_type: str = None):
+        return TradingSystemManager.add_discount(cookie, store_id, discount_data, exist_id, condition_type)
+
+    @log.loging(to_hide=[1])
+    def move_discount(self, cookie: str, store_id: str, src_id: str, dest_id: str):
+        return TradingSystemManager.move_discount(cookie, store_id, src_id, dest_id)
+
+    @log.loging(to_hide=[1])
+    def get_discounts(self, cookie: str, store_id: str):
+        return TradingSystemManager.get_discounts(cookie, store_id)
+
+    @log.loging(to_hide=[1])
+    def remove_discount(self, cookie: str, store_id: str, discount_id: str):
+        return TradingSystemManager.remove_discount(cookie, store_id, discount_id)
+
+    @log.loging(to_hide=[1])
+    def edit_simple_discount(self, cookie: str, store_id: str, discount_id: str, percentage: float = None, context: dict = None, duration=None):
+        return TradingSystemManager.edit_simple_discount(cookie, store_id, discount_id, percentage, context, duration)
+
+    @log.loging(to_hide=[1])
+    def edit_complex_discount(self, cookie: str, store_id: str, discount_id: str, complex_type: str = None, decision_rule: str = None):
+        return TradingSystemManager.edit_complex_discount(cookie, store_id, discount_id, complex_type, decision_rule)
+
+    @log.loging(to_hide=[1])
     def appoint_owner(self, cookie: str, store_id: str, username: str):
         return TradingSystemManager.appoint_owner(cookie, store_id, username)
 
@@ -212,6 +235,26 @@ class TradingSystem(object):
     def get_my_appointees(self, cookie: str, store_id: str):
         return TradingSystemManager.get_my_appointees(cookie, store_id)
 
+    # 4.2
+    @log.loging(to_hide=[1])
+    def add_purchase_rule(self, cookie: str, store_id: str, rule_details: dict, rule_type: str, parent_id: str, clause: str = None):
+        return TradingSystemManager.add_purchase_rule(cookie, store_id, rule_details, rule_type, parent_id, clause)
+
+    # 4.2
+    @log.loging(to_hide=[1])
+    def remove_purchase_rule(self, cookie: str, store_id: str, rule_id: str):
+        return TradingSystemManager.remove_purchase_rule(cookie, store_id, rule_id)
+
+    # 4.2
+    @log.loging(to_hide=[1])
+    def edit_purchase_rule(self, cookie: str, store_id: str, rule_details: dict, rule_id: str, rule_type: str):
+        return TradingSystemManager.edit_purchase_rule(cookie, store_id, rule_details, rule_id, rule_type)
+
+    # 4.2
+    @log.loging(to_hide=[1])
+    def move_purchase_rule(self, cookie: str, store_id: str, rule_id: str, new_parent_id: str):
+        return TradingSystemManager.move_purchase_rule(cookie, store_id, rule_id, new_parent_id)
+
     # 4.11
     @log.loging(to_hide=[1])
     def get_store_purchase_history(self, cookie: str, store_id: str):
@@ -227,3 +270,11 @@ class TradingSystem(object):
     @log.loging(to_hide=[1])
     def get_user_purchase_history(self, cookie: str, username: str):
         return TradingSystemManager.get_any_user_purchase_history_admin(cookie, username)
+
+    @log.loging(to_hide=[1])
+    def empty_notifications(self, cookie: str):
+        return TradingSystemManager.empty_notifications(cookie)
+
+    @log.loging(to_hide=[1])
+    def get_purchase_policy(self, cookie, store_id):
+        return TradingSystemManager.get_purchase_policy(cookie, store_id)

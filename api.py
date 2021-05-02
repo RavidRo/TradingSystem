@@ -148,7 +148,8 @@ async def purchase_cart():
     cookie = (await request.get_json())["cookie"]
     if cookie is None:
         cookie = __async_call(system.enter_system)
-    answer = __async_call(system.purchase_cart, cookie)
+    user_age = (await request.get_json())["user_age"]
+    answer = __async_call(system.purchase_cart, cookie, user_age)
     return __responseToJson(cookie, answer)
 
 

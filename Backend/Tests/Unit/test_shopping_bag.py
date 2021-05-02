@@ -133,6 +133,7 @@ def test_remove_product_not_existing(shopping_bag: ShoppingBag, product_stub: Pr
 # * buy_products
 # * ====================================================
 @patch.multiple(StoreStub, apply_discounts=MagicMock(return_value=10))
+@patch.multiple(ShoppingBag, purchase_types_checks=MagicMock(return_value=Response(True)))
 def test_buy_products_valid(
     shopping_bag: ShoppingBag,
     user_stub: UserStub,
@@ -141,7 +142,7 @@ def test_buy_products_valid(
 ):
     with patch.dict(shopping_bag.get_store()._products_to_quantities, products_stubs_store):
         with patch.dict(shopping_bag.get_products_to_quantity(), products_stubs_shopping_bag):
-            result = shopping_bag.buy_products(user_stub)
+            result = shopping_bag.buy_products(25)
             assert result.success == True
             for i in range(1, 4):
                 assert shopping_bag.get_store()._products_to_quantities.get(f"{i}")[1] == 3
