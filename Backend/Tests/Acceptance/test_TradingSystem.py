@@ -57,14 +57,32 @@ def _generate_store_name() -> str:
     store_lock.release()
     return store
 
+
 def _simple_rule_details_age() -> dict:
     return {'context': {'obj': 'user'}, 'operator': 'great-equals', 'target': 18}
+
+
+def _simple_rule_details_product() -> dict:
+    return {'context': {'obj': 'product', 'identifier': '1'}, 'operator': 'less-than', 'target': 10}
 
 def _simple_rule_details_age_invalid_operator() -> dict:
     return {'context': {'obj': 'user'}, 'operator': 'invalid', 'target': 18}
 
+
 def _simple_rule_details_age_missing_key_target() -> dict:
     return {'context': {'obj': 'user'}, 'operator': 'invalid'}
+
+
+def _complex_rule_details_or() -> dict:
+    return {'operator': 'or'}
+
+
+def _complex_rule_details_invalid_operator() -> dict:
+    return {'operator': 'invalid'}
+
+
+def _complex_rule_details_missing_operator() -> dict:
+    return {}
 
 def _generate_product_name() -> str:
     global product_number
@@ -1570,7 +1588,6 @@ def test_buy_last_product_together_fail():
         t2.start()
         t2.join()
         t1.join()
-        print(_t_responses[i * 2], _t_responses[i * 2 + 1])
         assert not (_t_responses[i * 2][1] and _t_responses[i * 2 + 1][1])
 
 
@@ -1608,7 +1625,6 @@ def test_buy_delete_product():
         t2.start()
         t2.join()
         t1.join()
-        print(_t_responses[i * 2], _t_responses[i * 2 + 1])
         # assert not (_t_responses[i * 2][1] and _t_responses[i * 2 + 1][1])
         if _t_responses[i * 2][1] and _t_responses[i * 2 + 1][1]:
             assert _t_responses[i * 2][1] == quantity - 1 or _t_responses[i * 2 + 1][1] == quantity - 1
@@ -1642,7 +1658,6 @@ def test_two_appointments():
         t2.join()
         a = _t_responses[i * 2]
         b = _t_responses[i * 2 + 1]
-        print(a, b)
         assert (a[1] and not b[1]) or (not a[1] and b[1])  # exactly one to succeed
 #endregion
 
@@ -1809,19 +1824,268 @@ def test_connect_after_get_notification():
 
 #region 4.2  purchase tests
 
-# def test_add_simple_rule_success():
-#     cookie, username, password, store_name, store_id = _initialize_info(_generate_username(), "aaa",
-#                                                                         _generate_store_name())
-#     parent_id = '1'
-#     response_add = system.add_purchase_rule(cookie, store_id, _simple_rule_details_age(), 'simple', parent_id)
-#     store_rules = system.get_purchase_policy(cookie, store_id)
-#     added_rule = store_rules['children'][0]
-#     del added_rule['id']
-#     assert response_add.succeeded() and added_rule == _simple_rule_details_age()
+#region add_purchase_rules
+def test_add_simple_rule_success():
+    cookie, username, password, store_name, store_id = _initialize_info(_generate_username(), "aaa",
+                                                                        _generate_store_name())
+    parent_id = '1'
+    response_add = system.add_purchase_rule(cookie, store_id, _simple_rule_details_age(), 'simple', parent_id)
+    assert response_add.succeeded()
 
 
-# def test_add_complex_rule_success():
+def test_add_simple_rule_invalid_fail():
+    cookie, username, password, store_name, store_id = _initialize_info(_generate_username(), "aaa",
+                                                                        _generate_store_name())
+    parent_id = '1'
+    response_add = system.add_purchase_rule(cookie, store_id, _simple_rule_details_age_invalid_operator(), 'simple', parent_id)
+    assert not response_add.succeeded()
 
 
+def test_add_simple_rule_missing_key_fail():
+    cookie, username, password, store_name, store_id = _initialize_info(_generate_username(), "aaa",
+                                                                        _generate_store_name())
+    parent_id = '1'
+    response_add = system.add_purchase_rule(cookie, store_id, _simple_rule_details_age_missing_key_target(), 'simple',
+                                            parent_id)
+    assert not response_add.succeeded()
 
+
+def test_add_complex_rule_success():
+    cookie, username, password, store_name, store_id = _initialize_info(_generate_username(), "aaa",
+                                                                        _generate_store_name())
+    parent_id = '1'
+    response_add = system.add_purchase_rule(cookie, store_id, _complex_rule_details_or(), 'complex', parent_id)
+    assert response_add.succeeded()
+
+
+def test_add_complex_rule_invalid_fail():
+    cookie, username, password, store_name, store_id = _initialize_info(_generate_username(), "aaa",
+                                                                        _generate_store_name())
+    parent_id = '1'
+    response_add = system.add_purchase_rule(cookie, store_id, _complex_rule_details_invalid_operator(), 'complex', parent_id)
+    assert not response_add.succeeded()
+
+
+def test_add_complex_missing_key_fail():
+    cookie, username, password, store_name, store_id = _initialize_info(_generate_username(), "aaa",
+                                                                        _generate_store_name())
+    parent_id = '1'
+    response_add = system.add_purchase_rule(cookie, store_id, _complex_rule_details_missing_operator(), 'complex',
+                                            parent_id)
+    assert not response_add.succeeded()
+
+
+def test_add_complex_success_simple_child_invalid():
+    cookie, username, password, store_name, store_id = _initialize_info(_generate_username(), "aaa",
+                                                                        _generate_store_name())
+    parent_id = '1'
+    response_add_complex = system.add_purchase_rule(cookie, store_id, _complex_rule_details_or(), 'complex',
+                                            parent_id)
+    parent_or_id = '2'
+    response_add_simple = system.add_purchase_rule(cookie, store_id, _simple_rule_details_age_invalid_operator(), 'simple',
+                                            parent_or_id)
+    assert response_add_complex.succeeded() and not response_add_simple.succeeded()
+
+
+def test_add_child_rule_to_not_existing_parent():
+    cookie, username, password, store_name, store_id = _initialize_info(_generate_username(), "aaa",
+                                                                        _generate_store_name())
+    parent_id = '2'
+    response_add_complex = system.add_purchase_rule(cookie, store_id, _complex_rule_details_or(), 'complex',
+                                                    parent_id)
+    assert not response_add_complex.succeeded()
+
+
+def test_add_purchase_rule_with_no_permission():
+    cookie, username, password, store_name, store_id = _initialize_info(_generate_username(), "aaa",
+                                                                        _generate_store_name())
+
+    new_cookie, new_username, new_password_, _, _ = _initialize_info(_generate_username(), "bbb")
+    parent_id = '1'
+    response_add_complex = system.add_purchase_rule(new_cookie, store_id, _complex_rule_details_or(), 'complex',
+                                                    parent_id)
+    assert not response_add_complex.succeeded()
+
+
+def test_add_purchase_rule_after_manager_appointment_with_no_permission():
+    cookie, username, password, store_name, store_id = _initialize_info(_generate_username(), "aaa",
+                                                                        _generate_store_name())
+
+    new_cookie, new_username, new_password_, _, _ = _initialize_info(_generate_username(), "bbb")
+    system.appoint_manager(cookie, store_id, new_username)
+    parent_id = '1'
+    response_add_complex = system.add_purchase_rule(new_cookie, store_id, _complex_rule_details_or(), 'complex',
+                                                    parent_id)
+    assert not response_add_complex.succeeded()
+
+
+def test_add_purchase_rule_after_manager_appointment_with_permission():
+    cookie, username, password, store_name, store_id = _initialize_info(_generate_username(), "aaa",
+                                                                        _generate_store_name())
+
+    new_cookie, new_username, new_password_, _, _ = _initialize_info(_generate_username(), "bbb")
+    system.appoint_manager(cookie, store_id, new_username)
+    new_responsibility = "manage_purchase_policy"
+    system.add_manager_permission(cookie, store_id, new_username, new_responsibility)
+    parent_id = '1'
+    response_add_complex = system.add_purchase_rule(new_cookie, store_id, _complex_rule_details_or(), 'complex',
+                                                    parent_id)
+    assert response_add_complex.succeeded()
+
+def test_founder_add_purchase_rule_to_other_store_fail():
+    cookie, username, password, store_name, store_id = _initialize_info(_generate_username(), "aaa",
+                                                                        _generate_store_name())
+
+    new_cookie, new_username, new_password, new_store_name, new_store_id = _initialize_info(_generate_username(), "bbb",
+                                                                        _generate_store_name())
+
+    parent_id = '1'
+    response_add_complex = system.add_purchase_rule(new_cookie, store_id, _complex_rule_details_or(), 'complex',
+                                                    parent_id)
+    assert not response_add_complex.succeeded()
+
+
+def test_founder_add_purchase_rule_to_other_store_fail_but_self_success():
+    cookie, username, password, store_name, store_id = _initialize_info(_generate_username(), "aaa",
+                                                                        _generate_store_name())
+
+    new_cookie, new_username, new_password, new_store_name, new_store_id = _initialize_info(_generate_username(), "bbb",
+                                                                        _generate_store_name())
+
+    parent_id = '1'
+    response_add_complex_wrong_store = system.add_purchase_rule(new_cookie, store_id, _complex_rule_details_or(), 'complex',
+                                                    parent_id)
+
+    response_add_complex_right_store = system.add_purchase_rule(new_cookie, new_store_id, _complex_rule_details_or(), 'complex',
+                                                    parent_id)
+    assert not response_add_complex_wrong_store.succeeded() and response_add_complex_right_store
+
+
+def test_add_complex_with_two_children():
+    cookie, username, password, store_name, store_id = _initialize_info(_generate_username(), "aaa",
+                                                                        _generate_store_name())
+    parent_id = '1'
+    response_add_complex = system.add_purchase_rule(cookie, store_id, _complex_rule_details_or(),
+                                                                'complex',
+                                                                parent_id)
+    response_add_simple_first = system.add_purchase_rule(cookie, store_id, _simple_rule_details_age(), 'simple', '2')
+    response_add_simple_second = system.add_purchase_rule(cookie, store_id, _simple_rule_details_product(), 'simple', '2')
+    assert response_add_complex.succeeded() and response_add_simple_first.succeeded() and response_add_simple_second.succeeded()
+
+#endregion
+
+#region remove_purchase_rules
+def test_remove_simple_rule_success():
+    cookie, username, password, store_name, store_id = _initialize_info(_generate_username(), "aaa",
+                                                                        _generate_store_name())
+    parent_id = '1'
+    system.add_purchase_rule(cookie, store_id, _simple_rule_details_age(), 'simple', parent_id)
+    response_remove = system.remove_purchase_rule(cookie, store_id, '2')
+    assert response_remove.succeeded()
+
+
+def test_remove_not_existing_rule():
+    cookie, username, password, store_name, store_id = _initialize_info(_generate_username(), "aaa",
+                                                                        _generate_store_name())
+    parent_id = '1'
+    system.add_purchase_rule(cookie, store_id, _simple_rule_details_age_invalid_operator(), 'simple', parent_id)
+    response_remove = system.remove_purchase_rule(cookie, store_id, '3')
+    assert not response_remove.succeeded()
+
+def test_remove_root_rule_fail():
+    cookie, username, password, store_name, store_id = _initialize_info(_generate_username(), "aaa",
+                                                                        _generate_store_name())
+    response_remove = system.remove_purchase_rule(cookie, store_id, '1')
+    assert not response_remove.succeeded()
+
+
+def test_remove_complex_rule_success():
+    cookie, username, password, store_name, store_id = _initialize_info(_generate_username(), "aaa",
+                                                                        _generate_store_name())
+    parent_id = '1'
+    system.add_purchase_rule(cookie, store_id, _complex_rule_details_or(), 'complex', parent_id)
+    response_remove = system.remove_purchase_rule(cookie, store_id, '2')
+    assert response_remove.succeeded()
+
+
+def test_remove_purchase_rule_with_no_permission():
+    cookie, username, password, store_name, store_id = _initialize_info(_generate_username(), "aaa",
+                                                                        _generate_store_name())
+
+    new_cookie, new_username, new_password_, _, _ = _initialize_info(_generate_username(), "bbb")
+    parent_id = '1'
+    system.add_purchase_rule(cookie, store_id, _complex_rule_details_or(), 'complex', parent_id)
+    response_remove_complex = system.remove_purchase_rule(new_cookie, store_id, '2')
+    assert not response_remove_complex.succeeded()
+
+
+def test_remove_purchase_rule_after_manager_appointment_with_no_permission():
+    cookie, username, password, store_name, store_id = _initialize_info(_generate_username(), "aaa",
+                                                                        _generate_store_name())
+
+    new_cookie, new_username, new_password_, _, _ = _initialize_info(_generate_username(), "bbb")
+    system.appoint_manager(cookie, store_id, new_username)
+    parent_id = '1'
+    system.add_purchase_rule(cookie, store_id, _complex_rule_details_or(), 'complex', parent_id)
+    response_remove_complex = system.remove_purchase_rule(new_cookie, store_id, '2')
+    assert not response_remove_complex.succeeded()
+
+
+def test_remove_purchase_rule_after_manager_appointment_with_permission():
+    cookie, username, password, store_name, store_id = _initialize_info(_generate_username(), "aaa",
+                                                                        _generate_store_name())
+
+    new_cookie, new_username, new_password_, _, _ = _initialize_info(_generate_username(), "bbb")
+    system.appoint_manager(cookie, store_id, new_username)
+    new_responsibility = "manage_purchase_policy"
+    system.add_manager_permission(cookie, store_id, new_username, new_responsibility)
+    parent_id = '1'
+    system.add_purchase_rule(cookie, store_id, _complex_rule_details_or(), 'complex', parent_id)
+    response_remove_complex = system.remove_purchase_rule(new_cookie, store_id, '2')
+    assert response_remove_complex.succeeded()
+
+
+def test_founder_remove_purchase_rule_to_other_store_fail():
+    cookie, username, password, store_name, store_id = _initialize_info(_generate_username(), "aaa",
+                                                                        _generate_store_name())
+
+    new_cookie, new_username, new_password, new_store_name, new_store_id = _initialize_info(_generate_username(), "bbb",
+                                                                        _generate_store_name())
+
+    parent_id = '1'
+    system.add_purchase_rule(cookie, store_id, _complex_rule_details_or(), 'complex', parent_id)
+    response_remove_complex = system.remove_purchase_rule(new_cookie, store_id, '2')
+    assert not response_remove_complex.succeeded()
+
+
+def test_founder_remove_purchase_rule_to_other_store_fail_but_self_success():
+    cookie, username, password, store_name, store_id = _initialize_info(_generate_username(), "aaa",
+                                                                        _generate_store_name())
+
+    new_cookie, new_username, new_password, new_store_name, new_store_id = _initialize_info(_generate_username(), "bbb",
+                                                                        _generate_store_name())
+
+    parent_id = '1'
+    system.add_purchase_rule(cookie, store_id, _complex_rule_details_or(), 'complex', parent_id)
+    system.add_purchase_rule(new_cookie, new_store_id, _complex_rule_details_or(), 'complex', parent_id)
+    response_remove_wrong = system.remove_purchase_rule(new_cookie, store_id, '2')
+    response_remove_right = system.remove_purchase_rule(new_cookie, new_store_id, '2')
+    assert not response_remove_wrong.succeeded() and response_remove_right
+
+
+def test_remove_complex_with_two_children():
+    cookie, username, password, store_name, store_id = _initialize_info(_generate_username(), "aaa",
+                                                                        _generate_store_name())
+    parent_id = '1'
+    system.add_purchase_rule(cookie, store_id, _complex_rule_details_or(),
+                                                                'complex',
+                                                                parent_id)
+    system.add_purchase_rule(cookie, store_id, _simple_rule_details_age(), 'simple', '2')
+    system.add_purchase_rule(cookie, store_id, _simple_rule_details_product(), 'simple', '2')
+    response_remove = system.remove_purchase_rule(cookie, store_id, '2')
+    assert response_remove.succeeded()
+#endregion
+
+#region edit_purchase_rules
+#endregion
 # endregion

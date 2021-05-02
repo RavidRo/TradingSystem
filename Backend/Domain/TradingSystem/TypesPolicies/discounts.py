@@ -11,7 +11,7 @@ class SimpleDiscount(IDiscount):
         return self._context
 
     def __init__(self, discount_data, duration=None):  # Add duration in later milestones
-        super().__init__(discount_data.get('condition'))
+        super().__init__()
         self._multiplier = discount_data['percentage'] / 100.0
         self._parent = None
         self._context = discount_data['context']
@@ -52,7 +52,7 @@ class SimpleDiscount(IDiscount):
         discount['discount_type'] = 'simple'
         return discount
 
-    def edit_simple_discount(self, discount_id, percentage=None, condition=None, context=None, duration=None):
+    def edit_simple_discount(self, discount_id, percentage=None, context=None, duration=None):
         if self.get_id() != discount_id:
             return Response(False, msg="The ID provided is not found!")
 
@@ -77,11 +77,7 @@ class SimpleDiscount(IDiscount):
 
         if percentage is not None:
             self._multiplier = percentage / 100
-        if condition is not None:
-            # TODO: ask Sean to implement this (fit this call to his interface)
 
-            # self._condition.edit_condition(condition)
-            self._condition = condition
         if context is not None:
             self._context = context
 
@@ -109,8 +105,8 @@ class SimpleDiscount(IDiscount):
 
 
 class CompositeDiscount(IDiscount, ABC):
-    def __init__(self, children: list[IDiscount] = None, condition=None):
-        super().__init__(condition)
+    def __init__(self, children: list[IDiscount] = None):
+        super().__init__()
         if children is None:
             children = []
         self._children = children
@@ -140,12 +136,12 @@ class CompositeDiscount(IDiscount, ABC):
     def is_composite(self) -> bool:
         return True
 
-    def edit_simple_discount(self, discount_id, percentage=None, condition=None, context=None, duration=None):
+    def edit_simple_discount(self, discount_id, percentage=None, context=None, duration=None):
         if self.get_id() == discount_id:
             return Response(False, msg="The ID provided is not belong to simple discount!")
 
         for child in self._children:
-            if child.edit_simple_discount(discount_id, percentage, condition, context).succeeded():
+            if child.edit_simple_discount(discount_id, percentage, context).succeeded():
                 return Response(True)
         return Response(False, msg="The ID provided is not found!")
 
@@ -210,15 +206,13 @@ class CompositeDiscount(IDiscount, ABC):
 
 class MaximumCompositeDiscount(CompositeDiscount):
 
-    def __init__(self, children: list[IDiscount] = None, condition=None):
-        super().__init__(children, condition)
+    def __init__(self, children: list[IDiscount] = None):
+        super().__init__(children)
 
-        def discount_func(products_to_quantities) -> float:
-            if len(self._children) == 0:
-                return 0.0
-            return max([child.apply_discount(products_to_quantities) for child in self._children])
-
-        self.discount_func = discount_func
+    def apply_discount(self, products_to_quantities: dict, user_age: int) -> float:
+        if len(self._children) == 0:
+            return 0.0
+        return max([child.apply_discount(products_to_quantities, user_age) for child in self._children])
 
     def parse(self):
         discounts = super().parse()
@@ -228,13 +222,11 @@ class MaximumCompositeDiscount(CompositeDiscount):
 
 class AddCompositeDiscount(CompositeDiscount):
 
-    def __init__(self, children: list[IDiscount] = None, condition=None):
-        super().__init__(children, condition)
+    def __init__(self, children: list[IDiscount] = None):
+        super().__init__(children)
 
-        def discount_func(products_to_quantities) -> float:
-            return sum([child.apply_discount(products_to_quantities) for child in self._children])
-
-        self.discount_func = discount_func
+    def apply_discount(self, products_to_quantities: dict, user_age: int) -> float:
+        return sum([child.apply_discount(products_to_quantities, user_age) for child in self._children])
 
     def parse(self):
         discounts = super().parse()
@@ -249,14 +241,14 @@ class XorCompositeDiscount(CompositeDiscount):
                      "min": lambda prices: min(prices) if len(prices) > 0 else 0.0
                      }
 
-    def __init__(self, decision_rule: str, children: list[IDiscount] = None, condition=None):
-        super().__init__(children, condition)
+    def __init__(self, decision_rule: str, children: list[IDiscount] = None):
+        super().__init__(children)
+        self.__desicion_rule = decision_rule
 
-        def discount_func(products_to_quantities) -> float:
-            prices = [child.apply_discount(products_to_quantities) for child in self._children]
-            return XorCompositeDiscount.decision_dict[decision_rule](prices)
+    def apply_discount(self, products_to_quantities: dict, user_age: int) -> float:
+        prices = [child.apply_discount(products_to_quantities, user_age) for child in self._children]
+        return XorCompositeDiscount.decision_dict[self.__desicion_rule](prices)
 
-        self.discount_func = discount_func
 
     def parse(self):
         discounts = super().parse()
@@ -266,11 +258,11 @@ class XorCompositeDiscount(CompositeDiscount):
 
 class AndConditionDiscount(CompositeDiscount):
 
-    def __init__(self, children: list[IDiscount] = None, condition=None):
-        super().__init__(children, condition)
+    def __init__(self, children: list[IDiscount] = None):
+        super().__init__(children)
 
-    def apply_discount(self, products_to_quantities: dict) -> float:
-        if all([child._condition(products_to_quantities) for child in self._children]):
+    def apply_discount(self, products_to_quantities: dict, user_age: int) -> float:
+        if all([child._conditions_policy.checkPolicy(products_to_quantities, user_age) for child in self._children]):
             return sum([child.discount_func(products_to_quantities) for child in self._children])
         return 0.0
 
@@ -282,11 +274,11 @@ class AndConditionDiscount(CompositeDiscount):
 
 class OrConditionDiscount(CompositeDiscount):
 
-    def __init__(self, children: list[IDiscount] = None, condition=None):
-        super().__init__(children, condition)
+    def __init__(self, children: list[IDiscount] = None):
+        super().__init__(children)
 
-    def apply_discount(self, products_to_quantities: dict) -> float:
-        if any([child._condition(products_to_quantities) for child in self._children]):
+    def apply_discount(self, products_to_quantities: dict, user_age: int) -> float:
+        if any([child._conditions_policy.checkPolicy(products_to_quantities, user_age) for child in self._children]):
             return sum([child.discount_func(products_to_quantities) for child in self._children])
         return 0.0
 

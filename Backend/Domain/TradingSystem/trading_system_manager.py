@@ -85,10 +85,6 @@ class TradingSystemManager:
             cookie, store_id, product_id, new_quantity
         )
 
-    @staticmethod
-    def get_discounted_current_cart_price(cookie: str):
-        return UserManager.get_discounted_current_cart_price(cookie)
-
     # 2.9
     @staticmethod
     def purchase_cart(cookie: str, user_age: int) -> Response[PrimitiveParsable[float]]:
@@ -220,7 +216,7 @@ class TradingSystemManager:
     # 4.2
     @staticmethod
     def get_purchase_policy(cookie: str, store_id: str):
-        return UserManager.get_purchase_policy(cookie, store_id)
+        return UserManager.get_purchase_policy(cookie, store_id).parse()
 
 
     # 4.3

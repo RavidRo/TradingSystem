@@ -101,7 +101,7 @@ class ShoppingBag(IShoppingBag):
         self.purchase_types_checks(user_age, self._products_to_quantity)
 
         """third step - check and apply the discount """
-        self.discount_apply()
+        self.discount_apply(user_age)
         return Response[PrimitiveParsable[float]](
             True,
             PrimitiveParsable(self.__pending_price),
@@ -116,11 +116,8 @@ class ShoppingBag(IShoppingBag):
             self.__store.send_back(self._products_to_quantity)
             return purchase_types_check
 
-    def discount_apply(self):
-        self.__pending_price = self.__store.apply_discounts(self._products_to_quantity)
-        # for now it's a copy- all of the products purchased regularly so they all passed to pending
-        if not bool(self._products_to_quantity):
-            self.send_back()
+    def discount_apply(self, user_age: int):
+        self.__pending_price = self.__store.apply_discounts(self._products_to_quantity, user_age)
         self.__pending_products_to_quantity = self._products_to_quantity.copy()
         self._products_to_quantity.clear()
 
@@ -145,9 +142,6 @@ class ShoppingBag(IShoppingBag):
             new_amount,
         )
         return Response(True, msg="amount changed successfully")
-
-    def get_discounted_current_cart_price(self):
-        return self.__store.apply_discounts(self._products_to_quantity)
 
     def delete_products_after_purchase(self, user_name="guest") -> PurchaseDetails:
         # for now this function will only return details, in the future there will be specific deletion
