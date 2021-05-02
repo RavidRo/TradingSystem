@@ -20,6 +20,10 @@ Permission = enum.Enum(
         ("REMOVE_MANAGER", 4),
         ("get history", 5),
         ("GET_HISTORY", 5),
+        ("manage_purchase_policy", 6),
+        ("MANAGE_PURCHASE_POLICY", 6),
+        ("manage_discount_policy", 7),
+        ("MANAGE_DISCOUNT_POLICY", 7),
     ],
 )
 
@@ -29,6 +33,8 @@ name_to_permission: dict[str, Permission] = {
     "appoint_manager": Permission.APPOINT_MANAGER,
     "remove_manager": Permission.REMOVE_MANAGER,
     "get_history": Permission.GET_HISTORY,
+    "manage_purchase_policy": Permission.MANAGE_PURCHASE_POLICY,
+    "manage_discount_policy": Permission.MANAGE_DISCOUNT_POLICY
 }
 
 
@@ -66,6 +72,46 @@ class Responsibility(Parsable):
         new_price: float,
         keywords: list[str] = None,
     ) -> Response[None]:
+        raise Exception(Responsibility.ERROR_MESSAGE)
+
+    # 4.2
+    def add_discount(self, discount_data: dict, exist_id: str):
+        raise Exception(Responsibility.ERROR_MESSAGE)
+
+    def move_discount(self, src_id: str, dest_id: str):
+        raise Exception(Responsibility.ERROR_MESSAGE)
+
+    def get_discounts(self):
+        raise Exception(Responsibility.ERROR_MESSAGE)
+
+    def remove_discount(self, discount_id: str):
+        raise Exception(Responsibility.ERROR_MESSAGE)
+
+    def edit_simple_discount(self, discount_id: str, percentage: float = None, condition: dict = None,
+                             context: dict = None, duration=None):
+        raise Exception(Responsibility.ERROR_MESSAGE)
+
+    def edit_complex_discount(self, discount_id: str, complex_type: str = None, decision_rule: str = None):
+        raise Exception(Responsibility.ERROR_MESSAGE)
+
+    # 4.2
+    def add_purchase_rule(self, rule_details: dict, rule_type: str, parent_id: str, clause: str = None):
+        raise Exception(Responsibility.ERROR_MESSAGE)
+
+    # 4.2
+    def remove_purchase_rule(self, rule_id: str):
+        raise Exception(Responsibility.ERROR_MESSAGE)
+
+    # 4.2
+    def edit_purchase_rule(self, rule_details: dict, rule_id: str, rule_type: str):
+        raise Exception(Responsibility.ERROR_MESSAGE)
+
+    # 4.2
+    def move_purchase_rule(self, rule_id: str, new_parent_id: str):
+        raise Exception(Responsibility.ERROR_MESSAGE)
+
+    # 4.2
+    def get_purchase_policy(self):
         raise Exception(Responsibility.ERROR_MESSAGE)
 
     # 4.3

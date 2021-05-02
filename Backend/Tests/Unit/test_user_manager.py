@@ -137,12 +137,12 @@ def test_change_product_quantity_in_cart_fails_when_given_invalid_cookie():
 # * purchase cart tests - 2.9
 # * ==============================================================
 def test_purchase_cart_deligates_to_user_successfully(cookie):
-    UserManager.purchase_cart(cookie)
+    UserManager.purchase_cart(cookie, 25)
     assert UserManager._get_cookie_user()[cookie]._purchase_cart
 
 
 def test_purchase_cart_fails_when_given_invalid_cookie():
-    assert not UserManager.purchase_cart("boogie boogie").succeeded()
+    assert not UserManager.purchase_cart("boogie boogie", 25).succeeded()
 
 
 # * purchase completed tests - 2.9

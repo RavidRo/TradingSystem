@@ -38,7 +38,6 @@ class ShoppingBag(IShoppingBag):
     def get_pending_price(self):
         return self.__pending_price
 
-
     def add_product(self, product_id: str, quantity: int) -> Response[None]:
 
         if quantity <= 0:
@@ -86,8 +85,9 @@ class ShoppingBag(IShoppingBag):
        1. check if products exist in the store with specified quantities
        2. check if purchase types are appropriate
                                             """
+
     # product info - list of tuples (product_id to purchase_type)
-    def buy_products(self, user_info, products_info=None) -> Response[PrimitiveParsable[float]]:
+    def buy_products(self, user_age: int, products_info=None) -> Response[PrimitiveParsable[float]]:
 
         """first step - check if all of the products exist in the store and acquire"""
         if products_info is None:
@@ -98,8 +98,7 @@ class ShoppingBag(IShoppingBag):
 
         """second step - check if the purchase_types are appropriate"""
         # since there are no purchase types for now- this checking isn't relevant
-        if products_info:
-            self.purchase_types_checks(user_info, products_info)
+        self.purchase_types_checks(user_age, self._products_to_quantity)
 
         """third step - check and apply the discount """
         self.discount_apply()
@@ -112,7 +111,7 @@ class ShoppingBag(IShoppingBag):
     def purchase_types_checks(self, user_info, products_info=None):
         if products_info is None:
             products_info = {}
-        purchase_types_check = self.__store.check_purchase_types(products_info, user_info)
+        purchase_types_check = self.__store.check_purchase(products_info, user_info)
         if not purchase_types_check.success:
             self.__store.send_back(self._products_to_quantity)
             return purchase_types_check
@@ -147,13 +146,17 @@ class ShoppingBag(IShoppingBag):
         )
         return Response(True, msg="amount changed successfully")
 
+    def get_discounted_current_cart_price(self):
+        return self.__store.apply_discounts(self._products_to_quantity)
+
     def delete_products_after_purchase(self, user_name="guest") -> PurchaseDetails:
         # for now this function will only return details, in the future there will be specific deletion
         product_names = [
             prod.get_name() for product_id, (prod, quantity) in self.__pending_products_to_quantity.items()
         ]
         self.__pending_products_to_quantity.clear()
-        purchase_details = PurchaseDetails(user_name, self.__store.get_name(), product_names, datetime.now(), self.__pending_price)
+        purchase_details = PurchaseDetails(user_name, self.__store.get_name(), product_names, datetime.now(),
+                                           self.__pending_price)
         self.__store.update_store_history(purchase_details)
         return purchase_details
 

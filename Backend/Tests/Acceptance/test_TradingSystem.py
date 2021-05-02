@@ -1,9 +1,13 @@
 import json
 import threading
+from collections import Callable
+from queue import Queue
 from unittest import mock
 from unittest.mock import patch, MagicMock
 from Backend.Domain.Payment.OutsideSystems.outside_cashing import OutsideCashing
+from Backend.Domain.TradingSystem.Interfaces.IUserState import IUserState
 from Backend.Domain.TradingSystem.States.member import Member
+from Backend.Domain.TradingSystem.States.user_state import UserState
 from Backend.Domain.TradingSystem.shopping_cart import ShoppingCart
 from Backend.Domain.TradingSystem.user import User
 from Backend.Domain.TradingSystem.user_manager import UserManager
@@ -53,6 +57,14 @@ def _generate_store_name() -> str:
     store_lock.release()
     return store
 
+def _simple_rule_details_age() -> dict:
+    return {'context': {'obj': 'user'}, 'operator': 'great-equals', 'target': 18}
+
+def _simple_rule_details_age_invalid_operator() -> dict:
+    return {'context': {'obj': 'user'}, 'operator': 'invalid', 'target': 18}
+
+def _simple_rule_details_age_missing_key_target() -> dict:
+    return {'context': {'obj': 'user'}, 'operator': 'invalid'}
 
 def _generate_product_name() -> str:
     global product_number
@@ -606,7 +618,8 @@ def test_purchase_cart_success():
     product_id, product_name, category, price, quantity = _create_product(cookie, store_id, _generate_product_name(),
                                                                           "A", 5.50, 10)
     system.save_product_in_cart(cookie, store_id, product_id, 1)
-    response = system.purchase_cart(cookie)
+    user_age = 25
+    response = system.purchase_cart(cookie, user_age)
     store_res = system.get_store(store_id)
     cart_res = system.get_cart_details(cookie)
     assert (
@@ -622,7 +635,8 @@ def test_purchase_cart_no_items_fail():
     cookie, username, password, store_name, store_id = _initialize_info(
         _generate_username(), "aaa", _generate_store_name()
     )
-    res = system.purchase_cart(cookie)
+    user_age = 25
+    res = system.purchase_cart(cookie, user_age)
     assert not res.succeeded()
 
 
@@ -634,7 +648,8 @@ def test_purchase_cart_twice_fail():
     product_id, product_name, category, price, quantity = _create_product(cookie, store_id, _generate_product_name(),
                                                                           "A", 5.50, 10)
     system.save_product_in_cart(cookie, store_id, product_id, 1)
-    system.purchase_cart(cookie)
+    user_age = 25
+    system.purchase_cart(cookie, user_age)
     response = system.purchase_cart(cookie)
     assert not response.succeeded(), response.get_msg()
 
@@ -647,7 +662,8 @@ def test_send_payment_success():
     product_id, product_name, category, price, quantity = _create_product(cookie, store_id, _generate_product_name(),
                                                                           "A", 5.50, 10)
     system.save_product_in_cart(cookie, store_id, product_id, 1)
-    system.purchase_cart(cookie)
+    user_age = 25
+    system.purchase_cart(cookie, user_age)
     response = system.send_payment(cookie, "", "")
     res = system.get_store(store_id)
     ids_to_quantity = res.object.ids_to_quantities[product_id]
@@ -666,7 +682,8 @@ def test_send_payment_success_timer_over():
     product_id, product_name, category, price, quantity = _create_product(cookie, store_id, _generate_product_name(),
                                                                           "A", 5.50, 10)
     system.save_product_in_cart(cookie, store_id, product_id, 1)
-    system.purchase_cart(cookie)
+    user_age = 25
+    system.purchase_cart(cookie, user_age)
     response = system.send_payment(cookie, "", "")
     timer = threading.Timer(6, finish_test_send_payment_success_timer_over(store_id, product_id, response))
     timer.start()
@@ -711,7 +728,8 @@ def test_send_payment_failed():
                                                                               _generate_product_name(),
                                                                               "A", 5.50, 10)
         system.save_product_in_cart(cookie, store_id, product_id, 1)
-        system.purchase_cart(cookie)
+        user_age = 25
+        system.purchase_cart(cookie, user_age)
         res1 = system.send_payment(cookie, "", "")
         # this line is added since the user might cancel the purchase after unsuccessful payment
         res_cancel = system.cancel_purchase(cookie)
@@ -734,7 +752,8 @@ def test_try_paying_after_time_passed():
     product_id, product_name, category, price, quantity = _create_product(cookie, store_id, _generate_product_name(),
                                                                           "A", 5.50, 10)
     system.save_product_in_cart(cookie, store_id, product_id, 1)
-    system.purchase_cart(cookie)
+    user_age = 25
+    system.purchase_cart(cookie, user_age)
     time.sleep(6)
     res1 = system.send_payment(cookie, "", "")
     res2 = system.get_store(store_id)
@@ -756,7 +775,8 @@ def test_try_paying_first_time_failed_than_success():
                                                                               _generate_product_name(),
                                                                               "A", 5.50, 10)
         system.save_product_in_cart(cookie, store_id, product_id, 1)
-        system.purchase_cart(cookie)
+        user_age = 25
+        system.purchase_cart(cookie, user_age)
         response = system.send_payment(cookie, "", "")
 
     try_again_response = system.send_payment(cookie, "", "")
@@ -779,7 +799,8 @@ def test_try_paying_first_time_incorrect_info_second_time_timer_over():
                                                                               _generate_product_name(),
                                                                               "A", 5.50, 10)
         system.save_product_in_cart(cookie, store_id, product_id, 1)
-        system.purchase_cart(cookie)
+        user_age = 25
+        system.purchase_cart(cookie, user_age)
         response = system.send_payment(cookie, "", "")
 
     time.sleep(6)
@@ -801,7 +822,8 @@ def test_get_purchase_history_success():
     product_id, product_name, category, price, quantity = _create_product(cookie, store_id, _generate_product_name(),
                                                                           "A", 5.50, 10)
     system.save_product_in_cart(cookie, store_id, product_id, 1)
-    system.purchase_cart(cookie)
+    user_age = 25
+    system.purchase_cart(cookie, user_age)
     system.send_payment(cookie, "", "")
     response = system.get_purchase_history(cookie)
     assert (
@@ -844,7 +866,8 @@ def test_get_purchase_history_no_payment_fail():
     product_id, product_name, category, price, quantity = _create_product(cookie, store_id, _generate_product_name(),
                                                                           "A", 5.50, 10)
     system.save_product_in_cart(cookie, store_id, product_id, 1)
-    system.purchase_cart(cookie)
+    user_age = 25
+    system.purchase_cart(cookie, user_age)
     response = system.get_purchase_history(cookie)
     assert len(response.object.values) == 0
 
@@ -1423,7 +1446,8 @@ def test_get_store_purchase_history_success():
     product_id, product_name, category, price, quantity = _create_product(cookie, store_id, _generate_product_name(),
                                                                           "A", 5.50, 10)
     system.save_product_in_cart(cookie, store_id, product_id, 1)
-    system.purchase_cart(cookie)
+    user_age = 25
+    system.purchase_cart(cookie, user_age)
     system.send_payment(cookie, "", "")
     response = system.get_store_purchase_history(cookie, store_id)
     assert (
@@ -1465,7 +1489,8 @@ def test_get_store_purchase_history_no_payment_success():
     product_id, product_name, category, price, quantity = _create_product(cookie, store_id, _generate_product_name(),
                                                                           "A", 5.50, 10)
     system.save_product_in_cart(cookie, store_id, product_id, 1)
-    system.purchase_cart(cookie)
+    user_age = 25
+    system.purchase_cart(cookie, user_age)
     response = system.get_store_purchase_history(cookie, store_id)
     assert len(response.object.values) == 0
 
@@ -1492,7 +1517,8 @@ def test_admin_get_store_purchase_history_success():
     product_id, product_name, category, price, quantity = _create_product(cookie, store_id, _generate_product_name(),
                                                                           "A", 5.50, 10)
     system.save_product_in_cart(cookie, store_id, product_id, 1)
-    system.purchase_cart(cookie)
+    user_age = 25
+    system.purchase_cart(cookie, user_age)
     system.send_payment(cookie, "", "")
     response = system.get_any_store_purchase_history(admin_cookie, store_id)
     assert (
@@ -1510,19 +1536,20 @@ def test_admin_get_user_purchase_history_success():
     product_id, product_name, category, price, quantity = _create_product(cookie, store_id, _generate_product_name(),
                                                                           "A", 5.50, 10)
     system.save_product_in_cart(cookie, store_id, product_id, 1)
-    system.purchase_cart(cookie)
+    user_age = 25
+    system.purchase_cart(cookie, user_age)
     system.send_payment(cookie, "", "")
     response = system.get_user_purchase_history(admin_cookie, username)
     assert response.succeeded()
 
 
-# parallel testing
+#region parallel testing
 _t_responses = []
 
 
 def __get_product(cookie: str, thread: int) -> None:
     global _t_responses
-    response = system.purchase_cart(cookie)
+    response = system.purchase_cart(cookie, 25)
     _t_responses.append((thread, response.succeeded()))
 
 
@@ -1617,3 +1644,184 @@ def test_two_appointments():
         b = _t_responses[i * 2 + 1]
         print(a, b)
         assert (a[1] and not b[1]) or (not a[1] and b[1])  # exactly one to succeed
+#endregion
+
+#region notifications tests
+
+
+def apply(owner_queue, messages):
+    for message in messages:
+        owner_queue.put(message)
+    return True
+
+def _initialize_info_notifications(username: str, password: str, connect: bool, store_name: str = None, owner_queue = None) -> tuple[str, str, str, str, str]:
+    store_id = ""
+    cookie = system.enter_system()
+
+    if connect:
+        system.connect(cookie, lambda messages: apply(owner_queue, messages))
+    system.register(cookie, username, password)
+    system.login(cookie, username, password)
+    if store_name:
+        store_res = system.create_store(cookie, store_name)
+        store_id = store_res.object
+    return cookie, username, password, store_name, store_id
+
+
+def test_store_owner_notification_after_purchase():
+    first_owner_queue = Queue()
+    cookie, username, password, store_name, store_id = _initialize_info_notifications(_generate_username(), "aaa", True,
+                                                                                      _generate_store_name(), owner_queue=first_owner_queue)
+    new_cookie, new_username, new_password_, _, _ = _initialize_info(_generate_username(), "bbb")
+    product_id, product_name, category, price, quantity = _create_product(cookie, store_id, _generate_product_name(),"A", 5.50, 10)
+    system.save_product_in_cart(new_cookie, store_id, product_id, 1)
+    user_age = 25
+    price = system.purchase_cart(new_cookie, user_age)
+    system.send_payment(new_cookie, "", "")
+    assert (not first_owner_queue.empty()) and system.empty_notifications(cookie)
+
+
+def test_store_owner_notification_after_purchase_owner_not_connected():
+    first_owner_queue = Queue()
+    cookie, username, password, store_name, store_id = _initialize_info_notifications(_generate_username(), "aaa", False,
+                                                                                      _generate_store_name())
+    new_cookie, new_username, new_password_, _, _ = _initialize_info(_generate_username(), "bbb")
+    product_id, product_name, category, price, quantity = _create_product(cookie, store_id, _generate_product_name(),"A", 5.50, 10)
+    system.save_product_in_cart(new_cookie, store_id, product_id, 1)
+    user_age = 25
+    system.purchase_cart(new_cookie, user_age)
+    system.send_payment(new_cookie, "", "")
+    assert first_owner_queue.empty() and not system.empty_notifications(cookie)
+
+
+def test_store_multiple_owners_notification_after_purchase_all_connected():
+    first_owner_queue = Queue()
+    second_owner_queue = Queue()
+    cookie, username, password, store_name, store_id = _initialize_info_notifications(_generate_username(), "aaa", True,
+                                                                                      _generate_store_name(), first_owner_queue)
+
+    new_owner_cookie, new_owner_username, new_owner_password, _, _ = _initialize_info(
+        _generate_username(), "bbb"
+    )
+    system.appoint_owner(cookie, store_id, new_owner_username)
+    system.connect(new_owner_cookie, lambda messages: apply(second_owner_queue, messages))
+    new_cookie, new_username, new_password_, _, _ = _initialize_info(_generate_username(), "bbb")
+    product_id, product_name, category, price, quantity = _create_product(cookie, store_id, _generate_product_name(), "A", 5.50, 10)
+    system.save_product_in_cart(new_cookie, store_id, product_id, 1)
+    user_age = 25
+    system.purchase_cart(new_cookie, user_age)
+    system.send_payment(new_cookie, "", "")
+    assert(
+    not first_owner_queue.empty()
+    and not second_owner_queue.empty()
+    and system.empty_notifications(cookie)
+    and system.empty_notifications(new_owner_cookie)
+    )
+
+
+def test_store_multiple_owners_notification_after_purchase_one_connected():
+    first_owner_queue = Queue()
+    second_owner_queue = Queue()
+    cookie, username, password, store_name, store_id = _initialize_info_notifications(_generate_username(), "aaa", False,
+                                                                                      _generate_store_name(), first_owner_queue)
+
+    new_owner_cookie, new_owner_username, new_owner_password, _, _ = _initialize_info(
+        _generate_username(), "bbb"
+    )
+    system.appoint_owner(cookie, store_id, new_owner_username)
+    system.connect(new_owner_cookie, lambda messages: apply(second_owner_queue, messages))
+    new_cookie, new_username, new_password_, _, _ = _initialize_info(_generate_username(), "bbb")
+    product_id, product_name, category, price, quantity = _create_product(cookie, store_id, _generate_product_name(), "A", 5.50, 10)
+    system.save_product_in_cart(new_cookie, store_id, product_id, 1)
+    user_age = 25
+    system.purchase_cart(new_cookie, user_age)
+    system.send_payment(new_cookie, "", "")
+    assert(
+    first_owner_queue.empty()
+    and not second_owner_queue.empty()
+    and not system.empty_notifications(cookie)
+    and system.empty_notifications(new_owner_cookie)
+    )
+
+
+def test_connect_after_notification_sent():
+    first_owner_queue = Queue()
+    cookie, username, password, store_name, store_id = _initialize_info_notifications(_generate_username(), "aaa", False,
+                                                                                      _generate_store_name(),
+                                                                                      first_owner_queue)
+    new_cookie, new_username, new_password_, _, _ = _initialize_info(_generate_username(), "bbb")
+    product_id, product_name, category, price, quantity = _create_product(cookie, store_id, _generate_product_name(),
+                                                                          "A", 5.50, 10)
+    system.save_product_in_cart(new_cookie, store_id, product_id, 1)
+    user_age = 25
+    system.purchase_cart(new_cookie, user_age)
+    system.send_payment(new_cookie, "", "")
+    first_queue_before_connect_empty = first_owner_queue.empty()
+    pending_before_connect_empty = system.empty_notifications(cookie)
+    system.connect(cookie, lambda messages: apply(first_owner_queue, messages))
+    assert (
+        first_queue_before_connect_empty
+        and not pending_before_connect_empty
+        and not first_owner_queue.empty()
+        and system.empty_notifications(cookie)
+    )
+
+
+def test_get_notification_after_remove_appointment_connected():
+    first_owner_queue = Queue()
+    cookie, username, password, store_name, store_id = _initialize_info_notifications(_generate_username(), "aaa", False, _generate_store_name())
+    new_cookie, new_username, new_password_, _, _ = _initialize_info_notifications(_generate_username(), "bbb", connect=True, owner_queue=first_owner_queue)
+    system.appoint_manager(cookie, store_id, new_username)
+    system.remove_appointment(cookie, store_id, new_username)
+    assert not first_owner_queue.empty() and system.empty_notifications(new_cookie)
+
+
+def test_get_notification_after_remove_appointment_not_connected():
+    first_owner_queue = Queue()
+    cookie, username, password, store_name, store_id = _initialize_info_notifications(_generate_username(), "aaa", False, _generate_store_name())
+    new_cookie, new_username, new_password_, _, _ = _initialize_info_notifications(_generate_username(), "bbb", connect=False)
+    system.appoint_manager(cookie, store_id, new_username)
+    system.remove_appointment(cookie, store_id, new_username)
+    assert first_owner_queue.empty() and not system.empty_notifications(new_cookie)
+
+
+def test_connect_after_get_notification():
+    first_owner_queue = Queue()
+    cookie, username, password, store_name, store_id = _initialize_info_notifications(_generate_username(), "aaa",
+                                                                                      False, _generate_store_name())
+    new_cookie, new_username, new_password_, _, _ = _initialize_info_notifications(_generate_username(), "bbb",
+                                                                                   connect=False)
+
+    system.appoint_manager(cookie, store_id, new_username)
+    system.remove_appointment(cookie, store_id, new_username)
+    first_queue_before_connect_empty = first_owner_queue.empty()
+    pending_before_connect_empty = system.empty_notifications(new_cookie)
+    system.connect(new_cookie, lambda messages: apply(first_owner_queue, messages))
+    assert (
+            first_queue_before_connect_empty
+            and not pending_before_connect_empty
+            and not first_owner_queue.empty()
+            and system.empty_notifications(cookie)
+    )
+
+#endregion
+
+
+#region 4.2  purchase tests
+
+# def test_add_simple_rule_success():
+#     cookie, username, password, store_name, store_id = _initialize_info(_generate_username(), "aaa",
+#                                                                         _generate_store_name())
+#     parent_id = '1'
+#     response_add = system.add_purchase_rule(cookie, store_id, _simple_rule_details_age(), 'simple', parent_id)
+#     store_rules = system.get_purchase_policy(cookie, store_id)
+#     added_rule = store_rules['children'][0]
+#     del added_rule['id']
+#     assert response_add.succeeded() and added_rule == _simple_rule_details_age()
+
+
+# def test_add_complex_rule_success():
+
+
+
+# endregion

@@ -94,9 +94,15 @@ class ShoppingCart(IShoppingCart):
             return Response(False, msg="Amount can't be negative!")
         return bag.change_product_quantity(product_id, new_amount)
 
+    def get_discounted_current_cart_price(self):
+        total_price = 0
+        for bag in self.__shopping_bags.values():
+            total_price += bag.get_discounted_current_cart_price()
+        return total_price
+
     """notice: if buy_products of any bag fails -> return acquired products to stores"""
     # products_purchase_info -a dict between store_id to list of tuples tuple (product_id to purchase_type)
-    def buy_products(self, user, products_purchase_info=None) -> Response[PrimitiveParsable[float]]:
+    def buy_products(self, user_age: int, products_purchase_info=None) -> Response[PrimitiveParsable[float]]:
         if products_purchase_info is None:
             products_purchase_info = {}
         if self.__pending_purchase:
@@ -116,7 +122,7 @@ class ShoppingCart(IShoppingCart):
             # this is the function call in the version with purchase types
             # result = self.shopping_bags[store_id].buy_products(products_purchase_info[store_id], user)
             # this is the current function call with default empty products_purchase_info
-            result = self.__shopping_bags[store_id].buy_products(user)
+            result = self.__shopping_bags[store_id].buy_products(user_age)
             if not result.success:
                 for bag in succeeded_bags:
                     bag.send_back()
