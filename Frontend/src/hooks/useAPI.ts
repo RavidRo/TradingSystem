@@ -59,11 +59,13 @@ export default function useAPI<Type>(
 				errorMsgVar = error;
 			})
 			.finally(() => {
-				setError(errorVar || (dataVar !== null && !dataVar.succeeded));
+				errorVar = errorVar || (dataVar !== null && !dataVar.succeeded);
+				setError(errorVar);
 				setLoading(false);
 				setData(dataVar);
-				setErrorMsg(dataVar?.error_msg ? dataVar?.error_msg : errorMsgVar);
-				console.log({ data: dataVar, error: errorMsgVar });
+				errorMsgVar = dataVar?.error_msg ? dataVar?.error_msg : errorMsgVar;
+				setErrorMsg(errorMsgVar);
+				console.log({ data: dataVar, error: errorVar, errorMsg: errorMsgVar });
 			})
 			.then(() => {
 				callback && callback(dataVar, errorVar, errorMsgVar);
