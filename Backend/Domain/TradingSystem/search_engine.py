@@ -4,6 +4,7 @@ from Backend.response import Response, ParsableTuple, PrimitiveParsable
 from Backend.response import ParsableMap
 from Backend.Domain.TradingSystem.stores_manager import StoresManager
 from Backend.Domain.TradingSystem.Interfaces.IProduct import IProduct as product
+from Backend.response import ParsableList
 
 
 class SearchEngine:
@@ -19,8 +20,8 @@ class SearchEngine:
         #     return Response(False, msg="You must search for at least one of the following: 'product', 'category', "
         #                                "'keywords'")
         stores = StoresManager.get_stores_details().get_obj().values
-        store_to_products = dict({store.get_id(): store.get_products_to_quantities().values() for store in stores})
-        return store_to_products
+        store_to_products = ((store.get_id(), store.get_products_to_quantities().values()) for store in stores)
+        return Response[ParsableList](True, ParsableList(store_to_products), msg="stores to products quantities")
 
         def filter_predicate(product_to_quantity) -> bool:
             product = product_to_quantity[0]
