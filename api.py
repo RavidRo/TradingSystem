@@ -114,6 +114,13 @@ async def get_stores_details():
     return __responseToJson(None, answer, lambda obj: obj.values)
 
 
+@app.route("/get_store", methods=["GET"])
+async def get_store():
+    store_id = request.args.get("store_id")
+    answer = await __async_call(system.get_store, store_id)
+    return __responseToJson(None, answer, lambda obj: obj.__dict__)
+
+
 @app.route("/get_products_by_store", methods=["GET"])
 async def get_products_by_store():
     store_id = request.args.get("store_id")
