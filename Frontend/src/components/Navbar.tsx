@@ -13,13 +13,13 @@ import '../styles/Navbar.scss';
 import config from '../config';
 import PopupCart from '../components/PopupCart';
 import { Product } from '../types';
-import { Badge, Divider, IconButton, List, ListItemText } from '@material-ui/core';
+import { Badge, Divider, Fade, IconButton, List, ListItemText, Paper } from '@material-ui/core';
 
 type NavBarProps = {
 	signedIn: boolean;
 	products: Product[];
 	propHandleDelete: (product: Product) => void;
-	notification: string[];
+	notifications: string[];
 	logout: () => void;
 };
 
@@ -27,11 +27,12 @@ const Navbar: FC<NavBarProps> = ({
 	signedIn,
 	products,
 	propHandleDelete,
-	notification,
+	notifications,
 	logout,
 }) => {
 	const [hoverCart, setHoverCart] = useState<boolean>(false);
 	const [productsInCart, setProducts] = useState<Product[]>(products);
+	const [openNotifications, setOpenNotifications] = useState<boolean>(false);
 
 	useEffect(() => {
 		setProducts(products);
@@ -84,16 +85,30 @@ const Navbar: FC<NavBarProps> = ({
 					)}
 				</div>
 				<div className="navbar-item">
-					<IconButton color={'inherit'}>
-						<Badge badgeContent={notification.length} showZero color="primary">
+					<IconButton
+						color={'inherit'}
+						onClick={() => setOpenNotifications((open) => !open)}
+					>
+						<Badge badgeContent={notifications.length} showZero color="primary">
 							<FontAwesomeIcon className="item-icon" icon={faBell} />
 						</Badge>
 					</IconButton>
-					{/* <List component="ul" style={{ position: 'absolute', padding-top: 50 }}>
-						<ListItemText primary="Inbox" />
-						<Divider />
-						<ListItemText primary="Drafts" />
-					</List> */}
+					<Fade in={openNotifications}>
+						<Paper className="notification-cont">
+							<List component="ul">
+								{notifications.map((notification, index) => (
+									<>
+										<ListItemText
+											primary={notification}
+											className="notification"
+											key={index}
+										/>
+										<Divider key={index} />
+									</>
+								))}
+							</List>
+						</Paper>
+					</Fade>
 				</div>
 			</nav>
 		</div>

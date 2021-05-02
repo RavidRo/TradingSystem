@@ -45,7 +45,7 @@ function App() {
 	const [cookie, setCookie] = useState<string>('');
 	const [productsInCart, setProducts] = useState<ProductQuantity[]>([]);
 
-	const [notification, setNotification] = useState<string[]>([]);
+	const [notifications, setNotifications] = useState<string[]>([]);
 
 	type storesToProductsMapType = {
 		[key: string]: Product[];
@@ -59,7 +59,7 @@ function App() {
 			console.log('WebSocket Client Connected');
 		};
 		client.onmessage = (message) => {
-			setNotification((old) => [...old, JSON.stringify(message)]);
+			setNotifications((old) => [...old, JSON.stringify(message)]);
 		};
 	}, []);
 
@@ -166,7 +166,7 @@ function App() {
 						signedIn={signedIn}
 						products={productsInCart}
 						propHandleDelete={handleDeleteProduct}
-						notification={notification}
+						notifications={notifications}
 						logout={() => {
 							setSignedIn(false);
 							setCookie('');

@@ -39,3 +39,12 @@
         margin-left: 5%;
     }
 }
+
+.notification-cont { 
+    margin-top: 165px;
+    right: 50px;
+    position: absolute;
+    .notification {
+        padding: 10px;
+    }
+}
