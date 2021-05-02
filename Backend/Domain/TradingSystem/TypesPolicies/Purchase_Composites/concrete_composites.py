@@ -56,6 +56,17 @@ class ConditioningCompositePurchaseRule(CompositePurchaseRule):
             else:
                 return Response(False, msg="There is an existing if clause for the condition")
 
+        else:
+            if self.children[0] is not None:
+                response_test = self.children[0].add(component, parent_id, clause)
+                if response_test.succeeded():
+                    return response_test
+            elif self.children[1] is not None:
+                return self.children[1].add(component, parent_id, clause)
+
+            else:
+                return Response(False, msg=f"There is no exsiting parent with {parent_id}")
+
     def add_to_clause(self, index_of_clause: int, component: PurchaseRule) -> Response[None]:
         if self.children[index_of_clause] is None:
             self.children[index_of_clause] = component
