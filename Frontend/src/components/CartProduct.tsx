@@ -4,6 +4,7 @@ import CancelIcon from '@material-ui/icons/Close';
 
 import IncrementField from './IncrementField';
 import { Product } from '../types';
+import '../styles/CardProduct.scss';
 
 type CartProductProps = {
 	product: Product;
@@ -26,6 +27,7 @@ const CartProduct: FC<CartProductProps> = ({ product, onRemove, onChangeQuantity
 						onChangeQuantity(id, newQuantity);
 					}}
 					value={quantity}
+					
 				/>
 				<p className="price">${price.toPrecision(digitPointPrecision)}</p>
 			</div>

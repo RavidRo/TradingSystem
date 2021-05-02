@@ -1,0 +1,24 @@
+.ProductSearchCard{
+    height: 100%;
+    width: 25%;
+    margin: 2%;
+}
+
+.prodCard{
+    background-color: #83f1e8;
+    font-size: large;
+}
+
+.cardContent{
+    font-weight: bold;
+}
+
+.buttonLink{
+    display: flex;
+    flex-direction: row;
+    align-items: baseline;
+}
+.linkStore{
+    margin-left: 50%;
+    color: blue;
+}

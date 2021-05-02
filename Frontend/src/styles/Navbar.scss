@@ -1,3 +1,7 @@
+.navbar{
+    width: 100%;
+    height: fit-content;
+}
 .navbar nav{
     background-color: #f9fce1;
     display: flex;
@@ -10,6 +14,7 @@
     text-decoration: none;
     color: black;
     flex: 1;
+    font-weight: bold;
 }
 .appName:hover {
     font-weight: bold;
@@ -19,31 +24,58 @@
     display: flex;
     flex-direction: row;
     align-items: center;
+    width: 10%;
 }
 .cartLink{
     font-size: 30px;
     text-decoration: none;
     color: black;
-    margin-left: 10px;
+    margin-left: 5%;
 }
 .cartIcon{
     font-size: 30px;
     cursor: pointer;
 }
+.storesDiv{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    width: 8%;
+}
+.storesLink{
+    font-size: 30px;
+    text-decoration: none;
+    color: black;
+}
 .signInDiv{
     display: flex;
     flex-direction: row;
     align-items: center;
-    margin: 0 30px;
-
+    width: 8%;
 }
 .signInLink{
     font-size: 30px;
     text-decoration: none;
     color: black;
+    margin-left: 5%;
 }
 .signInIcon{
     font-size: 30px;
     cursor: pointer;
-    margin-right: 10px;
+}
+.notifictionDiv{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    width: 3.5%;
+}
+.notifyLink{
+    font-size: 30px;
+    text-decoration: none;
+    color: black;
+    margin-left: 5%;
+}
+.notifyIcon{
+    font-size: 30px;
+    cursor: pointer;
 }
