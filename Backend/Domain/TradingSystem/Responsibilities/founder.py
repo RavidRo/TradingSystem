@@ -8,10 +8,6 @@ from Backend.response import Response, ParsableList, PrimitiveParsable
 
 
 class Founder(Responsibility):
-    def __init__(self, user_state, store, subscriber=None) -> None:
-        super().__init__(user_state, store, subscriber)
-        if subscriber != None:
-            self._store.subscribe(subscriber)
 
     # 4.1
     # Creating a new product a the store
@@ -42,7 +38,9 @@ class Founder(Responsibility):
         )
 
     # 4.2
-    def add_purchase_rule(self, rule_details: dict, rule_type: str, parent_id: str, clause: str = None):
+    def add_purchase_rule(
+        self, rule_details: dict, rule_type: str, parent_id: str, clause: str = None
+    ):
         return self._store.add_purchase_rule(rule_details, rule_type, parent_id, clause)
 
     # 4.2
@@ -78,12 +76,22 @@ class Founder(Responsibility):
         return self._store.remove_discount(discount_id)
 
     # 4.2
-    def edit_simple_discount(self, discount_id: str, percentage: float = None, condition: dict = None,
-                             context: dict = None, duration=None):
-        return self._store.edit_simple_discount(discount_id, percentage, condition, context, duration)
+    def edit_simple_discount(
+        self,
+        discount_id: str,
+        percentage: float = None,
+        condition: dict = None,
+        context: dict = None,
+        duration=None,
+    ):
+        return self._store.edit_simple_discount(
+            discount_id, percentage, condition, context, duration
+        )
 
     # 4.2
-    def edit_complex_discount(self, discount_id: str, complex_type: str = None, decision_rule: str = None):
+    def edit_complex_discount(
+        self, discount_id: str, complex_type: str = None, decision_rule: str = None
+    ):
         return self._store.edit_complex_discount(discount_id, complex_type, decision_rule)
 
     # 4.3

@@ -12,6 +12,7 @@ from Backend.Domain.TradingSystem.purchase_details import PurchaseDetails
 class Manager(Owner):
     def __init__(self, user_state, store, subscriber=None) -> None:
         super().__init__(user_state, store, subscriber)
+        self.__subscriber = subscriber
         self.__permissions = {
             Permission.MANAGE_PRODUCTS: False,
             Permission.GET_APPOINTMENTS: True,
@@ -19,7 +20,7 @@ class Manager(Owner):
             Permission.REMOVE_MANAGER: False,
             Permission.GET_HISTORY: False,
             Permission.MANAGE_PURCHASE_POLICY: False,
-            Permission.MANAGE_DISCOUNT_POLICY: False
+            Permission.MANAGE_DISCOUNT_POLICY: False,
         }
 
     def __create_no_permission_Response(self, permission: Permission) -> Response:
@@ -102,23 +103,35 @@ class Manager(Owner):
 
         # 4.2
 
-    def edit_simple_discount(self, discount_id: str, percentage: float = None, condition: dict = None,
-                             context: dict = None, duration=None):
+    def edit_simple_discount(
+        self,
+        discount_id: str,
+        percentage: float = None,
+        condition: dict = None,
+        context: dict = None,
+        duration=None,
+    ):
         if self.__permissions[Permission.MANAGE_DISCOUNT_POLICY]:
-            return super().edit_simple_discount(discount_id, percentage, condition, context, duration)
+            return super().edit_simple_discount(
+                discount_id, percentage, condition, context, duration
+            )
 
         return self.__create_no_permission_Response(Permission.MANAGE_DISCOUNT_POLICY)
 
         # 4.2
 
-    def edit_complex_discount(self, discount_id: str, complex_type: str = None, decision_rule: str = None):
+    def edit_complex_discount(
+        self, discount_id: str, complex_type: str = None, decision_rule: str = None
+    ):
         if self.__permissions[Permission.MANAGE_DISCOUNT_POLICY]:
             return super().edit_complex_discount(discount_id, complex_type, decision_rule)
 
         return self.__create_no_permission_Response(Permission.MANAGE_DISCOUNT_POLICY)
 
     # 4.2
-    def add_purchase_rule(self, rule_details: dict, rule_type: str, parent_id: str, clause: str = None):
+    def add_purchase_rule(
+        self, rule_details: dict, rule_type: str, parent_id: str, clause: str = None
+    ):
         if self.__permissions[Permission.MANAGE_PURCHASE_POLICY]:
             return super().add_purchase_rule(self, rule_details, rule_type, parent_id, clause)
         return self.__create_no_permission_Response(Permission.MANAGE_PURCHASE_POLICY)
