@@ -137,8 +137,10 @@ class User(IUser):
         )
 
     # 4.2
-    def add_discount(self, store_id: str, discount_data: dict, exist_id: str):
-        return self.state.add_discount(store_id, discount_data, exist_id)
+    def add_discount(
+        self, store_id: str, discount_data: dict, exist_id: str, condition_type: str = None
+    ):
+        return self.state.add_discount(store_id, discount_data, exist_id, condition_type)
 
     def move_discount(self, store_id: str, src_id: str, dest_id: str):
         return self.state.move_discount(store_id, src_id, dest_id)
@@ -154,18 +156,15 @@ class User(IUser):
         store_id: str,
         discount_id: str,
         percentage: float = None,
-        condition: dict = None,
         context: dict = None,
         duration=None,
     ):
-        return self.state.edit_simple_discount(
-            store_id, discount_id, percentage, condition, context, duration
-        )
+        return self.state.edit_simple_discount(store_id, discount_id, percentage, context, duration)
 
     def edit_complex_discount(
         self, store_id: str, discount_id: str, complex_type: str = None, decision_rule: str = None
     ):
-        return self.state.edit_complex_discount(discount_id, complex_type, decision_rule)
+        return self.state.edit_complex_discount(store_id, discount_id, complex_type, decision_rule)
 
     # 4.2
     def add_purchase_rule(

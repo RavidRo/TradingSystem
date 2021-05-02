@@ -242,11 +242,11 @@ class UserManager:
 
     # 4.2
     @staticmethod
-    def add_discount(cookie: str, store_id: str, discount_data: dict, exist_id: str):
+    def add_discount(
+        cookie: str, store_id: str, discount_data: dict, exist_id: str, condition_type: str = None
+    ):
         func: Callable[[User], Response] = lambda user: user.add_discount(
-            store_id,
-            discount_data,
-            exist_id,
+            store_id, discount_data, exist_id, condition_type
         )
         return UserManager.__deligate_to_user(cookie, func)
 
@@ -275,12 +275,11 @@ class UserManager:
         store_id: str,
         discount_id: str,
         percentage: float = None,
-        condition: dict = None,
         context: dict = None,
         duration=None,
     ):
         func: Callable[[User], Response] = lambda user: user.edit_simple_discount(
-            store_id, discount_id, percentage, condition, context, duration
+            store_id, discount_id, percentage, context, duration
         )
         return UserManager.__deligate_to_user(cookie, func)
 
@@ -295,6 +294,7 @@ class UserManager:
         func: Callable[[User], Response] = lambda user: user.edit_complex_discount(
             store_id, discount_id, complex_type, decision_rule
         )
+        return UserManager.__deligate_to_user(cookie, func)
 
     # 4.2
     @staticmethod

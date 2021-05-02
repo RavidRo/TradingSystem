@@ -10,20 +10,10 @@ from Backend.response import Response, Parsable, ParsableList
 
 class IDiscount(Parsable, ABC):
 
-    auto_id_lock = threading.Lock()
-
-    auto_id = 0
-
-    @staticmethod
-    def generate_id() -> str:
-        with IDiscount.auto_id_lock:
-            IDiscount.auto_id += 1
-            return str(IDiscount.auto_id - 1)
-
     @abstractmethod
-    def __init__(self):
+    def __init__(self, id):
         self._parent = None
-        self._id = IDiscount.generate_id()
+        self._id = id
         self.discount_func = None
         self._conditions_policy = DefaultPurchasePolicy()
 
@@ -53,7 +43,7 @@ class IDiscount(Parsable, ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def edit_complex_discount(self, discount_id, complex_type=None, decision_rule=None) -> Response[None]:
+    def edit_complex_discount(self, discount_id, new_id, complex_type=None, decision_rule=None) -> Response[None]:
         raise NotImplementedError
 
     @abstractmethod

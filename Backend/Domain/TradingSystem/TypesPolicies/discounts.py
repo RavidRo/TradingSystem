@@ -10,8 +10,8 @@ class SimpleDiscount(IDiscount):
     def get_context(self):
         return self._context
 
-    def __init__(self, discount_data, duration=None):  # Add duration in later milestones
-        super().__init__()
+    def __init__(self, discount_data, id, duration=None):  # Add duration in later milestones
+        super().__init__(id)
         self._multiplier = discount_data['percentage'] / 100.0
         self._parent = None
         self._context = discount_data['context']
@@ -83,7 +83,7 @@ class SimpleDiscount(IDiscount):
 
         return Response(True)
 
-    def edit_complex_discount(self, discount_id, complex_type=None, decision_rule=None):
+    def edit_complex_discount(self, discount_id, new_id, complex_type=None, decision_rule=None):
         return Response(False, msg="The ID provided does not belong to complex type!")
 
     def remove_discount(self, discount_id: str) -> Response[None]:
@@ -105,8 +105,8 @@ class SimpleDiscount(IDiscount):
 
 
 class CompositeDiscount(IDiscount, ABC):
-    def __init__(self, children: list[IDiscount] = None):
-        super().__init__()
+    def __init__(self, children: list[IDiscount] = None, id="1"):
+        super().__init__(id)
         if children is None:
             children = []
         self._children = children
@@ -146,14 +146,14 @@ class CompositeDiscount(IDiscount, ABC):
         return Response(False, msg="The ID provided is not found!")
 
     complex_type_generator = {
-        "max": lambda children, decision_rule: MaximumCompositeDiscount(children=children),
-        "add": lambda children, decision_rule: AddCompositeDiscount(children=children),
-        "xor": lambda children, decision_rule: XorCompositeDiscount(children=children, decision_rule=decision_rule),
-        "or": lambda children, decision_rule: OrConditionDiscount(children=children),
-        "and": lambda children, decision_rule: AndConditionDiscount(children=children)
+        "max": lambda children, decision_rule, new_id: MaximumCompositeDiscount(children=children, new_id=new_id),
+        "add": lambda children, decision_rule, new_id: AddCompositeDiscount(children=children, new_id=new_id),
+        "xor": lambda children, decision_rule, new_id: XorCompositeDiscount(children=children, decision_rule=decision_rule, new_id=new_id),
+        "or": lambda children, decision_rule, new_id: OrConditionDiscount(children=children, new_id=new_id),
+        "and": lambda children, decision_rule, new_id: AndConditionDiscount(children=children, new_id=new_id)
     }
 
-    def edit_complex_discount(self, discount_id: str, complex_type: str = None, decision_rule: str = None):
+    def edit_complex_discount(self, discount_id: str, new_id: str, complex_type: str = None, decision_rule: str = None):
 
         if self.get_id() == discount_id:
             msg = ""
@@ -167,12 +167,12 @@ class CompositeDiscount(IDiscount, ABC):
             if msg != "":
                 return Response(False, msg=msg)
             parent_children = self.get_parent().get_children()
-            parent_children[parent_children.index(self)] = CompositeDiscount.complex_type_generator.get(complex_type)(self._children, decision_rule)
+            parent_children[parent_children.index(self)] = CompositeDiscount.complex_type_generator.get(complex_type)(self._children, decision_rule, new_id)
             self._id = discount_id
             return Response(True)
 
         for child in self._children:
-            if child.edit_complex_discount(discount_id, complex_type, decision_rule).succeeded():
+            if child.edit_complex_discount(discount_id, new_id, complex_type, decision_rule).succeeded():
                 return Response(True)
         return Response(False, msg="The ID provided is not found!")
 
@@ -206,8 +206,8 @@ class CompositeDiscount(IDiscount, ABC):
 
 class MaximumCompositeDiscount(CompositeDiscount):
 
-    def __init__(self, children: list[IDiscount] = None):
-        super().__init__(children)
+    def __init__(self, children: list[IDiscount] = None, new_id="1"):
+        super().__init__(children, new_id)
 
     def apply_discount(self, products_to_quantities: dict, user_age: int) -> float:
         if len(self._children) == 0:
@@ -222,8 +222,8 @@ class MaximumCompositeDiscount(CompositeDiscount):
 
 class AddCompositeDiscount(CompositeDiscount):
 
-    def __init__(self, children: list[IDiscount] = None):
-        super().__init__(children)
+    def __init__(self, children: list[IDiscount] = None, new_id="1"):
+        super().__init__(children, new_id)
 
     def apply_discount(self, products_to_quantities: dict, user_age: int) -> float:
         return sum([child.apply_discount(products_to_quantities, user_age) for child in self._children])
@@ -241,8 +241,8 @@ class XorCompositeDiscount(CompositeDiscount):
                      "min": lambda prices: min(prices) if len(prices) > 0 else 0.0
                      }
 
-    def __init__(self, decision_rule: str, children: list[IDiscount] = None):
-        super().__init__(children)
+    def __init__(self, decision_rule: str, children: list[IDiscount] = None, new_id="1"):
+        super().__init__(children, new_id)
         self.__desicion_rule = decision_rule
 
     def apply_discount(self, products_to_quantities: dict, user_age: int) -> float:
@@ -258,8 +258,8 @@ class XorCompositeDiscount(CompositeDiscount):
 
 class AndConditionDiscount(CompositeDiscount):
 
-    def __init__(self, children: list[IDiscount] = None):
-        super().__init__(children)
+    def __init__(self, children: list[IDiscount] = None, new_id="1"):
+        super().__init__(children, new_id)
 
     def apply_discount(self, products_to_quantities: dict, user_age: int) -> float:
         if all([child._conditions_policy.checkPolicy(products_to_quantities, user_age) for child in self._children]):
@@ -274,8 +274,8 @@ class AndConditionDiscount(CompositeDiscount):
 
 class OrConditionDiscount(CompositeDiscount):
 
-    def __init__(self, children: list[IDiscount] = None):
-        super().__init__(children)
+    def __init__(self, children: list[IDiscount] = None, new_id="1"):
+        super().__init__(children, new_id)
 
     def apply_discount(self, products_to_quantities: dict, user_age: int) -> float:
         if any([child._conditions_policy.checkPolicy(products_to_quantities, user_age) for child in self._children]):

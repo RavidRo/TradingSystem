@@ -91,7 +91,7 @@ class ConcreteLeaf(PurchaseLeaf):
     # ~ price before discounts ~
     def bag_operation(self, products_to_quantities: dict):
         cart_price = 0
-        for _, (product, quantity) in products_to_quantities:
+        for _, (product, quantity) in products_to_quantities.items():
             cart_price += quantity * product.get_price()
         if ops[self._comparator](cart_price, self._constraint):
             return Response(True, msg="Purchase is permitted!")

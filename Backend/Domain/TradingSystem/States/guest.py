@@ -67,7 +67,7 @@ class Guest(UserState):
     def edit_product_details(self, store_id, product_id, new_name, new_category, new_price, keywords=None):
         return Response(False, msg="Guests cannot edit store product's details")
 
-    def add_discount(self, store_id: str, discount_data: dict, exist_id: str):
+    def add_discount(self, store_id: str, discount_data: dict, exist_id: str, condition_type: str = None):
         return Response(False, msg="Guests cannot add new discount to store")
 
     def move_discount(self, store_id: str, src_id: str, dest_id: str):
@@ -80,7 +80,7 @@ class Guest(UserState):
         return Response(False, msg="Guests cannot remove discount from store's discount tree")
 
     def edit_simple_discount(self, store_id: str, discount_id: str, percentage: float = None,
-                             condition: dict = None, context: dict = None, duration=None):
+                             context: dict = None, duration=None):
         return Response(False, msg="Guests cannot edit discounts")
 
     def edit_complex_discount(self, store_id: str, discount_id: str, complex_type: str = None,

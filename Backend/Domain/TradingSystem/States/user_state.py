@@ -76,7 +76,9 @@ class UserState(ABC):
         return Response(False, msg="Abstract Method")
 
     @abstractmethod
-    def add_discount(self, store_id: str, discount_data: dict, exist_id: str):
+    def add_discount(
+        self, store_id: str, discount_data: dict, exist_id: str, condition_type: str = None
+    ):
         return Response(False, msg="Abstract Method")
 
     @abstractmethod
@@ -97,7 +99,6 @@ class UserState(ABC):
         store_id: str,
         discount_id: str,
         percentage: float = None,
-        condition: dict = None,
         context: dict = None,
         duration=None,
     ):
