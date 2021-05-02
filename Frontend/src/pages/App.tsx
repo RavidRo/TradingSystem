@@ -40,6 +40,7 @@ const theme = createMuiTheme({
 
 function App() {
 	const [signedIn, setSignedIn] = useState<boolean>(false);
+	const [username, setUsername] = useState<string>('Guest');
 	const { request } = useAPI<{ cookie: string }>('/get_cookie');
 	const [cookie, setCookie] = useState<string>('');
 	const [productsInCart, setProducts] = useState<ProductQuantity[]>([]);
@@ -182,7 +183,14 @@ function App() {
 							)}
 						/>
 						<Route path="/sign-in" exact>
-							{() => <SignIn onSignIn={() => setSignedIn(true)} />}
+							{() => (
+								<SignIn
+									onSignIn={(username) => {
+										setSignedIn(true);
+										setUsername(username);
+									}}
+								/>
+							)}
 						</Route>
 						<Route path="/sign-up" exact component={SignUp} />
 						<Route
@@ -202,7 +210,11 @@ function App() {
 						<Route path="/Purchase" exact component={Purchase} />
 						<Route path="/searchPage" exact component={SearchPage} />
 						{signedIn ? (
-							<Route path="/my-stores" exact component={MyStores} />
+							<Route
+								path="/my-stores"
+								exact
+								render={(props) => <MyStores {...props} username={username} />}
+							/>
 						) : (
 							<Redirect to="/" />
 						)}

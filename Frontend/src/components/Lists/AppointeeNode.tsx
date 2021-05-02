@@ -32,18 +32,22 @@ const AppointeeNode: FC<AppointeeNodeProps> = ({ appointee, isSelected, onClick,
 		<>
 			<ListItem button selected={isSelected(appointee)} onClick={() => onClick(appointee)}>
 				<ListItemText
+					key="details"
 					primary={`${appointee.username} - ${appointee.role}`}
 					// className="first-field"
 				/>
 				{onDelete && (
-					<ListItemSecondaryAction onClick={() => onDelete(appointee.username)}>
+					<ListItemSecondaryAction
+						key="delete"
+						onClick={() => onDelete(appointee.username)}
+					>
 						<IconButton edge="end" aria-label="delete">
 							<DeleteForeverOutlinedIcon />
 						</IconButton>
 					</ListItemSecondaryAction>
 				)}
 				{appointee.appointees.length > 0 && (
-					<ListItemSecondaryAction onClick={handleClick}>
+					<ListItemSecondaryAction key="expand" onClick={handleClick}>
 						<IconButton edge="start" aria-label="expand">
 							{open ? <ExpandLess /> : <ExpandMore />}
 						</IconButton>

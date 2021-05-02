@@ -11,13 +11,25 @@ type AppointeeDetailsProps = {
 	appointee: Appointee;
 };
 
+const permissions: Permission[] = [
+	'manage products',
+	'get appointments',
+	'appoint manager',
+	'remove manager',
+	'get history',
+	'manage purchase policy',
+	'manage discount policy',
+];
+
 function permissionToString(permission: Permission) {
 	const map: { [key in Permission]: string } = {
-		appoint_manager: 'Appoint managers',
-		get_appointments: 'Get appointments',
-		get_history: 'Get purchase history',
-		manage_products: 'Manager products',
-		remove_manager: 'Remove managers',
+		'appoint manager': 'Appoint managers',
+		'get appointments': 'Get appointments',
+		'get history': 'Get purchase history',
+		'manage products': 'Manager products',
+		'remove manager': 'Remove managers',
+		'manage purchase policy': 'Manager purchase policy',
+		'manage discount policy': 'Manager discount policy',
 	};
 	return map[permission];
 }
@@ -31,24 +43,20 @@ const AppointeeDetails: FC<AppointeeDetailsProps> = ({ appointee }) => {
 					<Typography>Permissions:</Typography>
 					<Divider className="permissions-divider" />
 					<Grid container spacing={1}>
-						{Object.entries(appointee.permissions).map(
-							([permission_name, permitted]) => (
-								<>
-									<Grid item xs={5}>
-										<Typography>
-											{permissionToString(permission_name as Permission)}:
-										</Typography>
-									</Grid>
-									<Grid item xs={7}>
-										{permitted ? (
-											<CheckCircleOutlinedIcon />
-										) : (
-											<RemoveCircleOutlineIcon />
-										)}
-									</Grid>
-								</>
-							)
-						)}
+						{permissions.map((permission) => (
+							<>
+								<Grid item xs={5} key={permission}>
+									<Typography>{permissionToString(permission)}:</Typography>
+								</Grid>
+								<Grid item xs={7} key={permission + ' is permitted'}>
+									{appointee.permissions.includes(permission) ? (
+										<CheckCircleOutlinedIcon />
+									) : (
+										<RemoveCircleOutlineIcon />
+									)}
+								</Grid>
+							</>
+						))}
 					</Grid>
 				</>
 			)}

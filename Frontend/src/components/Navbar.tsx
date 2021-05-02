@@ -1,29 +1,28 @@
-import React, { FC, useState,useEffect } from 'react';
+import React, { FC, useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faShoppingCart, faSignInAlt , faSearch, faBell} from '@fortawesome/free-solid-svg-icons';
+import { faShoppingCart, faSignInAlt, faSearch, faBell } from '@fortawesome/free-solid-svg-icons';
 
 import '../styles/Navbar.scss';
 import config from '../config';
 import PopupCart from '../components/PopupCart';
-import {Product} from '../types';
+import { Product } from '../types';
 import { Badge } from '@material-ui/core';
 
 type NavBarProps = {
-	 signedIn: boolean,
-	 products:Product[],
-	 propHandleDelete:(product:Product)=>void,
-	 notification:string[],
-	};
+	signedIn: boolean;
+	products: Product[];
+	propHandleDelete: (product: Product) => void;
+	notification: string[];
+};
 
-const Navbar: FC<NavBarProps> = ({ signedIn ,products,propHandleDelete,notification}) => {
+const Navbar: FC<NavBarProps> = ({ signedIn, products, propHandleDelete, notification }) => {
 	const [hoverCart, setHoverCart] = useState<boolean>(false);
-    const [productsInCart,setProducts] = useState<Product[]>(products);
+	const [productsInCart, setProducts] = useState<Product[]>(products);
 
-	useEffect(()=>{
-        setProducts(products);
-    },[products]);
-
+	useEffect(() => {
+		setProducts(products);
+	}, [products]);
 
 	return (
 		<div className="navbar">
@@ -31,9 +30,9 @@ const Navbar: FC<NavBarProps> = ({ signedIn ,products,propHandleDelete,notificat
 				<Link className="nameLink" to="/">
 					{config.website_name}!
 				</Link>
-				
+
 				<div
-					className="cartDiv"
+					className="navbar_item"
 					onMouseOver={() => setHoverCart(true)}
 					onMouseLeave={() => setHoverCart(false)}
 				>
@@ -41,15 +40,17 @@ const Navbar: FC<NavBarProps> = ({ signedIn ,products,propHandleDelete,notificat
 					<Link className="cartLink" to="/cart">
 						My Cart
 					</Link>
-					{hoverCart ? <PopupCart products={productsInCart} propHandleDelete={propHandleDelete} /> : null}
+					{hoverCart ? (
+						<PopupCart products={productsInCart} propHandleDelete={propHandleDelete} />
+					) : null}
 				</div>
-				<div className="storesDiv">
+				<div className="navbar_item">
 					<FontAwesomeIcon className="cartIcon" icon={faSearch} />
 					<Link className="storesLink" to="/storesView">
 						Stores
 					</Link>
 				</div>
-				<div className="signInDiv">
+				<div className="navbar_item">
 					<FontAwesomeIcon className="signInIcon" icon={faSignInAlt} />
 					{signedIn ? (
 						<Link className="signInLink" to="/my-stores">
@@ -61,12 +62,11 @@ const Navbar: FC<NavBarProps> = ({ signedIn ,products,propHandleDelete,notificat
 						</Link>
 					)}
 				</div>
-				<div className="notifictionDiv">
+				<div className="navbar_item">
 					<Badge badgeContent={notification.length} showZero color="primary">
 						<FontAwesomeIcon className="signInIcon" icon={faBell} />
 					</Badge>
-						<Link className="notifyLink" to="/">
-						</Link>
+					<Link className="notifyLink" to="/"></Link>
 				</div>
 			</nav>
 		</div>
