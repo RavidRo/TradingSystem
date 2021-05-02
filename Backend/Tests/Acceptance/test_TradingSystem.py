@@ -2072,6 +2072,34 @@ def test_purchase_add_complex_with_two_children():
                                                           '2')
     assert response_add_complex.succeeded() and response_add_simple_first.succeeded() and response_add_simple_second.succeeded()
 
+def test_purchase_add_complex_conditioning():
+    cookie, username, password, store_name, store_id = _initialize_info(_generate_username(), "aaa",
+                                                                        _generate_store_name())
+    parent_id = '1'
+    response_add_complex = system.add_purchase_rule(cookie, store_id, _complex_rule_details_conditioning(),
+                                                    'complex',
+                                                    parent_id)
+
+    response_add_simple_first = system.add_purchase_rule(cookie, store_id, _simple_rule_details_age(), 'simple', '2', clause="test")
+    response_add_simple_second = system.add_purchase_rule(cookie, store_id, _simple_rule_details_product(), 'simple', '2',
+                                                         clause="then")
+
+    assert response_add_complex.succeeded() and response_add_simple_first.succeeded() and response_add_simple_second.succeeded()
+
+
+def test_purchase_add_complex_two_conditioning():
+    cookie, username, password, store_name, store_id = _initialize_info(_generate_username(), "aaa",
+                                                                        _generate_store_name())
+    parent_id = '1'
+    response_add_complex = system.add_purchase_rule(cookie, store_id, _complex_rule_details_conditioning(),
+                                                    'complex',
+                                                    parent_id)
+    response_add_complex_second = system.add_purchase_rule(cookie, store_id, _complex_rule_details_conditioning(),
+                                                    'complex',
+                                                    parent_id)
+    response_add_simple_rule = system.add_purchase_rule(cookie, store_id, _simple_rule_details_age(), 'simple', '3', clause='test')
+
+    assert response_add_complex.succeeded() and response_add_complex_second.succeeded() and response_add_simple_rule.succeeded()
 
 # endregion
 
