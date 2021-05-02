@@ -39,7 +39,14 @@ async def index():
 @app.route("/get_cookie", methods=["GET"])
 async def get_cookie():
     cookie = system.enter_system()
-    return json.dumps({"cookie": cookie})
+    return json.dumps(
+        {
+            "cookie": cookie,
+            "error_msg": "",
+            "succeeded": True,
+            "data": {"cookie": cookie},
+        }
+    )
 
 
 @app.websocket("/connect")
