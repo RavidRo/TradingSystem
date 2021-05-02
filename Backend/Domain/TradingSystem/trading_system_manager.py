@@ -185,21 +185,44 @@ class TradingSystemManager:
         return UserManager.remove_discount(cookie, store_id, discount_id)
 
     @staticmethod
-    def edit_simple_discount(cookie: str, store_id: str, discount_id: str, percentage: float = None,
-                             condition: dict = None, context: dict = None, duration=None):
-        return UserManager.edit_simple_discount(cookie, store_id, discount_id, percentage, condition, context,
-                                                duration)
+    def edit_simple_discount(
+        cookie: str,
+        store_id: str,
+        discount_id: str,
+        percentage: float = None,
+        condition: dict = None,
+        context: dict = None,
+        duration=None,
+    ):
+        return UserManager.edit_simple_discount(
+            cookie, store_id, discount_id, percentage, condition, context, duration
+        )
 
     @staticmethod
-    def edit_complex_discount(cookie: str, store_id: str, discount_id: str, complex_type: str = None,
-                              decision_rule: str = None):
-        return UserManager.edit_complex_discount(cookie, store_id, discount_id, complex_type, decision_rule)
+    def edit_complex_discount(
+        cookie: str,
+        store_id: str,
+        discount_id: str,
+        complex_type: str = None,
+        decision_rule: str = None,
+    ):
+        return UserManager.edit_complex_discount(
+            cookie, store_id, discount_id, complex_type, decision_rule
+        )
 
     # 4.2
     @staticmethod
-    def add_purchase_rule(cookie: str, store_id: str, rule_details: dict, rule_type: str, parent_id: str,
-                          clause: str = None) -> Response[None]:
-        return UserManager.add_purchase_rule(cookie, store_id, rule_details, rule_type, parent_id, clause)
+    def add_purchase_rule(
+        cookie: str,
+        store_id: str,
+        rule_details: dict,
+        rule_type: str,
+        parent_id: str,
+        clause: str = None,
+    ) -> Response[None]:
+        return UserManager.add_purchase_rule(
+            cookie, store_id, rule_details, rule_type, parent_id, clause
+        )
 
     # 4.2
     @staticmethod
@@ -208,20 +231,22 @@ class TradingSystemManager:
 
     # 4.2
     @staticmethod
-    def edit_purchase_rule(cookie: str, store_id: str, rule_details: dict, rule_id: str, rule_type: str) -> \
-    Response[None]:
+    def edit_purchase_rule(
+        cookie: str, store_id: str, rule_details: dict, rule_id: str, rule_type: str
+    ) -> Response[None]:
         return UserManager.edit_purchase_rule(cookie, store_id, rule_details, rule_id, rule_type)
 
     # 4.2
     @staticmethod
-    def move_purchase_rule(cookie: str, store_id: str, rule_id: str, new_parent_id: str) -> Response[None]:
+    def move_purchase_rule(
+        cookie: str, store_id: str, rule_id: str, new_parent_id: str
+    ) -> Response[None]:
         return UserManager.move_purchase_rule(cookie, store_id, rule_id, new_parent_id)
 
     # 4.2
     @staticmethod
     def get_purchase_policy(cookie: str, store_id: str):
         return UserManager.get_purchase_policy(cookie, store_id)
-
 
     # 4.3
     @staticmethod
@@ -266,10 +291,8 @@ class TradingSystemManager:
         return UserManager.get_store_appointments(cookie, store_id).parse()
 
     @staticmethod
-    def get_my_appointees(
-        cookie: str, store_id: str
-    ) -> Response[ParsableList[ResponsibilitiesData]]:
-        return UserManager.get_my_appointees(cookie, store_id).parse()
+    def get_my_appointments(cookie: str) -> Response[ParsableList[ResponsibilitiesData]]:
+        return UserManager.get_my_appointments(cookie).parse()
 
     # 4.11
     @staticmethod
@@ -322,6 +345,3 @@ class TradingSystemManager:
     @staticmethod
     def empty_notifications(cookie):
         return UserManager.empty_notifications(cookie)
-
-
-

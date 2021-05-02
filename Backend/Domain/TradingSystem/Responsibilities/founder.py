@@ -174,9 +174,6 @@ class Founder(Responsibility):
     def get_store_appointments(self) -> Response[Responsibility]:
         return self._store.get_personnel_info()
 
-    def get_my_appointees(self) -> Response[ParsableList[Responsibility]]:
-        return Response(True, ParsableList(self._appointed))
-
     # 4.11
     def get_store_purchase_history(self) -> Response[ParsableList[PurchaseDetails]]:
         return self._store.get_purchase_history()

@@ -388,8 +388,8 @@ class UserManager:
         return UserManager.__deligate_to_user(cookie, func)
 
     @staticmethod
-    def get_my_appointees(cookie: str, store_id: str) -> Response[ParsableList[Responsibility]]:
-        func: Callable[[User], Response] = lambda user: user.get_my_appointees(store_id)
+    def get_my_appointments(cookie: str) -> Response[ParsableList[Responsibility]]:
+        func: Callable[[User], Response] = lambda user: user.get_my_appointments()
         return UserManager.__deligate_to_user(cookie, func)
 
     # 4.11

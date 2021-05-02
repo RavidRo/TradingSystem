@@ -202,12 +202,32 @@ class TradingSystem(object):
         return TradingSystemManager.remove_discount(cookie, store_id, discount_id)
 
     @log.loging(to_hide=[1])
-    def edit_simple_discount(self, cookie: str, store_id: str, discount_id: str, percentage: float = None, condition: dict = None, context: dict = None, duration=None):
-        return TradingSystemManager.edit_simple_discount(cookie, store_id, discount_id, percentage, condition, context, duration)
+    def edit_simple_discount(
+        self,
+        cookie: str,
+        store_id: str,
+        discount_id: str,
+        percentage: float = None,
+        condition: dict = None,
+        context: dict = None,
+        duration=None,
+    ):
+        return TradingSystemManager.edit_simple_discount(
+            cookie, store_id, discount_id, percentage, condition, context, duration
+        )
 
     @log.loging(to_hide=[1])
-    def edit_complex_discount(self, cookie: str, store_id: str, discount_id: str, complex_type: str = None, decision_rule: str = None):
-        return TradingSystemManager.edit_complex_discount(cookie, store_id, discount_id, complex_type, decision_rule)
+    def edit_complex_discount(
+        self,
+        cookie: str,
+        store_id: str,
+        discount_id: str,
+        complex_type: str = None,
+        decision_rule: str = None,
+    ):
+        return TradingSystemManager.edit_complex_discount(
+            cookie, store_id, discount_id, complex_type, decision_rule
+        )
 
     @log.loging(to_hide=[1])
     def appoint_owner(self, cookie: str, store_id: str, username: str):
@@ -236,13 +256,23 @@ class TradingSystem(object):
         return TradingSystemManager.get_store_appointments(cookie, store_id)
 
     @log.loging(to_hide=[1])
-    def get_my_appointees(self, cookie: str, store_id: str):
-        return TradingSystemManager.get_my_appointees(cookie, store_id)
+    def get_my_appointments(self, cookie: str):
+        return TradingSystemManager.get_my_appointments(cookie)
 
     # 4.2
     @log.loging(to_hide=[1])
-    def add_purchase_rule(self, cookie: str, store_id: str, rule_details: dict, rule_type: str, parent_id: str, clause: str = None):
-        return TradingSystemManager.add_purchase_rule(cookie, store_id, rule_details, rule_type, parent_id, clause)
+    def add_purchase_rule(
+        self,
+        cookie: str,
+        store_id: str,
+        rule_details: dict,
+        rule_type: str,
+        parent_id: str,
+        clause: str = None,
+    ):
+        return TradingSystemManager.add_purchase_rule(
+            cookie, store_id, rule_details, rule_type, parent_id, clause
+        )
 
     # 4.2
     @log.loging(to_hide=[1])
@@ -251,8 +281,12 @@ class TradingSystem(object):
 
     # 4.2
     @log.loging(to_hide=[1])
-    def edit_purchase_rule(self, cookie: str, store_id: str, rule_details: dict, rule_id: str, rule_type: str):
-        return TradingSystemManager.edit_purchase_rule(cookie, store_id, rule_details, rule_id, rule_type)
+    def edit_purchase_rule(
+        self, cookie: str, store_id: str, rule_details: dict, rule_id: str, rule_type: str
+    ):
+        return TradingSystemManager.edit_purchase_rule(
+            cookie, store_id, rule_details, rule_id, rule_type
+        )
 
     # 4.2
     @log.loging(to_hide=[1])
