@@ -19,6 +19,16 @@ export type Permission =
 
 export const defaultPermissions: Permission[] = ['get appointments'];
 
+export const allPermissions: Permission[] = [
+	'manage products',
+	'get appointments',
+	'appoint manager',
+	'remove manager',
+	'get history',
+	'manage purchase policy',
+	'manage discount policy',
+];
+
 export type Role = 'Founder' | 'Owner' | 'Manager';
 export type Appointee = {
 	store_id: string;

@@ -21,52 +21,21 @@
     font-weight: bold;
 }
 
-.navbar_item {
+.navbar-item {
     display: flex;
     flex-direction: row;
     align-items: center;
     white-space: nowrap;
     margin-left: 20px;
-}
-.cartDiv{
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    white-space: nowrap;
-    // width: 10%;
-}
-.cartLink{
-    font-size: 30px;
-    text-decoration: none;
-    color: black;
-    margin-left: 5%;
-}
-.cartIcon{
-    font-size: 30px;
-    cursor: pointer;
-}
-.storesLink{
-    font-size: 30px;
-    text-decoration: none;
-    color: black;
-}
-.signInLink{
-    font-size: 30px;
-    text-decoration: none;
-    color: black;
-    margin-left: 5%;
-}
-.signInIcon{
-    font-size: 30px;
-    cursor: pointer;
-}
-.notifyLink{
-    font-size: 30px;
-    text-decoration: none;
-    color: black;
-    margin-left: 5%;
-}
-.notifyIcon{
-    font-size: 30px;
-    cursor: pointer;
+
+    .item-icon {
+        font-size: 30px;
+    }
+
+    .item-link {
+        font-size: 30px;
+        text-decoration: none;
+        color: black;
+        margin-left: 5%;
+    }
 }

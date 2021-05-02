@@ -150,12 +150,16 @@ function App() {
 		}
 	};
 
-	useEffect(() => {
+	const getCookie = () => {
 		request({}, (data, error) => {
 			if (!error && data !== null) {
 				setCookie(data.data.cookie);
 			}
 		});
+	};
+
+	useEffect(() => {
+		getCookie();
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
 
@@ -168,6 +172,11 @@ function App() {
 						products={productsInCart}
 						propHandleDelete={handleDeleteProduct}
 						notification={notification}
+						logout={() => {
+							setSignedIn(false);
+							setCookie('');
+							getCookie();
+						}}
 					/>
 					<Switch>
 						<Route path="/" exact component={Home} />

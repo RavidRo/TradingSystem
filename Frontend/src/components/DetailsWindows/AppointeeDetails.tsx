@@ -4,22 +4,12 @@ import { Divider, Grid, Typography } from '@material-ui/core';
 import CheckCircleOutlinedIcon from '@material-ui/icons/CheckCircleOutlined';
 import RemoveCircleOutlineIcon from '@material-ui/icons/RemoveCircleOutline';
 
-import { Appointee, Permission } from '../../types';
+import { allPermissions, Appointee, Permission } from '../../types';
 import DetailsWindow from './DetailsWindow';
 
 type AppointeeDetailsProps = {
 	appointee: Appointee;
 };
-
-const permissions: Permission[] = [
-	'manage products',
-	'get appointments',
-	'appoint manager',
-	'remove manager',
-	'get history',
-	'manage purchase policy',
-	'manage discount policy',
-];
 
 function permissionToString(permission: Permission) {
 	const map: { [key in Permission]: string } = {
@@ -43,7 +33,7 @@ const AppointeeDetails: FC<AppointeeDetailsProps> = ({ appointee }) => {
 					<Typography>Permissions:</Typography>
 					<Divider className="permissions-divider" />
 					<Grid container spacing={1}>
-						{permissions.map((permission) => (
+						{allPermissions.map((permission) => (
 							<>
 								<Grid item xs={5} key={permission}>
 									<Typography>{permissionToString(permission)}:</Typography>

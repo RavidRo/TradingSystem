@@ -1,7 +1,13 @@
 import React, { FC, useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faShoppingCart, faSignInAlt, faSearch, faBell } from '@fortawesome/free-solid-svg-icons';
+import {
+	faShoppingCart,
+	faSignInAlt,
+	faSearch,
+	faBell,
+	faSignOutAlt,
+} from '@fortawesome/free-solid-svg-icons';
 
 import '../styles/Navbar.scss';
 import config from '../config';
@@ -14,9 +20,16 @@ type NavBarProps = {
 	products: Product[];
 	propHandleDelete: (product: Product) => void;
 	notification: string[];
+	logout: () => void;
 };
 
-const Navbar: FC<NavBarProps> = ({ signedIn, products, propHandleDelete, notification }) => {
+const Navbar: FC<NavBarProps> = ({
+	signedIn,
+	products,
+	propHandleDelete,
+	notification,
+	logout,
+}) => {
 	const [hoverCart, setHoverCart] = useState<boolean>(false);
 	const [productsInCart, setProducts] = useState<Product[]>(products);
 
@@ -32,41 +45,49 @@ const Navbar: FC<NavBarProps> = ({ signedIn, products, propHandleDelete, notific
 				</Link>
 
 				<div
-					className="navbar_item"
+					className="navbar-item"
 					onMouseOver={() => setHoverCart(true)}
 					onMouseLeave={() => setHoverCart(false)}
 				>
-					<FontAwesomeIcon className="cartIcon" icon={faShoppingCart} />
-					<Link className="cartLink" to="/cart">
+					<FontAwesomeIcon className="item-icon" icon={faShoppingCart} />
+					<Link className="item-link" to="/cart">
 						My Cart
 					</Link>
 					{hoverCart ? (
 						<PopupCart products={productsInCart} propHandleDelete={propHandleDelete} />
 					) : null}
 				</div>
-				<div className="navbar_item">
-					<FontAwesomeIcon className="cartIcon" icon={faSearch} />
-					<Link className="storesLink" to="/storesView">
+				<div className="navbar-item">
+					<FontAwesomeIcon className="item-icon" icon={faSearch} />
+					<Link className="item-link" to="/storesView">
 						Stores
 					</Link>
 				</div>
-				<div className="navbar_item">
-					<FontAwesomeIcon className="signInIcon" icon={faSignInAlt} />
+				{signedIn && (
+					<div className="navbar-item">
+						<FontAwesomeIcon className="item-icon" icon={faSignOutAlt} />
+						<Link className="item-link" to="/" onClick={() => logout()}>
+							Logout
+						</Link>
+					</div>
+				)}
+				<div className="navbar-item">
+					<FontAwesomeIcon className="item-icon" icon={faSignInAlt} />
 					{signedIn ? (
-						<Link className="signInLink" to="/my-stores">
+						<Link className="item-link" to="/my-stores">
 							Account&Stores
 						</Link>
 					) : (
-						<Link className="signInLink" to="/sign-in">
+						<Link className="item-link" to="/sign-in">
 							Sign In
 						</Link>
 					)}
 				</div>
-				<div className="navbar_item">
+				<div className="navbar-item">
 					<Badge badgeContent={notification.length} showZero color="primary">
-						<FontAwesomeIcon className="signInIcon" icon={faBell} />
+						<FontAwesomeIcon className="item-icon" icon={faBell} />
 					</Badge>
-					<Link className="notifyLink" to="/"></Link>
+					<Link className="item-link" to="/"></Link>
 				</div>
 			</nav>
 		</div>

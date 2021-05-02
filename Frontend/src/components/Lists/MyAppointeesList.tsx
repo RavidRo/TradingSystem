@@ -1,6 +1,6 @@
 import React, { FC, useState } from 'react';
 import useAPI from '../../hooks/useAPI';
-import { Appointee, defaultPermissions, Role } from '../../types';
+import { allPermissions, Appointee, defaultPermissions, Role } from '../../types';
 import CreateAppointeeForm from '../FormWindows/CreateAppointeeForm';
 // import '../styles/AppointeesList.scss';
 import AppointeeNode from './AppointeeNode';
@@ -58,7 +58,7 @@ const MyAppointeesList: FC<MyAppointeesListProps> = ({
 						store_id: storeId,
 						username,
 						store_name: store_name,
-						permissions: defaultPermissions,
+						permissions: role === 'Manager' ? defaultPermissions : allPermissions,
 					},
 					...myAppointees,
 				]);

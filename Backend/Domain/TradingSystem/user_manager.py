@@ -344,7 +344,7 @@ class UserManager:
     def appoint_owner(cookie: str, store_id: str, username: str) -> Response[None]:
         to_appoint = UserManager.__get_user_by_username(username)
         if not to_appoint:
-            return Response(False, msg="Given username odes not exists")
+            return Response(False, msg="Given username does not exists")
         func: Callable[[User], Response] = lambda user: user.appoint_owner(store_id, to_appoint)
         return UserManager.__deligate_to_user(cookie, func)
 
@@ -353,8 +353,8 @@ class UserManager:
     def appoint_manager(cookie: str, store_id: str, username: str) -> Response[None]:
         to_appoint = UserManager.__get_user_by_username(username)
         if not to_appoint:
-            return Response(False, msg="Given username odes not exists")
-        func = lambda user: user.appoint_manager(store_id, to_appoint)
+            return Response(False, msg="Given username does not exists")
+        func: Callable[[User], Response] = lambda user: user.appoint_manager(store_id, to_appoint)
         return UserManager.__deligate_to_user(cookie, func)
 
     # 4.6
