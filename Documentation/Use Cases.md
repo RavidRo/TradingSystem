@@ -519,26 +519,90 @@
 -   <ins>_Happy Path_</ins>: The user chooses to edit a store’s discount types and entersnew discount type and it updated successfully.
 -   <ins>_Sad Path_</ins>: The user chooses to edit a store’s discount types and accidently deleted a discount type that he didn’t want to
 
+### 4.2. Add purchase policy
+
+**Actors**: Store personnel, enter store  
+**Parameters**: \_policy_details, \_store  
+**Pre-condition**: \_policy_details are valid policy details.  
+**Post-condition**: The purchase policies in the store are updated to include a new policy with \_policy_details.  
+**Actions**:
+
+1. <ins>Enter store</ins>: finishes.
+2. <ins>Store personnel</ins>: chooses to add to the store’s purchase policies.
+3. <ins>System</ins>: if the personnel is an owner or a manager with the relevant permissions:
+    1. <ins>System</ins>: asks for the new purchase policy's details.
+    2. <ins>Store personnel</ins>: enters \_policy_details.
+    3. <ins>System</ins>: adds the new purchase policy with \_policy_details to \_policies.
+4. <ins>System</ins>: else, generate error message and abort.
+
+**Tests**:
+
+-   <ins>_Happy Path_</ins>: A store owner chooses to add the policy and enters a valid policy details.
+-   <ins>_Sad Path_</ins>: A guest tries to add a policy and the system generates error message.
+
 ### 4.2. Edit purchase policy
 
 **Actors**: Store personnel, enter store  
-**Parameters**: \_policy, \_store  
-**Pre-condition**: \_policy is valid policy.  
-**Post-condition**: The purchase policy in the store is updated to \_policy.  
+**Parameters**: \_policy_details, \_store  
+**Pre-condition**: \_policy_details is valid policy.  
+**Post-condition**: The purchase policy in the store is updated to \_policy_details.  
 **Actions**:
 
 1. <ins>Enter store</ins>: finishes.
 2. <ins>Store personnel</ins>: chooses to edit the store’s purchase policy.
 3. <ins>System</ins>: if the personnel is an owner or a manager with the relevant responsibility:
     1. <ins>System</ins>: asks for the updated purchase policy.
-    2. <ins>Store personnel</ins>: enters \_policy.
-    3. <ins>System</ins>: updates the purchase policy of the store to \_policies.
-    4. <ins>System</ins>: else, generate error message and abort.
+    2. <ins>Store personnel</ins>: enters \_policy_details.
+    3. <ins>System</ins>: updates a purchase policy in the store to \_policy_details.
+4. <ins>System</ins>: else, generate error message and abort.
 
 **Tests**:
 
 -   <ins>_Happy Path_</ins>: A store owner chooses to edit the policy and enters a valid policy.
 -   <ins>_Sad Path_</ins>: A guest tries to edit policy and the system generates error message.
+
+### 4.2. remove purchase policy
+
+**Actors**: Store personnel, enter store  
+**Parameters**: \_policy_id, \_store  
+**Pre-condition**: \_policy_id is an id of an existing purchase policy.  
+**Post-condition**: The purchase policies in the store are updated to not include the policy with \_policy_id.  
+**Actions**:
+
+1. <ins>Enter store</ins>: finishes.
+2. <ins>Store personnel</ins>: chooses to remove a purchase policy from a store.
+3. <ins>System</ins>: if the personnel is an owner or a manager with the relevant permissions:
+    1. <ins>System</ins>: asks for the purchase policy's id.
+    2. <ins>Store personnel</ins>: enters \_policy_id.
+    3. <ins>System</ins>: removes the purchase policy with \_policy_id from \_policies.
+4. <ins>System</ins>: else, generate error message and abort.
+
+**Tests**:
+
+-   <ins>_Happy Path_</ins>: A store owner chooses to remove a policy and enters a valid policy id.
+-   <ins>_Sad Path_</ins>: A guest tries to remove a policy and the system generates an error message.
+
+### 4.2. move purchase policy
+
+**Actors**: Store personnel, enter store  
+**Parameters**: \_policy_id, \_parent_policy, \_store  
+**Pre-condition**: \_policy_id is an id of an existing purchase policy, \_parent_policy is an existing policy.
+**Post-condition**: the policy with \_policy_id is moved from its parent to be a child policy of \_parent_policy.  
+**Actions**:
+
+1. <ins>Enter store</ins>: finishes.
+2. <ins>Store personnel</ins>: chooses to move a purchase policy.
+3. <ins>System</ins>: if the personnel is an owner or a manager with the relevant permissions:
+    1. <ins>System</ins>: asks for the policy id and the parent id.
+    2. <ins>Store personnel</ins>: enters \_policy_id and \_parent_policy.
+    3. <ins>System</ins>: moves the purchase policy with \_policy_id from its parent to \_parent_policy.
+4. <ins>System</ins>: else, generate error message and abort.
+
+**Tests**:
+
+-   <ins>_Happy Path_</ins>: A store owner chooses to move the policy and enters a valid parent policy.
+-   <ins>_Sad Path_</ins>: A guest tries to move a policy and the system generates error message.
+
 
 ### 4.2. Edit discount policy
 
