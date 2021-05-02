@@ -56,7 +56,7 @@ const ProductsList: FC<ProductsListProps> = ({
 				if (!createProduct.error && createProduct.data !== null) {
 					setProducts([
 						{
-							id: createProduct.data.product_id,
+							id: createProduct.data.data.product_id,
 							name,
 							price,
 							category,

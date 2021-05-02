@@ -60,7 +60,7 @@ const MyStores: FC<MyStoresProps> = () => {
 	useEffect(() => {
 		myResponsibilities.request({}, (data, error) => {
 			if (!error && data !== null) {
-				const myStores = data.map((responsibility) => ({
+				const myStores = data.data.map((responsibility) => ({
 					id: responsibility.store_id,
 					name: responsibility.store_name,
 					role: responsibility.role,
@@ -96,12 +96,9 @@ const MyStores: FC<MyStoresProps> = () => {
 	};
 
 	const onNewStore = (newName: string) => {
-		openStore.request({ name: newName }).then(() => {
-			if (!openStore.error && openStore.data !== null) {
-				setStores([
-					{ id: openStore.data.store_id, name: newName, role: 'Founder' },
-					...stores,
-				]);
+		openStore.request({ name: newName }, (data, error) => {
+			if (!error && data !== null) {
+				setStores([{ id: data.data.store_id, name: newName, role: 'Founder' }, ...stores]);
 			}
 		});
 	};

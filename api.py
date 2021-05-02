@@ -15,13 +15,13 @@ pool = concurrent.futures.ThreadPoolExecutor(max_workers=10)
 app = Quart(__name__, static_url_path="", static_folder="Frontend/dist")
 
 
-def __responseToJson(cookie: str, response: Response):
+def __responseToJson(cookie: str, response: Response, toData: Callable = lambda obj: obj):
     return json.dumps(
         {
             "cookie": cookie,
             "error_msg": response.get_msg(),
             "succeeded": response.succeeded(),
-            "data": response.get_obj().__dict__ if response.get_obj() is not None else None,
+            "data": toData(response.get_obj()) if response.succeeded() else None,
         }
     )
 
@@ -76,14 +76,14 @@ async def login():
 @app.route("/get_stores_details", methods=["GET"])
 async def get_stores_details():
     answer = __async_call(system.get_stores_details)
-    return __responseToJson(None, answer)
+    return __responseToJson(None, answer, lambda obj: obj.values)
 
 
 @app.route("/get_products_by_store", methods=["GET"])
 async def get_products_by_store():
     store_id = request.args.get("store_id")
     answer = __async_call(system.get_products_by_store, store_id)
-    return __responseToJson(None, answer)
+    return __responseToJson(None, answer, lambda obj: obj.values)
 
 
 @app.route("/search_products", methods=["GET"])
@@ -96,7 +96,7 @@ async def search_products():
     answer = __async_call(
         system.search_products, product_name, category, min_price, max_price, **kwargs
     )
-    return __responseToJson(None, answer)
+    return __responseToJson(None, answer, lambda obj: obj.values)
 
 
 @app.route("/save_product_in_cart", methods=["POST"])
@@ -117,7 +117,7 @@ async def get_cart_details():
     if cookie is None:
         cookie = __async_call(system.enter_system)
     answer = __async_call(system.get_cart_details, cookie)
-    return __responseToJson(cookie, answer)
+    return __responseToJson(cookie, answer, lambda obj: obj.__dict__)
 
 
 @app.route("/remove_product_from_cart", methods=["POST"])
@@ -149,7 +149,7 @@ async def purchase_cart():
     if cookie is None:
         cookie = __async_call(system.enter_system)
     answer = __async_call(system.purchase_cart, cookie)
-    return __responseToJson(cookie, answer)
+    return __responseToJson(cookie, answer, lambda obj: obj.get_val())
 
 
 @app.route("/send_payment", methods=["POST"])
@@ -183,7 +183,7 @@ async def get_purchase_history():
     if cookie is None:
         cookie = __async_call(system.enter_system)
     answer = __async_call(system.get_purchase_history, cookie)
-    return __responseToJson(cookie, answer)
+    return __responseToJson(cookie, answer, lambda obj: obj.values)
 
 
 # Owner and manager
@@ -211,7 +211,7 @@ async def remove_products():
     store_id = (await request.get_json())["store_id"]
     product_id = (await request.get_json())["product_id"]
     answer = __async_call(system.remove_product_from_store, cookie, store_id, product_id)
-    return __responseToJson(cookie, answer)
+    return __responseToJson(cookie, answer, lambda obj: obj.get_val())
 
 
 @app.route("/change_product_quantity", methods=["POST"])
@@ -312,7 +312,7 @@ async def get_store_appointments():
     store_id = request.args.get("store_id")
     answer = __async_call(system.get_store_appointments, cookie, store_id)
 
-    return __responseToJson(cookie, answer)
+    return __responseToJson(cookie, answer, lambda obj: obj.__dict__)
 
 
 @app.route("/get_my_appointees", methods=["GET"])
@@ -322,7 +322,7 @@ async def get_my_appointees():
         cookie = __async_call(system.enter_system)
     store_id = request.args.get("store_id")
     answer = __async_call(system.get_my_appointees, cookie, store_id)
-    return __responseToJson(cookie, answer)
+    return __responseToJson(cookie, answer, lambda obj: obj.values)
 
 
 @app.route("/get_store_purchase_history", methods=["GET"])
@@ -332,7 +332,7 @@ async def get_store_purchases_history():
         cookie = __async_call(system.enter_system)
     store_id = request.args.get("store_id")
     answer = __async_call(system.get_store_purchase_history, cookie, store_id)
-    return __responseToJson(cookie, answer)
+    return __responseToJson(cookie, answer, lambda obj: obj.values)
 
 
 # System Manager
@@ -346,7 +346,7 @@ async def get_user_purchase_history():
         cookie = __async_call(system.enter_system)
     username = request.args.get("username")
     answer = __async_call(system.get_user_purchase_history, cookie, username)
-    return __responseToJson(cookie, answer)
+    return __responseToJson(cookie, answer, lambda obj: obj.values)
 
 
 @app.route("/get_any_store_purchase_history", methods=["GET"])
@@ -356,7 +356,7 @@ async def get_any_store_purchase_history():
         cookie = __async_call(system.enter_system)
     store_id = request.args.get("store_id")
     answer = __async_call(system.get_any_store_purchase_history, cookie, store_id)
-    return __responseToJson(cookie, answer)
+    return __responseToJson(cookie, answer, lambda obj: obj.values)
 
 
 @app.errorhandler(404)

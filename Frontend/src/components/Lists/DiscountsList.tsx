@@ -30,8 +30,8 @@ const DiscountsList: FC<DiscountsListProps> = ({ openTab, products, storeId }) =
 	const getDiscounts = () =>
 		getDiscountsAPI.request().then((getDiscountsAPI) => {
 			if (!getDiscountsAPI.error && getDiscountsAPI.data !== null) {
-				setRootId(getDiscountsAPI.data.id);
-				setDiscounts((getDiscountsAPI.data.rule as DiscountComplex).operands);
+				setRootId(getDiscountsAPI.data.data.id);
+				setDiscounts((getDiscountsAPI.data.data.rule as DiscountComplex).operands);
 			}
 		});
 

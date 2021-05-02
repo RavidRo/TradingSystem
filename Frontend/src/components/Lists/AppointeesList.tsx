@@ -20,7 +20,7 @@ const AppointeesList: FC<AppointeesListProps> = ({ selectedItem, storeId, onSele
 	useEffect(() => {
 		request().then(({ data, error }) => {
 			if (!error && data !== null) {
-				setAppointees(data);
+				setAppointees(data.data);
 			}
 		});
 		// eslint-disable-next-line react-hooks/exhaustive-deps

@@ -125,11 +125,11 @@ const ManageStore: FC<ManageStoreProps> = ({ storeId }) => {
 					!getStore.error &&
 					getStore.data !== null
 				) {
-					setStore(getStore.data);
+					setStore(getStore.data.data);
 					setProducts(
-						getProductsByStore.data.map((product) => ({
+						getProductsByStore.data.data.map((product) => ({
 							...product,
-							quantity: (getStore.data as Store).ids_to_quantities[product.id],
+							quantity: (getStore.data?.data as Store).ids_to_quantities[product.id],
 						}))
 					);
 				}

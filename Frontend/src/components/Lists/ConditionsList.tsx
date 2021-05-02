@@ -36,8 +36,8 @@ const ConditionsList: FC<ConditionsListProps> = ({ openTab, products, storeId })
 	const getConditions = () =>
 		getConditionsAPI.request().then((getConditionsAPI) => {
 			if (!getConditionsAPI.error && getConditionsAPI.data !== null) {
-				setRootId(getConditionsAPI.data.id);
-				setConditions((getConditionsAPI.data.rule as BasicRule).operands);
+				setRootId(getConditionsAPI.data.data.id);
+				setConditions((getConditionsAPI.data.data.rule as BasicRule).operands);
 			}
 		});
 

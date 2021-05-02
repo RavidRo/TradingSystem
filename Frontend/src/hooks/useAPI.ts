@@ -7,24 +7,24 @@ export default function useAPI<Type>(
 	dynamicParams?: object,
 	type: 'GET' | 'POST' = 'GET'
 ) {
-	// type APIResponse = {
-	// 	cookie: string;
-	// 	error_msg: string;
-	// 	succeeded: boolean;
-	// 	data: Type;
-	// };
+	type APIResponse = {
+		cookie: string;
+		error_msg: string;
+		succeeded: boolean;
+		data: Type;
+	};
 
 	const [loading, setLoading] = useState<boolean>(true);
 	const [error, setError] = useState<boolean>(false);
 	const [errorMsg, setErrorMsg] = useState<string>('');
-	const [data, setData] = useState<Type | null>(null);
+	const [data, setData] = useState<APIResponse | null>(null);
 	const cookie = useContext(CookieContext);
 
 	const defaultParams = { cookie };
 
 	const request = (
 		moreParams?: object,
-		callback?: (data: Type | null, error: boolean, errorMsg: string) => void
+		callback?: (data: APIResponse | null, error: boolean, errorMsg: string) => void
 	) => {
 		setLoading(true);
 		setError(false);
