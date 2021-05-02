@@ -20,7 +20,7 @@ class SearchEngine:
         #     return Response(False, msg="You must search for at least one of the following: 'product', 'category', "
         #                                "'keywords'")
         stores = StoresManager.get_stores_details().get_obj().values
-        store_to_products = ((store.get_id(), store.get_products_to_quantities().values()) for store in stores)
+        store_to_products = ({store.get_id(): store.get_products_to_quantities().values()} for store in stores)
         return Response[ParsableList](True, ParsableList(store_to_products), msg="stores to products quantities")
 
         def filter_predicate(product_to_quantity) -> bool:

@@ -6,8 +6,13 @@ export type Product = {
 	keywords: string[];
 };
 export type ProductQuantity = Product & { quantity: number };
-export type StoreToSearchedProducts = {[storeID: string]: [Product,number][]};
+export type StoreToSearchedProducts = {storeID:string, productQuantities:ProductToQuantity[]}[];
+export type ProductToQuantity = [Product,number];
 export type Store = { id: string; name: string; ids_to_quantities: { [key: string]: number } };
+export type ShoppingCart = {bags:ShoppingBag[]};
+export type ShoppingBag = {storeID:string, storeName:string,prodQuantities:ProductToQuantity[]};
+
+
 export type Permission =
 	| 'manage_products'
 	| 'get_appointments'

@@ -4,8 +4,6 @@ import ProductSearch from '../components/ProductSearch';
 import FilterMenu from '../components/FilterMenu';
 import SearchCategory from '../components/SearchCategory';
 import Keywards from '../components/Keywards';
-import storesToProducts from '../components/storesProductsMap';
-import storesProductsMap from '../components/storesProductsMap';
 import useAPI from '../hooks/useAPI';
 import {Product,ProductQuantity,Store,StoreToSearchedProducts} from '../types';
 
@@ -26,7 +24,7 @@ const SearchPage: FC<SearchPageProps> = ({location,propsAddProduct}) => {
     const [productRating, setProductRating] = useState<number >(0);
     const [storeRating, setStoreRating] = useState<number >(0);
 
-    const storeToSearchedProducts = useRef<StoreToSearchedProducts>({});
+    const storeToSearchedProducts = useRef<StoreToSearchedProducts>([]);
     const [productsToPresent,setProducts] = useState<ProductQuantity[]>([]);
     const [stores,setStores] = useState<Store[]>([]);
 
@@ -37,23 +35,23 @@ const SearchPage: FC<SearchPageProps> = ({location,propsAddProduct}) => {
         storesToProductsObj.request(
             {product_name:searchProduct,category:category,min_price:fromInput,max_price:toInput,kwargs:keyWords})
             .then(({data,error,errorMsg})=>{
-                console.log(data);
-                console.log(error);
-                console.log(errorMsg);
 
             if(!error && data!==null){
                 storeToSearchedProducts.current = data.data;
-                let productQuantityArr:ProductQuantity[] = (Object.values(storeToSearchedProducts.current)).map(([productQuantity])=>{
-                    return {
-                        id:productQuantity[0].id,
-                        name:productQuantity[0].name,
-                        category:productQuantity[0].category,
-                        price:productQuantity[0].price,
-                        keywords:productQuantity[0].keywords,
-                        quantity:productQuantity[1]
+                let productQuantitiesArr:ProductQuantity[] = [];
+                for(var i=0;i<storeToSearchedProducts.current.length;i++){
+                    let storeProductQuanMap = storeToSearchedProducts.current[i];
+                    let productQuantities = storeProductQuanMap.productQuantities;
+                    for(var j=0;j<productQuantities.length;j++){
+                        setProducts(old=>[...old,{id:productQuantities[j][0].id,
+                            name:productQuantities[j][0].name,
+                            category:productQuantities[j][0].category,
+                            price:productQuantities[j][0].price,
+                            keywords:productQuantities[j][0].keywords,
+                            quantity:productQuantities[j][1]}])
                     }
-                })
-                setProducts(productQuantityArr);
+                    
+                }
             }
             else{
                 alert(errorMsg)
@@ -100,17 +98,19 @@ const SearchPage: FC<SearchPageProps> = ({location,propsAddProduct}) => {
         return matrix;
     }
     const findBagIDByProductID = (id:string)=>{
-        for(var i=0; i<Object.keys(storeToSearchedProducts.current).length;i++){
-            let productsQuantitiesArr = (Object.values(storeToSearchedProducts.current)[i]);
-            for(var j=0; j<productsQuantitiesArr.length;j++){
-                if(productsQuantitiesArr[j][0].id===id){
-                    // return store name
-                    return Object.keys(storeToSearchedProducts.current)[i];
+
+        for(var i=0;i<storeToSearchedProducts.current.length;i++){
+            let storeProductQuanMap = storeToSearchedProducts.current[i];
+            let productQuantities = storeProductQuanMap.productQuantities;
+            for(var j=0;j<productQuantities.length;j++){
+                if(productQuantities[j][0].id===id){
+                    return storeProductQuanMap.storeID;
                 }
             }
         }
         return "";
     }
+
 	return (
 		<div className="SearchPageDiv">
             <SearchCategory
