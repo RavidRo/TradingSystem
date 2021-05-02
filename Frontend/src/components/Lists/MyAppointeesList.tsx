@@ -31,7 +31,7 @@ const MyAppointeesList: FC<MyAppointeesListProps> = ({
 		'POST'
 	);
 	const appointOwner = useAPI<{ cookie: string; answer: string; succeeded: boolean }>(
-		'/appoint_manager',
+		'/appoint_owner',
 		{
 			store_id: storeId,
 		},

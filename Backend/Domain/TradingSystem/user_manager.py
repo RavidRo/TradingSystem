@@ -68,7 +68,9 @@ class UserManager:
         def func(user: User):
             response = user.register(username, password)
             if response.succeeded():
-                UserManager.__username_user[username] = user
+                newUser = User()
+                newUser.login(username, password)
+                UserManager.__username_user[username] = newUser
             return response
 
         return UserManager.__deligate_to_user(cookie, func)
@@ -81,16 +83,21 @@ class UserManager:
 
             # If response succeeded we want to connect the cookie to the username
             if response.succeeded():
-                for user_cookie in UserManager.__cookie_user:
-                    old_user = UserManager.__cookie_user[user_cookie]
-                    response_username = old_user.get_username()
-                    if (
-                        response_username.succeeded()
-                        and old_user != user
-                        and response_username.get_obj().get_val() == username
-                    ):
+                for old_username in UserManager.__username_user:
+                    if old_username == username:
+                        old_user = UserManager.__username_user[old_username]
                         UserManager.__cookie_user[cookie] = old_user
                         old_user.connect(user.get_communicate())
+                # for user_cookie in UserManager.__cookie_user:
+                #     old_user = UserManager.__cookie_user[user_cookie]
+                #     response_username = old_user.get_username()
+                #     if (
+                #         response_username.succeeded()
+                #         and old_user != user
+                #         and response_username.get_obj().get_val() == username
+                #     ):
+                #         UserManager.__cookie_user[cookie] = old_user
+                #         old_user.connect(user.get_communicate())
             # *This action will delete the current cart but will restore the old one and other user details
 
             return response
