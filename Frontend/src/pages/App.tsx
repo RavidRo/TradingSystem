@@ -54,18 +54,13 @@ function App() {
 	const storesToProducts = useRef<storesToProductsMapType>({});
 	const storesProducts = useAPI<storesToProductsMapType>('/search_product', {});
 	useEffect(() => {
-		// const client = new W3CWebSocket('ws://127.0.0.1:8000');
-		// client.onopen = () => {
-		// 	console.log('WebSocket Client Connected');
-		//   };
-		//   client.onmessage = (message) => {
-		// 	setNotification(old=>[...old,JSON.stringify(message)]);
-		//   };
-		// storesProducts.request().then(({data,error,errorMsg})=>{
-		//     if(!storesProducts.error && storesProducts.data!==null){
-		//         storesToProducts.current = storesProducts.data;
-		//     }
-		// })
+		const client = new W3CWebSocket('ws://127.0.0.1:5000/connect');
+		client.onopen = () => {
+			console.log('WebSocket Client Connected');
+		};
+		client.onmessage = (message) => {
+			setNotification((old) => [...old, JSON.stringify(message)]);
+		};
 	}, []);
 
 	const getStoreByProductID = (id: string) => {

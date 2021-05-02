@@ -89,9 +89,9 @@ class ConditioningCompositePurchaseRule(CompositePurchaseRule):
             "id": self.id,
             "operator": "conditional",
             "test": self.children[clauses["test"]].parse()
-            if clauses["test"] in self.children
+            if self.children[clauses["test"]] is not None
             else None,
             "then": self.children[clauses["then"]].parse()
-            if clauses["then"] in self.children
+            if self.children[clauses["then"]] is not None
             else None,
         }

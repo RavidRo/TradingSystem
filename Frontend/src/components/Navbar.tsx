@@ -13,7 +13,7 @@ import '../styles/Navbar.scss';
 import config from '../config';
 import PopupCart from '../components/PopupCart';
 import { Product } from '../types';
-import { Badge } from '@material-ui/core';
+import { Badge, Divider, IconButton, List, ListItemText } from '@material-ui/core';
 
 type NavBarProps = {
 	signedIn: boolean;
@@ -84,10 +84,16 @@ const Navbar: FC<NavBarProps> = ({
 					)}
 				</div>
 				<div className="navbar-item">
-					<Badge badgeContent={notification.length} showZero color="primary">
-						<FontAwesomeIcon className="item-icon" icon={faBell} />
-					</Badge>
-					<Link className="item-link" to="/"></Link>
+					<IconButton color={'inherit'}>
+						<Badge badgeContent={notification.length} showZero color="primary">
+							<FontAwesomeIcon className="item-icon" icon={faBell} />
+						</Badge>
+					</IconButton>
+					{/* <List component="ul" style={{ position: 'absolute', padding-top: 50 }}>
+						<ListItemText primary="Inbox" />
+						<Divider />
+						<ListItemText primary="Drafts" />
+					</List> */}
 				</div>
 			</nav>
 		</div>
