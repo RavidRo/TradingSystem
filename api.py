@@ -55,10 +55,10 @@ def connect():  # TODO: this
 async def register():
     cookie = (await request.get_json())["cookie"]
     if cookie is None:
-        cookie = __async_call(system.enter_system)
+        cookie = await __async_call(system.enter_system)
     username = (await request.get_json())["username"]
     password = (await request.get_json())["password"]
-    answer = __async_call(system.register, cookie, username, password)
+    answer = await __async_call(system.register, cookie, username, password)
     return __responseToJson(cookie, answer)
 
 
@@ -66,23 +66,23 @@ async def register():
 async def login():
     cookie = (await request.get_json())["cookie"]
     if cookie is None:
-        cookie = __async_call(system.enter_system)
+        cookie = await __async_call(system.enter_system)
     username = (await request.get_json())["username"]
     password = (await request.get_json())["password"]
-    answer = __async_call(system.login, cookie, username, password)
+    answer = await __async_call(system.login, cookie, username, password)
     return __responseToJson(cookie, answer)
 
 
 @app.route("/get_stores_details", methods=["GET"])
 async def get_stores_details():
-    answer = __async_call(system.get_stores_details)
+    answer = await __async_call(system.get_stores_details)
     return __responseToJson(None, answer)
 
 
 @app.route("/get_products_by_store", methods=["GET"])
 async def get_products_by_store():
     store_id = request.args.get("store_id")
-    answer = __async_call(system.get_products_by_store, store_id)
+    answer = await __async_call(system.get_products_by_store, store_id)
     return __responseToJson(None, answer)
 
 
@@ -93,7 +93,7 @@ async def search_products():
     min_price = request.args.get("min_price")
     max_price = request.args.get("max_price")
     kwargs = request.args.get("kwargs")
-    answer = __async_call(
+    answer = await __async_call(
         system.search_products, product_name, category, min_price, max_price, **kwargs
     )
     return __responseToJson(None, answer)
@@ -103,11 +103,11 @@ async def search_products():
 async def save_product_in_cart():
     cookie = (await request.get_json())["cookie"]
     if cookie is None:
-        cookie = __async_call(system.enter_system)
+        cookie = await __async_call(system.enter_system)
     store_id = (await request.get_json())["store_id"]
     product_id = (await request.get_json())["product_id"]
     quantity = (await request.get_json())["quantity"]
-    answer = __async_call(system.save_product_in_cart, cookie, store_id, product_id, quantity)
+    answer = await __async_call(system.save_product_in_cart, cookie, store_id, product_id, quantity)
     return __responseToJson(cookie, answer)
 
 
@@ -115,8 +115,8 @@ async def save_product_in_cart():
 async def get_cart_details():
     cookie = request.args.get("cookie")
     if cookie is None:
-        cookie = __async_call(system.enter_system)
-    answer = __async_call(system.get_cart_details, cookie)
+        cookie = await __async_call(system.enter_system)
+    answer = await __async_call(system.get_cart_details, cookie)
     return __responseToJson(cookie, answer)
 
 
@@ -124,10 +124,10 @@ async def get_cart_details():
 async def remove_product_from_cart():
     cookie = (await request.get_json())["cookie"]
     if cookie is None:
-        cookie = __async_call(system.enter_system)
+        cookie = await __async_call(system.enter_system)
     product_id = (await request.get_json())["product_id"]
     quantity = (await request.get_json())["quantity"]
-    answer = __async_call(system.remove_product_from_cart, cookie, product_id, quantity)
+    answer = await __async_call(system.remove_product_from_cart, cookie, product_id, quantity)
     return __responseToJson(cookie, answer)
 
 
@@ -135,11 +135,11 @@ async def remove_product_from_cart():
 async def change_product_quantity_in_cart():
     cookie = (await request.get_json())["cookie"]
     if cookie is None:
-        cookie = __async_call(system.enter_system)
+        cookie = await __async_call(system.enter_system)
     store_id = (await request.get_json())["store_id"]
     product_id = (await request.get_json())["product_id"]
     quantity = (await request.get_json())["quantity"]
-    answer = __async_call(system.remove_product_from_cart, cookie, store_id, product_id, quantity)
+    answer = await __async_call(system.remove_product_from_cart, cookie, store_id, product_id, quantity)
     return __responseToJson(cookie, answer)
 
 
@@ -147,9 +147,9 @@ async def change_product_quantity_in_cart():
 async def purchase_cart():
     cookie = (await request.get_json())["cookie"]
     if cookie is None:
-        cookie = __async_call(system.enter_system)
+        cookie = await __async_call(system.enter_system)
     user_age = (await request.get_json())["user_age"]
-    answer = __async_call(system.purchase_cart, cookie, user_age)
+    answer = await __async_call(system.purchase_cart, cookie, user_age)
     return __responseToJson(cookie, answer)
 
 
@@ -157,10 +157,10 @@ async def purchase_cart():
 async def send_payment():
     cookie = (await request.get_json())["cookie"]
     if cookie is None:
-        cookie = __async_call(system.enter_system)
+        cookie = await __async_call(system.enter_system)
     payment_details = (await request.get_json())["payment_details"]
     address = (await request.get_json())["address"]
-    answer = __async_call(system.send_payment, cookie, payment_details, address)
+    answer = await __async_call(system.send_payment, cookie, payment_details, address)
     return __responseToJson(cookie, answer)
 
 
@@ -172,9 +172,9 @@ async def send_payment():
 async def create_store():
     cookie = (await request.get_json())["cookie"]
     if cookie is None:
-        cookie = __async_call(system.enter_system)
+        cookie = await __async_call(system.enter_system)
     name = (await request.get_json())["name"]
-    answer = __async_call(system.create_store, cookie, name)
+    answer = await __async_call(system.create_store, cookie, name)
     return __responseToJson(cookie, answer)
 
 
@@ -182,8 +182,8 @@ async def create_store():
 async def get_purchase_history():
     cookie = request.args.get("cookie")
     if cookie is None:
-        cookie = __async_call(system.enter_system)
-    answer = __async_call(system.get_purchase_history, cookie)
+        cookie = await __async_call(system.enter_system)
+    answer = await __async_call(system.get_purchase_history, cookie)
     return __responseToJson(cookie, answer)
 
 
@@ -195,12 +195,12 @@ async def get_purchase_history():
 async def create_product():
     cookie = (await request.get_json())["cookie"]
     if cookie is None:
-        cookie = __async_call(system.enter_system)
+        cookie = await __async_call(system.enter_system)
     store_id = (await request.get_json())["store_id"]
     name = (await request.get_json())["name"]
     price = (await request.get_json())["price"]
     quantity = (await request.get_json())["quantity"]
-    answer = __async_call(system.create_product, cookie, store_id, name, price, quantity)
+    answer = await __async_call(system.create_product, cookie, store_id, name, price, quantity)
     return __responseToJson(cookie, answer)
 
 
@@ -208,10 +208,10 @@ async def create_product():
 async def remove_products():
     cookie = (await request.get_json())["cookie"]
     if cookie is None:
-        cookie = __async_call(system.enter_system)
+        cookie = await __async_call(system.enter_system)
     store_id = (await request.get_json())["store_id"]
     product_id = (await request.get_json())["product_id"]
-    answer = __async_call(system.remove_product_from_store, cookie, store_id, product_id)
+    answer = await __async_call(system.remove_product_from_store, cookie, store_id, product_id)
     return __responseToJson(cookie, answer)
 
 
@@ -219,11 +219,11 @@ async def remove_products():
 async def change_product_quantity():
     cookie = (await request.get_json())["cookie"]
     if cookie is None:
-        cookie = __async_call(system.enter_system)
+        cookie = await __async_call(system.enter_system)
     store_id = (await request.get_json())["store_id"]
     product_id = (await request.get_json())["product_id"]
     quantity = (await request.get_json())["quantity"]
-    answer = __async_call(
+    answer = await __async_call(
         system.change_product_quantity_in_store, cookie, store_id, product_id, quantity
     )
     return __responseToJson(cookie, answer)
@@ -233,12 +233,12 @@ async def change_product_quantity():
 async def edit_product_details():
     cookie = (await request.get_json())["cookie"]
     if cookie is None:
-        cookie = __async_call(system.enter_system)
+        cookie = await __async_call(system.enter_system)
     store_id = (await request.get_json())["store_id"]
     product_id = (await request.get_json())["product_id"]
     new_name = (await request.get_json())["new_name"]
     new_price = (await request.get_json())["new_price"]
-    answer = __async_call(
+    answer = await __async_call(
         system.edit_product_details, cookie, store_id, product_id, new_name, new_price
     )
     return __responseToJson(cookie, answer)
@@ -248,10 +248,10 @@ async def edit_product_details():
 async def appoint_owner():
     cookie = (await request.get_json())["cookie"]
     if cookie is None:
-        cookie = __async_call(system.enter_system)
+        cookie = await __async_call(system.enter_system)
     store_id = (await request.get_json())["store_id"]
     username = (await request.get_json())["username"]
-    answer = __async_call(system.appoint_owner, cookie, store_id, username)
+    answer = await __async_call(system.appoint_owner, cookie, store_id, username)
     return __responseToJson(cookie, answer)
 
 
@@ -259,10 +259,10 @@ async def appoint_owner():
 async def appoint_manager():
     cookie = (await request.get_json())["cookie"]
     if cookie is None:
-        cookie = __async_call(system.enter_system)
+        cookie = await __async_call(system.enter_system)
     store_id = (await request.get_json())["store_id"]
     username = (await request.get_json())["username"]
-    answer = __async_call(system.appoint_manager, cookie, store_id, username)
+    answer = await __async_call(system.appoint_manager, cookie, store_id, username)
     return __responseToJson(cookie, answer)
 
 
@@ -270,11 +270,11 @@ async def appoint_manager():
 async def add_manager_permission():
     cookie = (await request.get_json())["cookie"]
     if cookie is None:
-        cookie = __async_call(system.enter_system)
+        cookie = await __async_call(system.enter_system)
     store_id = (await request.get_json())["store_id"]
     username = (await request.get_json())["username"]
     permission_number = (await request.get_json())["permission_number"]
-    answer = __async_call(
+    answer = await __async_call(
         system.add_manager_permission, cookie, store_id, username, permission_number
     )
     return __responseToJson(cookie, answer)
@@ -284,11 +284,11 @@ async def add_manager_permission():
 async def remove_manager_permission():
     cookie = (await request.get_json())["cookie"]
     if cookie is None:
-        cookie = __async_call(system.enter_system)
+        cookie = await __async_call(system.enter_system)
     store_id = (await request.get_json())["store_id"]
     username = (await request.get_json())["username"]
     permission_number = (await request.get_json())["permission_number"]
-    answer = __async_call(
+    answer = await __async_call(
         system.remove_manager_permission, cookie, store_id, username, permission_number
     )
     return __responseToJson(cookie, answer)
@@ -298,10 +298,10 @@ async def remove_manager_permission():
 async def remove_appointment():
     cookie = (await request.get_json())["cookie"]
     if cookie is None:
-        cookie = __async_call(system.enter_system)
+        cookie = await __async_call(system.enter_system)
     store_id = (await request.get_json())["store_id"]
     username = (await request.get_json())["username"]
-    answer = __async_call(system.remove_appointment, cookie, store_id, username)
+    answer = await __async_call(system.remove_appointment, cookie, store_id, username)
     return __responseToJson(cookie, answer)
 
 
@@ -309,9 +309,9 @@ async def remove_appointment():
 async def get_store_appointments():
     cookie = request.args.get("cookie")
     if cookie is None:
-        cookie = __async_call(system.enter_system)
+        cookie = await __async_call(system.enter_system)
     store_id = request.args.get("store_id")
-    answer = __async_call(system.get_store_appointments, cookie, store_id)
+    answer = await __async_call(system.get_store_appointments, cookie, store_id)
 
     return __responseToJson(cookie, answer)
 
@@ -320,9 +320,9 @@ async def get_store_appointments():
 async def get_my_appointees():
     cookie = request.args.get("cookie")
     if cookie is None:
-        cookie = __async_call(system.enter_system)
+        cookie = await __async_call(system.enter_system)
     store_id = request.args.get("store_id")
-    answer = __async_call(system.get_my_appointees, cookie, store_id)
+    answer = await __async_call(system.get_my_appointees, cookie, store_id)
     return __responseToJson(cookie, answer)
 
 
@@ -330,9 +330,9 @@ async def get_my_appointees():
 async def get_store_purchases_history():
     cookie = request.args.get("cookie")
     if cookie is None:
-        cookie = __async_call(system.enter_system)
+        cookie = await __async_call(system.enter_system)
     store_id = request.args.get("store_id")
-    answer = __async_call(system.get_store_purchase_history, cookie, store_id)
+    answer = await __async_call(system.get_store_purchase_history, cookie, store_id)
     return __responseToJson(cookie, answer)
 
 
@@ -344,9 +344,9 @@ async def get_store_purchases_history():
 async def get_user_purchase_history():
     cookie = request.args.get("cookie")
     if cookie is None:
-        cookie = __async_call(system.enter_system)
+        cookie = await __async_call(system.enter_system)
     username = request.args.get("username")
-    answer = __async_call(system.get_user_purchase_history, cookie, username)
+    answer = await __async_call(system.get_user_purchase_history, cookie, username)
     return __responseToJson(cookie, answer)
 
 
@@ -354,9 +354,9 @@ async def get_user_purchase_history():
 async def get_any_store_purchase_history():
     cookie = request.args.get("cookie")
     if cookie is None:
-        cookie = __async_call(system.enter_system)
+        cookie = await __async_call(system.enter_system)
     store_id = request.args.get("store_id")
-    answer = __async_call(system.get_any_store_purchase_history, cookie, store_id)
+    answer = await __async_call(system.get_any_store_purchase_history, cookie, store_id)
     return __responseToJson(cookie, answer)
 
 
