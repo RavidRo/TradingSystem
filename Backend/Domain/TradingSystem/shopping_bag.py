@@ -18,7 +18,7 @@ class ShoppingBag(IShoppingBag):
         self_prods_to_quantites = self._products_to_quantity if self._products_to_quantity != {} else self.__pending_products_to_quantity
         for product_id in self_prods_to_quantites:
             products_ids_to_quantities[product_id] = self_prods_to_quantites[product_id][1]
-        return ShoppingBagData(self.__store.get_name(), products_ids_to_quantities)
+        return ShoppingBagData(self.__store.get_id(), self.__store.get_name(), products_ids_to_quantities)
 
     """checks need to be made:
        ----------------------
