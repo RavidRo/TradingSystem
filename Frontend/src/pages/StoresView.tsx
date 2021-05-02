@@ -6,7 +6,7 @@ import '../styles/StoresView.scss';
 import ProductSearch from '../components/ProductSearch';
 import storesToProducts from '../components/storesProductsMap';
 import useAPI from '../hooks/useAPI';
-import {Product} from '../types';
+import {Product,Store} from '../types';
 
 
 type StoresViewProps = {
@@ -18,25 +18,33 @@ type StoresViewProps = {
 const StoresView: FC<StoresViewProps> = ({propsAddProduct,location}: StoresViewProps) => {
 
     const [presentProducts,setProducts] = useState<Product[]>([]);
-    const [stores,setStores] = useState<string[]>([]);
+    const [stores,setStores] = useState<Store[]>([]);
 
     const [store, setStore] = useState<string>(location.state!==undefined?location.state.storeID:"");
     const productsObj = useAPI<Product[]>('/get_products_by_store',{storeID:store});
     useEffect(()=>{
         productsObj.request().then(({data,error,errorMsg})=>{
-            if(!productsObj.error && productsObj.data!==null){
-                console.log(productsObj.data);
-                setProducts(productsObj.data);
+            if(!error && data !==null){
+                console.log(data.data);
+                setProducts(data.data);
+            }
+            else{
+                alert(errorMsg)
             }
             
         })
     },[store]);
 
-    const storesObj = useAPI<string[]>('/get_stores_details');
+    const storesObj = useAPI<Store[]>('/get_stores_details');
     useEffect(()=>{
         storesObj.request().then(({data,error,errorMsg})=>{
-            if(!storesObj.error && storesObj.data!==null){
-                setStores(storesObj.data);
+            console.log(data,error,errorMsg);
+            if(!error && data !==null){
+                console.log(data.data);
+                setStores(data.data);
+            }
+            else{
+                alert(errorMsg)
             }
             
         })
@@ -73,7 +81,7 @@ const StoresView: FC<StoresViewProps> = ({propsAddProduct,location}: StoresViewP
                 >
                    {stores.map((store)=>{
                       return(
-                        <MenuItem value={store} key={Object.keys(storesToProducts).indexOf(store)}>{store}</MenuItem>
+                        <MenuItem value={store.name} key={Object.keys(storesToProducts).indexOf(store.name)}>{store.name}</MenuItem>
                       )
                    })}
                 </Select>
