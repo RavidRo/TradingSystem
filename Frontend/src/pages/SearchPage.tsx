@@ -36,8 +36,11 @@ const SearchPage: FC<SearchPageProps> = ({location,propsAddProduct}) => {
     const productObj = useAPI<Product[]>('/search_products',{product_name:searchProduct,category:category,min_price:fromInput,max_price:toInput,kwargs:keyWords});
     useEffect(()=>{
         productObj.request().then(({data,error,errorMsg})=>{
-            if(!productObj.error && productObj.data!==null){
-                setProducts(productObj.data);
+            if(!error && data!==null){
+                // setProducts(productObj.data);
+            }
+            else{
+                alert(errorMsg)
             }
         })
     },[searchProduct,category,fromInput,toInput]);
@@ -46,8 +49,12 @@ const SearchPage: FC<SearchPageProps> = ({location,propsAddProduct}) => {
     const storesProductsObj = useAPI<storesToProductsMapType>('/search_product',{searchProduct:searchProduct,category:category,from:fromInput,to:toInput});
     useEffect(()=>{
         storesProductsObj.request().then(({data,error,errorMsg})=>{
-            if(!storesProductsObj.error && storesProductsObj.data!==null){
-                storesToProductsMap.current = storesProductsObj.data;
+            if(!error && data!==null){
+                // storesTo
+                storesToProductsMap.current = data.data;
+            }
+            else{
+                alert(errorMsg)
             }
         })
     },[searchProduct,category,fromInput,toInput]);
