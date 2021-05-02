@@ -196,6 +196,7 @@ class Responsibility(Parsable):
         message = f'You have been dismissed from store "{self._store.get_name()}"'
         if self.__subscriber:
             self.__subscriber.notify(message)
+            self._store.unsubscribe(subscriber)
         self._user_state.dismiss_from_store(store_id)
 
     # Parsing the object for user representation
