@@ -20,9 +20,9 @@ Permission = enum.Enum(
         ("REMOVE_MANAGER", 4),
         ("get history", 5),
         ("GET_HISTORY", 5),
-        ("manage_purchase_policy", 6),
+        ("manage purchase policy", 6),
         ("MANAGE_PURCHASE_POLICY", 6),
-        ("manage_discount_policy", 7),
+        ("manage discount policy", 7),
         ("MANAGE_DISCOUNT_POLICY", 7),
     ],
 )
@@ -149,9 +149,6 @@ class Responsibility(Parsable):
 
     # 4.9
     def get_store_appointments(self) -> Response[Responsibility]:
-        raise Exception(Responsibility.ERROR_MESSAGE)
-
-    def get_my_appointees(self) -> Response[ParsableList[Responsibility]]:
         raise Exception(Responsibility.ERROR_MESSAGE)
 
     # 4.11

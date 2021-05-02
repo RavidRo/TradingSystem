@@ -22,7 +22,8 @@ def __responseToJson(cookie: str, response: Response, toData: Callable = lambda 
             "error_msg": response.get_msg(),
             "succeeded": response.succeeded(),
             "data": toData(response.get_obj()) if response.succeeded() else None,
-        }
+        },
+        default=lambda o: o.__dict__,
     )
 
 
@@ -215,7 +216,11 @@ async def create_product():
     name = (await request.get_json())["name"]
     price = (await request.get_json())["price"]
     quantity = (await request.get_json())["quantity"]
-    answer = await __async_call(system.create_product, cookie, store_id, name, price, quantity)
+    category = (await request.get_json())["category"]
+    keywords = (await request.get_json())["keywords"]
+    answer = await __async_call(
+        system.create_product, cookie, store_id, name, category, price, quantity, keywords
+    )
     return __responseToJson(cookie, answer)
 
 
@@ -331,13 +336,12 @@ async def get_store_appointments():
     return __responseToJson(cookie, answer, lambda obj: obj.__dict__)
 
 
-@app.route("/get_my_appointees", methods=["GET"])
-async def get_my_appointees():
+@app.route("/get_my_appointments", methods=["GET"])
+async def get_my_appointments():
     cookie = request.args.get("cookie")
     if cookie is None:
         cookie = await __async_call(system.enter_system)
-    store_id = request.args.get("store_id")
-    answer = await __async_call(system.get_my_appointees, cookie, store_id)
+    answer = await __async_call(system.get_my_appointments, cookie)
     return __responseToJson(cookie, answer, lambda obj: obj.values)
 
 

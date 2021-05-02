@@ -59,7 +59,9 @@ class UserState(ABC):
         return Response(False, msg="Abstract Method")
 
     @abstractmethod
-    def add_new_product(self, store_id, product_name, category, product_price, quantity, keywords = None):
+    def add_new_product(
+        self, store_id, product_name, category, product_price, quantity, keywords=None
+    ):
         return Response(False, msg="Abstract Method")
 
     @abstractmethod
@@ -71,7 +73,9 @@ class UserState(ABC):
         return Response(False, msg="Abstract Method")
 
     @abstractmethod
-    def edit_product_details(self, store_id, product_id, new_name, new_category, new_price, keywords = None):
+    def edit_product_details(
+        self, store_id, product_id, new_name, new_category, new_price, keywords=None
+    ):
         return Response(False, msg="Abstract Method")
 
     @abstractmethod
@@ -91,13 +95,21 @@ class UserState(ABC):
         return Response(False, msg="Abstract Method")
 
     @abstractmethod
-    def edit_simple_discount(self, store_id: str, discount_id: str, percentage: float = None, condition: dict = None,
-                             context: dict = None, duration=None):
+    def edit_simple_discount(
+        self,
+        store_id: str,
+        discount_id: str,
+        percentage: float = None,
+        condition: dict = None,
+        context: dict = None,
+        duration=None,
+    ):
         return Response(False, msg="Abstract Method")
 
     @abstractmethod
-    def edit_complex_discount(self, store_id: str, discount_id: str, complex_type: str = None,
-                              decision_rule: str = None):
+    def edit_complex_discount(
+        self, store_id: str, discount_id: str, complex_type: str = None, decision_rule: str = None
+    ):
         return Response(False, msg="Abstract Method")
 
     @abstractmethod
@@ -125,7 +137,7 @@ class UserState(ABC):
         return Response(False, msg="Abstract Method")
 
     @abstractmethod
-    def get_my_appointees(self, store_id):
+    def get_my_appointments(self):
         return Response(False, msg="Abstract Method")
 
     @abstractmethod
@@ -155,8 +167,9 @@ class UserState(ABC):
 
     # 4.2
     @abstractmethod
-    def add_purchase_rule(self, store_id: str, rule_details: dict, rule_type: str, parent_id: str,
-                          clause: str = None):
+    def add_purchase_rule(
+        self, store_id: str, rule_details: dict, rule_type: str, parent_id: str, clause: str = None
+    ):
         return Response(False, msg="Abstract Method")
 
     # 4.2
