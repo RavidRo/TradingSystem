@@ -84,6 +84,9 @@ def _complex_rule_details_or() -> dict:
 def _complex_rule_details_and() -> dict:
     return {'operator': 'and'}
 
+def _complex_rule_details_conditioning() -> dict:
+    return {'operator': 'conditional'}
+
 def _complex_rule_details_invalid_operator() -> dict:
     return {'operator': 'invalid'}
 
@@ -2360,6 +2363,8 @@ def test_purchase_move_to_leaf_as_parent_fail():
 
 #region buy_products_with purchase rules
 
+@patch.multiple(ShoppingCart, interval_time=MagicMock(return_value=1))
+# age
 def test_purchase_cart_with_simple_age_rule_success():
     cookie, username, password, store_name, store_id = _initialize_info(_generate_username(), "aaa",
                                                                         _generate_store_name())
@@ -2372,6 +2377,7 @@ def test_purchase_cart_with_simple_age_rule_success():
     assert system.purchase_cart(cookie, user_age).succeeded()
 
 
+@patch.multiple(ShoppingCart, interval_time=MagicMock(return_value=1))
 def test_purchase_cart_with_simple_age_rule_fail():
     cookie, username, password, store_name, store_id = _initialize_info(_generate_username(), "aaa",
                                                                         _generate_store_name())
@@ -2384,15 +2390,97 @@ def test_purchase_cart_with_simple_age_rule_fail():
     assert not system.purchase_cart(cookie, user_age).succeeded()
 
 
-# def test_purchase_cart_with_simple_product_rule_success():
-#     cookie, username, password, store_name, store_id = _initialize_info(_generate_username(), "aaa",
-#                                                                         _generate_store_name())
-#     product_id, product_name, category, price, quantity = _create_product(cookie, store_id, _generate_product_name(),
-#                                                                           "A", 5.50, 9)
-#     product_simple_rule = {'context': {'obj': 'product', 'identifier': product_id}, 'operator': 'less-than','target': 6}
-#     system.save_product_in_cart(cookie, store_id, product_id, 5)
-#     assert
+# product
+@patch.multiple(ShoppingCart, interval_time=MagicMock(return_value=1))
+def test_purchase_cart_with_simple_product_rule_success():
+    cookie, username, password, store_name, store_id = _initialize_info(_generate_username(), "aaa",
+                                                                        _generate_store_name())
+    product_id, product_name, category, price, quantity = _create_product(cookie, store_id, _generate_product_name(),
+                                                                          "A", 5.50, 9)
+    product_simple_rule = {'context': {'obj': 'product', 'identifier': product_id}, 'operator': 'less-than', 'target': 6}
+    system.add_purchase_rule(cookie, store_id, product_simple_rule, 'simple', '1')
+    system.save_product_in_cart(cookie, store_id, product_id, 5)
+    assert system.purchase_cart(cookie, 20).succeeded()
 
+
+@patch.multiple(ShoppingCart, interval_time=MagicMock(return_value=1))
+def test_purchase_cart_with_simple_product_rule_failed():
+    cookie, username, password, store_name, store_id = _initialize_info(_generate_username(), "aaa",
+                                                                        _generate_store_name())
+    product_id, product_name, category, price, quantity = _create_product(cookie, store_id, _generate_product_name(),
+                                                                          "A", 5.50, 9)
+    product_simple_rule = {'context': {'obj': 'product', 'identifier': product_id}, 'operator': 'less-than', 'target': 6}
+    system.add_purchase_rule(cookie, store_id, product_simple_rule, 'simple', '1')
+    system.save_product_in_cart(cookie, store_id, product_id, 8)
+    assert not system.purchase_cart(cookie, 20).succeeded()
+
+
+# category
+@patch.multiple(ShoppingCart, interval_time=MagicMock(return_value=1))
+def test_purchase_cart_with_simple_category_rule_success():
+    cookie, username, password, store_name, store_id = _initialize_info(_generate_username(), "aaa",
+                                                                        _generate_store_name())
+    product_id, product_name, category, price, quantity = _create_product(cookie, store_id, _generate_product_name(),
+                                                                          "A", 5.50, 9)
+    new_product_id, new_product_name, category, new_price, new_quantity = _create_product(cookie, store_id, _generate_product_name(),
+                                                                          "A", 9.50, 4)
+
+    product_simple_rule = {'context': {'obj': 'category', 'identifier': "A"}, 'operator': 'equals', 'target': 10}
+    system.add_purchase_rule(cookie, store_id, product_simple_rule, 'simple', '1')
+    system.save_product_in_cart(cookie, store_id, product_id, 7)
+    system.save_product_in_cart(cookie, store_id, new_product_id, 3)
+    assert system.purchase_cart(cookie, 20).succeeded()
+
+
+@patch.multiple(ShoppingCart, interval_time=MagicMock(return_value=1))
+def test_purchase_cart_with_simple_category_rule_fail():
+    cookie, username, password, store_name, store_id = _initialize_info(_generate_username(), "aaa",
+                                                                        _generate_store_name())
+    product_id, product_name, category, price, quantity = _create_product(cookie, store_id, _generate_product_name(),
+                                                                          "A", 5.50, 9)
+    new_product_id, new_product_name, category, new_price, new_quantity = _create_product(cookie, store_id, _generate_product_name(),
+                                                                          "A", 9.50, 4)
+
+    product_simple_rule = {'context': {'obj': 'category', 'identifier': "A"}, 'operator': 'equals', 'target': 10}
+    system.add_purchase_rule(cookie, store_id, product_simple_rule, 'simple', '1')
+    system.save_product_in_cart(cookie, store_id, product_id, 5)
+    system.save_product_in_cart(cookie, store_id, new_product_id, 3)
+    assert not system.purchase_cart(cookie, 20).succeeded()
+
+# bag
+@patch.multiple(ShoppingCart, interval_time=MagicMock(return_value=1))
+def test_purchase_cart_with_simple_bag_rule_success():
+    cookie, username, password, store_name, store_id = _initialize_info(_generate_username(), "aaa",
+                                                                        _generate_store_name())
+    product_id, product_name, category, price, quantity = _create_product(cookie, store_id, _generate_product_name(),
+                                                                          "A", 8.0, 9)
+    new_product_id, new_product_name, category, new_price, new_quantity = _create_product(cookie, store_id, _generate_product_name(),
+                                                                          "A", 10.0, 4)
+
+    product_simple_rule = {'context': {'obj': 'bag'}, 'operator': 'great-than', 'target': 50}
+    system.add_purchase_rule(cookie, store_id, product_simple_rule, 'simple', '1')
+    system.save_product_in_cart(cookie, store_id, product_id, 3)
+    system.save_product_in_cart(cookie, store_id, new_product_id, 3)
+    assert system.purchase_cart(cookie, 20).succeeded()
+
+
+@patch.multiple(ShoppingCart, interval_time=MagicMock(return_value=1))
+def test_purchase_cart_with_simple_bag_rule_fail():
+    cookie, username, password, store_name, store_id = _initialize_info(_generate_username(), "aaa",
+                                                                        _generate_store_name())
+    product_id, product_name, category, price, quantity = _create_product(cookie, store_id, _generate_product_name(),
+                                                                          "A", 8.0, 9)
+    new_product_id, new_product_name, category, new_price, new_quantity = _create_product(cookie, store_id, _generate_product_name(),
+                                                                          "A", 10.0, 4)
+
+    product_simple_rule = {'context': {'obj': 'bag'}, 'operator': 'great-than', 'target': 60}
+    system.add_purchase_rule(cookie, store_id, product_simple_rule, 'simple', '1')
+    system.save_product_in_cart(cookie, store_id, product_id, 3)
+    system.save_product_in_cart(cookie, store_id, new_product_id, 3)
+    assert not system.purchase_cart(cookie, 20).succeeded()
+
+# or
+@patch.multiple(ShoppingCart, interval_time=MagicMock(return_value=1))
 def test_purchase_cart_with_complex_or_rule_success():
     cookie, username, password, store_name, store_id = _initialize_info(_generate_username(), "aaa",
                                                                          _generate_store_name())
@@ -2408,6 +2496,7 @@ def test_purchase_cart_with_complex_or_rule_success():
     assert system.purchase_cart(cookie, user_age).succeeded()
 
 
+@patch.multiple(ShoppingCart, interval_time=MagicMock(return_value=1))
 def test_purchase_cart_with_complex_or_rule_fail():
     cookie, username, password, store_name, store_id = _initialize_info(_generate_username(), "aaa",
                                                                          _generate_store_name())
@@ -2423,6 +2512,183 @@ def test_purchase_cart_with_complex_or_rule_fail():
     assert not system.purchase_cart(cookie, user_age).succeeded()
 
 
+# and
+@patch.multiple(ShoppingCart, interval_time=MagicMock(return_value=1))
+def test_purchase_cart_with_complex_and_rule_success():
+    cookie, username, password, store_name, store_id = _initialize_info(_generate_username(), "aaa",
+                                                                        _generate_store_name())
+    product_id, product_name, category, price, quantity = _create_product(cookie, store_id, _generate_product_name(),
+                                                                          "A", 8.5, 9)
+    new_product_id, new_product_name, category, new_price, new_quantity = _create_product(cookie, store_id,
+                                                                                          _generate_product_name(),
+                                                                                          "A", 10.0, 4)
+    parent_id = '1'
+    simple_rule_bag = {'context': {'obj': 'bag'}, 'operator': 'great-than', 'target': 50}
+    simple_rule_category = {'context': {'obj': 'category', 'identifier': "A"}, 'operator': 'equals', 'target': 6}
+    system.add_purchase_rule(cookie, store_id, _complex_rule_details_and(), 'complex', parent_id)
+    system.add_purchase_rule(cookie, store_id, simple_rule_bag, 'simple', '2')
+    system.add_purchase_rule(cookie, store_id, simple_rule_category, 'simple', '2')
+    system.save_product_in_cart(cookie, store_id, product_id, 3)
+    system.save_product_in_cart(cookie, store_id, new_product_id, 3)
+    user_age = 17
+    assert system.purchase_cart(cookie, user_age).succeeded()
+
+
+@patch.multiple(ShoppingCart, interval_time=MagicMock(return_value=1))
+def test_purchase_cart_with_complex_and_rule_fail():
+    cookie, username, password, store_name, store_id = _initialize_info(_generate_username(), "aaa",
+                                                                        _generate_store_name())
+    product_id, product_name, category, price, quantity = _create_product(cookie, store_id, _generate_product_name(),
+                                                                          "A", 8.0, 9)
+    new_product_id, new_product_name, category, new_price, new_quantity = _create_product(cookie, store_id,
+                                                                                          _generate_product_name(),
+                                                                                          "A", 10.0, 4)
+    parent_id = '1'
+    simple_rule_bag = {'context': {'obj': 'bag'}, 'operator': 'great-than', 'target': 50}
+    simple_rule_category = {'context': {'obj': 'category', 'identifier': "A"}, 'operator': 'equals', 'target': 7}
+    system.add_purchase_rule(cookie, store_id, _complex_rule_details_and(), 'complex', parent_id)
+    system.add_purchase_rule(cookie, store_id, simple_rule_bag, 'simple', '2')
+    system.add_purchase_rule(cookie, store_id, simple_rule_category, 'simple', '2')
+    system.save_product_in_cart(cookie, store_id, product_id, 3)
+    system.save_product_in_cart(cookie, store_id, new_product_id, 3)
+    user_age = 17
+    assert not system.purchase_cart(cookie, user_age).succeeded()
+
+# conditioning
+
+@patch.multiple(ShoppingCart, interval_time=MagicMock(return_value=1))
+def test_purchase_cart_with_complex_conditioning_rule_success():
+    cookie, username, password, store_name, store_id = _initialize_info(_generate_username(), "aaa",
+                                                                        _generate_store_name())
+    product_id, product_name, category, price, quantity = _create_product(cookie, store_id, _generate_product_name(),
+                                                                          "A", 8.5, 9)
+    new_product_id, new_product_name, category, new_price, new_quantity = _create_product(cookie, store_id,
+                                                                                          _generate_product_name(),
+                                                                                          "A", 10.0, 4)
+    parent_id = '1'
+    simple_rule_bag = {'context': {'obj': 'bag'}, 'operator': 'great-than', 'target': 50}
+    simple_rule_category = {'context': {'obj': 'category', 'identifier': "A"}, 'operator': 'equals', 'target': 6}
+    system.add_purchase_rule(cookie, store_id,_complex_rule_details_conditioning(), 'complex', parent_id)
+    system.add_purchase_rule(cookie, store_id, simple_rule_bag, 'simple', '2', clause='test')
+    system.add_purchase_rule(cookie, store_id, simple_rule_category, 'simple', '2', clause='then')
+    system.save_product_in_cart(cookie, store_id, product_id, 3)
+    system.save_product_in_cart(cookie, store_id, new_product_id, 3)
+    user_age = 17
+    assert system.purchase_cart(cookie, user_age).succeeded()
+
+
+@patch.multiple(ShoppingCart, interval_time=MagicMock(return_value=1))
+def test_purchase_cart_with_complex_conditioning_rule_success_test_clause_false():
+    cookie, username, password, store_name, store_id = _initialize_info(_generate_username(), "aaa",
+                                                                        _generate_store_name())
+    product_id, product_name, category, price, quantity = _create_product(cookie, store_id, _generate_product_name(),
+                                                                          "A", 8.5, 9)
+    new_product_id, new_product_name, category, new_price, new_quantity = _create_product(cookie, store_id,
+                                                                                          _generate_product_name(),
+                                                                                          "A", 10.0, 4)
+    parent_id = '1'
+    simple_rule_bag = {'context': {'obj': 'bag'}, 'operator': 'great-than', 'target': 60}
+    simple_rule_category = {'context': {'obj': 'category', 'identifier': "A"}, 'operator': 'equals', 'target': 6}
+    system.add_purchase_rule(cookie, store_id,_complex_rule_details_conditioning(), 'complex', parent_id)
+    system.add_purchase_rule(cookie, store_id, simple_rule_bag, 'simple', '2', clause='test')
+    system.add_purchase_rule(cookie, store_id, simple_rule_category, 'simple', '2', clause='then')
+    system.save_product_in_cart(cookie, store_id, product_id, 3)
+    system.save_product_in_cart(cookie, store_id, new_product_id, 3)
+    user_age = 17
+    assert system.purchase_cart(cookie, user_age).succeeded()
+
+
+@patch.multiple(ShoppingCart, interval_time=MagicMock(return_value=1))
+def test_purchase_cart_with_complex_conditioning_rule_fail():
+    cookie, username, password, store_name, store_id = _initialize_info(_generate_username(), "aaa",
+                                                                        _generate_store_name())
+    product_id, product_name, category, price, quantity = _create_product(cookie, store_id, _generate_product_name(),
+                                                                          "A", 8.5, 9)
+    new_product_id, new_product_name, category, new_price, new_quantity = _create_product(cookie, store_id,
+                                                                                          _generate_product_name(),
+                                                                                          "A", 10.0, 4)
+    parent_id = '1'
+    simple_rule_bag = {'context': {'obj': 'bag'}, 'operator': 'great-than', 'target': 50}
+    simple_rule_category = {'context': {'obj': 'category', 'identifier': "A"}, 'operator': 'equals', 'target': 8}
+    system.add_purchase_rule(cookie, store_id, _complex_rule_details_conditioning(), 'complex', parent_id)
+    system.add_purchase_rule(cookie, store_id, simple_rule_bag, 'simple', '2', clause='test')
+    system.add_purchase_rule(cookie, store_id, simple_rule_category, 'simple', '2', clause='then')
+    system.save_product_in_cart(cookie, store_id, product_id, 3)
+    system.save_product_in_cart(cookie, store_id, new_product_id, 3)
+    user_age = 17
+    assert not system.purchase_cart(cookie, user_age).succeeded()
+
+
+@patch.multiple(ShoppingCart, interval_time=MagicMock(return_value=1))
+def test_purchase_cart_with_condition_fail_then_remove_purchase_success():
+    cookie, username, password, store_name, store_id = _initialize_info(_generate_username(), "aaa",
+                                                                        _generate_store_name())
+    product_id, product_name, category, price, quantity = _create_product(cookie, store_id, _generate_product_name(),
+                                                                          "A", 8.5, 9)
+    new_product_id, new_product_name, category, new_price, new_quantity = _create_product(cookie, store_id,
+                                                                                          _generate_product_name(),
+                                                                                          "A", 10.0, 4)
+    parent_id = '1'
+    simple_rule_bag = {'context': {'obj': 'bag'}, 'operator': 'great-than', 'target': 50}
+    simple_rule_category = {'context': {'obj': 'category', 'identifier': "A"}, 'operator': 'equals', 'target': 8}
+    system.add_purchase_rule(cookie, store_id, _complex_rule_details_conditioning(), 'complex', parent_id)
+    system.add_purchase_rule(cookie, store_id, simple_rule_bag, 'simple', '2', clause='test')
+    system.add_purchase_rule(cookie, store_id, simple_rule_category, 'simple', '2', clause='then')
+    system.save_product_in_cart(cookie, store_id, product_id, 3)
+    system.save_product_in_cart(cookie, store_id, new_product_id, 3)
+    user_age = 17
+    response_with_condition = system.purchase_cart(cookie, user_age)
+    system.remove_purchase_rule(cookie, store_id, '4')
+    response_without_condition = system.purchase_cart(cookie, user_age)
+    assert not response_with_condition.succeeded() and response_without_condition.succeeded()
+
+
+@patch.multiple(ShoppingCart, interval_time=MagicMock(return_value=1))
+def test_purchase_cart_with_condition_fail_then_edit_purchase_success():
+    cookie, username, password, store_name, store_id = _initialize_info(_generate_username(), "aaa",
+                                                                        _generate_store_name())
+    product_id, product_name, category, price, quantity = _create_product(cookie, store_id, _generate_product_name(),
+                                                                          "A", 8.5, 9)
+    new_product_id, new_product_name, category, new_price, new_quantity = _create_product(cookie, store_id,
+                                                                                          _generate_product_name(),
+                                                                                          "A", 10.0, 4)
+    parent_id = '1'
+    simple_rule_bag = {'context': {'obj': 'bag'}, 'operator': 'great-than', 'target': 50}
+    simple_rule_category = {'context': {'obj': 'category', 'identifier': "A"}, 'operator': 'equals', 'target': 8}
+    system.add_purchase_rule(cookie, store_id, _complex_rule_details_conditioning(), 'complex', parent_id)
+    system.add_purchase_rule(cookie, store_id, simple_rule_bag, 'simple', '2', clause='test')
+    system.add_purchase_rule(cookie, store_id, simple_rule_category, 'simple', '2', clause='then')
+    system.save_product_in_cart(cookie, store_id, product_id, 3)
+    system.save_product_in_cart(cookie, store_id, new_product_id, 3)
+    user_age = 17
+    response_with_condition = system.purchase_cart(cookie, user_age)
+    edited_rule_category = {'context': {'obj': 'category', 'identifier': "A"}, 'operator': 'equals', 'target': 6}
+    system.edit_purchase_rule(cookie, store_id, edited_rule_category, '4', 'simple')
+    response_without_condition = system.purchase_cart(cookie, user_age)
+    assert not response_with_condition.succeeded() and response_without_condition.succeeded()
+
+
+@patch.multiple(ShoppingCart, interval_time=MagicMock(return_value=1))
+def test_purchase_cart_with_condition_fail_then_move_purchase_success():
+    cookie, username, password, store_name, store_id = _initialize_info(_generate_username(), "aaa",
+                                                                        _generate_store_name())
+    product_id, product_name, category, price, quantity = _create_product(cookie, store_id, _generate_product_name(),
+                                                                          "A", 8.5, 9)
+    new_product_id, new_product_name, category, new_price, new_quantity = _create_product(cookie, store_id,
+                                                                                          _generate_product_name(),
+                                                                                          "A", 10.0, 4)
+    parent_id = '1'
+    simple_rule_bag = {'context': {'obj': 'bag'}, 'operator': 'great-than', 'target': 60}
+    system.add_purchase_rule(cookie, store_id, _complex_rule_details_or(), 'complex', parent_id)
+    system.add_purchase_rule(cookie, store_id, _simple_rule_details_age(), 'simple', '2')
+    system.add_purchase_rule(cookie, store_id, simple_rule_bag, 'simple', parent_id)
+    system.save_product_in_cart(cookie, store_id, product_id, 3)
+    system.save_product_in_cart(cookie, store_id, new_product_id, 3)
+    user_age = 18
+    response_with_condition = system.purchase_cart(cookie, user_age)
+    system.move_purchase_rule(cookie, store_id, '4', '2')
+    response_without_condition = system.purchase_cart(cookie, user_age)
+    assert not response_with_condition.succeeded() and response_without_condition.succeeded()
 
 #endregion
 # endregion
