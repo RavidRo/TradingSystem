@@ -12,7 +12,7 @@ import MyStores from './MyStores';
 import SearchPage from './SearchPage';
 import StoresView from '../pages/StoresView';
 import Purchase from '../pages/Purchase';
-import { Product, ProductQuantity } from '../types';
+import { Product, ProductQuantity ,StoreToSearchedProducts} from '../types';
 import useAPI from '../hooks/useAPI';
 import { CookieContext } from '../contexts';
 
@@ -51,7 +51,7 @@ function App() {
 		[key: string]: Product[];
 	};
 
-	const storesToProducts = useRef<storesToProductsMapType>({});
+	const storesToProducts = useRef<StoreToSearchedProducts>([]);
 	const storesProducts = useAPI<storesToProductsMapType>('/search_product', {});
 	useEffect(() => {
 		// const client = new W3CWebSocket('ws://127.0.0.1:8000');
@@ -80,7 +80,7 @@ function App() {
 	const productObj = useAPI<Product[]>('/save_product_in_cart', {}, 'POST');
 	const productUpdateObj = useAPI<Product[]>('/change_product_quantity_in_cart', {}, 'POST');
 
-	const addProductToPopup = (product: Product) => {
+	const addProductToPopup = (product: Product,storeID:string) => {
 		let found = false;
 		let quantity = 1;
 		for (var i = 0; i < Object.values(productsInCart).length; i++) {
@@ -102,15 +102,16 @@ function App() {
 			setProducts((oldArray) => [...oldArray, newProduct]);
 			productObj
 				.request({
-					store_id: getStoreByProductID(product.id),
+					store_id:storeID,
 					product_id: product.id,
 					quantity: quantity,
 				})
 				.then(({ data, error, errorMsg }) => {
-					if (!productObj.error && productObj.data !== null) {
+					if (!error && data !== null) {
 						// do nothing
 						void 0;
 					}
+					alert(errorMsg);
 				});
 		} else {
 			productUpdateObj
@@ -120,9 +121,12 @@ function App() {
 					quantity: quantity,
 				})
 				.then(({ data, error, errorMsg }) => {
-					if (!productUpdateObj.error && productUpdateObj.data !== null) {
+					if (!error && data !== null) {
 						// do nothing
 						void 0;
+					}
+					else{
+						alert(errorMsg);
 					}
 				});
 		}
@@ -141,10 +145,11 @@ function App() {
 			productRemoveObj
 				.request({ product_id: product.id, quantity: getQuantityOfProduct(product.id) })
 				.then(({ data, error, errorMsg }) => {
-					if (!productRemoveObj.error && productRemoveObj.data !== null) {
+					if (!error && data !== null) {
 						// do nothing
 						void 0;
 					}
+					alert(errorMsg);
 				});
 			setProducts(Object.values(productsInCart).filter((item) => item.id !== product.id));
 		}

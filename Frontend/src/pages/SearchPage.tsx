@@ -9,7 +9,7 @@ import {Product,ProductQuantity,Store,StoreToSearchedProducts} from '../types';
 
 type SearchPageProps = {
     location: any,
-    propsAddProduct:(product:Product)=>void,
+    propsAddProduct:(product:Product,storeID:string)=>void,
 };
 
 
@@ -76,8 +76,8 @@ const SearchPage: FC<SearchPageProps> = ({location,propsAddProduct}) => {
         // all the set methods make useEffect to re-render and ask for server
         // to send new products
     }
-    const clickAddProduct = (key:number)=>{
-        propsAddProduct(productsToPresent[key]);
+    const clickAddProduct = (key:number,storeID:string)=>{
+        propsAddProduct(productsToPresent[key],storeID);
     }
     const updateKeyWords = (keyWords:string[])=>{
         setKeyWards(keyWords);
@@ -110,7 +110,12 @@ const SearchPage: FC<SearchPageProps> = ({location,propsAddProduct}) => {
         }
         return "";
     }
-
+    const handleAddToCart = (storeID:string,key:number)=>{
+        if(storeID!==""){//dummy product
+            clickAddProduct(key,storeID);
+        }
+    }
+   
 	return (
 		<div className="SearchPageDiv">
             <SearchCategory
@@ -135,12 +140,11 @@ const SearchPage: FC<SearchPageProps> = ({location,propsAddProduct}) => {
                                         
                                         <ProductSearch
                                             key={i*matrix_length+j}
-                                            id={cell!==undefined?cell.id:-1}
                                             storeID={cell!==undefined?findBagIDByProductID(cell.id):""}
                                             content={cell!==undefined?cell.name:""}
                                             price={cell!==undefined?cell.price:0}
                                             quantity={cell!==undefined?cell.quantity:0}
-                                            clickAddProduct={()=>clickAddProduct(productsToPresent.indexOf(cell))}
+                                            clickAddProduct={()=>handleAddToCart(cell!==undefined?findBagIDByProductID(cell.id):"",productsToPresent.indexOf(cell))}
                                         >
                                         </ProductSearch>
                                     )

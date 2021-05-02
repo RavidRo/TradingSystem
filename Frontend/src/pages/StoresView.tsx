@@ -1,4 +1,4 @@
-import React ,{FC, useEffect, useState} from 'react';
+import React ,{FC, useEffect, useState,useRef} from 'react';
 import FormControl from '@material-ui/core/FormControl';
 import Select from '@material-ui/core/Select';
 import MenuItem from '@material-ui/core/MenuItem';
@@ -10,7 +10,7 @@ import {Product,Store,ProductQuantity} from '../types';
 
 
 type StoresViewProps = {
-   propsAddProduct:(product:Product)=>void,
+   propsAddProduct:(product:Product,storeID:string)=>void,
    location: any,
 
 };
@@ -21,7 +21,8 @@ const StoresView: FC<StoresViewProps> = ({propsAddProduct,location}: StoresViewP
     const [stores,setStores] = useState<Store[]>([]);
 
     // storeID
-    const [store, setStore] = useState<string>(location.state!==undefined?location.state.storeID:"");
+    const [storeID, setStoreID] = useState<string>(location.state!==undefined?location.state.storeID:"");
+    const storeName = useRef<string>("");
     const productsObj = useAPI<Product[]>('/get_products_by_store');
 
     const getQuantityOfProduct = (productID:string,storeID:string)=>{
@@ -36,9 +37,20 @@ const StoresView: FC<StoresViewProps> = ({propsAddProduct,location}: StoresViewP
         }
         return 0;
     }
+    const gerStoreNameByID = (storeID:string)=>{
+        for(var i=0;i<stores.length;i++){
+            if(stores[i].id===storeID){
+                return stores[i].name;
+            }
+        }
+        return "";
+    }
     useEffect(()=>{
-        if(store!==""){
-            productsObj.request({storeID:store}).then(({data,error,errorMsg})=>{
+        storeName.current = gerStoreNameByID(storeID);
+        console.log(storeID);
+        if(storeName.current!==""){
+            console.log("hiiiii");
+            productsObj.request({store_id:storeID}).then(({data,error,errorMsg})=>{
                 if(!error && data !==null){
                     console.log(data.data);
                     let productsArray:Product[] = data.data;
@@ -49,7 +61,7 @@ const StoresView: FC<StoresViewProps> = ({propsAddProduct,location}: StoresViewP
                             category:product.category,
                             price:product.price,
                             keywords:product.keywords,
-                            quantity:getQuantityOfProduct(product.id,store)
+                            quantity:getQuantityOfProduct(product.id,storeID)
                         }
                     })
                     setProducts(productQuantityArr);
@@ -60,7 +72,7 @@ const StoresView: FC<StoresViewProps> = ({propsAddProduct,location}: StoresViewP
                 
             })
         }
-    },[store]);
+    },[storeID]);
 
     const storesObj = useAPI<Store[]>('/get_stores_details');
     useEffect(()=>{
@@ -78,7 +90,7 @@ const StoresView: FC<StoresViewProps> = ({propsAddProduct,location}: StoresViewP
     },[]);
 
    const handleChange = (e:any)=>{
-      setStore(e.target.value);
+      setStoreID(e.target.value);
     //   set store causes use effect and rendering new products
    }
    const matrix_length = 3;
@@ -100,18 +112,18 @@ const StoresView: FC<StoresViewProps> = ({propsAddProduct,location}: StoresViewP
              <FormControl style={{'marginLeft':'5%','width':'100%','fontSize':'large','height':'94%'}}>
                 <h3>Choose Store</h3>
                 <Select
-                value={store}
+                value={storeID}
                 style={{'fontSize': '2rem','width':'50%'}}
                 onChange={(e)=>handleChange(e)}
                 >
                    {stores.map((store)=>{
                       return(
-                        <MenuItem value={store.name} key={Object.keys(storesToProducts).indexOf(store.name)}>{store.name}</MenuItem>
+                        <MenuItem value={store.id} key={Object.keys(storesToProducts).indexOf(store.name)}>{store.name}</MenuItem>
                       )
                    })}
                 </Select>
                 <div className="productCards">
-                    {store!==""?
+                    {storeName.current!==""?
                     setProductsInMatrix().map((row,i)=>{
                         return(
                             <div className="cardsRow">
@@ -120,12 +132,11 @@ const StoresView: FC<StoresViewProps> = ({propsAddProduct,location}: StoresViewP
                                         
                                         <ProductSearch
                                             key={i*matrix_length+j}
-                                            id={cell!==undefined?cell.id:-1}
-                                            storeID={store}
+                                            storeID={storeID}
                                             content={cell!==undefined?cell.name:""}
                                             price={cell!==undefined?cell.price:0}
                                             quantity={cell!==undefined?cell.quantity:0}
-                                            clickAddProduct={()=>propsAddProduct(cell)}
+                                            clickAddProduct={()=>propsAddProduct(cell,storeID)}
                                         >
                                         </ProductSearch>
                                     )
