@@ -7,15 +7,13 @@ import Keywards from '../components/Keywards';
 import storesToProducts from '../components/storesProductsMap';
 import storesProductsMap from '../components/storesProductsMap';
 import useAPI from '../hooks/useAPI';
-import {Product} from '../types';
+import {Product,ProductQuantity,Store,StoreToSearchedProducts} from '../types';
 
 type SearchPageProps = {
     location: any,
     propsAddProduct:(product:Product)=>void,
 };
-type storesToProductsMapType = {
-    [key:string]:Product[]
-}
+
 
 const SearchPage: FC<SearchPageProps> = ({location,propsAddProduct}) => {
     const [searchProduct, setSearchProduct] = useState<string>(location.state.product);
@@ -28,44 +26,40 @@ const SearchPage: FC<SearchPageProps> = ({location,propsAddProduct}) => {
     const [productRating, setProductRating] = useState<number >(0);
     const [storeRating, setStoreRating] = useState<number >(0);
 
-    const storesToProductsMap = useRef<storesToProductsMapType>({});
-    const [productsToPresent,setProducts] = useState<Product[]>([]);
+    const storeToSearchedProducts = useRef<StoreToSearchedProducts>({});
+    const [productsToPresent,setProducts] = useState<ProductQuantity[]>([]);
+    const [stores,setStores] = useState<Store[]>([]);
 
-    // TODO: find out exactly what is returning from server
-    // and parse it correctly
-    const productObj = useAPI<Product[]>('/search_products',{product_name:searchProduct,category:category,min_price:fromInput,max_price:toInput,kwargs:keyWords});
+   
+    const storesToProductsObj = useAPI<StoreToSearchedProducts>('/search_products');
     useEffect(()=>{
-        productObj.request().then(({data,error,errorMsg})=>{
+        console.log(keyWords);
+        storesToProductsObj.request(
+            {product_name:searchProduct,category:category,min_price:fromInput,max_price:toInput,kwargs:keyWords})
+            .then(({data,error,errorMsg})=>{
+                console.log(data);
+                console.log(error);
+                console.log(errorMsg);
+
             if(!error && data!==null){
-                // setProducts(productObj.data);
+                storeToSearchedProducts.current = data.data;
+                let productQuantityArr:ProductQuantity[] = (Object.values(storeToSearchedProducts.current)).map(([productQuantity])=>{
+                    return {
+                        id:productQuantity[0].id,
+                        name:productQuantity[0].name,
+                        category:productQuantity[0].category,
+                        price:productQuantity[0].price,
+                        keywords:productQuantity[0].keywords,
+                        quantity:productQuantity[1]
+                    }
+                })
+                setProducts(productQuantityArr);
             }
             else{
                 alert(errorMsg)
             }
         })
-    },[searchProduct,category,fromInput,toInput]);
-    
-    
-    const storesProductsObj = useAPI<storesToProductsMapType>('/search_product',{searchProduct:searchProduct,category:category,from:fromInput,to:toInput});
-    useEffect(()=>{
-        storesProductsObj.request().then(({data,error,errorMsg})=>{
-            if(!error && data!==null){
-                // storesTo
-                storesToProductsMap.current = data.data;
-            }
-            else{
-                alert(errorMsg)
-            }
-        })
-    },[searchProduct,category,fromInput,toInput]);
-
-    // let products:Product[] = [];
-    // // TODO: get from server all products with 'searchProduct' name
-    // for(var i=0;i<Object.keys(storesToProducts).length;i++){
-    //     for(var prod=0; prod<Object.values(storesToProducts)[i].length; prod++){
-    //         products.push(Object.values(storesToProducts)[i][prod]);
-    //     }
-    // }
+    },[searchProduct,category,fromInput,toInput,keyWords]);
 
 
     const handleFilter = (from:number,to:number,prodRate:number,storeRate:number)=>{
@@ -73,18 +67,24 @@ const SearchPage: FC<SearchPageProps> = ({location,propsAddProduct}) => {
         setToInput(to);
         setProductRating(prodRate);
         setStoreRating(storeRate);
+        // all the set methods make useEffect to re-render and ask for server
+        // to send new products
 
     }
 
     const handleSearch = (toSearch:string,categoryName:string)=>{
         setSearchProduct(toSearch);
         setCategory(categoryName);
+        // all the set methods make useEffect to re-render and ask for server
+        // to send new products
     }
     const clickAddProduct = (key:number)=>{
         propsAddProduct(productsToPresent[key]);
     }
     const updateKeyWords = (keyWords:string[])=>{
         setKeyWards(keyWords);
+        // all the set methods make useEffect to re-render and ask for server
+        // to send new products
     }
     let matrix_length = 3;
     const setProductsInMatrix = ()=>{
@@ -100,12 +100,12 @@ const SearchPage: FC<SearchPageProps> = ({location,propsAddProduct}) => {
         return matrix;
     }
     const findBagIDByProductID = (id:string)=>{
-        for(var i=0; i<Object.keys(storesToProductsMap.current).length;i++){
-            let productsArray = (Object.values(storesToProductsMap.current)[i]);
-            for(var j=0; j<productsArray.length;j++){
-                if(productsArray[j].id===id){
+        for(var i=0; i<Object.keys(storeToSearchedProducts.current).length;i++){
+            let productsQuantitiesArr = (Object.values(storeToSearchedProducts.current)[i]);
+            for(var j=0; j<productsQuantitiesArr.length;j++){
+                if(productsQuantitiesArr[j][0].id===id){
                     // return store name
-                    return Object.keys(storesToProductsMap)[i];
+                    return Object.keys(storeToSearchedProducts.current)[i];
                 }
             }
         }
@@ -139,6 +139,7 @@ const SearchPage: FC<SearchPageProps> = ({location,propsAddProduct}) => {
                                             storeID={cell!==undefined?findBagIDByProductID(cell.id):""}
                                             content={cell!==undefined?cell.name:""}
                                             price={cell!==undefined?cell.price:0}
+                                            quantity={cell!==undefined?cell.quantity:0}
                                             clickAddProduct={()=>clickAddProduct(productsToPresent.indexOf(cell))}
                                         >
                                         </ProductSearch>

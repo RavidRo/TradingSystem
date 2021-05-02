@@ -6,7 +6,7 @@ import '../styles/StoresView.scss';
 import ProductSearch from '../components/ProductSearch';
 import storesToProducts from '../components/storesProductsMap';
 import useAPI from '../hooks/useAPI';
-import {Product,Store} from '../types';
+import {Product,Store,ProductQuantity} from '../types';
 
 
 type StoresViewProps = {
@@ -17,22 +17,49 @@ type StoresViewProps = {
 
 const StoresView: FC<StoresViewProps> = ({propsAddProduct,location}: StoresViewProps) => {
 
-    const [presentProducts,setProducts] = useState<Product[]>([]);
+    const [presentProducts,setProducts] = useState<ProductQuantity[]>([]);
     const [stores,setStores] = useState<Store[]>([]);
 
+    // storeID
     const [store, setStore] = useState<string>(location.state!==undefined?location.state.storeID:"");
-    const productsObj = useAPI<Product[]>('/get_products_by_store',{storeID:store});
+    const productsObj = useAPI<Product[]>('/get_products_by_store');
+
+    const getQuantityOfProduct = (productID:string,storeID:string)=>{
+        for(var i=0;i<stores.length;i++){
+            if(stores[i].id===storeID){
+                for(var j=0; j<Object.keys(stores[i].ids_to_quantities).length;j++){
+                    if(Object.keys(stores[i].ids_to_quantities)[j]===productID){
+                        return Object.values(stores[i].ids_to_quantities)[j];
+                    }
+                }
+            }
+        }
+        return 0;
+    }
     useEffect(()=>{
-        productsObj.request().then(({data,error,errorMsg})=>{
-            if(!error && data !==null){
-                console.log(data.data);
-                setProducts(data.data);
-            }
-            else{
-                alert(errorMsg)
-            }
-            
-        })
+        if(store!==""){
+            productsObj.request({storeID:store}).then(({data,error,errorMsg})=>{
+                if(!error && data !==null){
+                    console.log(data.data);
+                    let productsArray:Product[] = data.data;
+                    let productQuantityArr:ProductQuantity[] = productsArray.map((product)=>{
+                        return {
+                            id:product.id,
+                            name:product.name,
+                            category:product.category,
+                            price:product.price,
+                            keywords:product.keywords,
+                            quantity:getQuantityOfProduct(product.id,store)
+                        }
+                    })
+                    setProducts(productQuantityArr);
+                }
+                else{
+                    alert(errorMsg)
+                }
+                
+            })
+        }
     },[store]);
 
     const storesObj = useAPI<Store[]>('/get_stores_details');
@@ -52,9 +79,7 @@ const StoresView: FC<StoresViewProps> = ({propsAddProduct,location}: StoresViewP
 
    const handleChange = (e:any)=>{
       setStore(e.target.value);
-      let indexOfStore = Object.keys(storesToProducts).indexOf(e.target.value);
-      setProducts(Object.values(storesToProducts)[indexOfStore]);
-    //   TODO: request from server the products of this specific store
+    //   set store causes use effect and rendering new products
    }
    const matrix_length = 3;
    const setProductsInMatrix = ()=>{
@@ -99,6 +124,7 @@ const StoresView: FC<StoresViewProps> = ({propsAddProduct,location}: StoresViewP
                                             storeID={store}
                                             content={cell!==undefined?cell.name:""}
                                             price={cell!==undefined?cell.price:0}
+                                            quantity={cell!==undefined?cell.quantity:0}
                                             clickAddProduct={()=>propsAddProduct(cell)}
                                         >
                                         </ProductSearch>

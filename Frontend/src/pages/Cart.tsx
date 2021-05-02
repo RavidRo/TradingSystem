@@ -119,15 +119,17 @@ const Cart: FC<CartProps> = ({products,handleDeleteProduct}) => {
     }
     const discountObj = useAPI<number>('/get_discount',{age:age});
     useEffect(()=>{
-        discountObj.request().then(({data,error,errorMsg})=>{
-            if(!error && data!==null){
-                // setTotalAmount(discountObj.data);
-            }
-            else{
-                alert(errorMsg)
-            }
-            
-        })
+        if(showPurchaseLink){
+            discountObj.request().then(({data,error,errorMsg})=>{
+                if(!error && data!==null){
+                    // setTotalAmount(discountObj.data);
+                }
+                else{
+                    alert(errorMsg)
+                }
+                
+            })
+        }
     },[showPurchaseLink]);
     
     const handleOK = ()=>{

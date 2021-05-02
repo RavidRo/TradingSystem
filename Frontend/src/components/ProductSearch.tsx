@@ -10,10 +10,11 @@ type ProductSearchProps = {
     price:number,
     id:string,
     storeID:string,
+    quantity:number,
     clickAddProduct:()=>void,
 };
 
-const ProductSearch: FC<ProductSearchProps> = ({id,storeID,content,price,clickAddProduct}) => {
+const ProductSearch: FC<ProductSearchProps> = ({id,storeID,content,price,quantity,clickAddProduct}) => {
 
       
 	return (
@@ -31,6 +32,9 @@ const ProductSearch: FC<ProductSearchProps> = ({id,storeID,content,price,clickAd
                         </Typography> 
                         <Typography style={{'marginTop':'5%'}}>
                             {price}$
+                        </Typography> 
+                        <Typography style={{'marginTop':'5%'}}>
+                            Quantity: {quantity}
                         </Typography> 
                     </CardContent>
                     <div className="buttonLink">

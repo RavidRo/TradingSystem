@@ -15,9 +15,9 @@ class SearchEngine:
             product_name: str = None, product_category: str = None, min_price: float = 0,
             max_price: float = float("inf"), keywords: list[str] = None
     ):
-        if (not product_name) and (not product_category) and (not keywords):
-            return Response(False, msg="You must search for at least one of the following: 'product', 'category', "
-                                       "'keywords'")
+        # if (not product_name) and (not product_category) and (not keywords):
+        #     return Response(False, msg="You must search for at least one of the following: 'product', 'category', "
+        #                                "'keywords'")
         stores = StoresManager.get_stores_details().get_obj().values
         store_to_products = dict({store: store.get_products_to_quantities().values() for store in stores})
 
