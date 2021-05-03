@@ -18,40 +18,52 @@ const SearchPage: FC<SearchPageProps> = ({location,propsAddProduct}) => {
     const [category, setCategory] = useState<string>("");
     const [keyWords, setKeyWards] = useState<string[]>([]);
 
-    const categories = ['news','clothes','food','shows','makeUp','photos'];
     const [fromInput, setFromInput] = useState<number>(0);
     const [toInput, setToInput] = useState<number>(1000);
     const [productRating, setProductRating] = useState<number >(0);
     const [storeRating, setStoreRating] = useState<number >(0);
 
-    const storeToSearchedProducts = useRef<StoreToSearchedProducts>([]);
+    const storeToSearchedProducts = useRef<StoreToSearchedProducts>({});
     const [productsToPresent,setProducts] = useState<ProductQuantity[]>([]);
     const [stores,setStores] = useState<Store[]>([]);
-
+    const firstRender = useRef<boolean>(true);
    
+    const allCategories = useRef<string[]>([]);
     const storesToProductsObj = useAPI<StoreToSearchedProducts>('/search_products');
     useEffect(()=>{
-        console.log(keyWords);
         storesToProductsObj.request(
             {product_name:searchProduct,category:category,min_price:fromInput,max_price:toInput,kwargs:keyWords})
             .then(({data,error,errorMsg})=>{
 
             if(!error && data!==null){
                 storeToSearchedProducts.current = data.data;
-                let productQuantitiesArr:ProductQuantity[] = [];
-                for(var i=0;i<storeToSearchedProducts.current.length;i++){
-                    let storeProductQuanMap = storeToSearchedProducts.current[i];
-                    let productQuantities = storeProductQuanMap.productQuantities;
+                let productsToQuantities:ProductQuantity[] = [];
+                for(var i=0;i<Object.keys(storeToSearchedProducts.current).length;i++){
+                    let productQuantities = Object.values(storeToSearchedProducts.current)[i];
                     for(var j=0;j<productQuantities.length;j++){
-                        setProducts(old=>[...old,{id:productQuantities[j][0].id,
-                            name:productQuantities[j][0].name,
-                            category:productQuantities[j][0].category,
-                            price:productQuantities[j][0].price,
-                            keywords:productQuantities[j][0].keywords,
-                            quantity:productQuantities[j][1]}])
+                        productsToQuantities.push(
+                            {id:productQuantities[j][0].id,
+                                name:productQuantities[j][0].name,
+                                category:productQuantities[j][0].category,
+                                price:productQuantities[j][0].price,
+                                keywords:productQuantities[j][0].keywords,
+                                quantity:productQuantities[j][1]
+                            }
+                        )
+                        if(!allCategories.current.includes(productQuantities[j][0].category)){
+                            allCategories.current.push(productQuantities[j][0].category);
+                        }
+                    }
+                    if(firstRender.current===false){
+                        setProducts(productsToQuantities);
+                    }
+                    else{
+                        setProducts(old=>[...old,...productsToQuantities]);
                     }
                     
+                    firstRender.current = false;
                 }
+                
             }
             else{
                 alert(errorMsg)
@@ -98,13 +110,11 @@ const SearchPage: FC<SearchPageProps> = ({location,propsAddProduct}) => {
         return matrix;
     }
     const findBagIDByProductID = (id:string)=>{
-
-        for(var i=0;i<storeToSearchedProducts.current.length;i++){
-            let storeProductQuanMap = storeToSearchedProducts.current[i];
-            let productQuantities = storeProductQuanMap.productQuantities;
+        for(var i=0;i<Object.keys(storeToSearchedProducts.current).length;i++){
+            let productQuantities = Object.values(storeToSearchedProducts.current)[i];
             for(var j=0;j<productQuantities.length;j++){
                 if(productQuantities[j][0].id===id){
-                    return storeProductQuanMap.storeID;
+                    return Object.keys(storeToSearchedProducts.current)[i];
                 }
             }
         }
@@ -120,7 +130,7 @@ const SearchPage: FC<SearchPageProps> = ({location,propsAddProduct}) => {
 		<div className="SearchPageDiv">
             <SearchCategory
                 searchProduct = {searchProduct}
-                categories={categories}
+                categories={allCategories.current}
                 handleSearch={handleSearch}
             />
             <Keywards updateKeyWords={updateKeyWords}></Keywards>
@@ -137,13 +147,13 @@ const SearchPage: FC<SearchPageProps> = ({location,propsAddProduct}) => {
                             <div className="cardsRow">
                                 {row.map((cell,j)=>{
                                     return (
-                                        
                                         <ProductSearch
                                             key={i*matrix_length+j}
                                             storeID={cell!==undefined?findBagIDByProductID(cell.id):""}
                                             content={cell!==undefined?cell.name:""}
                                             price={cell!==undefined?cell.price:0}
                                             quantity={cell!==undefined?cell.quantity:0}
+                                            category={cell!==undefined?cell.category:""}
                                             clickAddProduct={()=>handleAddToCart(cell!==undefined?findBagIDByProductID(cell.id):"",productsToPresent.indexOf(cell))}
                                         >
                                         </ProductSearch>

@@ -6,7 +6,7 @@ export type Product = {
 	keywords: string[];
 };
 export type ProductQuantity = Product & { quantity: number };
-export type StoreToSearchedProducts = {storeID:string, productQuantities:ProductToQuantity[]}[];
+export type StoreToSearchedProducts = {[storeID:string] : ProductToQuantity[]};
 export type ProductToQuantity = [Product,number];
 export type Store = { id: string; name: string; ids_to_quantities: { [key: string]: number } };
 export type ShoppingCart = {bags:ShoppingBag[]};

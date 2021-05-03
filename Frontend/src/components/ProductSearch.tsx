@@ -12,24 +12,26 @@ type ProductSearchProps = {
     price:number,
     storeID:string,
     quantity:number,
+    category:string,
     clickAddProduct:()=>void,
 };
 
-const ProductSearch: FC<ProductSearchProps> = ({storeID,content,price,quantity,clickAddProduct}) => {
+const ProductSearch: FC<ProductSearchProps> = ({storeID,content,price,quantity,category,clickAddProduct}) => {
 
     const storeName = useRef<string>("")
-
     const storeObj = useAPI<Store>('/get_store',{store_id:storeID});
     useEffect(()=>{
-        storeObj.request().then(({data,error,errorMsg})=>{
-            if(!error && data !==null){
-                storeName.current = data.data.name;
-            }
-            else{
-                alert(errorMsg)
-            }
-            
-        })
+        if(storeID!==""){
+            storeObj.request().then(({data,error,errorMsg})=>{
+                if(!error && data !==null){
+                    storeName.current = data.data.name;
+                }
+                else{
+                    alert(errorMsg)
+                }
+                
+            })
+        }
     },[]);
 
 	return (
@@ -51,6 +53,9 @@ const ProductSearch: FC<ProductSearchProps> = ({storeID,content,price,quantity,c
                         </Typography> 
                         <Typography style={{'marginTop':'5%'}}>
                             Quantity: {quantity}
+                        </Typography> 
+                        <Typography style={{'marginTop':'5%'}}>
+                            Category: {category}
                         </Typography> 
                     </CardContent>
                     <div className="buttonLink">

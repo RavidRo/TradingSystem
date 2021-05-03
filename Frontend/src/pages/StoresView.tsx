@@ -136,6 +136,7 @@ const StoresView: FC<StoresViewProps> = ({propsAddProduct,location}: StoresViewP
                                             content={cell!==undefined?cell.name:""}
                                             price={cell!==undefined?cell.price:0}
                                             quantity={cell!==undefined?cell.quantity:0}
+                                            category ={cell!==undefined?cell.category:""}
                                             clickAddProduct={()=>propsAddProduct(cell,storeID)}
                                         >
                                         </ProductSearch>

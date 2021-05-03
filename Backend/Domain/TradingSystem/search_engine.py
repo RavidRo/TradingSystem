@@ -20,8 +20,8 @@ class SearchEngine:
         #     return Response(False, msg="You must search for at least one of the following: 'product', 'category', "
         #                                "'keywords'")
         stores = StoresManager.get_stores_details().get_obj().values
-        store_to_products = ({store.get_id(): store.get_products_to_quantities().values()} for store in stores)
-        return Response[ParsableList](True, ParsableList(store_to_products), msg="stores to products quantities")
+        store_to_products = {PrimitiveParsable(store.get_id()): store.get_products_to_quantities().values() for store in stores}
+        # return Response[ParsableList](True, ParsableList(store_to_products), msg="stores to products quantities")
 
         def filter_predicate(product_to_quantity) -> bool:
             product = product_to_quantity[0]
@@ -38,17 +38,14 @@ class SearchEngine:
                 fit = True
                 for keyword in keywords:
                     if keyword not in product.get_keywords():
-                        fit = False
-                        break
-                if fit:
-                    return True
+                        return False
 
-            if product_name and product_name == name:
-                return True
-            if product_category and product_category == category:
-                return True
+            if product_name and not product_name == name:
+                return False
+            if product_category and not product_category == category:
+                return False
 
-            return False
+            return True
 
         for store in store_to_products:
             store_to_products[store] = ParsableTuple(tuple(map(lambda product_to_quantity: ParsableTuple((product_to_quantity[0], PrimitiveParsable(product_to_quantity[1]))), tuple(filter(filter_predicate, store_to_products[store])))))

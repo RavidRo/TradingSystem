@@ -3,21 +3,24 @@ import '../styles/Cart.scss';
 import Bag from '../components/Bag';
 import { Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, TextField } from '@material-ui/core';
 import { Link } from 'react-router-dom';
-import {Product,ProductQuantity,ShoppingCart,ShoppingBag,ProductToQuantity} from '../types';
+import {Product,ProductQuantity,ShoppingCart,ShoppingBag,ProductToQuantity,StoreToSearchedProducts} from '../types';
 import useAPI from '../hooks/useAPI';
 import { faShoppingBag } from '@fortawesome/free-solid-svg-icons';
 
 type CartProps = {
 	products:ProductQuantity[],
+    storesToProducts:StoreToSearchedProducts,
     handleDeleteProduct:(product:Product|null)=>void,
 
 };
 
-const Cart: FC<CartProps> = ({products,handleDeleteProduct}) => {
+const Cart: FC<CartProps> = ({products,storesToProducts,handleDeleteProduct}) => {
     const [open,setOpen] = useState<boolean>(false);
     const [age,setAge] = useState<number>(0);
     const [showPurchaseLink,setLink] = useState<boolean>(false);
     const [bagsToProducts,setBags] = useState<ShoppingBag[]>([]);
+    const [storesToProductsMy,setStoresProducts] = useState<StoreToSearchedProducts>(storesToProducts);
+
 
     const cartObj = useAPI<ShoppingCart>('/get_cart_details');
     useEffect(()=>{
@@ -34,10 +37,8 @@ const Cart: FC<CartProps> = ({products,handleDeleteProduct}) => {
     },[]);
 
 
-    const productQuantityOfTuples = (bag:ShoppingBag)=>{
-        let bagIndex:number = bagsToProducts.indexOf(bag);
-        let tupleArr:ProductToQuantity[] = bagsToProducts[bagIndex].prodQuantities;
-        let prodQuantities:ProductQuantity[] = tupleArr.map(tuple=>{
+    const productQuantityOfTuples = (tuples:ProductToQuantity[])=>{
+        let prodQuantities:ProductQuantity[] = tuples.map(tuple=>{
                                                             return {
                                                                 id:tuple[0].id,
                                                                 name:tuple[0].name,
@@ -48,13 +49,14 @@ const Cart: FC<CartProps> = ({products,handleDeleteProduct}) => {
          return prodQuantities;           
 
     }
+
     const calculateTotal = ()=>{
         let total = 0;
-        for(var i=0;i<bagsToProducts.length;i++){
+        for(var i=0;i<Object.keys(storesToProductsMy).length;i++){
             let priceBag:number = 0;
-            for(var j=0;j<bagsToProducts[i].prodQuantities.length;j++){
-                let productPrice:number = bagsToProducts[i].prodQuantities[j][0].price;
-                let productQuantity = bagsToProducts[i].prodQuantities[j][1];
+            for(var j=0;j<Object.values(storesToProductsMy)[i].length;j++){
+                let productPrice:number = Object.values(storesToProductsMy)[i][j][0].price;
+                let productQuantity = Object.values(storesToProductsMy)[i][j][1];
                 priceBag+= productPrice* productQuantity;
             }
             total+=priceBag;
@@ -66,7 +68,7 @@ const Cart: FC<CartProps> = ({products,handleDeleteProduct}) => {
    
 	const handleDeleteProductMy = (id:string)=>{
         let product:Product= {} as Product;
-        for(var i=0;i<bagsToProducts.length;i++){
+        for(var i=0;i<Object.keys(storesToProductsMy).length;i++){
             for(var j=0;j<bagsToProducts[i].prodQuantities.length;j++){
                 if(bagsToProducts[i].prodQuantities[j][0].id===id){
                     product=bagsToProducts[i].prodQuantities[j][0];
@@ -79,10 +81,11 @@ const Cart: FC<CartProps> = ({products,handleDeleteProduct}) => {
         handleDeleteProduct(product);
 	}
     const findBagByProductID = (productID:string)=>{
-        for(var i=0;i<bagsToProducts.length;i++){
-            for(var j=0;j<bagsToProducts[i].prodQuantities.length;j++){
-                if(bagsToProducts[i].prodQuantities[j][0].id===productID){
-                    return bagsToProducts[i].storeID;
+        for(var i=0;i<<Object.keys(storesToProductsMy).length;i++){
+            let tuplesArr = Object.values(storesToProductsMy)[i];
+            for(var j=0;j<tuplesArr.length;j++){
+                if(tuplesArr[j][0].id===productID){
+                    return Object.keys(storesToProductsMy)[i];
                 }
             }
         }
@@ -90,14 +93,15 @@ const Cart: FC<CartProps> = ({products,handleDeleteProduct}) => {
 
     const productUpdateObj = useAPI<void>('/change_product_quantity_in_cart',{},'POST');
     const changeQuantity = (id: string, newQuantity: number)=>{
-        for(var i=0;i<bagsToProducts.length;i++){
-            for(var j=0;j<bagsToProducts[i].prodQuantities.length;j++){
-                if(bagsToProducts[i].prodQuantities[j][0].id===id){
-                    // change product quantity in bag to newQuantity
-                    bagsToProducts[i].prodQuantities[j][1] = newQuantity;
+        for(var i=0;i<Object.keys(storesToProductsMy).length;i++){
+            let tuplesArr = Object.values(storesToProductsMy)[i];
+            for(var j=0;j<tuplesArr.length;j++){
+                    if(tuplesArr[j][0].id===id){
+                        Object.values(storesToProductsMy)[i][j][1]=newQuantity;
+                    }
                 }
             }
-        }
+        
         setTotalAmount(calculateTotal());
 
         productUpdateObj.request({store_id:findBagByProductID(id),product_id:id,quantity:newQuantity}).then(({data,error,errorMsg})=>{
@@ -137,12 +141,13 @@ const Cart: FC<CartProps> = ({products,handleDeleteProduct}) => {
             <h3 className="cartTitle">
                 My Cart:
             </h3>
-            {bagsToProducts.map((bag)=>{
+            {Object.keys(storesToProductsMy).map((bagID)=>{
                 return (
                 <Bag
-                key={bagsToProducts.indexOf(bag)}
-                storeName={bag.storeName}
-                products={productQuantityOfTuples(bag)}
+                key={bagID}
+                // storeName={Object.values(bagIDToName.current)[index].storeName}
+                storeName={bagID}
+                products={productQuantityOfTuples(storesToProductsMy[bagID])}
                 propHandleDelete={handleDeleteProductMy}
                 changeQuantity={changeQuantity}
                 />)

@@ -13,7 +13,7 @@ type SearchCategoryProps = {
 const SearchCategory: FC<SearchCategoryProps> = ({searchProduct, categories,handleSearch}) => {
     const [toSearch, setToSearch] = useState<string>(searchProduct);
     const [menuOpen, setMenuOpen] = useState<boolean>(false);
-    const [categoryName, setCategoryName] = useState<string>("Category");
+    const [categoryName, setCategoryName] = useState<string>("");
 
 
     
@@ -28,7 +28,7 @@ const SearchCategory: FC<SearchCategoryProps> = ({searchProduct, categories,hand
             />
             <div className="categoryDiv" onClick={()=>setMenuOpen(!menuOpen)}>
                 <button className="categoryBtn">
-                    {categoryName}
+                    {categoryName!==""?categoryName:'Choose Category'}
                 <FontAwesomeIcon className="arrowIcon" icon={faCaretDown} />
                 </button>
                 {menuOpen?

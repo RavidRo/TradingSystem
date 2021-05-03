@@ -51,7 +51,8 @@ function App() {
 		[key: string]: Product[];
 	};
 
-	const storesToProducts = useRef<StoreToSearchedProducts>([]);
+
+	const storesToProducts = useRef<StoreToSearchedProducts>({});
 	const storesProducts = useAPI<storesToProductsMapType>('/search_product', {});
 	useEffect(() => {
 		// const client = new W3CWebSocket('ws://127.0.0.1:8000');
@@ -99,9 +100,17 @@ function App() {
 				category: product.category,
 				keywords: product.keywords,
 			};
-			setProducts((oldArray) => [...oldArray, newProduct]);
+			if(Object.keys(storesToProducts.current).includes(storeID)){
+				let tuplesArr = storesToProducts.current[storeID];
+				tuplesArr.push([newProduct,1]);
+			}
+			else{
+				storesToProducts.current[storeID]=[[newProduct,1]];
+			}
+			console.log(storeID);
 			productObj
 				.request({
+					cookie:cookie,
 					store_id:storeID,
 					product_id: product.id,
 					quantity: quantity,
@@ -111,12 +120,21 @@ function App() {
 						// do nothing
 						void 0;
 					}
-					alert(errorMsg);
+					else{
+						alert(errorMsg);
+					}
 				});
-		} else {
+			setProducts((oldArray) => [...oldArray, newProduct]);
+		}
+		else {
+			let tuplesArr = storesToProducts.current[storeID];
+			for(var i=0;i<tuplesArr.length;i++){
+				tuplesArr[i][1]+=1;
+			}
 			productUpdateObj
 				.request({
-					store_id: getStoreByProductID(product.id),
+					cookie:cookie,
+					store_id: storeID,
 					product_id: product.id,
 					quantity: quantity,
 				})
@@ -143,7 +161,7 @@ function App() {
 	const handleDeleteProduct = (product: Product | null) => {
 		if (product !== null) {
 			productRemoveObj
-				.request({ product_id: product.id, quantity: getQuantityOfProduct(product.id) })
+				.request({ cookie:cookie,product_id: product.id, quantity: getQuantityOfProduct(product.id) })
 				.then(({ data, error, errorMsg }) => {
 					if (!error && data !== null) {
 						// do nothing
@@ -175,6 +193,7 @@ function App() {
 					<Navbar
 						signedIn={signedIn}
 						products={productsInCart}
+						storesToProducts = {storesToProducts.current}
 						propHandleDelete={handleDeleteProduct}
 						notification={notification}
 						logout={() => {
@@ -192,6 +211,7 @@ function App() {
 								<Cart
 									{...props}
 									products={productsInCart}
+									storesToProducts = {storesToProducts.current}
 									handleDeleteProduct={handleDeleteProduct}
 								/>
 							)}

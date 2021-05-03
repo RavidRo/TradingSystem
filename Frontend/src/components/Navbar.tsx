@@ -12,12 +12,13 @@ import {
 import '../styles/Navbar.scss';
 import config from '../config';
 import PopupCart from '../components/PopupCart';
-import { Product } from '../types';
+import { Product,ProductQuantity ,StoreToSearchedProducts} from '../types';
 import { Badge } from '@material-ui/core';
 
 type NavBarProps = {
 	signedIn: boolean;
-	products: Product[];
+	products: ProductQuantity[];
+	storesToProducts:StoreToSearchedProducts;
 	propHandleDelete: (product: Product) => void;
 	notification: string[];
 	logout: () => void;
@@ -26,12 +27,13 @@ type NavBarProps = {
 const Navbar: FC<NavBarProps> = ({
 	signedIn,
 	products,
+	storesToProducts,
 	propHandleDelete,
 	notification,
 	logout,
 }) => {
 	const [hoverCart, setHoverCart] = useState<boolean>(false);
-	const [productsInCart, setProducts] = useState<Product[]>(products);
+	const [productsInCart, setProducts] = useState<ProductQuantity[]>(products);
 
 	useEffect(() => {
 		setProducts(products);
@@ -54,7 +56,7 @@ const Navbar: FC<NavBarProps> = ({
 						My Cart
 					</Link>
 					{hoverCart ? (
-						<PopupCart products={productsInCart} propHandleDelete={propHandleDelete} />
+						<PopupCart products={productsInCart} storesToProducts={storesToProducts} propHandleDelete={propHandleDelete} />
 					) : null}
 				</div>
 				<div className="navbar-item">

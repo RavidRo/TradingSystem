@@ -1,89 +1,124 @@
 
-import React ,{FC, useEffect, useState} from 'react';
+import React ,{FC, useEffect, useState,useRef} from 'react';
 import '../styles/PopupCart.scss';
 import storesProductsMap from '../components/storesProductsMap';
 import PopupBag from '../components/PopupBag';
-import {Product} from '../types';
+import {Product,ProductQuantity,ShoppingBag,ShoppingCart,ProductToQuantity,StoreToSearchedProducts,Store} from '../types';
+import useAPI from '../hooks/useAPI';
 
 type PopupCartProps = {
-    products:Product[],
+    products:ProductQuantity[],
+    storesToProducts:StoreToSearchedProducts,
     propHandleDelete:(product:Product)=>void,
    
 };
-const PopupCart: FC<PopupCartProps> = ({products,propHandleDelete}: PopupCartProps) => {
+const PopupCart: FC<PopupCartProps> = ({products,storesToProducts,propHandleDelete}: PopupCartProps) => {
 
-    const findBagByProductID = (id:string)=>{
-        for(var i=0; i<Object.keys(storesProductsMap).length;i++){
-            let productsArray = (Object.values(storesProductsMap)[i]);
-            for(var j=0; j<productsArray.length;j++){
-                if(productsArray[j].id===id){
-                    // return store name
-                    return Object.keys(storesProductsMap)[i];
+    console.log(storesToProducts);
+    const [bagsToProducts,setShoppingBags] = useState<ShoppingBag[]>([]);
+
+    const [storesToProductsMy,setStoresProducts] = useState<StoreToSearchedProducts>(storesToProducts);
+
+    const productQuantityOfTuples = (tuples:ProductToQuantity[])=>{
+        let prodQuantities:ProductQuantity[] = tuples.map(tuple=>{
+                                                            return {
+                                                                id:tuple[0].id,
+                                                                name:tuple[0].name,
+                                                                category:tuple[0].category,
+                                                                price:tuple[0].price,
+                                                                keywords:tuple[0].keywords,
+                                                                quantity:tuple[1]}})
+         return prodQuantities;           
+
+    }
+    const handleDeleteProductMy = (id:string)=>{
+        let product:Product= {} as Product;
+        for(var i=0;i<bagsToProducts.length;i++){
+            for(var j=0;j<bagsToProducts[i].prodQuantities.length;j++){
+                if(bagsToProducts[i].prodQuantities[j][0].id===id){
+                    product=bagsToProducts[i].prodQuantities[j][0];
+                    // change product quantity in bag to 0
+                    bagsToProducts[i].prodQuantities[j][1] = 0;
                 }
             }
         }
-        return "";
-    }
-    const bagsInclude = (storeName:string ,array:any[])=>{
-        for(var i=0; i<Object.keys(array).length; i++){
-            if(Object.keys(array[i])[0]===storeName){
-                return true;
+        propHandleDelete(product);
+	}
+    const findBagByProductID = (productID:string)=>{
+        for(var i=0;i<bagsToProducts.length;i++){
+            for(var j=0;j<bagsToProducts[i].prodQuantities.length;j++){
+                if(bagsToProducts[i].prodQuantities[j][0].id===productID){
+                    return bagsToProducts[i].storeID;
+                }
             }
         }
-        return false;
     }
-    const bagsIndexOf = (storeName:string ,array:any[])=>{
-        for(var i=0; i<array.length; i++){
-            if(Object.keys(array[i])[0]===storeName){
-                return i;
+    const productUpdateObj = useAPI<void>('/change_product_quantity_in_cart',{},'POST');
+    const changeQuantity = (id: string, newQuantity: number)=>{
+        for(var i=0;i<bagsToProducts.length;i++){
+            for(var j=0;j<bagsToProducts[i].prodQuantities.length;j++){
+                if(bagsToProducts[i].prodQuantities[j][0].id===id){
+                    // change product quantity in bag to newQuantity
+                    bagsToProducts[i].prodQuantities[j][1] = newQuantity;
+                }
             }
         }
-        return -1;
-    }
-    const setProductsInBags = ()=>{
-        let bagsArray:any = [];
-        for(var i=0; i<Object.keys(productsInCart).length; i++){
-            let storeName = findBagByProductID(Object.values(productsInCart)[i].id);
-            if(storeName!==""){
-                if(bagsInclude(storeName,bagsArray)){
-                    let indexOfStore = bagsIndexOf(storeName,bagsArray);
-                    bagsArray[indexOfStore][storeName].push(productsInCart[i]);
-                }
-                else{
-                    var storeProduct:any = {};
-                    storeProduct[storeName] = [productsInCart[i]];
-                    bagsArray.push(storeProduct)
-                }
+
+        productUpdateObj.request({store_id:findBagByProductID(id),product_id:id,quantity:newQuantity}).then(({data,error,errorMsg})=>{
+            if(!error && data!==null){
+                // do nothing
+                void(0);
             }
             else{
-                alert((productsInCart)[i]);
+                alert(errorMsg);
             }
-        }
-        return bagsArray;
-
+        })
     }
+ 
 
-    const [productsInCart,setProducts] = useState<Product[]>(products);
-    const [bags,setBags] = useState<any[]>(setProductsInBags());
-
+    const storeObj = useAPI<Store>('/get_store');
+    const getStoreNameByID = (storeID:string)=>{
+        storeObj.request({store_id:storeID}).then(({data,error,errorMsg})=>{
+                
+            if(!error && data!==null){
+                console.log(data.data.name);
+                return data.data.name;
+            }
+            else{
+                alert(errorMsg);
+                return "";
+            }
+        })
+    }
+    
+    const bagIDToName = useRef<{[storeID: string]: ShoppingBag}>({});
+    const cartObj = useAPI<ShoppingCart>('/get_cart_details');
     useEffect(()=>{
-        setProducts(products);
-        setBags(setProductsInBags());
-    },[products]);
-
-
+        cartObj.request().then(({data,error,errorMsg})=>{
+            if(!error && data!==null){
+                let bags = data.data.bags;
+                for(var i=0;i<bags.length;i++){
+                    bagIDToName.current[bags[i].storeID] = bags[i];
+                }
+                setShoppingBags(data.data.bags);
+            }
+            else{
+                alert(errorMsg)
+            }
+        })
+    },[]);
 
     return (
 		
 		<div className="popupCart">
-            {bags.map((bag)=>{
-                let storeName = Object.keys(bag)[0];
-                let index=bagsIndexOf(storeName,bags);
+            {Object.keys(storesToProductsMy).map((bagID)=>{
+                let index = Object.keys(storesToProductsMy).indexOf(bagID);
                 return (
                 <PopupBag
-                key={index}
-                storeName={storeName}
-                products={bag[storeName]}
+                key={bagID}
+                // storeName={Object.values(bagIDToName.current)[index].storeName}
+                storeName={bagID}
+                products={productQuantityOfTuples(storesToProductsMy[bagID])}
                 propHandleDelete={propHandleDelete}
                 />)
                     
