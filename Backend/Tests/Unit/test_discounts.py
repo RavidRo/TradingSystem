@@ -141,6 +141,22 @@ def test_add_complex_discount_success(store, complex_max_discount, current_root_
     assert res.succeeded() and store.get_discounts().get_obj().parse() == expected
 
 
+def test_add_multi_nested(store, complex_max_discount, current_root_id):
+    store.add_discount(complex_max_discount, current_root_id)
+    store.add_discount(complex_max_discount, str(int(current_root_id) + 1))
+    store.add_discount(complex_max_discount, str(int(current_root_id) + 2))
+    expected = {'type': 'add', 'discount_type': 'complex', 'discounts': [], 'id': current_root_id}
+    new_discount = copy.copy(complex_max_discount)
+    new_discount['id'] = str(int(current_root_id) + 1)
+    new_discount['discounts'] = [copy.copy(complex_max_discount)]
+    new_discount['discounts'][0]['id'] = str(int(current_root_id) + 2)
+    new_discount['discounts'][0]['discounts'] = [copy.copy(complex_max_discount)]
+    new_discount['discounts'][0]['discounts'][0]['id'] = str(int(current_root_id) + 3)
+    new_discount['discounts'][0]['discounts'][0]['discounts'] = []
+    expected['discounts'].append(new_discount)
+    assert store.get_discounts().get_obj().parse() == expected
+
+
 def test_add_multiple_discounts_success(store, complex_max_discount, complex_and_discount, product_discount,
                                         current_root_id):
     res1 = store.add_discount(complex_max_discount, current_root_id)

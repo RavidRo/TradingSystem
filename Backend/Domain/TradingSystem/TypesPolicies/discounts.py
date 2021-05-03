@@ -184,8 +184,9 @@ class CompositeDiscount(IDiscount, ABC):
         if self._id == exist_id:
             return self
         for child in self._children:
-            if child.get_discount_by_id(exist_id) is not None:
-                return child
+            found_discount = child.get_discount_by_id(exist_id)
+            if found_discount is not None:
+                return found_discount
         return None
 
     def remove_discount(self, discount_id: str) -> Response[None]:
