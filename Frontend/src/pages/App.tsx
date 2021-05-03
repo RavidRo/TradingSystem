@@ -12,7 +12,7 @@ import MyStores from './MyStores';
 import SearchPage from './SearchPage';
 import StoresView from '../pages/StoresView';
 import Purchase from '../pages/Purchase';
-import { Product, ProductQuantity ,StoreToSearchedProducts} from '../types';
+import { Product, ProductQuantity, StoreToSearchedProducts } from '../types';
 import useAPI from '../hooks/useAPI';
 import { CookieContext } from '../contexts';
 
@@ -45,28 +45,22 @@ function App() {
 	const [cookie, setCookie] = useState<string>('');
 	const [productsInCart, setProducts] = useState<ProductQuantity[]>([]);
 
-	const [notification, setNotification] = useState<string[]>([]);
+	const [notifications, setNotifications] = useState<string[]>([]);
 
 	type storesToProductsMapType = {
 		[key: string]: Product[];
 	};
 
-
 	const storesToProducts = useRef<StoreToSearchedProducts>({});
 	const storesProducts = useAPI<storesToProductsMapType>('/search_product', {});
 	useEffect(() => {
-		// const client = new W3CWebSocket('ws://127.0.0.1:8000');
-		// client.onopen = () => {
-		// 	console.log('WebSocket Client Connected');
-		//   };
-		//   client.onmessage = (message) => {
-		// 	setNotification(old=>[...old,JSON.stringify(message)]);
-		//   };
-		// storesProducts.request().then(({data,error,errorMsg})=>{
-		//     if(!storesProducts.error && storesProducts.data!==null){
-		//         storesToProducts.current = storesProducts.data;
-		//     }
-		// })
+		const client = new W3CWebSocket('ws://127.0.0.1:5000/connect');
+		client.onopen = () => {
+			console.log('WebSocket Client Connected');
+		};
+		client.onmessage = (message) => {
+			setNotifications((old) => [...old, JSON.stringify(message)]);
+		};
 	}, []);
 
 	const getStoreByProductID = (id: string) => {
@@ -81,10 +75,8 @@ function App() {
 	const productObj = useAPI<Product[]>('/save_product_in_cart', {}, 'POST');
 	const productUpdateObj = useAPI<Product[]>('/change_product_quantity_in_cart', {}, 'POST');
 
-	const addProductToPopup = (product: Product,storeID:string) => {
-
+	const addProductToPopup = (product: Product, storeID: string) => {
 		console.log(storesToProducts);
-
 
 		let found = false;
 		let quantity = 1;
@@ -104,44 +96,16 @@ function App() {
 				category: product.category,
 				keywords: product.keywords,
 			};
-			if(Object.keys(storesToProducts.current).includes(storeID)){
+			if (Object.keys(storesToProducts.current).includes(storeID)) {
 				let tuplesArr = storesToProducts.current[storeID];
-				tuplesArr.push([newProduct,1]);
-			}
-			else{
-				storesToProducts.current[storeID]=[[newProduct,1]];
+				tuplesArr.push([newProduct, 1]);
+			} else {
+				storesToProducts.current[storeID] = [[newProduct, 1]];
 			}
 			console.log(storeID);
 			productObj
 				.request({
-					cookie:cookie,
-					store_id:storeID,
-					product_id: product.id,
-					quantity: quantity,
-				})
-				.then(({ data, error, errorMsg }) => {
-					if (!error && data !== null) {
-						// do nothing
-						void 0;
-					}
-					else{
-						alert(errorMsg);
-					}
-				});
-			setProducts((oldArray) => [...oldArray, newProduct]);
-		}
-		else {
-			let tuplesArr = storesToProducts.current[storeID];
-			for(var i=0;i<tuplesArr.length;i++){
-				if(tuplesArr[i][0].id===product.id){
-					tuplesArr[i][1]+=1;
-				}
-			}
-			storesToProducts.current[storeID] = tuplesArr;
-
-			productUpdateObj
-				.request({
-					cookie:cookie,
+					cookie: cookie,
 					store_id: storeID,
 					product_id: product.id,
 					quantity: quantity,
@@ -150,8 +114,32 @@ function App() {
 					if (!error && data !== null) {
 						// do nothing
 						void 0;
+					} else {
+						alert(errorMsg);
 					}
-					else{
+				});
+			setProducts((oldArray) => [...oldArray, newProduct]);
+		} else {
+			let tuplesArr = storesToProducts.current[storeID];
+			for (var i = 0; i < tuplesArr.length; i++) {
+				if (tuplesArr[i][0].id === product.id) {
+					tuplesArr[i][1] += 1;
+				}
+			}
+			storesToProducts.current[storeID] = tuplesArr;
+
+			productUpdateObj
+				.request({
+					cookie: cookie,
+					store_id: storeID,
+					product_id: product.id,
+					quantity: quantity,
+				})
+				.then(({ data, error, errorMsg }) => {
+					if (!error && data !== null) {
+						// do nothing
+						void 0;
+					} else {
 						alert(errorMsg);
 					}
 				});
@@ -166,10 +154,15 @@ function App() {
 	};
 
 	const productRemoveObj = useAPI<Product[]>('/remove_product_from_cart', {}, 'POST');
-	const handleDeleteProduct = (product: Product | null,storeID:string) => {
+	const handleDeleteProduct = (product: Product | null, storeID: string) => {
 		if (product !== null) {
 			productRemoveObj
-				.request({ cookie:cookie,product_id: product.id, store_id:storeID,quantity: getQuantityOfProduct(product.id) })
+				.request({
+					cookie: cookie,
+					product_id: product.id,
+					store_id: storeID,
+					quantity: getQuantityOfProduct(product.id),
+				})
 				.then(({ data, error, errorMsg }) => {
 					if (!error && data !== null) {
 						// do nothing
@@ -179,9 +172,9 @@ function App() {
 				});
 			setProducts(Object.values(productsInCart).filter((item) => item.id !== product.id));
 			let tupleArr = storesToProducts.current[storeID];
-			for(var i=0;i<tupleArr.length;i++){
-				if(tupleArr[i][0].id===product.id){
-					tupleArr[i][1]=0;
+			for (var i = 0; i < tupleArr.length; i++) {
+				if (tupleArr[i][0].id === product.id) {
+					tupleArr[i][1] = 0;
 				}
 			}
 			storesToProducts.current[storeID] = tupleArr;
@@ -208,10 +201,10 @@ function App() {
 					<Navbar
 						signedIn={signedIn}
 						products={productsInCart}
-						storesToProducts = {storesToProducts.current}
+						storesToProducts={storesToProducts.current}
 						propHandleDelete={handleDeleteProduct}
 						propHandleAdd={addProductToPopup}
-						notification={notification}
+						notifications={notifications}
 						logout={() => {
 							setSignedIn(false);
 							setCookie('');
@@ -227,7 +220,7 @@ function App() {
 								<Cart
 									{...props}
 									products={productsInCart}
-									storesToProducts = {storesToProducts.current}
+									storesToProducts={storesToProducts.current}
 									handleDeleteProduct={handleDeleteProduct}
 								/>
 							)}

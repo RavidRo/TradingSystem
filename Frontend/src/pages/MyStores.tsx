@@ -4,7 +4,7 @@ import { ListItem } from '@material-ui/core';
 import ListItemText from '@material-ui/core/ListItemText';
 
 import '../styles/MyStores.scss';
-import { Appointee, defaultPermissions } from '../types';
+import { allPermissions, Appointee, defaultPermissions } from '../types';
 import CreateStoreForm from '../components/FormWindows/CreateStoreForm';
 import ManageStore from '../components/ManageStore';
 import GenericList from '../components/Lists/GenericList';
@@ -109,7 +109,7 @@ const MyStores: FC<MyStoresProps> = ({ username }) => {
 						appointment: {
 							appointees: [],
 							isManager: false,
-							permissions: defaultPermissions,
+							permissions: allPermissions,
 							role: 'Founder',
 							store_id: data.data,
 							store_name: newName,

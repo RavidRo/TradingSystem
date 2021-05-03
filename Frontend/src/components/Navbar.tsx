@@ -12,16 +12,16 @@ import {
 import '../styles/Navbar.scss';
 import config from '../config';
 import PopupCart from '../components/PopupCart';
-import { Product,ProductQuantity ,StoreToSearchedProducts} from '../types';
-import { Badge } from '@material-ui/core';
+import { Product, ProductQuantity, StoreToSearchedProducts } from '../types';
+import { Badge, Divider, Fade, IconButton, List, ListItemText, Paper } from '@material-ui/core';
 
 type NavBarProps = {
 	signedIn: boolean;
 	products: ProductQuantity[];
-	storesToProducts:StoreToSearchedProducts;
-	propHandleDelete: (product: Product,storeID:string) => void;
-	propHandleAdd:(product:Product,storeID:string)=>void;
-	notification: string[];
+	storesToProducts: StoreToSearchedProducts;
+	propHandleDelete: (product: Product, storeID: string) => void;
+	propHandleAdd: (product: Product, storeID: string) => void;
+	notifications: string[];
 	logout: () => void;
 };
 
@@ -30,12 +30,13 @@ const Navbar: FC<NavBarProps> = ({
 	products,
 	storesToProducts,
 	propHandleDelete,
-	notification,
+	notifications,
 	propHandleAdd,
 	logout,
 }) => {
 	const [hoverCart, setHoverCart] = useState<boolean>(false);
 	const [productsInCart, setProducts] = useState<ProductQuantity[]>(products);
+	const [openNotifications, setOpenNotifications] = useState<boolean>(false);
 
 	useEffect(() => {
 		setProducts(products);
@@ -58,7 +59,12 @@ const Navbar: FC<NavBarProps> = ({
 						My Cart
 					</Link>
 					{hoverCart ? (
-						<PopupCart products={productsInCart} storesToProducts={storesToProducts} propHandleAdd={propHandleAdd} propHandleDelete={propHandleDelete} />
+						<PopupCart
+							products={productsInCart}
+							storesToProducts={storesToProducts}
+							propHandleAdd={propHandleAdd}
+							propHandleDelete={propHandleDelete}
+						/>
 					) : null}
 				</div>
 				<div className="navbar-item">
@@ -88,10 +94,30 @@ const Navbar: FC<NavBarProps> = ({
 					)}
 				</div>
 				<div className="navbar-item">
-					<Badge badgeContent={notification.length} showZero color="primary">
-						<FontAwesomeIcon className="item-icon" icon={faBell} />
-					</Badge>
-					<Link className="item-link" to="/"></Link>
+					<IconButton
+						color={'inherit'}
+						onClick={() => setOpenNotifications((open) => !open)}
+					>
+						<Badge badgeContent={notifications.length} showZero color="primary">
+							<FontAwesomeIcon className="item-icon" icon={faBell} />
+						</Badge>
+					</IconButton>
+					<Fade in={openNotifications}>
+						<Paper className="notification-cont">
+							<List component="ul">
+								{notifications.map((notification, index) => (
+									<>
+										<ListItemText
+											primary={notification}
+											className="notification"
+											key={index}
+										/>
+										<Divider key={index} />
+									</>
+								))}
+							</List>
+						</Paper>
+					</Fade>
 				</div>
 			</nav>
 		</div>

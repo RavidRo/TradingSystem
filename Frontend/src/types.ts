@@ -63,23 +63,23 @@ export type ConditionSimple = {
 	target: number;
 };
 
-type ConditioningOperator = 'conditioning';
+type ConditioningOperator = 'conditional';
 type BasicOperator = 'and' | 'or';
 
 export type ComplexOperator = ConditioningOperator | BasicOperator;
 
 export type Conditioning = { operator: ConditioningOperator; test?: Condition; then?: Condition };
-export type BasicRule = { operator: BasicOperator; operands: Condition[] };
+export type BasicRule = { operator: BasicOperator; children: Condition[] };
 
 export type ConditionComplex = Conditioning | BasicRule;
 
-export type Condition = { id: string; rule: ConditionSimple | ConditionComplex };
+export type Condition = { id: string } & (ConditionSimple | ConditionComplex);
 
 export function isConditioning(rule: ConditionComplex): rule is Conditioning {
-	return (rule as Conditioning).operator === 'conditioning';
+	return (rule as Conditioning).operator === 'conditional';
 }
 export function isBasicRule(rule: ConditionComplex): rule is BasicRule {
-	return (rule as BasicRule).operands !== undefined;
+	return (rule as BasicRule).children !== undefined;
 }
 
 export function isConditionSimple(
@@ -99,28 +99,39 @@ export function isConditionComplex(
 export type DiscountObject = 'product' | 'category' | 'store';
 
 export type DiscountSimple = {
+	discount_type: 'simple';
 	percentage: number;
 	condition?: Condition;
-	context: { obj: 'product' | 'category'; identifier: string } | { obj: 'store' };
+	context: { obj: 'product' | 'category'; id: string } | { obj: 'store' };
 };
 
 export type DecisionRule = 'first' | 'max' | 'min';
 
-export type Operator = 'max' | 'and' | 'or' | 'xor';
+export type Operator = 'max' | 'and' | 'or' | 'xor' | 'add';
 
-type DiscountComplexNoneXOR = { operator: 'max' | 'and' | 'or' };
-type DiscountComplexXOR = { operator: 'xor'; decision_rule: DecisionRule };
-
-export type DiscountComplex = {
-	type: DiscountComplexNoneXOR | DiscountComplexXOR;
-	operands: Discount[];
+export type DiscountComplexNoneXOR = {
+	type: 'max' | 'and' | 'or' | 'add';
 };
 
-export type Discount = { id: string; rule: DiscountSimple | DiscountComplex };
+export type DiscountComplexXOR = {
+	type: 'xor';
+	decision_rule: DecisionRule;
+};
 
-export function isDiscountSimple(rule: DiscountSimple | DiscountComplex): rule is DiscountSimple {
-	return (rule as DiscountSimple).percentage !== undefined;
+export type DiscountComplex = { discounts: Discount[]; discount_type: 'complex' } & (
+	| DiscountComplexNoneXOR
+	| DiscountComplexXOR
+);
+
+export type Discount = { id: string } & (DiscountSimple | DiscountComplex);
+
+export function isDiscountSimple(
+	discount: DiscountSimple | DiscountComplex
+): discount is DiscountSimple {
+	return (discount as DiscountSimple).percentage !== undefined;
 }
-export function isDiscountComplex(rule: DiscountSimple | DiscountComplex): rule is DiscountComplex {
-	return (rule as DiscountComplex).operands !== undefined;
+export function isDiscountComplex(
+	discount: DiscountSimple | DiscountComplex
+): discount is DiscountComplex {
+	return (discount as DiscountComplex).discounts !== undefined;
 }

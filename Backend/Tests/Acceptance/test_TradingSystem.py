@@ -1911,7 +1911,6 @@ def test_connect_after_get_notification():
             and system.empty_notifications(cookie)
     )
 
-
 # endregion
 
 
@@ -2072,10 +2071,49 @@ def test_purchase_add_complex_with_two_children():
                                                           '2')
     assert response_add_complex.succeeded() and response_add_simple_first.succeeded() and response_add_simple_second.succeeded()
 
+def test_purchase_add_complex_conditioning():
+    cookie, username, password, store_name, store_id = _initialize_info(_generate_username(), "aaa",
+                                                                        _generate_store_name())
+    parent_id = '1'
+    response_add_complex = system.add_purchase_rule(cookie, store_id, _complex_rule_details_conditioning(),
+                                                    'complex',
+                                                    parent_id)
+
+    response_add_simple_first = system.add_purchase_rule(cookie, store_id, _simple_rule_details_age(), 'simple', '2', clause="test")
+    response_add_simple_second = system.add_purchase_rule(cookie, store_id, _simple_rule_details_product(), 'simple', '2',
+                                                         clause="then")
+
+    assert response_add_complex.succeeded() and response_add_simple_first.succeeded() and response_add_simple_second.succeeded()
+
+
+def test_purchase_add_complex_two_conditioning():
+    cookie, username, password, store_name, store_id = _initialize_info(_generate_username(), "aaa",
+                                                                        _generate_store_name())
+    parent_id = '1'
+    response_add_complex = system.add_purchase_rule(cookie, store_id, _complex_rule_details_conditioning(),
+                                                    'complex',
+                                                    parent_id)
+    response_add_complex_second = system.add_purchase_rule(cookie, store_id, _complex_rule_details_conditioning(),
+                                                    'complex',
+                                                    parent_id)
+    response_add_simple_rule = system.add_purchase_rule(cookie, store_id, _simple_rule_details_age(), 'simple', '3', clause='test')
+
+    assert response_add_complex.succeeded() and response_add_complex_second.succeeded() and response_add_simple_rule.succeeded()
 
 # endregion
 
 # region remove_purchase_rules
+
+def test_remove_conditional():
+    cookie, username, password, store_name, store_id = _initialize_info(_generate_username(), "aaa",
+                                                                        _generate_store_name())
+    parent_id = '1'
+    system.add_purchase_rule(cookie, store_id, _complex_rule_details_conditioning(),
+                                                    'complex',
+                                                    parent_id)
+    response_remove = system.remove_purchase_rule(cookie, store_id, '2')
+    assert response_remove.succeeded()
+
 def test_purchase_remove_simple_rule_success():
     cookie, username, password, store_name, store_id = _initialize_info(_generate_username(), "aaa",
                                                                         _generate_store_name())
@@ -3637,5 +3675,34 @@ def test_purchase_cart_discount_changed_due_to_discount_move():
     assert response_before_move.get_obj().parse() == 11 and response_after_move.get_obj().parse() == 15
 
 # endregion
+
+# endregion
+
+# region test_full_purchase_with_discounts_and_purchase_policy
+
+@patch.multiple(ShoppingCart, interval_time=MagicMock(return_value=5))
+def test_purchase_cart_with_rules_success():
+    cookie, username, password, store_name, store_id = _initialize_info(
+        _generate_username(), "aaa", _generate_store_name()
+    )
+    product_id, product_name, category, price, quantity = _create_product(cookie, store_id, _generate_product_name(),
+                                                                          "A", 10.0, 10)
+    saved_quantity = 5
+    system.save_product_in_cart(cookie, store_id, product_id, saved_quantity)
+    rule_details = {'context': {'obj': 'product', 'identifier': product_id}, 'operator': 'less-than', 'target': 10}
+    system.add_purchase_rule(cookie, store_id, rule_details, 'simple', '1')
+    system.add_discount(cookie, store_id,_category_discount(), '1')
+    user_age = 25
+    response = system.purchase_cart(cookie, user_age)
+    store_res = system.get_store(store_id)
+    cart_res = system.get_cart_details(cookie)
+    response_sent = system.send_payment(cookie, "", "")
+    assert (
+            response.succeeded()
+            and store_res.object.ids_to_quantities[product_id] == 5
+            and cart_res.succeeded()
+            and response.object.value == (saved_quantity * price) * 0.75
+            and response_sent.succeeded()
+    ), response.get_msg()
 
 # endregion
