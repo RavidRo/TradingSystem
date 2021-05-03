@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { BrowserRouter, Switch, Route, Redirect } from 'react-router-dom';
 import { createMuiTheme, ThemeProvider } from '@material-ui/core';
-import { w3cwebsocket as W3CWebSocket } from 'websocket';
+// import { w3cwebsocket as W3CWebSocket } from 'websocket';
 
 import Home from './Home';
 import Cart from './Cart';
@@ -53,15 +53,15 @@ function App() {
 
 	const storesToProducts = useRef<StoreToSearchedProducts>({});
 	const storesProducts = useAPI<storesToProductsMapType>('/search_product', {});
-	useEffect(() => {
-		const client = new W3CWebSocket('ws://127.0.0.1:5000/connect');
-		client.onopen = () => {
-			console.log('WebSocket Client Connected');
-		};
-		client.onmessage = (message) => {
-			setNotifications((old) => [...old, JSON.stringify(message)]);
-		};
-	}, []);
+	// useEffect(() => {
+	// 	const client = new W3CWebSocket('ws://127.0.0.1:5000/connect');
+	// 	client.onopen = () => {
+	// 		console.log('WebSocket Client Connected');
+	// 	};
+	// 	client.onmessage = (message) => {
+	// 		setNotifications((old) => [...old, JSON.stringify(message)]);
+	// 	};
+	// }, []);
 
 	const getStoreByProductID = (id: string) => {
 		for (var i = 0; i < Object.keys(storesToProducts).length; i++) {
