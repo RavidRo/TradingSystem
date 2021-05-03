@@ -12,7 +12,7 @@ import json
 
 system = TradingSystem.getInstance()
 pool = concurrent.futures.ThreadPoolExecutor(max_workers=10)
-app = Quart(__name__, static_url_path="", static_folder="Frontend/dist")
+app = Quart(__name__, static_url_path="", static_folder="Frontend/build")
 
 
 def __responseToJson(cookie: str, response: Response, toData: Callable = lambda obj: obj):
