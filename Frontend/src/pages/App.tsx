@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { BrowserRouter, Switch, Route, Redirect } from 'react-router-dom';
 import { createMuiTheme, ThemeProvider } from '@material-ui/core';
-import { w3cwebsocket as W3CWebSocket } from 'websocket';
+// import { w3cwebsocket as W3CWebSocket } from 'websocket';
 
 import Home from './Home';
 import Cart from './Cart';
@@ -12,7 +12,7 @@ import MyStores from './MyStores';
 import SearchPage from './SearchPage';
 import StoresView from '../pages/StoresView';
 import Purchase from '../pages/Purchase';
-import { Product, ProductQuantity } from '../types';
+import { Product, ProductQuantity, StoreToSearchedProducts } from '../types';
 import useAPI from '../hooks/useAPI';
 import { CookieContext } from '../contexts';
 
@@ -51,17 +51,17 @@ function App() {
 		[key: string]: Product[];
 	};
 
-	const storesToProducts = useRef<storesToProductsMapType>({});
+	const storesToProducts = useRef<StoreToSearchedProducts>({});
 	const storesProducts = useAPI<storesToProductsMapType>('/search_product', {});
-	useEffect(() => {
-		const client = new W3CWebSocket('ws://127.0.0.1:5000/connect');
-		client.onopen = () => {
-			console.log('WebSocket Client Connected');
-		};
-		client.onmessage = (message) => {
-			setNotifications((old) => [...old, JSON.stringify(message)]);
-		};
-	}, []);
+	// useEffect(() => {
+	// 	const client = new W3CWebSocket('ws://127.0.0.1:5000/connect');
+	// 	client.onopen = () => {
+	// 		console.log('WebSocket Client Connected');
+	// 	};
+	// 	client.onmessage = (message) => {
+	// 		setNotifications((old) => [...old, JSON.stringify(message)]);
+	// 	};
+	// }, []);
 
 	const getStoreByProductID = (id: string) => {
 		for (var i = 0; i < Object.keys(storesToProducts).length; i++) {
@@ -75,7 +75,9 @@ function App() {
 	const productObj = useAPI<Product[]>('/save_product_in_cart', {}, 'POST');
 	const productUpdateObj = useAPI<Product[]>('/change_product_quantity_in_cart', {}, 'POST');
 
-	const addProductToPopup = (product: Product) => {
+	const addProductToPopup = (product: Product, storeID: string) => {
+		console.log(storesToProducts);
+
 		let found = false;
 		let quantity = 1;
 		for (var i = 0; i < Object.values(productsInCart).length; i++) {
@@ -94,30 +96,51 @@ function App() {
 				category: product.category,
 				keywords: product.keywords,
 			};
-			setProducts((oldArray) => [...oldArray, newProduct]);
+			if (Object.keys(storesToProducts.current).includes(storeID)) {
+				let tuplesArr = storesToProducts.current[storeID];
+				tuplesArr.push([newProduct, 1]);
+			} else {
+				storesToProducts.current[storeID] = [[newProduct, 1]];
+			}
+			console.log(storeID);
 			productObj
 				.request({
-					store_id: getStoreByProductID(product.id),
+					cookie: cookie,
+					store_id: storeID,
 					product_id: product.id,
 					quantity: quantity,
 				})
 				.then(({ data, error, errorMsg }) => {
-					if (!productObj.error && productObj.data !== null) {
+					if (!error && data !== null) {
 						// do nothing
 						void 0;
+					} else {
+						alert(errorMsg);
 					}
 				});
+			setProducts((oldArray) => [...oldArray, newProduct]);
 		} else {
+			let tuplesArr = storesToProducts.current[storeID];
+			for (var i = 0; i < tuplesArr.length; i++) {
+				if (tuplesArr[i][0].id === product.id) {
+					tuplesArr[i][1] += 1;
+				}
+			}
+			storesToProducts.current[storeID] = tuplesArr;
+
 			productUpdateObj
 				.request({
-					store_id: getStoreByProductID(product.id),
+					cookie: cookie,
+					store_id: storeID,
 					product_id: product.id,
 					quantity: quantity,
 				})
 				.then(({ data, error, errorMsg }) => {
-					if (!productUpdateObj.error && productUpdateObj.data !== null) {
+					if (!error && data !== null) {
 						// do nothing
 						void 0;
+					} else {
+						alert(errorMsg);
 					}
 				});
 		}
@@ -131,17 +154,30 @@ function App() {
 	};
 
 	const productRemoveObj = useAPI<Product[]>('/remove_product_from_cart', {}, 'POST');
-	const handleDeleteProduct = (product: Product | null) => {
+	const handleDeleteProduct = (product: Product | null, storeID: string) => {
 		if (product !== null) {
 			productRemoveObj
-				.request({ product_id: product.id, quantity: getQuantityOfProduct(product.id) })
+				.request({
+					cookie: cookie,
+					product_id: product.id,
+					store_id: storeID,
+					quantity: getQuantityOfProduct(product.id),
+				})
 				.then(({ data, error, errorMsg }) => {
-					if (!productRemoveObj.error && productRemoveObj.data !== null) {
+					if (!error && data !== null) {
 						// do nothing
 						void 0;
 					}
+					alert(errorMsg);
 				});
 			setProducts(Object.values(productsInCart).filter((item) => item.id !== product.id));
+			let tupleArr = storesToProducts.current[storeID];
+			for (var i = 0; i < tupleArr.length; i++) {
+				if (tupleArr[i][0].id === product.id) {
+					tupleArr[i][1] = 0;
+				}
+			}
+			storesToProducts.current[storeID] = tupleArr;
 		}
 	};
 
@@ -165,7 +201,9 @@ function App() {
 					<Navbar
 						signedIn={signedIn}
 						products={productsInCart}
+						storesToProducts={storesToProducts.current}
 						propHandleDelete={handleDeleteProduct}
+						propHandleAdd={addProductToPopup}
 						notifications={notifications}
 						logout={() => {
 							setSignedIn(false);
@@ -182,6 +220,7 @@ function App() {
 								<Cart
 									{...props}
 									products={productsInCart}
+									storesToProducts={storesToProducts.current}
 									handleDeleteProduct={handleDeleteProduct}
 								/>
 							)}

@@ -1,23 +1,42 @@
 import { Button, Card, CardContent, Typography } from '@material-ui/core';
-import React, {FC} from 'react';
+import React, {FC,useEffect,useRef} from 'react';
 import '../styles/ProductSearch.scss';
 import { Link } from 'react-router-dom';
+import useAPI from '../hooks/useAPI';
+import {Store} from '../types';
 
 
 
 type ProductSearchProps = {
     content:string,
     price:number,
-    id:string,
     storeID:string,
+    quantity:number,
+    category:string,
     clickAddProduct:()=>void,
 };
 
-const ProductSearch: FC<ProductSearchProps> = ({id,storeID,content,price,clickAddProduct}) => {
+const ProductSearch: FC<ProductSearchProps> = ({storeID,content,price,quantity,category,clickAddProduct}) => {
 
-      
+    const storeName = useRef<string>("")
+    const storeObj = useAPI<Store>('/get_store',{store_id:storeID});
+    useEffect(()=>{
+        if(storeID!==""){
+            storeObj.request().then(({data,error,errorMsg})=>{
+                if(!error && data !==null){
+                    storeName.current = data.data.name;
+                }
+                else{
+                    alert(errorMsg)
+                }
+                
+            })
+        }
+    },[]);
+
 	return (
 		<div className="ProductSearchCard">
+            
             {content!==""?
                 <Card 
                     className="prodCard"
@@ -31,6 +50,12 @@ const ProductSearch: FC<ProductSearchProps> = ({id,storeID,content,price,clickAd
                         </Typography> 
                         <Typography style={{'marginTop':'5%'}}>
                             {price}$
+                        </Typography> 
+                        <Typography style={{'marginTop':'5%'}}>
+                            Quantity: {quantity}
+                        </Typography> 
+                        <Typography style={{'marginTop':'5%'}}>
+                            Category: {category}
                         </Typography> 
                     </CardContent>
                     <div className="buttonLink">
@@ -53,7 +78,7 @@ const ProductSearch: FC<ProductSearchProps> = ({id,storeID,content,price,clickAd
                             },
                             }}
                         >
-                                {storeID}
+                                {storeName.current}
                         </Link>
                     </div>
                 </Card>

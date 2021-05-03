@@ -1,4 +1,4 @@
-import React ,{FC, useEffect, useState} from 'react';
+import React ,{FC, useEffect, useState,useRef} from 'react';
 import FormControl from '@material-ui/core/FormControl';
 import Select from '@material-ui/core/Select';
 import MenuItem from '@material-ui/core/MenuItem';
@@ -6,34 +6,73 @@ import '../styles/StoresView.scss';
 import ProductSearch from '../components/ProductSearch';
 import storesToProducts from '../components/storesProductsMap';
 import useAPI from '../hooks/useAPI';
-import {Product,Store} from '../types';
+import {Product,Store,ProductQuantity} from '../types';
 
 
 type StoresViewProps = {
-   propsAddProduct:(product:Product)=>void,
+   propsAddProduct:(product:Product,storeID:string)=>void,
    location: any,
 
 };
 
 const StoresView: FC<StoresViewProps> = ({propsAddProduct,location}: StoresViewProps) => {
 
-    const [presentProducts,setProducts] = useState<Product[]>([]);
+    const [presentProducts,setProducts] = useState<ProductQuantity[]>([]);
     const [stores,setStores] = useState<Store[]>([]);
 
-    const [store, setStore] = useState<string>(location.state!==undefined?location.state.storeID:"");
-    const productsObj = useAPI<Product[]>('/get_products_by_store',{storeID:store});
+    // storeID
+    const [storeID, setStoreID] = useState<string>(location.state!==undefined?location.state.storeID:"");
+    const storeName = useRef<string>("");
+    const productsObj = useAPI<Product[]>('/get_products_by_store');
+
+    const getQuantityOfProduct = (productID:string,storeID:string)=>{
+        for(var i=0;i<stores.length;i++){
+            if(stores[i].id===storeID){
+                for(var j=0; j<Object.keys(stores[i].ids_to_quantities).length;j++){
+                    if(Object.keys(stores[i].ids_to_quantities)[j]===productID){
+                        return Object.values(stores[i].ids_to_quantities)[j];
+                    }
+                }
+            }
+        }
+        return 0;
+    }
+    const gerStoreNameByID = (storeID:string)=>{
+        for(var i=0;i<stores.length;i++){
+            if(stores[i].id===storeID){
+                return stores[i].name;
+            }
+        }
+        return "";
+    }
     useEffect(()=>{
-        productsObj.request().then(({data,error,errorMsg})=>{
-            if(!error && data !==null){
-                console.log(data.data);
-                setProducts(data.data);
-            }
-            else{
-                alert(errorMsg)
-            }
-            
-        })
-    },[store]);
+        storeName.current = gerStoreNameByID(storeID);
+        console.log(storeID);
+        if(storeName.current!==""){
+            console.log("hiiiii");
+            productsObj.request({store_id:storeID}).then(({data,error,errorMsg})=>{
+                if(!error && data !==null){
+                    console.log(data.data);
+                    let productsArray:Product[] = data.data;
+                    let productQuantityArr:ProductQuantity[] = productsArray.map((product)=>{
+                        return {
+                            id:product.id,
+                            name:product.name,
+                            category:product.category,
+                            price:product.price,
+                            keywords:product.keywords,
+                            quantity:getQuantityOfProduct(product.id,storeID)
+                        }
+                    })
+                    setProducts(productQuantityArr);
+                }
+                else{
+                    alert(errorMsg)
+                }
+                
+            })
+        }
+    },[storeID]);
 
     const storesObj = useAPI<Store[]>('/get_stores_details');
     useEffect(()=>{
@@ -51,10 +90,8 @@ const StoresView: FC<StoresViewProps> = ({propsAddProduct,location}: StoresViewP
     },[]);
 
    const handleChange = (e:any)=>{
-      setStore(e.target.value);
-      let indexOfStore = Object.keys(storesToProducts).indexOf(e.target.value);
-      setProducts(Object.values(storesToProducts)[indexOfStore]);
-    //   TODO: request from server the products of this specific store
+      setStoreID(e.target.value);
+    //   set store causes use effect and rendering new products
    }
    const matrix_length = 3;
    const setProductsInMatrix = ()=>{
@@ -75,18 +112,18 @@ const StoresView: FC<StoresViewProps> = ({propsAddProduct,location}: StoresViewP
              <FormControl style={{'marginLeft':'5%','width':'100%','fontSize':'large','height':'94%'}}>
                 <h3>Choose Store</h3>
                 <Select
-                value={store}
+                value={storeID}
                 style={{'fontSize': '2rem','width':'50%'}}
                 onChange={(e)=>handleChange(e)}
                 >
                    {stores.map((store)=>{
                       return(
-                        <MenuItem value={store.name} key={Object.keys(storesToProducts).indexOf(store.name)}>{store.name}</MenuItem>
+                        <MenuItem value={store.id} key={Object.keys(storesToProducts).indexOf(store.name)}>{store.name}</MenuItem>
                       )
                    })}
                 </Select>
                 <div className="productCards">
-                    {store!==""?
+                    {storeName.current!==""?
                     setProductsInMatrix().map((row,i)=>{
                         return(
                             <div className="cardsRow">
@@ -95,11 +132,12 @@ const StoresView: FC<StoresViewProps> = ({propsAddProduct,location}: StoresViewP
                                         
                                         <ProductSearch
                                             key={i*matrix_length+j}
-                                            id={cell!==undefined?cell.id:-1}
-                                            storeID={store}
+                                            storeID={storeID}
                                             content={cell!==undefined?cell.name:""}
                                             price={cell!==undefined?cell.price:0}
-                                            clickAddProduct={()=>propsAddProduct(cell)}
+                                            quantity={cell!==undefined?cell.quantity:0}
+                                            category ={cell!==undefined?cell.category:""}
+                                            clickAddProduct={()=>propsAddProduct(cell,storeID)}
                                         >
                                         </ProductSearch>
                                     )

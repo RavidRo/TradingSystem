@@ -138,9 +138,9 @@ async def search_products():
     max_price = request.args.get("max_price")
     kwargs = request.args.get("kwargs")
     answer = await __async_call(
-        system.search_products, product_name, category, min_price, max_price, **kwargs
+        system.search_products, product_name, category, float(min_price), float(max_price), kwargs
     )
-    return __responseToJson(None, answer, lambda obj: obj.values)
+    return __responseToJson(None, answer)
 
 
 @app.route("/save_product_in_cart", methods=["POST"])
@@ -212,7 +212,7 @@ async def change_product_quantity_in_cart():
     product_id = request_json["product_id"]
     quantity = request_json["quantity"]
     answer = await __async_call(
-        system.remove_product_from_cart, cookie, store_id, product_id, quantity
+        system.change_product_quantity_in_cart, cookie, store_id, product_id, quantity
     )
     return __responseToJson(cookie, answer)
 

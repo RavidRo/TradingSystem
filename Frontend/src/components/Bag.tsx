@@ -45,6 +45,14 @@ const Bag: FC<BagProps> = ({storeName,products,propHandleDelete,changeQuantity}:
 		setTotal(calculateTotal());
 		changeQuantity(id,newQuantity);
 	}
+	const getQuanOfProduct = (id:string)=>{
+		for(var i=0;i<productsInCart.length;i++){
+			if(productsInCart[i].id===id){
+				return productsInCart[i].quantity;
+			}
+		}
+		return 0;
+	}
 	
     return (
 		
@@ -58,6 +66,7 @@ const Bag: FC<BagProps> = ({storeName,products,propHandleDelete,changeQuantity}:
 							<CartProduct
 								key={product.id}
 								product={product}
+								quantity={getQuanOfProduct(product.id)}
 								onRemove={onRemove}
 								onChangeQuantity={onChangeQuantity}
 							/>

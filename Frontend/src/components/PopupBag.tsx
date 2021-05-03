@@ -6,11 +6,14 @@ import {Product,ProductQuantity} from '../types';
 
 type PopupBagProps = {
     storeName:string,
+    storeID:string,
     products:ProductQuantity[],
-    propHandleDelete:(product:ProductQuantity)=>void,
+    propHandleDelete:(productID:string)=>void,
+    propHandleAdd:(product:Product,storeID:string)=>void;
+
    
 };
-const PopupBag: FC<PopupBagProps> = ({storeName,products,propHandleDelete}:PopupBagProps) => {
+const PopupBag: FC<PopupBagProps> = ({storeName,storeID,products,propHandleAdd,propHandleDelete}:PopupBagProps) => {
 
     const [productsInCart,setProducts] = useState<ProductQuantity[]>(products);
 	
@@ -45,6 +48,7 @@ const PopupBag: FC<PopupBagProps> = ({storeName,products,propHandleDelete}:Popup
                                 keywords={p.keywords}
                                 category={p.category}
                                 propHandleDelete={propHandleDelete}
+                                propHandleAdd={(product:Product)=>propHandleAdd(product,storeID)}
                                 key={Object.values(productsInCart).indexOf(p)}
                                 />
                             ))}

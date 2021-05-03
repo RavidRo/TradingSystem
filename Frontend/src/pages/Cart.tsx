@@ -1,133 +1,134 @@
-import React, { FC, useState , useEffect} from 'react';
+import React, { FC, useState , useEffect,useRef} from 'react';
 import '../styles/Cart.scss';
 import Bag from '../components/Bag';
 import { Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, TextField } from '@material-ui/core';
 import { Link } from 'react-router-dom';
-import storesProductsMap from '../components/storesProductsMap';
-import {Product,ProductQuantity} from '../types';
+import {Product,ProductQuantity,ShoppingCart,ShoppingBag,ProductToQuantity,StoreToSearchedProducts} from '../types';
 import useAPI from '../hooks/useAPI';
+import { faShoppingBag } from '@fortawesome/free-solid-svg-icons';
 
 type CartProps = {
 	products:ProductQuantity[],
-    handleDeleteProduct:(product:Product|null)=>void,
+    storesToProducts:StoreToSearchedProducts,
+    handleDeleteProduct:(product:Product|null,storeID:string)=>void,
 
 };
 
-const Cart: FC<CartProps> = ({products,handleDeleteProduct}) => {
-	const [productsInCart,setProducts] = useState<ProductQuantity[]>(products);
+const Cart: FC<CartProps> = ({products,storesToProducts,handleDeleteProduct}) => {
     const [open,setOpen] = useState<boolean>(false);
     const [age,setAge] = useState<number>(0);
     const [showPurchaseLink,setLink] = useState<boolean>(false);
+    const [bagsToProducts,setBags] = useState<ShoppingBag[]>([]);
+    const [storesToProductsMy,setStoresProducts] = useState<StoreToSearchedProducts>(storesToProducts);
+
+
+    const cartObj = useAPI<ShoppingCart>('/get_cart_details');
+    useEffect(()=>{
+        cartObj.request().then(({data,error,errorMsg})=>{
+                
+            if(!error && data!==null){
+                console.log(data.data);
+                setBags(data.data.bags);
+            }
+            else{
+                alert(errorMsg)
+            }
+        })
+    },[]);
+
+
+    const productQuantityOfTuples = (tuples:ProductToQuantity[])=>{
+        let prodQuantities:ProductQuantity[] = tuples.map(tuple=>{
+                                                            return {
+                                                                id:tuple[0].id,
+                                                                name:tuple[0].name,
+                                                                category:tuple[0].category,
+                                                                price:tuple[0].price,
+                                                                keywords:tuple[0].keywords,
+                                                                quantity:tuple[1]}})
+         return prodQuantities;           
+
+    }
 
     const calculateTotal = ()=>{
-		const reducer = (accumulator:number, currentValue:ProductQuantity) => accumulator + (currentValue.price*currentValue.quantity);
-        return productsInCart.reduce(reducer,0);
+        let total = 0;
+        for(var i=0;i<Object.keys(storesToProductsMy).length;i++){
+            let priceBag:number = 0;
+            for(var j=0;j<Object.values(storesToProductsMy)[i].length;j++){
+                let productPrice:number = Object.values(storesToProductsMy)[i][j][0].price;
+                let productQuantity = Object.values(storesToProductsMy)[i][j][1];
+                priceBag+= productPrice* productQuantity;
+            }
+            total+=priceBag;
+        }
+        return total;
 	}
     const [totalAmount,setTotalAmount] = useState<number>(calculateTotal());
 
-    const findBagByProductID = (id:string)=>{
-        for(var i=0; i<Object.keys(storesProductsMap).length;i++){
-            let productsArray = (Object.values(storesProductsMap)[i]);
-            for(var j=0; j<productsArray.length;j++){
-                if(productsArray[j].id===id){
-                    // return store name
-                    return Object.keys(storesProductsMap)[i];
+   
+	const handleDeleteProductMy = (id:string,storeID:string)=>{
+        let product:Product= {} as Product;
+        for(var i=0;i<Object.keys(storesToProductsMy).length;i++){
+            let tupleArr = Object.values(storesToProductsMy)[i];
+            for(var j=0;j<tupleArr.length;j++){
+                if(tupleArr[i][0].id===id){
+                    product=Object.values(storesToProductsMy)[i][j][0];
+                    tupleArr[i][1]=0;
+                    // change product quantity in bag to 0
+                    Object.values(storesToProductsMy)[i] = tupleArr;
                 }
             }
         }
-        return "";
-    }
-    const bagsInclude = (storeName:string ,array:any[])=>{
-        for(var i=0; i<Object.keys(array).length; i++){
-            if(Object.keys(array[i])[0]===storeName){
-                return true;
-            }
-        }
-        return false;
-    }
-    const bagsIndexOf = (storeName:string ,array:any[])=>{
-        for(var i=0; i<array.length; i++){
-            if(Object.keys(array[i])[0]===storeName){
-                return i;
-            }
-        }
-        return -1;
-    }
-	const setProductsInBags = ()=>{
-        let bagsArray:any = [];
-        for(var i=0; i<Object.keys(productsInCart).length; i++){
-            let storeName = findBagByProductID(Object.values(productsInCart)[i].id);
-            if(storeName!==""){
-                if(bagsInclude(storeName,bagsArray)){
-                    let indexOfStore = bagsIndexOf(storeName,bagsArray);
-                    bagsArray[indexOfStore][storeName].push(productsInCart[i]);
-                }
-                else{
-                    var storeProduct:any = {};
-                    storeProduct[storeName] = [productsInCart[i]];
-                    bagsArray.push(storeProduct)
-                }
-            }
-            else{
-                alert((productsInCart)[i]);
-            }
-        }
-        return bagsArray;
-
-    }
-
-    useEffect(()=>{
-        setProducts(products);
-        setBags(setProductsInBags());
-    },[products]);
-	const [bags,setBags] = useState<any[]>(setProductsInBags());
-
-    const getProduct = (id:string)=>{
-        for(var i=0;i<productsInCart.length;i++){
-            if(productsInCart[i].id===id){
-                return {
-                    id:id,
-                    name:productsInCart[i].name,
-                    price:productsInCart[i].price,
-                    category:productsInCart[i].category,
-                    keywords:productsInCart[i].keywords
-                }
-            }
-        }
-        return null;
-    }
-
-	const handleDeleteProductMy = (id:string)=>{
-		setProducts(productsInCart.filter((product) => product.id !== id));
         setTotalAmount(calculateTotal());
-        handleDeleteProduct(getProduct(id));
+        handleDeleteProduct(product,storeID);
 	}
-    const productUpdateObj = useAPI<Product[]>('/change_product_quantity_in_cart',{},'POST');
+    const findBagByProductID = (productID:string)=>{
+        for(var i=0;i<<Object.keys(storesToProductsMy).length;i++){
+            let tuplesArr = Object.values(storesToProductsMy)[i];
+            for(var j=0;j<tuplesArr.length;j++){
+                if(tuplesArr[j][0].id===productID){
+                    return Object.keys(storesToProductsMy)[i];
+                }
+            }
+        }
+    }
+
+    const productUpdateObj = useAPI<void>('/change_product_quantity_in_cart',{},'POST');
     const changeQuantity = (id: string, newQuantity: number)=>{
-        productsInCart.forEach((product) => {
-			if (product.id === id) {
-				product.quantity = newQuantity;
-			}
-		});
+        for(var i=0;i<Object.keys(storesToProductsMy).length;i++){
+            let tuplesArr = Object.values(storesToProductsMy)[i];
+            for(var j=0;j<tuplesArr.length;j++){
+                    if(tuplesArr[j][0].id===id){
+                        Object.values(storesToProductsMy)[i][j][1]=newQuantity;
+                    }
+                }
+            }
+        
         setTotalAmount(calculateTotal());
+
         productUpdateObj.request({store_id:findBagByProductID(id),product_id:id,quantity:newQuantity}).then(({data,error,errorMsg})=>{
-            if(!productUpdateObj.error && productUpdateObj.data!==null){
+            if(!error && data!==null){
                 // do nothing
                 void(0);
+            }
+            else{
+                alert(errorMsg);
             }
         })
     }
     const discountObj = useAPI<number>('/get_discount',{age:age});
     useEffect(()=>{
-        discountObj.request().then(({data,error,errorMsg})=>{
-            if(!error && data!==null){
-                // setTotalAmount(discountObj.data);
-            }
-            else{
-                alert(errorMsg)
-            }
-            
-        })
+        if(showPurchaseLink){
+            discountObj.request().then(({data,error,errorMsg})=>{
+                if(!error && data!==null){
+                    setTotalAmount(data.data);
+                }
+                else{
+                    alert(errorMsg)
+                }
+                
+            })
+        }
     },[showPurchaseLink]);
     
     const handleOK = ()=>{
@@ -142,15 +143,14 @@ const Cart: FC<CartProps> = ({products,handleDeleteProduct}) => {
             <h3 className="cartTitle">
                 My Cart:
             </h3>
-            {bags.map((bag)=>{
-                let storeName = Object.keys(bag)[0];
-                let index=bagsIndexOf(storeName,bags);
+            {Object.keys(storesToProductsMy).map((bagID)=>{
                 return (
                 <Bag
-                key={index}
-                storeName={storeName}
-                products={bag[storeName]}
-                propHandleDelete={handleDeleteProductMy}
+                key={bagID}
+                // storeName={Object.values(bagIDToName.current)[index].storeName}
+                storeName={bagID}
+                products={productQuantityOfTuples(storesToProductsMy[bagID])}
+                propHandleDelete={(productID:string)=>handleDeleteProductMy(productID,bagID)}
                 changeQuantity={changeQuantity}
                 />)
                     

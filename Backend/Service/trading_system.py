@@ -16,7 +16,7 @@ class TradingSystem(object):
     # double locking mechanism
     @staticmethod
     def getInstance() -> TradingSystem:
-        """ Static access method. """
+        """Static access method."""
         if TradingSystem.__instance is None:
             with threading.Lock():
                 if TradingSystem.__instance is None:
@@ -24,7 +24,7 @@ class TradingSystem(object):
         return TradingSystem.__instance
 
     def __init__(self):
-        """ Virtually private constructor. """
+        """Virtually private constructor."""
         if TradingSystem.__instance is not None:
             raise Exception("This class is a singleton!")
         else:

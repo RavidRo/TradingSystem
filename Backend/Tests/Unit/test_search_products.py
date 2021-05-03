@@ -15,6 +15,7 @@ from Backend.response import Response, ParsableList
 def store_a():
     return Store("A")
 
+
 @pytest.fixture
 def store_b():
     return Store("B")
@@ -23,15 +24,21 @@ def store_b():
 # Tests:
 # ================================================================================
 
+
 def test_search_no_stores_success():
-    with mock.patch.object(StoresManager, 'get_stores_details', return_value=Response(True, ParsableList([]))):
+    with mock.patch.object(
+        StoresManager, "get_stores_details", return_value=Response(True, ParsableList([]))
+    ):
         res = SearchEngine.search_products("name")
         assert res.succeeded() and len(res.get_obj().parse()) == 0
 
 
 def test_search_no_products_success():
-    with mock.patch.object(StoresManager, 'get_stores_details',
-                           return_value=Response(True, ParsableList([Store("A"), Store("B"), Store("C")]))):
+    with mock.patch.object(
+        StoresManager,
+        "get_stores_details",
+        return_value=Response(True, ParsableList([Store("A"), Store("B"), Store("C")])),
+    ):
         res = SearchEngine.search_products("name")
         num_of_products = 0
         for store, products_to_quantities in res.get_obj().parse().items():
@@ -41,9 +48,16 @@ def test_search_no_products_success():
 
 
 def test_search_search_by_name_success(store_a, store_b):
-    with mock.patch.object(Store, 'get_products_to_quantities', return_value={"1": (Product("name", "A", 2), 5), "2": (Product("B", "A", 3), 7)}):
-        with mock.patch.object(StoresManager, 'get_stores_details',
-                               return_value=Response(True, ParsableList([store_a, store_b]))):
+    with mock.patch.object(
+        Store,
+        "get_products_to_quantities",
+        return_value={"1": (Product("name", "A", 2), 5), "2": (Product("B", "A", 3), 7)},
+    ):
+        with mock.patch.object(
+            StoresManager,
+            "get_stores_details",
+            return_value=Response(True, ParsableList([store_a, store_b])),
+        ):
             res = SearchEngine.search_products("name")
             num_of_products = 0
             for store, products_to_quantities in res.get_obj().parse().items():
@@ -53,9 +67,16 @@ def test_search_search_by_name_success(store_a, store_b):
 
 
 def test_search_search_by_category_success(store_a, store_b):
-    with mock.patch.object(Store, 'get_products_to_quantities', return_value={"1": (Product("name", "category", 2), 5), "2": (Product("B", "A", 3), 7)}):
-        with mock.patch.object(StoresManager, 'get_stores_details',
-                               return_value=Response(True, ParsableList([store_a, store_b]))):
+    with mock.patch.object(
+        Store,
+        "get_products_to_quantities",
+        return_value={"1": (Product("name", "category", 2), 5), "2": (Product("B", "A", 3), 7)},
+    ):
+        with mock.patch.object(
+            StoresManager,
+            "get_stores_details",
+            return_value=Response(True, ParsableList([store_a, store_b])),
+        ):
             res = SearchEngine.search_products(product_category="category")
             num_of_products = 0
             for store, products_to_quantities in res.get_obj().parse().items():
@@ -64,18 +85,35 @@ def test_search_search_by_category_success(store_a, store_b):
             assert res.succeeded() and len(res.get_obj().parse()) == 2 and num_of_products == 10
 
 
-def test_search_missing_argument_to_search_by_fail(store_a, store_b):
-    with mock.patch.object(Store, 'get_products_to_quantities', return_value={"1": (Product("name", "A", 2), 5), "2": (Product("B", "A", 3), 7)}):
-        with mock.patch.object(StoresManager, 'get_stores_details',
-                               return_value=Response(True, ParsableList([store_a, store_b]))):
+def test_search_missing_argument_to_search_by_success(store_a, store_b):
+    with mock.patch.object(
+        Store,
+        "get_products_to_quantities",
+        return_value={"1": (Product("name", "A", 2), 5), "2": (Product("B", "A", 3), 7)},
+    ):
+        with mock.patch.object(
+            StoresManager,
+            "get_stores_details",
+            return_value=Response(True, ParsableList([store_a, store_b])),
+        ):
             res = SearchEngine.search_products()
-            assert not res.succeeded()
+            assert res.succeeded()
 
 
 def test_search_by_keywords_have_all(store_a, store_b):
-    with mock.patch.object(Store, 'get_products_to_quantities', return_value={"1": (Product("name", "A", 2), 5), "2": (Product("B", "A", 3, ["cats", "dogs"]), 7)}):
-        with mock.patch.object(StoresManager, 'get_stores_details',
-                               return_value=Response(True, ParsableList([store_a, store_b]))):
+    with mock.patch.object(
+        Store,
+        "get_products_to_quantities",
+        return_value={
+            "1": (Product("name", "A", 2), 5),
+            "2": (Product("B", "A", 3, ["cats", "dogs"]), 7),
+        },
+    ):
+        with mock.patch.object(
+            StoresManager,
+            "get_stores_details",
+            return_value=Response(True, ParsableList([store_a, store_b])),
+        ):
             res = SearchEngine.search_products(keywords=["cats", "dogs"])
             num_of_products = 0
             for store, products_to_quantities in res.get_obj().parse().items():
@@ -85,9 +123,16 @@ def test_search_by_keywords_have_all(store_a, store_b):
 
 
 def test_search_by_keywords_missing_some(store_a, store_b):
-    with mock.patch.object(Store, 'get_products_to_quantities', return_value={"1": (Product("name", "A", 2), 5), "2": (Product("B", "A", 3, ["dogs"]), 7)}):
-        with mock.patch.object(StoresManager, 'get_stores_details',
-                               return_value=Response(True, ParsableList([store_a, store_b]))):
+    with mock.patch.object(
+        Store,
+        "get_products_to_quantities",
+        return_value={"1": (Product("name", "A", 2), 5), "2": (Product("B", "A", 3, ["dogs"]), 7)},
+    ):
+        with mock.patch.object(
+            StoresManager,
+            "get_stores_details",
+            return_value=Response(True, ParsableList([store_a, store_b])),
+        ):
             res = SearchEngine.search_products(keywords=["cats", "dogs"])
             num_of_products = 0
             for store, products_to_quantities in res.get_obj().parse().items():
@@ -97,9 +142,19 @@ def test_search_by_keywords_missing_some(store_a, store_b):
 
 
 def test_search_by_keywords_product_have_more_keywords(store_a, store_b):
-    with mock.patch.object(Store, 'get_products_to_quantities', return_value={"1": (Product("name", "A", 2), 5), "2": (Product("B", "A", 3, ["cats", "dogs", "horses"]), 7)}):
-        with mock.patch.object(StoresManager, 'get_stores_details',
-                               return_value=Response(True, ParsableList([store_a, store_b]))):
+    with mock.patch.object(
+        Store,
+        "get_products_to_quantities",
+        return_value={
+            "1": (Product("name", "A", 2), 5),
+            "2": (Product("B", "A", 3, ["cats", "dogs", "horses"]), 7),
+        },
+    ):
+        with mock.patch.object(
+            StoresManager,
+            "get_stores_details",
+            return_value=Response(True, ParsableList([store_a, store_b])),
+        ):
             res = SearchEngine.search_products(keywords=["cats", "dogs"])
             num_of_products = 0
             for store, products_to_quantities in res.get_obj().parse().items():
@@ -109,9 +164,19 @@ def test_search_by_keywords_product_have_more_keywords(store_a, store_b):
 
 
 def test_search_by_keywords_product_multiple_stores(store_a, store_b):
-    with mock.patch.object(Store, 'get_products_to_quantities', return_value={"1": (Product("name", "A", 2, ["cats"]), 5), "2": (Product("B", "A", 3, ["cats", "dogs"]), 7)}):
-        with mock.patch.object(StoresManager, 'get_stores_details',
-                               return_value=Response(True, ParsableList([store_a, store_b]))):
+    with mock.patch.object(
+        Store,
+        "get_products_to_quantities",
+        return_value={
+            "1": (Product("name", "A", 2, ["cats"]), 5),
+            "2": (Product("B", "A", 3, ["cats", "dogs"]), 7),
+        },
+    ):
+        with mock.patch.object(
+            StoresManager,
+            "get_stores_details",
+            return_value=Response(True, ParsableList([store_a, store_b])),
+        ):
             res = SearchEngine.search_products(keywords=["cats"])
             num_of_products = 0
             for store, products_to_quantities in res.get_obj().parse().items():
@@ -121,9 +186,19 @@ def test_search_by_keywords_product_multiple_stores(store_a, store_b):
 
 
 def test_search_min_price(store_a, store_b):
-    with mock.patch.object(Store, 'get_products_to_quantities', return_value={"1": (Product("name", "A", 1, ["cats"]), 5), "2": (Product("B", "A", 3, ["cats", "dogs"]), 7)}):
-        with mock.patch.object(StoresManager, 'get_stores_details',
-                               return_value=Response(True, ParsableList([store_a, store_b]))):
+    with mock.patch.object(
+        Store,
+        "get_products_to_quantities",
+        return_value={
+            "1": (Product("name", "A", 1, ["cats"]), 5),
+            "2": (Product("B", "A", 3, ["cats", "dogs"]), 7),
+        },
+    ):
+        with mock.patch.object(
+            StoresManager,
+            "get_stores_details",
+            return_value=Response(True, ParsableList([store_a, store_b])),
+        ):
             res = SearchEngine.search_products(product_category="A", min_price=2.0)
             num_of_products = 0
             for store, products_to_quantities in res.get_obj().parse().items():
@@ -133,9 +208,19 @@ def test_search_min_price(store_a, store_b):
 
 
 def test_search_min_price_include_border(store_a, store_b):
-    with mock.patch.object(Store, 'get_products_to_quantities', return_value={"1": (Product("name", "A", 1, ["cats"]), 5), "2": (Product("B", "A", 2, ["cats", "dogs"]), 7)}):
-        with mock.patch.object(StoresManager, 'get_stores_details',
-                               return_value=Response(True, ParsableList([store_a, store_b]))):
+    with mock.patch.object(
+        Store,
+        "get_products_to_quantities",
+        return_value={
+            "1": (Product("name", "A", 1, ["cats"]), 5),
+            "2": (Product("B", "A", 2, ["cats", "dogs"]), 7),
+        },
+    ):
+        with mock.patch.object(
+            StoresManager,
+            "get_stores_details",
+            return_value=Response(True, ParsableList([store_a, store_b])),
+        ):
             res = SearchEngine.search_products(product_category="A", min_price=2.0)
             num_of_products = 0
             for store, products_to_quantities in res.get_obj().parse().items():
@@ -145,9 +230,19 @@ def test_search_min_price_include_border(store_a, store_b):
 
 
 def test_search_max_price(store_a, store_b):
-    with mock.patch.object(Store, 'get_products_to_quantities', return_value={"1": (Product("name", "A", 1, ["cats"]), 5), "2": (Product("B", "A", 3, ["cats", "dogs"]), 7)}):
-        with mock.patch.object(StoresManager, 'get_stores_details',
-                               return_value=Response(True, ParsableList([store_a, store_b]))):
+    with mock.patch.object(
+        Store,
+        "get_products_to_quantities",
+        return_value={
+            "1": (Product("name", "A", 1, ["cats"]), 5),
+            "2": (Product("B", "A", 3, ["cats", "dogs"]), 7),
+        },
+    ):
+        with mock.patch.object(
+            StoresManager,
+            "get_stores_details",
+            return_value=Response(True, ParsableList([store_a, store_b])),
+        ):
             res = SearchEngine.search_products(product_category="A", max_price=2.0)
             num_of_products = 0
             for store, products_to_quantities in res.get_obj().parse().items():
@@ -157,9 +252,19 @@ def test_search_max_price(store_a, store_b):
 
 
 def test_search_max_price_include_border(store_a, store_b):
-    with mock.patch.object(Store, 'get_products_to_quantities', return_value={"1": (Product("name", "A", 2, ["cats"]), 5), "2": (Product("B", "A", 3, ["cats", "dogs"]), 7)}):
-        with mock.patch.object(StoresManager, 'get_stores_details',
-                               return_value=Response(True, ParsableList([store_a, store_b]))):
+    with mock.patch.object(
+        Store,
+        "get_products_to_quantities",
+        return_value={
+            "1": (Product("name", "A", 2, ["cats"]), 5),
+            "2": (Product("B", "A", 3, ["cats", "dogs"]), 7),
+        },
+    ):
+        with mock.patch.object(
+            StoresManager,
+            "get_stores_details",
+            return_value=Response(True, ParsableList([store_a, store_b])),
+        ):
             res = SearchEngine.search_products(product_category="A", max_price=2.0)
             num_of_products = 0
             for store, products_to_quantities in res.get_obj().parse().items():

@@ -54,7 +54,7 @@ class TradingSystemManager:
     @staticmethod
     def search_products(
         product_name: str, product_category: str, min_price, max_price, keywords
-    ) -> Response[ParsableList[ProductData]]:
+    ) -> Response[dict]:
         return SearchEngine.search_products(
             product_name, product_category, min_price, max_price, keywords
         ).parse()
