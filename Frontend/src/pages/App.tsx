@@ -40,11 +40,12 @@ const theme = createMuiTheme({
 
 function App() {
 	const [signedIn, setSignedIn] = useState<boolean>(false);
+	const [username, setUsername] = useState<string>('Guest');
 	const { request } = useAPI<{ cookie: string }>('/get_cookie');
 	const [cookie, setCookie] = useState<string>('');
 	const [productsInCart, setProducts] = useState<ProductQuantity[]>([]);
 
-	const [notification, setNotification] = useState<string[]>([]);
+	const [notifications, setNotifications] = useState<string[]>([]);
 
 	type storesToProductsMapType = {
 		[key: string]: Product[];
@@ -53,18 +54,13 @@ function App() {
 	const storesToProducts = useRef<storesToProductsMapType>({});
 	const storesProducts = useAPI<storesToProductsMapType>('/search_product', {});
 	useEffect(() => {
-		// const client = new W3CWebSocket('ws://127.0.0.1:8000');
-		// client.onopen = () => {
-		// 	console.log('WebSocket Client Connected');
-		//   };
-		//   client.onmessage = (message) => {
-		// 	setNotification(old=>[...old,JSON.stringify(message)]);
-		//   };
-		// storesProducts.request().then(({data,error,errorMsg})=>{
-		//     if(!storesProducts.error && storesProducts.data!==null){
-		//         storesToProducts.current = storesProducts.data;
-		//     }
-		// })
+		const client = new W3CWebSocket('ws://127.0.0.1:5000/connect');
+		client.onopen = () => {
+			console.log('WebSocket Client Connected');
+		};
+		client.onmessage = (message) => {
+			setNotifications((old) => [...old, JSON.stringify(message)]);
+		};
 	}, []);
 
 	const getStoreByProductID = (id: string) => {
@@ -149,12 +145,16 @@ function App() {
 		}
 	};
 
-	useEffect(() => {
+	const getCookie = () => {
 		request({}, (data, error) => {
 			if (!error && data !== null) {
 				setCookie(data.data.cookie);
 			}
 		});
+	};
+
+	useEffect(() => {
+		getCookie();
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
 
@@ -166,7 +166,12 @@ function App() {
 						signedIn={signedIn}
 						products={productsInCart}
 						propHandleDelete={handleDeleteProduct}
-						notification={notification}
+						notifications={notifications}
+						logout={() => {
+							setSignedIn(false);
+							setCookie('');
+							getCookie();
+						}}
 					/>
 					<Switch>
 						<Route path="/" exact component={Home} />
@@ -182,7 +187,14 @@ function App() {
 							)}
 						/>
 						<Route path="/sign-in" exact>
-							{() => <SignIn onSignIn={() => setSignedIn(true)} />}
+							{() => (
+								<SignIn
+									onSignIn={(username) => {
+										setSignedIn(true);
+										setUsername(username);
+									}}
+								/>
+							)}
 						</Route>
 						<Route path="/sign-up" exact component={SignUp} />
 						<Route
@@ -202,7 +214,11 @@ function App() {
 						<Route path="/Purchase" exact component={Purchase} />
 						<Route path="/searchPage" exact component={SearchPage} />
 						{signedIn ? (
-							<Route path="/my-stores" exact component={MyStores} />
+							<Route
+								path="/my-stores"
+								exact
+								render={(props) => <MyStores {...props} username={username} />}
+							/>
 						) : (
 							<Redirect to="/" />
 						)}

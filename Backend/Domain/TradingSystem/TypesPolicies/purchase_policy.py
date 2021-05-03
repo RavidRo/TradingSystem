@@ -1,5 +1,7 @@
 import operator
+import threading
 
+from Backend.Domain.TradingSystem.TypesPolicies.Purchase_Composites.composite_purchase_rule import PurchaseRule
 from Backend.Domain.TradingSystem.TypesPolicies.Purchase_Composites.concrete_composites import AndCompositePurchaseRule, \
     OrCompositePurchaseRule, ConditioningCompositePurchaseRule
 from Backend.Domain.TradingSystem.TypesPolicies.Purchase_Composites.purchase_leaves import ConcreteLeaf
@@ -34,12 +36,14 @@ class DefaultPurchasePolicy(PurchasePolicy):
     def __init__(self):
         super().__init__()
         self.__id = 0
+        self.auto_id_lock = threading.Lock()
         # the root will be always an AndComposite
         self.__purchase_rules = AndCompositePurchaseRule(self.generate_id())
 
     def generate_id(self) -> str:
-        self.__id += 1
-        return str(self.__id)
+        with self.auto_id_lock:
+            self.__id += 1
+            return str(self.__id)
 
     """
     rule_details json of relevant details.
@@ -87,7 +91,6 @@ class DefaultPurchasePolicy(PurchasePolicy):
         if 'operator' not in rule_details.keys():
             return Response(False, msg="Missing type in details!")
         return Response(True, msg="No missing keys")
-
 
     def add_purchase_rule(self, rule_details: dict, rule_type: str, parent_id: str, clause: str= None) -> Response[None]:
         if rule_type == "simple":
@@ -166,8 +169,8 @@ class DefaultPurchasePolicy(PurchasePolicy):
         else:
             return Response(False, msg=f"invalid rule type: {rule_type}")
 
-    def get_purchase_rules(self):
-        return Response(True, obj= ParsableMap(self.parse()), msg="Here are the purchase rules")
+    def get_purchase_rules(self) -> Response[PurchasePolicy]:
+        return Response(True, obj=self, msg="Here are the purchase rules")
 
     def checkPolicy(self, products_to_quantities: dict, user_age: int) -> Response[None]:
         return self.__purchase_rules.operation(products_to_quantities, user_age)

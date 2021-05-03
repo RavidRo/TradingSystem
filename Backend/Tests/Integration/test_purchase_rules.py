@@ -203,7 +203,7 @@ def test_edit_not_existing_rule(store: Store, edited_simple_rule_details):
 
 
 # region move_purchase_rule tests
-def test_move_purchase_rule_sucess(store: Store, complex_rule_details, simple_rule_details_upper):
+def test_move_purchase_rule_success(store: Store, complex_rule_details, simple_rule_details_upper):
     add_complex_simple_rules(complex_rule_details, simple_rule_details_upper, store)
     another_complex_details = {'operator': 'and'}
     another_complex_parent_id = '1'

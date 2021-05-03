@@ -59,9 +59,6 @@ class User(IUser):
     ) -> Response[None]:
         return self.state.change_product_quantity_in_cart(store_id, product_id, new_amount)
 
-    def get_discounted_current_cart_price(self):
-        return self.state.get_discounted_current_cart_price()
-
     # 2.9
     def purchase_cart(self, user_age: int) -> Response[PrimitiveParsable[float]]:
         return self.state.buy_cart(user_age)
@@ -140,8 +137,10 @@ class User(IUser):
         )
 
     # 4.2
-    def add_discount(self, store_id: str, discount_data: dict, exist_id: str):
-        return self.state.add_discount(store_id, discount_data, exist_id)
+    def add_discount(
+        self, store_id: str, discount_data: dict, exist_id: str, condition_type: str = None
+    ):
+        return self.state.add_discount(store_id, discount_data, exist_id, condition_type)
 
     def move_discount(self, store_id: str, src_id: str, dest_id: str):
         return self.state.move_discount(store_id, src_id, dest_id)
@@ -157,24 +156,21 @@ class User(IUser):
         store_id: str,
         discount_id: str,
         percentage: float = None,
-        condition: dict = None,
         context: dict = None,
         duration=None,
     ):
-        return self.state.edit_simple_discount(
-            store_id, discount_id, percentage, condition, context, duration
-        )
+        return self.state.edit_simple_discount(store_id, discount_id, percentage, context, duration)
 
     def edit_complex_discount(
         self, store_id: str, discount_id: str, complex_type: str = None, decision_rule: str = None
     ):
-        return self.state.edit_complex_discount(discount_id, complex_type, decision_rule)
+        return self.state.edit_complex_discount(store_id, discount_id, complex_type, decision_rule)
 
     # 4.2
     def add_purchase_rule(
         self, store_id: str, rule_details: dict, rule_type: str, parent_id: str, clause: str = None
     ):
-        return self.state.add_purchase_rule(rule_details, rule_type, parent_id, clause)
+        return self.state.add_purchase_rule(store_id, rule_details, rule_type, parent_id, clause)
 
     # 4.2
     def remove_purchase_rule(self, store_id: str, rule_id: str):

@@ -41,9 +41,9 @@ export default function useAPI<Type>(
 				  })
 				: axios.post(endPoint, params);
 
-		let dataVar = data;
-		let errorVar = error;
-		let errorMsgVar = errorMsg;
+		let dataVar: APIResponse | null = null;
+		let errorVar: boolean = false;
+		let errorMsgVar: string = '';
 
 		return promise
 			.then((response) => {
@@ -60,12 +60,13 @@ export default function useAPI<Type>(
 			})
 			.finally(() => {
 				errorVar = errorVar || (dataVar !== null && !dataVar.succeeded);
+				// console.log('EXPLANATIONNNN: ');
 				setError(errorVar);
 				setLoading(false);
 				setData(dataVar);
 				errorMsgVar = dataVar?.error_msg ? dataVar?.error_msg : errorMsgVar;
 				setErrorMsg(errorMsgVar);
-				console.log({ data: dataVar, error: errorVar, errorMsg: errorMsgVar });
+				console.log({ endPoint, data: dataVar, error: errorVar, errorMsg: errorMsgVar });
 			})
 			.then(() => {
 				callback && callback(dataVar, errorVar, errorMsgVar);

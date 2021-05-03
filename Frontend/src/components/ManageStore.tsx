@@ -102,9 +102,10 @@ import ConditionsList from './Lists/ConditionsList';
 
 type ManageStoreProps = {
 	storeId: string;
+	appointment: Appointee;
 };
 
-const ManageStore: FC<ManageStoreProps> = ({ storeId }) => {
+const ManageStore: FC<ManageStoreProps> = ({ storeId, appointment }) => {
 	const [products, setProducts] = useState<ProductQuantity[]>([]);
 	const [store, setStore] = useState<Store | null>(null);
 
@@ -170,27 +171,44 @@ const ManageStore: FC<ManageStoreProps> = ({ storeId }) => {
 			<div className="my-store-cont">
 				{store && (
 					<>
-						<ProductsList
-							openTab={openTab}
-							products={products}
-							selectedItem={selectedItem}
-							setProducts={setProducts}
-							storeId={store.id}
-						/>
+						{appointment.permissions.includes('manage products') && (
+							<ProductsList
+								openTab={openTab}
+								products={products}
+								selectedItem={selectedItem}
+								setProducts={setProducts}
+								storeId={store.id}
+							/>
+						)}
 						<MyAppointeesList
 							onSelectAppointee={onSelectAppointee}
 							openTab={openTab}
 							selectedItem={selectedItem}
 							storeId={store.id}
 							store_name={store.name}
+							appointment={appointment}
 						/>
-						<AppointeesList
-							onSelectAppointee={onSelectAppointee}
-							selectedItem={selectedItem}
-							storeId={store.id}
-						/>
-						<DiscountsList openTab={openTab} products={products} storeId={store.id} />
-						<ConditionsList openTab={openTab} products={products} storeId={store.id} />
+						{appointment.permissions.includes('get appointments') && (
+							<AppointeesList
+								onSelectAppointee={onSelectAppointee}
+								selectedItem={selectedItem}
+								storeId={store.id}
+							/>
+						)}
+						{appointment.permissions.includes('manage discount policy') && (
+							<DiscountsList
+								openTab={openTab}
+								products={products}
+								storeId={store.id}
+							/>
+						)}
+						{appointment.permissions.includes('manage purchase policy') && (
+							<ConditionsList
+								openTab={openTab}
+								products={products}
+								storeId={store.id}
+							/>
+						)}
 					</>
 				)}
 			</div>

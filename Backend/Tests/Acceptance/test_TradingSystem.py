@@ -57,14 +57,98 @@ def _generate_store_name() -> str:
     store_lock.release()
     return store
 
+
 def _simple_rule_details_age() -> dict:
     return {'context': {'obj': 'user'}, 'operator': 'great-equals', 'target': 18}
+
+
+def _simple_rule_details_age_edited() -> dict:
+    return {'context': {'obj': 'user'}, 'operator': 'great-equals', 'target': 21}
+
+
+def _simple_rule_details_product() -> dict:
+    return {'context': {'obj': 'product', 'identifier': '1'}, 'operator': 'less-than', 'target': 10}
+
 
 def _simple_rule_details_age_invalid_operator() -> dict:
     return {'context': {'obj': 'user'}, 'operator': 'invalid', 'target': 18}
 
+
 def _simple_rule_details_age_missing_key_target() -> dict:
     return {'context': {'obj': 'user'}, 'operator': 'invalid'}
+
+
+def _complex_rule_details_or() -> dict:
+    return {'operator': 'or'}
+
+
+def _complex_rule_details_and() -> dict:
+    return {'operator': 'and'}
+
+
+def _complex_rule_details_conditioning() -> dict:
+    return {'operator': 'conditional'}
+
+
+def _complex_rule_details_invalid_operator() -> dict:
+    return {'operator': 'invalid'}
+
+
+def _complex_rule_details_missing_operator() -> dict:
+    return {}
+
+
+def _product_discount(product_id="123") -> dict:
+    return {'discount_type': 'simple',
+            'percentage': 50.0,
+            'context': {
+                'obj': 'product',
+                'id': product_id
+            }}
+
+
+def _category_discount() -> dict:
+    return {'discount_type': 'simple',
+            'percentage': 25.0,
+            'context': {
+                'obj': 'category',
+                'id': 'A'
+            }}
+
+
+def _store_discount() -> dict:
+    return {'discount_type': 'simple',
+            'percentage': 10.0,
+            'context': {
+                'obj': 'store'
+            }}
+
+
+def _complex_max_discount() -> dict:
+    return {'discount_type': 'complex',
+            'type': 'max'}
+
+
+def _complex_add_discount() -> dict:
+    return {'discount_type': 'complex',
+            'type': 'add'}
+
+
+def _complex_and_discount() -> dict:
+    return {'discount_type': 'complex',
+            'type': 'and'}
+
+
+def _complex_or_discount() -> dict:
+    return {'discount_type': 'complex',
+            'type': 'or'}
+
+
+def _complex_xor_discount() -> dict:
+    return {'discount_type': 'complex',
+            'type': 'xor',
+            'decision_rule': "first"}
+
 
 def _generate_product_name() -> str:
     global product_number
@@ -94,6 +178,8 @@ def test_register_used_username_fail():
     assert not res.succeeded()
 
     # 2.4 https://github.com/SeanPikulin/TradingSystem/blob/main/Documentation/Use%20Cases.md#24-Login
+
+
 def test_login_success():
     new_username = _generate_username()
     password = "aaa"
@@ -130,13 +216,13 @@ def test_login_wrong_password_fail():
         assert res.succeeded()
 
 
-#def test_open_store_unsupported_character_fail():
-    #     cookie, username, password, _ = _initialize_info(_generate_username(), "aaa")
-    #     store_name = "stαrbucks"
-    #     assert not system.create_store(cookie, store_name).succeeded()
-    # not a fail condition
+# def test_open_store_unsupported_character_fail():
+#     cookie, username, password, _ = _initialize_info(_generate_username(), "aaa")
+#     store_name = "stαrbucks"
+#     assert not system.create_store(cookie, store_name).succeeded()
+# not a fail condition
 
-    # 2.5 https://github.com/SeanPikulin/TradingSystem/blob/main/Documentation/Use%20Cases.md#25-Getting-store-information
+# 2.5 https://github.com/SeanPikulin/TradingSystem/blob/main/Documentation/Use%20Cases.md#25-Getting-store-information
 def test_get_store_information_success():
     store_details = system.get_stores_details()
     num_of_stores = len(store_details.object.values)
@@ -150,12 +236,12 @@ def test_get_store_information_success():
     )
 
 
-#def test_get_store_information_no_stores_fail():
-    #     cookie, username, password, _ = _initialize_info(_generate_username(), "aaa")
-    #     assert not system.get_stores_details().succeeded()  # an empty list evaluates to false
-    # assumed empty list means failure
+# def test_get_store_information_no_stores_fail():
+#     cookie, username, password, _ = _initialize_info(_generate_username(), "aaa")
+#     assert not system.get_stores_details().succeeded()  # an empty list evaluates to false
+# assumed empty list means failure
 
-    # 4.1 https://github.com/SeanPikulin/TradingSystem/blob/main/Documentation/Use%20Cases.md#41-Add-new-product
+# 4.1 https://github.com/SeanPikulin/TradingSystem/blob/main/Documentation/Use%20Cases.md#41-Add-new-product
 def test_add_new_product_success():
     cookie, username, password, store_name, store_id = _initialize_info(
         _generate_username(), "aaa", _generate_store_name()
@@ -178,6 +264,7 @@ def test_add_new_product_negative_quantity_fail():
     quantity = -10
     res = system.create_product(cookie, store_id, product_name, category, price, quantity)
     assert not res.succeeded()
+
 
 def test_add_new_product_negative_price_fail():
     cookie, username, password, store_name, store_id = _initialize_info(
@@ -437,6 +524,8 @@ def test_products_by_store_wrong_store_fail():
     assert not response.succeeded()
 
     # # 2.7 https://github.com/SeanPikulin/TradingSystem/blob/main/Documentation/Use%20Cases.md#27-Save-products-in-shopping-bag
+
+
 def test_add_to_cart_success():
     cookie, username, password, store_name, store_id = _initialize_info(
         _generate_username(), "aaa", _generate_store_name()
@@ -479,6 +568,8 @@ def test_add_to_cart_quantity_too_high_fail():
     assert not res.succeeded()
 
     # # 2.8 https://github.com/SeanPikulin/TradingSystem/blob/main/Documentation/Use%20Cases.md#28-Visit-cart
+
+
 def test_visit_cart_success():
     cookie, username, password, store_name, store_id = _initialize_info(
         _generate_username(), "aaa", _generate_store_name()
@@ -872,7 +963,7 @@ def test_get_purchase_history_no_payment_fail():
     assert len(response.object.values) == 0
 
     # 4.3 https://github.com/SeanPikulin/TradingSystem/blob/main/Documentation/Use%20Cases.md#43-Appoint-new-store-owner
-    # def test_appoint_store_owner_success():
+def test_appoint_store_owner_success():
     cookie, username, password, store_name, store_id = _initialize_info(
         _generate_username(), "aaa", _generate_store_name()
     )
@@ -953,7 +1044,7 @@ def test_appoint_store_owner_circular_fail():
     assert not res.succeeded()
 
     # 4.5 https://github.com/SeanPikulin/TradingSystem/blob/main/Documentation/Use%20Cases.md#45-Appoint-new-store-manager
-    # def test_appoint_store_manager_success():
+def test_appoint_store_manager_success():
     cookie, username, password, store_name, store_id = _initialize_info(
         _generate_username(), "aaa", _generate_store_name()
     )
@@ -1543,7 +1634,7 @@ def test_admin_get_user_purchase_history_success():
     assert response.succeeded()
 
 
-#region parallel testing
+# region parallel testing
 _t_responses = []
 
 
@@ -1570,7 +1661,6 @@ def test_buy_last_product_together_fail():
         t2.start()
         t2.join()
         t1.join()
-        print(_t_responses[i * 2], _t_responses[i * 2 + 1])
         assert not (_t_responses[i * 2][1] and _t_responses[i * 2 + 1][1])
 
 
@@ -1608,7 +1698,6 @@ def test_buy_delete_product():
         t2.start()
         t2.join()
         t1.join()
-        print(_t_responses[i * 2], _t_responses[i * 2 + 1])
         # assert not (_t_responses[i * 2][1] and _t_responses[i * 2 + 1][1])
         if _t_responses[i * 2][1] and _t_responses[i * 2 + 1][1]:
             assert _t_responses[i * 2][1] == quantity - 1 or _t_responses[i * 2 + 1][1] == quantity - 1
@@ -1642,11 +1731,12 @@ def test_two_appointments():
         t2.join()
         a = _t_responses[i * 2]
         b = _t_responses[i * 2 + 1]
-        print(a, b)
         assert (a[1] and not b[1]) or (not a[1] and b[1])  # exactly one to succeed
-#endregion
 
-#region notifications tests
+
+# endregion
+
+# region notifications tests
 
 
 def apply(owner_queue, messages):
@@ -1654,7 +1744,9 @@ def apply(owner_queue, messages):
         owner_queue.put(message)
     return True
 
-def _initialize_info_notifications(username: str, password: str, connect: bool, store_name: str = None, owner_queue = None) -> tuple[str, str, str, str, str]:
+
+def _initialize_info_notifications(username: str, password: str, connect: bool, store_name: str = None,
+                                   owner_queue=None) -> tuple[str, str, str, str, str]:
     store_id = ""
     cookie = system.enter_system()
 
@@ -1671,9 +1763,11 @@ def _initialize_info_notifications(username: str, password: str, connect: bool, 
 def test_store_owner_notification_after_purchase():
     first_owner_queue = Queue()
     cookie, username, password, store_name, store_id = _initialize_info_notifications(_generate_username(), "aaa", True,
-                                                                                      _generate_store_name(), owner_queue=first_owner_queue)
+                                                                                      _generate_store_name(),
+                                                                                      owner_queue=first_owner_queue)
     new_cookie, new_username, new_password_, _, _ = _initialize_info(_generate_username(), "bbb")
-    product_id, product_name, category, price, quantity = _create_product(cookie, store_id, _generate_product_name(),"A", 5.50, 10)
+    product_id, product_name, category, price, quantity = _create_product(cookie, store_id, _generate_product_name(),
+                                                                          "A", 5.50, 10)
     system.save_product_in_cart(new_cookie, store_id, product_id, 1)
     user_age = 25
     price = system.purchase_cart(new_cookie, user_age)
@@ -1683,10 +1777,12 @@ def test_store_owner_notification_after_purchase():
 
 def test_store_owner_notification_after_purchase_owner_not_connected():
     first_owner_queue = Queue()
-    cookie, username, password, store_name, store_id = _initialize_info_notifications(_generate_username(), "aaa", False,
+    cookie, username, password, store_name, store_id = _initialize_info_notifications(_generate_username(), "aaa",
+                                                                                      False,
                                                                                       _generate_store_name())
     new_cookie, new_username, new_password_, _, _ = _initialize_info(_generate_username(), "bbb")
-    product_id, product_name, category, price, quantity = _create_product(cookie, store_id, _generate_product_name(),"A", 5.50, 10)
+    product_id, product_name, category, price, quantity = _create_product(cookie, store_id, _generate_product_name(),
+                                                                          "A", 5.50, 10)
     system.save_product_in_cart(new_cookie, store_id, product_id, 1)
     user_age = 25
     system.purchase_cart(new_cookie, user_age)
@@ -1698,7 +1794,8 @@ def test_store_multiple_owners_notification_after_purchase_all_connected():
     first_owner_queue = Queue()
     second_owner_queue = Queue()
     cookie, username, password, store_name, store_id = _initialize_info_notifications(_generate_username(), "aaa", True,
-                                                                                      _generate_store_name(), first_owner_queue)
+                                                                                      _generate_store_name(),
+                                                                                      first_owner_queue)
 
     new_owner_cookie, new_owner_username, new_owner_password, _, _ = _initialize_info(
         _generate_username(), "bbb"
@@ -1706,24 +1803,27 @@ def test_store_multiple_owners_notification_after_purchase_all_connected():
     system.appoint_owner(cookie, store_id, new_owner_username)
     system.connect(new_owner_cookie, lambda messages: apply(second_owner_queue, messages))
     new_cookie, new_username, new_password_, _, _ = _initialize_info(_generate_username(), "bbb")
-    product_id, product_name, category, price, quantity = _create_product(cookie, store_id, _generate_product_name(), "A", 5.50, 10)
+    product_id, product_name, category, price, quantity = _create_product(cookie, store_id, _generate_product_name(),
+                                                                          "A", 5.50, 10)
     system.save_product_in_cart(new_cookie, store_id, product_id, 1)
     user_age = 25
     system.purchase_cart(new_cookie, user_age)
     system.send_payment(new_cookie, "", "")
-    assert(
-    not first_owner_queue.empty()
-    and not second_owner_queue.empty()
-    and system.empty_notifications(cookie)
-    and system.empty_notifications(new_owner_cookie)
+    assert (
+            not first_owner_queue.empty()
+            and not second_owner_queue.empty()
+            and system.empty_notifications(cookie)
+            and system.empty_notifications(new_owner_cookie)
     )
 
 
 def test_store_multiple_owners_notification_after_purchase_one_connected():
     first_owner_queue = Queue()
     second_owner_queue = Queue()
-    cookie, username, password, store_name, store_id = _initialize_info_notifications(_generate_username(), "aaa", False,
-                                                                                      _generate_store_name(), first_owner_queue)
+    cookie, username, password, store_name, store_id = _initialize_info_notifications(_generate_username(), "aaa",
+                                                                                      False,
+                                                                                      _generate_store_name(),
+                                                                                      first_owner_queue)
 
     new_owner_cookie, new_owner_username, new_owner_password, _, _ = _initialize_info(
         _generate_username(), "bbb"
@@ -1731,22 +1831,24 @@ def test_store_multiple_owners_notification_after_purchase_one_connected():
     system.appoint_owner(cookie, store_id, new_owner_username)
     system.connect(new_owner_cookie, lambda messages: apply(second_owner_queue, messages))
     new_cookie, new_username, new_password_, _, _ = _initialize_info(_generate_username(), "bbb")
-    product_id, product_name, category, price, quantity = _create_product(cookie, store_id, _generate_product_name(), "A", 5.50, 10)
+    product_id, product_name, category, price, quantity = _create_product(cookie, store_id, _generate_product_name(),
+                                                                          "A", 5.50, 10)
     system.save_product_in_cart(new_cookie, store_id, product_id, 1)
     user_age = 25
     system.purchase_cart(new_cookie, user_age)
     system.send_payment(new_cookie, "", "")
-    assert(
-    first_owner_queue.empty()
-    and not second_owner_queue.empty()
-    and not system.empty_notifications(cookie)
-    and system.empty_notifications(new_owner_cookie)
+    assert (
+            first_owner_queue.empty()
+            and not second_owner_queue.empty()
+            and not system.empty_notifications(cookie)
+            and system.empty_notifications(new_owner_cookie)
     )
 
 
 def test_connect_after_notification_sent():
     first_owner_queue = Queue()
-    cookie, username, password, store_name, store_id = _initialize_info_notifications(_generate_username(), "aaa", False,
+    cookie, username, password, store_name, store_id = _initialize_info_notifications(_generate_username(), "aaa",
+                                                                                      False,
                                                                                       _generate_store_name(),
                                                                                       first_owner_queue)
     new_cookie, new_username, new_password_, _, _ = _initialize_info(_generate_username(), "bbb")
@@ -1760,17 +1862,20 @@ def test_connect_after_notification_sent():
     pending_before_connect_empty = system.empty_notifications(cookie)
     system.connect(cookie, lambda messages: apply(first_owner_queue, messages))
     assert (
-        first_queue_before_connect_empty
-        and not pending_before_connect_empty
-        and not first_owner_queue.empty()
-        and system.empty_notifications(cookie)
+            first_queue_before_connect_empty
+            and not pending_before_connect_empty
+            and not first_owner_queue.empty()
+            and system.empty_notifications(cookie)
     )
 
 
 def test_get_notification_after_remove_appointment_connected():
     first_owner_queue = Queue()
-    cookie, username, password, store_name, store_id = _initialize_info_notifications(_generate_username(), "aaa", False, _generate_store_name())
-    new_cookie, new_username, new_password_, _, _ = _initialize_info_notifications(_generate_username(), "bbb", connect=True, owner_queue=first_owner_queue)
+    cookie, username, password, store_name, store_id = _initialize_info_notifications(_generate_username(), "aaa",
+                                                                                      False, _generate_store_name())
+    new_cookie, new_username, new_password_, _, _ = _initialize_info_notifications(_generate_username(), "bbb",
+                                                                                   connect=True,
+                                                                                   owner_queue=first_owner_queue)
     system.appoint_manager(cookie, store_id, new_username)
     system.remove_appointment(cookie, store_id, new_username)
     assert not first_owner_queue.empty() and system.empty_notifications(new_cookie)
@@ -1778,8 +1883,10 @@ def test_get_notification_after_remove_appointment_connected():
 
 def test_get_notification_after_remove_appointment_not_connected():
     first_owner_queue = Queue()
-    cookie, username, password, store_name, store_id = _initialize_info_notifications(_generate_username(), "aaa", False, _generate_store_name())
-    new_cookie, new_username, new_password_, _, _ = _initialize_info_notifications(_generate_username(), "bbb", connect=False)
+    cookie, username, password, store_name, store_id = _initialize_info_notifications(_generate_username(), "aaa",
+                                                                                      False, _generate_store_name())
+    new_cookie, new_username, new_password_, _, _ = _initialize_info_notifications(_generate_username(), "bbb",
+                                                                                   connect=False)
     system.appoint_manager(cookie, store_id, new_username)
     system.remove_appointment(cookie, store_id, new_username)
     assert first_owner_queue.empty() and not system.empty_notifications(new_cookie)
@@ -1804,24 +1911,1798 @@ def test_connect_after_get_notification():
             and system.empty_notifications(cookie)
     )
 
-#endregion
+# endregion
 
 
-#region 4.2  purchase tests
+# region 4.2  purchase tests
 
-# def test_add_simple_rule_success():
-#     cookie, username, password, store_name, store_id = _initialize_info(_generate_username(), "aaa",
-#                                                                         _generate_store_name())
-#     parent_id = '1'
-#     response_add = system.add_purchase_rule(cookie, store_id, _simple_rule_details_age(), 'simple', parent_id)
-#     store_rules = system.get_purchase_policy(cookie, store_id)
-#     added_rule = store_rules['children'][0]
-#     del added_rule['id']
-#     assert response_add.succeeded() and added_rule == _simple_rule_details_age()
+# region add_purchase_rules
+def test_purchase_add_simple_rule_success():
+    cookie, username, password, store_name, store_id = _initialize_info(_generate_username(), "aaa",
+                                                                        _generate_store_name())
+    parent_id = '1'
+    response_add = system.add_purchase_rule(cookie, store_id, _simple_rule_details_age(), 'simple', parent_id)
+    assert response_add.succeeded()
 
 
-# def test_add_complex_rule_success():
+def test_purchase_add_simple_rule_invalid_fail():
+    cookie, username, password, store_name, store_id = _initialize_info(_generate_username(), "aaa",
+                                                                        _generate_store_name())
+    parent_id = '1'
+    response_add = system.add_purchase_rule(cookie, store_id, _simple_rule_details_age_invalid_operator(), 'simple',
+                                            parent_id)
+    assert not response_add.succeeded()
 
 
+def test_purchase_add_simple_rule_missing_key_fail():
+    cookie, username, password, store_name, store_id = _initialize_info(_generate_username(), "aaa",
+                                                                        _generate_store_name())
+    parent_id = '1'
+    response_add = system.add_purchase_rule(cookie, store_id, _simple_rule_details_age_missing_key_target(), 'simple',
+                                            parent_id)
+    assert not response_add.succeeded()
+
+
+def test_purchase_add_complex_rule_success():
+    cookie, username, password, store_name, store_id = _initialize_info(_generate_username(), "aaa",
+                                                                        _generate_store_name())
+    parent_id = '1'
+    response_add = system.add_purchase_rule(cookie, store_id, _complex_rule_details_or(), 'complex', parent_id)
+    assert response_add.succeeded()
+
+
+def test_purchase_add_complex_rule_invalid_fail():
+    cookie, username, password, store_name, store_id = _initialize_info(_generate_username(), "aaa",
+                                                                        _generate_store_name())
+    parent_id = '1'
+    response_add = system.add_purchase_rule(cookie, store_id, _complex_rule_details_invalid_operator(), 'complex',
+                                            parent_id)
+    assert not response_add.succeeded()
+
+
+def test_purchase_add_complex_missing_key_fail():
+    cookie, username, password, store_name, store_id = _initialize_info(_generate_username(), "aaa",
+                                                                        _generate_store_name())
+    parent_id = '1'
+    response_add = system.add_purchase_rule(cookie, store_id, _complex_rule_details_missing_operator(), 'complex',
+                                            parent_id)
+    assert not response_add.succeeded()
+
+
+def test_purchase_add_complex_success_simple_child_invalid():
+    cookie, username, password, store_name, store_id = _initialize_info(_generate_username(), "aaa",
+                                                                        _generate_store_name())
+    parent_id = '1'
+    response_add_complex = system.add_purchase_rule(cookie, store_id, _complex_rule_details_or(), 'complex',
+                                                    parent_id)
+    parent_or_id = '2'
+    response_add_simple = system.add_purchase_rule(cookie, store_id, _simple_rule_details_age_invalid_operator(),
+                                                   'simple',
+                                                   parent_or_id)
+    assert response_add_complex.succeeded() and not response_add_simple.succeeded()
+
+
+def test_purchase_add_child_rule_to_not_existing_parent():
+    cookie, username, password, store_name, store_id = _initialize_info(_generate_username(), "aaa",
+                                                                        _generate_store_name())
+    parent_id = '2'
+    response_add_complex = system.add_purchase_rule(cookie, store_id, _complex_rule_details_or(), 'complex',
+                                                    parent_id)
+    assert not response_add_complex.succeeded()
+
+
+def test_purchase_add_rule_with_no_permission():
+    cookie, username, password, store_name, store_id = _initialize_info(_generate_username(), "aaa",
+                                                                        _generate_store_name())
+
+    new_cookie, new_username, new_password_, _, _ = _initialize_info(_generate_username(), "bbb")
+    parent_id = '1'
+    response_add_complex = system.add_purchase_rule(new_cookie, store_id, _complex_rule_details_or(), 'complex',
+                                                    parent_id)
+    assert not response_add_complex.succeeded()
+
+
+def test_purchase_add_rule_after_manager_appointment_with_no_permission():
+    cookie, username, password, store_name, store_id = _initialize_info(_generate_username(), "aaa",
+                                                                        _generate_store_name())
+
+    new_cookie, new_username, new_password_, _, _ = _initialize_info(_generate_username(), "bbb")
+    system.appoint_manager(cookie, store_id, new_username)
+    parent_id = '1'
+    response_add_complex = system.add_purchase_rule(new_cookie, store_id, _complex_rule_details_or(), 'complex',
+                                                    parent_id)
+    assert not response_add_complex.succeeded()
+
+
+def test_purchase_add_rule_after_manager_appointment_with_permission():
+    cookie, username, password, store_name, store_id = _initialize_info(_generate_username(), "aaa",
+                                                                        _generate_store_name())
+
+    new_cookie, new_username, new_password_, _, _ = _initialize_info(_generate_username(), "bbb")
+    system.appoint_manager(cookie, store_id, new_username)
+    new_responsibility = "manage_purchase_policy"
+    system.add_manager_permission(cookie, store_id, new_username, new_responsibility)
+    parent_id = '1'
+    response_add_complex = system.add_purchase_rule(new_cookie, store_id, _complex_rule_details_or(), 'complex',
+                                                    parent_id)
+    assert response_add_complex.succeeded()
+
+
+def test_purchase_founder_add_rule_to_other_store_fail():
+    cookie, username, password, store_name, store_id = _initialize_info(_generate_username(), "aaa",
+                                                                        _generate_store_name())
+
+    new_cookie, new_username, new_password, new_store_name, new_store_id = _initialize_info(_generate_username(), "bbb",
+                                                                                            _generate_store_name())
+
+    parent_id = '1'
+    response_add_complex = system.add_purchase_rule(new_cookie, store_id, _complex_rule_details_or(), 'complex',
+                                                    parent_id)
+    assert not response_add_complex.succeeded()
+
+
+def test_purchase_founder_add_rule_to_other_store_fail_but_self_success():
+    cookie, username, password, store_name, store_id = _initialize_info(_generate_username(), "aaa",
+                                                                        _generate_store_name())
+
+    new_cookie, new_username, new_password, new_store_name, new_store_id = _initialize_info(_generate_username(), "bbb",
+                                                                                            _generate_store_name())
+
+    parent_id = '1'
+    response_add_complex_wrong_store = system.add_purchase_rule(new_cookie, store_id, _complex_rule_details_or(),
+                                                                'complex',
+                                                                parent_id)
+
+    response_add_complex_right_store = system.add_purchase_rule(new_cookie, new_store_id, _complex_rule_details_or(),
+                                                                'complex',
+                                                                parent_id)
+    assert not response_add_complex_wrong_store.succeeded() and response_add_complex_right_store
+
+
+def test_purchase_add_complex_with_two_children():
+    cookie, username, password, store_name, store_id = _initialize_info(_generate_username(), "aaa",
+                                                                        _generate_store_name())
+    parent_id = '1'
+    response_add_complex = system.add_purchase_rule(cookie, store_id, _complex_rule_details_or(),
+                                                    'complex',
+                                                    parent_id)
+    response_add_simple_first = system.add_purchase_rule(cookie, store_id, _simple_rule_details_age(), 'simple', '2')
+    response_add_simple_second = system.add_purchase_rule(cookie, store_id, _simple_rule_details_product(), 'simple',
+                                                          '2')
+    assert response_add_complex.succeeded() and response_add_simple_first.succeeded() and response_add_simple_second.succeeded()
+
+def test_purchase_add_complex_conditioning():
+    cookie, username, password, store_name, store_id = _initialize_info(_generate_username(), "aaa",
+                                                                        _generate_store_name())
+    parent_id = '1'
+    response_add_complex = system.add_purchase_rule(cookie, store_id, _complex_rule_details_conditioning(),
+                                                    'complex',
+                                                    parent_id)
+
+    response_add_simple_first = system.add_purchase_rule(cookie, store_id, _simple_rule_details_age(), 'simple', '2', clause="test")
+    response_add_simple_second = system.add_purchase_rule(cookie, store_id, _simple_rule_details_product(), 'simple', '2',
+                                                         clause="then")
+
+    assert response_add_complex.succeeded() and response_add_simple_first.succeeded() and response_add_simple_second.succeeded()
+
+
+def test_purchase_add_complex_two_conditioning():
+    cookie, username, password, store_name, store_id = _initialize_info(_generate_username(), "aaa",
+                                                                        _generate_store_name())
+    parent_id = '1'
+    response_add_complex = system.add_purchase_rule(cookie, store_id, _complex_rule_details_conditioning(),
+                                                    'complex',
+                                                    parent_id)
+    response_add_complex_second = system.add_purchase_rule(cookie, store_id, _complex_rule_details_conditioning(),
+                                                    'complex',
+                                                    parent_id)
+    response_add_simple_rule = system.add_purchase_rule(cookie, store_id, _simple_rule_details_age(), 'simple', '3', clause='test')
+
+    assert response_add_complex.succeeded() and response_add_complex_second.succeeded() and response_add_simple_rule.succeeded()
+
+# endregion
+
+# region remove_purchase_rules
+
+def test_remove_conditional():
+    cookie, username, password, store_name, store_id = _initialize_info(_generate_username(), "aaa",
+                                                                        _generate_store_name())
+    parent_id = '1'
+    system.add_purchase_rule(cookie, store_id, _complex_rule_details_conditioning(),
+                                                    'complex',
+                                                    parent_id)
+    response_remove = system.remove_purchase_rule(cookie, store_id, '2')
+    assert response_remove.succeeded()
+
+def test_purchase_remove_simple_rule_success():
+    cookie, username, password, store_name, store_id = _initialize_info(_generate_username(), "aaa",
+                                                                        _generate_store_name())
+    parent_id = '1'
+    system.add_purchase_rule(cookie, store_id, _simple_rule_details_age(), 'simple', parent_id)
+    response_remove = system.remove_purchase_rule(cookie, store_id, '2')
+    assert response_remove.succeeded()
+
+
+def test_purchase_remove_not_existing_rule():
+    cookie, username, password, store_name, store_id = _initialize_info(_generate_username(), "aaa",
+                                                                        _generate_store_name())
+    parent_id = '1'
+    system.add_purchase_rule(cookie, store_id, _simple_rule_details_age_invalid_operator(), 'simple', parent_id)
+    response_remove = system.remove_purchase_rule(cookie, store_id, '3')
+    assert not response_remove.succeeded()
+
+
+def test_purchase_remove_root_rule_fail():
+    cookie, username, password, store_name, store_id = _initialize_info(_generate_username(), "aaa",
+                                                                        _generate_store_name())
+    response_remove = system.remove_purchase_rule(cookie, store_id, '1')
+    assert not response_remove.succeeded()
+
+
+def test_purchase_complex_rule_success():
+    cookie, username, password, store_name, store_id = _initialize_info(_generate_username(), "aaa",
+                                                                        _generate_store_name())
+    parent_id = '1'
+    system.add_purchase_rule(cookie, store_id, _complex_rule_details_or(), 'complex', parent_id)
+    response_remove = system.remove_purchase_rule(cookie, store_id, '2')
+    assert response_remove.succeeded()
+
+
+def test_purchase_remove_rule_with_no_permission():
+    cookie, username, password, store_name, store_id = _initialize_info(_generate_username(), "aaa",
+                                                                        _generate_store_name())
+
+    new_cookie, new_username, new_password_, _, _ = _initialize_info(_generate_username(), "bbb")
+    parent_id = '1'
+    system.add_purchase_rule(cookie, store_id, _complex_rule_details_or(), 'complex', parent_id)
+    response_remove_complex = system.remove_purchase_rule(new_cookie, store_id, '2')
+    assert not response_remove_complex.succeeded()
+
+
+def test_purchase_remove_rule_after_manager_appointment_with_no_permission():
+    cookie, username, password, store_name, store_id = _initialize_info(_generate_username(), "aaa",
+                                                                        _generate_store_name())
+
+    new_cookie, new_username, new_password_, _, _ = _initialize_info(_generate_username(), "bbb")
+    system.appoint_manager(cookie, store_id, new_username)
+    parent_id = '1'
+    system.add_purchase_rule(cookie, store_id, _complex_rule_details_or(), 'complex', parent_id)
+    response_remove_complex = system.remove_purchase_rule(new_cookie, store_id, '2')
+    assert not response_remove_complex.succeeded()
+
+
+def test_purchase_remove_rule_after_manager_appointment_with_permission():
+    cookie, username, password, store_name, store_id = _initialize_info(_generate_username(), "aaa",
+                                                                        _generate_store_name())
+
+    new_cookie, new_username, new_password_, _, _ = _initialize_info(_generate_username(), "bbb")
+    system.appoint_manager(cookie, store_id, new_username)
+    new_responsibility = "manage_purchase_policy"
+    system.add_manager_permission(cookie, store_id, new_username, new_responsibility)
+    parent_id = '1'
+    system.add_purchase_rule(cookie, store_id, _complex_rule_details_or(), 'complex', parent_id)
+    response_remove_complex = system.remove_purchase_rule(new_cookie, store_id, '2')
+    assert response_remove_complex.succeeded()
+
+
+def test_purchase_founder_remove_rule_to_other_store_fail():
+    cookie, username, password, store_name, store_id = _initialize_info(_generate_username(), "aaa",
+                                                                        _generate_store_name())
+
+    new_cookie, new_username, new_password, new_store_name, new_store_id = _initialize_info(_generate_username(), "bbb",
+                                                                                            _generate_store_name())
+
+    parent_id = '1'
+    system.add_purchase_rule(cookie, store_id, _complex_rule_details_or(), 'complex', parent_id)
+    response_remove_complex = system.remove_purchase_rule(new_cookie, store_id, '2')
+    assert not response_remove_complex.succeeded()
+
+
+def test_purchase_founder_remove_rule_to_other_store_fail_but_self_success():
+    cookie, username, password, store_name, store_id = _initialize_info(_generate_username(), "aaa",
+                                                                        _generate_store_name())
+
+    new_cookie, new_username, new_password, new_store_name, new_store_id = _initialize_info(_generate_username(), "bbb",
+                                                                                            _generate_store_name())
+
+    parent_id = '1'
+    system.add_purchase_rule(cookie, store_id, _complex_rule_details_or(), 'complex', parent_id)
+    system.add_purchase_rule(new_cookie, new_store_id, _complex_rule_details_or(), 'complex', parent_id)
+    response_remove_wrong = system.remove_purchase_rule(new_cookie, store_id, '2')
+    response_remove_right = system.remove_purchase_rule(new_cookie, new_store_id, '2')
+    assert not response_remove_wrong.succeeded() and response_remove_right
+
+
+def test_purchase_remove_complex_with_two_children():
+    cookie, username, password, store_name, store_id = _initialize_info(_generate_username(), "aaa",
+                                                                        _generate_store_name())
+    parent_id = '1'
+    system.add_purchase_rule(cookie, store_id, _complex_rule_details_or(),
+                             'complex',
+                             parent_id)
+    system.add_purchase_rule(cookie, store_id, _simple_rule_details_age(), 'simple', '2')
+    system.add_purchase_rule(cookie, store_id, _simple_rule_details_product(), 'simple', '2')
+    response_remove = system.remove_purchase_rule(cookie, store_id, '2')
+    assert response_remove.succeeded()
+
+
+# endregion
+
+# region edit_purchase_rules
+def test_purchase_edit_simple_rule_success():
+    cookie, username, password, store_name, store_id = _initialize_info(_generate_username(), "aaa",
+                                                                        _generate_store_name())
+    parent_id = '1'
+    system.add_purchase_rule(cookie, store_id, _simple_rule_details_age(), 'simple', parent_id)
+    response_edit = system.edit_purchase_rule(cookie, store_id, _simple_rule_details_age_edited(), '2', 'simple')
+    assert response_edit.succeeded()
+
+
+def test_purchase_edit_simple_rule_invalid_fail():
+    cookie, username, password, store_name, store_id = _initialize_info(_generate_username(), "aaa",
+                                                                        _generate_store_name())
+    parent_id = '1'
+    system.add_purchase_rule(cookie, store_id, _simple_rule_details_age(), 'simple', parent_id)
+    response_edit = system.edit_purchase_rule(cookie, store_id, _simple_rule_details_age_invalid_operator(), '2',
+                                              'simple')
+    assert not response_edit.succeeded()
+
+
+def test_purchase_edit_simple_rule_missing_key_fail():
+    cookie, username, password, store_name, store_id = _initialize_info(_generate_username(), "aaa",
+                                                                        _generate_store_name())
+    parent_id = '1'
+    system.add_purchase_rule(cookie, store_id, _simple_rule_details_age_missing_key_target(), 'simple', parent_id)
+    response_edit = system.edit_purchase_rule(cookie, store_id, _simple_rule_details_age_missing_key_target(), '2',
+                                              'simple')
+    assert not response_edit.succeeded()
+
+
+def test_purchase_edit_complex_rule_success():
+    cookie, username, password, store_name, store_id = _initialize_info(_generate_username(), "aaa",
+                                                                        _generate_store_name())
+    parent_id = '1'
+    system.add_purchase_rule(cookie, store_id, _complex_rule_details_or(), 'complex', parent_id)
+    response_edit = system.edit_purchase_rule(cookie, store_id, _complex_rule_details_and(), '2', 'complex')
+    assert response_edit.succeeded()
+
+
+def test_purchase_edit_complex_rule_invalid_fail():
+    cookie, username, password, store_name, store_id = _initialize_info(_generate_username(), "aaa",
+                                                                        _generate_store_name())
+    parent_id = '1'
+    system.add_purchase_rule(cookie, store_id, _complex_rule_details_or(), 'complex', parent_id)
+    response_edit = system.edit_purchase_rule(cookie, store_id, _complex_rule_details_invalid_operator(), '2',
+                                              'complex')
+    assert not response_edit.succeeded()
+
+
+def test_purchase_edit_complex_missing_key_fail():
+    cookie, username, password, store_name, store_id = _initialize_info(_generate_username(), "aaa",
+                                                                        _generate_store_name())
+    parent_id = '1'
+    system.add_purchase_rule(cookie, store_id, _complex_rule_details_or(), 'complex', parent_id)
+    response_edit = system.edit_purchase_rule(cookie, store_id, _complex_rule_details_missing_operator(), '2',
+                                              'complex')
+    assert not response_edit.succeeded()
+
+
+def test_purchase_edit_complex_success_simple_child_invalid():
+    cookie, username, password, store_name, store_id = _initialize_info(_generate_username(), "aaa",
+                                                                        _generate_store_name())
+    parent_id = '1'
+    system.add_purchase_rule(cookie, store_id, _complex_rule_details_or(), 'complex', parent_id)
+    parent_or_id = '2'
+    system.add_purchase_rule(cookie, store_id, _simple_rule_details_age_invalid_operator(), 'simple', parent_or_id)
+    response_edit_complex = system.edit_purchase_rule(cookie, store_id, _complex_rule_details_and(), '2', 'complex')
+    response_edit_simple = system.edit_purchase_rule(cookie, store_id, _simple_rule_details_age_invalid_operator(), '3',
+                                                     'simple')
+    assert response_edit_complex.succeeded() and not response_edit_simple.succeeded()
+
+
+def test_purchase_edit_child_not_existing_rule():
+    cookie, username, password, store_name, store_id = _initialize_info(_generate_username(), "aaa",
+                                                                        _generate_store_name())
+    parent_id = '2'
+    system.add_purchase_rule(cookie, store_id, _complex_rule_details_or(), 'complex', parent_id)
+    response_edit = system.edit_purchase_rule(cookie, store_id, _complex_rule_details_and(), '3', 'complex')
+    assert not response_edit.succeeded()
+
+
+def test_purchase_edit_rule_with_no_permission():
+    cookie, username, password, store_name, store_id = _initialize_info(_generate_username(), "aaa",
+                                                                        _generate_store_name())
+
+    new_cookie, new_username, new_password_, _, _ = _initialize_info(_generate_username(), "bbb")
+    parent_id = '1'
+    system.add_purchase_rule(cookie, store_id, _complex_rule_details_or(), 'complex', parent_id)
+    response_edit = system.edit_purchase_rule(new_cookie, store_id, _complex_rule_details_and(), '2', 'complex')
+    assert not response_edit.succeeded()
+
+
+def test_purchase_edit_rule_after_manager_appointment_with_no_permission():
+    cookie, username, password, store_name, store_id = _initialize_info(_generate_username(), "aaa",
+                                                                        _generate_store_name())
+
+    new_cookie, new_username, new_password_, _, _ = _initialize_info(_generate_username(), "bbb")
+    system.appoint_manager(cookie, store_id, new_username)
+    parent_id = '1'
+    system.add_purchase_rule(cookie, store_id, _complex_rule_details_or(), 'complex', parent_id)
+    response_edit = system.edit_purchase_rule(new_cookie, store_id, _complex_rule_details_and(), '2', 'complex')
+    assert not response_edit.succeeded()
+
+
+def test_purchase_edit_rule_after_manager_appointment_with_permission():
+    cookie, username, password, store_name, store_id = _initialize_info(_generate_username(), "aaa",
+                                                                        _generate_store_name())
+
+    new_cookie, new_username, new_password_, _, _ = _initialize_info(_generate_username(), "bbb")
+    system.appoint_manager(cookie, store_id, new_username)
+    new_responsibility = "manage_purchase_policy"
+    system.add_manager_permission(cookie, store_id, new_username, new_responsibility)
+    parent_id = '1'
+    added = system.add_purchase_rule(cookie, store_id, _complex_rule_details_or(), 'complex', parent_id)
+    response_edit = system.edit_purchase_rule(new_cookie, store_id, _complex_rule_details_and(), '2', 'complex')
+    assert response_edit.succeeded()
+
+
+def test_purchase_founder_edit_rule_to_other_store_fail():
+    cookie, username, password, store_name, store_id = _initialize_info(_generate_username(), "aaa",
+                                                                        _generate_store_name())
+
+    new_cookie, new_username, new_password, new_store_name, new_store_id = _initialize_info(_generate_username(), "bbb",
+                                                                                            _generate_store_name())
+
+    parent_id = '1'
+    system.add_purchase_rule(cookie, store_id, _complex_rule_details_or(), 'complex', parent_id)
+    response_edit = system.edit_purchase_rule(new_cookie, store_id, _complex_rule_details_and(), '2', 'complex')
+    assert not response_edit.succeeded()
+
+
+def test_purchase_founder_edit_rule_to_other_store_fail_but_self_success():
+    cookie, username, password, store_name, store_id = _initialize_info(_generate_username(), "aaa",
+                                                                        _generate_store_name())
+
+    new_cookie, new_username, new_password, new_store_name, new_store_id = _initialize_info(_generate_username(), "bbb",
+                                                                                            _generate_store_name())
+
+    parent_id = '1'
+    system.add_purchase_rule(new_cookie, new_store_id, _complex_rule_details_or(), 'complex', parent_id)
+    system.add_purchase_rule(cookie, store_id, _complex_rule_details_or(), 'complex', parent_id)
+    response_edit_wrong = system.edit_purchase_rule(new_cookie, store_id, _complex_rule_details_and(), '2', 'complex')
+    response_edit_right = system.edit_purchase_rule(new_cookie, new_store_id, _complex_rule_details_and(), '2',
+                                                    'complex')
+    assert response_edit_right.succeeded() and not response_edit_wrong.succeeded()
+
+
+def test_purchase_edit_complex_with_two_children():
+    cookie, username, password, store_name, store_id = _initialize_info(_generate_username(), "aaa",
+                                                                        _generate_store_name())
+    parent_id = '1'
+    system.add_purchase_rule(cookie, store_id, _complex_rule_details_or(), 'complex', parent_id)
+    system.add_purchase_rule(cookie, store_id, _simple_rule_details_age(), 'simple', '2')
+    system.add_purchase_rule(cookie, store_id, _simple_rule_details_product(), 'simple', '2')
+    response_edit_right = system.edit_purchase_rule(cookie, store_id, _complex_rule_details_and(), '2', 'complex')
+    assert response_edit_right.succeeded()
+
+
+# endregion
+
+# region move_purchase_rules
+def test_purchase_move_rule_success():
+    cookie, username, password, store_name, store_id = _initialize_info(_generate_username(), "aaa",
+                                                                        _generate_store_name())
+    parent_id = '1'
+    system.add_purchase_rule(cookie, store_id, _complex_rule_details_or(), 'complex', parent_id)
+    system.add_purchase_rule(cookie, store_id, _simple_rule_details_age(), 'simple', parent_id)
+    response_move = system.move_purchase_rule(cookie, store_id, '3', '2')
+    assert response_move.succeeded()
+
+
+def test_purchase_move_rule_with_no_permission():
+    cookie, username, password, store_name, store_id = _initialize_info(_generate_username(), "aaa",
+                                                                        _generate_store_name())
+
+    new_cookie, new_username, new_password_, _, _ = _initialize_info(_generate_username(), "bbb")
+    parent_id = '1'
+    system.add_purchase_rule(cookie, store_id, _complex_rule_details_or(), 'complex', parent_id)
+    system.add_purchase_rule(cookie, store_id, _simple_rule_details_age(), 'simple', parent_id)
+    response_move = system.move_purchase_rule(new_cookie, store_id, '3', '2')
+    assert not response_move.succeeded()
+
+
+def test_purchase_move_rule_after_manager_appointment_with_no_permission():
+    cookie, username, password, store_name, store_id = _initialize_info(_generate_username(), "aaa",
+                                                                        _generate_store_name())
+
+    new_cookie, new_username, new_password_, _, _ = _initialize_info(_generate_username(), "bbb")
+    system.appoint_manager(cookie, store_id, new_username)
+    parent_id = '1'
+    system.add_purchase_rule(cookie, store_id, _complex_rule_details_or(), 'complex', parent_id)
+    system.add_purchase_rule(cookie, store_id, _simple_rule_details_age(), 'simple', parent_id)
+    response_move = system.move_purchase_rule(new_cookie, store_id, '3', '2')
+    assert not response_move.succeeded()
+
+
+def test_purchase_move_rule_after_manager_appointment_with_permission():
+    cookie, username, password, store_name, store_id = _initialize_info(_generate_username(), "aaa",
+                                                                        _generate_store_name())
+
+    new_cookie, new_username, new_password_, _, _ = _initialize_info(_generate_username(), "bbb")
+    system.appoint_manager(cookie, store_id, new_username)
+    new_responsibility = "manage_purchase_policy"
+    system.add_manager_permission(cookie, store_id, new_username, new_responsibility)
+    parent_id = '1'
+    system.add_purchase_rule(cookie, store_id, _complex_rule_details_or(), 'complex', parent_id)
+    system.add_purchase_rule(cookie, store_id, _simple_rule_details_age(), 'simple', parent_id)
+    response_move = system.move_purchase_rule(new_cookie, store_id, '3', '2')
+    assert response_move.succeeded()
+
+
+def test_purchase_founder_move_rule_to_other_store_fail():
+    cookie, username, password, store_name, store_id = _initialize_info(_generate_username(), "aaa",
+                                                                        _generate_store_name())
+
+    new_cookie, new_username, new_password, new_store_name, new_store_id = _initialize_info(_generate_username(), "bbb",
+                                                                                            _generate_store_name())
+
+    parent_id = '1'
+    system.add_purchase_rule(cookie, store_id, _complex_rule_details_or(), 'complex', parent_id)
+    system.add_purchase_rule(cookie, store_id, _simple_rule_details_age(), 'simple', parent_id)
+    response_move = system.move_purchase_rule(new_cookie, store_id, '3', '2')
+    assert not response_move.succeeded()
+
+
+def test_purchase_founder_move_rule_to_other_store_fail_but_self_success():
+    cookie, username, password, store_name, store_id = _initialize_info(_generate_username(), "aaa",
+                                                                        _generate_store_name())
+
+    new_cookie, new_username, new_password, new_store_name, new_store_id = _initialize_info(_generate_username(), "bbb",
+                                                                                            _generate_store_name())
+
+    parent_id = '1'
+    system.add_purchase_rule(cookie, store_id, _complex_rule_details_or(), 'complex', parent_id)
+    system.add_purchase_rule(cookie, store_id, _simple_rule_details_age(), 'simple', parent_id)
+    system.add_purchase_rule(new_cookie, new_store_id, _complex_rule_details_or(), 'complex', parent_id)
+    system.add_purchase_rule(new_cookie, new_store_id, _simple_rule_details_age(), 'simple', parent_id)
+    response_move_wrong = system.move_purchase_rule(new_cookie, store_id, '3', '2')
+    response_move_right = system.move_purchase_rule(new_cookie, new_store_id, '3', '2')
+    assert response_move_right.succeeded() and not response_move_wrong.succeeded()
+
+
+def test_purchase_move_complex_with_children_success():
+    cookie, username, password, store_name, store_id = _initialize_info(_generate_username(), "aaa",
+                                                                        _generate_store_name())
+    parent_id = '1'
+    system.add_purchase_rule(cookie, store_id, _complex_rule_details_or(), 'complex', parent_id)
+    system.add_purchase_rule(cookie, store_id, _complex_rule_details_and(), 'complex', parent_id)
+    system.add_purchase_rule(cookie, store_id, _simple_rule_details_age(), 'simple', '3')
+    response_move = system.move_purchase_rule(cookie, store_id, '3', '2')
+    assert response_move.succeeded()
+
+
+def test_purchase_move_root_fail():
+    cookie, username, password, store_name, store_id = _initialize_info(_generate_username(), "aaa",
+                                                                        _generate_store_name())
+    parent_id = '1'
+    system.add_purchase_rule(cookie, store_id, _complex_rule_details_or(), 'complex', parent_id)
+    response_move = system.move_purchase_rule(cookie, store_id, '1', '2')
+    assert not response_move.succeeded()
+
+
+def test_purchase_move_to_leaf_as_parent_fail():
+    cookie, username, password, store_name, store_id = _initialize_info(_generate_username(), "aaa",
+                                                                        _generate_store_name())
+    parent_id = '1'
+    system.add_purchase_rule(cookie, store_id, _complex_rule_details_or(), 'complex', parent_id)
+    system.add_purchase_rule(cookie, store_id, _simple_rule_details_age(), 'simple', parent_id)
+    response_move = system.move_purchase_rule(cookie, store_id, '2', '3')
+    assert not response_move.succeeded()
+
+
+# endregion
+
+# region buy_products_with purchase rules
+
+@patch.multiple(ShoppingCart, interval_time=MagicMock(return_value=1))
+# age
+def test_purchase_cart_with_simple_age_rule_success():
+    cookie, username, password, store_name, store_id = _initialize_info(_generate_username(), "aaa",
+                                                                        _generate_store_name())
+    parent_id = '1'
+    system.add_purchase_rule(cookie, store_id, _simple_rule_details_age(), 'simple', parent_id)
+    product_id, product_name, category, price, quantity = _create_product(cookie, store_id, _generate_product_name(),
+                                                                          "A", 5.50, 10)
+    system.save_product_in_cart(cookie, store_id, product_id, 1)
+    user_age = 25
+    assert system.purchase_cart(cookie, user_age).succeeded()
+
+
+@patch.multiple(ShoppingCart, interval_time=MagicMock(return_value=1))
+def test_purchase_cart_with_simple_age_rule_fail():
+    cookie, username, password, store_name, store_id = _initialize_info(_generate_username(), "aaa",
+                                                                        _generate_store_name())
+    parent_id = '1'
+    system.add_purchase_rule(cookie, store_id, _simple_rule_details_age(), 'simple', parent_id)
+    product_id, product_name, category, price, quantity = _create_product(cookie, store_id, _generate_product_name(),
+                                                                          "A", 5.50, 10)
+    system.save_product_in_cart(cookie, store_id, product_id, 1)
+    user_age = 17
+    assert not system.purchase_cart(cookie, user_age).succeeded()
+
+
+# product
+@patch.multiple(ShoppingCart, interval_time=MagicMock(return_value=1))
+def test_purchase_cart_with_simple_product_rule_success():
+    cookie, username, password, store_name, store_id = _initialize_info(_generate_username(), "aaa",
+                                                                        _generate_store_name())
+    product_id, product_name, category, price, quantity = _create_product(cookie, store_id, _generate_product_name(),
+                                                                          "A", 5.50, 9)
+    product_simple_rule = {'context': {'obj': 'product', 'identifier': product_id}, 'operator': 'less-than',
+                           'target': 6}
+    system.add_purchase_rule(cookie, store_id, product_simple_rule, 'simple', '1')
+    system.save_product_in_cart(cookie, store_id, product_id, 5)
+    assert system.purchase_cart(cookie, 20).succeeded()
+
+
+@patch.multiple(ShoppingCart, interval_time=MagicMock(return_value=1))
+def test_purchase_cart_with_simple_product_rule_failed():
+    cookie, username, password, store_name, store_id = _initialize_info(_generate_username(), "aaa",
+                                                                        _generate_store_name())
+    product_id, product_name, category, price, quantity = _create_product(cookie, store_id, _generate_product_name(),
+                                                                          "A", 5.50, 9)
+    product_simple_rule = {'context': {'obj': 'product', 'identifier': product_id}, 'operator': 'less-than',
+                           'target': 6}
+    system.add_purchase_rule(cookie, store_id, product_simple_rule, 'simple', '1')
+    system.save_product_in_cart(cookie, store_id, product_id, 8)
+    assert not system.purchase_cart(cookie, 20).succeeded()
+
+
+# category
+@patch.multiple(ShoppingCart, interval_time=MagicMock(return_value=1))
+def test_purchase_cart_with_simple_category_rule_success():
+    cookie, username, password, store_name, store_id = _initialize_info(_generate_username(), "aaa",
+                                                                        _generate_store_name())
+    product_id, product_name, category, price, quantity = _create_product(cookie, store_id, _generate_product_name(),
+                                                                          "A", 5.50, 9)
+    new_product_id, new_product_name, category, new_price, new_quantity = _create_product(cookie, store_id,
+                                                                                          _generate_product_name(),
+                                                                                          "A", 9.50, 4)
+
+    product_simple_rule = {'context': {'obj': 'category', 'identifier': "A"}, 'operator': 'equals', 'target': 10}
+    system.add_purchase_rule(cookie, store_id, product_simple_rule, 'simple', '1')
+    system.save_product_in_cart(cookie, store_id, product_id, 7)
+    system.save_product_in_cart(cookie, store_id, new_product_id, 3)
+    assert system.purchase_cart(cookie, 20).succeeded()
+
+
+@patch.multiple(ShoppingCart, interval_time=MagicMock(return_value=1))
+def test_purchase_cart_with_simple_category_rule_fail():
+    cookie, username, password, store_name, store_id = _initialize_info(_generate_username(), "aaa",
+                                                                        _generate_store_name())
+    product_id, product_name, category, price, quantity = _create_product(cookie, store_id, _generate_product_name(),
+                                                                          "A", 5.50, 9)
+    new_product_id, new_product_name, category, new_price, new_quantity = _create_product(cookie, store_id,
+                                                                                          _generate_product_name(),
+                                                                                          "A", 9.50, 4)
+
+    product_simple_rule = {'context': {'obj': 'category', 'identifier': "A"}, 'operator': 'equals', 'target': 10}
+    system.add_purchase_rule(cookie, store_id, product_simple_rule, 'simple', '1')
+    system.save_product_in_cart(cookie, store_id, product_id, 5)
+    system.save_product_in_cart(cookie, store_id, new_product_id, 3)
+    assert not system.purchase_cart(cookie, 20).succeeded()
+
+
+# bag
+@patch.multiple(ShoppingCart, interval_time=MagicMock(return_value=1))
+def test_purchase_cart_with_simple_bag_rule_success():
+    cookie, username, password, store_name, store_id = _initialize_info(_generate_username(), "aaa",
+                                                                        _generate_store_name())
+    product_id, product_name, category, price, quantity = _create_product(cookie, store_id, _generate_product_name(),
+                                                                          "A", 8.0, 9)
+    new_product_id, new_product_name, category, new_price, new_quantity = _create_product(cookie, store_id,
+                                                                                          _generate_product_name(),
+                                                                                          "A", 10.0, 4)
+
+    product_simple_rule = {'context': {'obj': 'bag'}, 'operator': 'great-than', 'target': 50}
+    system.add_purchase_rule(cookie, store_id, product_simple_rule, 'simple', '1')
+    system.save_product_in_cart(cookie, store_id, product_id, 3)
+    system.save_product_in_cart(cookie, store_id, new_product_id, 3)
+    assert system.purchase_cart(cookie, 20).succeeded()
+
+
+@patch.multiple(ShoppingCart, interval_time=MagicMock(return_value=1))
+def test_purchase_cart_with_simple_bag_rule_fail():
+    cookie, username, password, store_name, store_id = _initialize_info(_generate_username(), "aaa",
+                                                                        _generate_store_name())
+    product_id, product_name, category, price, quantity = _create_product(cookie, store_id, _generate_product_name(),
+                                                                          "A", 8.0, 9)
+    new_product_id, new_product_name, category, new_price, new_quantity = _create_product(cookie, store_id,
+                                                                                          _generate_product_name(),
+                                                                                          "A", 10.0, 4)
+
+    product_simple_rule = {'context': {'obj': 'bag'}, 'operator': 'great-than', 'target': 60}
+    system.add_purchase_rule(cookie, store_id, product_simple_rule, 'simple', '1')
+    system.save_product_in_cart(cookie, store_id, product_id, 3)
+    system.save_product_in_cart(cookie, store_id, new_product_id, 3)
+    assert not system.purchase_cart(cookie, 20).succeeded()
+
+
+# or
+@patch.multiple(ShoppingCart, interval_time=MagicMock(return_value=1))
+def test_purchase_cart_with_complex_or_rule_success():
+    cookie, username, password, store_name, store_id = _initialize_info(_generate_username(), "aaa",
+                                                                        _generate_store_name())
+    product_id, product_name, category, price, quantity = _create_product(cookie, store_id, _generate_product_name(),
+                                                                          "A", 5.50, 9)
+    parent_id = '1'
+    system.add_purchase_rule(cookie, store_id, _complex_rule_details_or(), 'complex', parent_id)
+    system.add_purchase_rule(cookie, store_id, _simple_rule_details_age(), 'simple', '2')
+    product_simple_rule = {'context': {'obj': 'product', 'identifier': product_id}, 'operator': 'less-than',
+                           'target': 10}
+    system.add_purchase_rule(cookie, store_id, product_simple_rule, 'simple', '2')
+    system.save_product_in_cart(cookie, store_id, product_id, 9)
+    user_age = 17
+    assert system.purchase_cart(cookie, user_age).succeeded()
+
+
+@patch.multiple(ShoppingCart, interval_time=MagicMock(return_value=1))
+def test_purchase_cart_with_complex_or_rule_fail():
+    cookie, username, password, store_name, store_id = _initialize_info(_generate_username(), "aaa",
+                                                                        _generate_store_name())
+    product_id, product_name, category, price, quantity = _create_product(cookie, store_id, _generate_product_name(),
+                                                                          "A", 5.50, 9)
+    parent_id = '1'
+    system.add_purchase_rule(cookie, store_id, _complex_rule_details_or(), 'complex', parent_id)
+    system.add_purchase_rule(cookie, store_id, _simple_rule_details_age(), 'simple', '2')
+    product_simple_rule = {'context': {'obj': 'product', 'identifier': product_id}, 'operator': 'less-than',
+                           'target': 6}
+    system.add_purchase_rule(cookie, store_id, product_simple_rule, 'simple', '2')
+    system.save_product_in_cart(cookie, store_id, product_id, 9)
+    user_age = 17
+    assert not system.purchase_cart(cookie, user_age).succeeded()
+
+
+# and
+@patch.multiple(ShoppingCart, interval_time=MagicMock(return_value=1))
+def test_purchase_cart_with_complex_and_rule_success():
+    cookie, username, password, store_name, store_id = _initialize_info(_generate_username(), "aaa",
+                                                                        _generate_store_name())
+    product_id, product_name, category, price, quantity = _create_product(cookie, store_id, _generate_product_name(),
+                                                                          "A", 8.5, 9)
+    new_product_id, new_product_name, category, new_price, new_quantity = _create_product(cookie, store_id,
+                                                                                          _generate_product_name(),
+                                                                                          "A", 10.0, 4)
+    parent_id = '1'
+    simple_rule_bag = {'context': {'obj': 'bag'}, 'operator': 'great-than', 'target': 50}
+    simple_rule_category = {'context': {'obj': 'category', 'identifier': "A"}, 'operator': 'equals', 'target': 6}
+    system.add_purchase_rule(cookie, store_id, _complex_rule_details_and(), 'complex', parent_id)
+    system.add_purchase_rule(cookie, store_id, simple_rule_bag, 'simple', '2')
+    system.add_purchase_rule(cookie, store_id, simple_rule_category, 'simple', '2')
+    system.save_product_in_cart(cookie, store_id, product_id, 3)
+    system.save_product_in_cart(cookie, store_id, new_product_id, 3)
+    user_age = 17
+    assert system.purchase_cart(cookie, user_age).succeeded()
+
+
+@patch.multiple(ShoppingCart, interval_time=MagicMock(return_value=1))
+def test_purchase_cart_with_complex_and_rule_fail():
+    cookie, username, password, store_name, store_id = _initialize_info(_generate_username(), "aaa",
+                                                                        _generate_store_name())
+    product_id, product_name, category, price, quantity = _create_product(cookie, store_id, _generate_product_name(),
+                                                                          "A", 8.0, 9)
+    new_product_id, new_product_name, category, new_price, new_quantity = _create_product(cookie, store_id,
+                                                                                          _generate_product_name(),
+                                                                                          "A", 10.0, 4)
+    parent_id = '1'
+    simple_rule_bag = {'context': {'obj': 'bag'}, 'operator': 'great-than', 'target': 50}
+    simple_rule_category = {'context': {'obj': 'category', 'identifier': "A"}, 'operator': 'equals', 'target': 7}
+    system.add_purchase_rule(cookie, store_id, _complex_rule_details_and(), 'complex', parent_id)
+    system.add_purchase_rule(cookie, store_id, simple_rule_bag, 'simple', '2')
+    system.add_purchase_rule(cookie, store_id, simple_rule_category, 'simple', '2')
+    system.save_product_in_cart(cookie, store_id, product_id, 3)
+    system.save_product_in_cart(cookie, store_id, new_product_id, 3)
+    user_age = 17
+    assert not system.purchase_cart(cookie, user_age).succeeded()
+
+
+# conditioning
+
+@patch.multiple(ShoppingCart, interval_time=MagicMock(return_value=1))
+def test_purchase_cart_with_complex_conditioning_rule_success():
+    cookie, username, password, store_name, store_id = _initialize_info(_generate_username(), "aaa",
+                                                                        _generate_store_name())
+    product_id, product_name, category, price, quantity = _create_product(cookie, store_id, _generate_product_name(),
+                                                                          "A", 8.5, 9)
+    new_product_id, new_product_name, category, new_price, new_quantity = _create_product(cookie, store_id,
+                                                                                          _generate_product_name(),
+                                                                                          "A", 10.0, 4)
+    parent_id = '1'
+    simple_rule_bag = {'context': {'obj': 'bag'}, 'operator': 'great-than', 'target': 50}
+    simple_rule_category = {'context': {'obj': 'category', 'identifier': "A"}, 'operator': 'equals', 'target': 6}
+    system.add_purchase_rule(cookie, store_id, _complex_rule_details_conditioning(), 'complex', parent_id)
+    system.add_purchase_rule(cookie, store_id, simple_rule_bag, 'simple', '2', clause='test')
+    system.add_purchase_rule(cookie, store_id, simple_rule_category, 'simple', '2', clause='then')
+    system.save_product_in_cart(cookie, store_id, product_id, 3)
+    system.save_product_in_cart(cookie, store_id, new_product_id, 3)
+    user_age = 17
+    assert system.purchase_cart(cookie, user_age).succeeded()
+
+
+@patch.multiple(ShoppingCart, interval_time=MagicMock(return_value=1))
+def test_purchase_cart_with_complex_conditioning_rule_success_test_clause_false():
+    cookie, username, password, store_name, store_id = _initialize_info(_generate_username(), "aaa",
+                                                                        _generate_store_name())
+    product_id, product_name, category, price, quantity = _create_product(cookie, store_id, _generate_product_name(),
+                                                                          "A", 8.5, 9)
+    new_product_id, new_product_name, category, new_price, new_quantity = _create_product(cookie, store_id,
+                                                                                          _generate_product_name(),
+                                                                                          "A", 10.0, 4)
+    parent_id = '1'
+    simple_rule_bag = {'context': {'obj': 'bag'}, 'operator': 'great-than', 'target': 60}
+    simple_rule_category = {'context': {'obj': 'category', 'identifier': "A"}, 'operator': 'equals', 'target': 6}
+    system.add_purchase_rule(cookie, store_id, _complex_rule_details_conditioning(), 'complex', parent_id)
+    system.add_purchase_rule(cookie, store_id, simple_rule_bag, 'simple', '2', clause='test')
+    system.add_purchase_rule(cookie, store_id, simple_rule_category, 'simple', '2', clause='then')
+    system.save_product_in_cart(cookie, store_id, product_id, 3)
+    system.save_product_in_cart(cookie, store_id, new_product_id, 3)
+    user_age = 17
+    assert system.purchase_cart(cookie, user_age).succeeded()
+
+
+@patch.multiple(ShoppingCart, interval_time=MagicMock(return_value=1))
+def test_purchase_cart_with_complex_conditioning_rule_fail():
+    cookie, username, password, store_name, store_id = _initialize_info(_generate_username(), "aaa",
+                                                                        _generate_store_name())
+    product_id, product_name, category, price, quantity = _create_product(cookie, store_id, _generate_product_name(),
+                                                                          "A", 8.5, 9)
+    new_product_id, new_product_name, category, new_price, new_quantity = _create_product(cookie, store_id,
+                                                                                          _generate_product_name(),
+                                                                                          "A", 10.0, 4)
+    parent_id = '1'
+    simple_rule_bag = {'context': {'obj': 'bag'}, 'operator': 'great-than', 'target': 50}
+    simple_rule_category = {'context': {'obj': 'category', 'identifier': "A"}, 'operator': 'equals', 'target': 8}
+    system.add_purchase_rule(cookie, store_id, _complex_rule_details_conditioning(), 'complex', parent_id)
+    system.add_purchase_rule(cookie, store_id, simple_rule_bag, 'simple', '2', clause='test')
+    system.add_purchase_rule(cookie, store_id, simple_rule_category, 'simple', '2', clause='then')
+    system.save_product_in_cart(cookie, store_id, product_id, 3)
+    system.save_product_in_cart(cookie, store_id, new_product_id, 3)
+    user_age = 17
+    assert not system.purchase_cart(cookie, user_age).succeeded()
+
+
+@patch.multiple(ShoppingCart, interval_time=MagicMock(return_value=1))
+def test_purchase_cart_with_condition_fail_then_remove_purchase_success():
+    cookie, username, password, store_name, store_id = _initialize_info(_generate_username(), "aaa",
+                                                                        _generate_store_name())
+    product_id, product_name, category, price, quantity = _create_product(cookie, store_id, _generate_product_name(),
+                                                                          "A", 8.5, 9)
+    new_product_id, new_product_name, category, new_price, new_quantity = _create_product(cookie, store_id,
+                                                                                          _generate_product_name(),
+                                                                                          "A", 10.0, 4)
+    parent_id = '1'
+    simple_rule_bag = {'context': {'obj': 'bag'}, 'operator': 'great-than', 'target': 50}
+    simple_rule_category = {'context': {'obj': 'category', 'identifier': "A"}, 'operator': 'equals', 'target': 8}
+    system.add_purchase_rule(cookie, store_id, _complex_rule_details_conditioning(), 'complex', parent_id)
+    system.add_purchase_rule(cookie, store_id, simple_rule_bag, 'simple', '2', clause='test')
+    system.add_purchase_rule(cookie, store_id, simple_rule_category, 'simple', '2', clause='then')
+    system.save_product_in_cart(cookie, store_id, product_id, 3)
+    system.save_product_in_cart(cookie, store_id, new_product_id, 3)
+    user_age = 17
+    response_with_condition = system.purchase_cart(cookie, user_age)
+    system.remove_purchase_rule(cookie, store_id, '4')
+    response_without_condition = system.purchase_cart(cookie, user_age)
+    assert not response_with_condition.succeeded() and response_without_condition.succeeded()
+
+
+@patch.multiple(ShoppingCart, interval_time=MagicMock(return_value=1))
+def test_purchase_cart_with_condition_fail_then_edit_purchase_success():
+    cookie, username, password, store_name, store_id = _initialize_info(_generate_username(), "aaa",
+                                                                        _generate_store_name())
+    product_id, product_name, category, price, quantity = _create_product(cookie, store_id, _generate_product_name(),
+                                                                          "A", 8.5, 9)
+    new_product_id, new_product_name, category, new_price, new_quantity = _create_product(cookie, store_id,
+                                                                                          _generate_product_name(),
+                                                                                          "A", 10.0, 4)
+    parent_id = '1'
+    simple_rule_bag = {'context': {'obj': 'bag'}, 'operator': 'great-than', 'target': 50}
+    simple_rule_category = {'context': {'obj': 'category', 'identifier': "A"}, 'operator': 'equals', 'target': 8}
+    system.add_purchase_rule(cookie, store_id, _complex_rule_details_conditioning(), 'complex', parent_id)
+    system.add_purchase_rule(cookie, store_id, simple_rule_bag, 'simple', '2', clause='test')
+    system.add_purchase_rule(cookie, store_id, simple_rule_category, 'simple', '2', clause='then')
+    system.save_product_in_cart(cookie, store_id, product_id, 3)
+    system.save_product_in_cart(cookie, store_id, new_product_id, 3)
+    user_age = 17
+    response_with_condition = system.purchase_cart(cookie, user_age)
+    edited_rule_category = {'context': {'obj': 'category', 'identifier': "A"}, 'operator': 'equals', 'target': 6}
+    system.edit_purchase_rule(cookie, store_id, edited_rule_category, '4', 'simple')
+    response_without_condition = system.purchase_cart(cookie, user_age)
+    assert not response_with_condition.succeeded() and response_without_condition.succeeded()
+
+
+@patch.multiple(ShoppingCart, interval_time=MagicMock(return_value=1))
+def test_purchase_cart_with_condition_fail_then_move_purchase_success():
+    cookie, username, password, store_name, store_id = _initialize_info(_generate_username(), "aaa",
+                                                                        _generate_store_name())
+    product_id, product_name, category, price, quantity = _create_product(cookie, store_id, _generate_product_name(),
+                                                                          "A", 8.5, 9)
+    new_product_id, new_product_name, category, new_price, new_quantity = _create_product(cookie, store_id,
+                                                                                          _generate_product_name(),
+                                                                                          "A", 10.0, 4)
+    parent_id = '1'
+    simple_rule_bag = {'context': {'obj': 'bag'}, 'operator': 'great-than', 'target': 60}
+    system.add_purchase_rule(cookie, store_id, _complex_rule_details_or(), 'complex', parent_id)
+    system.add_purchase_rule(cookie, store_id, _simple_rule_details_age(), 'simple', '2')
+    system.add_purchase_rule(cookie, store_id, simple_rule_bag, 'simple', parent_id)
+    system.save_product_in_cart(cookie, store_id, product_id, 3)
+    system.save_product_in_cart(cookie, store_id, new_product_id, 3)
+    user_age = 18
+    response_with_condition = system.purchase_cart(cookie, user_age)
+    system.move_purchase_rule(cookie, store_id, '4', '2')
+    response_without_condition = system.purchase_cart(cookie, user_age)
+    assert not response_with_condition.succeeded() and response_without_condition.succeeded()
+
+
+# endregion
+
+# region add_discount
+def test_add_simple_discount():
+    cookie, username, password, store_name, store_id = _initialize_info(_generate_username(), "aaa",
+                                                                        _generate_store_name())
+    parent_id = '1'
+    response_add = system.add_discount(cookie, store_id, _product_discount(), parent_id)
+    assert response_add.succeeded(), response_add.get_msg()
+
+
+def test_add_simple_discount_invalid_fail():
+    cookie, username, password, store_name, store_id = _initialize_info(_generate_username(), "aaa",
+                                                                        _generate_store_name())
+    parent_id = '1'
+    discount_data = _product_discount()
+    discount_data['percentage'] = -10
+    response_add = system.add_discount(cookie, store_id, discount_data,
+                                       parent_id)
+    assert not response_add.succeeded()
+
+
+def test_add_simple_discount_missing_key_fail():
+    cookie, username, password, store_name, store_id = _initialize_info(_generate_username(), "aaa",
+                                                                        _generate_store_name())
+    parent_id = '1'
+    discount_data = _product_discount()
+    del discount_data['percentage']
+    response_add = system.add_discount(cookie, store_id, discount_data,
+                                       parent_id)
+    assert not response_add.succeeded()
+
+
+def test_add_complex_discount_success():
+    cookie, username, password, store_name, store_id = _initialize_info(_generate_username(), "aaa",
+                                                                        _generate_store_name())
+    parent_id = '1'
+    response_add = system.add_discount(cookie, store_id, _complex_add_discount(), parent_id)
+    assert response_add.succeeded()
+
+
+def test_add_complex_discount_invalid_fail():
+    cookie, username, password, store_name, store_id = _initialize_info(_generate_username(), "aaa",
+                                                                        _generate_store_name())
+    parent_id = '1'
+    discount_data = _complex_or_discount()
+    discount_data['type'] = 'Halla'
+    response_add = system.add_discount(cookie, store_id, discount_data, 'complex',
+                                       parent_id)
+    assert not response_add.succeeded()
+
+
+def test_add_complex_discount_missing_key_fail():
+    cookie, username, password, store_name, store_id = _initialize_info(_generate_username(), "aaa",
+                                                                        _generate_store_name())
+    parent_id = '1'
+    discount_data = _complex_xor_discount()
+    del discount_data['type']
+    response_add = system.add_discount(cookie, store_id, _complex_rule_details_missing_operator(),
+                                       parent_id)
+    assert not response_add.succeeded()
+
+
+def test_add_complex_discount_success_simple_child_invalid():
+    cookie, username, password, store_name, store_id = _initialize_info(_generate_username(), "aaa",
+                                                                        _generate_store_name())
+    parent_id = '1'
+    response_add_complex = system.add_discount(cookie, store_id, _complex_max_discount(),
+                                               parent_id)
+    parent_or_id = '2'
+    discount_data = _category_discount()
+    discount_data['context']['obj'] = "P"
+    response_add_simple = system.add_discount(cookie, store_id, discount_data,
+                                              parent_or_id)
+    assert response_add_complex.succeeded() and not response_add_simple.succeeded()
+
+
+def test_add_child_discount_to_not_existing_parent():
+    cookie, username, password, store_name, store_id = _initialize_info(_generate_username(), "aaa",
+                                                                        _generate_store_name())
+    parent_id = '2'
+    response_add_complex = system.add_discount(cookie, store_id, _complex_or_discount(),
+                                               parent_id)
+    assert not response_add_complex.succeeded()
+
+
+def test_add_discount_with_no_permission():
+    cookie, username, password, store_name, store_id = _initialize_info(_generate_username(), "aaa",
+                                                                        _generate_store_name())
+
+    new_cookie, new_username, new_password_, _, _ = _initialize_info(_generate_username(), "bbb")
+    parent_id = '1'
+    response_add_complex = system.add_discount(new_cookie, store_id, _complex_max_discount(),
+                                               parent_id)
+    assert not response_add_complex.succeeded()
+
+
+def test_add_discount_after_manager_appointment_with_no_permission():
+    cookie, username, password, store_name, store_id = _initialize_info(_generate_username(), "aaa",
+                                                                        _generate_store_name())
+
+    new_cookie, new_username, new_password_, _, _ = _initialize_info(_generate_username(), "bbb")
+    system.appoint_manager(cookie, store_id, new_username)
+    parent_id = '1'
+    response_add_complex = system.add_discount(new_cookie, store_id, _complex_xor_discount(),
+                                               parent_id)
+    assert not response_add_complex.succeeded()
+
+
+def test_add_discount_after_manager_appointment_with_permission():
+    cookie, username, password, store_name, store_id = _initialize_info(_generate_username(), "aaa",
+                                                                        _generate_store_name())
+
+    new_cookie, new_username, new_password_, _, _ = _initialize_info(_generate_username(), "bbb")
+    system.appoint_manager(cookie, store_id, new_username)
+    new_responsibility = "manage_discount_policy"
+    system.add_manager_permission(cookie, store_id, new_username, new_responsibility)
+    parent_id = '1'
+    response_add_complex = system.add_discount(new_cookie, store_id, _product_discount(),
+                                               parent_id)
+    assert response_add_complex.succeeded()
+
+
+def test_founder_add_discount_to_other_store_fail():
+    cookie, username, password, store_name, store_id = _initialize_info(_generate_username(), "aaa",
+                                                                        _generate_store_name())
+
+    new_cookie, new_username, new_password, new_store_name, new_store_id = _initialize_info(_generate_username(), "bbb",
+                                                                                            _generate_store_name())
+
+    parent_id = '1'
+    response_add_complex = system.add_discount(new_cookie, store_id, _store_discount(),
+                                               parent_id)
+    assert not response_add_complex.succeeded()
+
+
+def test_founder_add_discount_to_other_store_fail_but_self_success():
+    cookie, username, password, store_name, store_id = _initialize_info(_generate_username(), "aaa",
+                                                                        _generate_store_name())
+
+    new_cookie, new_username, new_password, new_store_name, new_store_id = _initialize_info(_generate_username(), "bbb",
+                                                                                            _generate_store_name())
+
+    parent_id = '1'
+    response_add_complex_wrong_store = system.add_discount(new_cookie, store_id, _category_discount(),
+                                                           parent_id)
+
+    response_add_complex_right_store = system.add_discount(new_cookie, new_store_id, _category_discount(),
+                                                           parent_id)
+    assert not response_add_complex_wrong_store.succeeded() and response_add_complex_right_store
+
+
+def test_add_complex_discount_with_two_children():
+    cookie, username, password, store_name, store_id = _initialize_info(_generate_username(), "aaa",
+                                                                        _generate_store_name())
+    parent_id = '1'
+    response_add_complex = system.add_discount(cookie, store_id, _complex_and_discount(),
+                                               parent_id)
+    response_add_simple_first = system.add_discount(cookie, store_id, _product_discount(), '2')
+    response_add_simple_second = system.add_discount(cookie, store_id, _category_discount(),
+                                                     '2')
+    assert response_add_complex.succeeded() and response_add_simple_first.succeeded() and response_add_simple_second.succeeded()
+
+
+# endregion
+
+# region remove_discount
+def test_remove_simple_discount_success():
+    cookie, username, password, store_name, store_id = _initialize_info(_generate_username(), "aaa",
+                                                                        _generate_store_name())
+    parent_id = '1'
+    system.add_discount(cookie, store_id, _product_discount(), parent_id)
+    response_remove = system.remove_discount(cookie, store_id, '2')
+    assert response_remove.succeeded()
+
+
+def test_remove_not_existing_discount():
+    cookie, username, password, store_name, store_id = _initialize_info(_generate_username(), "aaa",
+                                                                        _generate_store_name())
+    parent_id = '1'
+    discount_data = _category_discount()
+    discount_data['percentage'] = 120
+    system.add_discount(cookie, store_id, discount_data, parent_id)
+    response_remove = system.remove_discount(cookie, store_id, '2')
+    assert not response_remove.succeeded()
+
+
+def test_remove_root_discount_fail():
+    cookie, username, password, store_name, store_id = _initialize_info(_generate_username(), "aaa",
+                                                                        _generate_store_name())
+    response_remove = system.remove_discount(cookie, store_id, '1')
+    assert not response_remove.succeeded()
+
+
+def test_remove_complex_discount_success():
+    cookie, username, password, store_name, store_id = _initialize_info(_generate_username(), "aaa",
+                                                                        _generate_store_name())
+    parent_id = '1'
+    system.add_discount(cookie, store_id, _complex_max_discount(), parent_id)
+    response_remove = system.remove_discount(cookie, store_id, '2')
+    assert response_remove.succeeded()
+
+
+def test_remove_discount_with_no_permission():
+    cookie, username, password, store_name, store_id = _initialize_info(_generate_username(), "aaa",
+                                                                        _generate_store_name())
+
+    new_cookie, new_username, new_password_, _, _ = _initialize_info(_generate_username(), "bbb")
+    parent_id = '1'
+    system.add_discount(cookie, store_id, _store_discount(), parent_id)
+    response_remove_complex = system.remove_discount(new_cookie, store_id, '2')
+    assert not response_remove_complex.succeeded()
+
+
+def test_remove_discount_after_manager_appointment_with_no_permission():
+    cookie, username, password, store_name, store_id = _initialize_info(_generate_username(), "aaa",
+                                                                        _generate_store_name())
+
+    new_cookie, new_username, new_password_, _, _ = _initialize_info(_generate_username(), "bbb")
+    system.appoint_manager(cookie, store_id, new_username)
+    parent_id = '1'
+    system.add_discount(cookie, store_id, _complex_add_discount(), parent_id)
+    response_remove_complex = system.remove_discount(new_cookie, store_id, '2')
+    assert not response_remove_complex.succeeded()
+
+
+def test_remove_discount_after_manager_appointment_with_permission():
+    cookie, username, password, store_name, store_id = _initialize_info(_generate_username(), "aaa",
+                                                                        _generate_store_name())
+
+    new_cookie, new_username, new_password_, _, _ = _initialize_info(_generate_username(), "bbb")
+    system.appoint_manager(cookie, store_id, new_username)
+    new_responsibility = "manage_discount_policy"
+    system.add_manager_permission(cookie, store_id, new_username, new_responsibility)
+    parent_id = '1'
+    system.add_discount(cookie, store_id, _complex_and_discount(), parent_id)
+    response_remove_complex = system.remove_discount(new_cookie, store_id, '2')
+    assert response_remove_complex.succeeded()
+
+
+def test_founder_remove_discount_to_other_store_fail():
+    cookie, username, password, store_name, store_id = _initialize_info(_generate_username(), "aaa",
+                                                                        _generate_store_name())
+
+    new_cookie, new_username, new_password, new_store_name, new_store_id = _initialize_info(_generate_username(), "bbb",
+                                                                                            _generate_store_name())
+
+    parent_id = '1'
+    system.add_discount(cookie, store_id, _complex_xor_discount(), parent_id)
+    response_remove_complex = system.remove_discount(new_cookie, store_id, '2')
+    assert not response_remove_complex.succeeded()
+
+
+def test_founder_remove_discount_to_other_store_fail_but_self_success():
+    cookie, username, password, store_name, store_id = _initialize_info(_generate_username(), "aaa",
+                                                                        _generate_store_name())
+
+    new_cookie, new_username, new_password, new_store_name, new_store_id = _initialize_info(_generate_username(), "bbb",
+                                                                                            _generate_store_name())
+
+    parent_id = '1'
+    system.add_discount(cookie, store_id, _category_discount(), parent_id)
+    system.add_discount(new_cookie, new_store_id, _store_discount(), parent_id)
+    response_remove_wrong = system.remove_discount(new_cookie, store_id, '2')
+    response_remove_right = system.remove_discount(new_cookie, new_store_id, '2')
+    assert not response_remove_wrong.succeeded() and response_remove_right
+
+
+def test_remove_complex_discount_with_two_children():
+    cookie, username, password, store_name, store_id = _initialize_info(_generate_username(), "aaa",
+                                                                        _generate_store_name())
+    parent_id = '1'
+    system.add_discount(cookie, store_id, _complex_or_discount(),
+                        parent_id)
+    system.add_discount(cookie, store_id, _product_discount(), '2')
+    system.add_discount(cookie, store_id, _category_discount(), '2')
+    response_remove = system.remove_discount(cookie, store_id, '2')
+    assert response_remove.succeeded()
+
+
+# endregion
+
+# region edit_simple_discount
+def test_edit_simple_discount_success():
+    cookie, username, password, store_name, store_id = _initialize_info(_generate_username(), "aaa",
+                                                                        _generate_store_name())
+    parent_id = '1'
+    system.add_discount(cookie, store_id, _product_discount(), parent_id)
+    response_edit = system.edit_simple_discount(cookie, store_id, '2', percentage=12.5)
+    assert response_edit.succeeded(), response_edit.get_msg()
+
+
+def test_edit_simple_discount_invalid_fail():
+    cookie, username, password, store_name, store_id = _initialize_info(_generate_username(), "aaa",
+                                                                        _generate_store_name())
+    parent_id = '1'
+    system.add_discount(cookie, store_id, _category_discount(), parent_id)
+    response_edit = system.edit_simple_discount(cookie, store_id, '2', percentage=-50)
+    assert not response_edit.succeeded()
+
+
+def test_edit_complex_discount_with_simple_function_fail():
+    cookie, username, password, store_name, store_id = _initialize_info(_generate_username(), "aaa",
+                                                                        _generate_store_name())
+    parent_id = '1'
+    system.add_discount(cookie, store_id, _complex_max_discount(), parent_id)
+    response_edit = system.edit_simple_discount(cookie, store_id, '2', "add")
+    assert not response_edit.succeeded()
+
+
+def test_edit_simple_child_discount_not_existing_rule():
+    cookie, username, password, store_name, store_id = _initialize_info(_generate_username(), "aaa",
+                                                                        _generate_store_name())
+    parent_id = '2'
+    system.add_discount(cookie, store_id, _store_discount(), parent_id)
+    response_edit = system.edit_simple_discount(cookie, store_id, '3', context={"obj": "store"})
+    assert not response_edit.succeeded()
+
+
+def test_edit_simple_discount_with_no_permission():
+    cookie, username, password, store_name, store_id = _initialize_info(_generate_username(), "aaa",
+                                                                        _generate_store_name())
+
+    new_cookie, new_username, new_password_, _, _ = _initialize_info(_generate_username(), "bbb")
+    parent_id = '1'
+    system.add_discount(cookie, store_id, _store_discount(), parent_id)
+    response_edit = system.edit_purchase_rule(new_cookie, store_id, '2', context={"obj": "category", "id": "456"})
+    assert not response_edit.succeeded()
+
+
+def test_edit_simple_discount_after_manager_appointment_with_no_permission():
+    cookie, username, password, store_name, store_id = _initialize_info(_generate_username(), "aaa",
+                                                                        _generate_store_name())
+
+    new_cookie, new_username, new_password_, _, _ = _initialize_info(_generate_username(), "bbb")
+    system.appoint_manager(cookie, store_id, new_username)
+    parent_id = '1'
+    system.add_discount(cookie, store_id, _product_discount(), parent_id)
+    response_edit = system.edit_simple_discount(new_cookie, store_id, '2', percentage=25)
+    assert not response_edit.succeeded()
+
+
+def test_edit_simple_discount_after_manager_appointment_with_permission():
+    cookie, username, password, store_name, store_id = _initialize_info(_generate_username(), "aaa",
+                                                                        _generate_store_name())
+
+    new_cookie, new_username, new_password_, _, _ = _initialize_info(_generate_username(), "bbb")
+    system.appoint_manager(cookie, store_id, new_username)
+    new_responsibility = "manage_discount_policy"
+    system.add_manager_permission(cookie, store_id, new_username, new_responsibility)
+    parent_id = '1'
+    system.add_discount(cookie, store_id, _product_discount(), parent_id)
+    response_edit = system.edit_simple_discount(new_cookie, store_id, '2', percentage=90)
+    assert response_edit.succeeded()
+
+
+def test_founder_edit_simple_discount_to_other_store_fail():
+    cookie, username, password, store_name, store_id = _initialize_info(_generate_username(), "aaa",
+                                                                        _generate_store_name())
+
+    new_cookie, new_username, new_password, new_store_name, new_store_id = _initialize_info(_generate_username(), "bbb",
+                                                                                            _generate_store_name())
+
+    parent_id = '1'
+    system.add_discount(cookie, store_id, _category_discount(), parent_id)
+    response_edit = system.edit_simple_discount(new_cookie, store_id, '2', context={"obj": "product", "id": "123"})
+    assert not response_edit.succeeded()
+
+
+def test_founder_edit_simple_discount_to_other_store_fail_but_self_success():
+    cookie, username, password, store_name, store_id = _initialize_info(_generate_username(), "aaa",
+                                                                        _generate_store_name())
+
+    new_cookie, new_username, new_password, new_store_name, new_store_id = _initialize_info(_generate_username(), "bbb",
+                                                                                            _generate_store_name())
+
+    parent_id = '1'
+    system.add_discount(new_cookie, new_store_id, _category_discount(), parent_id)
+    system.add_discount(cookie, store_id, _store_discount(), parent_id)
+    response_edit_wrong = system.edit_simple_discount(new_cookie, store_id, '2', percentage=5.5)
+    response_edit_right = system.edit_simple_discount(new_cookie, new_store_id, '2', percentage=10.5)
+    assert response_edit_right.succeeded() and not response_edit_wrong.succeeded()
+
+
+# endregion
+
+# region edit_complex_discount
+
+
+def test_edit_complex_discount_success():
+    cookie, username, password, store_name, store_id = _initialize_info(_generate_username(), "aaa",
+                                                                        _generate_store_name())
+    parent_id = '1'
+    system.add_discount(cookie, store_id, _complex_max_discount(), parent_id)
+    response_edit = system.edit_complex_discount(cookie, store_id, '2', "add")
+    assert response_edit.succeeded(), response_edit.get_msg()
+
+
+def test_edit_complex_discount_invalid_fail():
+    cookie, username, password, store_name, store_id = _initialize_info(_generate_username(), "aaa",
+                                                                        _generate_store_name())
+    parent_id = '1'
+    system.add_discount(cookie, store_id, _complex_or_discount(), parent_id)
+    response_edit = system.edit_complex_discount(cookie, store_id, '2', "iff")
+    assert not response_edit.succeeded()
+
+
+def test_edit_complex_with_simple_function_fail():
+    cookie, username, password, store_name, store_id = _initialize_info(_generate_username(), "aaa",
+                                                                        _generate_store_name())
+    parent_id = '1'
+    system.add_discount(cookie, store_id, _complex_or_discount(), parent_id)
+    response_edit = system.edit_simple_discount(cookie, store_id, '2', "and")
+    assert not response_edit.succeeded()
+
+
+def test_edit_complex_discount_success_simple_child_invalid():
+    cookie, username, password, store_name, store_id = _initialize_info(_generate_username(), "aaa",
+                                                                        _generate_store_name())
+    parent_id = '1'
+    system.add_discount(cookie, store_id, _complex_and_discount(), parent_id)
+    parent_or_id = '2'
+    system.add_discount(cookie, store_id, _product_discount(), parent_or_id)
+    response_edit_complex = system.edit_complex_discount(cookie, store_id, '2', "or")
+    response_edit_simple = system.edit_simple_discount(cookie, store_id, '3', percentage=-1)
+    assert response_edit_complex.succeeded() and not response_edit_simple.succeeded()
+
+
+def test_edit_complex_child_discount_not_existing_rule():
+    cookie, username, password, store_name, store_id = _initialize_info(_generate_username(), "aaa",
+                                                                        _generate_store_name())
+    parent_id = '2'
+    system.add_discount(cookie, store_id, _complex_and_discount(), parent_id)
+    response_edit = system.edit_complex_discount(cookie, store_id, '3', "add")
+    assert not response_edit.succeeded()
+
+
+def test_edit_complex_discount_with_no_permission():
+    cookie, username, password, store_name, store_id = _initialize_info(_generate_username(), "aaa",
+                                                                        _generate_store_name())
+
+    new_cookie, new_username, new_password_, _, _ = _initialize_info(_generate_username(), "bbb")
+    parent_id = '1'
+    system.add_discount(cookie, store_id, _complex_max_discount(), parent_id)
+    response_edit = system.edit_complex_discount(new_cookie, store_id, '2', "add")
+    assert not response_edit.succeeded()
+
+
+def test_edit_complex_discount_after_manager_appointment_with_no_permission():
+    cookie, username, password, store_name, store_id = _initialize_info(_generate_username(), "aaa",
+                                                                        _generate_store_name())
+
+    new_cookie, new_username, new_password_, _, _ = _initialize_info(_generate_username(), "bbb")
+    system.appoint_manager(cookie, store_id, new_username)
+    parent_id = '1'
+    system.add_discount(cookie, store_id, _complex_max_discount(), parent_id)
+    response_edit = system.edit_complex_discount(new_cookie, store_id, '2', "or")
+    assert not response_edit.succeeded()
+
+
+def test_edit_complex_discount_after_manager_appointment_with_permission():
+    cookie, username, password, store_name, store_id = _initialize_info(_generate_username(), "aaa",
+                                                                        _generate_store_name())
+
+    new_cookie, new_username, new_password_, _, _ = _initialize_info(_generate_username(), "bbb")
+    system.appoint_manager(cookie, store_id, new_username)
+    new_responsibility = "manage_discount_policy"
+    system.add_manager_permission(cookie, store_id, new_username, new_responsibility)
+    parent_id = '1'
+    system.add_discount(cookie, store_id, _complex_xor_discount(), parent_id)
+    response_edit = system.edit_complex_discount(new_cookie, store_id, '2', "max")
+    assert response_edit.succeeded()
+
+
+def test_founder_edit_complex_discount_to_other_store_fail():
+    cookie, username, password, store_name, store_id = _initialize_info(_generate_username(), "aaa",
+                                                                        _generate_store_name())
+
+    new_cookie, new_username, new_password, new_store_name, new_store_id = _initialize_info(_generate_username(), "bbb",
+                                                                                            _generate_store_name())
+
+    parent_id = '1'
+    system.add_discount(cookie, store_id, _complex_or_discount(), parent_id)
+    response_edit = system.edit_complex_discount(new_cookie, store_id, '2', "xor", "first")
+    assert not response_edit.succeeded()
+
+
+def test_founder_edit_complex_discount_to_other_store_fail_but_self_success():
+    cookie, username, password, store_name, store_id = _initialize_info(_generate_username(), "aaa",
+                                                                        _generate_store_name())
+
+    new_cookie, new_username, new_password, new_store_name, new_store_id = _initialize_info(_generate_username(), "bbb",
+                                                                                            _generate_store_name())
+
+    parent_id = '1'
+    system.add_discount(new_cookie, new_store_id, _complex_max_discount(), parent_id)
+    system.add_discount(cookie, store_id, _complex_add_discount(), parent_id)
+    response_edit_wrong = system.edit_complex_discount(new_cookie, store_id, '2', "or")
+    response_edit_right = system.edit_complex_discount(new_cookie, new_store_id, '2', "and")
+    assert response_edit_right.succeeded() and not response_edit_wrong.succeeded()
+
+
+def test__edit_complex_discount_with_two_children():
+    cookie, username, password, store_name, store_id = _initialize_info(_generate_username(), "aaa",
+                                                                        _generate_store_name())
+    parent_id = '1'
+    system.add_discount(cookie, store_id, _complex_and_discount(), parent_id)
+    system.add_discount(cookie, store_id, _product_discount(), '2')
+    system.add_discount(cookie, store_id, _category_discount(), 'simple', '2')
+    response_edit_right = system.edit_complex_discount(cookie, store_id, '2', "or")
+    assert response_edit_right.succeeded()
+
+
+# endregion
+
+# region move_discount
+def test_move_discount_success():
+    cookie, username, password, store_name, store_id = _initialize_info(_generate_username(), "aaa",
+                                                                        _generate_store_name())
+    parent_id = '1'
+    system.add_discount(cookie, store_id, _complex_max_discount(), parent_id)
+    system.add_discount(cookie, store_id, _category_discount(), parent_id)
+    response_move = system.move_discount(cookie, store_id, '3', '2')
+    assert response_move.succeeded()
+
+
+def test_move_discount_with_no_permission():
+    cookie, username, password, store_name, store_id = _initialize_info(_generate_username(), "aaa",
+                                                                        _generate_store_name())
+
+    new_cookie, new_username, new_password_, _, _ = _initialize_info(_generate_username(), "bbb")
+    parent_id = '1'
+    system.add_discount(cookie, store_id, _complex_or_discount(), parent_id)
+    system.add_discount(cookie, store_id, _product_discount(), parent_id)
+    response_move = system.move_discount(new_cookie, store_id, '3', '2')
+    assert not response_move.succeeded()
+
+
+def test_move_discount_after_manager_appointment_with_no_permission():
+    cookie, username, password, store_name, store_id = _initialize_info(_generate_username(), "aaa",
+                                                                        _generate_store_name())
+
+    new_cookie, new_username, new_password_, _, _ = _initialize_info(_generate_username(), "bbb")
+    system.appoint_manager(cookie, store_id, new_username)
+    parent_id = '1'
+    system.add_discount(cookie, store_id, _complex_add_discount(), parent_id)
+    system.add_discount(cookie, store_id, _store_discount(), parent_id)
+    response_move = system.move_discount(new_cookie, store_id, '3', '2')
+    assert not response_move.succeeded()
+
+
+def test_move_discount_after_manager_appointment_with_permission():
+    cookie, username, password, store_name, store_id = _initialize_info(_generate_username(), "aaa",
+                                                                        _generate_store_name())
+
+    new_cookie, new_username, new_password_, _, _ = _initialize_info(_generate_username(), "bbb")
+    system.appoint_manager(cookie, store_id, new_username)
+    new_responsibility = "manage_discount_policy"
+    system.add_manager_permission(cookie, store_id, new_username, new_responsibility)
+    parent_id = '1'
+    system.add_discount(cookie, store_id, _complex_xor_discount(), parent_id)
+    system.add_discount(cookie, store_id, _product_discount(), parent_id)
+    response_move = system.move_discount(new_cookie, store_id, '3', '2')
+    assert response_move.succeeded()
+
+
+def test_founder_move_discount_to_other_store_fail():
+    cookie, username, password, store_name, store_id = _initialize_info(_generate_username(), "aaa",
+                                                                        _generate_store_name())
+
+    new_cookie, new_username, new_password, new_store_name, new_store_id = _initialize_info(_generate_username(), "bbb",
+                                                                                            _generate_store_name())
+
+    parent_id = '1'
+    system.add_discount(cookie, store_id, _complex_max_discount(), parent_id)
+    system.add_discount(cookie, store_id, _category_discount(), parent_id)
+    response_move = system.move_discount(new_cookie, store_id, '3', '2')
+    assert not response_move.succeeded()
+
+
+def test_founder_move_discount_to_other_store_fail_but_self_success():
+    cookie, username, password, store_name, store_id = _initialize_info(_generate_username(), "aaa",
+                                                                        _generate_store_name())
+
+    new_cookie, new_username, new_password, new_store_name, new_store_id = _initialize_info(_generate_username(), "bbb",
+                                                                                            _generate_store_name())
+
+    parent_id = '1'
+    system.add_discount(cookie, store_id, _complex_add_discount(), parent_id)
+    system.add_discount(cookie, store_id, _store_discount(), 'simple', parent_id)
+    system.add_discount(new_cookie, new_store_id, _complex_add_discount(), parent_id)
+    system.add_discount(new_cookie, new_store_id, _store_discount(), parent_id)
+    response_move_wrong = system.move_discount(new_cookie, store_id, '3', '2')
+    response_move_right = system.move_discount(new_cookie, new_store_id, '3', '2')
+    assert response_move_right.succeeded() and not response_move_wrong.succeeded()
+
+
+def test_move_complex_discount_with_children_success():
+    cookie, username, password, store_name, store_id = _initialize_info(_generate_username(), "aaa",
+                                                                        _generate_store_name())
+    parent_id = '1'
+    system.add_discount(cookie, store_id, _complex_xor_discount(), parent_id)
+    system.add_discount(cookie, store_id, _complex_and_discount(), parent_id)
+    system.add_discount(cookie, store_id, _product_discount(), '3')
+    response_move = system.move_discount(cookie, store_id, '3', '2')
+    assert response_move.succeeded()
+
+
+def test_move_root_discount_fail():
+    cookie, username, password, store_name, store_id = _initialize_info(_generate_username(), "aaa",
+                                                                        _generate_store_name())
+    parent_id = '1'
+    system.add_discount(cookie, store_id, _complex_xor_discount(), parent_id)
+    response_move = system.move_discount(cookie, store_id, '1', '2')
+    assert not response_move.succeeded()
+
+
+def test_move_discount_to_leaf_as_parent_fail():
+    cookie, username, password, store_name, store_id = _initialize_info(_generate_username(), "aaa",
+                                                                        _generate_store_name())
+    parent_id = '1'
+    system.add_discount(cookie, store_id, _complex_and_discount(), parent_id)
+    system.add_discount(cookie, store_id, _category_discount(), parent_id)
+    response_move = system.move_discount(cookie, store_id, '2', '3')
+    assert not response_move.succeeded()
+
+
+# endregion
+
+# region buy_products with discount no conditions rules
+
+@patch.multiple(ShoppingCart, interval_time=MagicMock(return_value=1))
+def test_purchase_cart_with_simple_product_discount_success():
+    cookie, username, password, store_name, store_id = _initialize_info(_generate_username(), "aaa",
+                                                                        _generate_store_name())
+    parent_id = '1'
+    product_id, product_name, category, price, quantity = _create_product(cookie, store_id, _generate_product_name(),
+                                                                          "A", 10, 10)
+
+    new_product_id, new_product_name, category, new_price, new_quantity = _create_product(cookie, store_id,
+                                                                                          _generate_product_name(),
+                                                                                          "A", 10.0, 4)
+
+    system.save_product_in_cart(cookie, store_id, product_id, 1)
+    system.save_product_in_cart(cookie, store_id, new_product_id, 1)
+    system.add_discount(cookie, store_id, _product_discount(product_id), parent_id)
+    user_age = 25
+    price_res = system.purchase_cart(cookie, user_age)
+    assert price_res.get_obj().parse() == 15
+
+
+@patch.multiple(ShoppingCart, interval_time=MagicMock(return_value=1))
+def test_purchase_cart_with_simple_discount_wrong_context():
+    cookie, username, password, store_name, store_id = _initialize_info(_generate_username(), "aaa",
+                                                                        _generate_store_name())
+    parent_id = '1'
+    system.add_discount(cookie, store_id, _product_discount(), parent_id)
+    product_id, product_name, category, price, quantity = _create_product(cookie, store_id, _generate_product_name(),
+                                                                          "A", 10, 10)
+    system.save_product_in_cart(cookie, store_id, product_id, 1)
+    user_age = 17
+    price_res = system.purchase_cart(cookie, user_age)
+    assert price_res.get_obj().parse() == 10
+
+
+@patch.multiple(ShoppingCart, interval_time=MagicMock(return_value=1))
+def test_purchase_cart_with_simple_category_discount_success():
+    cookie, username, password, store_name, store_id = _initialize_info(_generate_username(), "aaa",
+                                                                        _generate_store_name())
+    product_id, product_name, category, price, quantity = _create_product(cookie, store_id, _generate_product_name(),
+                                                                          "A", 12, 9)
+    other_product_id, other_product_name, other_category, other_price, other_quantity = _create_product(cookie,
+                                                                                                        store_id,
+                                                                                                        _generate_product_name(),
+                                                                                                        "A", 12, 9)
+    new_product_id, new_product_name, category, new_price, new_quantity = _create_product(cookie, store_id,
+                                                                                          _generate_product_name(),
+                                                                                          "B", 10.0, 4)
+    system.add_discount(cookie, store_id, _category_discount(), '1')
+    system.save_product_in_cart(cookie, store_id, product_id, 1)
+    system.save_product_in_cart(cookie, store_id, other_product_id, 1)
+    system.save_product_in_cart(cookie, store_id, new_product_id, 1)
+    price_res = system.purchase_cart(cookie, 20)
+    assert price_res.get_obj().parse() == 28
+
+
+@patch.multiple(ShoppingCart, interval_time=MagicMock(return_value=1))
+def test_purchase_cart_with_simple_category_discount_wrong_context():
+    cookie, username, password, store_name, store_id = _initialize_info(_generate_username(), "aaa",
+                                                                        _generate_store_name())
+    product_id, product_name, category, price, quantity = _create_product(cookie, store_id, _generate_product_name(),
+                                                                          "B", 10, 9)
+
+    system.add_discount(cookie, store_id, _category_discount(), '1')
+    system.save_product_in_cart(cookie, store_id, product_id, 8)
+    price_res = system.purchase_cart(cookie, 20)
+    assert price_res.get_obj().parse() == 80
+
+
+@patch.multiple(ShoppingCart, interval_time=MagicMock(return_value=1))
+def test_purchase_cart_with_simple_store_discount_success():
+    cookie, username, password, store_name, store_id = _initialize_info(_generate_username(), "aaa",
+                                                                        _generate_store_name())
+    product_id, product_name, category, price, quantity = _create_product(cookie, store_id, _generate_product_name(),
+                                                                          "A", 10, 20)
+    new_product_id, new_product_name, category, new_price, new_quantity = _create_product(cookie, store_id,
+                                                                                          _generate_product_name(),
+                                                                                          "A", 20, 10)
+
+    system.add_discount(cookie, store_id, _store_discount(), '1')
+    system.save_product_in_cart(cookie, store_id, product_id, 10)
+    system.save_product_in_cart(cookie, store_id, new_product_id, 5)
+    price_res = system.purchase_cart(cookie, 20)
+    assert price_res.get_obj().parse() == 180
+
+
+@patch.multiple(ShoppingCart, interval_time=MagicMock(return_value=1))
+def test_purchase_cart_with_complex_max_discount_success():
+    cookie, username, password, store_name, store_id = _initialize_info(_generate_username(), "aaa",
+                                                                        _generate_store_name())
+    product_id, product_name, category, price, quantity = _create_product(cookie, store_id, _generate_product_name(),
+                                                                          "A", 8, 20)
+    parent_id = '1'
+    system.add_discount(cookie, store_id, _complex_max_discount(), parent_id)
+    system.add_discount(cookie, store_id, _product_discount(product_id), '2')
+    system.add_discount(cookie, store_id, _category_discount(), '2')
+
+    system.save_product_in_cart(cookie, store_id, product_id, 10)
+    price_res = system.purchase_cart(cookie, 20)
+    assert price_res.get_obj().parse() == 40
+
+
+@patch.multiple(ShoppingCart, interval_time=MagicMock(return_value=1))
+def test_purchase_cart_with_complex_max_with_no_children():
+    cookie, username, password, store_name, store_id = _initialize_info(_generate_username(), "aaa",
+                                                                        _generate_store_name())
+    product_id, product_name, category, price, quantity = _create_product(cookie, store_id, _generate_product_name(),
+                                                                          "A", 5.50, 20)
+    parent_id = '1'
+    system.add_discount(cookie, store_id, _complex_max_discount(), parent_id)
+    system.save_product_in_cart(cookie, store_id, product_id, 10)
+    price_res = system.purchase_cart(cookie, 20)
+    assert price_res.get_obj().parse() == 55
+
+
+@patch.multiple(ShoppingCart, interval_time=MagicMock(return_value=1))
+def test_purchase_cart_with_complex_add_discount_success():
+    cookie, username, password, store_name, store_id = _initialize_info(_generate_username(), "aaa",
+                                                                        _generate_store_name())
+    product_id, product_name, category, price, quantity = _create_product(cookie, store_id, _generate_product_name(),
+                                                                          "A", 8, 20)
+    parent_id = '1'
+    system.add_discount(cookie, store_id, _complex_add_discount(), parent_id)
+    system.add_discount(cookie, store_id, _product_discount(product_id), '2')
+    system.add_discount(cookie, store_id, _category_discount(), '2')
+
+    system.save_product_in_cart(cookie, store_id, product_id, 10)
+    price_res = system.purchase_cart(cookie, 20)
+    assert price_res.get_obj().parse() == 20
+
+
+@patch.multiple(ShoppingCart, interval_time=MagicMock(return_value=1))
+def test_purchase_cart_final_price_changes_due_to_discount_remove():
+    cookie, username, password, store_name, store_id = _initialize_info(_generate_username(), "aaa",
+                                                                        _generate_store_name())
+    product_id, product_name, category, price, quantity = _create_product(cookie, store_id, _generate_product_name(),
+                                                                          "A", 10, 9)
+    new_product_id, new_product_name, category, new_price, new_quantity = _create_product(cookie, store_id,
+                                                                                          _generate_product_name(),
+                                                                                          "A", 5, 10)
+    parent_id = '1'
+    system.add_discount(cookie, store_id, _product_discount(product_id), parent_id)
+    system.save_product_in_cart(cookie, store_id, product_id, 3)
+    system.save_product_in_cart(cookie, store_id, new_product_id, 3)
+    user_age = 17
+    response_with_discount = system.purchase_cart(cookie, user_age)
+    system.send_payment(cookie, "", "")
+    system.remove_discount(cookie, store_id, '2')
+    system.save_product_in_cart(cookie, store_id, product_id, 3)
+    system.save_product_in_cart(cookie, store_id, new_product_id, 3)
+    response_without_discount = system.purchase_cart(cookie, user_age)
+    assert response_with_discount.get_obj().parse() == 30 and response_without_discount.get_obj().parse() == 45
+
+
+@patch.multiple(ShoppingCart, interval_time=MagicMock(return_value=1))
+def test_purchase_cart_final_price_changes_due_to_discount_edit():
+    cookie, username, password, store_name, store_id = _initialize_info(_generate_username(), "aaa",
+                                                                        _generate_store_name())
+    product_id, product_name, category, price, quantity = _create_product(cookie, store_id, _generate_product_name(),
+                                                                          "A", 10, 9)
+    new_product_id, new_product_name, category, new_price, new_quantity = _create_product(cookie, store_id,
+                                                                                          _generate_product_name(),
+                                                                                          "A", 5, 10)
+    parent_id = '1'
+    system.add_discount(cookie, store_id, _product_discount(product_id), parent_id)
+    system.save_product_in_cart(cookie, store_id, product_id, 3)
+    system.save_product_in_cart(cookie, store_id, new_product_id, 3)
+    user_age = 17
+    response_before_edit = system.purchase_cart(cookie, user_age)
+    system.send_payment(cookie, "", "")
+    system.edit_simple_discount(cookie, store_id, '2', percentage=25)
+    system.save_product_in_cart(cookie, store_id, product_id, 3)
+    system.save_product_in_cart(cookie, store_id, new_product_id, 3)
+    response_after_edit = system.purchase_cart(cookie, user_age)
+    assert response_before_edit.get_obj().parse() == 30 and response_after_edit.get_obj().parse() == 37.5
+
+
+@patch.multiple(ShoppingCart, interval_time=MagicMock(return_value=1))
+def test_purchase_cart_discount_changed_due_to_discount_move():
+    cookie, username, password, store_name, store_id = _initialize_info(_generate_username(), "aaa",
+                                                                        _generate_store_name())
+    product_id, product_name, category, price, quantity = _create_product(cookie, store_id, _generate_product_name(),
+                                                                          "A", 8, 9)
+    new_product_id, new_product_name, category, new_price, new_quantity = _create_product(cookie, store_id,
+                                                                                          _generate_product_name(),
+                                                                                          "A", 12, 10)
+    parent_id = '1'
+    system.add_discount(cookie, store_id, _complex_max_discount(), parent_id)
+    system.add_discount(cookie, store_id, _product_discount(product_id), '2')
+    system.add_discount(cookie, store_id, _category_discount(), parent_id)
+    system.save_product_in_cart(cookie, store_id, product_id, 1)
+    system.save_product_in_cart(cookie, store_id, new_product_id, 1)
+    user_age = 18
+    response_before_move = system.purchase_cart(cookie, user_age)
+    system.send_payment(cookie, "", "")
+    system.move_discount(cookie, store_id, '4', '2')
+    system.save_product_in_cart(cookie, store_id, product_id, 1)
+    system.save_product_in_cart(cookie, store_id, new_product_id, 1)
+    response_after_move = system.purchase_cart(cookie, user_age)
+    assert response_before_move.get_obj().parse() == 11 and response_after_move.get_obj().parse() == 15
+
+# endregion
+
+# endregion
+
+# region test_full_purchase_with_discounts_and_purchase_policy
+
+@patch.multiple(ShoppingCart, interval_time=MagicMock(return_value=5))
+def test_purchase_cart_with_rules_success():
+    cookie, username, password, store_name, store_id = _initialize_info(
+        _generate_username(), "aaa", _generate_store_name()
+    )
+    product_id, product_name, category, price, quantity = _create_product(cookie, store_id, _generate_product_name(),
+                                                                          "A", 10.0, 10)
+    saved_quantity = 5
+    system.save_product_in_cart(cookie, store_id, product_id, saved_quantity)
+    rule_details = {'context': {'obj': 'product', 'identifier': product_id}, 'operator': 'less-than', 'target': 10}
+    system.add_purchase_rule(cookie, store_id, rule_details, 'simple', '1')
+    system.add_discount(cookie, store_id,_category_discount(), '1')
+    user_age = 25
+    response = system.purchase_cart(cookie, user_age)
+    store_res = system.get_store(store_id)
+    cart_res = system.get_cart_details(cookie)
+    response_sent = system.send_payment(cookie, "", "")
+    assert (
+            response.succeeded()
+            and store_res.object.ids_to_quantities[product_id] == 5
+            and cart_res.succeeded()
+            and response.object.value == (saved_quantity * price) * 0.75
+            and response_sent.succeeded()
+    ), response.get_msg()
 
 # endregion

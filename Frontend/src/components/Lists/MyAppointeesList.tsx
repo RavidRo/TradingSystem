@@ -1,6 +1,6 @@
-import React, { FC, useEffect, useState } from 'react';
+import React, { FC, useState } from 'react';
 import useAPI from '../../hooks/useAPI';
-import { Appointee, defaultPermissions, Role } from '../../types';
+import { allPermissions, Appointee, defaultPermissions, Role } from '../../types';
 import CreateAppointeeForm from '../FormWindows/CreateAppointeeForm';
 // import '../styles/AppointeesList.scss';
 import AppointeeNode from './AppointeeNode';
@@ -12,6 +12,7 @@ type MyAppointeesListProps = {
 	storeId: string;
 	onSelectAppointee: (appointee: Appointee) => void;
 	store_name: string;
+	appointment: Appointee;
 };
 
 const MyAppointeesList: FC<MyAppointeesListProps> = ({
@@ -20,10 +21,8 @@ const MyAppointeesList: FC<MyAppointeesListProps> = ({
 	storeId,
 	onSelectAppointee,
 	store_name,
+	appointment,
 }) => {
-	const getMyAppointees = useAPI<Appointee[]>('/get_my_appointees', {
-		store_id: storeId,
-	});
 	const appointManager = useAPI<{ cookie: string; answer: string; succeeded: boolean }>(
 		'/appoint_manager',
 		{
@@ -32,7 +31,7 @@ const MyAppointeesList: FC<MyAppointeesListProps> = ({
 		'POST'
 	);
 	const appointOwner = useAPI<{ cookie: string; answer: string; succeeded: boolean }>(
-		'/appoint_manager',
+		'/appoint_owner',
 		{
 			store_id: storeId,
 		},
@@ -45,20 +44,11 @@ const MyAppointeesList: FC<MyAppointeesListProps> = ({
 		},
 		'POST'
 	);
-	const [myAppointees, setMyAppointees] = useState<Appointee[]>([]);
-
-	useEffect(() => {
-		getMyAppointees.request().then((getMyAppointees) => {
-			if (!getMyAppointees.error && getMyAppointees.data !== null) {
-				setMyAppointees(getMyAppointees.data.data);
-			}
-		});
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, []);
+	const [myAppointees, setMyAppointees] = useState<Appointee[]>(appointment.appointees);
 
 	const onAppoint = (username: string, role: Role) => {
 		const request = role === 'Manager' ? appointManager : appointOwner;
-		request.request().then((request) => {
+		request.request({ username: username }).then((request) => {
 			if (!request.error && request.data !== null && request.data.succeeded) {
 				setMyAppointees([
 					{
@@ -68,7 +58,7 @@ const MyAppointeesList: FC<MyAppointeesListProps> = ({
 						store_id: storeId,
 						username,
 						store_name: store_name,
-						permissions: defaultPermissions,
+						permissions: role === 'Manager' ? defaultPermissions : allPermissions,
 					},
 					...myAppointees,
 				]);
@@ -93,18 +83,22 @@ const MyAppointeesList: FC<MyAppointeesListProps> = ({
 	return (
 		<GenericList
 			data={myAppointees}
-			onCreate={openAppointeeForm}
+			onCreate={
+				appointment.permissions.includes('appoint manager') ? openAppointeeForm : undefined
+			}
 			header="My appointees"
 			createTxt="+ Appoint a new member"
 			narrow
 		>
 			{(appointee) => (
 				<AppointeeNode
-					key={appointee.id}
+					key={appointee.username}
 					appointee={appointee}
 					isSelected={(appointee) => selectedItem === appointee.username}
 					onClick={(appointee) => onSelectAppointee(appointee)}
-					onDelete={onDelete}
+					onDelete={
+						appointment.permissions.includes('remove manager') ? onDelete : undefined
+					}
 				/>
 			)}
 		</GenericList>

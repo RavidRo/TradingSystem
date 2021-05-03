@@ -77,15 +77,16 @@ class CompositePurchaseRule(PurchaseRule):
 
     def children_operation(self, func: callable, id: str, component: PurchaseRule = None, clause: str = None) -> Response[None]:
         for child in self._children:
-            if component is None:
-                response = func(child, id)
-            else:
-                if clause is None:
-                    response = func(child, component, id)
+            if child is not None:
+                if component is None:
+                    response = func(child, id)
                 else:
-                    response = func(child, component, id, clause)
-            if response.succeeded():
-                return response
+                    if clause is None:
+                        response = func(child, component, id)
+                    else:
+                        response = func(child, component, id, clause)
+                if response.succeeded():
+                    return response
         return Response(False, msg=f"Operation couldn't be performed! Wrong parent_id: {id}")
 
     def add(self, component: PurchaseRule, parent_id: str, clause: str = None) -> Response[None]:
@@ -98,8 +99,10 @@ class CompositePurchaseRule(PurchaseRule):
         else:
             return Response(False, msg=f"Operation couldn't be performed! Wrong parent_id: {id}")
 
-    def remove(self, component_id: str, ) -> Response[None]:
+    def remove(self, component_id: str) -> Response[None]:
         if self.id == component_id:
+            if self.parent is None:
+                return Response(False, msg="Root can't be removed!")
             self.parent._children.remove(self)
             self.parent = None
             return Response(True, msg="Rule was removed successfully!")

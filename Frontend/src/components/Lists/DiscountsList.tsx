@@ -31,7 +31,7 @@ const DiscountsList: FC<DiscountsListProps> = ({ openTab, products, storeId }) =
 		getDiscountsAPI.request().then((getDiscountsAPI) => {
 			if (!getDiscountsAPI.error && getDiscountsAPI.data !== null) {
 				setRootId(getDiscountsAPI.data.data.id);
-				setDiscounts((getDiscountsAPI.data.data.rule as DiscountComplex).operands);
+				setDiscounts((getDiscountsAPI.data.data as DiscountComplex).discounts);
 			}
 		});
 
@@ -44,8 +44,8 @@ const DiscountsList: FC<DiscountsListProps> = ({ openTab, products, storeId }) =
 		const onAddDiscount = (rule: DiscountSimple | DiscountComplex): void => {
 			addDiscount
 				.request({
-					fatherId,
-					rule,
+					exist_id: fatherId,
+					discount_data: rule,
 				})
 				.then((addDiscount) => {
 					if (!addDiscount.error && addDiscount.data !== null) {
@@ -65,14 +65,29 @@ const DiscountsList: FC<DiscountsListProps> = ({ openTab, products, storeId }) =
 		});
 	};
 
+	const productIdToString = (productId: string) => {
+		for (const product of products) {
+			if (product.id === productId) {
+				return product.name;
+			}
+		}
+		return '';
+	};
+
 	return (
-		<GenericList data={discounts} header="Discounts" narrow>
+		<GenericList
+			data={discounts}
+			header="Discounts"
+			narrow
+			createTxt="+ Add discount"
+			onCreate={() => openDiscountForm(rootId)}
+		>
 			{(discount: Discount) => (
 				<DiscountNode
 					discount={discount}
 					onCreate={openDiscountForm}
-					fatherId={rootId}
 					onDelete={onDelete}
+					productIdToString={productIdToString}
 				/>
 			)}
 		</GenericList>

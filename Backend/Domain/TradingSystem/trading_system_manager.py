@@ -85,10 +85,6 @@ class TradingSystemManager:
             cookie, store_id, product_id, new_quantity
         )
 
-    @staticmethod
-    def get_discounted_current_cart_price(cookie: str):
-        return UserManager.get_discounted_current_cart_price(cookie)
-
     # 2.9
     @staticmethod
     def purchase_cart(cookie: str, user_age: int) -> Response[PrimitiveParsable[float]]:
@@ -169,8 +165,10 @@ class TradingSystemManager:
 
     # 4.2
     @staticmethod
-    def add_discount(cookie: str, store_id: str, discount_data: dict, exist_id: str):
-        return UserManager.add_discount(cookie, store_id, discount_data, exist_id)
+    def add_discount(
+        cookie: str, store_id: str, discount_data: dict, exist_id: str, condition_type: str = None
+    ):
+        return UserManager.add_discount(cookie, store_id, discount_data, exist_id, condition_type)
 
     @staticmethod
     def move_discount(cookie: str, store_id: str, src_id: str, dest_id: str):
@@ -178,7 +176,7 @@ class TradingSystemManager:
 
     @staticmethod
     def get_discounts(cookie: str, store_id: str):
-        return UserManager.get_discounts(cookie, store_id)
+        return UserManager.get_discounts(cookie, store_id).parse()
 
     @staticmethod
     def remove_discount(cookie: str, store_id: str, discount_id: str):
@@ -190,12 +188,11 @@ class TradingSystemManager:
         store_id: str,
         discount_id: str,
         percentage: float = None,
-        condition: dict = None,
         context: dict = None,
         duration=None,
     ):
         return UserManager.edit_simple_discount(
-            cookie, store_id, discount_id, percentage, condition, context, duration
+            cookie, store_id, discount_id, percentage, context, duration
         )
 
     @staticmethod
@@ -246,7 +243,7 @@ class TradingSystemManager:
     # 4.2
     @staticmethod
     def get_purchase_policy(cookie: str, store_id: str):
-        return UserManager.get_purchase_policy(cookie, store_id)
+        return UserManager.get_purchase_policy(cookie, store_id).parse()
 
     # 4.3
     @staticmethod

@@ -41,34 +41,32 @@ const CreateConditionForm: FC<CreateConditionFormProps> = ({ onSubmit, products 
 
 	function handleSubmit() {
 		setTargetError(+target < 0);
-		if (!targetError && target !== '') {
-			if (simple) {
-				if (simpleOperator !== '' && conditionObject !== '') {
-					if (conditionObject === 'product' || conditionObject === 'category') {
-						onSubmit({
-							target: +target,
-							operator: simpleOperator,
-							context: { obj: conditionObject, identifier: conditionIdentifier },
-						});
-					} else {
-						onSubmit({
-							target: +target,
-							operator: simpleOperator,
-							context: { obj: conditionObject },
-						});
-					}
-				}
-			} else if (complexOperator !== '') {
-				if (complexOperator === 'conditioning') {
+		if (simple) {
+			if (!targetError && target !== '' && simpleOperator !== '' && conditionObject !== '') {
+				if (conditionObject === 'product' || conditionObject === 'category') {
 					onSubmit({
-						operator: complexOperator,
+						target: +target,
+						operator: simpleOperator,
+						context: { obj: conditionObject, identifier: conditionIdentifier },
 					});
 				} else {
 					onSubmit({
-						operator: complexOperator,
-						operands: [],
+						target: +target,
+						operator: simpleOperator,
+						context: { obj: conditionObject },
 					});
 				}
+			}
+		} else if (complexOperator !== '') {
+			if (complexOperator === 'conditional') {
+				onSubmit({
+					operator: complexOperator,
+				});
+			} else {
+				onSubmit({
+					operator: complexOperator,
+					children: [],
+				});
 			}
 		}
 	}
@@ -114,7 +112,7 @@ const CreateConditionForm: FC<CreateConditionFormProps> = ({ onSubmit, products 
 					/>
 				</RadioGroup>
 			</FormControl>
-			<Fade in={simple}>
+			<Fade in={simple} unmountOnExit>
 				<div style={!simple ? { position: 'absolute' } : {}}>
 					<TextField
 						required
@@ -126,15 +124,17 @@ const CreateConditionForm: FC<CreateConditionFormProps> = ({ onSubmit, products 
 						inputMode="numeric"
 						type="number"
 						error={targetError}
+						name="target"
 					/>
 					<FormControl fullWidth margin="normal">
 						<InputLabel id="operator-label">Operator</InputLabel>
 						<Select
 							labelId="operator-label"
-							id="operator-select"
+							id="operator-simple"
 							value={simpleOperator}
 							onChange={handleSimpleOperatorChange}
 							required
+							name="operator"
 						>
 							<MenuItem value={'equals'}>Equals to target</MenuItem>
 							<MenuItem value={'great-than'}>Greater than target</MenuItem>
@@ -151,6 +151,7 @@ const CreateConditionForm: FC<CreateConditionFormProps> = ({ onSubmit, products 
 							value={conditionObject}
 							onChange={handleObjectChange}
 							required
+							name="object"
 						>
 							<MenuItem value={'product'}>Product</MenuItem>
 							<MenuItem value={'category'}>Category</MenuItem>
@@ -163,10 +164,11 @@ const CreateConditionForm: FC<CreateConditionFormProps> = ({ onSubmit, products 
 							<InputLabel id="identifier-label">Identifier</InputLabel>
 							<Select
 								labelId="identifier-label"
-								id="identifier-select"
+								id="identifier"
 								value={conditionIdentifier}
 								onChange={handleIdentifierChange}
 								required
+								name="identifier"
 							>
 								{conditionObject === 'category'
 									? categories.map((category, index) => (
@@ -184,7 +186,7 @@ const CreateConditionForm: FC<CreateConditionFormProps> = ({ onSubmit, products 
 					)}
 				</div>
 			</Fade>
-			<Fade in={!simple}>
+			<Fade in={!simple} unmountOnExit>
 				<div style={simple ? { position: 'absolute' } : {}}>
 					<FormControl fullWidth margin="normal">
 						<InputLabel id="operator-label">Operator</InputLabel>
@@ -194,8 +196,9 @@ const CreateConditionForm: FC<CreateConditionFormProps> = ({ onSubmit, products 
 							value={complexOperator}
 							onChange={handleComplexOperatorChange}
 							required
+							name="operator-complex"
 						>
-							<MenuItem value={'conditioning'}>CONDITIONING</MenuItem>
+							<MenuItem value={'conditional'}>CONDITIONAL</MenuItem>
 							<MenuItem value={'and'}>AND</MenuItem>
 							<MenuItem value={'or'}>OR</MenuItem>
 						</Select>

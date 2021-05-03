@@ -53,7 +53,7 @@ def test_registers_user_when_registered_successfully(cookie):
     username = "username"
     UserManager._get_cookie_user()[cookie].set_username(username)
     UserManager.register(username, "password", cookie)
-    assert UserManager._get_username_user()[username] == UserManager._get_cookie_user()[cookie]
+    assert username in UserManager._get_username_user()
 
 
 def test_does_not_register_when_registration_fails(cookie):
@@ -71,16 +71,6 @@ def test_login_successfully(cookie):
 
 def test_login_fails_when_given_invalid_cookie():
     assert not UserManager.login("username", "password", "boogie boogie").succeeded()
-
-
-def test_login_gets_back_old_data_on_success(cookie, cookie2):
-    username = "username"
-    UserManager._get_cookie_user()[cookie].set_username(username)
-    UserManager._get_cookie_user()[cookie2].set_username(username)
-    UserManager.register(username, "password", cookie2)
-    UserManager.login(username, "password", cookie2)
-    same_user = UserManager._get_cookie_user()[cookie] == UserManager._get_cookie_user()[cookie2]
-    assert same_user
 
 
 def test_login_does_not_get_back_old_data_on_fail(cookie, cookie2):

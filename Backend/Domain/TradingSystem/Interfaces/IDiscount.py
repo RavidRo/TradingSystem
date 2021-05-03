@@ -3,32 +3,19 @@ from __future__ import annotations      # for self type annotating
 import threading
 from abc import ABC, abstractmethod
 
+from Backend.Domain.TradingSystem.TypesPolicies.Purchase_Composites.concrete_composites import AndCompositePurchaseRule
+from Backend.Domain.TradingSystem.TypesPolicies.purchase_policy import DefaultPurchasePolicy
 from Backend.response import Response, Parsable, ParsableList
 
 
 class IDiscount(Parsable, ABC):
 
-    auto_id_lock = threading.Lock()
-
-    auto_id = 0
-
-    @staticmethod
-    def generate_id() -> str:
-        with IDiscount.auto_id_lock:
-            IDiscount.auto_id += 1
-            return str(IDiscount.auto_id - 1)
-
     @abstractmethod
-    def __init__(self, condition=None):
+    def __init__(self, id):
         self._parent = None
-        self._id = IDiscount.generate_id()
+        self._id = id
         self.discount_func = None
-        # TODO: convert discount_data['condition'] to Rule
-        # self._condition = AndPurchaseRule([])
-        if condition is not None:
-            # self.condition.add_new_rule(condition, self._condition.get_id())
-            pass
-        self._condition = lambda x: True
+        self._conditions_policy = DefaultPurchasePolicy()
 
     def get_parent(self) -> IDiscount:
         return self._parent
@@ -39,8 +26,11 @@ class IDiscount(Parsable, ABC):
     def get_id(self):
         return self._id
 
-    def apply_discount(self, products_to_quantities: dict) -> float:
-        if self._condition(products_to_quantities):
+    def get_conditions_policy(self):
+        return self._conditions_policy
+
+    def apply_discount(self, products_to_quantities: dict, user_age: int) -> float:
+        if self._conditions_policy.checkPolicy(products_to_quantities, user_age):
             return self.discount_func(products_to_quantities)
         return 0.0
 
@@ -49,11 +39,11 @@ class IDiscount(Parsable, ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def edit_simple_discount(self, discount_id, percentage=None, condition=None, context=None, duration=None) -> Response[None]:
+    def edit_simple_discount(self, discount_id, percentage=None, context=None, duration=None) -> Response[None]:
         raise NotImplementedError
 
     @abstractmethod
-    def edit_complex_discount(self, discount_id, complex_type=None, decision_rule=None) -> Response[None]:
+    def edit_complex_discount(self, discount_id, new_id, complex_type=None, decision_rule=None) -> Response[None]:
         raise NotImplementedError
 
     @abstractmethod

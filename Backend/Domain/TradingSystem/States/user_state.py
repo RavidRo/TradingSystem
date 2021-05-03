@@ -37,9 +37,6 @@ class UserState(ABC):
     def change_product_quantity_in_cart(self, store_id, product_id, new_amount):
         return self._cart.change_product_quantity(store_id, product_id, new_amount)
 
-    def get_discounted_current_cart_price(self):
-        return self._cart.get_discounted_current_cart_price()
-
     def buy_cart(self, user_age: int):
         return self._cart.buy_products(user_age)
 
@@ -79,7 +76,9 @@ class UserState(ABC):
         return Response(False, msg="Abstract Method")
 
     @abstractmethod
-    def add_discount(self, store_id: str, discount_data: dict, exist_id: str):
+    def add_discount(
+        self, store_id: str, discount_data: dict, exist_id: str, condition_type: str = None
+    ):
         return Response(False, msg="Abstract Method")
 
     @abstractmethod
@@ -100,7 +99,6 @@ class UserState(ABC):
         store_id: str,
         discount_id: str,
         percentage: float = None,
-        condition: dict = None,
         context: dict = None,
         duration=None,
     ):

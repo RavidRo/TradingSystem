@@ -77,7 +77,7 @@ class Responsibility(Parsable):
         raise Exception(Responsibility.ERROR_MESSAGE)
 
     # 4.2
-    def add_discount(self, discount_data: dict, exist_id: str):
+    def add_discount(self, discount_data: dict, exist_id: str, condition_type: str = None):
         raise Exception(Responsibility.ERROR_MESSAGE)
 
     def move_discount(self, src_id: str, dest_id: str):
@@ -90,12 +90,7 @@ class Responsibility(Parsable):
         raise Exception(Responsibility.ERROR_MESSAGE)
 
     def edit_simple_discount(
-        self,
-        discount_id: str,
-        percentage: float = None,
-        condition: dict = None,
-        context: dict = None,
-        duration=None,
+        self, discount_id: str, percentage: float = None, context: dict = None, duration=None
     ):
         raise Exception(Responsibility.ERROR_MESSAGE)
 
@@ -196,6 +191,7 @@ class Responsibility(Parsable):
         message = f'You have been dismissed from store "{self._store.get_name()}"'
         if self.__subscriber:
             self.__subscriber.notify(message)
+            self._store.unsubscribe(self.__subscriber)
         self._user_state.dismiss_from_store(store_id)
 
     # Parsing the object for user representation
