@@ -2104,6 +2104,17 @@ def test_purchase_add_complex_two_conditioning():
 # endregion
 
 # region remove_purchase_rules
+
+def test_remove_conditional():
+    cookie, username, password, store_name, store_id = _initialize_info(_generate_username(), "aaa",
+                                                                        _generate_store_name())
+    parent_id = '1'
+    system.add_purchase_rule(cookie, store_id, _complex_rule_details_conditioning(),
+                                                    'complex',
+                                                    parent_id)
+    response_remove = system.remove_purchase_rule(cookie, store_id, '2')
+    assert response_remove.succeeded()
+
 def test_purchase_remove_simple_rule_success():
     cookie, username, password, store_name, store_id = _initialize_info(_generate_username(), "aaa",
                                                                         _generate_store_name())

@@ -76,15 +76,17 @@ class ConditioningCompositePurchaseRule(CompositePurchaseRule):
             return Response(False, msg="There is an existing if clause for the condition")
 
     def remove(self, component_id: str) -> Response[None]:
-        if self.children[0].id == component_id:
-            self.children[0] = AndCompositePurchaseRule(self.children[0].id)
-            return Response(True, msg="Rule was removed successfully!")
+        if self.children[0] is not None:
+            if self.children[0].id == component_id:
+                self.children[0] = AndCompositePurchaseRule(self.children[0].id)
+                return Response(True, msg="Rule was removed successfully!")
 
-        elif self.children[1].id == component_id:
-            self.children[1] = AndCompositePurchaseRule(self.children[1].id)
-            return Response(True, msg="Rule was removed successfully!")
-        else:
-            return super().remove(component_id)
+        if self.children[1] is not None:
+            if self.children[1].id == component_id:
+                self.children[1] = AndCompositePurchaseRule(self.children[1].id)
+                return Response(True, msg="Rule was removed successfully!")
+
+        return super().remove(component_id)
 
     def operation(self, products_to_quantities: dict, user_age: int) -> Response[None]:
         if (
