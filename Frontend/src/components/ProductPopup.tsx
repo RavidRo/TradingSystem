@@ -12,9 +12,10 @@ type ProductPopupProps = {
     keywords:string[],
     category:string,
     propHandleDelete:(product:ProductQuantity)=>void,
+    propHandleAdd:(product:Product)=>void;
    
 };
-const PopupCart: FC<ProductPopupProps> = ({id,name,price,quantity,keywords,category,propHandleDelete}: ProductPopupProps) => {
+const PopupCart: FC<ProductPopupProps> = ({id,name,price,quantity,keywords,category,propHandleDelete,propHandleAdd}: ProductPopupProps) => {
 const [prod_quantity, setQuantity] = useState<number>(quantity);
 const handleDelete = ()=>{
     if(prod_quantity===1){
@@ -25,6 +26,17 @@ const handleDelete = ()=>{
         setQuantity(prod_quantity-1);
     }
 }
+const handleAddPoup = ()=>{
+    let me = {
+        id:id,
+        name:name,
+        price:price,
+        keywords:keywords,
+        category:category,
+    }
+    propHandleAdd(me);
+    setQuantity(prod_quantity+1);
+}
 	return (
             prod_quantity>0?
                 <TableRow style={{'alignItems':'right'}} >
@@ -33,7 +45,7 @@ const handleDelete = ()=>{
                     <TableCell align={'center'}>{prod_quantity}</TableCell>
                     <TableCell className="buttonsCell" >
                         <div className="buttons">
-                            <button className="buttonP" onClick={()=>setQuantity(prod_quantity+1)}>
+                            <button className="buttonP" onClick={()=>handleAddPoup()}>
                                 +
                             </button>
                             <button className="buttonM" onClick={()=>handleDelete()}>

@@ -8,15 +8,16 @@ import '../styles/CardProduct.scss';
 
 type CartProductProps = {
 	product: Product;
+	quantity:number;
 	onRemove: (id: string) => void;
 	onChangeQuantity: (id: string, newQuantity: number) => void;
 };
 
 const digitPointPrecision = 3;
 
-const CartProduct: FC<CartProductProps> = ({ product, onRemove, onChangeQuantity }) => {
+const CartProduct: FC<CartProductProps> = ({ product,quantity, onRemove, onChangeQuantity }) => {
 	const { id, name, price } = product;
-	const [quantity, setQuantity] = useState<number>(10);
+	const [quantityMy, setQuantity] = useState<number>(quantity);
 	return (
 		<div className="product">
 			<div className="product-fields">
@@ -26,7 +27,7 @@ const CartProduct: FC<CartProductProps> = ({ product, onRemove, onChangeQuantity
 						setQuantity(newQuantity);
 						onChangeQuantity(id, newQuantity);
 					}}
-					value={quantity}
+					value={quantityMy}
 					
 				/>
 				<p className="price">${price.toPrecision(digitPointPrecision)}</p>

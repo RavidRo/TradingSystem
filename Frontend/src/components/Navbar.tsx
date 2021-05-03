@@ -20,6 +20,7 @@ type NavBarProps = {
 	products: ProductQuantity[];
 	storesToProducts:StoreToSearchedProducts;
 	propHandleDelete: (product: Product) => void;
+	propHandleAdd:(product:Product,storeID:string)=>void;
 	notification: string[];
 	logout: () => void;
 };
@@ -30,6 +31,7 @@ const Navbar: FC<NavBarProps> = ({
 	storesToProducts,
 	propHandleDelete,
 	notification,
+	propHandleAdd,
 	logout,
 }) => {
 	const [hoverCart, setHoverCart] = useState<boolean>(false);
@@ -56,7 +58,7 @@ const Navbar: FC<NavBarProps> = ({
 						My Cart
 					</Link>
 					{hoverCart ? (
-						<PopupCart products={productsInCart} storesToProducts={storesToProducts} propHandleDelete={propHandleDelete} />
+						<PopupCart products={productsInCart} storesToProducts={storesToProducts} propHandleAdd={propHandleAdd} propHandleDelete={propHandleDelete} />
 					) : null}
 				</div>
 				<div className="navbar-item">

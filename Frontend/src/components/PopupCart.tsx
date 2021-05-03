@@ -10,11 +10,11 @@ type PopupCartProps = {
     products:ProductQuantity[],
     storesToProducts:StoreToSearchedProducts,
     propHandleDelete:(product:Product)=>void,
+	propHandleAdd:(product:Product,storeID:string)=>void;
    
 };
-const PopupCart: FC<PopupCartProps> = ({products,storesToProducts,propHandleDelete}: PopupCartProps) => {
+const PopupCart: FC<PopupCartProps> = ({products,propHandleAdd,storesToProducts,propHandleDelete}: PopupCartProps) => {
 
-    console.log(storesToProducts);
     const [bagsToProducts,setShoppingBags] = useState<ShoppingBag[]>([]);
 
     const [storesToProductsMy,setStoresProducts] = useState<StoreToSearchedProducts>(storesToProducts);
@@ -118,8 +118,10 @@ const PopupCart: FC<PopupCartProps> = ({products,storesToProducts,propHandleDele
                 key={bagID}
                 // storeName={Object.values(bagIDToName.current)[index].storeName}
                 storeName={bagID}
+                storeID={bagID}
                 products={productQuantityOfTuples(storesToProductsMy[bagID])}
                 propHandleDelete={propHandleDelete}
+                propHandleAdd={propHandleAdd}
                 />)
                     
             })}

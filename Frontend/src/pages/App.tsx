@@ -82,6 +82,10 @@ function App() {
 	const productUpdateObj = useAPI<Product[]>('/change_product_quantity_in_cart', {}, 'POST');
 
 	const addProductToPopup = (product: Product,storeID:string) => {
+
+		console.log(storesToProducts);
+
+
 		let found = false;
 		let quantity = 1;
 		for (var i = 0; i < Object.values(productsInCart).length; i++) {
@@ -129,8 +133,12 @@ function App() {
 		else {
 			let tuplesArr = storesToProducts.current[storeID];
 			for(var i=0;i<tuplesArr.length;i++){
-				tuplesArr[i][1]+=1;
+				if(tuplesArr[i][0].id===product.id){
+					tuplesArr[i][1]+=1;
+				}
 			}
+			storesToProducts.current[storeID] = tuplesArr;
+
 			productUpdateObj
 				.request({
 					cookie:cookie,
@@ -195,6 +203,7 @@ function App() {
 						products={productsInCart}
 						storesToProducts = {storesToProducts.current}
 						propHandleDelete={handleDeleteProduct}
+						propHandleAdd={addProductToPopup}
 						notification={notification}
 						logout={() => {
 							setSignedIn(false);
