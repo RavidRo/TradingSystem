@@ -11,7 +11,7 @@ type ProductPopupProps = {
     quantity: number,
     keywords:string[],
     category:string,
-    propHandleDelete:(product:ProductQuantity)=>void,
+    propHandleDelete:(productID:string)=>void,
     propHandleAdd:(product:Product)=>void;
    
 };
@@ -19,7 +19,7 @@ const PopupCart: FC<ProductPopupProps> = ({id,name,price,quantity,keywords,categ
 const [prod_quantity, setQuantity] = useState<number>(quantity);
 const handleDelete = ()=>{
     if(prod_quantity===1){
-        propHandleDelete({id:id,name:name,price:price,quantity:quantity,keywords:keywords,category:category});
+        propHandleDelete(id);
         setQuantity(0);
     }
     else{

@@ -10,7 +10,7 @@ import { faShoppingBag } from '@fortawesome/free-solid-svg-icons';
 type CartProps = {
 	products:ProductQuantity[],
     storesToProducts:StoreToSearchedProducts,
-    handleDeleteProduct:(product:Product|null)=>void,
+    handleDeleteProduct:(product:Product|null,storeID:string)=>void,
 
 };
 
@@ -66,19 +66,21 @@ const Cart: FC<CartProps> = ({products,storesToProducts,handleDeleteProduct}) =>
     const [totalAmount,setTotalAmount] = useState<number>(calculateTotal());
 
    
-	const handleDeleteProductMy = (id:string)=>{
+	const handleDeleteProductMy = (id:string,storeID:string)=>{
         let product:Product= {} as Product;
         for(var i=0;i<Object.keys(storesToProductsMy).length;i++){
-            for(var j=0;j<bagsToProducts[i].prodQuantities.length;j++){
-                if(bagsToProducts[i].prodQuantities[j][0].id===id){
-                    product=bagsToProducts[i].prodQuantities[j][0];
+            let tupleArr = Object.values(storesToProductsMy)[i];
+            for(var j=0;j<tupleArr.length;j++){
+                if(tupleArr[i][0].id===id){
+                    product=Object.values(storesToProductsMy)[i][j][0];
+                    tupleArr[i][1]=0;
                     // change product quantity in bag to 0
-                    bagsToProducts[i].prodQuantities[j][1] = 0;
+                    Object.values(storesToProductsMy)[i] = tupleArr;
                 }
             }
         }
         setTotalAmount(calculateTotal());
-        handleDeleteProduct(product);
+        handleDeleteProduct(product,storeID);
 	}
     const findBagByProductID = (productID:string)=>{
         for(var i=0;i<<Object.keys(storesToProductsMy).length;i++){
@@ -148,7 +150,7 @@ const Cart: FC<CartProps> = ({products,storesToProducts,handleDeleteProduct}) =>
                 // storeName={Object.values(bagIDToName.current)[index].storeName}
                 storeName={bagID}
                 products={productQuantityOfTuples(storesToProductsMy[bagID])}
-                propHandleDelete={handleDeleteProductMy}
+                propHandleDelete={(productID:string)=>handleDeleteProductMy(productID,bagID)}
                 changeQuantity={changeQuantity}
                 />)
                     

@@ -166,10 +166,10 @@ function App() {
 	};
 
 	const productRemoveObj = useAPI<Product[]>('/remove_product_from_cart', {}, 'POST');
-	const handleDeleteProduct = (product: Product | null) => {
+	const handleDeleteProduct = (product: Product | null,storeID:string) => {
 		if (product !== null) {
 			productRemoveObj
-				.request({ cookie:cookie,product_id: product.id, quantity: getQuantityOfProduct(product.id) })
+				.request({ cookie:cookie,product_id: product.id, store_id:storeID,quantity: getQuantityOfProduct(product.id) })
 				.then(({ data, error, errorMsg }) => {
 					if (!error && data !== null) {
 						// do nothing
@@ -178,6 +178,13 @@ function App() {
 					alert(errorMsg);
 				});
 			setProducts(Object.values(productsInCart).filter((item) => item.id !== product.id));
+			let tupleArr = storesToProducts.current[storeID];
+			for(var i=0;i<tupleArr.length;i++){
+				if(tupleArr[i][0].id===product.id){
+					tupleArr[i][1]=0;
+				}
+			}
+			storesToProducts.current[storeID] = tupleArr;
 		}
 	};
 

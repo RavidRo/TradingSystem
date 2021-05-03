@@ -8,7 +8,7 @@ type PopupBagProps = {
     storeName:string,
     storeID:string,
     products:ProductQuantity[],
-    propHandleDelete:(product:ProductQuantity)=>void,
+    propHandleDelete:(productID:string)=>void,
     propHandleAdd:(product:Product,storeID:string)=>void;
 
    

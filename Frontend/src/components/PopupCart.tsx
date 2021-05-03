@@ -9,7 +9,7 @@ import useAPI from '../hooks/useAPI';
 type PopupCartProps = {
     products:ProductQuantity[],
     storesToProducts:StoreToSearchedProducts,
-    propHandleDelete:(product:Product)=>void,
+    propHandleDelete:(product:Product,storeID:string)=>void,
 	propHandleAdd:(product:Product,storeID:string)=>void;
    
 };
@@ -31,7 +31,7 @@ const PopupCart: FC<PopupCartProps> = ({products,propHandleAdd,storesToProducts,
          return prodQuantities;           
 
     }
-    const handleDeleteProductMy = (id:string)=>{
+    const handleDeleteProductMy = (id:string,bagID:string)=>{
         let product:Product= {} as Product;
         for(var i=0;i<bagsToProducts.length;i++){
             for(var j=0;j<bagsToProducts[i].prodQuantities.length;j++){
@@ -42,7 +42,7 @@ const PopupCart: FC<PopupCartProps> = ({products,propHandleAdd,storesToProducts,
                 }
             }
         }
-        propHandleDelete(product);
+        propHandleDelete(product,bagID);
 	}
     const findBagByProductID = (productID:string)=>{
         for(var i=0;i<bagsToProducts.length;i++){
@@ -120,7 +120,7 @@ const PopupCart: FC<PopupCartProps> = ({products,propHandleAdd,storesToProducts,
                 storeName={bagID}
                 storeID={bagID}
                 products={productQuantityOfTuples(storesToProductsMy[bagID])}
-                propHandleDelete={propHandleDelete}
+                propHandleDelete={(productID:string)=>handleDeleteProductMy(productID,bagID)}
                 propHandleAdd={propHandleAdd}
                 />)
                     
