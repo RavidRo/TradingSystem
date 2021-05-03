@@ -258,7 +258,9 @@
 7. <ins>User</ins>: enters \_payment_information and \_address.
 8. <ins>System</ins>: sends \_payment_information and total price to Outside Cashing.
 9. <ins>Outside Cashing</ins>: performs billing and returns indicate message.
-10. <ins>System</ins>: if the process succeeded, return success message, else rollback the purchase and return error.
+10. <ins>System</ins>: 
+    1. if the process succeeded, send real time notification to each store's owner for products purchased.
+    2. else rollback the purchase and return error.
 11. <ins>System</ins>: sends the products and \_address to Outside Supplyment.
 12. <ins>Outside Supplyment</ins>: supply products, return indicate message, else rollback the purchase and return error..
 13. <ins>System</ins>: if outside supplyment accepts, generates success message and returns to the user.
@@ -766,6 +768,7 @@
 4. <ins>Store owner</ins>: enters \_manager.
     1. if data legal removes \_manager from the store.
         1. removes all the users that were appointed by him and their subtrees of responsibilities.
+        2. sends real time notification to _manager for dismissing ownership.
     2. else, generate an error message.
 
 **Tests**:

@@ -20,9 +20,9 @@ Permission = enum.Enum(
         ("REMOVE_MANAGER", 4),
         ("get history", 5),
         ("GET_HISTORY", 5),
-        ("manage_purchase_policy", 6),
+        ("manage purchase policy", 6),
         ("MANAGE_PURCHASE_POLICY", 6),
-        ("manage_discount_policy", 7),
+        ("manage discount policy", 7),
         ("MANAGE_DISCOUNT_POLICY", 7),
     ],
 )
@@ -34,7 +34,7 @@ name_to_permission: dict[str, Permission] = {
     "remove_manager": Permission.REMOVE_MANAGER,
     "get_history": Permission.GET_HISTORY,
     "manage_purchase_policy": Permission.MANAGE_PURCHASE_POLICY,
-    "manage_discount_policy": Permission.MANAGE_DISCOUNT_POLICY
+    "manage_discount_policy": Permission.MANAGE_DISCOUNT_POLICY,
 }
 
 
@@ -46,6 +46,8 @@ class Responsibility(Parsable):
         user_state.add_responsibility(self, store.get_id())
         self._store = store
         self.__subscriber = subscriber
+        if subscriber:
+            self._store.subscribe(subscriber)
         self._appointed: list[Responsibility] = []
 
     # 4.1
@@ -87,15 +89,20 @@ class Responsibility(Parsable):
     def remove_discount(self, discount_id: str):
         raise Exception(Responsibility.ERROR_MESSAGE)
 
-    def edit_simple_discount(self, discount_id: str, percentage: float = None,
-                             context: dict = None, duration=None):
+    def edit_simple_discount(
+        self, discount_id: str, percentage: float = None, context: dict = None, duration=None
+    ):
         raise Exception(Responsibility.ERROR_MESSAGE)
 
-    def edit_complex_discount(self, discount_id: str, complex_type: str = None, decision_rule: str = None):
+    def edit_complex_discount(
+        self, discount_id: str, complex_type: str = None, decision_rule: str = None
+    ):
         raise Exception(Responsibility.ERROR_MESSAGE)
 
     # 4.2
-    def add_purchase_rule(self, rule_details: dict, rule_type: str, parent_id: str, clause: str = None):
+    def add_purchase_rule(
+        self, rule_details: dict, rule_type: str, parent_id: str, clause: str = None
+    ):
         raise Exception(Responsibility.ERROR_MESSAGE)
 
     # 4.2
@@ -137,9 +144,6 @@ class Responsibility(Parsable):
 
     # 4.9
     def get_store_appointments(self) -> Response[Responsibility]:
-        raise Exception(Responsibility.ERROR_MESSAGE)
-
-    def get_my_appointees(self) -> Response[ParsableList[Responsibility]]:
         raise Exception(Responsibility.ERROR_MESSAGE)
 
     # 4.11
@@ -187,6 +191,7 @@ class Responsibility(Parsable):
         message = f'You have been dismissed from store "{self._store.get_name()}"'
         if self.__subscriber:
             self.__subscriber.notify(message)
+            self._store.unsubscribe(self.__subscriber)
         self._user_state.dismiss_from_store(store_id)
 
     # Parsing the object for user representation

@@ -4,7 +4,7 @@ import { ListItem } from '@material-ui/core';
 import ListItemText from '@material-ui/core/ListItemText';
 
 import '../styles/MyStores.scss';
-import { Appointee } from '../types';
+import { allPermissions, Appointee, defaultPermissions } from '../types';
 import CreateStoreForm from '../components/FormWindows/CreateStoreForm';
 import ManageStore from '../components/ManageStore';
 import GenericList from '../components/Lists/GenericList';
@@ -50,20 +50,23 @@ import useAPI from '../hooks/useAPI';
 // 	],
 // };
 
-type MyStoresProps = {};
+type MyStoresProps = {
+	username: string;
+};
 
-type MyStore = { id: string; name: string; role: string };
+type MyStore = { id: string; name: string; role: string; appointment: Appointee };
 
-const MyStores: FC<MyStoresProps> = () => {
-	const myResponsibilities = useAPI<Appointee[]>('/get_my_appointees');
-	const openStore = useAPI<{ cookie: string; store_id: string }>('/create_store', {}, 'POST');
+const MyStores: FC<MyStoresProps> = ({ username }) => {
+	const myResponsibilities = useAPI<Appointee[]>('/get_my_appointments');
+	const openStore = useAPI<string>('/create_store', {}, 'POST');
 	useEffect(() => {
 		myResponsibilities.request({}, (data, error) => {
 			if (!error && data !== null) {
-				const myStores = data.map((responsibility) => ({
+				const myStores = data.data.map((responsibility) => ({
 					id: responsibility.store_id,
 					name: responsibility.store_name,
 					role: responsibility.role,
+					appointment: responsibility,
 				}));
 				setStores(myStores);
 			}
@@ -76,10 +79,10 @@ const MyStores: FC<MyStoresProps> = () => {
 	const [open, setOpen] = useState<boolean>(false);
 	const [Tab, setTab] = useState<FC | null>(null);
 
-	const onSelectStore = (storeId: string) => {
+	const onSelectStore = (storeId: string, appointment: Appointee) => {
 		if (storeId !== selectedStore) {
 			setSelectedStore(storeId);
-			setTabAnimation(() => <ManageStore storeId={storeId} />);
+			setTabAnimation(() => <ManageStore storeId={storeId} appointment={appointment} />);
 		}
 	};
 
@@ -96,10 +99,23 @@ const MyStores: FC<MyStoresProps> = () => {
 	};
 
 	const onNewStore = (newName: string) => {
-		openStore.request({ name: newName }).then(() => {
-			if (!openStore.error && openStore.data !== null) {
+		openStore.request({ name: newName }, (data, error) => {
+			if (!error && data !== null) {
 				setStores([
-					{ id: openStore.data.store_id, name: newName, role: 'Founder' },
+					{
+						id: data.data,
+						name: newName,
+						role: 'Founder',
+						appointment: {
+							appointees: [],
+							isManager: false,
+							permissions: allPermissions,
+							role: 'Founder',
+							store_id: data.data,
+							store_name: newName,
+							username: username,
+						},
+					},
 					...stores,
 				]);
 			}
@@ -119,7 +135,7 @@ const MyStores: FC<MyStoresProps> = () => {
 						<ListItem
 							key={store.id}
 							button
-							onClick={() => onSelectStore(store.id)}
+							onClick={() => onSelectStore(store.id, store.appointment)}
 							selected={store.id === selectedStore}
 						>
 							<ListItemText primary={`${store.name} - ${store.role}`} />

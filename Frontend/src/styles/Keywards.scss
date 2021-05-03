@@ -1,0 +1,31 @@
+.keywards{
+    display: flex;
+    flex-direction: row;
+    height: 100%;
+    width: 100%;
+    align-items: center;
+}
+.keywordInput{
+    margin-left: 3%;
+    margin-top: 2%;
+    height: 30px;
+}
+.wardsDiv{
+    display: flex;
+    flex-direction: row;
+    margin-left: 10%;
+}
+.wardsDiv li{
+    display: inline;
+}
+.keyBtn{
+    height: 36px;
+    width: 8%;
+    margin-top: 2%;
+}
+.wordsP{
+    align-self: baseline;
+    margin-left: 10%;
+    margin-bottom: 0%;
+    padding: 0%;
+}

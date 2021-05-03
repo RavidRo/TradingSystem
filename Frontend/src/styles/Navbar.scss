@@ -1,8 +1,13 @@
+.navbar{
+    width: 100%;
+    height: fit-content;
+}
 .navbar nav{
     background-color: #f9fce1;
     display: flex;
     flex-direction: row;
     align-items: center;
+    padding: 0 20px;
 }
 
 .nameLink{
@@ -10,40 +15,36 @@
     text-decoration: none;
     color: black;
     flex: 1;
+    font-weight: bold;
 }
 .appName:hover {
     font-weight: bold;
 }
 
-.cartDiv{
+.navbar-item {
     display: flex;
     flex-direction: row;
     align-items: center;
-}
-.cartLink{
-    font-size: 30px;
-    text-decoration: none;
-    color: black;
-    margin-left: 10px;
-}
-.cartIcon{
-    font-size: 30px;
-    cursor: pointer;
-}
-.signInDiv{
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    margin: 0 30px;
+    white-space: nowrap;
+    margin-left: 20px;
 
+    .item-icon {
+        font-size: 30px;
+    }
+
+    .item-link {
+        font-size: 30px;
+        text-decoration: none;
+        color: black;
+        margin-left: 5%;
+    }
 }
-.signInLink{
-    font-size: 30px;
-    text-decoration: none;
-    color: black;
-}
-.signInIcon{
-    font-size: 30px;
-    cursor: pointer;
-    margin-right: 10px;
+
+.notification-cont { 
+    margin-top: 165px;
+    right: 50px;
+    position: absolute;
+    .notification {
+        padding: 10px;
+    }
 }

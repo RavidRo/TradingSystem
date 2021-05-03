@@ -8,10 +8,6 @@ from Backend.response import Response, ParsableList, PrimitiveParsable
 
 
 class Founder(Responsibility):
-    def __init__(self, user_state, store, subscriber=None) -> None:
-        super().__init__(user_state, store, subscriber)
-        if subscriber != None:
-            self._store.subscribe(subscriber)
 
     # 4.1
     # Creating a new product a the store
@@ -42,7 +38,9 @@ class Founder(Responsibility):
         )
 
     # 4.2
-    def add_purchase_rule(self, rule_details: dict, rule_type: str, parent_id: str, clause: str = None):
+    def add_purchase_rule(
+        self, rule_details: dict, rule_type: str, parent_id: str, clause: str = None
+    ):
         return self._store.add_purchase_rule(rule_details, rule_type, parent_id, clause)
 
     # 4.2
@@ -78,12 +76,15 @@ class Founder(Responsibility):
         return self._store.remove_discount(discount_id)
 
     # 4.2
-    def edit_simple_discount(self, discount_id: str, percentage: float = None,
-                             context: dict = None, duration=None):
+    def edit_simple_discount(
+        self, discount_id: str, percentage: float = None, context: dict = None, duration=None
+    ):
         return self._store.edit_simple_discount(discount_id, percentage, context, duration)
 
     # 4.2
-    def edit_complex_discount(self, discount_id: str, complex_type: str = None, decision_rule: str = None):
+    def edit_complex_discount(
+        self, discount_id: str, complex_type: str = None, decision_rule: str = None
+    ):
         return self._store.edit_complex_discount(discount_id, complex_type, decision_rule)
 
     # 4.3
@@ -116,6 +117,9 @@ class Founder(Responsibility):
         from Backend.Domain.TradingSystem.Responsibilities.manager import Manager
 
         # We don't to appoint a user to the same store twice
+        print("My user name", self._user_state.get_username())
+        print("To appoint username, ", user.get_username())
+
         with user.get_appointment_lock():
             appointed_response = user.is_appointed(self._store.get_id())
             if not appointed_response.succeeded():
@@ -165,9 +169,6 @@ class Founder(Responsibility):
     # 4.9
     def get_store_appointments(self) -> Response[Responsibility]:
         return self._store.get_personnel_info()
-
-    def get_my_appointees(self) -> Response[ParsableList[Responsibility]]:
-        return Response(True, ParsableList(self._appointed))
 
     # 4.11
     def get_store_purchase_history(self) -> Response[ParsableList[PurchaseDetails]]:

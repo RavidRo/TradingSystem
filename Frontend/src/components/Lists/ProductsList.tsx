@@ -25,12 +25,9 @@ const ProductsList: FC<ProductsListProps> = ({
 	setProducts,
 	storeId,
 }) => {
-	const createProduct = useAPI<{
-		cookie: string;
-		product_id: string;
-	}>('/create_product', {}, 'POST');
+	const createProduct = useAPI<string>('/create_product', {}, 'POST');
 
-	const deleteProductAPI = useAPI<{ cookie: string; answer: string; succeeded: boolean }>(
+	const deleteProductAPI = useAPI<null>(
 		'/remove_product_from_store',
 		{ store_id: storeId },
 		'POST'
@@ -56,7 +53,7 @@ const ProductsList: FC<ProductsListProps> = ({
 				if (!createProduct.error && createProduct.data !== null) {
 					setProducts([
 						{
-							id: createProduct.data.product_id,
+							id: createProduct.data.data,
 							name,
 							price,
 							category,

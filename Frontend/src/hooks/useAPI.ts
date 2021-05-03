@@ -7,24 +7,24 @@ export default function useAPI<Type>(
 	dynamicParams?: object,
 	type: 'GET' | 'POST' = 'GET'
 ) {
-	// type APIResponse = {
-	// 	cookie: string;
-	// 	error_msg: string;
-	// 	succeeded: boolean;
-	// 	data: Type;
-	// };
+	type APIResponse = {
+		cookie: string;
+		error_msg: string;
+		succeeded: boolean;
+		data: Type;
+	};
 
 	const [loading, setLoading] = useState<boolean>(true);
 	const [error, setError] = useState<boolean>(false);
 	const [errorMsg, setErrorMsg] = useState<string>('');
-	const [data, setData] = useState<Type | null>(null);
+	const [data, setData] = useState<APIResponse | null>(null);
 	const cookie = useContext(CookieContext);
 
 	const defaultParams = { cookie };
 
 	const request = (
 		moreParams?: object,
-		callback?: (data: Type | null, error: boolean, errorMsg: string) => void
+		callback?: (data: APIResponse | null, error: boolean, errorMsg: string) => void
 	) => {
 		setLoading(true);
 		setError(false);
@@ -41,9 +41,9 @@ export default function useAPI<Type>(
 				  })
 				: axios.post(endPoint, params);
 
-		let dataVar = data;
-		let errorVar = error;
-		let errorMsgVar = errorMsg;
+		let dataVar: APIResponse | null = null;
+		let errorVar: boolean = false;
+		let errorMsgVar: string = '';
 
 		return promise
 			.then((response) => {
@@ -59,11 +59,14 @@ export default function useAPI<Type>(
 				errorMsgVar = error;
 			})
 			.finally(() => {
+				errorVar = errorVar || (dataVar !== null && !dataVar.succeeded);
+				// console.log('EXPLANATIONNNN: ');
 				setError(errorVar);
 				setLoading(false);
 				setData(dataVar);
+				errorMsgVar = dataVar?.error_msg ? dataVar?.error_msg : errorMsgVar;
 				setErrorMsg(errorMsgVar);
-				console.log({ data: dataVar, error: errorMsgVar });
+				console.log({ endPoint, data: dataVar, error: errorVar, errorMsg: errorMsgVar });
 			})
 			.then(() => {
 				callback && callback(dataVar, errorVar, errorMsgVar);

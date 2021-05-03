@@ -15,48 +15,52 @@ import GenericList from './GenericList';
 type DiscountNodeProps = {
 	discount: Discount;
 	onCreate: (father_id: string) => void;
-	fatherId: string;
 	onDelete?: (discountId: string) => void;
+	productIdToString: (productId: string) => string;
 };
 
-function discountToString(discount: Discount) {
-	const rule = discount.rule;
-	if (isDiscountSimple(rule)) {
-		const discountOn =
-			rule.context.obj === 'store'
-				? 'all products'
-				: rule.context.obj === 'category'
-				? `all products in the ${rule.context.identifier} category`
-				: `product "${rule.context.identifier}"`;
-		return `${rule.percentage}% discount on ${discountOn}`;
-	} else {
-		const type = rule.type;
-		return `${type.operator.toUpperCase()}${
-			type.operator === 'xor'
-				? ` - decision rule: ${decisionRuleToString(type.decision_rule)}`
-				: ''
-		}`;
-	}
-}
-
-function decisionRuleToString(decisionRule: DecisionRule): string {
-	const ruleToString: { [key in DecisionRule]: string } = {
-		first: 'first discount',
-		max: 'best discount value',
-		min: 'worst discount value',
-	};
-	return ruleToString[decisionRule];
-}
-
-const DiscountNode: FC<DiscountNodeProps> = ({ discount, onCreate, fatherId, onDelete }) => {
+const DiscountNode: FC<DiscountNodeProps> = ({
+	discount,
+	onCreate,
+	onDelete,
+	productIdToString,
+}) => {
 	const [open, setOpen] = useState(false);
 	const handleClick = () => {
 		setOpen(!open);
 	};
+
+	function decisionRuleToString(decisionRule: DecisionRule): string {
+		const ruleToString: { [key in DecisionRule]: string } = {
+			first: 'first discount',
+			max: 'best discount value',
+			min: 'worst discount value',
+		};
+		return ruleToString[decisionRule];
+	}
+
+	function discountToString(discount: Discount) {
+		if (isDiscountSimple(discount)) {
+			const discountOn =
+				discount.context.obj === 'store'
+					? 'all products'
+					: discount.context.obj === 'category'
+					? `all products in the ${discount.context.id} category`
+					: `product "${productIdToString(discount.context.id)}"`;
+			return `${discount.percentage}% discount on ${discountOn}`;
+		} else {
+			return `${discount.type.toUpperCase()}${
+				discount.type === 'xor'
+					? ` - decision rule: ${decisionRuleToString(discount.decision_rule)}`
+					: ''
+			}`;
+		}
+	}
+
 	return (
 		<>
 			<ListItem button onClick={handleClick}>
-				{isDiscountComplex(discount.rule) && (
+				{isDiscountComplex(discount) && (
 					<IconButton edge="start" aria-label="delete">
 						{open ? <ExpandLess /> : <ExpandMore />}
 					</IconButton>
@@ -70,11 +74,11 @@ const DiscountNode: FC<DiscountNodeProps> = ({ discount, onCreate, fatherId, onD
 					</ListItemSecondaryAction>
 				)}
 			</ListItem>
-			{isDiscountComplex(discount.rule) && (
+			{isDiscountComplex(discount) && (
 				<Collapse in={open} timeout="auto">
 					<GenericList
-						data={discount.rule.operands}
-						onCreate={() => onCreate(fatherId)}
+						data={discount.discounts}
+						onCreate={() => onCreate(discount.id)}
 						createTxt="+ Add new discount"
 						padRight
 					>
@@ -83,8 +87,8 @@ const DiscountNode: FC<DiscountNodeProps> = ({ discount, onCreate, fatherId, onD
 								key={discount.id}
 								discount={discount}
 								onCreate={onCreate}
-								fatherId={discount.id}
 								onDelete={onDelete}
+								productIdToString={productIdToString}
 							/>
 						)}
 					</GenericList>

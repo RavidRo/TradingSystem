@@ -1,9 +1,16 @@
 .buttonP{
-    
     background-color: rgba(78, 243, 100, 0.932);
-    
 }
 .buttonM{
-    margin-left: 20%;
     background-color: rgb(248, 88, 88);
+}
+.buttons{
+    display: flex;
+    flex-direction: row;
+}
+.popupRow{
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    width: 100%;
 }
