@@ -18,7 +18,7 @@ class ShoppingBag(IShoppingBag):
         self_prods_to_quantites = self._products_to_quantity if self._products_to_quantity != {} else self.__pending_products_to_quantity
         for product_id in self_prods_to_quantites:
             products_ids_to_quantities[product_id] = self_prods_to_quantites[product_id][1]
-        return ShoppingBagData(self.__store.get_name(), products_ids_to_quantities)
+        return ShoppingBagData(self.__store.get_id(), self.__store.get_name(), products_ids_to_quantities)
 
     """checks need to be made:
        ----------------------
@@ -98,7 +98,9 @@ class ShoppingBag(IShoppingBag):
 
         """second step - check if the purchase_types are appropriate"""
         # since there are no purchase types for now- this checking isn't relevant
-        self.purchase_types_checks(user_age, self._products_to_quantity)
+        purchase_policy_check = self.purchase_types_checks(user_age, self._products_to_quantity)
+        if not purchase_policy_check.succeeded():
+            return purchase_policy_check
 
         """third step - check and apply the discount """
         self.discount_apply(user_age)
@@ -108,13 +110,15 @@ class ShoppingBag(IShoppingBag):
             msg="All the details are good! here comes the price",
         )
 
-    def purchase_types_checks(self, user_info, products_info=None):
+    def purchase_types_checks(self, user_age: int, products_info=None):
         if products_info is None:
             products_info = {}
-        purchase_types_check = self.__store.check_purchase(products_info, user_info)
+        purchase_types_check = self.__store.check_purchase(products_info, user_age)
         if not purchase_types_check.success:
             self.__store.send_back(self._products_to_quantity)
             return purchase_types_check
+
+        return Response(True, msg="The cart passed the purchase policy check!")
 
     def discount_apply(self, user_age: int):
         self.__pending_price = self.__store.apply_discounts(self._products_to_quantity, user_age)

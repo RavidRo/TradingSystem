@@ -165,8 +165,10 @@ class TradingSystemManager:
 
     # 4.2
     @staticmethod
-    def add_discount(cookie: str, store_id: str, discount_data: dict, exist_id: str):
-        return UserManager.add_discount(cookie, store_id, discount_data, exist_id)
+    def add_discount(
+        cookie: str, store_id: str, discount_data: dict, exist_id: str, condition_type: str = None
+    ):
+        return UserManager.add_discount(cookie, store_id, discount_data, exist_id, condition_type)
 
     @staticmethod
     def move_discount(cookie: str, store_id: str, src_id: str, dest_id: str):
@@ -186,12 +188,11 @@ class TradingSystemManager:
         store_id: str,
         discount_id: str,
         percentage: float = None,
-        condition: dict = None,
         context: dict = None,
         duration=None,
     ):
         return UserManager.edit_simple_discount(
-            cookie, store_id, discount_id, percentage, condition, context, duration
+            cookie, store_id, discount_id, percentage, context, duration
         )
 
     @staticmethod

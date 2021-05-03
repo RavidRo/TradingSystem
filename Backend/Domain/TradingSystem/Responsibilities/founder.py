@@ -60,8 +60,8 @@ class Founder(Responsibility):
         return self._store.get_purchase_policy()
 
     # 4.2
-    def add_discount(self, discount_data: dict, exist_id: str):
-        return self._store.add_discount(discount_data, exist_id)
+    def add_discount(self, discount_data: dict, exist_id: str, condition_type: str = None):
+        return self._store.add_discount(discount_data, exist_id, condition_type)
 
     # 4.2
     def move_discount(self, src_id: str, dest_id: str):
@@ -77,16 +77,9 @@ class Founder(Responsibility):
 
     # 4.2
     def edit_simple_discount(
-        self,
-        discount_id: str,
-        percentage: float = None,
-        condition: dict = None,
-        context: dict = None,
-        duration=None,
+        self, discount_id: str, percentage: float = None, context: dict = None, duration=None
     ):
-        return self._store.edit_simple_discount(
-            discount_id, percentage, condition, context, duration
-        )
+        return self._store.edit_simple_discount(discount_id, percentage, context, duration)
 
     # 4.2
     def edit_complex_discount(

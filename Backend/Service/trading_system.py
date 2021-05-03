@@ -16,7 +16,7 @@ class TradingSystem(object):
     # double locking mechanism
     @staticmethod
     def getInstance() -> TradingSystem:
-        """ Static access method. """
+        """Static access method."""
         if TradingSystem.__instance is None:
             with threading.Lock():
                 if TradingSystem.__instance is None:
@@ -24,7 +24,7 @@ class TradingSystem(object):
         return TradingSystem.__instance
 
     def __init__(self):
-        """ Virtually private constructor. """
+        """Virtually private constructor."""
         if TradingSystem.__instance is not None:
             raise Exception("This class is a singleton!")
         else:
@@ -186,8 +186,17 @@ class TradingSystem(object):
         )
 
     @log.loging(to_hide=[1])
-    def add_discount(self, cookie: str, store_id: str, discount_data: dict, exist_id: str):
-        return TradingSystemManager.add_discount(cookie, store_id, discount_data, exist_id)
+    def add_discount(
+        self,
+        cookie: str,
+        store_id: str,
+        discount_data: dict,
+        exist_id: str,
+        condition_type: str = None,
+    ):
+        return TradingSystemManager.add_discount(
+            cookie, store_id, discount_data, exist_id, condition_type
+        )
 
     @log.loging(to_hide=[1])
     def move_discount(self, cookie: str, store_id: str, src_id: str, dest_id: str):
@@ -208,12 +217,11 @@ class TradingSystem(object):
         store_id: str,
         discount_id: str,
         percentage: float = None,
-        condition: dict = None,
         context: dict = None,
         duration=None,
     ):
         return TradingSystemManager.edit_simple_discount(
-            cookie, store_id, discount_id, percentage, condition, context, duration
+            cookie, store_id, discount_id, percentage, context, duration
         )
 
     @log.loging(to_hide=[1])

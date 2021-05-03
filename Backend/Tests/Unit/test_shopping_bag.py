@@ -133,7 +133,7 @@ def test_remove_product_not_existing(shopping_bag: ShoppingBag, product_stub: Pr
 # * buy_products
 # * ====================================================
 @patch.multiple(StoreStub, apply_discounts=MagicMock(return_value=10))
-@patch.multiple(ShoppingBag, purchase_types_checks=MagicMock(return_value=True))
+@patch.multiple(ShoppingBag, purchase_types_checks=MagicMock(return_value=Response(True)))
 def test_buy_products_valid(
     shopping_bag: ShoppingBag,
     user_stub: UserStub,
