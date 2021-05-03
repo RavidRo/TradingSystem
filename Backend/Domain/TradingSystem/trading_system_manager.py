@@ -176,7 +176,7 @@ class TradingSystemManager:
 
     @staticmethod
     def get_discounts(cookie: str, store_id: str):
-        return UserManager.get_discounts(cookie, store_id)
+        return UserManager.get_discounts(cookie, store_id).parse()
 
     @staticmethod
     def remove_discount(cookie: str, store_id: str, discount_id: str):

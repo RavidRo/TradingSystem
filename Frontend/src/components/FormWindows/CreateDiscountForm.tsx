@@ -49,33 +49,33 @@ const CreateDiscountForm: FC<CreateDiscountFormProps> = ({ onSubmit, products })
 						context: {
 							obj: contextObject,
 						},
+						discount_type: 'simple',
 					});
 				} else if (contextIdentifier !== '') {
 					onSubmit({
 						percentage: +percentage,
 						context: {
 							obj: contextObject,
-							identifier: contextIdentifier,
+							id: contextIdentifier,
 						},
+						discount_type: 'simple',
 					});
 				}
 			} else {
 				if (operator === 'xor') {
 					if (decisionRule !== '') {
 						onSubmit({
-							type: {
-								operator,
-								decision_rule: decisionRule,
-							},
-							operands: [],
+							type: operator,
+							decision_rule: decisionRule,
+							discounts: [],
+							discount_type: 'complex',
 						});
 					}
 				} else if (operator !== '') {
 					onSubmit({
-						type: {
-							operator,
-						},
-						operands: [],
+						type: operator,
+						discounts: [],
+						discount_type: 'complex',
 					});
 				}
 			}
@@ -120,7 +120,7 @@ const CreateDiscountForm: FC<CreateDiscountFormProps> = ({ onSubmit, products })
 				</RadioGroup>
 			</FormControl>
 			<div>
-				<Fade in={simple}>
+				<Fade in={simple} unmountOnExit>
 					<div style={!simple ? { position: 'absolute' } : {}}>
 						<TextField
 							required
@@ -173,7 +173,7 @@ const CreateDiscountForm: FC<CreateDiscountFormProps> = ({ onSubmit, products })
 						)}
 					</div>
 				</Fade>
-				<Fade in={!simple}>
+				<Fade in={!simple} unmountOnExit>
 					<div style={simple ? { position: 'absolute' } : {}}>
 						<FormControl fullWidth margin="normal">
 							<InputLabel id="operator-label">Operator</InputLabel>
@@ -188,6 +188,7 @@ const CreateDiscountForm: FC<CreateDiscountFormProps> = ({ onSubmit, products })
 								<MenuItem value={'and'}>AND</MenuItem>
 								<MenuItem value={'or'}>OR</MenuItem>
 								<MenuItem value={'xor'}>XOR</MenuItem>
+								<MenuItem value={'add'}>ADD</MenuItem>
 							</Select>
 						</FormControl>
 						{operator === 'xor' && (
