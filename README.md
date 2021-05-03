@@ -9,7 +9,6 @@
 ### Fronted:
 
 -   install Node >= 10.16 and npm >= 5.6
--   install nwb `npm list -g nwb`
 -   install install dependencies `cd ./Frontend && npm install`
 
 # Run the app:
