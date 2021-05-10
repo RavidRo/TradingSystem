@@ -1,8 +1,7 @@
 import React, { FC, useState } from 'react';
 import useAPI from '../../hooks/useAPI';
 import { allPermissions, Appointee, defaultPermissions, Role } from '../../types';
-import CreateAppointeeForm from '../FormWindows/CreateAppointeeForm';
-// import '../styles/AppointeesList.scss';
+import CreateAppointeeForm from '../FormWindows/CreateForms/CreateAppointeeForm';
 import AppointeeNode from './AppointeeNode';
 import GenericList from './GenericList';
 

@@ -1,61 +1,56 @@
-
-import { Button} from '@material-ui/core';
-import React ,{FC, useEffect, useState} from 'react';
+import React, { FC, useEffect, useState } from 'react';
 import CartProduct from '../components/CartProduct';
-import PurchaseIcon from '@material-ui/icons/LocalMall';
 import { Link } from 'react-router-dom';
 import '../styles/Bag.scss';
-import {Product,ProductQuantity} from '../types';
+import { ProductQuantity } from '../types';
 
 type BagProps = {
-    storeName:string,
-    products:ProductQuantity[],
-    propHandleDelete:(id:string)=>void,
-	changeQuantity:(id: string, newQuantity: number)=>void,
-   
+	storeName: string;
+	products: ProductQuantity[];
+	propHandleDelete: (id: string) => void;
+	changeQuantity: (id: string, newQuantity: number) => void;
 };
 
-const Bag: FC<BagProps> = ({storeName,products,propHandleDelete,changeQuantity}:BagProps) => {
+const Bag: FC<BagProps> = ({ storeName, products, propHandleDelete, changeQuantity }: BagProps) => {
+	const [productsInCart, setProducts] = useState<ProductQuantity[]>(products);
 
-    const [productsInCart,setProducts] = useState<ProductQuantity[]>(products);
+	useEffect(() => {
+		setProducts(products);
+	}, [products]);
 
-    useEffect(()=>{
-        setProducts(products);
-    },[products]);
-
-	const calculateTotal = ()=>{
-		const reducer = (accumulator:number, currentValue:ProductQuantity) => accumulator + (currentValue.price*currentValue.quantity);
-		return productsInCart.reduce(reducer,0);
-	}
-	const [total,setTotal] = useState<number>(calculateTotal());
+	const calculateTotal = () => {
+		const reducer = (accumulator: number, currentValue: ProductQuantity) =>
+			accumulator + currentValue.price * currentValue.quantity;
+		return productsInCart.reduce(reducer, 0);
+	};
+	const [total, setTotal] = useState<number>(calculateTotal());
 
 	const onRemove = (id: string) => {
 		setProducts(productsInCart.filter((product) => product.id !== id));
 		propHandleDelete(id);
-	}
-    const onChangeQuantity = (id: string, newQuantity: number) => {
+	};
+	const onChangeQuantity = (id: string, newQuantity: number) => {
 		productsInCart.forEach((product) => {
 			if (product.id === id) {
 				product.quantity = newQuantity;
-				if(newQuantity===0){
+				if (newQuantity === 0) {
 					onRemove(id);
 				}
 			}
 		});
 		setTotal(calculateTotal());
-		changeQuantity(id,newQuantity);
-	}
-	const getQuanOfProduct = (id:string)=>{
-		for(var i=0;i<productsInCart.length;i++){
-			if(productsInCart[i].id===id){
+		changeQuantity(id, newQuantity);
+	};
+	const getQuanOfProduct = (id: string) => {
+		for (var i = 0; i < productsInCart.length; i++) {
+			if (productsInCart[i].id === id) {
 				return productsInCart[i].quantity;
 			}
 		}
 		return 0;
-	}
-	
-    return (
-		
+	};
+
+	return (
 		<div className="page">
 			<div className="order-cont">
 				<div className="products-cont">
@@ -94,6 +89,6 @@ const Bag: FC<BagProps> = ({storeName,products,propHandleDelete,changeQuantity}:
 			</div>
 		</div>
 	);
-}
+};
 
 export default Bag;

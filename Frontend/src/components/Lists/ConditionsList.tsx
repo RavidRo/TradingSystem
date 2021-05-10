@@ -9,7 +9,7 @@ import {
 	isConditionComplex,
 	ProductQuantity,
 } from '../../types';
-import CreateConditionForm from '../FormWindows/CreateConditionForm';
+import CreateConditionForm from '../FormWindows/CreateForms/CreateConditionForm';
 import ConditionNode from './ConditionNode';
 import GenericList from './GenericList';
 

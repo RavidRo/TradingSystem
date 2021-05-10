@@ -1,4 +1,4 @@
-import React, { FC, useState, useEffect } from 'react';
+import React, { FC, useState } from 'react';
 import useInterval from '../components/useInterval';
 import '../styles/Timer.scss';
 

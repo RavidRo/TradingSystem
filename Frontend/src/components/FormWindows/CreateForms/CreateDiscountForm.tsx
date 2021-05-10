@@ -17,8 +17,8 @@ import {
 	DiscountSimple,
 	Operator,
 	Product,
-} from '../../types';
-import FormWindow from './FormWindow';
+} from '../../../types';
+import FormWindow from '../FormWindow';
 // import '../styles/CreateDiscountForm.scss';
 
 type CreateDiscountFormProps = {

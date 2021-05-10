@@ -2,7 +2,7 @@ import React, { FC, useState } from 'react';
 
 import { TextField } from '@material-ui/core';
 
-import FormWindow from './FormWindow';
+import FormWindow from '../FormWindow';
 
 type CreateStoreFormProps = {
 	onSubmit: (name: string) => void;

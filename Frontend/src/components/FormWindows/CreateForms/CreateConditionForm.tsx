@@ -19,8 +19,8 @@ import {
 	ConditionSimple,
 	Product,
 	SimpleOperator,
-} from '../../types';
-import FormWindow from './FormWindow';
+} from '../../../types';
+import FormWindow from '../FormWindow';
 // import '../styles/CreateConditionForm.scss';
 
 type CreateConditionFormProps = {

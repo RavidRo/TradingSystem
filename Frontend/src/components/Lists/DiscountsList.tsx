@@ -1,8 +1,7 @@
 import React, { FC, useEffect, useState } from 'react';
 import useAPI from '../../hooks/useAPI';
 import { Discount, DiscountComplex, DiscountSimple, ProductQuantity } from '../../types';
-import CreateDiscountForm from '../FormWindows/CreateDiscountForm';
-// import '../styles/DiscountsList.scss';
+import CreateDiscountForm from '../FormWindows/CreateForms/CreateDiscountForm';
 import DiscountNode from './DiscountNode';
 import GenericList from './GenericList';
 

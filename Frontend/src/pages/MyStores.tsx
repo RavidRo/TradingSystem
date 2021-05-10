@@ -3,52 +3,12 @@ import React, { FC, useEffect, useState } from 'react';
 import { ListItem } from '@material-ui/core';
 import ListItemText from '@material-ui/core/ListItemText';
 
-import '../styles/MyStores.scss';
-import { allPermissions, Appointee, defaultPermissions } from '../types';
-import CreateStoreForm from '../components/FormWindows/CreateStoreForm';
+import '../styles/MyStoresPage/MyStores.scss';
+import { allPermissions, Appointee } from '../types';
+import CreateStoreForm from '../components/FormWindows/CreateForms/CreateStoreForm';
 import ManageStore from '../components/ManageStore';
 import GenericList from '../components/Lists/GenericList';
 import useAPI from '../hooks/useAPI';
-
-// const init_stores: Store[] = [
-// 	{ id: '0', name: 'Tiffany&Stuff', ids_to_quantities: {} },
-// 	{ id: '1', name: 'Fluffy My Puppy', ids_to_quantities: {} },
-// ];
-
-// const products_per_store: { [key: string]: Product[] } = {
-// 	'0': [
-// 		{
-// 			id: '0',
-// 			name: 'Milk',
-// 			price: 20,
-// 			keywords: [],
-// 			category: 'Food',
-// 		},
-// 		{
-// 			id: '1',
-// 			name: 'Bamba',
-// 			price: 3.2,
-// 			keywords: ['Food', 'Yummy'],
-// 			category: 'Snacks',
-// 		},
-// 		{
-// 			id: '2',
-// 			name: 'Tomato',
-// 			price: 2.34,
-// 			keywords: ['Vegetable', 'Red'],
-// 			category: 'Vegetables',
-// 		},
-// 	],
-// 	'1': [
-// 		{
-// 			id: '0',
-// 			name: 'Red paint',
-// 			price: 20,
-// 			keywords: ['Paint', 'Epic'],
-// 			category: 'Construction',
-// 		},
-// 	],
-// };
 
 type MyStoresProps = {
 	username: string;

@@ -47,12 +47,7 @@ function App() {
 
 	const [notifications, setNotifications] = useState<string[]>([]);
 
-	type storesToProductsMapType = {
-		[key: string]: Product[];
-	};
-
 	const storesToProducts = useRef<StoreToSearchedProducts>({});
-	const storesProducts = useAPI<storesToProductsMapType>('/search_product', {});
 	// useEffect(() => {
 	// 	const client = new W3CWebSocket('ws://127.0.0.1:5000/connect');
 	// 	client.onopen = () => {
@@ -63,15 +58,6 @@ function App() {
 	// 	};
 	// }, []);
 
-	const getStoreByProductID = (id: string) => {
-		for (var i = 0; i < Object.keys(storesToProducts).length; i++) {
-			for (var j = 0; j < Object.values(storesToProducts)[i].length; j++) {
-				if (Object.values(storesToProducts)[i][j].id === id) {
-					return Object.keys(storesToProducts)[i];
-				}
-			}
-		}
-	};
 	const productObj = useAPI<Product[]>('/save_product_in_cart', {}, 'POST');
 	const productUpdateObj = useAPI<Product[]>('/change_product_quantity_in_cart', {}, 'POST');
 
@@ -80,7 +66,7 @@ function App() {
 
 		let found = false;
 		let quantity = 1;
-		for (var i = 0; i < Object.values(productsInCart).length; i++) {
+		for (let i = 0; i < Object.values(productsInCart).length; i++) {
 			if (Object.values(productsInCart)[i].id === product.id) {
 				Object.values(productsInCart)[i].quantity += 1;
 				quantity = productsInCart[i].quantity + 1;
@@ -121,7 +107,7 @@ function App() {
 			setProducts((oldArray) => [...oldArray, newProduct]);
 		} else {
 			let tuplesArr = storesToProducts.current[storeID];
-			for (var i = 0; i < tuplesArr.length; i++) {
+			for (let i = 0; i < tuplesArr.length; i++) {
 				if (tuplesArr[i][0].id === product.id) {
 					tuplesArr[i][1] += 1;
 				}

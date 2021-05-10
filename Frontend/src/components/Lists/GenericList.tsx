@@ -1,6 +1,5 @@
 import { Divider, List, ListItem, ListItemText, Typography } from '@material-ui/core';
 import React, { FC } from 'react';
-// import '../styles/GenericList.scss';
 
 type GenericListProps = {
 	data: any[];
