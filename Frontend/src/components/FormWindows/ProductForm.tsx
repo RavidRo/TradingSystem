@@ -17,8 +17,8 @@ type ProductFormProps = {
 	productEditing?: ProductQuantity;
 };
 
-const ProductForm: FC<ProductFormProps> = ({ onSubmit, productEditing = undefined }) => {
-	const [name, setName] = useState<string>(productEditing ? `${productEditing.name}` : '');
+const ProductForm: FC<ProductFormProps> = ({ onSubmit, productEditing }) => {
+	const [name, setName] = useState<string>(productEditing ? productEditing.name : '');
 	const [price, setPrice] = useState<string>(productEditing ? `${productEditing.price}` : '');
 	const [quantity, setQuantity] = useState<string>(
 		productEditing ? `${productEditing.quantity}` : ''
@@ -43,7 +43,7 @@ const ProductForm: FC<ProductFormProps> = ({ onSubmit, productEditing = undefine
 	}
 	return (
 		<FormWindow
-			createText={productEditing ? 'Edit Product' : 'Add Product!'}
+			submitText={productEditing ? 'Edit Product' : 'Add Product!'}
 			handleSubmit={handleSubmit}
 			header={productEditing ? 'Confirm' : 'New product'}
 		>

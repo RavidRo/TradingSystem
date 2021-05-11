@@ -89,7 +89,7 @@ const CreateConditionForm: FC<CreateConditionFormProps> = ({ onSubmit, products 
 	const categories = [...set];
 
 	return (
-		<FormWindow createText="Add Condition!" handleSubmit={handleSubmit} header="New condition">
+		<FormWindow submitText="Add Condition!" handleSubmit={handleSubmit} header="New condition">
 			<FormControl component="fieldset" margin="normal">
 				<RadioGroup
 					row

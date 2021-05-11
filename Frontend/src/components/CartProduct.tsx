@@ -8,14 +8,14 @@ import '../styles/CardProduct.scss';
 
 type CartProductProps = {
 	product: Product;
-	quantity:number;
+	quantity: number;
 	onRemove: (id: string) => void;
 	onChangeQuantity: (id: string, newQuantity: number) => void;
 };
 
-const digitPointPrecision = 3;
+const digitPointPrecision = 2;
 
-const CartProduct: FC<CartProductProps> = ({ product,quantity, onRemove, onChangeQuantity }) => {
+const CartProduct: FC<CartProductProps> = ({ product, quantity, onRemove, onChangeQuantity }) => {
 	const { id, name, price } = product;
 	const [quantityMy, setQuantity] = useState<number>(quantity);
 	return (
@@ -28,9 +28,8 @@ const CartProduct: FC<CartProductProps> = ({ product,quantity, onRemove, onChang
 						onChangeQuantity(id, newQuantity);
 					}}
 					value={quantityMy}
-					
 				/>
-				<p className="price">${price.toPrecision(digitPointPrecision)}</p>
+				<p className="price">${price.toFixed(digitPointPrecision)}</p>
 			</div>
 			<IconButton aria-label="remove" onClick={() => onRemove(id)}>
 				<CancelIcon />

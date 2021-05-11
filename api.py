@@ -616,13 +616,13 @@ async def add_manager_permission():
         missing_args += " store_id"
     if "username" not in request_json:
         missing_args += " username"
-    if "permission_number" not in request_json:
-        missing_args += " permission_number"
+    if "permission" not in request_json:
+        missing_args += " permission"
     if missing_args != "":
         return __missing_args(cookie, missing_args)
     store_id = request_json["store_id"]
     username = request_json["username"]
-    permission_number = request_json["permission_number"]
+    permission_number = request_json["permission"]
     answer = await __async_call(
         system.add_manager_permission, cookie, store_id, username, permission_number
     )
@@ -641,13 +641,13 @@ async def remove_manager_permission():
         missing_args += " store_id"
     if "username" not in request_json:
         missing_args += " username"
-    if "permission_number" not in request_json:
-        missing_args += " permission_number"
+    if "permission" not in request_json:
+        missing_args += " permission"
     if missing_args != "":
         return __missing_args(cookie, missing_args)
     store_id = request_json["store_id"]
     username = request_json["username"]
-    permission_number = request_json["permission_number"]
+    permission_number = request_json["permission"]
     answer = await __async_call(
         system.remove_manager_permission, cookie, store_id, username, permission_number
     )

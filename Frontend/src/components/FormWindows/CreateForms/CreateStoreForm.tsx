@@ -15,7 +15,7 @@ const CreateStoreForm: FC<CreateStoreFormProps> = ({ onSubmit }) => {
 		onSubmit(name);
 	}
 	return (
-		<FormWindow handleSubmit={handleSubmit} createText="Open Store!" header="New store">
+		<FormWindow handleSubmit={handleSubmit} submitText="Open Store!" header="New store">
 			<TextField
 				required
 				margin="normal"

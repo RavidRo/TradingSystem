@@ -1,7 +1,9 @@
 import React, { FC, useState } from 'react';
+
 import useAPI from '../../hooks/useAPI';
-import { allPermissions, Appointee, defaultPermissions, Role } from '../../types';
+import { allPermissions, Appointee, defaultPermissions, Permission, Role } from '../../types';
 import CreateAppointeeForm from '../FormWindows/CreateForms/CreateAppointeeForm';
+import EditPermissionsForm from '../FormWindows/EditPermissionsForm';
 import AppointeeNode from './AppointeeNode';
 import GenericList from './GenericList';
 
@@ -52,7 +54,7 @@ const MyAppointeesList: FC<MyAppointeesListProps> = ({
 				setMyAppointees([
 					{
 						appointees: [],
-						isManager: role === 'Manager',
+						is_manager: role === 'Manager',
 						role,
 						store_id: storeId,
 						username,
@@ -78,6 +80,43 @@ const MyAppointeesList: FC<MyAppointeesListProps> = ({
 			}
 		});
 	};
+	const addPermission = useAPI('/add_manager_permission', { store_id: storeId }, 'POST');
+	const removePermission = useAPI('/remove_manager_permission', { store_id: storeId }, 'POST');
+	const onEditAppointeeForm = (appointee: Appointee) => {
+		const onEdit = (newPermissions: Permission[]) => {
+			const promises: Promise<{ error: boolean; errorMsg: string }>[] = [];
+			newPermissions.forEach((permission) => {
+				if (!appointee.permissions.includes(permission)) {
+					// A new permission was added (Was not in the original permissions list)
+					promises.push(
+						addPermission.request({ username: appointee.username, permission })
+					);
+				}
+			});
+			appointee.permissions.forEach((oldPermission) => {
+				if (!newPermissions.includes(oldPermission)) {
+					// An old permission in not included in the new ones(It was removed)
+					removePermission.request({
+						username: appointee.username,
+						permission: oldPermission,
+					});
+				}
+			});
+			Promise.all(promises).then((results) => {
+				if (!results.some((result) => result.error)) {
+					const newAppointees = [
+						...myAppointees.filter(
+							(appointeeTemp) => appointeeTemp.username !== appointee.username
+						),
+						{ ...appointee, permissions: newPermissions },
+					];
+					console.log(newAppointees);
+					setMyAppointees(newAppointees);
+				}
+			});
+		};
+		openTab(() => <EditPermissionsForm onSubmit={onEdit} appointee={appointee} />, '');
+	};
 
 	return (
 		<GenericList
@@ -97,6 +136,11 @@ const MyAppointeesList: FC<MyAppointeesListProps> = ({
 					onClick={(appointee) => onSelectAppointee(appointee)}
 					onDelete={
 						appointment.permissions.includes('remove manager') ? onDelete : undefined
+					}
+					onEdit={
+						appointment.permissions.includes('appoint manager')
+							? onEditAppointeeForm
+							: undefined
 					}
 				/>
 			)}

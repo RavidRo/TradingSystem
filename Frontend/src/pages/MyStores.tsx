@@ -68,7 +68,7 @@ const MyStores: FC<MyStoresProps> = ({ username }) => {
 						role: 'Founder',
 						appointment: {
 							appointees: [],
-							isManager: false,
+							is_manager: false,
 							permissions: allPermissions,
 							role: 'Founder',
 							store_id: data.data,

@@ -22,7 +22,7 @@ const CreateAppointeeForm: FC<CreateAppointeeFormProps> = ({ onSubmit }) => {
 	};
 
 	return (
-		<FormWindow createText="Add appointee!" handleSubmit={handleSubmit} header="New appointee">
+		<FormWindow submitText="Add appointee!" handleSubmit={handleSubmit} header="New appointee">
 			<TextField
 				required
 				margin="normal"

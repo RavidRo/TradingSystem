@@ -10,7 +10,7 @@ type ProductDetailsProps = {
 const ProductDetails: FC<ProductDetailsProps> = ({ product }) => {
 	const details = [
 		{ field: 'Quantity', value: product.quantity.toString() },
-		{ field: 'Price', value: product.price.toPrecision(3) },
+		{ field: 'Price', value: product.price.toFixed(2) },
 		{ field: 'Category', value: 'Some category' },
 	];
 	return (

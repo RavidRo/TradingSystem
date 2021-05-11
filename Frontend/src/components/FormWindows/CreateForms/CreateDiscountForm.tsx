@@ -96,7 +96,7 @@ const CreateDiscountForm: FC<CreateDiscountFormProps> = ({ onSubmit, products })
 	};
 
 	return (
-		<FormWindow handleSubmit={handleSubmit} createText="Add discount!" header="New discount">
+		<FormWindow handleSubmit={handleSubmit} submitText="Add discount!" header="New discount">
 			<FormControl component="fieldset" margin="normal">
 				<RadioGroup
 					row
