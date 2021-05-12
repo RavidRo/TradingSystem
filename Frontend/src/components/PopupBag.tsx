@@ -10,10 +10,11 @@ type PopupBagProps = {
     products:ProductQuantity[],
     propHandleDelete:(productID:string)=>void,
     propHandleAdd:(product:Product,storeID:string)=>Promise<boolean>;
+    changeQuantity:(store:string,product:string,quan:number)=>void,
 
    
 };
-const PopupBag: FC<PopupBagProps> = ({storeID,products,propHandleAdd,propHandleDelete}:PopupBagProps) => {
+const PopupBag: FC<PopupBagProps> = ({storeID,products,propHandleAdd,propHandleDelete,changeQuantity}:PopupBagProps) => {
 
     const [productsInCart,setProducts] = useState<ProductQuantity[]>(products);
     const [storeName,setStoreName] =  useState<string>("");
@@ -32,6 +33,9 @@ const PopupBag: FC<PopupBagProps> = ({storeID,products,propHandleAdd,propHandleD
                 alert(errorMsg);
             }
     })},[]);
+
+   
+ 
 
     return (
 		
@@ -52,6 +56,7 @@ const PopupBag: FC<PopupBagProps> = ({storeID,products,propHandleAdd,propHandleD
                         <TableBody>
                             {Object.values(productsInCart).map((p) => (
                                 <ProductPopup
+                                {...console.log(p)}
                                 id={p.id}
                                 name={p.name}
                                 price={p.price}
@@ -60,6 +65,7 @@ const PopupBag: FC<PopupBagProps> = ({storeID,products,propHandleAdd,propHandleD
                                 category={p.category}
                                 propHandleDelete={propHandleDelete}
                                 propHandleAdd={(product:Product)=>propHandleAdd(product,storeID)}
+                                changeQuantity={(productID,newQuantity)=>changeQuantity(storeID,productID,newQuantity)}
                                 key={Object.values(productsInCart).indexOf(p)}
                                 />
                             ))}

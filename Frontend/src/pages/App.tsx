@@ -63,15 +63,7 @@ function App() {
 	// 	};
 	// }, []);
 
-	const getStoreByProductID = (id: string) => {
-		for (var i = 0; i < Object.keys(storesToProducts).length; i++) {
-			for (var j = 0; j < Object.values(storesToProducts)[i].length; j++) {
-				if (Object.values(storesToProducts)[i][j].id === id) {
-					return Object.keys(storesToProducts)[i];
-				}
-			}
-		}
-	};
+
 	const productObj = useAPI<Product[]>('/save_product_in_cart', {}, 'POST');
 	const productUpdateObj = useAPI<Product[]>('/change_product_quantity_in_cart', {}, 'POST');
 
@@ -149,6 +141,30 @@ function App() {
 				});
 		}
 	};
+	const productQuantityObj = useAPI<void>('/change_product_quantity_in_cart',{},'POST');
+    const changeQuantity = (storeID:string, productID: string, newQuantity: number)=>{
+        productQuantityObj.request({cookie:cookie,store_id:storeID,product_id:productID,quantity:newQuantity}).then(({data,error,errorMsg})=>{
+            if(!error && data!==null){
+				for (var i = 0; i < Object.values(productsInCart).length; i++) {
+					if (Object.values(productsInCart)[i].id === productID) {
+						Object.values(productsInCart)[i].quantity += 1;
+					}
+				}
+				let tuplesArr = storesToProducts.current[storeID];
+				for (var i = 0; i < tuplesArr.length; i++) {
+					if (tuplesArr[i][0].id === productID) {
+						tuplesArr[i][1]  = newQuantity;
+					}
+				}
+				storesToProducts.current[storeID] = tuplesArr;
+				setProducts(productsInCart);
+                void(0);
+            }
+            else{
+                alert(errorMsg);
+            }
+        })
+    }
 	const getQuantityOfProduct = (productID: string) => {
 		for (var i = 0; i < productsInCart.length; i++) {
 			if (productsInCart[i].id === productID) {
@@ -169,10 +185,11 @@ function App() {
 				})
 				.then(({ data, error, errorMsg }) => {
 					if (!error && data !== null) {
-						// do nothing
 						void 0;
 					}
-					alert(errorMsg);
+					else{
+						alert(errorMsg);
+					}
 				});
 			setProducts(Object.values(productsInCart).filter((item) => item.id !== product.id));
 			let tupleArr = storesToProducts.current[storeID];
@@ -197,21 +214,7 @@ function App() {
 		getCookie();
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
-	const storeIDToNameObj = useAPI<Store>('/get_store');
-	const getStoreNameByID = (storeID:string) => {
-		storeIDToNameObj
-			.request({
-					store_id: storeID,
-				})
-			.then(({ data, error, errorMsg }) => {
-				if (!error && data !== null) {
-					return data.data.name;
-				}
-				else{
-					alert(errorMsg);
-				}
-			});
-	};
+	
 
 	return cookie !== '' ? (
 		<ThemeProvider theme={theme}>
@@ -224,6 +227,7 @@ function App() {
 						propHandleDelete={handleDeleteProduct}
 						propHandleAdd={addProductToPopup}
 						notifications={notifications}
+						changeQuantity={changeQuantity}
 						logout={() => {
 							setSignedIn(false);
 							setCookie('');

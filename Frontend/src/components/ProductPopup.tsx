@@ -13,9 +13,10 @@ type ProductPopupProps = {
     category:string,
     propHandleDelete:(productID:string)=>void,
     propHandleAdd:(product:Product)=>Promise<boolean>,
+    changeQuantity:(productID:string,newQuantity:number)=>void,
    
 };
-const PopupCart: FC<ProductPopupProps> = ({id,name,price,quantity,keywords,category,propHandleDelete,propHandleAdd}: ProductPopupProps) => {
+const PopupCart: FC<ProductPopupProps> = ({id,name,price,quantity,keywords,category,propHandleDelete,propHandleAdd,changeQuantity}: ProductPopupProps) => {
 const [prod_quantity, setQuantity] = useState<number>(quantity);
 const handleDelete = ()=>{
     if(prod_quantity===1){
@@ -24,6 +25,7 @@ const handleDelete = ()=>{
     }
     else{
         setQuantity(prod_quantity-1);
+        changeQuantity(id,prod_quantity - 1);
     }
 }
 const handleAddPoup = ()=>{
@@ -36,12 +38,11 @@ const handleAddPoup = ()=>{
     }
     let answer = propHandleAdd(me);
     answer.then((result)=>{
-        console.log(result);
         if(result === true){
             setQuantity(prod_quantity + 1);
         }
         else{
-            console.log(prod_quantity);
+            setQuantity(prod_quantity);
         }
     })
 }
