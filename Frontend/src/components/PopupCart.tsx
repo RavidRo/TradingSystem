@@ -27,7 +27,6 @@ const PopupCart: FC<PopupCartProps> = ({products,propHandleAdd,storesToProducts,
     const [storesToProductsMy,setStoresProducts] = useState<StoreToSearchedProducts>(storesToProducts);
 
     useEffect(()=>{
-        console.log(storesToProducts)
         setStoresProducts(storesToProducts);
     },[storesToProducts]);
 
@@ -46,28 +45,14 @@ const PopupCart: FC<PopupCartProps> = ({products,propHandleAdd,storesToProducts,
     }
     const handleDeleteProductMy = (id:string,bagID:string)=>{
         let product:Product = {} as Product;
-        for(var i=0;i<bagsToProducts.current.length;i++){
-            if(bagsToProducts.current[i].storeID == bagID){
-                for(var j=0;j<bagsToProducts.current[i].prodQuantities.length;j++){
-                    if(bagsToProducts.current[i].prodQuantities[j][0].id===id){
-                        product=bagsToProducts.current[i].prodQuantities[j][0];
-                        // change product quantity in bag to 0
-                        bagsToProducts.current[i].prodQuantities[j][1] = 0;
-                    }
-                }
+        let prodToQuanArr = storesToProducts[bagID];
+        for(var i=0;i<prodToQuanArr.length;i++){
+            if(prodToQuanArr[i][0].id === id){
+                product = prodToQuanArr[i][0];
             }
         }
         propHandleDelete(product,bagID);
 	}
-    const findBagByProductID = (productID:string)=>{
-        for(var i=0;i<bagsToProducts.current.length;i++){
-            for(var j=0;j<bagsToProducts.current[i].prodQuantities.length;j++){
-                if(bagsToProducts.current[i].prodQuantities[j][0].id===productID){
-                    return bagsToProducts.current[i].storeID;
-                }
-            }
-        }
-    }
        
     const bagIDToName = useRef<{[storeID: string]: ShoppingBag}>({});
     const cartObj = useAPI<ShoppingCart>('/get_cart_details');
@@ -89,22 +74,9 @@ const PopupCart: FC<PopupCartProps> = ({products,propHandleAdd,storesToProducts,
     return (
 		
 		<div className="popupCart">
-            {/* {Object.keys(storesToProductsMy).map((bagID)=>{
-                return (
-                <PopupBag
-                key={bagID}
-                storeID={bagID}
-                products={productQuantityOfTuples(storesToProductsMy[bagID])}
-                propHandleDelete={(productID:string)=>handleDeleteProductMy(productID,bagID)}
-                propHandleAdd={propHandleAdd}
-                changeQuantity={changeQuantity}
-                />)
-                    
-            })} */}
             {Object.keys(storesToProductsMy).map((bagID)=>{
                 return (
                 <PopupBag
-                {...console.log(storesToProductsMy)}
                 key={bagID}
                 storeID={bagID}
                 products={productQuantityOfTuples(storesToProductsMy[bagID])}

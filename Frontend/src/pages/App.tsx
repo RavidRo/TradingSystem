@@ -176,6 +176,7 @@ function App() {
 	const productRemoveObj = useAPI<Product[]>('/remove_product_from_cart', {}, 'POST');
 	const handleDeleteProduct = (product: Product | null, storeID: string) => {
 		if (product !== null) {
+			console.log(product)
 			productRemoveObj
 				.request({
 					cookie: cookie,
@@ -191,7 +192,6 @@ function App() {
 						alert(errorMsg);
 					}
 				});
-			setProducts(Object.values(productsInCart).filter((item) => item.id !== product.id));
 			let tupleArr = storesToProducts.current[storeID];
 			for (var i = 0; i < tupleArr.length; i++) {
 				if (tupleArr[i][0].id === product.id) {
@@ -199,6 +199,7 @@ function App() {
 				}
 			}
 			storesToProducts.current[storeID] = tupleArr;
+			setProducts(Object.values(productsInCart).filter((item) => item.id !== product.id));
 		}
 	};
 

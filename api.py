@@ -185,10 +185,13 @@ async def remove_product_from_cart():
         cookie = request_json["cookie"]
     if "product_id" not in request_json:
         missing_args += " product_id"
+    if "store_id" not in request_json:
+        missing_args += " store_id"
     if missing_args != "":
         return __missing_args(cookie, missing_args)
     product_id = request_json["product_id"]
-    answer = await __async_call(system.remove_product_from_cart, cookie, product_id)
+    store_id = request_json["store_id"]
+    answer = await __async_call(system.remove_product_from_cart, cookie, store_id, product_id)
     return __responseToJson(cookie, answer)
 
 

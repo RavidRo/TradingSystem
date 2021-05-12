@@ -56,7 +56,6 @@ const PopupBag: FC<PopupBagProps> = ({storeID,products,propHandleAdd,propHandleD
                         <TableBody>
                             {Object.values(productsInCart).map((p) => (
                                 <ProductPopup
-                                {...console.log(p)}
                                 id={p.id}
                                 name={p.name}
                                 price={p.price}
