@@ -12,9 +12,10 @@ import ConditionsList from './Lists/ConditionsList';
 type ManageStoreProps = {
 	storeId: string;
 	appointment: Appointee;
+	setAppointment: (storeId: string, appointment: Appointee) => void;
 };
 
-const ManageStore: FC<ManageStoreProps> = ({ storeId, appointment }) => {
+const ManageStore: FC<ManageStoreProps> = ({ storeId, appointment, setAppointment }) => {
 	const [products, setProducts] = useState<ProductQuantity[]>([]);
 	const [store, setStore] = useState<Store | null>(null);
 
@@ -96,6 +97,7 @@ const ManageStore: FC<ManageStoreProps> = ({ storeId, appointment }) => {
 							storeId={store.id}
 							store_name={store.name}
 							appointment={appointment}
+							setAppointment={setAppointment}
 						/>
 						{appointment.permissions.includes('get appointments') && (
 							<AppointeesList

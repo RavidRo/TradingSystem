@@ -4,7 +4,7 @@ import { ListItem } from '@material-ui/core';
 import ListItemText from '@material-ui/core/ListItemText';
 
 import '../styles/MyStoresPage/MyStores.scss';
-import { allPermissions, Appointee } from '../types';
+import { allPermissions, Appointee, Store } from '../types';
 import CreateStoreForm from '../components/FormWindows/CreateForms/CreateStoreForm';
 import ManageStore from '../components/ManageStore';
 import GenericList from '../components/Lists/GenericList';
@@ -39,10 +39,22 @@ const MyStores: FC<MyStoresProps> = ({ username }) => {
 	const [open, setOpen] = useState<boolean>(false);
 	const [Tab, setTab] = useState<FC | null>(null);
 
-	const onSelectStore = (storeId: string, appointment: Appointee) => {
-		if (storeId !== selectedStore) {
-			setSelectedStore(storeId);
-			setTabAnimation(() => <ManageStore storeId={storeId} appointment={appointment} />);
+	const setAppointment = (storeId: string, appointment: Appointee) => {
+		setStores((myStores) =>
+			myStores.map((store) => (store.id !== storeId ? store : { ...store, appointment }))
+		);
+	};
+
+	const onSelectStore = (storeToOpen: MyStore) => {
+		if (storeToOpen.id !== selectedStore && storeToOpen) {
+			setSelectedStore(storeToOpen.id);
+			setTabAnimation(() => (
+				<ManageStore
+					storeId={storeToOpen.id}
+					appointment={storeToOpen.appointment}
+					setAppointment={setAppointment}
+				/>
+			));
 		}
 	};
 
@@ -95,7 +107,7 @@ const MyStores: FC<MyStoresProps> = ({ username }) => {
 						<ListItem
 							key={store.id}
 							button
-							onClick={() => onSelectStore(store.id, store.appointment)}
+							onClick={() => onSelectStore(store)}
 							selected={store.id === selectedStore}
 						>
 							<ListItemText primary={`${store.name} - ${store.role}`} />

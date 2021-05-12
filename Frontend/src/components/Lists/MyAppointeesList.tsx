@@ -14,6 +14,7 @@ type MyAppointeesListProps = {
 	onSelectAppointee: (appointee: Appointee) => void;
 	store_name: string;
 	appointment: Appointee;
+	setAppointment: (storeId: string, appointment: Appointee) => void;
 };
 
 const MyAppointeesList: FC<MyAppointeesListProps> = ({
@@ -23,6 +24,7 @@ const MyAppointeesList: FC<MyAppointeesListProps> = ({
 	onSelectAppointee,
 	store_name,
 	appointment,
+	setAppointment,
 }) => {
 	const appointManager = useAPI<{ cookie: string; answer: string; succeeded: boolean }>(
 		'/appoint_manager',
@@ -46,12 +48,18 @@ const MyAppointeesList: FC<MyAppointeesListProps> = ({
 		'POST'
 	);
 	const [myAppointees, setMyAppointees] = useState<Appointee[]>(appointment.appointees);
-
+	const setAppointees = (newAppointees: Appointee[]) => {
+		setAppointment(storeId, {
+			...appointment,
+			appointees: newAppointees,
+		});
+		setMyAppointees(newAppointees);
+	};
 	const onAppoint = (username: string, role: Role) => {
 		const request = role === 'Manager' ? appointManager : appointOwner;
 		request.request({ username: username }).then((request) => {
 			if (!request.error && request.data !== null && request.data.succeeded) {
-				setMyAppointees([
+				setAppointees([
 					{
 						appointees: [],
 						is_manager: role === 'Manager',
@@ -74,8 +82,10 @@ const MyAppointeesList: FC<MyAppointeesListProps> = ({
 	const onDelete = (appointeeUsername: string) => {
 		removeAppointment.request({ username: appointeeUsername }, (data, error) => {
 			if (!error && data !== null) {
-				setMyAppointees((myAppointees) =>
-					myAppointees.filter((myAppointee) => myAppointee.username !== appointeeUsername)
+				setAppointees(
+					appointment.appointees.filter(
+						(myAppointee) => myAppointee.username !== appointeeUsername
+					)
 				);
 			}
 		});
@@ -110,8 +120,7 @@ const MyAppointeesList: FC<MyAppointeesListProps> = ({
 						),
 						{ ...appointee, permissions: newPermissions },
 					];
-					console.log(newAppointees);
-					setMyAppointees(newAppointees);
+					setAppointees(newAppointees);
 				}
 			});
 		};
