@@ -26,6 +26,7 @@ const ConditionsList: FC<ConditionsListProps> = ({ openTab, products, storeId })
 	const addCondition = useAPI<string>('/add_purchase_rule', { store_id: storeId }, 'POST');
 	const removeConditionAPI = useAPI('/remove_purchase_rule', { store_id: storeId }, 'POST');
 	const editConditionAPI = useAPI('/edit_purchase_rule', { store_id: storeId }, 'POST');
+	const moveConditionAPI = useAPI('/move_purchase_rule', { store_id: storeId }, 'POST');
 
 	const [rootId, setRootId] = useState<string>('');
 	const [conditions, setConditions] = useState<Condition[]>([]);
@@ -123,6 +124,23 @@ const ConditionsList: FC<ConditionsListProps> = ({ openTab, products, storeId })
 		}
 	};
 
+	const onMove = (conditionId: string, newParentId: string) => {
+		moveConditionAPI.request(
+			{ rule_id: conditionId, new_parent_id: newParentId },
+			(_, error) => {
+				if (!error) {
+					getConditions();
+				}
+			}
+		);
+	};
+
+	const onDropRoot = (event: React.DragEvent) => {
+		event.preventDefault();
+		const draggableElementData = event.dataTransfer.getData('text');
+		onMove(draggableElementData, rootId);
+	};
+
 	return (
 		<GenericList
 			data={conditions}
@@ -130,6 +148,7 @@ const ConditionsList: FC<ConditionsListProps> = ({ openTab, products, storeId })
 			narrow
 			onCreate={() => openConditionForm(rootId)}
 			createTxt="+ Add condition"
+			onDrop={onDropRoot}
 		>
 			{(condition: Condition) => (
 				<ConditionNode
@@ -138,6 +157,7 @@ const ConditionsList: FC<ConditionsListProps> = ({ openTab, products, storeId })
 					onDelete={onDelete}
 					productIdToName={productIdToString}
 					onEdit={onEditConditionForm}
+					onMove={onMove}
 				/>
 			)}
 		</GenericList>

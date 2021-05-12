@@ -20,6 +20,7 @@ type DiscountNodeProps = {
 	onDelete: (discountId: string) => void;
 	onEdit: (discount: Discount) => void;
 	productIdToString: (productId: string) => string;
+	onMove: (srcId: string, destId: string) => void;
 };
 
 const DiscountNode: FC<DiscountNodeProps> = ({
@@ -28,6 +29,7 @@ const DiscountNode: FC<DiscountNodeProps> = ({
 	onDelete,
 	productIdToString,
 	onEdit,
+	onMove,
 }) => {
 	const [open, setOpen] = useState(false);
 	const handleClick = () => {
@@ -61,26 +63,48 @@ const DiscountNode: FC<DiscountNodeProps> = ({
 		}
 	}
 
+	const onDragStart = (event: React.DragEvent) => {
+		event.dataTransfer.setData('text', discount.id);
+		// Disabling the drag ghost image
+		const img = new Image();
+		img.src = 'data:image/gif;base64,R0lGODlhAQABAIAAAAUEBAAAACwAAAAAAQABAAACAkQBADs=';
+		event.dataTransfer.setDragImage(img, 0, 0);
+	};
+	const onDragOver = (event: React.DragEvent) => {
+		if (isDiscountComplex(discount)) {
+			event.preventDefault();
+		}
+	};
+	const onDrop = (event: React.DragEvent<HTMLDivElement>) => {
+		if (isDiscountComplex(discount)) {
+			event.preventDefault();
+			const draggableElementData = event.dataTransfer.getData('text');
+			onMove(draggableElementData, discount.id);
+		}
+	};
+
 	return (
 		<>
-			<ListItem button onClick={handleClick}>
-				{isDiscountComplex(discount) && (
-					<IconButton edge="start" aria-label="delete">
-						{open ? <ExpandLess /> : <ExpandMore />}
-					</IconButton>
-				)}
-				<ListItemText primary={discountToString(discount)} />
-				{onDelete && (
-					<ListItemSecondaryAction>
-						<SecondaryActionButton onClick={() => onEdit(discount)}>
-							<EditIcon />
-						</SecondaryActionButton>
-						<SecondaryActionButton onClick={() => onDelete(discount.id)}>
-							<DeleteForeverOutlinedIcon />
-						</SecondaryActionButton>
-					</ListItemSecondaryAction>
-				)}
-			</ListItem>
+			<div draggable="true" onDragStart={onDragStart} onDragOver={onDragOver} onDrop={onDrop}>
+				<ListItem button onClick={handleClick} className="discount-node">
+					{isDiscountComplex(discount) && (
+						<IconButton edge="start" aria-label="delete">
+							{open ? <ExpandLess /> : <ExpandMore />}
+						</IconButton>
+					)}
+					<ListItemText primary={discountToString(discount)} />
+					{onDelete && (
+						<ListItemSecondaryAction>
+							<SecondaryActionButton onClick={() => onEdit(discount)}>
+								<EditIcon />
+							</SecondaryActionButton>
+							<SecondaryActionButton onClick={() => onDelete(discount.id)}>
+								<DeleteForeverOutlinedIcon />
+							</SecondaryActionButton>
+						</ListItemSecondaryAction>
+					)}
+				</ListItem>
+			</div>
 			{isDiscountComplex(discount) && (
 				<Collapse in={open} timeout="auto">
 					<GenericList
@@ -97,6 +121,7 @@ const DiscountNode: FC<DiscountNodeProps> = ({
 								onDelete={onDelete}
 								productIdToString={productIdToString}
 								onEdit={onEdit}
+								onMove={onMove}
 							/>
 						)}
 					</GenericList>

@@ -31,6 +31,7 @@ type ConditionNodeProps = {
 	onDelete: (conditionId: string) => void;
 	productIdToName: (productId: string) => string;
 	onEdit: (condition: Condition) => void;
+	onMove: (conditionId: string, newParentId: string) => void;
 };
 
 function operatorToString(operator: SimpleOperator): string {
@@ -50,6 +51,7 @@ const ConditionNode: FC<ConditionNodeProps> = ({
 	onDelete,
 	productIdToName,
 	onEdit,
+	onMove,
 }) => {
 	const [open, setOpen] = React.useState(true);
 	const handleClick = () => {
@@ -78,25 +80,52 @@ const ConditionNode: FC<ConditionNodeProps> = ({
 		}
 	};
 
+	const onDragStart = (event: React.DragEvent) => {
+		event.dataTransfer.setData('text', condition.id);
+		// Disabling the drag ghost image
+		const img = new Image();
+		img.src = 'data:image/gif;base64,R0lGODlhAQABAIAAAAUEBAAAACwAAAAAAQABAAACAkQBADs=';
+		event.dataTransfer.setDragImage(img, 0, 0);
+	};
+	const onDragOverBasicRule = (event: React.DragEvent) => {
+		if (isConditionComplex(condition) && isBasicRule(condition)) {
+			event.preventDefault();
+		}
+	};
+	const onDrop = (event: React.DragEvent<HTMLDivElement>) => {
+		if (isConditionComplex(condition) && isBasicRule(condition)) {
+			event.preventDefault();
+			const draggableElementData = event.dataTransfer.getData('text');
+			onMove(draggableElementData, condition.id);
+		}
+	};
+
 	return (
 		<>
-			<ListItem button onClick={handleClick}>
-				{isConditionComplex(condition) && (
-					<IconButton edge="start" aria-label="delete">
-						{open ? <ExpandLess /> : <ExpandMore />}
-					</IconButton>
-				)}
-				<ListItemText primary={conditionToString(condition)} />
+			<div
+				draggable
+				onDragStart={onDragStart}
+				onDragOver={onDragOverBasicRule}
+				onDrop={onDrop}
+			>
+				<ListItem button onClick={handleClick} className="condition-node">
+					{isConditionComplex(condition) && (
+						<IconButton edge="start" aria-label="delete">
+							{open ? <ExpandLess /> : <ExpandMore />}
+						</IconButton>
+					)}
+					<ListItemText primary={conditionToString(condition)} />
 
-				<ListItemSecondaryAction>
-					<SecondaryActionButton onClick={() => onEdit(condition)}>
-						<EditIcon />
-					</SecondaryActionButton>
-					<SecondaryActionButton onClick={() => onDelete(condition.id)}>
-						<DeleteForeverOutlinedIcon />
-					</SecondaryActionButton>
-				</ListItemSecondaryAction>
-			</ListItem>
+					<ListItemSecondaryAction>
+						<SecondaryActionButton onClick={() => onEdit(condition)}>
+							<EditIcon />
+						</SecondaryActionButton>
+						<SecondaryActionButton onClick={() => onDelete(condition.id)}>
+							<DeleteForeverOutlinedIcon />
+						</SecondaryActionButton>
+					</ListItemSecondaryAction>
+				</ListItem>
+			</div>
 			{isConditionComplex(condition) && (
 				<Collapse in={open} timeout="auto">
 					{isBasicRule(condition) ? (
@@ -114,6 +143,7 @@ const ConditionNode: FC<ConditionNodeProps> = ({
 									onDelete={onDelete}
 									productIdToName={productIdToName}
 									onEdit={onEdit}
+									onMove={onMove}
 								/>
 							)}
 						</GenericList>
@@ -129,6 +159,7 @@ const ConditionNode: FC<ConditionNodeProps> = ({
 										onDelete={onDelete}
 										productIdToName={productIdToName}
 										onEdit={onEdit}
+										onMove={onMove}
 									/>
 								) : (
 									<ListItem button onClick={() => onCreate(condition.id, 'then')}>
@@ -144,6 +175,7 @@ const ConditionNode: FC<ConditionNodeProps> = ({
 										onDelete={onDelete}
 										productIdToName={productIdToName}
 										onEdit={onEdit}
+										onMove={onMove}
 									/>
 								) : (
 									<ListItem button onClick={() => onCreate(condition.id, 'test')}>

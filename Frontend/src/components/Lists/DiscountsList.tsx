@@ -26,6 +26,7 @@ const DiscountsList: FC<DiscountsListProps> = ({ openTab, products, storeId }) =
 	const removeDiscountAPI = useAPI('/remove_discount', { store_id: storeId }, 'POST');
 	const editSimpleDiscount = useAPI('/edit_simple_discount', { store_id: storeId }, 'POST');
 	const editComplexDiscount = useAPI('/edit_complex_discount', { store_id: storeId }, 'POST');
+	const moveDiscount = useAPI('/move_discount', { store_id: storeId }, 'POST');
 
 	const [discounts, setDiscounts] = useState<Discount[]>([]);
 	const [rootId, setRootId] = useState<string>('');
@@ -132,6 +133,20 @@ const DiscountsList: FC<DiscountsListProps> = ({ openTab, products, storeId }) =
 		return '';
 	};
 
+	const onMove = (srcId: string, destId: string) => {
+		moveDiscount.request({ src_id: srcId, dest_id: destId }, (_, error) => {
+			if (!error) {
+				getDiscounts();
+			}
+		});
+	};
+
+	const onDrop = (event: React.DragEvent) => {
+		event.preventDefault();
+		const draggableElementData = event.dataTransfer.getData('text');
+		onMove(draggableElementData, rootId);
+	};
+
 	return (
 		<GenericList
 			data={discounts}
@@ -139,6 +154,7 @@ const DiscountsList: FC<DiscountsListProps> = ({ openTab, products, storeId }) =
 			narrow
 			createTxt="+ Add discount"
 			onCreate={() => openDiscountForm(rootId)}
+			onDrop={onDrop}
 		>
 			{(discount: Discount) => (
 				<DiscountNode
@@ -147,6 +163,7 @@ const DiscountsList: FC<DiscountsListProps> = ({ openTab, products, storeId }) =
 					onDelete={onDelete}
 					productIdToString={productIdToString}
 					onEdit={onEditForm}
+					onMove={onMove}
 				/>
 			)}
 		</GenericList>

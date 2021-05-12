@@ -9,6 +9,7 @@ type GenericListProps = {
 	onCreate?: () => void;
 	narrow?: boolean;
 	padRight?: boolean;
+	onDrop?: (event: React.DragEvent) => void;
 };
 
 const GenericList: FC<GenericListProps> = ({
@@ -19,14 +20,23 @@ const GenericList: FC<GenericListProps> = ({
 	onCreate,
 	createTxt,
 	padRight = false,
+	onDrop,
 }) => {
+	const onDragOver = (event: React.DragEvent) => {
+		if (onDrop) {
+			event.preventDefault();
+		}
+	};
+
 	return (
 		<List component="div">
 			{header && (
 				<>
-					<ListItem>
-						<Typography>{header}</Typography>
-					</ListItem>
+					<div onDrop={onDrop} onDragOver={onDragOver}>
+						<ListItem>
+							<Typography>{header}</Typography>
+						</ListItem>
+					</div>
 					<Divider />
 				</>
 			)}
