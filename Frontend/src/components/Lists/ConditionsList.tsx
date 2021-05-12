@@ -10,6 +10,8 @@ import {
 	ProductQuantity,
 } from '../../types';
 import CreateConditionForm from '../FormWindows/CreateForms/CreateConditionForm';
+import EditComplexConditionForm from '../FormWindows/EditForms/EditComplexConditionForm';
+import EditSimpleConditionForm from '../FormWindows/EditForms/EditSimpleConditionForm';
 import ConditionNode from './ConditionNode';
 import GenericList from './GenericList';
 
@@ -21,16 +23,10 @@ type ConditionsListProps = {
 
 const ConditionsList: FC<ConditionsListProps> = ({ openTab, products, storeId }) => {
 	const getConditionsAPI = useAPI<Condition>('/get_purchase_policy', { store_id: storeId });
-	const addCondition = useAPI<{ cookie: string; condition_id: string }>(
-		'/add_purchase_rule',
-		{ store_id: storeId },
-		'POST'
-	);
-	const removeConditionAPI = useAPI<{ cookie: string; answer: string; succeeded: boolean }>(
-		'/remove_purchase_rule',
-		{ store_id: storeId },
-		'POST'
-	);
+	const addCondition = useAPI<string>('/add_purchase_rule', { store_id: storeId }, 'POST');
+	const removeConditionAPI = useAPI('/remove_purchase_rule', { store_id: storeId }, 'POST');
+	const editConditionAPI = useAPI('/edit_purchase_rule', { store_id: storeId }, 'POST');
+
 	const [rootId, setRootId] = useState<string>('');
 	const [conditions, setConditions] = useState<Condition[]>([]);
 
@@ -82,6 +78,51 @@ const ConditionsList: FC<ConditionsListProps> = ({ openTab, products, storeId })
 		openTab(() => <CreateConditionForm onSubmit={onAddCondition} products={products} />, '');
 	};
 
+	const onEditConditionForm = (condition: Condition) => {
+		const onEditConditionSimple = (newCondition: ConditionSimple) => {
+			editConditionAPI.request(
+				{ rule_type: 'simple', rule_id: condition.id, rule_details: newCondition },
+				(_, error) => {
+					if (!error) {
+						getConditions();
+					}
+				}
+			);
+		};
+		const onEditConditionComplex = (newCondition: ConditionComplex) => {
+			editConditionAPI.request(
+				{ rule_type: 'complex', rule_id: condition.id, rule_details: newCondition },
+				(_, error) => {
+					if (!error) {
+						getConditions();
+					}
+				}
+			);
+		};
+		if (isConditionComplex(condition)) {
+			openTab(
+				() => (
+					<EditComplexConditionForm
+						onSubmit={onEditConditionComplex}
+						conditionToEdit={condition}
+					/>
+				),
+				''
+			);
+		} else {
+			openTab(
+				() => (
+					<EditSimpleConditionForm
+						onSubmit={onEditConditionSimple}
+						conditionToEdit={condition}
+						products={products}
+					/>
+				),
+				''
+			);
+		}
+	};
+
 	return (
 		<GenericList
 			data={conditions}
@@ -96,6 +137,7 @@ const ConditionsList: FC<ConditionsListProps> = ({ openTab, products, storeId })
 					onCreate={openConditionForm}
 					onDelete={onDelete}
 					productIdToName={productIdToString}
+					onEdit={onEditConditionForm}
 				/>
 			)}
 		</GenericList>

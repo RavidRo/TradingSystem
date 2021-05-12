@@ -3,7 +3,7 @@ import React, { FC, useState } from 'react';
 import useAPI from '../../hooks/useAPI';
 import { allPermissions, Appointee, defaultPermissions, Permission, Role } from '../../types';
 import CreateAppointeeForm from '../FormWindows/CreateForms/CreateAppointeeForm';
-import EditPermissionsForm from '../FormWindows/EditPermissionsForm';
+import EditPermissionsForm from '../FormWindows/EditForms/EditPermissionsForm';
 import AppointeeNode from './AppointeeNode';
 import GenericList from './GenericList';
 

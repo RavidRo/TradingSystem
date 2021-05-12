@@ -1,6 +1,6 @@
 import React, { FC } from 'react';
 
-import { IconButton, ListItem, ListItemSecondaryAction, ListItemText } from '@material-ui/core';
+import { ListItem, ListItemSecondaryAction, ListItemText } from '@material-ui/core';
 import DeleteForeverOutlinedIcon from '@material-ui/icons/DeleteForeverOutlined';
 import EditIcon from '@material-ui/icons/Edit';
 
@@ -9,6 +9,7 @@ import { ProductQuantity } from '../../types';
 import ProductDetails from '../DetailsWindows/ProductDetails';
 import ProductForm from '../FormWindows/ProductForm';
 import GenericList from './GenericList';
+import SecondaryActionButton from './SecondaryActionButton';
 
 type ProductsListProps = {
 	products: ProductQuantity[];
@@ -187,20 +188,12 @@ const ProductsList: FC<ProductsListProps> = ({
 					<ListItemText primary={product.name} className="first-field" />
 					<ListItemText primary={`in stock: ${product.quantity}`} />
 					<ListItemSecondaryAction>
-						<IconButton
-							edge="end"
-							aria-label="edit"
-							onClick={() => openProductForm(product)}
-						>
+						<SecondaryActionButton onClick={() => openProductForm(product)}>
 							<EditIcon />
-						</IconButton>
-						<IconButton
-							edge="end"
-							aria-label="delete"
-							onClick={() => onDelete(product.id)}
-						>
+						</SecondaryActionButton>
+						<SecondaryActionButton onClick={() => onDelete(product.id)}>
 							<DeleteForeverOutlinedIcon />
-						</IconButton>
+						</SecondaryActionButton>
 					</ListItemSecondaryAction>
 				</ListItem>
 			)}

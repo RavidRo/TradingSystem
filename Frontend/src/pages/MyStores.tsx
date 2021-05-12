@@ -4,7 +4,7 @@ import { ListItem } from '@material-ui/core';
 import ListItemText from '@material-ui/core/ListItemText';
 
 import '../styles/MyStoresPage/MyStores.scss';
-import { allPermissions, Appointee, Store } from '../types';
+import { allPermissions, Appointee } from '../types';
 import CreateStoreForm from '../components/FormWindows/CreateForms/CreateStoreForm';
 import ManageStore from '../components/ManageStore';
 import GenericList from '../components/Lists/GenericList';

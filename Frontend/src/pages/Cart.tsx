@@ -34,9 +34,8 @@ const Cart: FC<CartProps> = ({ products, storesToProducts, handleDeleteProduct }
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	const [bagsToProducts, setBags] = useState<ShoppingBag[]>([]);
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
-	const [storesToProductsMy, setStoresProducts] = useState<StoreToSearchedProducts>(
-		storesToProducts
-	);
+	const [storesToProductsMy, setStoresProducts] =
+		useState<StoreToSearchedProducts>(storesToProducts);
 
 	const cartObj = useAPI<ShoppingCart>('/get_cart_details');
 	useEffect(() => {
@@ -45,7 +44,7 @@ const Cart: FC<CartProps> = ({ products, storesToProducts, handleDeleteProduct }
 				console.log(data.data);
 				setBags(data.data.bags);
 			} else {
-				alert(errorMsg);
+				// alert(errorMsg);
 			}
 		});
 		// eslint-disable-next-line react-hooks/exhaustive-deps
@@ -127,7 +126,7 @@ const Cart: FC<CartProps> = ({ products, storesToProducts, handleDeleteProduct }
 					// do nothing
 					void 0;
 				} else {
-					alert(errorMsg);
+					// alert(errorMsg);
 				}
 			});
 	};
@@ -138,7 +137,7 @@ const Cart: FC<CartProps> = ({ products, storesToProducts, handleDeleteProduct }
 				if (!error && data !== null) {
 					setTotalAmount(data.data);
 				} else {
-					alert(errorMsg);
+					// alert(errorMsg);
 				}
 			});
 		}

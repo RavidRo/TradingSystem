@@ -26,9 +26,8 @@ const PopupCart: FC<PopupCartProps> = ({
 	const [bagsToProducts, setShoppingBags] = useState<ShoppingBag[]>([]);
 
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
-	const [storesToProductsMy, setStoresProducts] = useState<StoreToSearchedProducts>(
-		storesToProducts
-	);
+	const [storesToProductsMy, setStoresProducts] =
+		useState<StoreToSearchedProducts>(storesToProducts);
 
 	const productQuantityOfTuples = (tuples: ProductToQuantity[]) => {
 		let prodQuantities: ProductQuantity[] = tuples.map((tuple) => {
@@ -112,7 +111,7 @@ const PopupCart: FC<PopupCartProps> = ({
 				}
 				setShoppingBags(data.data.bags);
 			} else {
-				alert(errorMsg);
+				// alert(errorMsg);
 			}
 		});
 		// eslint-disable-next-line react-hooks/exhaustive-deps

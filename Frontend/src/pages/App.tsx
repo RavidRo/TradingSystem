@@ -101,7 +101,7 @@ function App() {
 						// do nothing
 						void 0;
 					} else {
-						alert(errorMsg);
+						// alert(errorMsg);
 					}
 				});
 			setProducts((oldArray) => [...oldArray, newProduct]);
@@ -126,7 +126,7 @@ function App() {
 						// do nothing
 						void 0;
 					} else {
-						alert(errorMsg);
+						// alert(errorMsg);
 					}
 				});
 		}
@@ -154,7 +154,7 @@ function App() {
 						// do nothing
 						void 0;
 					}
-					alert(errorMsg);
+					// alert(errorMsg);
 				});
 			setProducts(Object.values(productsInCart).filter((item) => item.id !== product.id));
 			let tupleArr = storesToProducts.current[storeID];

@@ -11,6 +11,7 @@ import {
 } from '@material-ui/core';
 import { ExpandLess, ExpandMore } from '@material-ui/icons';
 import DeleteForeverOutlinedIcon from '@material-ui/icons/DeleteForeverOutlined';
+import EditIcon from '@material-ui/icons/Edit';
 
 import {
 	Condition,
@@ -21,13 +22,15 @@ import {
 	SimpleOperator,
 } from '../../types';
 import GenericList from './GenericList';
+import SecondaryActionButton from './SecondaryActionButton';
 // import '../styles/ConditionNode.scss';
 
 type ConditionNodeProps = {
 	condition: Condition;
 	onCreate: (fatherId: string, conditioning?: 'test' | 'then' | undefined) => void;
-	onDelete?: (conditionId: string) => void;
+	onDelete: (conditionId: string) => void;
 	productIdToName: (productId: string) => string;
+	onEdit: (condition: Condition) => void;
 };
 
 function operatorToString(operator: SimpleOperator): string {
@@ -46,6 +49,7 @@ const ConditionNode: FC<ConditionNodeProps> = ({
 	onCreate,
 	onDelete,
 	productIdToName,
+	onEdit,
 }) => {
 	const [open, setOpen] = React.useState(true);
 	const handleClick = () => {
@@ -83,13 +87,15 @@ const ConditionNode: FC<ConditionNodeProps> = ({
 					</IconButton>
 				)}
 				<ListItemText primary={conditionToString(condition)} />
-				{onDelete && (
-					<ListItemSecondaryAction onClick={() => onDelete(condition.id)}>
-						<IconButton edge="end" aria-label="delete">
-							<DeleteForeverOutlinedIcon />
-						</IconButton>
-					</ListItemSecondaryAction>
-				)}
+
+				<ListItemSecondaryAction>
+					<SecondaryActionButton onClick={() => onEdit(condition)}>
+						<EditIcon />
+					</SecondaryActionButton>
+					<SecondaryActionButton onClick={() => onDelete(condition.id)}>
+						<DeleteForeverOutlinedIcon />
+					</SecondaryActionButton>
+				</ListItemSecondaryAction>
 			</ListItem>
 			{isConditionComplex(condition) && (
 				<Collapse in={open} timeout="auto">
@@ -107,6 +113,7 @@ const ConditionNode: FC<ConditionNodeProps> = ({
 									onCreate={onCreate}
 									onDelete={onDelete}
 									productIdToName={productIdToName}
+									onEdit={onEdit}
 								/>
 							)}
 						</GenericList>
@@ -121,6 +128,7 @@ const ConditionNode: FC<ConditionNodeProps> = ({
 										onCreate={onCreate}
 										onDelete={onDelete}
 										productIdToName={productIdToName}
+										onEdit={onEdit}
 									/>
 								) : (
 									<ListItem button onClick={() => onCreate(condition.id, 'then')}>
@@ -135,6 +143,7 @@ const ConditionNode: FC<ConditionNodeProps> = ({
 										onCreate={onCreate}
 										onDelete={onDelete}
 										productIdToName={productIdToName}
+										onEdit={onEdit}
 									/>
 								) : (
 									<ListItem button onClick={() => onCreate(condition.id, 'test')}>

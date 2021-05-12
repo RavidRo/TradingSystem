@@ -1,8 +1,8 @@
 import React, { FC, useState } from 'react';
 
-import { Appointee, Permission } from '../../types';
-import FormWindow from './FormWindow';
-import PermissionsList from '../PermissionsList';
+import { Appointee, Permission } from '../../../types';
+import FormWindow from '../FormWindow';
+import PermissionsList from '../../PermissionsList';
 
 type EditPermissionsFormProps = {
 	appointee: Appointee;

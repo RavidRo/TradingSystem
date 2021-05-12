@@ -63,7 +63,7 @@ const SearchPage: FC<SearchPageProps> = ({ location, propsAddProduct }) => {
 						firstRender.current = false;
 					}
 				} else {
-					alert(errorMsg);
+					// alert(errorMsg);
 				}
 			});
 		// eslint-disable-next-line react-hooks/exhaustive-deps

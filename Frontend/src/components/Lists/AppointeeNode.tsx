@@ -1,18 +1,12 @@
 import React, { FC } from 'react';
 
-import {
-	List,
-	ListItem,
-	ListItemText,
-	Collapse,
-	ListItemSecondaryAction,
-	IconButton,
-} from '@material-ui/core';
+import { List, ListItem, ListItemText, Collapse, ListItemSecondaryAction } from '@material-ui/core';
 import { ExpandLess, ExpandMore } from '@material-ui/icons';
 import DeleteForeverOutlinedIcon from '@material-ui/icons/DeleteForeverOutlined';
 import EditIcon from '@material-ui/icons/Edit';
 
 import { Appointee } from '../../types';
+import SecondaryActionButton from './SecondaryActionButton';
 // import '../styles/AppointeeTree.scss';
 
 type AppointeeNodeProps = {
@@ -43,31 +37,19 @@ const AppointeeNode: FC<AppointeeNodeProps> = ({
 
 				<ListItemSecondaryAction key="expandAndDelete">
 					{onEdit && appointee.is_manager && (
-						<span className="secondary-second-action">
-							<IconButton
-								edge="end"
-								aria-label="delete"
-								onClick={() => onEdit(appointee)}
-							>
-								<EditIcon />
-							</IconButton>
-						</span>
+						<SecondaryActionButton onClick={() => onEdit(appointee)}>
+							<EditIcon />
+						</SecondaryActionButton>
 					)}
 					{onDelete && (
-						<span className="secondary-second-action">
-							<IconButton
-								edge="end"
-								aria-label="delete"
-								onClick={() => onDelete(appointee.username)}
-							>
-								<DeleteForeverOutlinedIcon />
-							</IconButton>
-						</span>
+						<SecondaryActionButton onClick={() => onDelete(appointee.username)}>
+							<DeleteForeverOutlinedIcon />
+						</SecondaryActionButton>
 					)}
 					{appointee.appointees.length > 0 && (
-						<IconButton edge="start" aria-label="expand" onClick={handleClick}>
+						<SecondaryActionButton onClick={handleClick}>
 							{open ? <ExpandLess /> : <ExpandMore />}
-						</IconButton>
+						</SecondaryActionButton>
 					)}
 				</ListItemSecondaryAction>
 			</ListItem>

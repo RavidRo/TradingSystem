@@ -766,7 +766,7 @@ async def edit_purchase_rule():
     rule_type = request_json["rule_type"]
     rule_id = request_json["rule_id"]
     answer = await __async_call(
-        system.edit_purchase_rule, cookie, store_id, rule_details, rule_type, rule_id
+        system.edit_purchase_rule, cookie, store_id, rule_details, rule_id, rule_type
     )
     return __responseToJson(cookie, answer)
 

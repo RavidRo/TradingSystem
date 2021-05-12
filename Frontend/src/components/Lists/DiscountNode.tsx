@@ -8,14 +8,17 @@ import {
 } from '@material-ui/core';
 import { ExpandLess, ExpandMore } from '@material-ui/icons';
 import DeleteForeverOutlinedIcon from '@material-ui/icons/DeleteForeverOutlined';
+import EditIcon from '@material-ui/icons/Edit';
 
 import { DecisionRule, Discount, isDiscountComplex, isDiscountSimple } from '../../types';
 import GenericList from './GenericList';
+import SecondaryActionButton from './SecondaryActionButton';
 
 type DiscountNodeProps = {
 	discount: Discount;
 	onCreate: (father_id: string) => void;
-	onDelete?: (discountId: string) => void;
+	onDelete: (discountId: string) => void;
+	onEdit: (discount: Discount) => void;
 	productIdToString: (productId: string) => string;
 };
 
@@ -24,6 +27,7 @@ const DiscountNode: FC<DiscountNodeProps> = ({
 	onCreate,
 	onDelete,
 	productIdToString,
+	onEdit,
 }) => {
 	const [open, setOpen] = useState(false);
 	const handleClick = () => {
@@ -67,10 +71,13 @@ const DiscountNode: FC<DiscountNodeProps> = ({
 				)}
 				<ListItemText primary={discountToString(discount)} />
 				{onDelete && (
-					<ListItemSecondaryAction onClick={() => onDelete(discount.id)}>
-						<IconButton edge="end" aria-label="delete">
+					<ListItemSecondaryAction>
+						<SecondaryActionButton onClick={() => onEdit(discount)}>
+							<EditIcon />
+						</SecondaryActionButton>
+						<SecondaryActionButton onClick={() => onDelete(discount.id)}>
 							<DeleteForeverOutlinedIcon />
-						</IconButton>
+						</SecondaryActionButton>
 					</ListItemSecondaryAction>
 				)}
 			</ListItem>
@@ -89,6 +96,7 @@ const DiscountNode: FC<DiscountNodeProps> = ({
 								onCreate={onCreate}
 								onDelete={onDelete}
 								productIdToString={productIdToString}
+								onEdit={onEdit}
 							/>
 						)}
 					</GenericList>

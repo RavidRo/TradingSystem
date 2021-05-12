@@ -30,7 +30,7 @@ const ProductSearch: FC<ProductSearchProps> = ({
 				if (!error && data !== null) {
 					storeName.current = data.data.name;
 				} else {
-					alert(errorMsg);
+					// alert(errorMsg);
 				}
 			});
 		}

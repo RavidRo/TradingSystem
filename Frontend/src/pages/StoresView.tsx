@@ -62,7 +62,7 @@ const StoresView: FC<StoresViewProps> = ({ propsAddProduct, location }: StoresVi
 					});
 					setProducts(productQuantityArr);
 				} else {
-					alert(errorMsg);
+					// alert(errorMsg);
 				}
 			});
 		}
@@ -75,7 +75,7 @@ const StoresView: FC<StoresViewProps> = ({ propsAddProduct, location }: StoresVi
 			if (!error && data !== null) {
 				setStores(data.data);
 			} else {
-				alert(errorMsg);
+				// alert(errorMsg);
 			}
 		});
 		// eslint-disable-next-line react-hooks/exhaustive-deps

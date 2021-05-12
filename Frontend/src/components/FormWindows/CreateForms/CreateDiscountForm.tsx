@@ -1,15 +1,7 @@
-import {
-	Fade,
-	FormControl,
-	FormControlLabel,
-	InputLabel,
-	MenuItem,
-	Radio,
-	RadioGroup,
-	Select,
-	TextField,
-} from '@material-ui/core';
 import React, { FC, useState } from 'react';
+
+import { Fade, FormControl, FormControlLabel, Radio, RadioGroup } from '@material-ui/core';
+
 import {
 	DecisionRule,
 	DiscountComplex,
@@ -19,7 +11,8 @@ import {
 	Product,
 } from '../../../types';
 import FormWindow from '../FormWindow';
-// import '../styles/CreateDiscountForm.scss';
+import SimpleDiscountForm from '../SimpleDiscountForm';
+import ComplexDiscountForm from '../ComplexDiscountForm';
 
 type CreateDiscountFormProps = {
 	onSubmit: (discount: DiscountSimple | DiscountComplex) => void;
@@ -35,9 +28,6 @@ const CreateDiscountForm: FC<CreateDiscountFormProps> = ({ onSubmit, products })
 	const [decisionRule, setDecisionRule] = useState<DecisionRule | ''>('');
 
 	const [percentageError, setPercentageError] = useState<boolean>(false);
-
-	const set = Array.from(new Set(products.map((product) => product.category)));
-	const categories = [...set];
 
 	function handleSubmit() {
 		setPercentageError(+percentage < 0);
@@ -82,19 +72,6 @@ const CreateDiscountForm: FC<CreateDiscountFormProps> = ({ onSubmit, products })
 		}
 	}
 
-	const handleObjectChange = (event: React.ChangeEvent<{ value: unknown }>) => {
-		setContextObject(event.target.value as DiscountObject);
-	};
-	const handleIdentifierChange = (event: React.ChangeEvent<{ value: unknown }>) => {
-		setContextIdentifier(event.target.value as string);
-	};
-	const handleOperatorChange = (event: React.ChangeEvent<{ value: unknown }>) => {
-		setOperator(event.target.value as Operator);
-	};
-	const handleDecisionRuleChange = (event: React.ChangeEvent<{ value: unknown }>) => {
-		setDecisionRule(event.target.value as DecisionRule);
-	};
-
 	return (
 		<FormWindow handleSubmit={handleSubmit} submitText="Add discount!" header="New discount">
 			<FormControl component="fieldset" margin="normal">
@@ -122,91 +99,25 @@ const CreateDiscountForm: FC<CreateDiscountFormProps> = ({ onSubmit, products })
 			<div>
 				<Fade in={simple} unmountOnExit>
 					<div style={!simple ? { position: 'absolute' } : {}}>
-						<TextField
-							required
-							margin="normal"
-							id="percentage"
-							fullWidth
-							label="Percentage"
-							onChange={(event) => setPercentage(event.currentTarget.value)}
-							inputMode="numeric"
-							type="number"
-							error={percentageError}
+						<SimpleDiscountForm
+							contextIdentifier={contextIdentifier}
+							contextObject={contextObject}
+							percentageError={percentageError}
+							products={products}
+							setContextIdentifier={setContextIdentifier}
+							setContextObject={setContextObject}
+							setPercentage={setPercentage}
 						/>
-						<FormControl fullWidth margin="normal">
-							<InputLabel id="object-label">Context</InputLabel>
-							<Select
-								labelId="object-label"
-								id="object-select"
-								value={contextObject}
-								onChange={handleObjectChange}
-								required
-							>
-								<MenuItem value={'product'}>Product</MenuItem>
-								<MenuItem value={'category'}>Category</MenuItem>
-								<MenuItem value={'store'}>Store</MenuItem>
-							</Select>
-						</FormControl>
-						{contextObject !== 'store' && contextObject !== '' && (
-							<FormControl fullWidth margin="normal">
-								<InputLabel id="identifier-label">Identifier</InputLabel>
-								<Select
-									labelId="identifier-label"
-									id="identifier-select"
-									value={contextIdentifier}
-									onChange={handleIdentifierChange}
-									required
-								>
-									{contextObject === 'category'
-										? categories.map((category, index) => (
-												<MenuItem key={index} value={category}>
-													{category}
-												</MenuItem>
-										  ))
-										: products.map((product, index) => (
-												<MenuItem key={index} value={product.id}>
-													{product.name}
-												</MenuItem>
-										  ))}
-								</Select>
-							</FormControl>
-						)}
 					</div>
 				</Fade>
 				<Fade in={!simple} unmountOnExit>
 					<div style={simple ? { position: 'absolute' } : {}}>
-						<FormControl fullWidth margin="normal">
-							<InputLabel id="operator-label">Operator</InputLabel>
-							<Select
-								labelId="operator-label"
-								id="operator-select"
-								value={operator}
-								onChange={handleOperatorChange}
-								required
-							>
-								<MenuItem value={'max'}>MAX</MenuItem>
-								<MenuItem value={'and'}>AND</MenuItem>
-								<MenuItem value={'or'}>OR</MenuItem>
-								<MenuItem value={'xor'}>XOR</MenuItem>
-								<MenuItem value={'add'}>ADD</MenuItem>
-							</Select>
-						</FormControl>
-						{operator === 'xor' && (
-							<FormControl fullWidth margin="normal">
-								<InputLabel id="decision-rule-label">Decision rule</InputLabel>
-								<Select
-									labelId="decision-rule-label"
-									id="decision-rule-select"
-									value={decisionRule}
-									onChange={handleDecisionRuleChange}
-									required
-								>
-									<MenuItem value={'first'}>First discount</MenuItem>
-									<MenuItem value={'max'}>Maximum value</MenuItem>
-									<MenuItem value={'min'}>Minimum value</MenuItem>
-								</Select>
-							</FormControl>
-						)}
+						<ComplexDiscountForm
+							decisionRule={decisionRule}
+							operator={operator}
+							setDecisionRule={setDecisionRule}
+							setOperator={setOperator}
+						/>
 					</div>
 				</Fade>
 			</div>
