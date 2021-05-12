@@ -1,19 +1,33 @@
 import React, { FC, useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+
 import {
-	faShoppingCart,
-	faSignInAlt,
-	faSearch,
-	faBell,
-	faSignOutAlt,
-} from '@fortawesome/free-solid-svg-icons';
+	Badge,
+	Button,
+	ClickAwayListener,
+	Divider,
+	Fade,
+	Grow,
+	IconButton,
+	List,
+	ListItemIcon,
+	ListItemText,
+	MenuItem,
+	MenuList,
+	Paper,
+	Popper,
+} from '@material-ui/core';
+import ExitToAppIcon from '@material-ui/icons/ExitToApp';
+import StoreIcon from '@material-ui/icons/Store';
+import SupervisorAccountIcon from '@material-ui/icons/SupervisorAccount';
+
+import { Link, useHistory } from 'react-router-dom';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faShoppingCart, faSignInAlt, faSearch, faBell } from '@fortawesome/free-solid-svg-icons';
 
 import '../styles/Navbar.scss';
 import config from '../config';
 import PopupCart from '../components/PopupCart';
 import { Product, ProductQuantity, StoreToSearchedProducts } from '../types';
-import { Badge, Divider, Fade, IconButton, List, ListItemText, Paper } from '@material-ui/core';
 
 type NavBarProps = {
 	signedIn: boolean;
@@ -37,10 +51,32 @@ const Navbar: FC<NavBarProps> = ({
 	const [hoverCart, setHoverCart] = useState<boolean>(false);
 	const [productsInCart, setProducts] = useState<ProductQuantity[]>(products);
 	const [openNotifications, setOpenNotifications] = useState<boolean>(false);
+	const [accountMenuOpen, setAccountMenuOpen] = useState<boolean>(false);
+	const accountMenuRef = React.useRef<HTMLButtonElement>(null);
+	const history = useHistory();
 
 	useEffect(() => {
 		setProducts(products);
 	}, [products]);
+	const handleCloseMenu = () => setAccountMenuOpen(false);
+
+	const AccountMenuItem: FC<{ onClick?: () => void; text: string }> = ({
+		onClick,
+		text,
+		children,
+	}) => {
+		return (
+			<MenuItem
+				onClick={() => {
+					handleCloseMenu();
+					onClick && onClick();
+				}}
+			>
+				{children && <ListItemIcon>{children}</ListItemIcon>}
+				<ListItemText primary={text} />
+			</MenuItem>
+		);
+	};
 
 	return (
 		<div className="navbar">
@@ -73,32 +109,60 @@ const Navbar: FC<NavBarProps> = ({
 						Stores
 					</Link>
 				</div>
-				{signedIn && (
-					<div className="navbar-item">
-						<FontAwesomeIcon className="item-icon" icon={faSignOutAlt} />
-						<Link className="item-link" to="/" onClick={() => logout()}>
-							Logout
-						</Link>
-					</div>
-				)}
 				<div className="navbar-item">
 					<FontAwesomeIcon className="item-icon" icon={faSignInAlt} />
 					{signedIn ? (
-						<Link className="item-link" to="/my-stores">
+						<Button
+							ref={accountMenuRef}
+							className="item-link"
+							onClick={() => setAccountMenuOpen((prevOpen) => !prevOpen)}
+						>
 							Account&Stores
-						</Link>
+						</Button>
 					) : (
 						<Link className="item-link" to="/sign-in">
 							Sign In
 						</Link>
 					)}
 				</div>
+				<Popper
+					open={accountMenuOpen}
+					anchorEl={accountMenuRef.current}
+					transition
+					// disablePortal
+				>
+					{({ TransitionProps }) => (
+						<Grow {...TransitionProps}>
+							<Paper>
+								<ClickAwayListener onClickAway={handleCloseMenu}>
+									<MenuList autoFocusItem={accountMenuOpen} onKeyDown={() => {}}>
+										<AccountMenuItem
+											text="My stores"
+											onClick={() => history.push('/my-stores')}
+										>
+											<StoreIcon />
+										</AccountMenuItem>
+										<AccountMenuItem
+											text="My account"
+											onClick={() => history.push('/my-account')}
+										>
+											<SupervisorAccountIcon />
+										</AccountMenuItem>
+										<AccountMenuItem text="Logout" onClick={logout}>
+											<ExitToAppIcon />
+										</AccountMenuItem>
+									</MenuList>
+								</ClickAwayListener>
+							</Paper>
+						</Grow>
+					)}
+				</Popper>
 				<div className="navbar-item">
 					<IconButton
 						color={'inherit'}
 						onClick={() => setOpenNotifications((open) => !open)}
 					>
-						<Badge badgeContent={notifications.length} showZero color="primary">
+						<Badge badgeContent={notifications.length} color="primary">
 							<FontAwesomeIcon className="item-icon" icon={faBell} />
 						</Badge>
 					</IconButton>

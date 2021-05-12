@@ -26,17 +26,19 @@
     flex-direction: row;
     align-items: center;
     white-space: nowrap;
-    margin-left: 20px;
+    margin-left: 30px;
 
     .item-icon {
-        font-size: 30px;
+        font-size: 21px;
     }
 
     .item-link {
-        font-size: 30px;
+        font-size: 21px;
         text-decoration: none;
         color: black;
         margin-left: 5%;
+        text-transform: none;
+        font-weight: 500;
     }
 }
 

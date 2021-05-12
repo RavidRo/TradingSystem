@@ -15,6 +15,7 @@ import Purchase from '../pages/Purchase';
 import { Product, ProductQuantity, StoreToSearchedProducts } from '../types';
 import useAPI from '../hooks/useAPI';
 import { CookieContext } from '../contexts';
+import MyAccount from './MyAccount';
 
 const theme = createMuiTheme({
 	typography: {
@@ -220,6 +221,9 @@ function App() {
 									}}
 								/>
 							)}
+						</Route>
+						<Route path="/my-account" exact>
+							{() => <MyAccount username={username} />}
 						</Route>
 						<Route path="/sign-up" exact component={SignUp} />
 						<Route
