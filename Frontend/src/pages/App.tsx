@@ -12,7 +12,7 @@ import MyStores from './MyStores';
 import SearchPage from './SearchPage';
 import StoresView from '../pages/StoresView';
 import Purchase from '../pages/Purchase';
-import { Product, ProductQuantity, StoreToSearchedProducts } from '../types';
+import { Product, ProductQuantity, StoreToSearchedProducts,Store } from '../types';
 import useAPI from '../hooks/useAPI';
 import { CookieContext } from '../contexts';
 
@@ -76,13 +76,11 @@ function App() {
 	const productUpdateObj = useAPI<Product[]>('/change_product_quantity_in_cart', {}, 'POST');
 
 	const addProductToPopup = (product: Product, storeID: string) => {
-		console.log(storesToProducts);
-
 		let found = false;
 		let quantity = 1;
 		for (var i = 0; i < Object.values(productsInCart).length; i++) {
 			if (Object.values(productsInCart)[i].id === product.id) {
-				Object.values(productsInCart)[i].quantity += 1;
+				// Object.values(productsInCart)[i].quantity += 1;
 				quantity = productsInCart[i].quantity + 1;
 				found = true;
 			}
@@ -102,8 +100,7 @@ function App() {
 			} else {
 				storesToProducts.current[storeID] = [[newProduct, 1]];
 			}
-			console.log(storeID);
-			productObj
+			return productObj
 				.request({
 					cookie: cookie,
 					store_id: storeID,
@@ -113,22 +110,16 @@ function App() {
 				.then(({ data, error, errorMsg }) => {
 					if (!error && data !== null) {
 						// do nothing
-						void 0;
+						setProducts((oldArray) => [...oldArray, newProduct]);
+						return true;
 					} else {
 						alert(errorMsg);
+						return false;
 					}
 				});
-			setProducts((oldArray) => [...oldArray, newProduct]);
-		} else {
-			let tuplesArr = storesToProducts.current[storeID];
-			for (var i = 0; i < tuplesArr.length; i++) {
-				if (tuplesArr[i][0].id === product.id) {
-					tuplesArr[i][1] += 1;
-				}
-			}
-			storesToProducts.current[storeID] = tuplesArr;
-
-			productUpdateObj
+		}
+		else {
+			return productUpdateObj
 				.request({
 					cookie: cookie,
 					store_id: storeID,
@@ -137,10 +128,23 @@ function App() {
 				})
 				.then(({ data, error, errorMsg }) => {
 					if (!error && data !== null) {
-						// do nothing
-						void 0;
-					} else {
+						for (var i = 0; i < Object.values(productsInCart).length; i++) {
+							if (Object.values(productsInCart)[i].id === product.id) {
+								Object.values(productsInCart)[i].quantity += 1;
+							}
+						}
+						let tuplesArr = storesToProducts.current[storeID];
+						for (var i = 0; i < tuplesArr.length; i++) {
+							if (tuplesArr[i][0].id === product.id) {
+								tuplesArr[i][1] += 1;
+							}
+						}
+						storesToProducts.current[storeID] = tuplesArr;
+						return true;
+					} 
+					else {
 						alert(errorMsg);
+						return false;
 					}
 				});
 		}
@@ -193,6 +197,21 @@ function App() {
 		getCookie();
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
+	const storeIDToNameObj = useAPI<Store>('/get_store');
+	const getStoreNameByID = (storeID:string) => {
+		storeIDToNameObj
+			.request({
+					store_id: storeID,
+				})
+			.then(({ data, error, errorMsg }) => {
+				if (!error && data !== null) {
+					return data.data.name;
+				}
+				else{
+					alert(errorMsg);
+				}
+			});
+	};
 
 	return cookie !== '' ? (
 		<ThemeProvider theme={theme}>

@@ -20,7 +20,7 @@ type NavBarProps = {
 	products: ProductQuantity[];
 	storesToProducts: StoreToSearchedProducts;
 	propHandleDelete: (product: Product, storeID: string) => void;
-	propHandleAdd: (product: Product, storeID: string) => void;
+	propHandleAdd: (product: Product, storeID: string) => Promise<boolean>;
 	notifications: string[];
 	logout: () => void;
 };

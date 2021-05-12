@@ -1,26 +1,37 @@
 
 import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@material-ui/core';
-import React ,{FC, useEffect, useState} from 'react';
+import React ,{FC, useEffect, useState, useRef} from 'react';
 import ProductPopup from '../components/ProductPopup';
-import {Product,ProductQuantity} from '../types';
+import {Product,ProductQuantity,Store} from '../types';
+import useAPI from '../hooks/useAPI';
 
 type PopupBagProps = {
-    storeName:string,
     storeID:string,
     products:ProductQuantity[],
     propHandleDelete:(productID:string)=>void,
-    propHandleAdd:(product:Product,storeID:string)=>void;
+    propHandleAdd:(product:Product,storeID:string)=>Promise<boolean>;
 
    
 };
-const PopupBag: FC<PopupBagProps> = ({storeName,storeID,products,propHandleAdd,propHandleDelete}:PopupBagProps) => {
+const PopupBag: FC<PopupBagProps> = ({storeID,products,propHandleAdd,propHandleDelete}:PopupBagProps) => {
 
     const [productsInCart,setProducts] = useState<ProductQuantity[]>(products);
+    const [storeName,setStoreName] =  useState<string>("");
 	
     useEffect(()=>{
         setProducts(products);
     },[products]);
 
+    const storeIDToNameObj = useAPI<Store>('/get_store',{store_id:storeID});
+    useEffect(()=>{
+        storeIDToNameObj.request().then(({ data, error, errorMsg }) => {
+            if (!error && data !== null) {
+                setStoreName(data.data.name);
+            }
+            else{
+                alert(errorMsg);
+            }
+    })},[]);
 
     return (
 		

@@ -12,7 +12,7 @@ type ProductPopupProps = {
     keywords:string[],
     category:string,
     propHandleDelete:(productID:string)=>void,
-    propHandleAdd:(product:Product)=>void;
+    propHandleAdd:(product:Product)=>Promise<boolean>,
    
 };
 const PopupCart: FC<ProductPopupProps> = ({id,name,price,quantity,keywords,category,propHandleDelete,propHandleAdd}: ProductPopupProps) => {
@@ -34,9 +34,18 @@ const handleAddPoup = ()=>{
         keywords:keywords,
         category:category,
     }
-    propHandleAdd(me);
-    setQuantity(prod_quantity+1);
+    let answer = propHandleAdd(me);
+    answer.then((result)=>{
+        console.log(result);
+        if(result === true){
+            setQuantity(prod_quantity + 1);
+        }
+        else{
+            console.log(prod_quantity);
+        }
+    })
 }
+
 	return (
             prod_quantity>0?
                 <TableRow style={{'alignItems':'right'}} >

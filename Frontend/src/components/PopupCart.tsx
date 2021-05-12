@@ -10,7 +10,7 @@ type PopupCartProps = {
     products:ProductQuantity[],
     storesToProducts:StoreToSearchedProducts,
     propHandleDelete:(product:Product,storeID:string)=>void,
-	propHandleAdd:(product:Product,storeID:string)=>void;
+	propHandleAdd:(product:Product,storeID:string)=>Promise<boolean>;
    
 };
 const PopupCart: FC<PopupCartProps> = ({products,propHandleAdd,storesToProducts,propHandleDelete}: PopupCartProps) => {
@@ -75,21 +75,6 @@ const PopupCart: FC<PopupCartProps> = ({products,propHandleAdd,storesToProducts,
         })
     }
  
-
-    const storeObj = useAPI<Store>('/get_store');
-    const getStoreNameByID = (storeID:string)=>{
-        storeObj.request({store_id:storeID}).then(({data,error,errorMsg})=>{
-                
-            if(!error && data!==null){
-                console.log(data.data.name);
-                return data.data.name;
-            }
-            else{
-                alert(errorMsg);
-                return "";
-            }
-        })
-    }
     
     const bagIDToName = useRef<{[storeID: string]: ShoppingBag}>({});
     const cartObj = useAPI<ShoppingCart>('/get_cart_details');
@@ -112,12 +97,9 @@ const PopupCart: FC<PopupCartProps> = ({products,propHandleAdd,storesToProducts,
 		
 		<div className="popupCart">
             {Object.keys(storesToProductsMy).map((bagID)=>{
-                let index = Object.keys(storesToProductsMy).indexOf(bagID);
                 return (
                 <PopupBag
                 key={bagID}
-                // storeName={Object.values(bagIDToName.current)[index].storeName}
-                storeName={bagID}
                 storeID={bagID}
                 products={productQuantityOfTuples(storesToProductsMy[bagID])}
                 propHandleDelete={(productID:string)=>handleDeleteProductMy(productID,bagID)}
