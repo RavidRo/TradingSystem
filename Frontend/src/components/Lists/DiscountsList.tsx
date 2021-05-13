@@ -1,4 +1,5 @@
 import React, { FC, useEffect, useState } from 'react';
+import { areYouSure } from '../../decorators';
 
 import useAPI from '../../hooks/useAPI';
 import {
@@ -116,13 +117,17 @@ const DiscountsList: FC<DiscountsListProps> = ({ openTab, products, storeId }) =
 		}
 	};
 
-	const onDelete = (discountId: string) => {
-		removeDiscountAPI.request({ discount_id: discountId }, (data, error) => {
-			if (!error && data !== null && data.succeeded) {
-				getDiscounts();
-			}
-		});
-	};
+	const onDelete = areYouSure(
+		(discountId: string) => {
+			removeDiscountAPI.request({ discount_id: discountId }, (data, error) => {
+				if (!error && data !== null && data.succeeded) {
+					getDiscounts();
+				}
+			});
+		},
+		"You won't be able to revert this!",
+		'Yes, remove discount!'
+	);
 
 	const productIdToString = (productId: string) => {
 		for (const product of products) {

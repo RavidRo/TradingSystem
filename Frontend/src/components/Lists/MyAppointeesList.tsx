@@ -1,4 +1,5 @@
 import React, { FC, useState } from 'react';
+import { areYouSure } from '../../decorators';
 
 import useAPI from '../../hooks/useAPI';
 import { allPermissions, Appointee, defaultPermissions, Permission, Role } from '../../types';
@@ -79,17 +80,21 @@ const MyAppointeesList: FC<MyAppointeesListProps> = ({
 		openTab(() => <CreateAppointeeForm onSubmit={onAppoint} />, '');
 	};
 
-	const onDelete = (appointeeUsername: string) => {
-		removeAppointment.request({ username: appointeeUsername }, (data, error) => {
-			if (!error && data !== null) {
-				setAppointees(
-					appointment.appointees.filter(
-						(myAppointee) => myAppointee.username !== appointeeUsername
-					)
-				);
-			}
-		});
-	};
+	const onDelete = areYouSure(
+		(appointeeUsername: string) => {
+			removeAppointment.request({ username: appointeeUsername }, (data, error) => {
+				if (!error && data !== null) {
+					setAppointees(
+						appointment.appointees.filter(
+							(myAppointee) => myAppointee.username !== appointeeUsername
+						)
+					);
+				}
+			});
+		},
+		"You won't be able to revert this!",
+		'Yes, remove appointment!'
+	);
 	const addPermission = useAPI('/add_manager_permission', { store_id: storeId }, 'POST');
 	const removePermission = useAPI('/remove_manager_permission', { store_id: storeId }, 'POST');
 	const onEditAppointeeForm = (appointee: Appointee) => {

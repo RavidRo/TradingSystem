@@ -10,6 +10,7 @@ import ProductDetails from '../DetailsWindows/ProductDetails';
 import ProductForm from '../FormWindows/ProductForm';
 import GenericList from './GenericList';
 import SecondaryActionButton from './SecondaryActionButton';
+import { areYouSure, confirmOnSuccess } from '../../decorators';
 
 type ProductsListProps = {
 	products: ProductQuantity[];
@@ -72,65 +73,71 @@ const ProductsList: FC<ProductsListProps> = ({
 				}
 			});
 	};
-	const handleEditProduct = (
-		id: string,
-		name: string,
-		price: number,
-		quantity: number,
-		category: string,
-		keywords: string[]
-	) => {
-		editProductAPI
-			.request({
-				product_id: id,
-				store_id: storeId,
-				new_name: name,
-				new_price: price,
-				new_category: category,
-				keywords: keywords,
-			})
-			.then((createProduct) => {
-				if (!createProduct.error && createProduct.data !== null) {
-					setProducts(
-						products.map((product) =>
-							product.id === id
-								? {
-										id,
-										category,
-										keywords,
-										name,
-										price,
-										quantity: product.quantity,
-								  }
-								: product
-						)
-					);
-				}
-				editProductQuantityAPI
-					.request({
-						product_id: id,
-						quantity,
-					})
-					.then((editProduct) => {
-						if (!editProduct.error && editProduct.data !== null) {
-							setProducts(
-								products.map((product) =>
-									product.id === id
-										? {
-												id,
-												category,
-												keywords,
-												name,
-												price,
-												quantity,
-										  }
-										: product
-								)
-							);
-						}
-					});
-			});
-	};
+	const handleEditProduct = confirmOnSuccess(
+		(
+			id: string,
+			name: string,
+			price: number,
+			quantity: number,
+			category: string,
+			keywords: string[]
+		) => {
+			return editProductAPI
+				.request({
+					product_id: id,
+					store_id: storeId,
+					new_name: name,
+					new_price: price,
+					new_category: category,
+					keywords: keywords,
+				})
+				.then((createProduct) => {
+					if (!createProduct.error && createProduct.data !== null) {
+						setProducts(
+							products.map((product) =>
+								product.id === id
+									? {
+											id,
+											category,
+											keywords,
+											name,
+											price,
+											quantity: product.quantity,
+									  }
+									: product
+							)
+						);
+					}
+					return editProductQuantityAPI
+						.request({
+							product_id: id,
+							quantity,
+						})
+						.then((editProduct) => {
+							if (!editProduct.error && editProduct.data !== null) {
+								setProducts(
+									products.map((product) =>
+										product.id === id
+											? {
+													id,
+													category,
+													keywords,
+													name,
+													price,
+													quantity,
+											  }
+											: product
+									)
+								);
+								return true;
+							}
+							return false;
+						});
+				});
+		},
+		'Edited!',
+		'The product was edited successfully!'
+	);
 
 	const openProductForm = (productToEdit: ProductQuantity | undefined = undefined) => {
 		openTab(
@@ -162,13 +169,17 @@ const ProductsList: FC<ProductsListProps> = ({
 		}
 	};
 
-	const onDelete = (productId: string) => {
-		deleteProductAPI.request({ product_id: productId }, (data, error) => {
-			if (!error && data !== null) {
-				setProducts(products.filter((product) => product.id !== productId));
-			}
-		});
-	};
+	const onDelete = areYouSure(
+		(productId: string) => {
+			deleteProductAPI.request({ product_id: productId }, (data, error) => {
+				if (!error && data !== null) {
+					setProducts(products.filter((product) => product.id !== productId));
+				}
+			});
+		},
+		"You won't be able to revert this!",
+		'Yes, delete product!'
+	);
 
 	return (
 		<GenericList

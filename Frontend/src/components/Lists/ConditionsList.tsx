@@ -1,4 +1,5 @@
 import React, { FC, useEffect, useState } from 'react';
+import { areYouSure } from '../../decorators';
 
 import useAPI from '../../hooks/useAPI';
 import {
@@ -53,13 +54,17 @@ const ConditionsList: FC<ConditionsListProps> = ({ openTab, products, storeId })
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
 
-	const onDelete = (conditionId: string) => {
-		removeConditionAPI.request({ rule_id: conditionId }, (data, error) => {
-			if (!error && data !== null && data.succeeded) {
-				getConditions();
-			}
-		});
-	};
+	const onDelete = areYouSure(
+		(conditionId: string) => {
+			removeConditionAPI.request({ rule_id: conditionId }, (data, error) => {
+				if (!error && data !== null && data.succeeded) {
+					getConditions();
+				}
+			});
+		},
+		"You won't be able to revert this!",
+		'Yes, remove condition!'
+	);
 
 	const openConditionForm = (fatherId: string, conditioning?: 'test' | 'then' | undefined) => {
 		const onAddCondition = (rule: ConditionSimple | ConditionComplex): void => {
