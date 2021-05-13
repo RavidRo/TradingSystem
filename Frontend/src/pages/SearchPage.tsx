@@ -84,7 +84,7 @@ const SearchPage: FC<SearchPageProps> = ({location,propsAddProduct}) => {
 
     const handleSearch = (toSearch:string,categoryName:string)=>{
         setSearchProduct(toSearch);
-        setCategory(categoryName);
+        setCategory(categoryName==="All"?"":categoryName);
         // all the set methods make useEffect to re-render and ask for server
         // to send new products
     }

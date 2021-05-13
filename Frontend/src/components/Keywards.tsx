@@ -1,5 +1,5 @@
 import { Chip } from '@material-ui/core';
-import React ,{FC, useState} from 'react';
+import React ,{FC, useState, useRef} from 'react';
 import '../styles/Keywards.scss';
 
 type Keywordsprops = {
@@ -8,16 +8,16 @@ type Keywordsprops = {
 
 const Keywards: FC<Keywordsprops> = ({updateKeyWords}) => {
 
-    const [keyWords, setKeyWards] = useState<string[]>([]);
+    const keyWords = useRef<string[]>([]);
     const [currentKey, setCurrentKey] = useState<string>("");
 
     const handleDelete = (key:number)=>{
-        setKeyWards(keyWords.filter((word)=>word!==keyWords[key]));
-        updateKeyWords(keyWords);
+        keyWords.current = keyWords.current.filter((word)=>word!==keyWords.current[key]);
+        updateKeyWords(keyWords.current);
     }
     const handleAddWord = ()=>{
-        setKeyWards(old=>[...old,currentKey]);
-        updateKeyWords(keyWords);
+        keyWords.current = [...keyWords.current, currentKey];
+        updateKeyWords(keyWords.current);
     }
     return (
 		
@@ -32,12 +32,12 @@ const Keywards: FC<Keywordsprops> = ({updateKeyWords}) => {
 
             <button className="keyBtn" onClick={()=>handleAddWord()}>Add</button>
                 <div className="wardsDiv">
-                    {keyWords.map((word) => {
+                    {keyWords.current.map((word) => {
                         return (
-                        <li key={keyWords.indexOf(word)}>
+                        <li key={keyWords.current.indexOf(word)}>
                             <Chip
                             label={word}
-                            onDelete={()=>handleDelete(keyWords.indexOf(word))}
+                            onDelete={()=>handleDelete(keyWords.current.indexOf(word))}
                             />
                         </li>
                         );

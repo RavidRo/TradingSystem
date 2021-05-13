@@ -11,23 +11,27 @@ type CartProps = {
 	products:ProductQuantity[],
     storesToProducts:StoreToSearchedProducts,
     handleDeleteProduct:(product:Product|null,storeID:string)=>void,
-
+    propHandleAdd:(product:Product,storeID:string)=>Promise<boolean>;
+    changeQuantity:(store:string,product:string,quan:number)=>void;
 };
 
-const Cart: FC<CartProps> = ({products,storesToProducts,handleDeleteProduct}) => {
+const Cart: FC<CartProps> = ({products,storesToProducts,handleDeleteProduct, propHandleAdd, changeQuantity}) => {
     const [open,setOpen] = useState<boolean>(false);
     const [age,setAge] = useState<number>(0);
     const [showPurchaseLink,setLink] = useState<boolean>(false);
     const [bagsToProducts,setBags] = useState<ShoppingBag[]>([]);
     const [storesToProductsMy,setStoresProducts] = useState<StoreToSearchedProducts>(storesToProducts);
 
+    useEffect(()=>{
+        setStoresProducts(storesToProducts);
+        setTotalAmount(calculateTotal());
+    },[storesToProducts]);
 
     const cartObj = useAPI<ShoppingCart>('/get_cart_details');
     useEffect(()=>{
         cartObj.request().then(({data,error,errorMsg})=>{
                 
             if(!error && data!==null){
-                console.log(data.data);
                 setBags(data.data.bags);
             }
             else{
@@ -94,27 +98,27 @@ const Cart: FC<CartProps> = ({products,storesToProducts,handleDeleteProduct}) =>
     }
 
     const productUpdateObj = useAPI<void>('/change_product_quantity_in_cart',{},'POST');
-    const changeQuantity = (id: string, newQuantity: number)=>{
-        for(var i=0;i<Object.keys(storesToProductsMy).length;i++){
-            let tuplesArr = Object.values(storesToProductsMy)[i];
-            for(var j=0;j<tuplesArr.length;j++){
-                    if(tuplesArr[j][0].id===id){
-                        Object.values(storesToProductsMy)[i][j][1]=newQuantity;
-                    }
-                }
-            }
-        
+    const changeQuantityMy = (storeID: string, prodID:string,  newQuantity: number)=>{
+        // for(var i=0;i<Object.keys(storesToProductsMy).length;i++){
+        //     let tuplesArr = Object.values(storesToProductsMy)[i];
+        //     for(var j=0;j<tuplesArr.length;j++){
+        //             if(tuplesArr[j][0].id===id){
+        //                 Object.values(storesToProductsMy)[i][j][1]=newQuantity;
+        //             }
+        //         }
+        //     }
+        changeQuantity(storeID,prodID,newQuantity);
         setTotalAmount(calculateTotal());
 
-        productUpdateObj.request({store_id:findBagByProductID(id),product_id:id,quantity:newQuantity}).then(({data,error,errorMsg})=>{
-            if(!error && data!==null){
-                // do nothing
-                void(0);
-            }
-            else{
-                alert(errorMsg);
-            }
-        })
+        // productUpdateObj.request({store_id:findBagByProductID(id),product_id:id,quantity:newQuantity}).then(({data,error,errorMsg})=>{
+        //     if(!error && data!==null){
+        //         // do nothing
+        //         void(0);
+        //     }
+        //     else{
+        //         alert(errorMsg);
+        //     }
+        // })
     }
     const discountObj = useAPI<number>('/get_discount',{age:age});
     useEffect(()=>{
@@ -147,11 +151,11 @@ const Cart: FC<CartProps> = ({products,storesToProducts,handleDeleteProduct}) =>
                 return (
                 <Bag
                 key={bagID}
-                // storeName={Object.values(bagIDToName.current)[index].storeName}
-                storeName={bagID}
+                storeID={bagID}
                 products={productQuantityOfTuples(storesToProductsMy[bagID])}
                 propHandleDelete={(productID:string)=>handleDeleteProductMy(productID,bagID)}
-                changeQuantity={changeQuantity}
+                propHandleAdd={propHandleAdd}
+                changeQuantity={(storeID, productID, newQuantity)=>changeQuantityMy(storeID, productID,newQuantity)}
                 />)
                     
             })}

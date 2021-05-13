@@ -5,22 +5,36 @@ import CartProduct from '../components/CartProduct';
 import PurchaseIcon from '@material-ui/icons/LocalMall';
 import { Link } from 'react-router-dom';
 import '../styles/Bag.scss';
-import {Product,ProductQuantity} from '../types';
+import {Product,ProductQuantity,Store} from '../types';
+import useAPI from '../hooks/useAPI';
 
 type BagProps = {
-    storeName:string,
+	storeID:string,
     products:ProductQuantity[],
-    propHandleDelete:(id:string)=>void,
-	changeQuantity:(id: string, newQuantity: number)=>void,
-   
+    propHandleDelete:(productID:string)=>void,
+    propHandleAdd:(product:Product,storeID:string)=>Promise<boolean>;
+    changeQuantity:(store:string,product:string,quan:number)=>void,
 };
 
-const Bag: FC<BagProps> = ({storeName,products,propHandleDelete,changeQuantity}:BagProps) => {
+const Bag: FC<BagProps> = ({storeID,products,propHandleDelete,changeQuantity,propHandleAdd}:BagProps) => {
 
     const [productsInCart,setProducts] = useState<ProductQuantity[]>(products);
+    const [storeName,setStoreName] =  useState<string>("");
+
+	const storeIDToNameObj = useAPI<Store>('/get_store',{store_id:storeID});
+    useEffect(()=>{
+        storeIDToNameObj.request().then(({ data, error, errorMsg }) => {
+            if (!error && data !== null) {
+                setStoreName(data.data.name);
+            }
+            else{
+                alert(errorMsg);
+            }
+    })},[]);
 
     useEffect(()=>{
         setProducts(products);
+		setTotal(calculateTotal());
     },[products]);
 
 	const calculateTotal = ()=>{
@@ -34,16 +48,16 @@ const Bag: FC<BagProps> = ({storeName,products,propHandleDelete,changeQuantity}:
 		propHandleDelete(id);
 	}
     const onChangeQuantity = (id: string, newQuantity: number) => {
-		productsInCart.forEach((product) => {
-			if (product.id === id) {
-				product.quantity = newQuantity;
-				if(newQuantity===0){
-					onRemove(id);
-				}
-			}
-		});
+		// productsInCart.forEach((product) => {
+		// 	if (product.id === id) {
+		// 		product.quantity = newQuantity;
+		// 		if(newQuantity===0){
+		// 			onRemove(id);
+		// 		}
+		// 	}
+		// });
 		setTotal(calculateTotal());
-		changeQuantity(id,newQuantity);
+		// changeQuantity(id,newQuantity);
 	}
 	const getQuanOfProduct = (id:string)=>{
 		for(var i=0;i<productsInCart.length;i++){
@@ -69,6 +83,10 @@ const Bag: FC<BagProps> = ({storeName,products,propHandleDelete,changeQuantity}:
 								quantity={getQuanOfProduct(product.id)}
 								onRemove={onRemove}
 								onChangeQuantity={onChangeQuantity}
+								propHandleDelete={propHandleDelete}
+                                propHandleAdd={(product:Product)=>propHandleAdd(product,storeID)}
+                                changeQuantity={(productID,newQuantity)=>changeQuantity(storeID,productID,newQuantity)}
+                               
 							/>
 						))
 					) : (

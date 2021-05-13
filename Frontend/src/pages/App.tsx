@@ -246,6 +246,8 @@ function App() {
 									products={productsInCart}
 									storesToProducts={storesToProducts.current}
 									handleDeleteProduct={handleDeleteProduct}
+									propHandleAdd={addProductToPopup}								
+									changeQuantity={changeQuantity}
 								/>
 							)}
 						/>
