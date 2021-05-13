@@ -1,21 +1,14 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { BrowserRouter, Switch, Route, Redirect } from 'react-router-dom';
+import { BrowserRouter } from 'react-router-dom';
 import { createMuiTheme, ThemeProvider } from '@material-ui/core';
 // import { w3cwebsocket as W3CWebSocket } from 'websocket';
 
-import Home from './Home';
-import Cart from './Cart';
 import Navbar from '../components/Navbar';
-import SignIn from './SignIn';
-import SignUp from './SignUp';
-import MyStores from './MyStores';
-import SearchPage from './SearchPage';
-import StoresView from '../pages/StoresView';
-import Purchase from '../pages/Purchase';
+
 import { Product, ProductQuantity, StoreToSearchedProducts } from '../types';
 import useAPI from '../hooks/useAPI';
 import { CookieContext } from '../contexts';
-import MyAccount from './MyAccount';
+import Routes from './Routes';
 
 const theme = createMuiTheme({
 	typography: {
@@ -198,61 +191,16 @@ function App() {
 							getCookie();
 						}}
 					/>
-					<Switch>
-						<Route path="/" exact component={Home} />
-						<Route
-							path="/cart"
-							exact
-							render={(props) => (
-								<Cart
-									{...props}
-									products={productsInCart}
-									storesToProducts={storesToProducts.current}
-									handleDeleteProduct={handleDeleteProduct}
-								/>
-							)}
-						/>
-						<Route path="/sign-in" exact>
-							{() => (
-								<SignIn
-									onSignIn={(username) => {
-										setSignedIn(true);
-										setUsername(username);
-									}}
-								/>
-							)}
-						</Route>
-						<Route path="/my-account" exact>
-							{() => <MyAccount username={username} />}
-						</Route>
-						<Route path="/sign-up" exact component={SignUp} />
-						<Route
-							path="/searchPage"
-							exact
-							render={(props) => (
-								<SearchPage {...props} propsAddProduct={addProductToPopup} />
-							)}
-						/>
-						<Route
-							path="/storesView"
-							exact
-							render={(props) => (
-								<StoresView {...props} propsAddProduct={addProductToPopup} />
-							)}
-						/>
-						<Route path="/Purchase" exact component={Purchase} />
-						<Route path="/searchPage" exact component={SearchPage} />
-						{signedIn ? (
-							<Route
-								path="/my-stores"
-								exact
-								render={(props) => <MyStores {...props} username={username} />}
-							/>
-						) : (
-							<Redirect to="/" />
-						)}
-						<Route render={() => <h1>404: page not found</h1>} />
-					</Switch>
+					<Routes
+						addProductToPopup={addProductToPopup}
+						handleDeleteProduct={handleDeleteProduct}
+						productsInCart={productsInCart}
+						setSignedIn={setSignedIn}
+						setUsername={setUsername}
+						signedIn={signedIn}
+						storesToProducts={storesToProducts}
+						username={username}
+					/>
 				</BrowserRouter>
 			</CookieContext.Provider>
 		</ThemeProvider>
