@@ -79,7 +79,9 @@ class DefaultDiscountPolicy(DiscountPolicy):
             return Response(False, msg="Tries to add child to simple discount! please create the composite discount "
                                        "first!")
 
+        exist_discount.wrlock.acquire_write()
         exist_discount.add_child(discount_res.get_obj())
+        exist_discount.wrlock.release_write()
         return Response(True)
 
     def move_discount(self, src_id, dest_id) -> Response[None]:
@@ -98,8 +100,12 @@ class DefaultDiscountPolicy(DiscountPolicy):
             return Response(False, msg="Tries to add child to simple discount! please create the composite discount "
                                        "first!")
 
+        src_discount.wrlock.acquire_write()
+        dest_discount.wrlock.acquire_write()
         src_discount.get_parent().remove_child(src_discount)
         dest_discount.add_child(src_discount)
+        dest_discount.wrlock.release_write()
+        src_discount.wrlock.release_write()
         return Response(True)
 
     def remove_discount(self, discount_id: str) -> Response[None]:

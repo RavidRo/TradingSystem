@@ -56,9 +56,11 @@ class SimpleDiscount(IDiscount):
         return False
 
     def parse(self):
+        self.wrlock.acquire_read()
         discount = super().parse()
         discount["percentage"] = self._multiplier * 100
         discount["context"] = self._context
+        self.wrlock.release_read()
         discount["discount_type"] = "simple"
         return discount
 
@@ -85,11 +87,14 @@ class SimpleDiscount(IDiscount):
         if msg != "":
             return Response(False, msg=msg)
 
+        self.wrlock.acquire_write()
         if percentage is not None:
             self._multiplier = percentage / 100
 
         if context is not None:
             self._context = context
+
+        self.wrlock.release_write()
 
         return Response(True)
 
@@ -99,8 +104,10 @@ class SimpleDiscount(IDiscount):
     def remove_discount(self, discount_id: str) -> Response[None]:
         # assuming it has a parent
         if self._id == discount_id:
+            self.wrlock.acquire_write()
             self.get_parent().remove_child(self)
             self.set_parent(None)  # kinda redundant
+            self.wrlock.release_write()
             return Response(True)
         return Response(False, msg="discount to remove not found!")
 
@@ -151,9 +158,12 @@ class CompositeDiscount(IDiscount, ABC):
         if self.get_id() == discount_id:
             return Response(False, msg="The ID provided is not belong to simple discount!")
 
+        self.wrlock.acquire_write()
         for child in self._children:
             if child.edit_simple_discount(discount_id, percentage, context).succeeded():
+                self.wrlock.release_write()
                 return Response(True)
+        self.wrlock.release_write()
         return Response(False, msg="The ID provided is not found!")
 
     complex_type_generator = {
@@ -195,6 +205,8 @@ class CompositeDiscount(IDiscount, ABC):
 
             if msg != "":
                 return Response(False, msg=msg)
+
+            self.wrlock.acquire_write()
             parent_children = self.get_parent().get_children()
             parent_children[
                 parent_children.index(self)
@@ -202,40 +214,58 @@ class CompositeDiscount(IDiscount, ABC):
                 self._children, decision_rule, new_id
             )
             self._id = discount_id
+            self.wrlock.release_write()
             return Response(True)
 
+        self.wrlock.acquire_write()
         for child in self._children:
             if child.edit_complex_discount(
                 discount_id, new_id, complex_type, decision_rule
             ).succeeded():
+                self.wrlock.release_write()
                 return Response(True)
+
+        self.wrlock.release_write()
         return Response(False, msg="The ID provided is not found!")
 
     def get_discount_by_id(self, exist_id: str):
         if self._id == exist_id:
             return self
+
+        self.wrlock.acquire_read()
         for child in self._children:
             found_discount = child.get_discount_by_id(exist_id)
             if found_discount is not None:
+                self.wrlock.release_read()
                 return found_discount
+
+        self.wrlock.release_read()
         return None
 
     def remove_discount(self, discount_id: str) -> Response[None]:
+        self.wrlock.acquire_write()
         if self._id == discount_id:
             if self.get_parent() is None:
+                self.wrlock.release_write()
                 return Response(False, msg="Tries to remove hidden root!")
             self.get_parent().remove_child(self)
             self.set_parent(None)  # kinda redundant
+            self.wrlock.release_write()
             return Response(True)
         for child in self._children:
             child_res = child.remove_discount(discount_id)
             if child_res.succeeded():
+                self.wrlock.release_write()
                 return child_res
+
+        self.wrlock.release_write()
         return Response(False, msg="discount to remove not found")
 
     def parse(self):
         discounts = super().parse()
+        self.wrlock.acquire_read()
         discounts["discounts"] = [child.parse() for child in self._children]
+        self.wrlock.release_read()
         discounts["discount_type"] = "complex"
         return discounts
 
@@ -245,11 +275,14 @@ class MaximumCompositeDiscount(CompositeDiscount):
         super().__init__(children, new_id)
 
     def apply_discount(self, products_to_quantities: dict, user_age: int) -> float:
+        self.wrlock.acquire_read()
         if len(self._children) == 0:
             return 0.0
-        return max(
+        discount = max(
             [child.apply_discount(products_to_quantities, user_age) for child in self._children]
         )
+        self.wrlock.release_read()
+        return discount
 
     def parse(self):
         discounts = super().parse()
@@ -262,9 +295,12 @@ class AddCompositeDiscount(CompositeDiscount):
         super().__init__(children, new_id)
 
     def apply_discount(self, products_to_quantities: dict, user_age: int) -> float:
-        return sum(
+        self.wrlock.acquire_read()
+        discount = sum(
             [child.apply_discount(products_to_quantities, user_age) for child in self._children]
         )
+        self.wrlock.release_read()
+        return discount
 
     def parse(self):
         discounts = super().parse()
@@ -285,10 +321,13 @@ class XorCompositeDiscount(CompositeDiscount):
         self.__desicion_rule = decision_rule
 
     def apply_discount(self, products_to_quantities: dict, user_age: int) -> float:
+        self.wrlock.acquire_read()
         prices = [
             child.apply_discount(products_to_quantities, user_age) for child in self._children
         ]
-        return XorCompositeDiscount.decision_dict[self.__desicion_rule](prices)
+        discount = XorCompositeDiscount.decision_dict[self.__desicion_rule](prices)
+        self.wrlock.release_read()
+        return discount
 
     def parse(self):
         discounts = super().parse()
@@ -302,14 +341,19 @@ class AndConditionDiscount(CompositeDiscount):
         super().__init__(children, new_id)
 
     def apply_discount(self, products_to_quantities: dict, user_age: int) -> float:
+        self.wrlock.acquire_read()
         if all(
             [
                 child._conditions_policy.checkPolicy(products_to_quantities, user_age)
                 for child in self._children
             ]
         ):
-            return sum([child.discount_func(products_to_quantities) for child in self._children])
-        return 0.0
+            discount = sum([child.discount_func(products_to_quantities) for child in self._children])
+        else:
+            discount = 0.0
+
+        self.wrlock.release_read()
+        return discount
 
     def parse(self):
         discounts = super().parse()
@@ -322,14 +366,19 @@ class OrConditionDiscount(CompositeDiscount):
         super().__init__(children, new_id)
 
     def apply_discount(self, products_to_quantities: dict, user_age: int) -> float:
+        self.wrlock.acquire_read()
         if any(
             [
                 child._conditions_policy.checkPolicy(products_to_quantities, user_age)
                 for child in self._children
             ]
         ):
-            return sum([child.discount_func(products_to_quantities) for child in self._children])
-        return 0.0
+            discount = sum([child.discount_func(products_to_quantities) for child in self._children])
+        else:
+            discount = 0.0
+
+        self.wrlock.release_read()
+        return discount
 
     def parse(self):
         discounts = super().parse()
