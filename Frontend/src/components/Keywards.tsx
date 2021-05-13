@@ -16,8 +16,13 @@ const Keywards: FC<Keywordsprops> = ({updateKeyWords}) => {
         updateKeyWords(keyWords.current);
     }
     const handleAddWord = ()=>{
-        keyWords.current = [...keyWords.current, currentKey];
-        updateKeyWords(keyWords.current);
+        if(currentKey === ""){
+            alert("you can not add empty keyword");
+        }
+        else{
+            keyWords.current = [...keyWords.current, currentKey];
+            updateKeyWords(keyWords.current);
+        }
     }
     return (
 		

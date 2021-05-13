@@ -136,7 +136,8 @@ async def search_products():
     category = request.args.get("category")
     min_price = request.args.get("min_price")
     max_price = request.args.get("max_price")
-    kwargs = request.args.get("kwargs")
+    kwargs = request.args.getlist("kwargs[]")
+
     answer = await __async_call(
         system.search_products, product_name, category, float(min_price), float(max_price), kwargs
     )
