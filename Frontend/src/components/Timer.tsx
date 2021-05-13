@@ -1,5 +1,5 @@
 import React, { FC, useState } from 'react';
-import useInterval from '../components/useInterval';
+import useInterval from '../hooks/useInterval';
 import '../styles/Timer.scss';
 
 type TimerProps = {};

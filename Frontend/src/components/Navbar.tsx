@@ -1,4 +1,4 @@
-import React, { FC, useState, useEffect } from 'react';
+import React, { FC, useState, useEffect, useContext } from 'react';
 
 import {
 	Badge,
@@ -19,6 +19,7 @@ import {
 import ExitToAppIcon from '@material-ui/icons/ExitToApp';
 import StoreIcon from '@material-ui/icons/Store';
 import SupervisorAccountIcon from '@material-ui/icons/SupervisorAccount';
+import PersonIcon from '@material-ui/icons/Person';
 
 import { Link, useHistory } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -34,6 +35,7 @@ import '../styles/Navbar.scss';
 import config from '../config';
 import PopupCart from '../components/PopupCart';
 import { Product, ProductQuantity, StoreToSearchedProducts } from '../types';
+import { AdminsContext, UsernameContext } from '../contexts';
 
 type NavBarProps = {
 	signedIn: boolean;
@@ -60,6 +62,8 @@ const Navbar: FC<NavBarProps> = ({
 	const [accountMenuOpen, setAccountMenuOpen] = useState<boolean>(false);
 	const accountMenuRef = React.useRef<HTMLButtonElement>(null);
 	const history = useHistory();
+	const username = useContext(UsernameContext);
+	const admins = useContext(AdminsContext);
 
 	useEffect(() => {
 		setProducts(products);
@@ -157,8 +161,16 @@ const Navbar: FC<NavBarProps> = ({
 											text="My account"
 											onClick={() => history.push('/my-account')}
 										>
-											<SupervisorAccountIcon />
+											<PersonIcon />
 										</AccountMenuItem>
+										{admins.includes(username) && (
+											<AccountMenuItem
+												text="Admin page"
+												onClick={() => history.push('/admin')}
+											>
+												<SupervisorAccountIcon />
+											</AccountMenuItem>
+										)}
 										<AccountMenuItem text="Logout" onClick={logout}>
 											<ExitToAppIcon />
 										</AccountMenuItem>

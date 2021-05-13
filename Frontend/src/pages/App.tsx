@@ -7,7 +7,7 @@ import Navbar from '../components/Navbar';
 
 import { Product, ProductQuantity, StoreToSearchedProducts } from '../types';
 import useAPI from '../hooks/useAPI';
-import { CookieContext } from '../contexts';
+import { AdminsContext, CookieContext, UsernameContext } from '../contexts';
 import Routes from './Routes';
 
 const theme = createMuiTheme({
@@ -177,31 +177,34 @@ function App() {
 	return cookie !== '' ? (
 		<ThemeProvider theme={theme}>
 			<CookieContext.Provider value={cookie}>
-				<BrowserRouter>
-					<Navbar
-						signedIn={signedIn}
-						products={productsInCart}
-						storesToProducts={storesToProducts.current}
-						propHandleDelete={handleDeleteProduct}
-						propHandleAdd={addProductToPopup}
-						notifications={notifications}
-						logout={() => {
-							setSignedIn(false);
-							setCookie('');
-							getCookie();
-						}}
-					/>
-					<Routes
-						addProductToPopup={addProductToPopup}
-						handleDeleteProduct={handleDeleteProduct}
-						productsInCart={productsInCart}
-						setSignedIn={setSignedIn}
-						setUsername={setUsername}
-						signedIn={signedIn}
-						storesToProducts={storesToProducts}
-						username={username}
-					/>
-				</BrowserRouter>
+				<AdminsContext.Provider value={['tali', 'ravid', 'inon', 'sean', 'omer']}>
+					<UsernameContext.Provider value={username}>
+						<BrowserRouter>
+							<Navbar
+								signedIn={signedIn}
+								products={productsInCart}
+								storesToProducts={storesToProducts.current}
+								propHandleDelete={handleDeleteProduct}
+								propHandleAdd={addProductToPopup}
+								notifications={notifications}
+								logout={() => {
+									setSignedIn(false);
+									setCookie('');
+									getCookie();
+								}}
+							/>
+							<Routes
+								addProductToPopup={addProductToPopup}
+								handleDeleteProduct={handleDeleteProduct}
+								productsInCart={productsInCart}
+								setSignedIn={setSignedIn}
+								setUsername={setUsername}
+								signedIn={signedIn}
+								storesToProducts={storesToProducts}
+							/>
+						</BrowserRouter>
+					</UsernameContext.Provider>
+				</AdminsContext.Provider>
 			</CookieContext.Provider>
 		</ThemeProvider>
 	) : (
