@@ -75,16 +75,18 @@ const Routes: FC<RoutesProps> = ({
 			<Route path="/Purchase" exact component={Purchase} />
 			<Route path="/searchPage" exact component={SearchPage} />
 			{signedIn ? (
-				<>
-					<Route
-						path="/my-stores"
-						exact
-						render={(props) => <MyStores {...props} username={username} />}
-					/>
-					<Route path="/my-account" exact>
-						{(props) => <MyAccount {...props} username={username} />}
-					</Route>
-				</>
+				<Route
+					path="/my-stores"
+					exact
+					render={(props) => <MyStores {...props} username={username} />}
+				/>
+			) : (
+				<Redirect to="/" />
+			)}
+			{signedIn ? (
+				<Route path="/my-account" exact>
+					{(props) => <MyAccount {...props} username={username} />}
+				</Route>
 			) : (
 				<Redirect to="/" />
 			)}

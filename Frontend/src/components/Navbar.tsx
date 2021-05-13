@@ -22,7 +22,13 @@ import SupervisorAccountIcon from '@material-ui/icons/SupervisorAccount';
 
 import { Link, useHistory } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faShoppingCart, faSignInAlt, faSearch, faBell } from '@fortawesome/free-solid-svg-icons';
+import {
+	faShoppingCart,
+	faSignInAlt,
+	faSearch,
+	faBell,
+	faCaretDown,
+} from '@fortawesome/free-solid-svg-icons';
 
 import '../styles/Navbar.scss';
 import config from '../config';
@@ -110,19 +116,24 @@ const Navbar: FC<NavBarProps> = ({
 					</Link>
 				</div>
 				<div className="navbar-item">
-					<FontAwesomeIcon className="item-icon" icon={faSignInAlt} />
 					{signedIn ? (
-						<Button
-							ref={accountMenuRef}
-							className="item-link"
-							onClick={() => setAccountMenuOpen((prevOpen) => !prevOpen)}
-						>
-							Account&Stores
-						</Button>
+						<>
+							<FontAwesomeIcon className="item-icon" icon={faCaretDown} />
+							<Button
+								ref={accountMenuRef}
+								className="item-link"
+								onClick={() => setAccountMenuOpen((prevOpen) => !prevOpen)}
+							>
+								Account&Stores
+							</Button>
+						</>
 					) : (
-						<Link className="item-link" to="/sign-in">
-							Sign In
-						</Link>
+						<>
+							<FontAwesomeIcon className="item-icon" icon={faSignInAlt} />
+							<Link className="item-link" to="/sign-in">
+								Sign In
+							</Link>
+						</>
 					)}
 				</div>
 				<Popper

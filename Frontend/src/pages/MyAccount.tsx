@@ -1,6 +1,6 @@
 import { Container, Paper, Typography } from '@material-ui/core';
 import React, { FC, useEffect, useState } from 'react';
-import PurchaseHistoryTable from '../components/PurchaseHistoryTable';
+import PurchaseHistoryTable from '../components/Lists/PurchaseHistoryTable';
 import useAPI from '../hooks/useAPI';
 import '../styles/MyAccount.scss';
 import { PurchaseDetails } from '../types';

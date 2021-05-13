@@ -12,7 +12,7 @@ import TableRow from '@material-ui/core/TableRow';
 import Paper from '@material-ui/core/Paper';
 import KeyboardArrowDownIcon from '@material-ui/icons/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@material-ui/icons/KeyboardArrowUp';
-import { PurchaseDetails } from '../types';
+import { PurchaseDetails } from '../../types';
 
 const useRowStyles = makeStyles({
 	root: {
@@ -22,8 +22,8 @@ const useRowStyles = makeStyles({
 	},
 });
 
-const Row: FC<{ row: PurchaseDetails }> = (props) => {
-	const { row } = props;
+const Row: FC<{ row: PurchaseDetails; showUsername: boolean }> = (props) => {
+	const { row, showUsername } = props;
 	const [open, setOpen] = React.useState(false);
 	const classes = useRowStyles();
 
@@ -38,7 +38,7 @@ const Row: FC<{ row: PurchaseDetails }> = (props) => {
 				<TableCell component="th" scope="row">
 					{row.date.toDateString()}
 				</TableCell>
-				<TableCell>{row.store_name}</TableCell>
+				<TableCell>{showUsername ? row.username : row.store_name}</TableCell>
 				<TableCell align="right">{row.total_price}</TableCell>
 			</TableRow>
 			<TableRow>
@@ -72,7 +72,10 @@ const Row: FC<{ row: PurchaseDetails }> = (props) => {
 	);
 };
 
-const PurchaseHistoryTable: FC<{ history: PurchaseDetails[] }> = ({ history }) => {
+const PurchaseHistoryTable: FC<{ history: PurchaseDetails[]; showUsername?: boolean }> = ({
+	history,
+	showUsername = false,
+}) => {
 	return (
 		<TableContainer component={Paper}>
 			<Table aria-label="purchase history table" stickyHeader>
@@ -80,13 +83,13 @@ const PurchaseHistoryTable: FC<{ history: PurchaseDetails[] }> = ({ history }) =
 					<TableRow>
 						<TableCell />
 						<TableCell>Date</TableCell>
-						<TableCell>Store</TableCell>
+						<TableCell>{`${showUsername ? 'Username' : 'Store'}`}</TableCell>
 						<TableCell align="right">Price</TableCell>
 					</TableRow>
 				</TableHead>
 				<TableBody>
 					{history.map((row, index) => (
-						<Row key={index} row={row} />
+						<Row key={index} row={row} showUsername={showUsername} />
 					))}
 				</TableBody>
 			</Table>
