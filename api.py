@@ -62,9 +62,9 @@ async def get_cookie():
 
 
 @app.websocket("/connect")
-def connect():
-    print("here")
-    cookie = request.args.get("cookie")
+async def connect():
+    data = await websocket.receive()
+    cookie = data["cookie"]
     if cookie is None:
         cookie = system.enter_system()
     answer = system.connect(cookie, lambda messages: websocket.send(messages))
