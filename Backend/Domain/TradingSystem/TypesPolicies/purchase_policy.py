@@ -1,12 +1,10 @@
 import operator
 import threading
-
-from Backend.Domain.TradingSystem.TypesPolicies.Purchase_Composites.composite_purchase_rule import PurchaseRule
 from Backend.Domain.TradingSystem.TypesPolicies.Purchase_Composites.concrete_composites import AndCompositePurchaseRule, \
     OrCompositePurchaseRule, ConditioningCompositePurchaseRule
-from Backend.Domain.TradingSystem.TypesPolicies.Purchase_Composites.purchase_leaves import ConcreteLeaf
-from Backend.Domain.TradingSystem.user import User
-from Backend.response import Response, ParsableMap
+from Backend.Domain.TradingSystem.TypesPolicies.Purchase_Composites.concrete_leaf import ProductLeafPurchaseRule, \
+    BagLeafPurchaseRule, UserLeafPurchaseRule, CategoryLeafPurchaseRule
+from Backend.response import Response
 
 
 class PurchasePolicy:
@@ -19,6 +17,12 @@ class PurchasePolicy:
 logic_types = {"or": lambda self: OrCompositePurchaseRule(self.generate_id()),
                "and": lambda self: AndCompositePurchaseRule(self.generate_id()),
                "conditional": lambda self: ConditioningCompositePurchaseRule(self.generate_id())}
+
+leaf_types = {"product": lambda self, leaf_details: ProductLeafPurchaseRule(leaf_details=leaf_details, identifier=self.generate_id()),
+              "bag": lambda self, leaf_details: BagLeafPurchaseRule(leaf_details=leaf_details, identifier=self.generate_id()),
+              "user": lambda self, leaf_details: UserLeafPurchaseRule(leaf_details=leaf_details, identifier=self.generate_id()),
+              "category": lambda self, leaf_details: CategoryLeafPurchaseRule(leaf_details=leaf_details, identifier=self.generate_id()),
+              }
 
 
 objects = ['product', 'user', 'category', 'bag']
@@ -97,8 +101,12 @@ class DefaultPurchasePolicy(PurchasePolicy):
             response_validity = self.check_simple_rule_details_validity(rule_details)
             if not response_validity.succeeded():
                 return response_validity
-            simple_rule = ConcreteLeaf(rule_details, self.generate_id())
-            return self.__purchase_rules.add(simple_rule, parent_id, clause)
+            leaf_type = rule_details['context']['obj']
+            if leaf_type in leaf_types.keys():
+                simple_rule = leaf_types[leaf_type](self, rule_details)
+                return self.__purchase_rules.add(simple_rule, parent_id, clause)
+            else:
+                return Response(False, msg=f"invalid simple rule type: {leaf_type}")
 
         elif rule_type == "complex":
             response_validity = self.check_complex_rule_details_validity(rule_details)
@@ -152,8 +160,11 @@ class DefaultPurchasePolicy(PurchasePolicy):
             response_validity = self.check_simple_rule_details_validity(rule_details)
             if not response_validity.succeeded():
                 return response_validity
-            simple_rule = ConcreteLeaf(rule_details, self.generate_id())
-            return self.__purchase_rules.edit_rule(rule_id, simple_rule)
+            leaf_type = rule_details['context']['obj']
+            if leaf_type in leaf_types.keys():
+                return self.__purchase_rules.edit_rule(rule_id, leaf_types[leaf_type](self, rule_details))
+            else:
+                return Response(False, msg=f"invalid simple rule type: {leaf_type}")
 
         elif rule_type == "complex":
             response_validity = self.check_complex_rule_details_validity(rule_details)

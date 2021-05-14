@@ -1,16 +1,10 @@
 import json
 import threading
-from collections import Callable
 from queue import Queue
 from unittest import mock
 from unittest.mock import patch, MagicMock
 from Backend.Domain.Payment.OutsideSystems.outside_cashing import OutsideCashing
-from Backend.Domain.TradingSystem.Interfaces.IUserState import IUserState
-from Backend.Domain.TradingSystem.States.member import Member
-from Backend.Domain.TradingSystem.States.user_state import UserState
 from Backend.Domain.TradingSystem.shopping_cart import ShoppingCart
-from Backend.Domain.TradingSystem.user import User
-from Backend.Domain.TradingSystem.user_manager import UserManager
 from Backend.Service.trading_system import TradingSystem
 
 system = TradingSystem.getInstance()
@@ -1905,6 +1899,7 @@ def test_connect_after_get_notification():
     pending_before_connect_empty = system.empty_notifications(new_cookie)
     system.connect(new_cookie, lambda messages: apply(first_owner_queue, messages))
     assert (
+        \
             first_queue_before_connect_empty
             and not pending_before_connect_empty
             and not first_owner_queue.empty()
