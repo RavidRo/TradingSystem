@@ -164,6 +164,7 @@ class ShoppingCart(IShoppingCart):
         if self.__pending_purchase:
             self.__price = None
             self.__purchase_time_passed = True
+            self.__pending_purchase = False
             for bag in self.__shopping_bags.values():
                 bag.send_back()
         self.__transaction_lock.release()

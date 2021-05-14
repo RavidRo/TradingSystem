@@ -19,6 +19,7 @@ def products_data():
 
 
 @pytest.fixture
+@patch.multiple(ShoppingCart, interval_time=MagicMock(return_value=1))
 def initialization(products_data):
     system = TradingSystem.getInstance()
     cookie = system.enter_system()
@@ -107,7 +108,6 @@ def complex_or_discount():
 @patch.multiple(DefaultPurchasePolicy, checkPolicy=MagicMock(return_value=Response(True)))
 @patch.multiple(CashingAdapter, pay=MagicMock(return_value=Response(True)))
 @patch.multiple(SupplyAdapter, deliver=MagicMock(return_value=Response(True)))
-@patch.multiple(ShoppingCart, interval_time=MagicMock(return_value=1))
 def test_purchase_success(system, cookie, store_id, store, product_ids, products_data):
     for product_id in product_ids:
         system.save_product_in_cart(cookie, store_id, product_id, 2)
@@ -139,7 +139,6 @@ def fail_purchase_payment_case(system, cookie, store_id, store, product_ids, pro
 @patch.multiple(DefaultPurchasePolicy, checkPolicy=MagicMock(return_value=Response(True)))
 @patch.multiple(CashingAdapter, pay=MagicMock(return_value=Response(False)))
 @patch.multiple(SupplyAdapter, deliver=MagicMock(return_value=Response(True)))
-@patch.multiple(ShoppingCart, interval_time=MagicMock(return_value=1))
 def test_purchase_fail_false_payment(system, cookie, store_id, store, product_ids, products_data):
     fail_purchase_payment_case(system, cookie, store_id, store, product_ids, products_data)
 
@@ -148,7 +147,6 @@ def test_purchase_fail_false_payment(system, cookie, store_id, store, product_id
 @patch.multiple(DefaultPurchasePolicy, checkPolicy=MagicMock(return_value=Response(True)))
 @patch.multiple(CashingAdapter, pay=MagicMock(return_value=Response(True)))
 @patch.multiple(SupplyAdapter, deliver=MagicMock(return_value=Response(False)))
-@patch.multiple(ShoppingCart, interval_time=MagicMock(return_value=1))
 def test_purchase_fail_false_deliver(system, cookie, store_id, store, product_ids, products_data):
     fail_purchase_payment_case(system, cookie, store_id, store, product_ids, products_data)
 
@@ -157,7 +155,6 @@ def test_purchase_fail_false_deliver(system, cookie, store_id, store, product_id
 @patch.multiple(DefaultPurchasePolicy, checkPolicy=MagicMock(return_value=Response(True)))
 @patch.multiple(CashingAdapter, pay=MagicMock(return_value=Response(False)))
 @patch.multiple(SupplyAdapter, deliver=MagicMock(return_value=Response(False)))
-@patch.multiple(ShoppingCart, interval_time=MagicMock(return_value=1))
 def test_purchase_fail_false_payment_false_deliver(system, cookie, store_id, store, product_ids, products_data):
     fail_purchase_payment_case(system, cookie, store_id, store, product_ids, products_data)
 
@@ -166,7 +163,6 @@ def test_purchase_fail_false_payment_false_deliver(system, cookie, store_id, sto
 @patch.multiple(DefaultPurchasePolicy, checkPolicy=MagicMock(return_value=Response(True)))
 @patch.multiple(CashingAdapter, pay=MagicMock(side_effect=Exception()))
 @patch.multiple(SupplyAdapter, deliver=MagicMock(return_value=Response(True)))
-@patch.multiple(ShoppingCart, interval_time=MagicMock(return_value=1))
 def test_purchase_fail_crash_payment(system, cookie, store_id, store, product_ids, products_data):
     fail_purchase_payment_case(system, cookie, store_id, store, product_ids, products_data)
 
@@ -175,14 +171,12 @@ def test_purchase_fail_crash_payment(system, cookie, store_id, store, product_id
 @patch.multiple(DefaultPurchasePolicy, checkPolicy=MagicMock(return_value=Response(True)))
 @patch.multiple(CashingAdapter, pay=MagicMock(return_value=Response(True)))
 @patch.multiple(SupplyAdapter, deliver=MagicMock(side_effect=Exception()))
-@patch.multiple(ShoppingCart, interval_time=MagicMock(return_value=1))
 def test_purchase_fail_crash_deliver(system, cookie, store_id, store, product_ids, products_data):
     fail_purchase_payment_case(system, cookie, store_id, store, product_ids, products_data)
 
 
 @patch.multiple(CashingAdapter, pay=MagicMock(return_value=Response(True)))
 @patch.multiple(SupplyAdapter, deliver=MagicMock(return_value=Response(True)))
-@patch.multiple(ShoppingCart, interval_time=MagicMock(return_value=1))
 def test_purchase_rule_fail_blocking_rule(system, cookie, store_id, store, product_ids, products_data,
                                           simple_product_rule):
     system.add_purchase_rule(cookie, store_id, simple_product_rule, "simple", "1")
@@ -202,7 +196,6 @@ def test_purchase_rule_fail_blocking_rule(system, cookie, store_id, store, produ
 
 @patch.multiple(CashingAdapter, pay=MagicMock(return_value=Response(True)))
 @patch.multiple(SupplyAdapter, deliver=MagicMock(return_value=Response(True)))
-@patch.multiple(ShoppingCart, interval_time=MagicMock(return_value=1))
 def test_simple_conditional_discount_true_cond(system, cookie, store_id, store, product_ids, products_data,
                                                simple_product_true_conditional_discount):
     for product_id in product_ids:
@@ -221,7 +214,6 @@ def test_simple_conditional_discount_true_cond(system, cookie, store_id, store, 
 
 @patch.multiple(CashingAdapter, pay=MagicMock(return_value=Response(True)))
 @patch.multiple(SupplyAdapter, deliver=MagicMock(return_value=Response(True)))
-@patch.multiple(ShoppingCart, interval_time=MagicMock(return_value=1))
 def test_simple_conditional_discount_false_cond(system, cookie, store_id, store, product_ids, products_data,
                                                 simple_product_true_conditional_discount):
     for product_id in product_ids:
@@ -241,7 +233,6 @@ def test_simple_conditional_discount_false_cond(system, cookie, store_id, store,
 
 @patch.multiple(CashingAdapter, pay=MagicMock(return_value=Response(True)))
 @patch.multiple(SupplyAdapter, deliver=MagicMock(return_value=Response(True)))
-@patch.multiple(ShoppingCart, interval_time=MagicMock(return_value=1))
 def test_and_conditional_discount_false(system, cookie, store_id, store, product_ids, products_data,
                                         simple_product_true_conditional_discount,
                                         simple_category_false_conditional_discount, complex_and_discount):
@@ -264,7 +255,6 @@ def test_and_conditional_discount_false(system, cookie, store_id, store, product
 
 @patch.multiple(CashingAdapter, pay=MagicMock(return_value=Response(True)))
 @patch.multiple(SupplyAdapter, deliver=MagicMock(return_value=Response(True)))
-@patch.multiple(ShoppingCart, interval_time=MagicMock(return_value=1))
 def test_and_conditional_discount_true(system, cookie, store_id, store, product_ids, products_data,
                                        simple_product_true_conditional_discount,
                                        simple_category_false_conditional_discount, complex_and_discount):
@@ -289,7 +279,6 @@ def test_and_conditional_discount_true(system, cookie, store_id, store, product_
 
 @patch.multiple(CashingAdapter, pay=MagicMock(return_value=Response(True)))
 @patch.multiple(SupplyAdapter, deliver=MagicMock(return_value=Response(True)))
-@patch.multiple(ShoppingCart, interval_time=MagicMock(return_value=1))
 def test_or_conditional_discount_true(system, cookie, store_id, store, product_ids, products_data,
                                       simple_product_true_conditional_discount,
                                       simple_category_false_conditional_discount, complex_or_discount):
@@ -312,7 +301,6 @@ def test_or_conditional_discount_true(system, cookie, store_id, store, product_i
 
 @patch.multiple(CashingAdapter, pay=MagicMock(return_value=Response(True)))
 @patch.multiple(SupplyAdapter, deliver=MagicMock(return_value=Response(True)))
-@patch.multiple(ShoppingCart, interval_time=MagicMock(return_value=1))
 def test_or_conditional_discount_false(system, cookie, store_id, store, product_ids, products_data,
                                        simple_product_true_conditional_discount,
                                        simple_category_false_conditional_discount, complex_or_discount):
@@ -327,6 +315,7 @@ def test_or_conditional_discount_false(system, cookie, store_id, store, product_
     system.add_discount(cookie, store_id, simple_product_true_conditional_discount, "2", "simple")
     price_res = system.purchase_cart(cookie, 12)
     res = system.send_payment(cookie, "", "")
+
     assert res.succeeded() and len(system.get_cart_details(cookie).object.bags) == 0 \
            and all(list(
         map(lambda after_data, before_data: before_data[3] - after_data == 2 and before_data[0] == store.get_product(
@@ -337,18 +326,64 @@ def test_or_conditional_discount_false(system, cookie, store_id, store, product_
 
 @patch.multiple(CashingAdapter, pay=MagicMock(return_value=Response(True)))
 @patch.multiple(SupplyAdapter, deliver=MagicMock(return_value=Response(True)))
-@patch.multiple(ShoppingCart, interval_time=MagicMock(return_value=5))
 def test_try_paying_after_time_passed(system, cookie, store_id, store, product_ids, products_data):
     import time
 
     for product_id in product_ids:
         system.save_product_in_cart(cookie, store_id, product_id, 2)
     system.purchase_cart(cookie, 18)
-    time.sleep(6)
+    time.sleep(2)
     res = system.send_payment(cookie, "", "")
 
     assert not res.succeeded() and len(system.get_cart_details(cookie).object.bags[0].product_ids_to_quantities) == 3 \
            and all(list(
+        map(lambda after_data, before_data: before_data[3] - after_data[1] == 0 and before_data[0] == store.get_product(
+            after_data[0]).get_name(),
+            store.ids_to_quantities, products_data)))
+
+
+def test_try_paying_first_time_failed_than_success(system, cookie, store_id, store, product_ids, products_data):
+    with patch.object(CashingAdapter, 'pay', return_value=Response(False)):
+        for product_id in product_ids:
+            system.save_product_in_cart(cookie, store_id, product_id, 2)
+
+        user_age = 25
+        system.purchase_cart(cookie, user_age)
+        res = system.send_payment(cookie, "", "")
+
+    assert not res.succeeded() and len(
+        system.get_cart_details(cookie).object.bags[0].product_ids_to_quantities) == 3 and all(list(
+        map(lambda after_data, before_data: before_data[3] - after_data[1] == 0 and before_data[0] == store.get_product(
+            after_data[0]).get_name(),
+            store.ids_to_quantities, products_data)))
+
+    with patch.object(CashingAdapter, 'pay', return_value=Response(True)):
+        res = system.send_payment(cookie, "", "")
+
+    assert res.succeeded() and len(system.get_cart_details(cookie).object.bags) == 0 \
+           and all(list(
+        map(lambda after_data, before_data: before_data[3] - after_data == 2 and before_data[0] == store.get_product(
+            after_data[0]).get_name(),
+            store.ids_to_quantities.values(),
+            products_data)))
+
+
+def test_try_paying_first_time_fail_second_time_timer_over(system, cookie, store_id, store, product_ids,
+                                                           products_data):
+    import time
+    with patch.object(CashingAdapter, 'pay', return_value=Response(False)):
+        for product_id in product_ids:
+            system.save_product_in_cart(cookie, store_id, product_id, 2)
+        user_age = 25
+        system.purchase_cart(cookie, user_age)
+        system.send_payment(cookie, "", "")
+
+    time.sleep(2)
+    with patch.object(CashingAdapter, 'pay', return_value=Response(False)):
+        res = system.send_payment(cookie, "", "")
+
+    assert not res.succeeded() and len(
+        system.get_cart_details(cookie).object.bags[0].product_ids_to_quantities) == 3 and all(list(
         map(lambda after_data, before_data: before_data[3] - after_data[1] == 0 and before_data[0] == store.get_product(
             after_data[0]).get_name(),
             store.ids_to_quantities, products_data)))
