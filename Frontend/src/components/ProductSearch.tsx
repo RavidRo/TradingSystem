@@ -1,5 +1,5 @@
 import { Button, Card, CardContent, Typography } from '@material-ui/core';
-import React, {FC,useEffect,useRef} from 'react';
+import React, {FC,useEffect,useRef, useState} from 'react';
 import '../styles/ProductSearch.scss';
 import { Link } from 'react-router-dom';
 import useAPI from '../hooks/useAPI';
@@ -18,13 +18,14 @@ type ProductSearchProps = {
 
 const ProductSearch: FC<ProductSearchProps> = ({storeID,content,price,quantity,category,clickAddProduct}) => {
 
-    const storeName = useRef<string>("")
+    const [storeName,setStoreName] = useState<string>("")
     const storeObj = useAPI<Store>('/get_store',{store_id:storeID});
     useEffect(()=>{
         if(storeID!==""){
+            console.log("hi")
             storeObj.request().then(({data,error,errorMsg})=>{
                 if(!error && data !==null){
-                    storeName.current = data.data.name;
+                    setStoreName(data.data.name);
                 }
                 else{
                     alert(errorMsg)
@@ -32,7 +33,7 @@ const ProductSearch: FC<ProductSearchProps> = ({storeID,content,price,quantity,c
                 
             })
         }
-    },[]);
+    },[storeID]);
 
 	return (
 		<div className="ProductSearchCard">
@@ -78,7 +79,7 @@ const ProductSearch: FC<ProductSearchProps> = ({storeID,content,price,quantity,c
                             },
                             }}
                         >
-                                {storeName.current}
+                                {storeName}
                         </Link>
                     </div>
                 </Card>

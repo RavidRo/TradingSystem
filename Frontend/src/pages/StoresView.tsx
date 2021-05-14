@@ -22,7 +22,7 @@ const StoresView: FC<StoresViewProps> = ({propsAddProduct,location}: StoresViewP
 
     // storeID
     const [storeID, setStoreID] = useState<string>(location.state!==undefined?location.state.storeID:"");
-    const storeName = useRef<string>("");
+    const [storeName,setStoreName] = useState<string>("");
     const productsObj = useAPI<Product[]>('/get_products_by_store');
 
     const getQuantityOfProduct = (productID:string,storeID:string)=>{
@@ -46,13 +46,11 @@ const StoresView: FC<StoresViewProps> = ({propsAddProduct,location}: StoresViewP
         return "";
     }
     useEffect(()=>{
-        storeName.current = gerStoreNameByID(storeID);
-        console.log(storeID);
-        if(storeName.current!==""){
-            console.log("hiiiii");
+        setStoreName(gerStoreNameByID(storeID));
+        if(storeName!==""){
             productsObj.request({store_id:storeID}).then(({data,error,errorMsg})=>{
                 if(!error && data !==null){
-                    console.log(data.data);
+                    console.log(data.data)
                     let productsArray:Product[] = data.data;
                     let productQuantityArr:ProductQuantity[] = productsArray.map((product)=>{
                         return {
@@ -72,14 +70,12 @@ const StoresView: FC<StoresViewProps> = ({propsAddProduct,location}: StoresViewP
                 
             })
         }
-    },[storeID]);
+    },[storeID, storeName]);
 
     const storesObj = useAPI<Store[]>('/get_stores_details');
     useEffect(()=>{
         storesObj.request().then(({data,error,errorMsg})=>{
-            console.log(data,error,errorMsg);
             if(!error && data !==null){
-                console.log(data.data);
                 setStores(data.data);
             }
             else{
@@ -123,7 +119,7 @@ const StoresView: FC<StoresViewProps> = ({propsAddProduct,location}: StoresViewP
                    })}
                 </Select>
                 <div className="productCards">
-                    {storeName.current!==""?
+                    {storeName!==""?
                     setProductsInMatrix().map((row,i)=>{
                         return(
                             <div className="cardsRow">
