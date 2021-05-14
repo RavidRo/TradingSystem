@@ -304,7 +304,7 @@ class AndConditionDiscount(CompositeDiscount):
     def apply_discount(self, products_to_quantities: dict, user_age: int) -> float:
         if all(
             [
-                child._conditions_policy.checkPolicy(products_to_quantities, user_age)
+                child._conditions_policy.checkPolicy(products_to_quantities, user_age).succeeded()
                 for child in self._children
             ]
         ):
@@ -324,7 +324,7 @@ class OrConditionDiscount(CompositeDiscount):
     def apply_discount(self, products_to_quantities: dict, user_age: int) -> float:
         if any(
             [
-                child._conditions_policy.checkPolicy(products_to_quantities, user_age)
+                child._conditions_policy.checkPolicy(products_to_quantities, user_age).succeeded()
                 for child in self._children
             ]
         ):

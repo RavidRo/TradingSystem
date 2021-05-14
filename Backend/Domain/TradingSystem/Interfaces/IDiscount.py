@@ -30,7 +30,7 @@ class IDiscount(Parsable, ABC):
         return self._conditions_policy
 
     def apply_discount(self, products_to_quantities: dict, user_age: int) -> float:
-        if self._conditions_policy.checkPolicy(products_to_quantities, user_age):
+        if self._conditions_policy.checkPolicy(products_to_quantities, user_age).succeeded():
             return self.discount_func(products_to_quantities)
         return 0.0
 
@@ -69,5 +69,7 @@ class IDiscount(Parsable, ABC):
     def parse(self):
         discount = dict()
         discount['id'] = self._id
-        # discount['condition'] = self._condition.parse()
+        condition_parse = self._conditions_policy.parse()
+        if len(condition_parse['children']) > 0:
+            discount['condition'] = condition_parse
         return discount
