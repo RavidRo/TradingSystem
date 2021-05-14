@@ -34,11 +34,19 @@ const PopupBag: FC<PopupBagProps> = ({storeID,products,propHandleAdd,propHandleD
             }
     })},[]);
 
+    const shouldPresent = ()=>{
+        for(var i=0; i<productsInCart.length; i++){
+            if(productsInCart[i].quantity>0){
+                return true;
+            }
+        }
+        return false; //all products in cart have quantity 0
+    }
    
  
 
     return (
-		
+        shouldPresent()?
 		<div className="PopupBag">
             <h3>
                 {storeName}
@@ -74,6 +82,7 @@ const PopupBag: FC<PopupBagProps> = ({storeID,products,propHandleAdd,propHandleD
             </h3>
             
 		</div>
+        :null
 	);
 }
 

@@ -5,7 +5,6 @@ import { Button, Dialog, DialogActions, DialogContent, DialogContentText, Dialog
 import { Link } from 'react-router-dom';
 import {Product,ProductQuantity,ShoppingCart,ShoppingBag,ProductToQuantity,StoreToSearchedProducts} from '../types';
 import useAPI from '../hooks/useAPI';
-import { faShoppingBag } from '@fortawesome/free-solid-svg-icons';
 
 type CartProps = {
 	products:ProductQuantity[],
@@ -13,9 +12,10 @@ type CartProps = {
     handleDeleteProduct:(product:Product|null,storeID:string)=>void,
     propHandleAdd:(product:Product,storeID:string)=>Promise<boolean>;
     changeQuantity:(store:string,product:string,quan:number)=>void;
+    getPropsCookie:()=>string,
 };
 
-const Cart: FC<CartProps> = ({products,storesToProducts,handleDeleteProduct, propHandleAdd, changeQuantity}) => {
+const Cart: FC<CartProps> = ({products,storesToProducts,handleDeleteProduct, propHandleAdd, changeQuantity, getPropsCookie}) => {
     const [open,setOpen] = useState<boolean>(false);
     const [age,setAge] = useState<number>(0);
     const [showPurchaseLink,setLink] = useState<boolean>(false);
@@ -23,6 +23,7 @@ const Cart: FC<CartProps> = ({products,storesToProducts,handleDeleteProduct, pro
     const [storesToProductsMy,setStoresProducts] = useState<StoreToSearchedProducts>(storesToProducts);
 
     useEffect(()=>{
+        console.log(storesToProducts);
         setStoresProducts(storesToProducts);
         setTotalAmount(calculateTotal());
     },[storesToProducts]);
@@ -41,16 +42,21 @@ const Cart: FC<CartProps> = ({products,storesToProducts,handleDeleteProduct, pro
     },[]);
 
 
-    const productQuantityOfTuples = (tuples:ProductToQuantity[])=>{
-        let prodQuantities:ProductQuantity[] = tuples.map(tuple=>{
-                                                            return {
-                                                                id:tuple[0].id,
-                                                                name:tuple[0].name,
-                                                                category:tuple[0].category,
-                                                                price:tuple[0].price,
-                                                                keywords:tuple[0].keywords,
-                                                                quantity:tuple[1]}})
-         return prodQuantities;           
+    const productQuantityOfTuples = (bagID:string)=>{
+        let productsToReturn = [];
+        let tuples = storesToProducts[bagID];
+        for(var i=0;i<tuples.length; i++){
+            let product = {
+                id: tuples[i][0].id,
+                name: tuples[i][0].name,
+                price: tuples[i][0].price,
+                category: tuples[i][0].category,
+                keywords: tuples[i][0].keywords,
+                quantity: tuples[i][1]
+            }
+            productsToReturn.push(product);
+        }
+        return productsToReturn;
 
     }
 
@@ -77,55 +83,42 @@ const Cart: FC<CartProps> = ({products,storesToProducts,handleDeleteProduct, pro
             for(var j=0;j<tupleArr.length;j++){
                 if(tupleArr[i][0].id===id){
                     product=Object.values(storesToProductsMy)[i][j][0];
-                    tupleArr[i][1]=0;
                     // change product quantity in bag to 0
+                    tupleArr[i][1]=0;
                     Object.values(storesToProductsMy)[i] = tupleArr;
                 }
             }
         }
-        setTotalAmount(calculateTotal());
-        handleDeleteProduct(product,storeID);
+        setTotalAmount(calculateTotal()); //updating amount
+        handleDeleteProduct(product,storeID); //updating server
 	}
-    const findBagByProductID = (productID:string)=>{
-        for(var i=0;i<<Object.keys(storesToProductsMy).length;i++){
+
+    const changeQuantityMy = (storeID: string, prodID:string,  newQuantity: number)=>{
+        for(var i=0;i<Object.keys(storesToProductsMy).length;i++){
             let tuplesArr = Object.values(storesToProductsMy)[i];
             for(var j=0;j<tuplesArr.length;j++){
-                if(tuplesArr[j][0].id===productID){
-                    return Object.keys(storesToProductsMy)[i];
+                    if(tuplesArr[j][0].id===prodID){
+                        Object.values(storesToProductsMy)[i][j][1]=newQuantity;
+                    }
                 }
             }
-        }
-    }
-
-    const productUpdateObj = useAPI<void>('/change_product_quantity_in_cart',{},'POST');
-    const changeQuantityMy = (storeID: string, prodID:string,  newQuantity: number)=>{
-        // for(var i=0;i<Object.keys(storesToProductsMy).length;i++){
-        //     let tuplesArr = Object.values(storesToProductsMy)[i];
-        //     for(var j=0;j<tuplesArr.length;j++){
-        //             if(tuplesArr[j][0].id===id){
-        //                 Object.values(storesToProductsMy)[i][j][1]=newQuantity;
-        //             }
-        //         }
-        //     }
-        changeQuantity(storeID,prodID,newQuantity);
+        changeQuantity(storeID,prodID,newQuantity);//update server
         setTotalAmount(calculateTotal());
 
-        // productUpdateObj.request({store_id:findBagByProductID(id),product_id:id,quantity:newQuantity}).then(({data,error,errorMsg})=>{
-        //     if(!error && data!==null){
-        //         // do nothing
-        //         void(0);
-        //     }
-        //     else{
-        //         alert(errorMsg);
-        //     }
-        // })
     }
-    const discountObj = useAPI<number>('/get_discount',{age:age});
+    const discountObj = useAPI<number>('/purchase_cart',{cookie: getPropsCookie(), age:age}, 'POST');
     useEffect(()=>{
         if(showPurchaseLink){
             discountObj.request().then(({data,error,errorMsg})=>{
                 if(!error && data!==null){
-                    setTotalAmount(data.data);
+                    let prevCost = totalAmount;
+                    if(data.data < prevCost){
+                        alert("Congratulations! You got discount of: "+ (prevCost - data.data));
+                        setTotalAmount(data.data);
+                    }
+                    else{
+                        alert("No discount for you :(");
+                    }
                 }
                 else{
                     alert(errorMsg)
@@ -142,6 +135,18 @@ const Cart: FC<CartProps> = ({products,storesToProducts,handleDeleteProduct, pro
     const handleClick = ()=>{
         setOpen(true);
     }
+
+    const updateAmount = (product:Product)=>{
+        let newAmount = totalAmount;
+        newAmount = newAmount + (product.price);
+        setTotalAmount(newAmount);
+    }
+
+    const handleAddMy = (product:Product,storeID:string)=>{
+        updateAmount(product);
+        return propHandleAdd(product,storeID);
+    }
+
 	return (
 		<div className="cart">
             <h3 className="cartTitle">
@@ -152,9 +157,9 @@ const Cart: FC<CartProps> = ({products,storesToProducts,handleDeleteProduct, pro
                 <Bag
                 key={bagID}
                 storeID={bagID}
-                products={productQuantityOfTuples(storesToProductsMy[bagID])}
+                products={productQuantityOfTuples(bagID)}
                 propHandleDelete={(productID:string)=>handleDeleteProductMy(productID,bagID)}
-                propHandleAdd={propHandleAdd}
+                propHandleAdd={(product:Product,storeID:string)=>handleAddMy(product,storeID)}
                 changeQuantity={(storeID, productID, newQuantity)=>changeQuantityMy(storeID, productID,newQuantity)}
                 />)
                     

@@ -83,7 +83,8 @@ const PopupCart: FC<PopupCartProps> = ({products,propHandleAdd,storesToProducts,
                 propHandleDelete={(productID:string)=>handleDeleteProductMy(productID,bagID)}
                 propHandleAdd={propHandleAdd}
                 changeQuantity={changeQuantity}
-                />)
+                />
+                )
                     
             })}
             

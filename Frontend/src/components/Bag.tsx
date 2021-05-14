@@ -43,22 +43,12 @@ const Bag: FC<BagProps> = ({storeID,products,propHandleDelete,changeQuantity,pro
 	}
 	const [total,setTotal] = useState<number>(calculateTotal());
 
+	//when clicking the X besides the product in cart
 	const onRemove = (id: string) => {
 		setProducts(productsInCart.filter((product) => product.id !== id));
-		propHandleDelete(id);
+		propHandleDelete(id);//updating server
 	}
-    const onChangeQuantity = (id: string, newQuantity: number) => {
-		// productsInCart.forEach((product) => {
-		// 	if (product.id === id) {
-		// 		product.quantity = newQuantity;
-		// 		if(newQuantity===0){
-		// 			onRemove(id);
-		// 		}
-		// 	}
-		// });
-		setTotal(calculateTotal());
-		// changeQuantity(id,newQuantity);
-	}
+   
 	const getQuanOfProduct = (id:string)=>{
 		for(var i=0;i<productsInCart.length;i++){
 			if(productsInCart[i].id===id){
@@ -82,7 +72,6 @@ const Bag: FC<BagProps> = ({storeID,products,propHandleDelete,changeQuantity,pro
 								product={product}
 								quantity={getQuanOfProduct(product.id)}
 								onRemove={onRemove}
-								onChangeQuantity={onChangeQuantity}
 								propHandleDelete={propHandleDelete}
                                 propHandleAdd={(product:Product)=>propHandleAdd(product,storeID)}
                                 changeQuantity={(productID,newQuantity)=>changeQuantity(storeID,productID,newQuantity)}

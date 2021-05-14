@@ -10,10 +10,9 @@ type CartProductProps = {
 	product: Product;
 	quantity:number;
 	onRemove: (id: string) => void;
-	onChangeQuantity: (id: string, newQuantity: number) => void;
-	propHandleAdd:(product:Product)=>Promise<boolean>,
-    propHandleDelete:(productID:string)=>void,
-    changeQuantity:(productID:string,newQuantity:number)=>void,
+	propHandleAdd:(product:Product)=>Promise<boolean>,//to update server
+    propHandleDelete:(productID:string)=>void,//to update server
+    changeQuantity:(productID:string,newQuantity:number)=>void,//to update bag and total amount in cart
 
 };
 
@@ -21,16 +20,18 @@ const digitPointPrecision = 3;
 
 
 
-const CartProduct: FC<CartProductProps> = ({ product,quantity, onRemove, onChangeQuantity,propHandleAdd,propHandleDelete ,changeQuantity}) => {
+const CartProduct: FC<CartProductProps> = ({ product,quantity, onRemove,propHandleAdd,propHandleDelete ,changeQuantity}) => {
 	const { id, name, price } = product;
 	const [quantityMy, setQuantity] = useState<number>(quantity);
 
 	const handleAdd = ()=>{
 		let me = product;
+		//calling the server to add product to cart
 		let answer = propHandleAdd(me);
 		answer.then((result)=>{
 			if(result === true){
 				setQuantity(quantityMy + 1);
+				changeQuantity(id,quantityMy + 1); //update bag
 			}
 			else{
 				setQuantity(quantityMy);
@@ -40,22 +41,20 @@ const CartProduct: FC<CartProductProps> = ({ product,quantity, onRemove, onChang
 
 	const handleDelete = ()=>{
 		if(quantityMy===1){
-			propHandleDelete(id);
+			propHandleDelete(id); //calling server to update cart
 			setQuantity(0);
 		}
 		else{
 			setQuantity(quantityMy-1);
-			changeQuantity(id,quantityMy - 1);
+			changeQuantity(id,quantityMy - 1);//update bag
 		}
 	}
 	const handleChangeQuantity = (newQuantity:number)=>{
 		if(newQuantity > quantityMy){
 			handleAdd();
-			onChangeQuantity(id, newQuantity);
 		}
 		else{
 			handleDelete();
-			onChangeQuantity(id, newQuantity);
 		}
 	}
 	return (

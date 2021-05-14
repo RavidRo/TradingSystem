@@ -63,7 +63,6 @@ function App() {
 	// 	};
 	// }, []);
 
-
 	const productObj = useAPI<Product[]>('/save_product_in_cart', {}, 'POST');
 	const productUpdateObj = useAPI<Product[]>('/change_product_quantity_in_cart', {}, 'POST');
 
@@ -176,7 +175,6 @@ function App() {
 	const productRemoveObj = useAPI<Product[]>('/remove_product_from_cart', {}, 'POST');
 	const handleDeleteProduct = (product: Product | null, storeID: string) => {
 		if (product !== null) {
-			console.log(product)
 			productRemoveObj
 				.request({
 					cookie: cookie,
@@ -186,20 +184,20 @@ function App() {
 				})
 				.then(({ data, error, errorMsg }) => {
 					if (!error && data !== null) {
-						void 0;
+						let tupleArr = storesToProducts.current[storeID];
+						for (var i = 0; i < tupleArr.length; i++) {
+							if (tupleArr[i][0].id === product.id) {
+								tupleArr[i][1] = 0;
+							}
+						}
+						storesToProducts.current[storeID] = tupleArr;
+						setProducts(Object.values(productsInCart).filter((item) => item.id !== product.id));
 					}
 					else{
 						alert(errorMsg);
 					}
 				});
-			let tupleArr = storesToProducts.current[storeID];
-			for (var i = 0; i < tupleArr.length; i++) {
-				if (tupleArr[i][0].id === product.id) {
-					tupleArr[i][1] = 0;
-				}
-			}
-			storesToProducts.current[storeID] = tupleArr;
-			setProducts(Object.values(productsInCart).filter((item) => item.id !== product.id));
+			
 		}
 	};
 
@@ -210,6 +208,10 @@ function App() {
 			}
 		});
 	};
+
+	const getPropsCookie = ()=>{
+		return cookie;
+	}
 
 	useEffect(() => {
 		getCookie();
@@ -248,6 +250,7 @@ function App() {
 									handleDeleteProduct={handleDeleteProduct}
 									propHandleAdd={addProductToPopup}								
 									changeQuantity={changeQuantity}
+									getPropsCookie={getPropsCookie}
 								/>
 							)}
 						/>
