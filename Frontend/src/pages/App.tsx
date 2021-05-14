@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { BrowserRouter, Switch, Route, Redirect } from 'react-router-dom';
 import { createMuiTheme, ThemeProvider } from '@material-ui/core';
-// import { w3cwebsocket as W3CWebSocket } from 'websocket';
+import { w3cwebsocket as W3CWebSocket } from 'websocket';
 
 import Home from './Home';
 import Cart from './Cart';
@@ -15,6 +15,7 @@ import Purchase from '../pages/Purchase';
 import { Product, ProductQuantity, StoreToSearchedProducts,Store } from '../types';
 import useAPI from '../hooks/useAPI';
 import { CookieContext } from '../contexts';
+import Notifications from '../pages/Notifications';
 
 const theme = createMuiTheme({
 	typography: {
@@ -53,15 +54,15 @@ function App() {
 
 	const storesToProducts = useRef<StoreToSearchedProducts>({});
 	const storesProducts = useAPI<storesToProductsMapType>('/search_product', {});
-	// useEffect(() => {
-	// 	const client = new W3CWebSocket('ws://127.0.0.1:5000/connect');
-	// 	client.onopen = () => {
-	// 		console.log('WebSocket Client Connected');
-	// 	};
-	// 	client.onmessage = (message) => {
-	// 		setNotifications((old) => [...old, JSON.stringify(message)]);
-	// 	};
-	// }, []);
+	useEffect(() => {
+		const client = new W3CWebSocket('ws://127.0.0.1:5000/connect');
+		client.onopen = () => {
+			alert('WebSocket Client Connected');
+		};
+		client.onmessage = (message) => {
+			setNotifications((old) => [...old, JSON.stringify(message)]);
+		};
+	}, []);
 
 	const productObj = useAPI<Product[]>('/save_product_in_cart', {}, 'POST');
 	const productUpdateObj = useAPI<Product[]>('/change_product_quantity_in_cart', {}, 'POST');
@@ -280,6 +281,7 @@ function App() {
 							)}
 						/>
 						<Route path="/Purchase" exact component={Purchase} />
+						<Route path="/Notifications" exact component={Notifications} />
 						<Route path="/searchPage" exact component={SearchPage} />
 						{signedIn ? (
 							<Route

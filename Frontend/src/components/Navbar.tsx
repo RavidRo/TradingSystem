@@ -13,7 +13,7 @@ import '../styles/Navbar.scss';
 import config from '../config';
 import PopupCart from '../components/PopupCart';
 import { Product, ProductQuantity, StoreToSearchedProducts } from '../types';
-import { Badge, Divider, Fade, IconButton, List, ListItemText, Paper } from '@material-ui/core';
+import { Badge, IconButton} from '@material-ui/core';
 
 type NavBarProps = {
 	signedIn: boolean;
@@ -40,6 +40,13 @@ const Navbar: FC<NavBarProps> = ({
 	const [productsInCart, setProducts] = useState<ProductQuantity[]>(products);
 	const [openNotifications, setOpenNotifications] = useState<boolean>(false);
     const [storesToProductsMy,setStoresProducts] = useState<StoreToSearchedProducts>(storesToProducts);
+	const [myNotifications, setNotifications] = useState<string[]>(notifications);
+
+	useEffect(()=>{
+		// TODO: change to what got from props
+		setNotifications(["hello everybody"]);
+	},[notifications]);
+
 
 	useEffect(()=>{
 		setStoresProducts(storesToProducts);
@@ -103,30 +110,21 @@ const Navbar: FC<NavBarProps> = ({
 					)}
 				</div>
 				<div className="navbar-item">
-					<IconButton
-						color={'inherit'}
-						onClick={() => setOpenNotifications((open) => !open)}
+					<Link 
+						className="item-link" 
+						to={{
+                            pathname: '/Notifications',
+                            state: {
+                                notifications: myNotifications
+                            },
+                            }}
 					>
-						<Badge badgeContent={notifications.length} showZero color="primary">
-							<FontAwesomeIcon className="item-icon" icon={faBell} />
-						</Badge>
-					</IconButton>
-					<Fade in={openNotifications}>
-						<Paper className="notification-cont">
-							<List component="ul">
-								{notifications.map((notification, index) => (
-									<>
-										<ListItemText
-											primary={notification}
-											className="notification"
-											key={index}
-										/>
-										<Divider key={index} />
-									</>
-								))}
-							</List>
-						</Paper>
-					</Fade>
+						<IconButton color={'inherit'}>
+							<Badge badgeContent={myNotifications.length} showZero color="primary">
+								<FontAwesomeIcon className="item-icon" icon={faBell} />
+							</Badge>
+						</IconButton>
+					</Link>
 				</div>
 			</nav>
 		</div>

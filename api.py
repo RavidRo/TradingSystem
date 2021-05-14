@@ -63,6 +63,7 @@ async def get_cookie():
 
 @app.websocket("/connect")
 def connect():
+    print("here")
     cookie = request.args.get("cookie")
     if cookie is None:
         cookie = system.enter_system()
