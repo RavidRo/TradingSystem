@@ -6,10 +6,11 @@ import SearchCategory from '../components/SearchCategory';
 import Keywards from '../components/Keywards';
 import useAPI from '../hooks/useAPI';
 import {Product,ProductQuantity,Store,StoreToSearchedProducts} from '../types';
+import Swal from 'sweetalert2';
 
 type SearchPageProps = {
     location: any,
-    propsAddProduct:(product:Product,storeID:string)=>void,
+    propsAddProduct:(product:Product,storeID:string)=>Promise<boolean>,
 };
 
 
@@ -90,7 +91,16 @@ const SearchPage: FC<SearchPageProps> = ({location,propsAddProduct}) => {
         // to send new products
     }
     const clickAddProduct = (key:number,storeID:string)=>{
-        propsAddProduct(productsToPresent[key],storeID);
+        let response = propsAddProduct(productsToPresent[key],storeID);
+        response.then((result)=>{
+            if(result===true){
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Congratulations!',
+                    text: 'The item added to cart successfully',
+                  })
+            }
+        })
     }
     const updateKeyWords = (keyWords:string[])=>{
         setKeyWards(keyWords);

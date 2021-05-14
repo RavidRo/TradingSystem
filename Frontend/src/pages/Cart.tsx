@@ -212,7 +212,8 @@ const Cart: FC<CartProps> = ({products,storesToProducts,handleDeleteProduct, pro
                         to={{
                         pathname: '/Purchase',
                         state: {
-                            totalAmount:totalAmount
+                            totalAmount:totalAmount,
+                            cookie: getPropsCookie()
                         },
                         }}
                     >

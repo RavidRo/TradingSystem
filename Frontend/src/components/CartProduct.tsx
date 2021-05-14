@@ -16,9 +16,6 @@ type CartProductProps = {
 
 };
 
-const digitPointPrecision = 3;
-
-
 
 const CartProduct: FC<CartProductProps> = ({ product,quantity, onRemove,propHandleAdd,propHandleDelete ,changeQuantity}) => {
 	const { id, name, price } = product;
@@ -67,7 +64,7 @@ const CartProduct: FC<CartProductProps> = ({ product,quantity, onRemove,propHand
 						value={quantityMy}
 						
 					/>
-					<p className="price">${price.toPrecision(digitPointPrecision)}</p>
+					<p className="price">${price}</p>
 				</div>
 				<IconButton aria-label="remove" onClick={() => onRemove(id)}>
 					<CancelIcon />
