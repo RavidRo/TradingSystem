@@ -20,9 +20,17 @@ const StoresView: FC<StoresViewProps> = ({propsAddProduct,location}: StoresViewP
     const [presentProducts,setProducts] = useState<ProductQuantity[]>([]);
     const [stores,setStores] = useState<Store[]>([]);
 
+    const gerStoreNameByID = (storeID:string)=>{
+        for(var i=0;i<stores.length;i++){
+            if(stores[i].id===storeID){
+                return stores[i].name;
+            }
+        }
+        return "";
+    }
     // storeID
     const [storeID, setStoreID] = useState<string>(location.state!==undefined?location.state.storeID:"");
-    const [storeName,setStoreName] = useState<string>("");
+    const [storeName,setStoreName] = useState<string>(location.state!==undefined?gerStoreNameByID(storeID):"");
     const productsObj = useAPI<Product[]>('/get_products_by_store');
 
     const getQuantityOfProduct = (productID:string,storeID:string)=>{
@@ -37,17 +45,10 @@ const StoresView: FC<StoresViewProps> = ({propsAddProduct,location}: StoresViewP
         }
         return 0;
     }
-    const gerStoreNameByID = (storeID:string)=>{
-        for(var i=0;i<stores.length;i++){
-            if(stores[i].id===storeID){
-                return stores[i].name;
-            }
-        }
-        return "";
-    }
+   
     useEffect(()=>{
-        setStoreName(gerStoreNameByID(storeID));
-        if(storeName!==""){
+        if(storeID!==""){
+            setStoreName(gerStoreNameByID(storeID));
             productsObj.request({store_id:storeID}).then(({data,error,errorMsg})=>{
                 if(!error && data !==null){
                     console.log(data.data)
@@ -119,7 +120,7 @@ const StoresView: FC<StoresViewProps> = ({propsAddProduct,location}: StoresViewP
                    })}
                 </Select>
                 <div className="productCards">
-                    {storeName!==""?
+                    {storeID!==""?
                     setProductsInMatrix().map((row,i)=>{
                         return(
                             <div className="cardsRow">

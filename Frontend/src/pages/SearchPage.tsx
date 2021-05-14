@@ -31,7 +31,6 @@ const SearchPage: FC<SearchPageProps> = ({location,propsAddProduct}) => {
     const allCategories = useRef<string[]>([]);
     const storesToProductsObj = useAPI<StoreToSearchedProducts>('/search_products');
     useEffect(()=>{
-        console.log(keyWords);
         
         storesToProductsObj.request(
             {product_name:searchProduct,category:category,min_price:fromInput,max_price:toInput,kwargs:keyWords})
