@@ -1,6 +1,6 @@
 
 import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@material-ui/core';
-import React ,{FC, useEffect, useState, useRef} from 'react';
+import React ,{FC, useEffect, useState} from 'react';
 import ProductPopup from '../components/ProductPopup';
 import {Product,ProductQuantity,Store} from '../types';
 import useAPI from '../hooks/useAPI';

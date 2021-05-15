@@ -1,9 +1,8 @@
 import { Button, TextField } from '@material-ui/core';
-import React, { FC,useState,useEffect, useRef} from 'react';
+import React, { FC,useState} from 'react';
 import '../styles/Purchase.scss';
 import Timer from '../components/Timer';
 import useAPI from '../hooks/useAPI';
-import getPropsCookie from '../pages/App';
 import { useHistory } from "react-router-dom";
 import Swal from 'sweetalert2';
 

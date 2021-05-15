@@ -13,10 +13,11 @@ type ProductSearchProps = {
     storeID:string,
     quantity:number,
     category:string,
+    keywords:string[],
     clickAddProduct:()=>void,
 };
 
-const ProductSearch: FC<ProductSearchProps> = ({storeID,content,price,quantity,category,clickAddProduct}) => {
+const ProductSearch: FC<ProductSearchProps> = ({storeID,content,price,quantity,category,keywords,clickAddProduct}) => {
 
     const [storeName,setStoreName] = useState<string>("")
     const storeObj = useAPI<Store>('/get_store',{store_id:storeID});
@@ -57,6 +58,11 @@ const ProductSearch: FC<ProductSearchProps> = ({storeID,content,price,quantity,c
                         <Typography style={{'marginTop':'5%'}}>
                             Category: {category}
                         </Typography> 
+                        {keywords.length!==0?
+                        <Typography style={{'marginTop':'5%'}}>
+                            Keywords: {keywords}
+                        </Typography> 
+                        :null}
                     </CardContent>
                     <div className="buttonLink">
                         <Button 

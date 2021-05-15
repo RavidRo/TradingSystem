@@ -1,7 +1,6 @@
 
 import React ,{FC, useEffect, useState,useRef} from 'react';
 import '../styles/PopupCart.scss';
-import storesProductsMap from '../components/storesProductsMap';
 import PopupBag from '../components/PopupBag';
 import {Product,ProductQuantity,ShoppingBag,ShoppingCart,ProductToQuantity,StoreToSearchedProducts,Store} from '../types';
 import useAPI from '../hooks/useAPI';

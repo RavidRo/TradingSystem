@@ -2,7 +2,7 @@
 import { TableCell, TableRow } from '@material-ui/core';
 import React ,{FC, useState} from 'react';
 import '../styles/ProductPopup.scss';
-import {Product,ProductQuantity} from '../types';
+import {Product} from '../types';
 
 type ProductPopupProps = {
     id:string,

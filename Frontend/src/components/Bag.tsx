@@ -1,8 +1,6 @@
 
-import { Button} from '@material-ui/core';
 import React ,{FC, useEffect, useState} from 'react';
 import CartProduct from '../components/CartProduct';
-import PurchaseIcon from '@material-ui/icons/LocalMall';
 import { Link } from 'react-router-dom';
 import '../styles/Bag.scss';
 import {Product,ProductQuantity,Store} from '../types';

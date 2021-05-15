@@ -1,9 +1,8 @@
-import React, { FC, useState , useEffect,useRef} from 'react';
+import React, { FC, useState , useEffect} from 'react';
 import '../styles/Cart.scss';
 import Bag from '../components/Bag';
 import { Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, TextField } from '@material-ui/core';
-import { Link } from 'react-router-dom';
-import {Product,ProductQuantity,ShoppingCart,ShoppingBag,ProductToQuantity,StoreToSearchedProducts} from '../types';
+import {Product,ProductQuantity,ShoppingCart,ShoppingBag,StoreToSearchedProducts} from '../types';
 import useAPI from '../hooks/useAPI';
 import { useHistory } from "react-router-dom";
 
@@ -131,9 +130,27 @@ const Cart: FC<CartProps> = ({products,storesToProducts,handleDeleteProduct, pro
     },[showPurchaseLink]);
     
     const handleOK = ()=>{
+            discountObj.request().then(({data,error,errorMsg})=>{
+                if(!error && data!==null){
+                    let prevCost = totalAmount;
+                    if(data.data < prevCost){
+                        alert("Congratulations! You got discount of: "+ (prevCost - data.data));
+                        setTotalAmount(data.data);
+                        setLink(true);
+                    }
+                    else{
+                        alert("No discount for you :(");
+                        setLink(true);
+                    }
+                }
+                else{
+                    alert(errorMsg)
+                }
+                
+            })
         setOpen(false);
-        setLink(true);
     }
+
     const handleClick = ()=>{
         setOpen(true);
     }

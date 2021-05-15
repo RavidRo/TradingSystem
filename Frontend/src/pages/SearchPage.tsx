@@ -165,6 +165,7 @@ const SearchPage: FC<SearchPageProps> = ({location,propsAddProduct}) => {
                                             price={cell!==undefined?cell.price:0}
                                             quantity={cell!==undefined?cell.quantity:0}
                                             category={cell!==undefined?cell.category:""}
+                                            keywords={cell!==undefined?cell.keywords:""}
                                             clickAddProduct={()=>handleAddToCart(cell!==undefined?findBagIDByProductID(cell.id):"",productsToPresent.indexOf(cell))}
                                         >
                                         </ProductSearch>
