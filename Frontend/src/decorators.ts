@@ -22,16 +22,18 @@ export function areYouSure<T extends unknown[], R = unknown>(
 	};
 }
 
+export function confirm(headerText: string = '', text: string = '') {
+	Swal.fire(headerText, text, 'success');
+}
+
 export function confirmOnSuccess<T extends unknown[]>(
-	func: (...args: T) => Promise<boolean>,
+	func: (...args: T) => Promise<unknown>,
 	headerText: string = '',
 	text: string = ''
 ) {
-	return (...params: T): void => {
-		func(...params).then((success) => {
-			if (success) {
-				Swal.fire(headerText, text, 'success');
-			}
+	return (...params: T): Promise<unknown> => {
+		return func(...params).then(() => {
+			confirm(headerText, text);
 		});
 	};
 }

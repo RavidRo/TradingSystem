@@ -1,7 +1,15 @@
-import React, { FC, useEffect, useState } from 'react';
-import { areYouSure } from '../../decorators';
+import React, { FC, useEffect } from 'react';
 
-import useAPI from '../../hooks/useAPI';
+import {
+	addDiscount,
+	editComplexDiscount,
+	editSimpleDiscount,
+	getDiscounts as getDiscountsAPI,
+	moveDiscount,
+	removeDiscount,
+} from '../../api';
+import { areYouSure, confirmOnSuccess } from '../../decorators';
+import { useAPI2 } from '../../hooks/useAPI';
 import {
 	Discount,
 	DiscountComplex,
@@ -22,23 +30,14 @@ type DiscountsListProps = {
 };
 
 const DiscountsList: FC<DiscountsListProps> = ({ openTab, products, storeId }) => {
-	const getDiscountsAPI = useAPI<Discount>('/get_discounts', { store_id: storeId });
-	const addDiscount = useAPI<string>('/add_discount', { store_id: storeId }, 'POST');
-	const removeDiscountAPI = useAPI('/remove_discount', { store_id: storeId }, 'POST');
-	const editSimpleDiscount = useAPI('/edit_simple_discount', { store_id: storeId }, 'POST');
-	const editComplexDiscount = useAPI('/edit_complex_discount', { store_id: storeId }, 'POST');
-	const moveDiscount = useAPI('/move_discount', { store_id: storeId }, 'POST');
+	const { request: getDiscountsRequest, data: rootDiscount } = useAPI2(getDiscountsAPI);
+	const addDiscountAPI = useAPI2(addDiscount);
+	const removeDiscountAPI = useAPI2(removeDiscount);
+	const editSimpleDiscountAPI = useAPI2(editSimpleDiscount);
+	const editComplexDiscountAPI = useAPI2(editComplexDiscount);
+	const moveDiscountAPI = useAPI2(moveDiscount);
 
-	const [discounts, setDiscounts] = useState<Discount[]>([]);
-	const [rootId, setRootId] = useState<string>('');
-
-	const getDiscounts = () =>
-		getDiscountsAPI.request().then((getDiscountsAPI) => {
-			if (!getDiscountsAPI.error && getDiscountsAPI.data !== null) {
-				setRootId(getDiscountsAPI.data.data.id);
-				setDiscounts((getDiscountsAPI.data.data as DiscountComplex).discounts);
-			}
-		});
+	const getDiscounts = () => getDiscountsRequest(storeId);
 
 	useEffect(() => {
 		getDiscounts();
@@ -47,52 +46,42 @@ const DiscountsList: FC<DiscountsListProps> = ({ openTab, products, storeId }) =
 
 	const openDiscountForm = (fatherId: string) => {
 		const onAddDiscount = (rule: DiscountSimple | DiscountComplex): void => {
-			addDiscount
-				.request({
-					exist_id: fatherId,
-					discount_data: rule,
-				})
-				.then((addDiscount) => {
-					if (!addDiscount.error && addDiscount.data !== null) {
-						getDiscounts();
-					}
-				});
+			addDiscountAPI.request(storeId, rule, fatherId).then(getDiscounts);
 		};
 
 		openTab(() => <CreateDiscountForm onSubmit={onAddDiscount} products={products} />, '');
 	};
 
 	const onEditForm = (discount: Discount) => {
-		const onEditDiscountSimple = (discountEdited: DiscountSimple) => {
-			editSimpleDiscount.request(
-				{
-					discount_id: discount.id,
-					percentage: discountEdited.percentage,
-					condition: discountEdited.condition,
-					context: discountEdited.context,
-				},
-				(_, error) => {
-					if (!error) {
-						getDiscounts();
-					}
-				}
-			);
-		};
-		const onEditDiscountComplex = (discountEdited: DiscountComplex) => {
-			editComplexDiscount.request(
-				{
-					discount_id: discount.id,
-					complex_type: discountEdited.type,
-					decision_rule:
-						discountEdited.type === 'xor' ? discountEdited.decision_rule : '',
-				},
-				(_, error) => {
-					if (!error) {
-						getDiscounts();
-					}
-				}
-			);
-		};
+		const successMessage = 'Discount was edited successfully! \\(v_v)/';
+		const onEditDiscountSimple = confirmOnSuccess(
+			(discountEdited: DiscountSimple) =>
+				editSimpleDiscountAPI
+					.request(
+						storeId,
+						discount.id,
+						discountEdited.percentage,
+						discountEdited.context,
+						discountEdited.condition
+					)
+					.then(getDiscounts),
+			'Edited!',
+			successMessage
+		);
+		const onEditDiscountComplex = confirmOnSuccess(
+			(discountEdited: DiscountComplex) =>
+				editComplexDiscountAPI
+					.request(
+						storeId,
+						discount.id,
+						discountEdited.type,
+						discountEdited.type === 'xor' ? discountEdited.decision_rule : undefined
+					)
+					.then(getDiscounts),
+			'Edited!',
+			successMessage
+		);
+
 		if (isDiscountSimple(discount)) {
 			openTab(
 				() => (
@@ -119,11 +108,7 @@ const DiscountsList: FC<DiscountsListProps> = ({ openTab, products, storeId }) =
 
 	const onDelete = areYouSure(
 		(discountId: string) => {
-			removeDiscountAPI.request({ discount_id: discountId }, (data, error) => {
-				if (!error && data !== null && data.succeeded) {
-					getDiscounts();
-				}
-			});
+			removeDiscountAPI.request(storeId, discountId).then(getDiscounts);
 		},
 		"You won't be able to revert this!",
 		'Yes, remove discount!'
@@ -138,40 +123,42 @@ const DiscountsList: FC<DiscountsListProps> = ({ openTab, products, storeId }) =
 		return '';
 	};
 
-	const onMove = (srcId: string, destId: string) => {
-		moveDiscount.request({ src_id: srcId, dest_id: destId }, (_, error) => {
-			if (!error) {
-				getDiscounts();
-			}
-		});
-	};
+	const onMove = confirmOnSuccess(
+		(srcId: string, destId: string) => moveDiscountAPI.request(storeId, srcId, destId),
+		'Moved!',
+		'Discount was moved successfully <3'
+	);
 
 	const onDrop = (event: React.DragEvent) => {
 		event.preventDefault();
 		const draggableElementData = event.dataTransfer.getData('text');
-		onMove(draggableElementData, rootId);
+		if (rootDiscount) {
+			onMove(draggableElementData, rootDiscount.id);
+		}
 	};
 
 	return (
-		<GenericList
-			data={discounts}
-			header="Discounts"
-			narrow
-			createTxt="+ Add discount"
-			onCreate={() => openDiscountForm(rootId)}
-			onDrop={onDrop}
-		>
-			{(discount: Discount) => (
-				<DiscountNode
-					discount={discount}
-					onCreate={openDiscountForm}
-					onDelete={onDelete}
-					productIdToString={productIdToString}
-					onEdit={onEditForm}
-					onMove={onMove}
-				/>
-			)}
-		</GenericList>
+		rootDiscount && (
+			<GenericList
+				data={(rootDiscount as DiscountComplex).discounts}
+				header="Discounts"
+				narrow
+				createTxt="+ Add discount"
+				onCreate={() => openDiscountForm(rootDiscount.id)}
+				onDrop={onDrop}
+			>
+				{(discount: Discount) => (
+					<DiscountNode
+						discount={discount}
+						onCreate={openDiscountForm}
+						onDelete={onDelete}
+						productIdToString={productIdToString}
+						onEdit={onEditForm}
+						onMove={onMove}
+					/>
+				)}
+			</GenericList>
+		)
 	);
 };
 

@@ -7,7 +7,7 @@ import {
 	DiscountComplex,
 	DiscountObject,
 	DiscountSimple,
-	Operator,
+	DiscountComplexType,
 	Product,
 } from '../../../types';
 import FormWindow from '../FormWindow';
@@ -24,7 +24,7 @@ const CreateDiscountForm: FC<CreateDiscountFormProps> = ({ onSubmit, products })
 	const [percentage, setPercentage] = useState<string>('');
 	const [contextObject, setContextObject] = useState<DiscountObject | ''>('');
 	const [contextIdentifier, setContextIdentifier] = useState<string>('');
-	const [operator, setOperator] = useState<Operator | ''>('');
+	const [operator, setOperator] = useState<DiscountComplexType | ''>('');
 	const [decisionRule, setDecisionRule] = useState<DecisionRule | ''>('');
 
 	const [percentageError, setPercentageError] = useState<boolean>(false);

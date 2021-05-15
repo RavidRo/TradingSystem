@@ -121,16 +121,18 @@ export function isConditionComplex(
 
 export type DiscountObject = 'product' | 'category' | 'store';
 
+export type DiscountContext = { obj: 'product' | 'category'; id: string } | { obj: 'store' };
+
 export type DiscountSimple = {
 	discount_type: 'simple';
 	percentage: number;
 	condition?: Condition;
-	context: { obj: 'product' | 'category'; id: string } | { obj: 'store' };
+	context: DiscountContext;
 };
 
 export type DecisionRule = 'first' | 'max' | 'min';
 
-export type Operator = 'max' | 'and' | 'or' | 'xor' | 'add';
+export type DiscountComplexType = 'max' | 'and' | 'or' | 'xor' | 'add';
 
 export type DiscountComplexNoneXOR = {
 	type: 'max' | 'and' | 'or' | 'add';
