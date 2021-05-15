@@ -3,15 +3,18 @@ from Backend.Domain.TradingSystem.States.user_state import UserState
 from Backend.response import Response
 import json
 
+from Backend.settings import Settings
+
 admins = []
 
 
 def register_admins() -> None:
-    with open("config.json", "r") as read_file:
-        data = json.load(read_file)
-        for username in data["admins"]:
-            authentication.register(username, data["admin-password"])
-            admins.append(username)
+    settings = Settings.get_instance()
+    admin_list = settings.get_admins()
+    admin_password = settings.get__password()
+    for username in admin_list:
+        authentication.register(username, admin_password)
+        admins.append(username)
 
 
 register_admins()
