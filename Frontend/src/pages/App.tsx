@@ -61,6 +61,7 @@ function App() {
 		};
 		client.onmessage = (message) => {
 			setNotifications((old) => [...old, JSON.stringify(message)]);
+			console.log("received socket message");
 		};
 	}, []);
 

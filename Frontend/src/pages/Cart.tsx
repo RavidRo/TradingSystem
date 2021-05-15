@@ -5,6 +5,7 @@ import { Button, Dialog, DialogActions, DialogContent, DialogContentText, Dialog
 import { Link } from 'react-router-dom';
 import {Product,ProductQuantity,ShoppingCart,ShoppingBag,ProductToQuantity,StoreToSearchedProducts} from '../types';
 import useAPI from '../hooks/useAPI';
+import { useHistory } from "react-router-dom";
 
 type CartProps = {
 	products:ProductQuantity[],
@@ -21,6 +22,7 @@ const Cart: FC<CartProps> = ({products,storesToProducts,handleDeleteProduct, pro
     const [showPurchaseLink,setLink] = useState<boolean>(false);
     const [bagsToProducts,setBags] = useState<ShoppingBag[]>([]);
     const [storesToProductsMy,setStoresProducts] = useState<StoreToSearchedProducts>(storesToProducts);
+    const history = useHistory();
 
     useEffect(()=>{
         console.log(storesToProducts);
@@ -147,6 +149,11 @@ const Cart: FC<CartProps> = ({products,storesToProducts,handleDeleteProduct, pro
         return propHandleAdd(product,storeID);
     }
 
+    const handlePurchase = ()=>{
+        history.push("/Purchase", { 
+                totalAmount:totalAmount,
+                cookie: getPropsCookie() })}
+    
 	return (
 		<div className="cart">
             <h3 className="cartTitle">
@@ -207,24 +214,13 @@ const Cart: FC<CartProps> = ({products,storesToProducts,handleDeleteProduct, pro
                 </DialogActions>
             </Dialog>
             {showPurchaseLink?
-                <Link 
-                        className="link" 
-                        to={{
-                        pathname: '/Purchase',
-                        state: {
-                            totalAmount:totalAmount,
-                            cookie: getPropsCookie()
-                        },
-                        }}
-                    >
-                    <button 
-                    className="purchaseBtn" 
-                    style={{background:'#7FFF00',height:'50px',fontWeight:'bold',fontSize:'large',marginTop:'40%',marginLeft:'20%'}}
-                    onClick={handleClick}
-                    > 
-                    Purchase
-                    </button>
-                </Link>   
+                <button 
+                className="purchaseBtn" 
+                style={{background:'#7FFF00',height:'50px',fontWeight:'bold',fontSize:'large'}}
+                onClick={handlePurchase}
+                > 
+                Purchase
+                </button>
             :null}
         </div> 
             

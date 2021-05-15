@@ -60,6 +60,9 @@ async def get_cookie():
         }
     )
 
+def ravid_connect(messages):
+    print(messages)
+    websocket.send(messages)
 
 @app.websocket("/connect")
 async def connect():
@@ -67,7 +70,7 @@ async def connect():
     cookie = data["cookie"]
     if cookie is None:
         cookie = system.enter_system()
-    answer = system.connect(cookie, lambda messages: websocket.send(messages))
+    answer = system.connect(cookie, lambda messages: ravid_connect(messages))
     return __responseToJson(cookie, answer)
 
 
