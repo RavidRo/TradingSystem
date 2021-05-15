@@ -1593,7 +1593,7 @@ def _get_admin() -> str:
     admin_cookie = system.enter_system()
     with open("config.json", "r") as read_file:
         data = json.load(read_file)
-        system.login(admin_cookie, data["admins"][0], data["admin-password"])
+        system.login(admin_cookie, data["admins"][0], data["password"])
     return admin_cookie
 
 
