@@ -61,26 +61,20 @@ async def get_cookie():
     )
    
 async def send_msg(messages):
-    await websocket.send(messages)
+    print("in lambda")
+    try:
+        await websocket.send(messages)
+        print("ended await")
+        return True
+    except asyncio.CancelledError:
+        return False
 
 @app.websocket("/connect")
 async def connect():
-    data = websocket.receive()
+    await websocket.receive()
     await websocket.send("hiiii")
-    # print("stuck 0")
-    # data = await data
-    # print("stuck 1")
-    # cookie = data["cookie"]
-    # print("stuck 2")
-    # if cookie is None:
     cookie = system.enter_system() # we think that in connect there is no cookie
-    print("sending to system")
-    await system.connect(cookie, lambda messages: send_msg(messages))
-    return json.dumps(
-        {
-            "cookie": cookie,
-        }
-    )
+    return await system.connect(cookie, lambda messages: send_msg(messages))
 
 
 @app.route("/register", methods=["POST"])

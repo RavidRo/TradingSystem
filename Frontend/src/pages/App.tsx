@@ -58,6 +58,7 @@ function App() {
 		const client = new WebSocket('ws://127.0.0.1:5000/connect');
 		client.onopen = () => {
 			alert('WebSocket Client Opened');
+			client.send("hiiii"); // have to be here - else socket.receive in server gets stuck
 		};
 		client.onmessage = (message) => {
 			setNotifications((old) => [...old, JSON.stringify(message)]);

@@ -22,6 +22,7 @@ class User(IUser):
 
     def __notify_self(self) -> bool:
         answer = self.__communicate(self.__notifications)
+        print(answer)
         if answer:
             self.__notifications = []
         return answer

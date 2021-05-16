@@ -59,6 +59,7 @@ class UserManager:
 
     @staticmethod
     def connect(cookie: str, communicate: Callable[[list[str]], bool]) -> Response[None]:
+        print("in user manager")
         func: Callable[[User], Response] = lambda user: user.connect(communicate)
         return UserManager.__deligate_to_user(cookie, func)
 
