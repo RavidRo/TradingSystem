@@ -59,19 +59,28 @@ async def get_cookie():
             "data": {"cookie": cookie},
         }
     )
-
-def ravid_connect(messages):
-    print(messages)
-    websocket.send(messages)
+   
+async def send_msg(messages):
+    await websocket.send(messages)
 
 @app.websocket("/connect")
 async def connect():
-    data = await websocket.receive()
-    cookie = data["cookie"]
-    if cookie is None:
-        cookie = system.enter_system()
-    answer = system.connect(cookie, lambda messages: ravid_connect(messages))
-    return __responseToJson(cookie, answer)
+    data = websocket.receive()
+    await websocket.send("hiiii")
+    # print("stuck 0")
+    # data = await data
+    # print("stuck 1")
+    # cookie = data["cookie"]
+    # print("stuck 2")
+    # if cookie is None:
+    cookie = system.enter_system() # we think that in connect there is no cookie
+    print("sending to system")
+    await system.connect(cookie, lambda messages: send_msg(messages))
+    return json.dumps(
+        {
+            "cookie": cookie,
+        }
+    )
 
 
 @app.route("/register", methods=["POST"])

@@ -55,13 +55,14 @@ function App() {
 	const storesToProducts = useRef<StoreToSearchedProducts>({});
 	const storesProducts = useAPI<storesToProductsMapType>('/search_product', {});
 	useEffect(() => {
-		const client = new W3CWebSocket('ws://127.0.0.1:5000/connect');
+		const client = new WebSocket('ws://127.0.0.1:5000/connect');
 		client.onopen = () => {
-			alert('WebSocket Client Connected');
+			alert('WebSocket Client Opened');
 		};
 		client.onmessage = (message) => {
 			setNotifications((old) => [...old, JSON.stringify(message)]);
-			console.log("received socket message");
+			alert("received socket message");
+			console.log(message)
 		};
 	}, []);
 
