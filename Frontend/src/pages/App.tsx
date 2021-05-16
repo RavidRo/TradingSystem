@@ -65,6 +65,9 @@ function App() {
 			alert("received socket message");
 			console.log(message)
 		};
+		client.onclose = ()=>{
+			alert("connection closed!");
+		}
 	}, []);
 
 	const productObj = useAPI<Product[]>('/save_product_in_cart', {}, 'POST');

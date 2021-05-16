@@ -69,10 +69,12 @@ async def send_msg(messages):
     except asyncio.CancelledError:
         return False
 
+# socket is closing after exitting the function
 @app.websocket("/connect")
 async def connect():
     await websocket.receive()
     await websocket.send("hiiii")
+    await websocket.send("hiiii222222")
     cookie = system.enter_system() # we think that in connect there is no cookie
     return await system.connect(cookie, lambda messages: send_msg(messages))
 
