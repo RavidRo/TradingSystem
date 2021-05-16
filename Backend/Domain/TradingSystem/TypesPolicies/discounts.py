@@ -19,7 +19,7 @@ class Discounter(ABC):
         self._id = id
 
 
-class ProductDiscounter(Discounter):
+class ProductDiscountStrategy(Discounter):
 
     def __init__(self, id, percentage):
         super().__init__(id, percentage)
@@ -35,7 +35,7 @@ class ProductDiscounter(Discounter):
         )
 
 
-class CategoryDiscounter(Discounter):
+class CategoryDiscountStrategy(Discounter):
 
     def __init__(self, id, percentage):
         super().__init__(id, percentage)
@@ -51,7 +51,7 @@ class CategoryDiscounter(Discounter):
         )
 
 
-class StoreDiscounter(Discounter):
+class StoreDiscountStrategy(Discounter):
 
     def __init__(self, percentage):
         super().__init__(None, percentage)
@@ -66,9 +66,9 @@ class StoreDiscounter(Discounter):
 
 
 class SimpleDiscount(IDiscount):
-    discounter_generator = {"product": lambda id, percentage: ProductDiscounter(id, percentage),
-                            "category": lambda id, percentage: CategoryDiscounter(id, percentage),
-                            "store": lambda id, percentage: StoreDiscounter(percentage)}
+    strategy_generator = {"product": lambda id, percentage: ProductDiscountStrategy(id, percentage),
+                            "category": lambda id, percentage: CategoryDiscountStrategy(id, percentage),
+                            "store": lambda id, percentage: StoreDiscountStrategy(percentage)}
 
     def get_context(self):
         return self._context
@@ -77,13 +77,13 @@ class SimpleDiscount(IDiscount):
         super().__init__(id)
         self._parent = None
         self._context = discount_data["context"]
-        self._discounter = SimpleDiscount.discounter_generator[discount_data["context"]["obj"]](
+        self._discount_strategy = SimpleDiscount.strategy_generator[discount_data["context"]["obj"]](
             discount_data["context"].get("id"), discount_data["percentage"])
         self._duration = duration
 
     def apply_discount(self, products_to_quantities: dict, user_age: int) -> float:
         if self._conditions_policy.checkPolicy(products_to_quantities, user_age):
-            return self._discounter.discount_func(products_to_quantities)
+            return self._discount_strategy.discount_func(products_to_quantities)
         return 0.0
 
     def get_discount_by_id(self, exist_id: str):
@@ -96,7 +96,7 @@ class SimpleDiscount(IDiscount):
 
     def parse(self):
         discount = super().parse()
-        discount["percentage"] = self._discounter.multiplier * 100
+        discount["percentage"] = self._discount_strategy.multiplier * 100
         discount["context"] = self._context
         discount["discount_type"] = "simple"
         return discount
@@ -127,14 +127,14 @@ class SimpleDiscount(IDiscount):
         if context is not None:
             if self._context["obj"] == context["obj"]:
                 self._context["id"] = context.get("id")
-                self._discounter.set_id(context.get("id"))
+                self._discount_strategy.set_id(context.get("id"))
             else:
-                self._discounter = SimpleDiscount.discounter_generator[context["obj"]](context.get("id"),
-                                                                                       percentage if percentage is not None else self._discounter.multiplier * 100)
+                self._discount_strategy = SimpleDiscount.strategy_generator[context["obj"]](context.get("id"),
+                                                                                            percentage if percentage is not None else self._discount_strategy.multiplier * 100)
                 self._context = context
 
         if percentage is not None:
-            self._discounter.multiplier = percentage / 100
+            self._discount_strategy.multiplier = percentage / 100
 
         if duration is not None:
             self._duration = duration
