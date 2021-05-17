@@ -20,7 +20,6 @@ logic_types = {"or": lambda self: OrCompositePurchaseRule(self.generate_id()),
                "and": lambda self: AndCompositePurchaseRule(self.generate_id()),
                "conditional": lambda self: ConditioningCompositePurchaseRule(self.generate_id())}
 
-
 objects = ['product', 'user', 'category', 'bag']
 objects_with_id = ['category', 'product']
 ops = {'great-than': operator.gt,
@@ -28,6 +27,7 @@ ops = {'great-than': operator.gt,
        'great-equals': operator.ge,
        'less-equals': operator.le,
        'equals': operator.eq}
+
 
 # endregion
 
@@ -63,7 +63,7 @@ class DefaultPurchasePolicy(PurchasePolicy):
     def check_keys_in_rule_details(self, keys: list[str], rule_details: dict):
         for key in keys:
             if key not in rule_details.keys():
-                return Response(False, msg= f"Missing {key} in details!")
+                return Response(False, msg=f"Missing {key} in details!")
         return Response(True, msg="all keys exist")
 
     def check_simple_rule_details_validity(self, rule_details: dict) -> Response[None]:
@@ -92,7 +92,8 @@ class DefaultPurchasePolicy(PurchasePolicy):
             return Response(False, msg="Missing type in details!")
         return Response(True, msg="No missing keys")
 
-    def add_purchase_rule(self, rule_details: dict, rule_type: str, parent_id: str, clause: str= None) -> Response[None]:
+    def add_purchase_rule(self, rule_details: dict, rule_type: str, parent_id: str, clause: str = None) -> Response[
+        None]:
         if rule_type == "simple":
             response_validity = self.check_simple_rule_details_validity(rule_details)
             if not response_validity.succeeded():
@@ -111,7 +112,6 @@ class DefaultPurchasePolicy(PurchasePolicy):
                 return Response(False, msg=f"invalid logic type: {logic_type}")
         else:
             return Response(False, msg=f"invalid rule type: {rule_type}")
-
 
     def remove_purchase_rule(self, rule_id: str):
         return self.__purchase_rules.remove(rule_id)
