@@ -3953,7 +3953,7 @@ def test_try_supply_first_time_failed_than_success():
 @patch.multiple(ShoppingCart, interval_time=MagicMock(return_value=5))
 def test_try_supply_first_time_exception_second_time_timer_over():
     import time
-    with mock.patch.object(OutsideSupplyment, 'deliver', return_value=Exception()):
+    with mock.patch.object(OutsideSupplyment, 'deliver', side_effect=Exception()):
         cookie, username, password, store_name, store_id = _initialize_info(
             _generate_username(), "aaa", _generate_store_name()
         )
