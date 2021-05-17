@@ -8,9 +8,9 @@ import useAPI from '../hooks/useAPI';
 type PopupCartProps = {
     products:ProductQuantity[],
     storesToProducts:StoreToSearchedProducts,
-    propHandleDelete:(product:Product,storeID:string)=>void,
+    propHandleDelete:(product:Product,storeID:string)=>Promise<boolean> | boolean,
 	propHandleAdd:(product:Product,storeID:string)=>Promise<boolean>;
-    changeQuantity:(store:string,product:string,quan:number)=>void;
+    changeQuantity:(store:string,product:string,quan:number)=>Promise<boolean>;
    
 };
 const PopupCart: FC<PopupCartProps> = ({products,propHandleAdd,storesToProducts,propHandleDelete,changeQuantity}: PopupCartProps) => {
@@ -18,6 +18,8 @@ const PopupCart: FC<PopupCartProps> = ({products,propHandleAdd,storesToProducts,
     const bagsToProducts = useRef<ShoppingBag[]>([]);
 
     const [productsMy,setProducts] = useState<ProductQuantity[]>(products);
+
+
     useEffect(()=>{
         setProducts(products);
     },[products]);
@@ -50,7 +52,7 @@ const PopupCart: FC<PopupCartProps> = ({products,propHandleAdd,storesToProducts,
                 product = prodToQuanArr[i][0];
             }
         }
-        propHandleDelete(product,bagID);
+        return propHandleDelete(product,bagID);
 	}
        
     const bagIDToName = useRef<{[storeID: string]: ShoppingBag}>({});

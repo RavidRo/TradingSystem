@@ -1,6 +1,6 @@
 
 import { TableCell, TableRow } from '@material-ui/core';
-import React ,{FC, useState} from 'react';
+import React ,{FC, useEffect, useState} from 'react';
 import '../styles/ProductPopup.scss';
 import {Product} from '../types';
 
@@ -11,21 +11,30 @@ type ProductPopupProps = {
     quantity: number,
     keywords:string[],
     category:string,
-    propHandleDelete:(productID:string)=>void,
+    propHandleDelete:(productID:string)=>Promise<boolean> | boolean,
     propHandleAdd:(product:Product)=>Promise<boolean>,
-    changeQuantity:(productID:string,newQuantity:number)=>void,
+    changeQuantity:(productID:string,newQuantity:number)=>Promise<boolean>,
    
 };
 const PopupCart: FC<ProductPopupProps> = ({id,name,price,quantity,keywords,category,propHandleDelete,propHandleAdd,changeQuantity}: ProductPopupProps) => {
+
 const [prod_quantity, setQuantity] = useState<number>(quantity);
+useEffect(()=>{
+    setQuantity(quantity);
+},[quantity]);
+
 const handleDelete = ()=>{
     if(prod_quantity===1){
         propHandleDelete(id);
         setQuantity(0);
     }
     else{
-        setQuantity(prod_quantity-1);
-        changeQuantity(id,prod_quantity - 1);
+        let answer = changeQuantity(id,prod_quantity - 1);
+        answer.then((result)=>{
+            if(result===true){
+                setQuantity(prod_quantity-1);
+            }
+        })
     }
 }
 const handleAddPoup = ()=>{

@@ -9,9 +9,9 @@ import useAPI from '../hooks/useAPI';
 type BagProps = {
 	storeID:string,
     products:ProductQuantity[],
-    propHandleDelete:(productID:string)=>void,
+    propHandleDelete:(productID:string)=>Promise<boolean> | boolean,
     propHandleAdd:(product:Product,storeID:string)=>Promise<boolean>;
-    changeQuantity:(store:string,product:string,quan:number)=>void,
+    changeQuantity:(store:string,product:string,quan:number)=>Promise<boolean>,
 };
 
 const Bag: FC<BagProps> = ({storeID,products,propHandleDelete,changeQuantity,propHandleAdd}:BagProps) => {
@@ -43,10 +43,35 @@ const Bag: FC<BagProps> = ({storeID,products,propHandleDelete,changeQuantity,pro
 
 	//when clicking the X besides the product in cart
 	const onRemove = (id: string) => {
-		setProducts(productsInCart.filter((product) => product.id !== id));
-		propHandleDelete(id);//updating server
+		let answer = propHandleDelete(id);//updating server
+		if(answer!==false && answer!==true){
+			answer.then((result)=>{
+				if(result===true){
+					setProducts(productsInCart.filter((product) => product.id !== id));
+					setTotal(calculateTotal());
+				}
+			})
+		}
+		return answer;
 	}
-   
+	const handleAddMy = (product:Product,storeID:string)=>{
+		let answer = propHandleAdd(product,storeID);
+		answer.then((result)=>{
+			if(result!== false && result!== true){
+				setTotal(calculateTotal());
+			}
+		})
+		return answer;
+	}
+	const handleChangeMy = (storeID:string, productID:string,quantity:number)=>{
+		let answer = changeQuantity(storeID, productID,quantity);
+		answer.then((result)=>{
+			if(result!== false && result!== true){
+				setTotal(calculateTotal());
+			}
+		})
+		return answer;
+	}
 	const getQuanOfProduct = (id:string)=>{
 		for(var i=0;i<productsInCart.length;i++){
 			if(productsInCart[i].id===id){
@@ -70,9 +95,8 @@ const Bag: FC<BagProps> = ({storeID,products,propHandleDelete,changeQuantity,pro
 								product={product}
 								quantity={getQuanOfProduct(product.id)}
 								onRemove={onRemove}
-								propHandleDelete={propHandleDelete}
-                                propHandleAdd={(product:Product)=>propHandleAdd(product,storeID)}
-                                changeQuantity={(productID,newQuantity)=>changeQuantity(storeID,productID,newQuantity)}
+                                propHandleAdd={(product:Product)=>handleAddMy(product,storeID)}
+                                changeQuantity={(productID,newQuantity)=>handleChangeMy(storeID,productID,newQuantity)}
                                
 							/>
 						))

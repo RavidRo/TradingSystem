@@ -153,11 +153,11 @@ function App() {
 	};
 	const productQuantityObj = useAPI<void>('/change_product_quantity_in_cart',{},'POST');
     const changeQuantity = (storeID:string, productID: string, newQuantity: number)=>{
-        productQuantityObj.request({cookie:cookie,store_id:storeID,product_id:productID,quantity:newQuantity}).then(({data,error,errorMsg})=>{
+        return productQuantityObj.request({cookie:cookie,store_id:storeID,product_id:productID,quantity:newQuantity}).then(({data,error,errorMsg})=>{
             if(!error && data!==null){
 				for (var i = 0; i < Object.values(productsInCart).length; i++) {
 					if (Object.values(productsInCart)[i].id === productID) {
-						Object.values(productsInCart)[i].quantity += 1;
+						Object.values(productsInCart)[i].quantity = newQuantity;
 					}
 				}
 				let tuplesArr = storesToProducts.current[storeID];
@@ -168,10 +168,11 @@ function App() {
 				}
 				storesToProducts.current[storeID] = tuplesArr;
 				setProducts(productsInCart);
-                void(0);
+                return true;
             }
             else{
                 alert(errorMsg);
+				return false;
             }
         })
     }
@@ -186,7 +187,7 @@ function App() {
 	const productRemoveObj = useAPI<Product[]>('/remove_product_from_cart', {}, 'POST');
 	const handleDeleteProduct = (product: Product | null, storeID: string) => {
 		if (product !== null) {
-			productRemoveObj
+			return productRemoveObj
 				.request({
 					cookie: cookie,
 					product_id: product.id,
@@ -203,13 +204,16 @@ function App() {
 						}
 						storesToProducts.current[storeID] = tupleArr;
 						setProducts(Object.values(productsInCart).filter((item) => item.id !== product.id));
+						return true;
 					}
 					else{
 						alert(errorMsg);
+						return false;
 					}
 				});
 			
 		}
+		return false;
 	};
 
 	const getCookie = () => {

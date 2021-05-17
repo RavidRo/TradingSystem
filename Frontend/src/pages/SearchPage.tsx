@@ -56,16 +56,8 @@ const SearchPage: FC<SearchPageProps> = ({location,propsAddProduct}) => {
                             allCategories.current.push(productQuantities[j][0].category);
                         }
                     }
-                    // if(firstRender.current===true){
-                    // }
-                    // else{
-                    //     setProducts(old=>[...old,...productsToQuantities]);
-                    // }
-                    
-                    // firstRender.current = false;
                 }
                 setProducts(productsToQuantities);
-                console.log(productsToQuantities)
                 
             }
             else{

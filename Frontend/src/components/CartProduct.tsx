@@ -11,13 +11,12 @@ type CartProductProps = {
 	quantity:number;
 	onRemove: (id: string) => void;
 	propHandleAdd:(product:Product)=>Promise<boolean>,//to update server
-    propHandleDelete:(productID:string)=>void,//to update server
-    changeQuantity:(productID:string,newQuantity:number)=>void,//to update bag and total amount in cart
+    changeQuantity:(productID:string,newQuantity:number)=>Promise<boolean>,//to update bag and total amount in cart
 
 };
 
 
-const CartProduct: FC<CartProductProps> = ({ product,quantity, onRemove,propHandleAdd,propHandleDelete ,changeQuantity}) => {
+const CartProduct: FC<CartProductProps> = ({ product,quantity, onRemove,propHandleAdd ,changeQuantity}) => {
 	const { id, name, price } = product;
 	const [quantityMy, setQuantity] = useState<number>(quantity);
 
@@ -27,24 +26,23 @@ const CartProduct: FC<CartProductProps> = ({ product,quantity, onRemove,propHand
 		let answer = propHandleAdd(me);
 		answer.then((result)=>{
 			if(result === true){
-				setQuantity(quantityMy + 1);
-				changeQuantity(id,quantityMy + 1); //update bag
-			}
-			else{
-				setQuantity(quantityMy);
+				// let answer2 = changeQuantity(id,quantityMy + 1); //update bag
+				// answer2.then((result2)=>{
+				// 	if(result2===true){
+						setQuantity(quantityMy + 1);
+					// }
+				// })
 			}
 		})
 	}
 
 	const handleDelete = ()=>{
-		if(quantityMy===1){
-			propHandleDelete(id); //calling server to update cart
-			setQuantity(0);
-		}
-		else{
-			setQuantity(quantityMy-1);
-			changeQuantity(id,quantityMy - 1);//update bag
-		}
+			let answer = changeQuantity(id,quantityMy - 1);//update bag
+			answer.then((result)=>{
+				if(result===true){
+					setQuantity(quantityMy-1);
+				}
+			})
 	}
 	const handleChangeQuantity = (newQuantity:number)=>{
 		if(newQuantity > quantityMy){

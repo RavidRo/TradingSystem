@@ -2,16 +2,16 @@ import React, { FC, useState , useEffect} from 'react';
 import '../styles/Cart.scss';
 import Bag from '../components/Bag';
 import { Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, TextField } from '@material-ui/core';
-import {Product,ProductQuantity,ShoppingCart,ShoppingBag,StoreToSearchedProducts} from '../types';
+import {Product,ProductQuantity,ShoppingCart,ShoppingBag,StoreToSearchedProducts, ProductToQuantity} from '../types';
 import useAPI from '../hooks/useAPI';
 import { useHistory } from "react-router-dom";
 
 type CartProps = {
 	products:ProductQuantity[],
     storesToProducts:StoreToSearchedProducts,
-    handleDeleteProduct:(product:Product|null,storeID:string)=>void,
+    handleDeleteProduct:(product:Product|null,storeID:string)=>Promise<boolean> | boolean,
     propHandleAdd:(product:Product,storeID:string)=>Promise<boolean>;
-    changeQuantity:(store:string,product:string,quan:number)=>void;
+    changeQuantity:(store:string,product:string,quan:number)=>Promise<boolean>;
     getPropsCookie:()=>string,
 };
 
@@ -19,47 +19,14 @@ const Cart: FC<CartProps> = ({products,storesToProducts,handleDeleteProduct, pro
     const [open,setOpen] = useState<boolean>(false);
     const [age,setAge] = useState<number>(0);
     const [showPurchaseLink,setLink] = useState<boolean>(false);
-    const [bagsToProducts,setBags] = useState<ShoppingBag[]>([]);
     const [storesToProductsMy,setStoresProducts] = useState<StoreToSearchedProducts>(storesToProducts);
     const history = useHistory();
 
-    useEffect(()=>{
-        console.log(storesToProducts);
-        setStoresProducts(storesToProducts);
-        setTotalAmount(calculateTotal());
-    },[storesToProducts]);
-
     const cartObj = useAPI<ShoppingCart>('/get_cart_details');
     useEffect(()=>{
-        cartObj.request().then(({data,error,errorMsg})=>{
-                
-            if(!error && data!==null){
-                setBags(data.data.bags);
-            }
-            else{
-                alert(errorMsg)
-            }
-        })
-    },[]);
-
-
-    const productQuantityOfTuples = (bagID:string)=>{
-        let productsToReturn = [];
-        let tuples = storesToProducts[bagID];
-        for(var i=0;i<tuples.length; i++){
-            let product = {
-                id: tuples[i][0].id,
-                name: tuples[i][0].name,
-                price: tuples[i][0].price,
-                category: tuples[i][0].category,
-                keywords: tuples[i][0].keywords,
-                quantity: tuples[i][1]
-            }
-            productsToReturn.push(product);
-        }
-        return productsToReturn;
-
-    }
+        setStoresProducts(storesToProductsMy);
+        setTotalAmount(calculateTotal());
+    },[storesToProducts]);
 
     const calculateTotal = ()=>{
         let total = 0;
@@ -74,7 +41,34 @@ const Cart: FC<CartProps> = ({products,storesToProducts,handleDeleteProduct, pro
         }
         return total;
 	}
-    const [totalAmount,setTotalAmount] = useState<number>(calculateTotal());
+    const [totalAmount,setTotalAmount] = useState<number>(0);
+
+
+
+    const productQuantityOfTuples = (bagID:string)=>{
+        let productsToReturn = [];
+        for(var k=0; k<Object.keys(storesToProductsMy).length; k++){
+            if(Object.keys(storesToProductsMy)[k] === bagID){
+                let tuples = Object.values(storesToProductsMy)[k];
+                for(var i=0;i < tuples.length; i++){
+                    let product = {
+                        id: tuples[i][0].id,
+                        name: tuples[i][0].name,
+                        price: tuples[i][0].price,
+                        category: tuples[i][0].category,
+                        keywords: tuples[i][0].keywords,
+                        quantity: tuples[i][1]
+                    }
+                    productsToReturn.push(product);
+                }
+            }
+        }
+        
+        return productsToReturn;
+
+    }
+
+    
 
    
 	const handleDeleteProductMy = (id:string,storeID:string)=>{
@@ -84,28 +78,48 @@ const Cart: FC<CartProps> = ({products,storesToProducts,handleDeleteProduct, pro
             for(var j=0;j<tupleArr.length;j++){
                 if(tupleArr[i][0].id===id){
                     product=Object.values(storesToProductsMy)[i][j][0];
-                    // change product quantity in bag to 0
-                    tupleArr[i][1]=0;
-                    Object.values(storesToProductsMy)[i] = tupleArr;
                 }
             }
         }
-        setTotalAmount(calculateTotal()); //updating amount
-        handleDeleteProduct(product,storeID); //updating server
+
+        let answer = handleDeleteProduct(product,storeID); //updating server
+        if(answer !== false && answer !== true){
+            answer.then((result)=>{
+                if(result===true){
+                    for(var i=0;i<Object.keys(storesToProductsMy).length;i++){
+                        let tupleArr = Object.values(storesToProductsMy)[i];
+                        for(var j=0;j<tupleArr.length;j++){
+                            if(tupleArr[i][0].id===id){
+                                product=Object.values(storesToProductsMy)[i][j][0];
+                                // change product quantity in bag to 0
+                                tupleArr[i][1]=0;
+                                Object.values(storesToProductsMy)[i] = tupleArr;
+                            }
+                        }
+                    }
+                    setTotalAmount(calculateTotal()); //updating amount
+                }
+            })
+        }
+        return answer;
 	}
 
     const changeQuantityMy = (storeID: string, prodID:string,  newQuantity: number)=>{
-        for(var i=0;i<Object.keys(storesToProductsMy).length;i++){
-            let tuplesArr = Object.values(storesToProductsMy)[i];
-            for(var j=0;j<tuplesArr.length;j++){
-                    if(tuplesArr[j][0].id===prodID){
-                        Object.values(storesToProductsMy)[i][j][1]=newQuantity;
+        let answer = changeQuantity(storeID,prodID,newQuantity);//update server
+        answer.then((result)=>{
+            if(result===true){
+                for(var i=0;i<Object.keys(storesToProductsMy).length;i++){
+                    let tuplesArr = Object.values(storesToProductsMy)[i];
+                    for(var j=0;j<tuplesArr.length;j++){
+                        if(tuplesArr[j][0].id===prodID){
+                            Object.values(storesToProductsMy)[i][j][1]=newQuantity;
+                        }
                     }
                 }
+                setTotalAmount(calculateTotal());
             }
-        changeQuantity(storeID,prodID,newQuantity);//update server
-        setTotalAmount(calculateTotal());
-
+        })
+        return answer;
     }
     const discountObj = useAPI<number>('/purchase_cart',{cookie: getPropsCookie(), age:age}, 'POST');
     useEffect(()=>{
@@ -162,8 +176,13 @@ const Cart: FC<CartProps> = ({products,storesToProducts,handleDeleteProduct, pro
     }
 
     const handleAddMy = (product:Product,storeID:string)=>{
-        updateAmount(product);
-        return propHandleAdd(product,storeID);
+        let answer = propHandleAdd(product,storeID);
+        answer.then((result)=>{
+            if(result===true){
+                updateAmount(product);
+            }
+        })
+        return answer;
     }
 
     const handlePurchase = ()=>{
@@ -240,7 +259,6 @@ const Cart: FC<CartProps> = ({products,storesToProducts,handleDeleteProduct, pro
                 </button>
             :null}
         </div> 
-            
 	);
 };
 

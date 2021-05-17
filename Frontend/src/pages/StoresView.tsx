@@ -51,7 +51,6 @@ const StoresView: FC<StoresViewProps> = ({propsAddProduct,location}: StoresViewP
             setStoreName(gerStoreNameByID(storeID));
             productsObj.request({store_id:storeID}).then(({data,error,errorMsg})=>{
                 if(!error && data !==null){
-                    console.log(data.data)
                     let productsArray:Product[] = data.data;
                     let productQuantityArr:ProductQuantity[] = productsArray.map((product)=>{
                         return {

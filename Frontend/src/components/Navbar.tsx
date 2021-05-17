@@ -19,10 +19,10 @@ type NavBarProps = {
 	signedIn: boolean;
 	products: ProductQuantity[];
 	storesToProducts: StoreToSearchedProducts;
-	propHandleDelete: (product: Product, storeID: string) => void;
+	propHandleDelete: (product: Product, storeID: string) => Promise<boolean> | boolean;
 	propHandleAdd: (product: Product, storeID: string) => Promise<boolean>;
 	notifications: string[];
-	changeQuantity:(store:string,product:string,quan:number)=>void;
+	changeQuantity:(store:string,product:string,quan:number)=>Promise<boolean>;
 	logout: () => void;
 };
 
