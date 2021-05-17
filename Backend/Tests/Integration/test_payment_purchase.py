@@ -13,8 +13,6 @@ from Backend.response import Response
 
 auto_int = 0
 
-
-@pytest.fixture()
 def auto_id():
     global auto_int
     auto_int += 1
@@ -28,11 +26,11 @@ def products_data():
 
 @pytest.fixture
 @patch.multiple(ShoppingCart, interval_time=MagicMock(return_value=1))
-def initialization(products_data, auto_id):
+def initialization(products_data):
     system = TradingSystem.getInstance()
     cookie = system.enter_system()
-    username = auto_id
-    password = auto_id
+    username = auto_id()
+    password = auto_id()
     system.register(cookie, username, password)
     system.login(cookie, username, password)
     store_id = system.create_store(cookie, "store").object
