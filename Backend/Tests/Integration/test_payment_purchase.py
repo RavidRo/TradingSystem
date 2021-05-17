@@ -31,8 +31,8 @@ def products_data():
 def initialization(products_data, auto_id):
     system = TradingSystem.getInstance()
     cookie = system.enter_system()
-    username = str(auto_int)
-    password = str(auto_int)
+    username = auto_id
+    password = auto_id
     system.register(cookie, username, password)
     system.login(cookie, username, password)
     store_id = system.create_store(cookie, "store").object
