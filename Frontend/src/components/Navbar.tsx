@@ -44,7 +44,7 @@ const [openNotifications, setOpenNotifications] = useState<boolean>(false);
 
 	useEffect(()=>{
 		// TODO: change to what got from props
-		setNotifications((old)=>[...old, ...notifications]);
+		setNotifications(notifications);
 		console.log(notifications);
 	},[notifications]);
 
