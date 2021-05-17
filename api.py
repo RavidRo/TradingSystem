@@ -59,24 +59,47 @@ async def get_cookie():
             "data": {"cookie": cookie},
         }
     )
-   
-async def send_msg(messages):
-    print("in lambda")
-    try:
-        await websocket.send(messages)
-        print("ended await")
-        return True
-    except asyncio.CancelledError:
-        return False
 
-# socket is closing after exitting the function
 @app.websocket("/connect")
 async def connect():
-    await websocket.receive()
-    await websocket.send("hiiii")
-    await websocket.send("hiiii222222")
-    cookie = system.enter_system() # we think that in connect there is no cookie
-    return await system.connect(cookie, lambda messages: send_msg(messages))
+    cookie = await websocket.receive()
+    print("got cookie from client")
+    queue = []
+
+    # queue = asyncio.Queue()
+
+    # loop = asyncio.get_running_loop()
+    open = True
+    # def send_messages(messages):
+    #     loop = asyncio.new_event_loop()
+    #     asyncio.set_event_loop(loop)
+    #     loop.call_soon(queue.put_nowait, messages)
+    #     return open
+
+    def send_messages(messages):
+        print("Recieved messages", messages)
+        queue.append(messages)
+        return open
+        
+
+    system.connect(cookie, send_messages)
+    print("Connection started")
+    while True:
+        try:
+            await asyncio.sleep(10)
+            while len(queue) > 0:
+                messages = queue.pop()
+                for message in messages:
+                    print("Sending message", message)
+                    await websocket.send(message)
+            # messages = await queue.get()
+            # print("Sending messages to socket", messages)
+            # for message in messages:
+            #     await websocket.send(message)
+        except:
+            print("Socket disconnected")
+            open = False
+            return
 
 
 @app.route("/register", methods=["POST"])

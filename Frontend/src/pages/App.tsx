@@ -55,19 +55,23 @@ function App() {
 	const storesToProducts = useRef<StoreToSearchedProducts>({});
 	const storesProducts = useAPI<storesToProductsMapType>('/search_product', {});
 	useEffect(() => {
-		const client = new WebSocket('ws://127.0.0.1:5000/connect');
-		client.onopen = () => {
-			alert('WebSocket Client Opened');
-			client.send("hiiii"); // have to be here - else socket.receive in server gets stuck
-		};
-		client.onmessage = (message) => {
-			setNotifications((old) => [...old, JSON.stringify(message)]);
-			alert("received socket message");
-			console.log(message)
-		};
-		client.onclose = ()=>{
-			alert("connection closed!");
-		}
+		getCookie().then((cookie)=>{
+			if(cookie){
+				const client = new WebSocket('ws://127.0.0.1:5000/connect');
+				client.onopen = () => {
+					alert('WebSocket Client Opened');
+					client.send(cookie); // have to be here - else socket.receive in server gets stuck
+				};
+				client.onmessage = (messageEvent) => {
+					setNotifications((old) => [...old, messageEvent.data]);
+					alert("received socket message");
+					console.log(messageEvent)
+				};
+				client.onclose = ()=>{
+					alert("connection closed!");
+				}
+			}
+		})
 	}, []);
 
 	const productObj = useAPI<Product[]>('/save_product_in_cart', {}, 'POST');
@@ -209,9 +213,10 @@ function App() {
 	};
 
 	const getCookie = () => {
-		request({}, (data, error) => {
+		return request({}).then(({data, error}) => {
 			if (!error && data !== null) {
 				setCookie(data.data.cookie);
+				return data.data.cookie;
 			}
 		});
 	};
@@ -220,10 +225,10 @@ function App() {
 		return cookie;
 	}
 
-	useEffect(() => {
-		getCookie();
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, []);
+	// useEffect(() => {
+	// 	getCookie();
+	// 	// eslint-disable-next-line react-hooks/exhaustive-deps
+	// }, []);
 	
 
 	return cookie !== '' ? (
