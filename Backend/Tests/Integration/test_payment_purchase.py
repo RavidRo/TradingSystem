@@ -11,7 +11,7 @@ from Backend.Domain.TradingSystem.shopping_cart import ShoppingCart
 from Backend.Service.trading_system import TradingSystem
 from Backend.response import Response
 
-auto_string = "1"
+auto_int= 1
 
 
 @pytest.fixture
@@ -24,10 +24,10 @@ def products_data():
 def initialization(products_data):
     system = TradingSystem.getInstance()
     cookie = system.enter_system()
-    global auto_string
-    username = auto_string
-    password = auto_string
-    auto_string = str(int(auto_string) + 1)
+    global auto_int
+    auto_int += 1
+    username = str(auto_int)
+    password = str(auto_int)
     system.register(cookie, username, password)
     system.login(cookie, username, password)
     store_id = system.create_store(cookie, "store").object
