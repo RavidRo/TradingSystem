@@ -20,6 +20,7 @@ import ExitToAppIcon from '@material-ui/icons/ExitToApp';
 import StoreIcon from '@material-ui/icons/Store';
 import SupervisorAccountIcon from '@material-ui/icons/SupervisorAccount';
 import PersonIcon from '@material-ui/icons/Person';
+import DetailsIcon from '@material-ui/icons/Details';
 
 import { Link, useHistory } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -122,12 +123,13 @@ const Navbar: FC<NavBarProps> = ({
 				<div className="navbar-item">
 					{signedIn ? (
 						<>
-							<FontAwesomeIcon className="item-icon" icon={faCaretDown} />
+							{/* <FontAwesomeIcon className="item-icon" icon={faCaretDown} /> */}
 							<Button
 								ref={accountMenuRef}
 								className="item-link"
 								onClick={() => setAccountMenuOpen((prevOpen) => !prevOpen)}
 							>
+								<DetailsIcon className="item-icon" />
 								Account&Stores
 							</Button>
 						</>
