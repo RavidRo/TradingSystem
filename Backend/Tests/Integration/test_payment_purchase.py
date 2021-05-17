@@ -11,7 +11,14 @@ from Backend.Domain.TradingSystem.shopping_cart import ShoppingCart
 from Backend.Service.trading_system import TradingSystem
 from Backend.response import Response
 
-auto_int= 1
+auto_int = 0
+
+
+@pytest.fixture()
+def auto_id():
+    global auto_int
+    auto_int += 1
+    return str(auto_int)
 
 
 @pytest.fixture
@@ -21,11 +28,9 @@ def products_data():
 
 @pytest.fixture
 @patch.multiple(ShoppingCart, interval_time=MagicMock(return_value=1))
-def initialization(products_data):
+def initialization(products_data, auto_id):
     system = TradingSystem.getInstance()
     cookie = system.enter_system()
-    global auto_int
-    auto_int += 1
     username = str(auto_int)
     password = str(auto_int)
     system.register(cookie, username, password)
