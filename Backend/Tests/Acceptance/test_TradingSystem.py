@@ -385,6 +385,17 @@ def test_edit_product_details_negative_price_fail():
     assert not res.succeeded()
 
 
+def test_get_product_success():
+    cookie, username, password, store_name, store_id = _initialize_info(
+        _generate_username(), "aaa", _generate_store_name()
+    )
+    product_id, product_name, category, price, quantity = _create_product(cookie, store_id, _generate_product_name(),
+                                                                          "A", 5.50, 10)
+
+    prod_data_res = system.get_product(store_id, product_id)
+    assert prod_data_res.succeeded() and prod_data_res.get_obj().name == product_name
+
+
 # 2.6 https://github.com/SeanPikulin/TradingSystem/blob/main/Documentation/Use%20Cases.md#26-Filter-search-results
 
 def test_product_search_no_args_success():

@@ -163,6 +163,10 @@ class TradingSystemManager:
             cookie, store_id, product_id, new_name, new_category, new_price, keywords
         )
 
+    @staticmethod
+    def get_product(store_id: str, product_id: str) -> ProductData:
+        return StoresManager.get_product(store_id, product_id).parse()
+
     # 4.2
     @staticmethod
     def add_discount(
