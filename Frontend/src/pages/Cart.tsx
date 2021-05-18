@@ -13,9 +13,10 @@ type CartProps = {
     propHandleAdd:(product:Product,storeID:string)=>Promise<boolean>;
     changeQuantity:(store:string,product:string,quan:number)=>Promise<boolean>;
     getPropsCookie:()=>string,
+    propUpdateStores:(map:StoreToSearchedProducts)=>void,
 };
 
-const Cart: FC<CartProps> = ({products,storesToProducts,handleDeleteProduct, propHandleAdd, changeQuantity, getPropsCookie}) => {
+const Cart: FC<CartProps> = ({products,storesToProducts,handleDeleteProduct, propHandleAdd, changeQuantity, getPropsCookie,propUpdateStores}) => {
     const [open,setOpen] = useState<boolean>(false);
     const [age,setAge] = useState<number>(0);
     const [showPurchaseLink,setLink] = useState<boolean>(false);
@@ -23,9 +24,48 @@ const Cart: FC<CartProps> = ({products,storesToProducts,handleDeleteProduct, pro
     const history = useHistory();
 
     const cartObj = useAPI<ShoppingCart>('/get_cart_details');
+    const productObj = useAPI<Product>('/get_product');
+    
     useEffect(()=>{
-        setStoresProducts(storesToProductsMy);
-        setTotalAmount(calculateTotal());
+
+        cartObj.request().then(({data,error,errorMsg})=>{
+            if(!error && data!==null){
+                let bags = data.data.bags;
+                let map:{[storeID:string]: ProductToQuantity[]} = {};
+                let promises : Promise<void>[] =  [];
+                for(var i=0;i<bags.length;i++){
+                    let bag = bags[i];
+                    let storeID = bag.store_id;
+                    let productQuantitiesMap = bag.product_ids_to_quantities;
+                    let tuplesArr: ProductToQuantity[] = [];
+                    for(var j=0; j<Object.keys(productQuantitiesMap).length; j++){
+                        let productID:string = Object.keys(productQuantitiesMap)[j];
+                        let quantity:number = Object.values(productQuantitiesMap)[j];
+
+                        let promise = productObj.request({product_id: productID, store_id: storeID}).then(({data, error, errorMsg})=>{
+                            if(!error && data!==null){
+                                let product = data.data;
+                                tuplesArr.push([product, quantity])
+                            }
+                            else{
+                                alert(errorMsg);
+                            }
+                        });
+                        promises.push(promise);  
+                    }
+                    map[storeID] = tuplesArr;
+                }
+                Promise.allSettled(promises).then(()=>{
+                    setStoresProducts(map);
+                    propUpdateStores(map);
+                    setTotalAmount(calculateTotal());
+                })
+                
+            }
+            else{
+                alert(errorMsg)
+            }
+        })
     },[storesToProducts]);
 
     const calculateTotal = ()=>{
@@ -169,17 +209,11 @@ const Cart: FC<CartProps> = ({products,storesToProducts,handleDeleteProduct, pro
         setOpen(true);
     }
 
-    const updateAmount = (product:Product)=>{
-        let newAmount = totalAmount;
-        newAmount = newAmount + (product.price);
-        setTotalAmount(newAmount);
-    }
-
     const handleAddMy = (product:Product,storeID:string)=>{
         let answer = propHandleAdd(product,storeID);
         answer.then((result)=>{
             if(result===true){
-                updateAmount(product);
+                setTotalAmount((amount)=>amount+product.price);
             }
         })
         return answer;
@@ -203,7 +237,7 @@ const Cart: FC<CartProps> = ({products,storesToProducts,handleDeleteProduct, pro
                 products={productQuantityOfTuples(bagID)}
                 propHandleDelete={(productID:string)=>handleDeleteProductMy(productID,bagID)}
                 propHandleAdd={(product:Product,storeID:string)=>handleAddMy(product,storeID)}
-                changeQuantity={(storeID, productID, newQuantity)=>changeQuantityMy(storeID, productID,newQuantity)}
+                changeQuantity={changeQuantityMy}
                 />)
                     
             })}

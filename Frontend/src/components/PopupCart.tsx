@@ -15,22 +15,7 @@ type PopupCartProps = {
 };
 const PopupCart: FC<PopupCartProps> = ({products,propHandleAdd,storesToProducts,propHandleDelete,changeQuantity}: PopupCartProps) => {
 
-    // const bagsToProducts = useRef<ShoppingBag[]>([]);
-
-    // const [productsMy,setProducts] = useState<ProductQuantity[]>(products);
-
-
-    // useEffect(()=>{
-    //     setProducts(products);
-    // },[products]);
-
-
     const [storesToProductsMy,setStoresProducts] = useState<StoreToSearchedProducts>(storesToProducts);
-
-    // useEffect(()=>{
-    //     setStoresProducts(storesToProducts);
-    // },[storesToProducts]);
-
 
     const productQuantityOfTuples = (tuples:ProductToQuantity[])=>{
         let prodQuantities:ProductQuantity[] = tuples.map(tuple=>{
@@ -41,7 +26,7 @@ const PopupCart: FC<PopupCartProps> = ({products,propHandleAdd,storesToProducts,
                                                                 price:tuple[0].price,
                                                                 keywords:tuple[0].keywords,
                                                                 quantity:tuple[1]}})
-         return prodQuantities;           
+         return prodQuantities;       
 
     }
     const handleDeleteProductMy = (id:string,bagID:string)=>{
@@ -55,24 +40,24 @@ const PopupCart: FC<PopupCartProps> = ({products,propHandleAdd,storesToProducts,
         return propHandleDelete(product,bagID);
 	}
        
-    // const bagIDToName = useRef<{[storeID: string]: ShoppingBag}>({});
     const cartObj = useAPI<ShoppingCart>('/get_cart_details');
     const productObj = useAPI<Product>('/get_product');
     useEffect(()=>{
         cartObj.request().then(({data,error,errorMsg})=>{
             if(!error && data!==null){
                 let bags = data.data.bags;
-                let map:{[storeID:string]:ProductToQuantity[]} = {};
+                let map:{[storeID:string]: ProductToQuantity[]} = {};
+                let promises : Promise<void>[] =  [];
                 for(var i=0;i<bags.length;i++){
                     let bag = bags[i];
-                    let storeID = Object.values(bag)[0] as string;
-                    let productQuantitiesMap = Object.values(bag)[2];
-                    let tuplesArr:ProductToQuantity[] = [];
+                    let storeID = bag.store_id;
+                    let productQuantitiesMap = bag.product_ids_to_quantities;
+                    let tuplesArr: ProductToQuantity[] = [];
                     for(var j=0; j<Object.keys(productQuantitiesMap).length; j++){
-                        let productID = Object.keys(productQuantitiesMap)[j];
-                        let quantity = Object.values(productQuantitiesMap)[j] as number;
+                        let productID:string = Object.keys(productQuantitiesMap)[j];
+                        let quantity:number = Object.values(productQuantitiesMap)[j];
 
-                        productObj.request({product_id: productID, store_id: storeID}).then(({data, error, errorMsg})=>{
+                        let promise = productObj.request({product_id: productID, store_id: storeID}).then(({data, error, errorMsg})=>{
                             if(!error && data!==null){
                                 let product = data.data;
                                 tuplesArr.push([product, quantity])
@@ -80,19 +65,21 @@ const PopupCart: FC<PopupCartProps> = ({products,propHandleAdd,storesToProducts,
                             else{
                                 alert(errorMsg);
                             }
-                        })
+                        });
+                        promises.push(promise);  
                     }
                     map[storeID] = tuplesArr;
-                    // bagIDToName.current[bags[i].storeID] = bags[i];
                 }
-                setStoresProducts(map);
-                // bagsToProducts.current = data.data.bags;
+                Promise.allSettled(promises).then(()=>{
+                    setStoresProducts(map);
+                })
+                
             }
             else{
                 alert(errorMsg)
             }
         })
-    },[storesToProducts]);
+    },[storesToProducts, products]);
 
     return (
 		

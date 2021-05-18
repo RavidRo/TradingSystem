@@ -151,6 +151,10 @@ function App() {
 				});
 		}
 	};
+
+	const propUpdateStores = (map:StoreToSearchedProducts)=>{
+		storesToProducts.current = map;
+	}
 	const productQuantityObj = useAPI<void>('/change_product_quantity_in_cart',{},'POST');
     const changeQuantity = (storeID:string, productID: string, newQuantity: number)=>{
         return productQuantityObj.request({cookie:cookie,store_id:storeID,product_id:productID,quantity:newQuantity}).then(({data,error,errorMsg})=>{
@@ -267,6 +271,7 @@ function App() {
 									propHandleAdd={addProductToPopup}								
 									changeQuantity={changeQuantity}
 									getPropsCookie={getPropsCookie}
+									propUpdateStores={propUpdateStores}
 								/>
 							)}
 						/>

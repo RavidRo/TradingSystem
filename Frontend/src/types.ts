@@ -10,7 +10,7 @@ export type StoreToSearchedProducts = {[storeID:string] : ProductToQuantity[]};
 export type ProductToQuantity = [Product,number];
 export type Store = { id: string; name: string; ids_to_quantities: { [key: string]: number } };
 export type ShoppingCart = {bags:ShoppingBag[]};
-export type ShoppingBag = {storeID:string, storeName:string,prodQuantities:ProductToQuantity[]};
+export type ShoppingBag = {store_id: string, store_name:string, product_ids_to_quantities: {[productId:string] : number}};
 
 
 export type Permission =

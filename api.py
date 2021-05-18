@@ -456,7 +456,7 @@ async def edit_product_details():
 
 
 @app.route("/get_product", methods=["GET"])
-async def get_purchase_history():
+async def get_product():
     store_id = request.args.get("store_id")
     product_id = request.args.get("product_id")
 

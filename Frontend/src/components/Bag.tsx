@@ -48,6 +48,7 @@ const Bag: FC<BagProps> = ({storeID,products,propHandleDelete,changeQuantity,pro
 			answer.then((result)=>{
 				if(result===true){
 					setProducts(productsInCart.filter((product) => product.id !== id));
+					console.log("On remove");
 					setTotal(calculateTotal());
 				}
 			})
@@ -57,16 +58,18 @@ const Bag: FC<BagProps> = ({storeID,products,propHandleDelete,changeQuantity,pro
 	const handleAddMy = (product:Product,storeID:string)=>{
 		let answer = propHandleAdd(product,storeID);
 		answer.then((result)=>{
-			if(result!== false && result!== true){
-				setTotal(calculateTotal());
+			if(result){
+				console.log("Added to price", product.price);
+				setTotal(totalNow=>totalNow + product.price);
 			}
 		})
 		return answer;
 	}
-	const handleChangeMy = (storeID:string, productID:string,quantity:number)=>{
+	const handleChangeMy = (productID:string,quantity:number)=>{
 		let answer = changeQuantity(storeID, productID,quantity);
 		answer.then((result)=>{
-			if(result!== false && result!== true){
+			if(result){
+				console.log("Change my");
 				setTotal(calculateTotal());
 			}
 		})
@@ -96,7 +99,7 @@ const Bag: FC<BagProps> = ({storeID,products,propHandleDelete,changeQuantity,pro
 								quantity={getQuanOfProduct(product.id)}
 								onRemove={onRemove}
                                 propHandleAdd={(product:Product)=>handleAddMy(product,storeID)}
-                                changeQuantity={(productID,newQuantity)=>handleChangeMy(storeID,productID,newQuantity)}
+                                changeQuantity={handleChangeMy}
                                
 							/>
 						))
