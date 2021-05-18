@@ -30,7 +30,7 @@ const CartProduct: FC<CartProductProps> = ({ product,quantity, onRemove,propHand
 			}
 		})
 	}
-
+	// when - is presses , only decrease product  not remove
 	const handleDelete = ()=>{
 			let answer = changeQuantity(id,quantityMy - 1);//update bag
 			answer.then((result)=>{

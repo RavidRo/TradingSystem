@@ -55,6 +55,7 @@ const Bag: FC<BagProps> = ({storeID,products,propHandleDelete,changeQuantity,pro
 		}
 		return answer;
 	}
+	// handle add product to bag (increase quantity) and set total amount
 	const handleAddMy = (product:Product,storeID:string)=>{
 		let answer = propHandleAdd(product,storeID);
 		answer.then((result)=>{
@@ -65,6 +66,7 @@ const Bag: FC<BagProps> = ({storeID,products,propHandleDelete,changeQuantity,pro
 		})
 		return answer;
 	}
+	//change quantity of product in bag and update total bag price
 	const handleChangeMy = (productID:string,quantity:number)=>{
 		let answer = changeQuantity(storeID, productID,quantity);
 		answer.then((result)=>{

@@ -23,9 +23,9 @@ const Cart: FC<CartProps> = ({products,storesToProducts,handleDeleteProduct, pro
     const [storesToProductsMy,setStoresProducts] = useState<StoreToSearchedProducts>(storesToProducts);
     const history = useHistory();
 
+    //loas the cart of user when enters the cart page
     const cartObj = useAPI<ShoppingCart>('/get_cart_details');
     const productObj = useAPI<Product>('/get_product');
-    
     useEffect(()=>{
 
         cartObj.request().then(({data,error,errorMsg})=>{
@@ -84,7 +84,7 @@ const Cart: FC<CartProps> = ({products,storesToProducts,handleDeleteProduct, pro
     const [totalAmount,setTotalAmount] = useState<number>(0);
 
 
-
+    //helper function to present products and transfer then to bag
     const productQuantityOfTuples = (bagID:string)=>{
         let productsToReturn = [];
         for(var k=0; k<Object.keys(storesToProductsMy).length; k++){
@@ -108,9 +108,7 @@ const Cart: FC<CartProps> = ({products,storesToProducts,handleDeleteProduct, pro
 
     }
 
-    
-
-   
+    //remove product from cart
 	const handleDeleteProductMy = (product:Product,storeID:string)=>{
         let answer = handleDeleteProduct(product,storeID); //updating server
         if(answer !== false && answer !== true){
@@ -132,7 +130,7 @@ const Cart: FC<CartProps> = ({products,storesToProducts,handleDeleteProduct, pro
         }
         return answer;
 	}
-
+    //change quantity of product
     const changeQuantityMy = (storeID: string, prodID:string,  newQuantity: number)=>{
         let answer = changeQuantity(storeID,prodID,newQuantity);//update server
         answer.then((result)=>{
@@ -197,7 +195,7 @@ const Cart: FC<CartProps> = ({products,storesToProducts,handleDeleteProduct, pro
     const handleClick = ()=>{
         setOpen(true);
     }
-
+    // when pressing + beside the product, update the total amount of the cart
     const handleAddMy = (product:Product,storeID:string)=>{
         let answer = propHandleAdd(product,storeID);
         answer.then((result)=>{

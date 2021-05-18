@@ -164,6 +164,7 @@ function App() {
 						Object.values(productsInCart)[i].quantity = newQuantity;
 					}
 				}
+				console.log(storesToProducts)
 				let tuplesArr = storesToProducts.current[storeID];
 				for (var i = 0; i < tuplesArr.length; i++) {
 					if (tuplesArr[i][0].id === productID) {
@@ -255,7 +256,6 @@ function App() {
 						products={productsInCart}
 						storesToProducts={storesToProducts.current}
 						propHandleDelete={handleDeleteProduct}
-						propHandleAdd={addProductToPopup}
 						notifications={notifications}
 						changeQuantity={changeQuantity}
 						logout={() => {
@@ -263,6 +263,7 @@ function App() {
 							setCookie('');
 							getCookie();
 						}}
+						propUpdateStores={propUpdateStores}
 					/>
 					<Switch>
 						<Route path="/" exact component={Home} />

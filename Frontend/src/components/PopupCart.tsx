@@ -9,14 +9,14 @@ type PopupCartProps = {
     products:ProductQuantity[],
     storesToProducts:StoreToSearchedProducts,
     propHandleDelete:(product:Product,storeID:string)=>Promise<boolean> | boolean,
-	propHandleAdd:(product:Product,storeID:string)=>Promise<boolean>;
     changeQuantity:(store:string,product:string,quan:number)=>Promise<boolean>;
-   
+    propUpdateStores:(map:StoreToSearchedProducts)=>void,
 };
-const PopupCart: FC<PopupCartProps> = ({products,propHandleAdd,storesToProducts,propHandleDelete,changeQuantity}: PopupCartProps) => {
+const PopupCart: FC<PopupCartProps> = ({products,storesToProducts,propHandleDelete,changeQuantity,propUpdateStores}: PopupCartProps) => {
 
     const [storesToProductsMy,setStoresProducts] = useState<StoreToSearchedProducts>(storesToProducts);
 
+    //helper function to present the products and give the to bag nicely
     const productQuantityOfTuples = (tuples:ProductToQuantity[])=>{
         let prodQuantities:ProductQuantity[] = tuples.map(tuple=>{
                                                             return {
@@ -29,8 +29,9 @@ const PopupCart: FC<PopupCartProps> = ({products,propHandleAdd,storesToProducts,
          return prodQuantities;       
 
     }
+    //need to delete product from cart and update the server
     const handleDeleteProductMy = (product:Product,bagID:string)=>{
-        let answer = propHandleDelete(product,bagID);
+        let answer = propHandleDelete(product,bagID);//update the server
         if(answer !== false && answer !== true){
             answer.then((result)=>{
                 if(result===true){
@@ -50,7 +51,7 @@ const PopupCart: FC<PopupCartProps> = ({products,propHandleAdd,storesToProducts,
         
         return answer;
 	}
-       
+    //load the cart when user enters the website
     const cartObj = useAPI<ShoppingCart>('/get_cart_details');
     const productObj = useAPI<Product>('/get_product');
     useEffect(()=>{
@@ -83,6 +84,7 @@ const PopupCart: FC<PopupCartProps> = ({products,propHandleAdd,storesToProducts,
                 }
                 Promise.allSettled(promises).then(()=>{
                     setStoresProducts(map);
+                    propUpdateStores(map);
                 })
                 
             }
@@ -102,7 +104,6 @@ const PopupCart: FC<PopupCartProps> = ({products,propHandleAdd,storesToProducts,
                 storeID={bagID}
                 products={productQuantityOfTuples(storesToProductsMy[bagID])}
                 propHandleDelete={(product:Product)=>handleDeleteProductMy(product,bagID)}
-                propHandleAdd={propHandleAdd}
                 changeQuantity={changeQuantity}
                 />
                 )

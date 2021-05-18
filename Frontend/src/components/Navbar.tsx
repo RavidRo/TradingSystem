@@ -20,22 +20,13 @@ type NavBarProps = {
 	products: ProductQuantity[];
 	storesToProducts: StoreToSearchedProducts;
 	propHandleDelete: (product: Product, storeID: string) => Promise<boolean> | boolean;
-	propHandleAdd: (product: Product, storeID: string) => Promise<boolean>;
 	notifications: string[];
 	changeQuantity:(store:string,product:string,quan:number)=>Promise<boolean>;
 	logout: () => void;
+	propUpdateStores:(map:StoreToSearchedProducts)=>void,
 };
 
-const Navbar: FC<NavBarProps> = ({
-	signedIn,
-	products,
-	storesToProducts,
-	propHandleDelete,
-	notifications,
-	propHandleAdd,
-	changeQuantity,
-	logout,
-}) => {
+const Navbar: FC<NavBarProps> = ({signedIn,products,storesToProducts,propHandleDelete,notifications,changeQuantity,logout,propUpdateStores}) => {
 	const [hoverCart, setHoverCart] = useState<boolean>(false);
 	const [productsInCart, setProducts] = useState<ProductQuantity[]>(products);
 const [openNotifications, setOpenNotifications] = useState<boolean>(false);
@@ -78,9 +69,9 @@ const [openNotifications, setOpenNotifications] = useState<boolean>(false);
 						<PopupCart
 							products={productsInCart}
 							storesToProducts={storesToProductsMy}
-							propHandleAdd={propHandleAdd}
 							propHandleDelete={propHandleDelete}
 							changeQuantity={changeQuantity}
+							propUpdateStores={propUpdateStores}
 						/>
 					) : null}
 				</div>

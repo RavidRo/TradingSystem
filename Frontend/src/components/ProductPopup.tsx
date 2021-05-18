@@ -12,23 +12,23 @@ type ProductPopupProps = {
     keywords:string[],
     category:string,
     propHandleDelete:(product:Product)=>Promise<boolean> | boolean,
-    propHandleAdd:(product:Product)=>Promise<boolean>,
     changeQuantity:(productID:string,newQuantity:number)=>Promise<boolean>,
    
 };
-const PopupCart: FC<ProductPopupProps> = ({id,name,price,quantity,keywords,category,propHandleDelete,propHandleAdd,changeQuantity}: ProductPopupProps) => {
+const PopupCart: FC<ProductPopupProps> = ({id,name,price,quantity,keywords,category,propHandleDelete,changeQuantity}: ProductPopupProps) => {
 
 const [prod_quantity, setQuantity] = useState<number>(quantity);
 useEffect(()=>{
     setQuantity(quantity);
 },[quantity]);
 
+//every time the - is pressed
 const handleDelete = ()=>{
-    if(prod_quantity===1){
+    if(prod_quantity===1){ // need to remove 
         propHandleDelete({id:id, name:name, price:price, keywords:keywords, category:category});
         setQuantity(0);
     }
-    else{
+    else{ // need to change quantity
         let answer = changeQuantity(id,prod_quantity - 1);
         answer.then((result)=>{
             if(result===true){
@@ -37,15 +37,9 @@ const handleDelete = ()=>{
         })
     }
 }
+//every time the + is pressed
 const handleAddPoup = ()=>{
-    let me = {
-        id:id,
-        name:name,
-        price:price,
-        keywords:keywords,
-        category:category,
-    }
-    let answer = propHandleAdd(me);
+    let answer = changeQuantity(id, prod_quantity + 1);
     answer.then((result)=>{
         if(result === true){
             setQuantity(prod_quantity + 1);
