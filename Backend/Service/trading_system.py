@@ -185,6 +185,10 @@ class TradingSystem(object):
             cookie, store_id, product_id, new_name, new_category, new_price, keywords
         )
 
+    @log.loging()
+    def get_product(self, store_id: str, product_id: str):
+        return TradingSystemManager.get_product(store_id, product_id)
+
     @log.loging(to_hide=[1])
     def add_discount(
         self,
