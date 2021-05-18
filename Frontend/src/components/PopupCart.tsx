@@ -15,21 +15,21 @@ type PopupCartProps = {
 };
 const PopupCart: FC<PopupCartProps> = ({products,propHandleAdd,storesToProducts,propHandleDelete,changeQuantity}: PopupCartProps) => {
 
-    const bagsToProducts = useRef<ShoppingBag[]>([]);
+    // const bagsToProducts = useRef<ShoppingBag[]>([]);
 
-    const [productsMy,setProducts] = useState<ProductQuantity[]>(products);
+    // const [productsMy,setProducts] = useState<ProductQuantity[]>(products);
 
 
-    useEffect(()=>{
-        setProducts(products);
-    },[products]);
+    // useEffect(()=>{
+    //     setProducts(products);
+    // },[products]);
 
 
     const [storesToProductsMy,setStoresProducts] = useState<StoreToSearchedProducts>(storesToProducts);
 
-    useEffect(()=>{
-        setStoresProducts(storesToProducts);
-    },[storesToProducts]);
+    // useEffect(()=>{
+    //     setStoresProducts(storesToProducts);
+    // },[storesToProducts]);
 
 
     const productQuantityOfTuples = (tuples:ProductToQuantity[])=>{
@@ -55,22 +55,44 @@ const PopupCart: FC<PopupCartProps> = ({products,propHandleAdd,storesToProducts,
         return propHandleDelete(product,bagID);
 	}
        
-    const bagIDToName = useRef<{[storeID: string]: ShoppingBag}>({});
+    // const bagIDToName = useRef<{[storeID: string]: ShoppingBag}>({});
     const cartObj = useAPI<ShoppingCart>('/get_cart_details');
+    const productObj = useAPI<Product>('/get_product');
     useEffect(()=>{
         cartObj.request().then(({data,error,errorMsg})=>{
             if(!error && data!==null){
                 let bags = data.data.bags;
+                let map:{[storeID:string]:ProductToQuantity[]} = {};
                 for(var i=0;i<bags.length;i++){
-                    bagIDToName.current[bags[i].storeID] = bags[i];
+                    let bag = bags[i];
+                    let storeID = Object.values(bag)[0] as string;
+                    let productQuantitiesMap = Object.values(bag)[2];
+                    let tuplesArr:ProductToQuantity[] = [];
+                    for(var j=0; j<Object.keys(productQuantitiesMap).length; j++){
+                        let productID = Object.keys(productQuantitiesMap)[j];
+                        let quantity = Object.values(productQuantitiesMap)[j] as number;
+
+                        productObj.request({product_id: productID, store_id: storeID}).then(({data, error, errorMsg})=>{
+                            if(!error && data!==null){
+                                let product = data.data;
+                                tuplesArr.push([product, quantity])
+                            }
+                            else{
+                                alert(errorMsg);
+                            }
+                        })
+                    }
+                    map[storeID] = tuplesArr;
+                    // bagIDToName.current[bags[i].storeID] = bags[i];
                 }
-                bagsToProducts.current = data.data.bags;
+                setStoresProducts(map);
+                // bagsToProducts.current = data.data.bags;
             }
             else{
                 alert(errorMsg)
             }
         })
-    },[]);
+    },[storesToProducts]);
 
     return (
 		
