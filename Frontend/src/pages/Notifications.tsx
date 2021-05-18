@@ -10,7 +10,6 @@ type NotificationProps = {
 };
 
 const Notifications: FC<NotificationProps> = ({location}) => {
-    console.log(location.state);
     const [notifications, setNotifications] = useState<string[]>(location.state.notifications);
 
     useEffect(()=>{

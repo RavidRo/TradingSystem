@@ -48,7 +48,6 @@ const Bag: FC<BagProps> = ({storeID,products,propHandleDelete,changeQuantity,pro
 			answer.then((result)=>{
 				if(result===true){
 					setProducts(productsInCart.filter((product) => product.id !== productMe.id));
-					console.log("On remove");
 					setTotal(calculateTotal());
 				}
 			})
@@ -60,7 +59,6 @@ const Bag: FC<BagProps> = ({storeID,products,propHandleDelete,changeQuantity,pro
 		let answer = propHandleAdd(product,storeID);
 		answer.then((result)=>{
 			if(result){
-				console.log("Added to price", product.price);
 				setTotal(totalNow=>totalNow + product.price);
 			}
 		})
@@ -71,7 +69,6 @@ const Bag: FC<BagProps> = ({storeID,products,propHandleDelete,changeQuantity,pro
 		let answer = changeQuantity(storeID, productID,quantity);
 		answer.then((result)=>{
 			if(result){
-				console.log("Change my");
 				setTotal(calculateTotal());
 			}
 		})

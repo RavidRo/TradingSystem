@@ -65,7 +65,6 @@ function App() {
 				client.onmessage = (messageEvent) => {
 					setNotifications((old) => [...old, messageEvent.data]);
 					alert("received socket message");
-					console.log(messageEvent)
 				};
 				client.onclose = ()=>{
 					alert("connection closed!");
@@ -164,7 +163,6 @@ function App() {
 						Object.values(productsInCart)[i].quantity = newQuantity;
 					}
 				}
-				console.log(storesToProducts)
 				let tuplesArr = storesToProducts.current[storeID];
 				for (var i = 0; i < tuplesArr.length; i++) {
 					if (tuplesArr[i][0].id === productID) {

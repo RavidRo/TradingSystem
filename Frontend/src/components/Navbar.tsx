@@ -29,14 +29,11 @@ type NavBarProps = {
 const Navbar: FC<NavBarProps> = ({signedIn,products,storesToProducts,propHandleDelete,notifications,changeQuantity,logout,propUpdateStores}) => {
 	const [hoverCart, setHoverCart] = useState<boolean>(false);
 	const [productsInCart, setProducts] = useState<ProductQuantity[]>(products);
-const [openNotifications, setOpenNotifications] = useState<boolean>(false);
     const [storesToProductsMy,setStoresProducts] = useState<StoreToSearchedProducts>(storesToProducts);
 	const [myNotifications, setNotifications] = useState<string[]>(notifications);
 
 	useEffect(()=>{
-		// TODO: change to what got from props
-		setNotifications(notifications);
-		console.log(notifications);
+		setNotifications((old)=>[...old, ...notifications]);
 	},[notifications]);
 
 
