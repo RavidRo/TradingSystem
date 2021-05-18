@@ -78,9 +78,6 @@ class Store(Parsable):
         self._products_lock.release_write()
         return Response(True, msg=f"Product {product_id} name was changed successfully!")
 
-    def get_name(self) -> str:
-        return self.__name
-
     """checks need to be made:
        ----------------------
        1. product_name != ""
