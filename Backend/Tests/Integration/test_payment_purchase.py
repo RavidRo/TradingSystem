@@ -24,8 +24,8 @@ def initialization(products_data):
     system = TradingSystem.getInstance()
     cookie = system.enter_system()
     letters = string.ascii_lowercase
-    username = "".join(random.choices(letters, k=5))
-    password = "".join(random.choices(letters, k=5))
+    username = "".join(random.choices(letters, k=15))
+    password = "".join(random.choices(letters, k=15))
     system.register(cookie, username, password)
     system.login(cookie, username, password)
     store_id = system.create_store(cookie, "store").object
