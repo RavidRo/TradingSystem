@@ -11,7 +11,7 @@ type ProductPopupProps = {
     quantity: number,
     keywords:string[],
     category:string,
-    propHandleDelete:(productID:string)=>Promise<boolean> | boolean,
+    propHandleDelete:(product:Product)=>Promise<boolean> | boolean,
     propHandleAdd:(product:Product)=>Promise<boolean>,
     changeQuantity:(productID:string,newQuantity:number)=>Promise<boolean>,
    
@@ -25,7 +25,7 @@ useEffect(()=>{
 
 const handleDelete = ()=>{
     if(prod_quantity===1){
-        propHandleDelete(id);
+        propHandleDelete({id:id, name:name, price:price, keywords:keywords, category:category});
         setQuantity(0);
     }
     else{

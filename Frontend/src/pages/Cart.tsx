@@ -66,7 +66,7 @@ const Cart: FC<CartProps> = ({products,storesToProducts,handleDeleteProduct, pro
                 alert(errorMsg)
             }
         })
-    },[storesToProducts]);
+    },[storesToProducts, products]);
 
     const calculateTotal = ()=>{
         let total = 0;
@@ -111,17 +111,7 @@ const Cart: FC<CartProps> = ({products,storesToProducts,handleDeleteProduct, pro
     
 
    
-	const handleDeleteProductMy = (id:string,storeID:string)=>{
-        let product:Product= {} as Product;
-        for(var i=0;i<Object.keys(storesToProductsMy).length;i++){
-            let tupleArr = Object.values(storesToProductsMy)[i];
-            for(var j=0;j<tupleArr.length;j++){
-                if(tupleArr[i][0].id===id){
-                    product=Object.values(storesToProductsMy)[i][j][0];
-                }
-            }
-        }
-
+	const handleDeleteProductMy = (product:Product,storeID:string)=>{
         let answer = handleDeleteProduct(product,storeID); //updating server
         if(answer !== false && answer !== true){
             answer.then((result)=>{
@@ -129,10 +119,9 @@ const Cart: FC<CartProps> = ({products,storesToProducts,handleDeleteProduct, pro
                     for(var i=0;i<Object.keys(storesToProductsMy).length;i++){
                         let tupleArr = Object.values(storesToProductsMy)[i];
                         for(var j=0;j<tupleArr.length;j++){
-                            if(tupleArr[i][0].id===id){
-                                product=Object.values(storesToProductsMy)[i][j][0];
+                            if(tupleArr[j][0].id===product.id){
                                 // change product quantity in bag to 0
-                                tupleArr[i][1]=0;
+                                tupleArr[j][1]=0;
                                 Object.values(storesToProductsMy)[i] = tupleArr;
                             }
                         }
@@ -235,7 +224,7 @@ const Cart: FC<CartProps> = ({products,storesToProducts,handleDeleteProduct, pro
                 key={bagID}
                 storeID={bagID}
                 products={productQuantityOfTuples(bagID)}
-                propHandleDelete={(productID:string)=>handleDeleteProductMy(productID,bagID)}
+                propHandleDelete={(product:Product)=>handleDeleteProductMy(product,bagID)}
                 propHandleAdd={(product:Product,storeID:string)=>handleAddMy(product,storeID)}
                 changeQuantity={changeQuantityMy}
                 />)

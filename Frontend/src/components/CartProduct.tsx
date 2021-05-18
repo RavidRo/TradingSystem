@@ -9,7 +9,7 @@ import '../styles/CardProduct.scss';
 type CartProductProps = {
 	product: Product;
 	quantity:number;
-	onRemove: (id: string) => void;
+	onRemove: (product: Product) => void;
 	propHandleAdd:(product:Product)=>Promise<boolean>,//to update server
     changeQuantity:(productID:string,newQuantity:number)=>Promise<boolean>,//to update bag and total amount in cart
 
@@ -26,12 +26,7 @@ const CartProduct: FC<CartProductProps> = ({ product,quantity, onRemove,propHand
 		let answer = propHandleAdd(me);
 		answer.then((result)=>{
 			if(result === true){
-				// let answer2 = changeQuantity(id,quantityMy + 1); //update bag
-				// answer2.then((result2)=>{
-				// 	if(result2===true){
-						setQuantity(quantityMy + 1);
-					// }
-				// })
+				setQuantity(quantityMy + 1);
 			}
 		})
 	}
@@ -64,7 +59,7 @@ const CartProduct: FC<CartProductProps> = ({ product,quantity, onRemove,propHand
 					/>
 					<p className="price">${price}</p>
 				</div>
-				<IconButton aria-label="remove" onClick={() => onRemove(id)}>
+				<IconButton aria-label="remove" onClick={() => onRemove(product)}>
 					<CancelIcon />
 				</IconButton>
 			</div>

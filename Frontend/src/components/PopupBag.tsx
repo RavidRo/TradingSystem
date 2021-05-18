@@ -8,7 +8,7 @@ import useAPI from '../hooks/useAPI';
 type PopupBagProps = {
     storeID:string,
     products:ProductQuantity[],
-    propHandleDelete:(productID:string)=>Promise<boolean> | boolean,
+    propHandleDelete:(product:Product)=>Promise<boolean> | boolean,
     propHandleAdd:(product:Product,storeID:string)=>Promise<boolean>;
     changeQuantity:(store:string,product:string,quan:number)=>Promise<boolean>,
 

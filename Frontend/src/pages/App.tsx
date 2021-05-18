@@ -201,10 +201,17 @@ function App() {
 				.then(({ data, error, errorMsg }) => {
 					if (!error && data !== null) {
 						let tupleArr = storesToProducts.current[storeID];
-						for (var i = 0; i < tupleArr.length; i++) {
-							if (tupleArr[i][0].id === product.id) {
-								tupleArr[i][1] = 0;
+						if(tupleArr.length === 1){ // removed the only item from this bag
+							tupleArr = [];
+						}
+						else{
+							let index = 0;
+							for (var i = 0; i < tupleArr.length; i++) {
+								if (tupleArr[i][0].id === product.id) {
+									index = i;
+								}
 							}
+							tupleArr.splice(index, 1);
 						}
 						storesToProducts.current[storeID] = tupleArr;
 						setProducts(Object.values(productsInCart).filter((item) => item.id !== product.id));

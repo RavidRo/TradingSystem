@@ -9,7 +9,7 @@ import useAPI from '../hooks/useAPI';
 type BagProps = {
 	storeID:string,
     products:ProductQuantity[],
-    propHandleDelete:(productID:string)=>Promise<boolean> | boolean,
+    propHandleDelete:(product:Product)=>Promise<boolean> | boolean,
     propHandleAdd:(product:Product,storeID:string)=>Promise<boolean>;
     changeQuantity:(store:string,product:string,quan:number)=>Promise<boolean>,
 };
@@ -42,12 +42,12 @@ const Bag: FC<BagProps> = ({storeID,products,propHandleDelete,changeQuantity,pro
 	const [total,setTotal] = useState<number>(calculateTotal());
 
 	//when clicking the X besides the product in cart
-	const onRemove = (id: string) => {
-		let answer = propHandleDelete(id);//updating server
+	const onRemove = (productMe: Product) => {
+		let answer = propHandleDelete(productMe);//updating server
 		if(answer!==false && answer!==true){
 			answer.then((result)=>{
 				if(result===true){
-					setProducts(productsInCart.filter((product) => product.id !== id));
+					setProducts(productsInCart.filter((product) => product.id !== productMe.id));
 					console.log("On remove");
 					setTotal(calculateTotal());
 				}

@@ -29,15 +29,26 @@ const PopupCart: FC<PopupCartProps> = ({products,propHandleAdd,storesToProducts,
          return prodQuantities;       
 
     }
-    const handleDeleteProductMy = (id:string,bagID:string)=>{
-        let product:Product = {} as Product;
-        let prodToQuanArr = storesToProducts[bagID];
-        for(var i=0;i<prodToQuanArr.length;i++){
-            if(prodToQuanArr[i][0].id === id){
-                product = prodToQuanArr[i][0];
-            }
+    const handleDeleteProductMy = (product:Product,bagID:string)=>{
+        let answer = propHandleDelete(product,bagID);
+        if(answer !== false && answer !== true){
+            answer.then((result)=>{
+                if(result===true){
+                    for(var i=0;i<Object.keys(storesToProductsMy).length;i++){
+                        let tupleArr = Object.values(storesToProductsMy)[i];
+                        for(var j=0;j<tupleArr.length;j++){
+                            if(tupleArr[j][0].id===product.id){
+                                // change product quantity in bag to 0
+                                tupleArr[j][1]=0;
+                                Object.values(storesToProductsMy)[i] = tupleArr;
+                            }
+                        }
+                    }
+                }
+            })
         }
-        return propHandleDelete(product,bagID);
+        
+        return answer;
 	}
        
     const cartObj = useAPI<ShoppingCart>('/get_cart_details');
@@ -90,7 +101,7 @@ const PopupCart: FC<PopupCartProps> = ({products,propHandleAdd,storesToProducts,
                 key={bagID}
                 storeID={bagID}
                 products={productQuantityOfTuples(storesToProductsMy[bagID])}
-                propHandleDelete={(productID:string)=>handleDeleteProductMy(productID,bagID)}
+                propHandleDelete={(product:Product)=>handleDeleteProductMy(product,bagID)}
                 propHandleAdd={propHandleAdd}
                 changeQuantity={changeQuantity}
                 />
