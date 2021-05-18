@@ -20,17 +20,13 @@ import ExitToAppIcon from '@material-ui/icons/ExitToApp';
 import StoreIcon from '@material-ui/icons/Store';
 import SupervisorAccountIcon from '@material-ui/icons/SupervisorAccount';
 import PersonIcon from '@material-ui/icons/Person';
-import DetailsIcon from '@material-ui/icons/Details';
+import MoreVertIcon from '@material-ui/icons/MoreVert';
+import SearchIcon from '@material-ui/icons/Search';
+import ShoppingCartIcon from '@material-ui/icons/ShoppingCart';
+import MeetingRoomIcon from '@material-ui/icons/MeetingRoom';
+import NotificationsIcon from '@material-ui/icons/Notifications';
 
 import { Link, useHistory } from 'react-router-dom';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import {
-	faShoppingCart,
-	faSignInAlt,
-	faSearch,
-	faBell,
-	faCaretDown,
-} from '@fortawesome/free-solid-svg-icons';
 
 import '../styles/Navbar.scss';
 import config from '../config';
@@ -101,10 +97,10 @@ const Navbar: FC<NavBarProps> = ({
 					onMouseOver={() => setHoverCart(true)}
 					onMouseLeave={() => setHoverCart(false)}
 				>
-					<FontAwesomeIcon className="item-icon" icon={faShoppingCart} />
-					<Link className="item-link" to="/cart">
+					<Button className="item-link" onClick={() => history.push('/cart')}>
+						<ShoppingCartIcon className="item-icon" />
 						My Cart
-					</Link>
+					</Button>
 					{hoverCart ? (
 						<PopupCart
 							products={productsInCart}
@@ -115,10 +111,10 @@ const Navbar: FC<NavBarProps> = ({
 					) : null}
 				</div>
 				<div className="navbar-item">
-					<FontAwesomeIcon className="item-icon" icon={faSearch} />
-					<Link className="item-link" to="/storesView">
+					<Button className="item-link" onClick={() => history.push('/storesView')}>
+						<SearchIcon className="item-icon" />
 						Stores
-					</Link>
+					</Button>
 				</div>
 				<div className="navbar-item">
 					{signedIn ? (
@@ -129,16 +125,16 @@ const Navbar: FC<NavBarProps> = ({
 								className="item-link"
 								onClick={() => setAccountMenuOpen((prevOpen) => !prevOpen)}
 							>
-								<DetailsIcon className="item-icon" />
+								<MoreVertIcon className="item-icon" />
 								Account&Stores
 							</Button>
 						</>
 					) : (
 						<>
-							<FontAwesomeIcon className="item-icon" icon={faSignInAlt} />
-							<Link className="item-link" to="/sign-in">
+							<Button className="item-link" onClick={() => history.push('/sign-in')}>
+								<ExitToAppIcon className="item-icon" />
 								Sign In
-							</Link>
+							</Button>
 						</>
 					)}
 				</div>
@@ -174,7 +170,7 @@ const Navbar: FC<NavBarProps> = ({
 											</AccountMenuItem>
 										)}
 										<AccountMenuItem text="Logout" onClick={logout}>
-											<ExitToAppIcon />
+											<MeetingRoomIcon />
 										</AccountMenuItem>
 									</MenuList>
 								</ClickAwayListener>
@@ -188,7 +184,7 @@ const Navbar: FC<NavBarProps> = ({
 						onClick={() => setOpenNotifications((open) => !open)}
 					>
 						<Badge badgeContent={notifications.length} color="primary">
-							<FontAwesomeIcon className="item-icon" icon={faBell} />
+							<NotificationsIcon className="item-icon" />
 						</Badge>
 					</IconButton>
 					<Fade in={openNotifications}>
