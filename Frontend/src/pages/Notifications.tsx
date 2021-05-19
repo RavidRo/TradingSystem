@@ -18,12 +18,6 @@ const Notifications: FC<NotificationProps> = ({location}) => {
 
 	return (
         <div className="NotificationsDiv">
-            {/* <ul>
-                {notifications.map((notification)=>{
-                    return (<li>{notification}</li>)
-                })}
-            </ul> */}
-
             <GridList cellHeight={130} cols={1}>
                 {notifications.map((notification) => (
                     <Box className="box" color="black" bgcolor="pink" m={1}>
