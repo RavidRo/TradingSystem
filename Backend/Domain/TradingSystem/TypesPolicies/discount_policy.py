@@ -25,7 +25,8 @@ CONDITION_ROOT_ID = '1'
 class DefaultDiscountPolicy(DiscountPolicy):
     def __init__(self):
         super().__init__()
-        self.__discount: IDiscount = AddCompositeDiscount([], self.generate_id())  # retrieve from DB in later milestones
+        self.__discount: IDiscount = AddCompositeDiscount([],
+                                                          self.generate_id())  # retrieve from DB in later milestones
         self.discounts_generator = {'simple': lambda discount_data: SimpleDiscount(discount_data, self.generate_id()),
                                     'complex': lambda discount_data:
                                     MaximumCompositeDiscount([], self.generate_id())
@@ -47,7 +48,8 @@ class DefaultDiscountPolicy(DiscountPolicy):
         if discount_data['discount_type'] == 'simple':
             if discount_data['context']['obj'] not in ('product', 'category', 'store'):
                 return Response(False, msg="Discount context is not 'product', 'context', or 'store'!")
-            if 'percentage' not in discount_data or (discount_data['percentage'] < 0.0 or discount_data['percentage'] > 100.0):
+            if 'percentage' not in discount_data or (
+                    discount_data['percentage'] < 0.0 or discount_data['percentage'] > 100.0):
                 return Response(False, msg="Percentage of discount must be between 0 and 100")
         else:
             if 'type' in discount_data and discount_data['type'] not in ('max', 'add', 'and', 'or', 'xor'):
@@ -72,19 +74,25 @@ class DefaultDiscountPolicy(DiscountPolicy):
                                                                              CONDITION_ROOT_ID)
 
         exist_discount = self.__discount.get_discount_by_id(exist_id)
+
         if exist_discount is None:
             return Response(False, msg="Couldn't find the existing discount whose id was sent!")
 
+        exist_discount.wrlock.acquire_write()
+
         if not exist_discount.is_composite():
+            exist_discount.wrlock.release_write()
             return Response(False, msg="Tries to add child to simple discount! please create the composite discount "
                                        "first!")
 
-        exist_discount.wrlock.acquire_write()
         exist_discount.add_child(discount_res.get_obj())
         exist_discount.wrlock.release_write()
         return Response(True)
 
     def move_discount(self, src_id, dest_id) -> Response[None]:
+        if src_id == dest_id:
+            return Response(False, msg="Cannot move discount to itself!")
+
         src_discount = self.__discount.get_discount_by_id(src_id)
         if src_discount is None:
             return Response(False, msg="Source discount cannot be found!")
@@ -96,14 +104,19 @@ class DefaultDiscountPolicy(DiscountPolicy):
         if dest_discount is None:
             return Response(False, msg="Destination discount cannot be found")
 
+        # this is the top line that can acquire write since get_discount_by_id acquires all the branches read.
+        src_discount.wrlock.acquire_write()
+        dest_discount.wrlock.acquire_write()
+
         if not dest_discount.is_composite():
+            dest_discount.wrlock.release_write()
+            src_discount.wrlock.release_write()
             return Response(False, msg="Tries to add child to simple discount! please create the composite discount "
                                        "first!")
 
-        src_discount.wrlock.acquire_write()
-        dest_discount.wrlock.acquire_write()
         src_discount.get_parent().remove_child(src_discount)
         dest_discount.add_child(src_discount)
+
         dest_discount.wrlock.release_write()
         src_discount.wrlock.release_write()
         return Response(True)
