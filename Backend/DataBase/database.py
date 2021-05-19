@@ -12,7 +12,7 @@ SQLAlchemy_DATABASE_URI = 'postgresql://nklfongbputsdr' \
 engine = create_engine(SQLAlchemy_DATABASE_URI)
 
 # create a configured "Session" class
-Session = sessionmaker(bind=engine, autocommit=False, autoflush=False)
-Session = scoped_session(Session)
+Session = scoped_session(sessionmaker(bind=engine, autocommit=False, autoflush=False))
+""":type: sqlalchemy.orm.scoped_session"""
 
 Base = declarative_base()

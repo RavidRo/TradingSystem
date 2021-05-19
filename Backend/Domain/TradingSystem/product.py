@@ -36,6 +36,9 @@ class Product(IProduct):
     def get_keywords(self):
         return self.__keywords
 
+    def set_keywords(self, keywords):
+        self.__keywords = keywords
+
     def id_generator(self):
         return uuid.uuid4()
 
