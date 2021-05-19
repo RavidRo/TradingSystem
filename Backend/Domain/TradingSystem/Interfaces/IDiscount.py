@@ -1,11 +1,9 @@
 from __future__ import annotations      # for self type annotating
 
-import threading
 from abc import ABC, abstractmethod
 
-from Backend.Domain.TradingSystem.TypesPolicies.Purchase_Composites.concrete_composites import AndCompositePurchaseRule
 from Backend.Domain.TradingSystem.TypesPolicies.purchase_policy import DefaultPurchasePolicy
-from Backend.response import Response, Parsable, ParsableList
+from Backend.response import Response, Parsable
 
 
 class IDiscount(Parsable, ABC):
@@ -28,11 +26,6 @@ class IDiscount(Parsable, ABC):
 
     def get_conditions_policy(self):
         return self._conditions_policy
-
-    def apply_discount(self, products_to_quantities: dict, user_age: int) -> float:
-        if self._conditions_policy.checkPolicy(products_to_quantities, user_age):
-            return self.discount_func(products_to_quantities)
-        return 0.0
 
     @abstractmethod
     def is_composite(self) -> bool:
@@ -64,6 +57,10 @@ class IDiscount(Parsable, ABC):
 
     @abstractmethod
     def get_children(self) -> list[IDiscount]:
+        raise NotImplementedError
+
+    @abstractmethod
+    def apply_discount(self, products_to_quantities: dict, user_age: int) -> float:
         raise NotImplementedError
 
     def parse(self):
