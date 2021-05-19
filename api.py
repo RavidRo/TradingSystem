@@ -419,6 +419,15 @@ async def edit_product_details():
     return __responseToJson(cookie, answer)
 
 
+@app.route("/get_product", methods=["GET"])
+async def get_purchase_history():
+    store_id = request.args.get("store_id")
+    product_id = request.args.get("product_id")
+
+    answer = await __async_call(system.get_product, store_id, product_id)
+    return __responseToJson(None, answer)
+
+
 @app.route("/add_discount", methods=["POST"])
 async def add_discount():
     request_json = await request.get_json()
