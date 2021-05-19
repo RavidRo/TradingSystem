@@ -12,7 +12,6 @@ class IDiscount(Parsable, ABC):
     def __init__(self, id):
         self._parent = None
         self._id = id
-        self.discount_func = None
         self._conditions_policy = DefaultPurchasePolicy()
 
     def get_parent(self) -> IDiscount:

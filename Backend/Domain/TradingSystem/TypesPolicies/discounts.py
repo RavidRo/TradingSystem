@@ -82,9 +82,12 @@ class SimpleDiscount(IDiscount):
         self._duration = duration
 
     def apply_discount(self, products_to_quantities: dict, user_age: int) -> float:
-        if self._conditions_policy.checkPolicy(products_to_quantities, user_age):
+        if self._conditions_policy.checkPolicy(products_to_quantities, user_age).succeeded():
             return self._discount_strategy.discount_func(products_to_quantities)
         return 0.0
+
+    def discount_func(self, products_to_quantities: dict) -> float:
+        return self._discount_strategy.discount_func(products_to_quantities)
 
     def get_discount_by_id(self, exist_id: str):
         if self._id == exist_id:
