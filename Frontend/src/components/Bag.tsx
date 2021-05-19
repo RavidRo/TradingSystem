@@ -118,9 +118,6 @@ const Bag: FC<BagProps> = ({storeID,products,propHandleDelete,changeQuantity,pro
 						<h4>Total:</h4>
 						<h4>{total}$</h4>
 					</div>
-					{/* <Button variant="contained" color="secondary" startIcon={<PurchaseIcon />}>
-						Checkout
-					</Button> */}
 				</div>
 			</div>
 		</div>

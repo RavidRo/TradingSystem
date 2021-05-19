@@ -7,10 +7,11 @@ import ProductSearch from '../components/ProductSearch';
 import storesToProducts from '../components/storesProductsMap';
 import useAPI from '../hooks/useAPI';
 import {Product,Store,ProductQuantity} from '../types';
+import Swal from 'sweetalert2';
 
 
 type StoresViewProps = {
-   propsAddProduct:(product:Product,storeID:string)=>void,
+   propsAddProduct:(product:Product,storeID:string)=>Promise<boolean>,
    location: any,
 
 };
@@ -85,6 +86,19 @@ const StoresView: FC<StoresViewProps> = ({propsAddProduct,location}: StoresViewP
         })
     },[]);
 
+    const clickAddProduct = (cell:any, storeID:string)=>{
+        let response = propsAddProduct(cell,storeID);
+        response.then((result)=>{
+            if(result===true){
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Congratulations!',
+                    text: 'The item added to cart successfully',
+                  })
+            }
+        })
+    }
+
    const handleChange = (e:any)=>{
       setStoreID(e.target.value);
     //   set store causes use effect and rendering new products
@@ -134,7 +148,7 @@ const StoresView: FC<StoresViewProps> = ({propsAddProduct,location}: StoresViewP
                                             quantity={cell!==undefined?cell.quantity:0}
                                             category ={cell!==undefined?cell.category:""}
                                             keywords ={cell!==undefined?cell.keywords:""}
-                                            clickAddProduct={()=>propsAddProduct(cell,storeID)}
+                                            clickAddProduct={()=>clickAddProduct(cell,storeID)}
                                         >
                                         </ProductSearch>
                                     )

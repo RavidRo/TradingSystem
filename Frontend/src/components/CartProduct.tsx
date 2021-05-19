@@ -1,10 +1,11 @@
-import React, { FC, useState } from 'react';
-import { IconButton } from '@material-ui/core';
+import React, { FC, useState, useRef } from 'react';
+import { IconButton, MenuItem, Select } from '@material-ui/core';
 import CancelIcon from '@material-ui/icons/Close';
 
 import IncrementField from './IncrementField';
 import { Product } from '../types';
 import '../styles/CardProduct.scss';
+import OfferField from '../components/OfferField';
 
 type CartProductProps = {
 	product: Product;
@@ -19,6 +20,9 @@ type CartProductProps = {
 const CartProduct: FC<CartProductProps> = ({ product,quantity, onRemove,propHandleAdd ,changeQuantity}) => {
 	const { id, name, price } = product;
 	const [quantityMy, setQuantity] = useState<number>(quantity);
+
+	const purchaseTypes = useRef<string[]>(["immediate", "offer"]);
+	const [currentType, setCurrentType] = useState<string>("immediate");
 
 	const handleAdd = ()=>{
 		let me = product;
@@ -47,6 +51,9 @@ const CartProduct: FC<CartProductProps> = ({ product,quantity, onRemove,propHand
 			handleDelete();
 		}
 	}
+	const handleChangeType = (e:any)=>{
+		setCurrentType(e.target.value);
+	}
 	return (
 		quantityMy > 0 ? 
 			<div className="product">
@@ -55,13 +62,32 @@ const CartProduct: FC<CartProductProps> = ({ product,quantity, onRemove,propHand
 					<IncrementField
 						onChange={(newQuantity) =>handleChangeQuantity(newQuantity)}
 						value={quantityMy}
-						
 					/>
 					<p className="price">${price}</p>
 				</div>
+				
 				<IconButton aria-label="remove" onClick={() => onRemove(product)}>
 					<CancelIcon />
 				</IconButton>
+				<Select
+                style={{'fontSize': '1rem','width':'30%'}}
+				value={currentType}
+                onChange={(e)=>handleChangeType(e)}
+                >
+                   {purchaseTypes.current.map((type)=>{
+                      return(
+                        <MenuItem value={type} key={purchaseTypes.current.indexOf(type)}>{type}</MenuItem>
+                      )
+                   })}
+                </Select>
+				{currentType === "offer"?
+				//should be offer value from server
+					<OfferField
+					offer={0}
+					/>
+
+				:null}
+				
 			</div>
 		:null
 	);
