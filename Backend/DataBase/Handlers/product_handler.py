@@ -1,14 +1,13 @@
-from sqlalchemy import Table, Column, String, Float, Integer, ForeignKey, CheckConstraint, PrimaryKeyConstraint
+from sqlalchemy import Table, Column, String, Float, Integer, ForeignKey, CheckConstraint, insert
 from sqlalchemy.orm import mapper, relationship
 
 from Backend.DataBase.IHandler import IHandler
-from Backend.DataBase.database import Base
+from Backend.DataBase.database import Base, Session
 from Backend.Domain.TradingSystem.product import Product
-from Backend.response import Response
+from Backend.response import Response, PrimitiveParsable
 
 
 class ProductHandler(IHandler):
-
     class Keyword(Base):
         __tablename__ = 'products_keywords'
         product_id = Column(String(50), ForeignKey('products.product_id'), primary_key=True),
@@ -32,8 +31,28 @@ class ProductHandler(IHandler):
     })
 
     @staticmethod
-    def save(obj, **args) -> Response[None]:
-        pass
+    def save(obj, **kwargs) -> Response[None]:
+        session = Session()
+        res = Response(True)
+        try:
+            stmt = insert(ProductHandler.products).values(product_id=obj.get_id(),
+                                                          product_name=obj.get_name(),
+                                                          category=obj.get_category(),
+                                                          price=obj.get_price(),
+                                                          quantity=kwargs['quantity'])
+            session.execute(stmt)
+
+            for keyword in obj.get_keywords():
+                stmt = insert(Base.metadata.tables['products_keywords']).values(product_id=obj.get_id(),
+                                                                                keyword=keyword)
+                session.execute(stmt)
+            session.commit()
+        except Exception as e:
+            session.rollback()
+            res = Response(False, PrimitiveParsable(str(e)))
+        finally:
+            Session.remove()
+            return res
 
     def update(self, id, update_dict):
         pass
@@ -43,4 +62,3 @@ class ProductHandler(IHandler):
 
     def load_all(self):
         pass
-

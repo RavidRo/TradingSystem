@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 
+from Backend.DataBase.database import Session
 from Backend.response import Response, PrimitiveParsable, ParsableList
-from database import Session
 
 
 class IHandler(ABC):
@@ -11,7 +11,7 @@ class IHandler(ABC):
         self._classname = classname
 
     @staticmethod
-    def save(obj, **args) -> Response[None]:
+    def save(obj, **kwargs) -> Response[None]:
         session = Session()
         res = Response(True)
         try:
@@ -21,7 +21,7 @@ class IHandler(ABC):
             session.rollback()
             res = Response(False, PrimitiveParsable(str(e)))
         finally:
-            session.close()
+            Session.remove()
             return res
 
     @staticmethod
@@ -35,7 +35,7 @@ class IHandler(ABC):
             session.rollback()
             res = Response(False, PrimitiveParsable(str(e)))
         finally:
-            session.close()
+            Session.remove()
             return res
 
     @abstractmethod
@@ -58,6 +58,6 @@ class IHandler(ABC):
             session.rollback()
             res = Response(False, PrimitiveParsable(str(e)))
         finally:
-            session.close()
+            Session.remove()
             return res
 
