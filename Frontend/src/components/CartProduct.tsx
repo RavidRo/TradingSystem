@@ -81,7 +81,7 @@ const CartProduct: FC<CartProductProps> = ({ product,quantity, onRemove,propHand
                    })}
                 </Select>
 				{currentType === "offer"?
-				//should be offer value from server
+				//TODO: should be offer value from server
 					<OfferField
 					offer={0}
 					/>

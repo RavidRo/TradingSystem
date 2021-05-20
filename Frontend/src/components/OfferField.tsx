@@ -19,6 +19,7 @@ const OfferField: FC<OfferFieldProps> = ({offer}) => {
         setOpen(true);
     }
     const changeOffer = (e:number)=>{
+        //TODO: need to send to server
         setNewOffer(e);
     }
     //just when the user agrees, the current offer changes
