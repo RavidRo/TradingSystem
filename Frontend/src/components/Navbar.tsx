@@ -17,7 +17,6 @@ import { Badge, IconButton} from '@material-ui/core';
 
 type NavBarProps = {
 	signedIn: boolean;
-	products: ProductQuantity[];
 	storesToProducts: StoreToSearchedProducts;
 	propHandleDelete: (product: Product, storeID: string) => Promise<boolean> | boolean;
 	notifications: string[];
@@ -26,9 +25,8 @@ type NavBarProps = {
 	propUpdateStores:(map:StoreToSearchedProducts)=>void,
 };
 
-const Navbar: FC<NavBarProps> = ({signedIn,products,storesToProducts,propHandleDelete,notifications,changeQuantity,logout,propUpdateStores}) => {
+const Navbar: FC<NavBarProps> = ({signedIn,storesToProducts,propHandleDelete,notifications,changeQuantity,logout,propUpdateStores}) => {
 	const [hoverCart, setHoverCart] = useState<boolean>(false);
-	const [productsInCart, setProducts] = useState<ProductQuantity[]>(products);
     const [storesToProductsMy,setStoresProducts] = useState<StoreToSearchedProducts>(storesToProducts);
 	const [myNotifications, setNotifications] = useState<string[]>(notifications);
 
@@ -41,10 +39,6 @@ const Navbar: FC<NavBarProps> = ({signedIn,products,storesToProducts,propHandleD
 		setStoresProducts(storesToProducts);
 	},[storesToProducts]);
 
-
-	useEffect(() => {
-		setProducts(products);
-	}, [products]);
 
 	return (
 		<div className="navbar">
@@ -64,7 +58,6 @@ const Navbar: FC<NavBarProps> = ({signedIn,products,storesToProducts,propHandleD
 					</Link>
 					{hoverCart ? (
 						<PopupCart
-							products={productsInCart}
 							storesToProducts={storesToProductsMy}
 							propHandleDelete={propHandleDelete}
 							changeQuantity={changeQuantity}

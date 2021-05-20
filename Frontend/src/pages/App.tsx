@@ -44,15 +44,13 @@ function App() {
 	const [username, setUsername] = useState<string>('Guest');
 	const { request } = useAPI<{ cookie: string }>('/get_cookie');
 	const [cookie, setCookie] = useState<string>('');
-	const [productsInCart, setProducts] = useState<ProductQuantity[]>([]);
-
 	const [notifications, setNotifications] = useState<string[]>([]);
+	const storesToProducts = useRef<StoreToSearchedProducts>({});
 
 	type storesToProductsMapType = {
 		[key: string]: Product[];
 	};
 
-	const storesToProducts = useRef<StoreToSearchedProducts>({});
 	const storesProducts = useAPI<storesToProductsMapType>('/search_product', {});
 	useEffect(() => {
 		getCookie().then((cookie)=>{
@@ -79,12 +77,14 @@ function App() {
 	const addProductToPopup = (product: Product, storeID: string) => {
 		let found = false;
 		let quantity = 1;
-		console.log(productsInCart)
-		for (var i = 0; i < Object.values(productsInCart).length; i++) {
-			if (Object.values(productsInCart)[i].id === product.id) {
-				// Object.values(productsInCart)[i].quantity += 1;
-				quantity = productsInCart[i].quantity + 1;
-				found = true;
+		console.log(storesToProducts)
+		for (var i = 0; i < Object.values(storesToProducts.current).length; i++) {
+			let tuplesArr = Object.values(storesToProducts.current)[i];
+			for (var j = 0; j < tuplesArr.length; j++) {
+				if(tuplesArr[j][0].id === product.id){
+					quantity =tuplesArr[j][1] + 1;
+					found = true;
+				}
 			}
 		}
 		if (!found) {
@@ -112,10 +112,8 @@ function App() {
 				.then(({ data, error, errorMsg }) => {
 					if (!error && data !== null) {
 						// do nothing
-						setProducts((oldArray) => [...oldArray, newProduct]);
 						return true;
 					} else {
-						console.log("here")
 						alert(errorMsg);
 						return false;
 					}
@@ -131,11 +129,7 @@ function App() {
 				})
 				.then(({ data, error, errorMsg }) => {
 					if (!error && data !== null) {
-						for (var i = 0; i < Object.values(productsInCart).length; i++) {
-							if (Object.values(productsInCart)[i].id === product.id) {
-								Object.values(productsInCart)[i].quantity += 1;
-							}
-						}
+
 						let tuplesArr = storesToProducts.current[storeID];
 						for (var i = 0; i < tuplesArr.length; i++) {
 							if (tuplesArr[i][0].id === product.id) {
@@ -161,11 +155,7 @@ function App() {
     const changeQuantity = (storeID:string, productID: string, newQuantity: number)=>{
         return productQuantityObj.request({cookie:cookie,store_id:storeID,product_id:productID,quantity:newQuantity}).then(({data,error,errorMsg})=>{
             if(!error && data!==null){
-				for (var i = 0; i < Object.values(productsInCart).length; i++) {
-					if (Object.values(productsInCart)[i].id === productID) {
-						Object.values(productsInCart)[i].quantity = newQuantity;
-					}
-				}
+
 				let tuplesArr = storesToProducts.current[storeID];
 				for (var i = 0; i < tuplesArr.length; i++) {
 					if (tuplesArr[i][0].id === productID) {
@@ -173,7 +163,6 @@ function App() {
 					}
 				}
 				storesToProducts.current[storeID] = tuplesArr;
-				setProducts(productsInCart);
                 return true;
             }
             else{
@@ -183,9 +172,12 @@ function App() {
         })
     }
 	const getQuantityOfProduct = (productID: string) => {
-		for (var i = 0; i < productsInCart.length; i++) {
-			if (productsInCart[i].id === productID) {
-				return productsInCart[i].quantity;
+		for (var i = 0; i < Object.values(storesToProducts.current).length; i++) {
+			let tuplesArr = Object.values(storesToProducts.current)[i];
+			for (var j = 0; j < tuplesArr.length; j++) {
+				if(tuplesArr[j][0].id === productID){
+					return tuplesArr[j][1] ;
+				}
 			}
 		}
 	};
@@ -216,7 +208,6 @@ function App() {
 							tupleArr.splice(index, 1);
 						}
 						storesToProducts.current[storeID] = tupleArr;
-						setProducts(Object.values(productsInCart).filter((item) => item.id !== product.id));
 						return true;
 					}
 					else{
@@ -254,7 +245,6 @@ function App() {
 				<BrowserRouter>
 					<Navbar
 						signedIn={signedIn}
-						products={productsInCart}
 						storesToProducts={storesToProducts.current}
 						propHandleDelete={handleDeleteProduct}
 						notifications={notifications}
@@ -274,7 +264,6 @@ function App() {
 							render={(props) => (
 								<Cart
 									{...props}
-									products={productsInCart}
 									storesToProducts={storesToProducts.current}
 									handleDeleteProduct={handleDeleteProduct}
 									propHandleAdd={addProductToPopup}								

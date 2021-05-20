@@ -6,13 +6,12 @@ import {Product,ProductQuantity,ShoppingBag,ShoppingCart,ProductToQuantity,Store
 import useAPI from '../hooks/useAPI';
 
 type PopupCartProps = {
-    products:ProductQuantity[],
     storesToProducts:StoreToSearchedProducts,
     propHandleDelete:(product:Product,storeID:string)=>Promise<boolean> | boolean,
     changeQuantity:(store:string,product:string,quan:number)=>Promise<boolean>;
     propUpdateStores:(map:StoreToSearchedProducts)=>void,
 };
-const PopupCart: FC<PopupCartProps> = ({products,storesToProducts,propHandleDelete,changeQuantity,propUpdateStores}: PopupCartProps) => {
+const PopupCart: FC<PopupCartProps> = ({storesToProducts,propHandleDelete,changeQuantity,propUpdateStores}: PopupCartProps) => {
 
     const [storesToProductsMy,setStoresProducts] = useState<StoreToSearchedProducts>(storesToProducts);
 
@@ -92,7 +91,7 @@ const PopupCart: FC<PopupCartProps> = ({products,storesToProducts,propHandleDele
                 alert(errorMsg)
             }
         })
-    },[storesToProducts, products]);
+    },[storesToProducts]);
 
     return (
 		

@@ -8,7 +8,6 @@ import { useHistory } from "react-router-dom";
 import Swal from 'sweetalert2';
 
 type CartProps = {
-	products:ProductQuantity[],
     storesToProducts:StoreToSearchedProducts,
     handleDeleteProduct:(product:Product|null,storeID:string)=>Promise<boolean> | boolean,
     propHandleAdd:(product:Product,storeID:string)=>Promise<boolean>;
@@ -17,7 +16,7 @@ type CartProps = {
     propUpdateStores:(map:StoreToSearchedProducts)=>void,
 };
 
-const Cart: FC<CartProps> = ({products,storesToProducts,handleDeleteProduct, propHandleAdd, changeQuantity, getPropsCookie,propUpdateStores}) => {
+const Cart: FC<CartProps> = ({storesToProducts,handleDeleteProduct, propHandleAdd, changeQuantity, getPropsCookie,propUpdateStores}) => {
     const [open,setOpen] = useState<boolean>(false);
     const [age,setAge] = useState<number>(0);
     const [showPurchaseLink,setLink] = useState<boolean>(false);
@@ -67,7 +66,7 @@ const Cart: FC<CartProps> = ({products,storesToProducts,handleDeleteProduct, pro
                 alert(errorMsg)
             }
         })
-    },[storesToProducts, products]);
+    },[storesToProducts]);
 
     const calculateTotal = ()=>{
         let total = 0;
@@ -150,26 +149,6 @@ const Cart: FC<CartProps> = ({products,storesToProducts,handleDeleteProduct, pro
         return answer;
     }
     const discountObj = useAPI<number>('/purchase_cart',{cookie: getPropsCookie(), age:age}, 'POST');
-    // useEffect(()=>{
-    //     if(showPurchaseLink){
-    //         discountObj.request().then(({data,error,errorMsg})=>{
-    //             if(!error && data!==null){
-    //                 let prevCost = totalAmount;
-    //                 if(data.data < prevCost){
-    //                     alert("Congratulations! You got discount of: "+ (prevCost - data.data));
-    //                     setTotalAmount(data.data);
-    //                 }
-    //                 else{
-    //                     alert("No discount for you :(");
-    //                 }
-    //             }
-    //             else{
-    //                 alert(errorMsg)
-    //             }
-                
-    //         })
-    //     }
-    // },[showPurchaseLink]);
     
     const handleOK = ()=>{
             discountObj.request().then(({data,error,errorMsg})=>{
