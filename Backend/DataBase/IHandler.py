@@ -11,33 +11,33 @@ class IHandler(ABC):
         self._rwlock = rwlock
 
     def save(self, obj, **kwargs) -> Response[None]:
+        self._rwlock.acquire_write()
         session = Session()
         res = Response(True)
         try:
-            self._rwlock.acquire_write()
             session.add(obj)
             session.commit()
         except Exception as e:
             session.rollback()
             res = Response(False, PrimitiveParsable(str(e)))
         finally:
-            self._rwlock.release_write()
             Session.remove()
+            self._rwlock.release_write()
             return res
 
     def remove(self, obj) -> Response[None]:
         session = Session()
+        self._rwlock.acquire_write()
         res = Response(True)
         try:
-            self._rwlock.acquire_write()
             session.delete(obj)
             session.commit()
         except Exception as e:
             session.rollback()
             res = Response(False, PrimitiveParsable(str(e)))
         finally:
-            self._rwlock.release_write()
             Session.remove()
+            self._rwlock.release_write()
             return res
 
     @abstractmethod

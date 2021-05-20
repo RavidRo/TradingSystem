@@ -1,8 +1,8 @@
-from sqlalchemy import Table, Column, String, Float, Integer, ForeignKey, CheckConstraint, insert, update
+from sqlalchemy import Table, Column, String, Float, Integer, ForeignKey, CheckConstraint, insert
 from sqlalchemy.orm import mapper, relationship
 
 from Backend.DataBase.IHandler import IHandler
-from Backend.DataBase.database import Base, Session
+from Backend.DataBase.database import Base, Session, engine
 from Backend.Domain.TradingSystem.product import Product
 from Backend.response import Response, PrimitiveParsable, ParsableList
 
@@ -12,7 +12,7 @@ from threading import Lock
 
 class Keyword(Base):
     __tablename__ = 'products_keywords'
-    product_id = Column(String(50), ForeignKey('products.product_id'), primary_key=True),
+    product_id = Column(String(50), ForeignKey('products.product_id'), primary_key=True)
     keyword = Column(String(50), primary_key=True)
 
 
@@ -37,7 +37,7 @@ class ProductHandler(IHandler):
             '_Product__product_name': self.__products.c.product_name,
             '_Product__category': self.__products.c.category,
             '_Product__price': self.__products.c.price,
-            '_Product__keywords': relationship(Keyword, cascade="all, delete", passive_deletes=True)
+            '_Product__keywords': relationship(Keyword, cascade="all, delete", passive_deletes=True, lazy='joined')
         })
 
     @staticmethod
@@ -47,11 +47,11 @@ class ProductHandler(IHandler):
                 ProductHandler._instance = ProductHandler()
         return ProductHandler._instance
 
-    def save(self, obj, **kwargs) -> Response[None]:
+    def save(self, obj: Product, **kwargs) -> Response[None]:
+        self._rwlock.acquire_write()
         session = Session()
         res = Response(True)
         try:
-            self._rwlock.acquire_write()
             stmt = insert(self.__products).values(product_id=obj.get_id(),
                                                   product_name=obj.get_name(),
                                                   category=obj.get_category(),
@@ -69,20 +69,20 @@ class ProductHandler(IHandler):
             session.rollback()
             res = Response(False, PrimitiveParsable(str(e)))
         finally:
-            self._rwlock.release_write()
             Session.remove()
+            self._rwlock.release_write()
             return res
 
     def update(self, id, update_dict):
         keywords = update_dict.pop('keywords', None)
+        self._rwlock.acquire_write()
         session = Session()
         res = Response(True)
         try:
-            self._rwlock.acquire_write()
-            session.query(self.__products).filter_by(product_id=id).update(update_dict)
+            session.query(Product).filter_by(product_id=id).update(update_dict)
 
             if keywords is not None:
-                session.query(Base.metadata.tables['products_keywords']).filter_by(product_id=id).delete()
+                session.query(Keyword).filter_by(product_id=id).delete()
 
                 for keyword in keywords:
                     stmt = insert(Base.metadata.tables['products_keywords']).values(product_id=id,
@@ -93,67 +93,67 @@ class ProductHandler(IHandler):
             session.rollback()
             res = Response(False, PrimitiveParsable(str(e)))
         finally:
-            self._rwlock.acquire_write()
             Session.remove()
+            self._rwlock.release_write()
             return res
 
     def load(self, id):
+        self._rwlock.acquire_read()
         session = Session()
         res = Response(True)
         try:
-            self._rwlock.acquire_read()
-            product = session.query(self.__products).get(id)
+            product = session.query(Product).get(id)
 
-            keywords = session.query(Base.metadata.tables['products_keywords']).filter_by(product_id=id).all()
-            product.set_keywords(keywords)
+            keywords = session.query(Keyword).filter_by(product_id=id).all()
+            product.set_keywords(map(lambda entry: entry.keyword, keywords))
             session.commit()
             res = Response(True, product)
         except Exception as e:
             session.rollback()
             res = Response(False, PrimitiveParsable(str(e)))
         finally:
-            self._rwlock.release_read()
             Session.remove()
+            self._rwlock.release_read()
             return res
 
     def load_all(self):
+        self._rwlock.acquire_read()
         session = Session()
         res = Response(True)
         try:
-            self._rwlock.acquire_read()
-            products = session.query(self.__products).all()
+            products = session.query(Product).all()
 
             for product in products:
-                keywords = session.query(Base.metadata.tables['products_keywords']).filter_by(
+                keywords = session.query(Keyword).filter_by(
                     product_id=product.get_id()).all()
-                product.set_keywords(keywords)
+                product.set_keywords(map(lambda entry: entry.keyword, keywords))
             session.commit()
             res = Response(True, ParsableList(products))
         except Exception as e:
             session.rollback()
             res = Response(False, PrimitiveParsable(str(e)))
         finally:
-            self._rwlock.release_read()
             Session.remove()
+            self._rwlock.release_read()
             return res
 
     def load_products_by_store(self, store_id):
         session = Session()
+        self._rwlock.acquire_read()
         res = Response(True)
         try:
-            self._rwlock.acquire_read()
-            products = session.query(self.__products).filter_by(store_id=store_id).all()
+            products = session.query(Product).filter_by(store_id=store_id).all()
 
             for product in products:
-                keywords = session.query(Base.metadata.tables['products_keywords']).filter_by(
+                keywords = session.query(Keyword).filter_by(
                     product_id=product.get_id()).all()
-                product.set_keywords(keywords)
+                product.set_keywords(map(lambda entry: entry.keyword, keywords))
             session.commit()
             res = Response(True, ParsableList(products))
         except Exception as e:
             session.rollback()
             res = Response(False, PrimitiveParsable(str(e)))
         finally:
-            self._rwlock.release_read()
             Session.remove()
+            self._rwlock.release_read()
             return res

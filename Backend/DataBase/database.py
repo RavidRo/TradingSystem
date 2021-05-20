@@ -4,7 +4,6 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, declarative_base, scoped_session
 
 # create an engine
-from Backend.Domain.TradingSystem.product import Product
 
 SQLAlchemy_DATABASE_URI = 'postgresql://nklfongbputsdr' \
                           ':780ea33e04aa8fb36400cd72967b97385d186978a31d262416b53791ae93c425@ec2-54-155-35-88.eu-west' \
@@ -16,5 +15,3 @@ Session = scoped_session(sessionmaker(bind=engine, autocommit=False, autoflush=F
 """:type: sqlalchemy.orm.scoped_session"""
 
 Base = declarative_base()
-
-Base.metadata.create_all(engine)
