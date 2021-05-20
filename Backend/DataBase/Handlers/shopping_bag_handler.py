@@ -69,22 +69,22 @@ class ShoppingBagHandler(IHandler):
             session.rollback()
             res = Response(False, msg=str(e))
         finally:
-            Session.remove()
+            session.close()
             self._rwlock.release_write()
             return res
 
-    def remove(self, obj, **kwargs) -> Response[None]:
+    def remove(self, obj: ShoppingBag, **kwargs) -> Response[None]:
         self._rwlock.acquire_write()
         session = Session()
         res = Response(True)
         try:
-            session.delete(obj)
+            session.query(ShoppingBag).filter_by(store_id=obj.get_store_ID(), username=kwargs['username']).delete()
             session.commit()
         except Exception as e:
             session.rollback()
             res = Response(False, msg=str(e))
         finally:
-            Session.remove()
+            session.close()
             self._rwlock.release_write()
             return res
 
@@ -116,6 +116,6 @@ if __name__ == "__main__":
     res = bags_handler.save(bag, username="Me")
     if not res.succeeded():
         print(res.get_msg())
-    res = bags_handler.remove(bag, )
+    res = bags_handler.remove(bag, username="Me")
     if not res.succeeded():
         print(res.get_msg())

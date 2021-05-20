@@ -60,7 +60,7 @@ class ProductHandler(IHandler):
             session.rollback()
             res = Response(False, msg=str(e))
         finally:
-            Session.remove()
+            session.close()
             self._rwlock.release_write()
             return res
 
@@ -75,7 +75,7 @@ class ProductHandler(IHandler):
             session.rollback()
             res = Response(False, msg=str(e))
         finally:
-            Session.remove()
+            session.close()
             self._rwlock.release_write()
             return res
 
@@ -90,7 +90,7 @@ class ProductHandler(IHandler):
             session.rollback()
             res = Response(False, msg=str(e))
         finally:
-            Session.remove()
+            session.close()
             self._rwlock.release_write()
             return res
 
@@ -106,7 +106,7 @@ class ProductHandler(IHandler):
             session.rollback()
             res = Response(False, msg=str(e))
         finally:
-            Session.remove()
+            session.close()
             self._rwlock.release_read()
             return res
 
@@ -122,7 +122,7 @@ class ProductHandler(IHandler):
             session.rollback()
             res = Response(False, msg=str(e))
         finally:
-            Session.remove()
+            session.close()
             self._rwlock.release_read()
             return res
 
@@ -138,6 +138,6 @@ class ProductHandler(IHandler):
             session.rollback()
             res = Response(False, msg=str(e))
         finally:
-            Session.remove()
+            session.close()
             self._rwlock.release_read()
             return res
