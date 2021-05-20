@@ -5,6 +5,7 @@ import { Button, Dialog, DialogActions, DialogContent, DialogContentText, Dialog
 import {Product,ProductQuantity,ShoppingCart,ShoppingBag,StoreToSearchedProducts, ProductToQuantity} from '../types';
 import useAPI from '../hooks/useAPI';
 import { useHistory } from "react-router-dom";
+import Swal from 'sweetalert2';
 
 type CartProps = {
 	products:ProductQuantity[],
@@ -149,26 +150,26 @@ const Cart: FC<CartProps> = ({products,storesToProducts,handleDeleteProduct, pro
         return answer;
     }
     const discountObj = useAPI<number>('/purchase_cart',{cookie: getPropsCookie(), age:age}, 'POST');
-    useEffect(()=>{
-        if(showPurchaseLink){
-            discountObj.request().then(({data,error,errorMsg})=>{
-                if(!error && data!==null){
-                    let prevCost = totalAmount;
-                    if(data.data < prevCost){
-                        alert("Congratulations! You got discount of: "+ (prevCost - data.data));
-                        setTotalAmount(data.data);
-                    }
-                    else{
-                        alert("No discount for you :(");
-                    }
-                }
-                else{
-                    alert(errorMsg)
-                }
+    // useEffect(()=>{
+    //     if(showPurchaseLink){
+    //         discountObj.request().then(({data,error,errorMsg})=>{
+    //             if(!error && data!==null){
+    //                 let prevCost = totalAmount;
+    //                 if(data.data < prevCost){
+    //                     alert("Congratulations! You got discount of: "+ (prevCost - data.data));
+    //                     setTotalAmount(data.data);
+    //                 }
+    //                 else{
+    //                     alert("No discount for you :(");
+    //                 }
+    //             }
+    //             else{
+    //                 alert(errorMsg)
+    //             }
                 
-            })
-        }
-    },[showPurchaseLink]);
+    //         })
+    //     }
+    // },[showPurchaseLink]);
     
     const handleOK = ()=>{
             discountObj.request().then(({data,error,errorMsg})=>{
@@ -192,8 +193,33 @@ const Cart: FC<CartProps> = ({products,storesToProducts,handleDeleteProduct, pro
         setOpen(false);
     }
 
+    const anyItemsInStore = (prodQuanArr:ProductToQuantity[])=>{
+        for(var i=0; i<prodQuanArr.length; i++){
+            if(prodQuanArr[i][1]>0){//quantity>0
+                return true;
+            }
+        }
+        return false;
+    }
+    const anyItemsInCart = ()=>{
+        for(var i=0; i<Object.keys(storesToProductsMy).length; i++){
+            if(anyItemsInStore(Object.values(storesToProductsMy)[i])){
+                return true;
+            }
+        }
+        return false;
+    }
     const handleClick = ()=>{
-        setOpen(true);
+        if(anyItemsInCart()){
+            setOpen(true);
+        }
+        else{
+            Swal.fire({
+                icon: 'error',
+                title: 'Oopss...!',
+                text: "your can't purchase an empty cart"
+              })
+        }
     }
     // when pressing + beside the product, update the total amount of the cart
     const handleAddMy = (product:Product,storeID:string)=>{

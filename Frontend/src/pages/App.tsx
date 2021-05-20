@@ -79,6 +79,7 @@ function App() {
 	const addProductToPopup = (product: Product, storeID: string) => {
 		let found = false;
 		let quantity = 1;
+		console.log(productsInCart)
 		for (var i = 0; i < Object.values(productsInCart).length; i++) {
 			if (Object.values(productsInCart)[i].id === product.id) {
 				// Object.values(productsInCart)[i].quantity += 1;
@@ -114,6 +115,7 @@ function App() {
 						setProducts((oldArray) => [...oldArray, newProduct]);
 						return true;
 					} else {
+						console.log("here")
 						alert(errorMsg);
 						return false;
 					}
@@ -144,6 +146,7 @@ function App() {
 						return true;
 					} 
 					else {
+						console.log("now here")
 						alert(errorMsg);
 						return false;
 					}

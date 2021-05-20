@@ -1,5 +1,5 @@
 import { Button, TextField } from '@material-ui/core';
-import React, { FC,useState} from 'react';
+import React, { FC,useState, useEffect} from 'react';
 import '../styles/Purchase.scss';
 import Timer from '../components/Timer';
 import useAPI from '../hooks/useAPI';
@@ -18,8 +18,19 @@ const Purchase: FC<PurchaseProps> = ({location}) => {
     // const [age,setAge] = useState<string>("");
     const history = useHistory();
 
-    const purchaseObj = useAPI<number>('/send_payment',{},'POST');
+    const handleUnload = (e:any) => {
+        e.preventDefault();
+        console.log('hey')
+        alert("HEY");
+    }
     
+    useEffect(() => {
+        window.addEventListener("beforeunload", handleUnload);
+        return () => window.removeEventListener("beforeunload", handleUnload);
+      }, [handleUnload]);
+
+   
+    const purchaseObj = useAPI<number>('/send_payment',{},'POST');
     const handlePurchase = ()=>{
         purchaseObj.request({cookie: location.state.cookie,payment_details: {credit},address: address}).then(({data,error,errorMsg})=>{
             if(!error && data!==null){
