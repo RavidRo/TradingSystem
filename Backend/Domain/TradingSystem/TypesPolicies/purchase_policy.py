@@ -130,7 +130,7 @@ class DefaultPurchasePolicy(PurchasePolicy):
         check_validity = rule_to_move.check_validity(new_parent_id)
         if not check_validity.succeeded():
             return check_validity
-        rule_to_move.parent.children.remove(rule_to_move)
+        rule_to_move.parent.children.remove(rule_to_move, )
         rule_to_move.parent = new_parent
         new_parent.children.append(rule_to_move)
         return Response(True, msg="Move succeeded!")

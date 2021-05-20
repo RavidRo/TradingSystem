@@ -25,7 +25,7 @@ class IHandler(ABC):
             self._rwlock.release_write()
             return res
 
-    def remove(self, obj) -> Response[None]:
+    def remove(self, obj, **kwargs) -> Response[None]:
         session = Session()
         self._rwlock.acquire_write()
         res = Response(True)
