@@ -19,7 +19,7 @@ class IHandler(ABC):
             session.commit()
         except Exception as e:
             session.rollback()
-            res = Response(False, PrimitiveParsable(str(e)))
+            res = Response(False, msg=str(e))
         finally:
             Session.remove()
             self._rwlock.release_write()
@@ -34,7 +34,7 @@ class IHandler(ABC):
             session.commit()
         except Exception as e:
             session.rollback()
-            res = Response(False, PrimitiveParsable(str(e)))
+            res = Response(False, msg=str(e))
         finally:
             Session.remove()
             self._rwlock.release_write()

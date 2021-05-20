@@ -15,6 +15,10 @@ class Keyword(Base):
     product_id = Column(String(50), ForeignKey('products.product_id'), primary_key=True)
     keyword = Column(String(50), primary_key=True)
 
+    def __init__(self, product_id, keyword):
+        self.product_id = product_id
+        self.keyword = keyword
+
 
 class ProductHandler(IHandler):
     _lock = Lock()
@@ -67,7 +71,7 @@ class ProductHandler(IHandler):
             session.commit()
         except Exception as e:
             session.rollback()
-            res = Response(False, PrimitiveParsable(str(e)))
+            res = Response(False, msg=str(e))
         finally:
             Session.remove()
             self._rwlock.release_write()
@@ -91,7 +95,7 @@ class ProductHandler(IHandler):
             session.commit()
         except Exception as e:
             session.rollback()
-            res = Response(False, PrimitiveParsable(str(e)))
+            res = Response(False, msg=str(e))
         finally:
             Session.remove()
             self._rwlock.release_write()
@@ -103,14 +107,11 @@ class ProductHandler(IHandler):
         res = Response(True)
         try:
             product = session.query(Product).get(id)
-
-            keywords = session.query(Keyword).filter_by(product_id=id).all()
-            product.set_keywords(map(lambda entry: entry.keyword, keywords))
             session.commit()
             res = Response(True, product)
         except Exception as e:
             session.rollback()
-            res = Response(False, PrimitiveParsable(str(e)))
+            res = Response(False, msg=str(e))
         finally:
             Session.remove()
             self._rwlock.release_read()
@@ -122,16 +123,11 @@ class ProductHandler(IHandler):
         res = Response(True)
         try:
             products = session.query(Product).all()
-
-            for product in products:
-                keywords = session.query(Keyword).filter_by(
-                    product_id=product.get_id()).all()
-                product.set_keywords(map(lambda entry: entry.keyword, keywords))
             session.commit()
             res = Response(True, ParsableList(products))
         except Exception as e:
             session.rollback()
-            res = Response(False, PrimitiveParsable(str(e)))
+            res = Response(False, msg=str(e))
         finally:
             Session.remove()
             self._rwlock.release_read()
@@ -143,17 +139,20 @@ class ProductHandler(IHandler):
         res = Response(True)
         try:
             products = session.query(Product).filter_by(store_id=store_id).all()
-
-            for product in products:
-                keywords = session.query(Keyword).filter_by(
-                    product_id=product.get_id()).all()
-                product.set_keywords(map(lambda entry: entry.keyword, keywords))
             session.commit()
             res = Response(True, ParsableList(products))
         except Exception as e:
             session.rollback()
-            res = Response(False, PrimitiveParsable(str(e)))
+            res = Response(False, msg=str(e))
         finally:
             Session.remove()
             self._rwlock.release_read()
             return res
+
+
+if __name__ == "__main__":
+    product_handler = ProductHandler.get_instance()
+    object1 = Product("inon", "katz", 0.1)
+    res = product_handler.save(object1, quantity=3, store_id="1")
+    if not res.succeeded():
+        print(res.get_msg())
