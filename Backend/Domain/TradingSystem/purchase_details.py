@@ -8,6 +8,7 @@ from typing import List
 class PurchaseDetails:
     user_name: str
     store_name: str
+    store_id: str
     product_names: List[str]
     date: datetime
     total_price: float
