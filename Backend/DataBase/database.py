@@ -16,3 +16,5 @@ Session = scoped_session(sessionmaker(bind=engine, autocommit=False, autoflush=F
 """:type: sqlalchemy.orm.scoped_session"""
 
 Base = declarative_base()
+
+Base.metadata.create_all(engine)

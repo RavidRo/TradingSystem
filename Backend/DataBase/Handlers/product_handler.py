@@ -9,13 +9,14 @@ from Backend.response import Response, PrimitiveParsable, ParsableList
 from Backend.rw_lock import ReadWriteLock
 from threading import Lock
 
+
 class Keyword(Base):
     __tablename__ = 'products_keywords'
     product_id = Column(String(50), ForeignKey('products.product_id'), primary_key=True),
     keyword = Column(String(50), primary_key=True)
 
-class ProductHandler(IHandler):
 
+class ProductHandler(IHandler):
     _lock = Lock()
     _instance = None
 
@@ -23,13 +24,13 @@ class ProductHandler(IHandler):
         super().__init__(ReadWriteLock())
 
         self.__products = Table('products', Base.metadata,
-                     Column('product_id', String(50), primary_key=True),
-                     Column('product_name', String(50)),
-                     Column('category', String(50)),
-                     Column('price', Float),
-                     Column('store_id', String(50), ForeignKey('stores.store_id')),
-                     Column('quantity', Integer, CheckConstraint('quantity > 0'))
-                     )
+                                Column('product_id', String(50), primary_key=True),
+                                Column('product_name', String(50)),
+                                Column('category', String(50)),
+                                Column('price', Float),
+                                Column('store_id', String(50), ForeignKey('stores.store_id')),
+                                Column('quantity', Integer, CheckConstraint('quantity > 0'))
+                                )
 
         mapper(Product, self.__products, properties={
             '_Product__id': self.__products.c.product_id,
@@ -50,12 +51,13 @@ class ProductHandler(IHandler):
         session = Session()
         res = Response(True)
         try:
+            self._rwlock.acquire_write()
             stmt = insert(self.__products).values(product_id=obj.get_id(),
-                                                          product_name=obj.get_name(),
-                                                          category=obj.get_category(),
-                                                          price=obj.get_price(),
-                                                          store_id=kwargs['store_id'],
-                                                          quantity=kwargs['quantity'])
+                                                  product_name=obj.get_name(),
+                                                  category=obj.get_category(),
+                                                  price=obj.get_price(),
+                                                  store_id=kwargs['store_id'],
+                                                  quantity=kwargs['quantity'])
             session.execute(stmt)
 
             for keyword in obj.get_keywords():
@@ -67,6 +69,7 @@ class ProductHandler(IHandler):
             session.rollback()
             res = Response(False, PrimitiveParsable(str(e)))
         finally:
+            self._rwlock.release_write()
             Session.remove()
             return res
 
@@ -75,6 +78,7 @@ class ProductHandler(IHandler):
         session = Session()
         res = Response(True)
         try:
+            self._rwlock.acquire_write()
             session.query(self.__products).filter_by(product_id=id).update(update_dict)
 
             if keywords is not None:
@@ -89,6 +93,7 @@ class ProductHandler(IHandler):
             session.rollback()
             res = Response(False, PrimitiveParsable(str(e)))
         finally:
+            self._rwlock.acquire_write()
             Session.remove()
             return res
 
@@ -96,6 +101,7 @@ class ProductHandler(IHandler):
         session = Session()
         res = Response(True)
         try:
+            self._rwlock.acquire_read()
             product = session.query(self.__products).get(id)
 
             keywords = session.query(Base.metadata.tables['products_keywords']).filter_by(product_id=id).all()
@@ -106,6 +112,7 @@ class ProductHandler(IHandler):
             session.rollback()
             res = Response(False, PrimitiveParsable(str(e)))
         finally:
+            self._rwlock.release_read()
             Session.remove()
             return res
 
@@ -113,10 +120,12 @@ class ProductHandler(IHandler):
         session = Session()
         res = Response(True)
         try:
+            self._rwlock.acquire_read()
             products = session.query(self.__products).all()
 
             for product in products:
-                keywords = session.query(Base.metadata.tables['products_keywords']).filter_by(product_id=product.get_id()).all()
+                keywords = session.query(Base.metadata.tables['products_keywords']).filter_by(
+                    product_id=product.get_id()).all()
                 product.set_keywords(keywords)
             session.commit()
             res = Response(True, ParsableList(products))
@@ -124,7 +133,27 @@ class ProductHandler(IHandler):
             session.rollback()
             res = Response(False, PrimitiveParsable(str(e)))
         finally:
+            self._rwlock.release_read()
             Session.remove()
             return res
 
-    # def load_products_by_store(self, store_id):
+    def load_products_by_store(self, store_id):
+        session = Session()
+        res = Response(True)
+        try:
+            self._rwlock.acquire_read()
+            products = session.query(self.__products).filter_by(store_id=store_id).all()
+
+            for product in products:
+                keywords = session.query(Base.metadata.tables['products_keywords']).filter_by(
+                    product_id=product.get_id()).all()
+                product.set_keywords(keywords)
+            session.commit()
+            res = Response(True, ParsableList(products))
+        except Exception as e:
+            session.rollback()
+            res = Response(False, PrimitiveParsable(str(e)))
+        finally:
+            self._rwlock.release_read()
+            Session.remove()
+            return res
