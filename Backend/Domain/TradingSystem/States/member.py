@@ -1,3 +1,6 @@
+import threading
+from datetime import date
+
 from Backend.Domain.TradingSystem.Responsibilities.founder import Founder
 from Backend.Domain.TradingSystem.store import Store
 
@@ -35,6 +38,8 @@ class Member(UserState):
         self._username = username
         self.__responsibilities = responsibilities
         self.__purchase_details = purchase_details
+        self.__notifications: list[str] = []
+        self.notifications_lock = threading.Lock()
         # get cart data from DB
 
     def login(self, username, password):
@@ -233,3 +238,7 @@ class Member(UserState):
     # 4.2
     def get_purchase_policy(self, store_id):
         return self.__responsibilities[store_id].get_purchase_policy()
+
+
+    def add_purchase_rule_history(self, purchase):
+        self.__purchase_details.append(purchase)
