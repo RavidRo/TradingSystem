@@ -1,5 +1,5 @@
 import { Button, Card, CardContent, Typography } from '@material-ui/core';
-import React, {FC,useEffect,useRef} from 'react';
+import React, {FC,useEffect, useState} from 'react';
 import '../styles/ProductSearch.scss';
 import { Link } from 'react-router-dom';
 import useAPI from '../hooks/useAPI';
@@ -13,18 +13,19 @@ type ProductSearchProps = {
     storeID:string,
     quantity:number,
     category:string,
+    keywords:string[],
     clickAddProduct:()=>void,
 };
 
-const ProductSearch: FC<ProductSearchProps> = ({storeID,content,price,quantity,category,clickAddProduct}) => {
+const ProductSearch: FC<ProductSearchProps> = ({storeID,content,price,quantity,category,keywords,clickAddProduct}) => {
 
-    const storeName = useRef<string>("")
+    const [storeName,setStoreName] = useState<string>("")
     const storeObj = useAPI<Store>('/get_store',{store_id:storeID});
     useEffect(()=>{
         if(storeID!==""){
             storeObj.request().then(({data,error,errorMsg})=>{
                 if(!error && data !==null){
-                    storeName.current = data.data.name;
+                    setStoreName(data.data.name);
                 }
                 else{
                     alert(errorMsg)
@@ -32,7 +33,8 @@ const ProductSearch: FC<ProductSearchProps> = ({storeID,content,price,quantity,c
                 
             })
         }
-    },[]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    },[storeID]);
 
 	return (
 		<div className="ProductSearchCard">
@@ -57,6 +59,11 @@ const ProductSearch: FC<ProductSearchProps> = ({storeID,content,price,quantity,c
                         <Typography style={{'marginTop':'5%'}}>
                             Category: {category}
                         </Typography> 
+                        {keywords.length!==0?
+                        <Typography style={{'marginTop':'5%'}}>
+                            Keywords: {keywords}
+                        </Typography> 
+                        :null}
                     </CardContent>
                     <div className="buttonLink">
                         <Button 
@@ -78,7 +85,7 @@ const ProductSearch: FC<ProductSearchProps> = ({storeID,content,price,quantity,c
                             },
                             }}
                         >
-                                {storeName.current}
+                                {storeName}
                         </Link>
                     </div>
                 </Card>

@@ -5,11 +5,12 @@ import FilterMenu from '../components/FilterMenu';
 import SearchCategory from '../components/SearchCategory';
 import Keywards from '../components/Keywards';
 import useAPI from '../hooks/useAPI';
-import {Product,ProductQuantity,Store,StoreToSearchedProducts} from '../types';
+import {Product,ProductQuantity,StoreToSearchedProducts} from '../types';
+import Swal from 'sweetalert2';
 
 type SearchPageProps = {
     location: any,
-    propsAddProduct:(product:Product,storeID:string)=>void,
+    propsAddProduct:(product:Product,storeID:string)=>Promise<boolean>,
 };
 
 
@@ -25,12 +26,11 @@ const SearchPage: FC<SearchPageProps> = ({location,propsAddProduct}) => {
 
     const storeToSearchedProducts = useRef<StoreToSearchedProducts>({});
     const [productsToPresent,setProducts] = useState<ProductQuantity[]>([]);
-    const [stores,setStores] = useState<Store[]>([]);
-    const firstRender = useRef<boolean>(true);
    
     const allCategories = useRef<string[]>([]);
     const storesToProductsObj = useAPI<StoreToSearchedProducts>('/search_products');
     useEffect(()=>{
+        
         storesToProductsObj.request(
             {product_name:searchProduct,category:category,min_price:fromInput,max_price:toInput,kwargs:keyWords})
             .then(({data,error,errorMsg})=>{
@@ -54,21 +54,15 @@ const SearchPage: FC<SearchPageProps> = ({location,propsAddProduct}) => {
                             allCategories.current.push(productQuantities[j][0].category);
                         }
                     }
-                    if(firstRender.current===false){
-                        setProducts(productsToQuantities);
-                    }
-                    else{
-                        setProducts(old=>[...old,...productsToQuantities]);
-                    }
-                    
-                    firstRender.current = false;
                 }
+                setProducts(productsToQuantities);
                 
             }
             else{
                 alert(errorMsg)
             }
         })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     },[searchProduct,category,fromInput,toInput,keyWords]);
 
 
@@ -84,12 +78,21 @@ const SearchPage: FC<SearchPageProps> = ({location,propsAddProduct}) => {
 
     const handleSearch = (toSearch:string,categoryName:string)=>{
         setSearchProduct(toSearch);
-        setCategory(categoryName);
+        setCategory(categoryName==="All"?"":categoryName);
         // all the set methods make useEffect to re-render and ask for server
         // to send new products
     }
     const clickAddProduct = (key:number,storeID:string)=>{
-        propsAddProduct(productsToPresent[key],storeID);
+        let response = propsAddProduct(productsToPresent[key],storeID);
+        response.then((result)=>{
+            if(result===true){
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Congratulations!',
+                    text: 'The item added to cart successfully',
+                  })
+            }
+        })
     }
     const updateKeyWords = (keyWords:string[])=>{
         setKeyWards(keyWords);
@@ -154,6 +157,7 @@ const SearchPage: FC<SearchPageProps> = ({location,propsAddProduct}) => {
                                             price={cell!==undefined?cell.price:0}
                                             quantity={cell!==undefined?cell.quantity:0}
                                             category={cell!==undefined?cell.category:""}
+                                            keywords={cell!==undefined?cell.keywords:""}
                                             clickAddProduct={()=>handleAddToCart(cell!==undefined?findBagIDByProductID(cell.id):"",productsToPresent.indexOf(cell))}
                                         >
                                         </ProductSearch>

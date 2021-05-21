@@ -1,16 +1,16 @@
-import React ,{FC, useEffect, useState,useRef} from 'react';
+import React ,{FC, useEffect, useState} from 'react';
 import FormControl from '@material-ui/core/FormControl';
 import Select from '@material-ui/core/Select';
 import MenuItem from '@material-ui/core/MenuItem';
 import '../styles/StoresView.scss';
 import ProductSearch from '../components/ProductSearch';
-import storesToProducts from '../components/storesProductsMap';
 import useAPI from '../hooks/useAPI';
 import {Product,Store,ProductQuantity} from '../types';
+import Swal from 'sweetalert2';
 
 
 type StoresViewProps = {
-   propsAddProduct:(product:Product,storeID:string)=>void,
+   propsAddProduct:(product:Product,storeID:string)=>Promise<boolean>,
    location: any,
 
 };
@@ -20,9 +20,17 @@ const StoresView: FC<StoresViewProps> = ({propsAddProduct,location}: StoresViewP
     const [presentProducts,setProducts] = useState<ProductQuantity[]>([]);
     const [stores,setStores] = useState<Store[]>([]);
 
+    const gerStoreNameByID = (storeID:string)=>{
+        for(var i=0;i<stores.length;i++){
+            if(stores[i].id===storeID){
+                return stores[i].name;
+            }
+        }
+        return "";
+    }
     // storeID
     const [storeID, setStoreID] = useState<string>(location.state!==undefined?location.state.storeID:"");
-    const storeName = useRef<string>("");
+    const [storeName,setStoreName] = useState<string>(location.state!==undefined?gerStoreNameByID(storeID):"");
     const productsObj = useAPI<Product[]>('/get_products_by_store');
 
     const getQuantityOfProduct = (productID:string,storeID:string)=>{
@@ -37,22 +45,12 @@ const StoresView: FC<StoresViewProps> = ({propsAddProduct,location}: StoresViewP
         }
         return 0;
     }
-    const gerStoreNameByID = (storeID:string)=>{
-        for(var i=0;i<stores.length;i++){
-            if(stores[i].id===storeID){
-                return stores[i].name;
-            }
-        }
-        return "";
-    }
+   
     useEffect(()=>{
-        storeName.current = gerStoreNameByID(storeID);
-        console.log(storeID);
-        if(storeName.current!==""){
-            console.log("hiiiii");
+        if(storeID!==""){
+            setStoreName(gerStoreNameByID(storeID));
             productsObj.request({store_id:storeID}).then(({data,error,errorMsg})=>{
                 if(!error && data !==null){
-                    console.log(data.data);
                     let productsArray:Product[] = data.data;
                     let productQuantityArr:ProductQuantity[] = productsArray.map((product)=>{
                         return {
@@ -72,14 +70,13 @@ const StoresView: FC<StoresViewProps> = ({propsAddProduct,location}: StoresViewP
                 
             })
         }
-    },[storeID]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    },[storeID, storeName]);
 
     const storesObj = useAPI<Store[]>('/get_stores_details');
     useEffect(()=>{
         storesObj.request().then(({data,error,errorMsg})=>{
-            console.log(data,error,errorMsg);
             if(!error && data !==null){
-                console.log(data.data);
                 setStores(data.data);
             }
             else{
@@ -87,7 +84,21 @@ const StoresView: FC<StoresViewProps> = ({propsAddProduct,location}: StoresViewP
             }
             
         })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     },[]);
+
+    const clickAddProduct = (cell:any, storeID:string)=>{
+        let response = propsAddProduct(cell,storeID);
+        response.then((result)=>{
+            if(result===true){
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Congratulations!',
+                    text: 'The item added to cart successfully',
+                  })
+            }
+        })
+    }
 
    const handleChange = (e:any)=>{
       setStoreID(e.target.value);
@@ -118,12 +129,12 @@ const StoresView: FC<StoresViewProps> = ({propsAddProduct,location}: StoresViewP
                 >
                    {stores.map((store)=>{
                       return(
-                        <MenuItem value={store.id} key={Object.keys(storesToProducts).indexOf(store.name)}>{store.name}</MenuItem>
+                        <MenuItem value={store.id} key={stores.indexOf(store)}>{store.name}</MenuItem>
                       )
                    })}
                 </Select>
                 <div className="productCards">
-                    {storeName.current!==""?
+                    {storeID!==""?
                     setProductsInMatrix().map((row,i)=>{
                         return(
                             <div className="cardsRow">
@@ -137,7 +148,8 @@ const StoresView: FC<StoresViewProps> = ({propsAddProduct,location}: StoresViewP
                                             price={cell!==undefined?cell.price:0}
                                             quantity={cell!==undefined?cell.quantity:0}
                                             category ={cell!==undefined?cell.category:""}
-                                            clickAddProduct={()=>propsAddProduct(cell,storeID)}
+                                            keywords ={cell!==undefined?cell.keywords:""}
+                                            clickAddProduct={()=>clickAddProduct(cell,storeID)}
                                         >
                                         </ProductSearch>
                                     )

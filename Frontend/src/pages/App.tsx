@@ -1,7 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { BrowserRouter, Switch, Route, Redirect } from 'react-router-dom';
 import { createMuiTheme, ThemeProvider } from '@material-ui/core';
-// import { w3cwebsocket as W3CWebSocket } from 'websocket';
 
 import Home from './Home';
 import Cart from './Cart';
@@ -12,9 +11,10 @@ import MyStores from './MyStores';
 import SearchPage from './SearchPage';
 import StoresView from '../pages/StoresView';
 import Purchase from '../pages/Purchase';
-import { Product, ProductQuantity, StoreToSearchedProducts } from '../types';
+import { Product, StoreToSearchedProducts } from '../types';
 import useAPI from '../hooks/useAPI';
 import { CookieContext } from '../contexts';
+import Notifications from '../pages/Notifications';
 
 const theme = createMuiTheme({
 	typography: {
@@ -43,48 +43,44 @@ function App() {
 	const [username, setUsername] = useState<string>('Guest');
 	const { request } = useAPI<{ cookie: string }>('/get_cookie');
 	const [cookie, setCookie] = useState<string>('');
-	const [productsInCart, setProducts] = useState<ProductQuantity[]>([]);
-
 	const [notifications, setNotifications] = useState<string[]>([]);
-
-	type storesToProductsMapType = {
-		[key: string]: Product[];
-	};
-
 	const storesToProducts = useRef<StoreToSearchedProducts>({});
-	const storesProducts = useAPI<storesToProductsMapType>('/search_product', {});
-	// useEffect(() => {
-	// 	const client = new W3CWebSocket('ws://127.0.0.1:5000/connect');
-	// 	client.onopen = () => {
-	// 		console.log('WebSocket Client Connected');
-	// 	};
-	// 	client.onmessage = (message) => {
-	// 		setNotifications((old) => [...old, JSON.stringify(message)]);
-	// 	};
-	// }, []);
 
-	const getStoreByProductID = (id: string) => {
-		for (var i = 0; i < Object.keys(storesToProducts).length; i++) {
-			for (var j = 0; j < Object.values(storesToProducts)[i].length; j++) {
-				if (Object.values(storesToProducts)[i][j].id === id) {
-					return Object.keys(storesToProducts)[i];
+
+	useEffect(() => {
+		getCookie().then((cookie)=>{
+			if(cookie){
+				const client = new WebSocket('ws://127.0.0.1:5000/connect');
+				client.onopen = () => {
+					alert('WebSocket Client Opened');
+					client.send(cookie); // have to be here - else socket.receive in server gets stuck
+				};
+				client.onmessage = (messageEvent) => {
+					setNotifications((old) => [...old, messageEvent.data]);
+					alert("received socket message");
+				};
+				client.onclose = ()=>{
+					alert("connection closed!");
 				}
 			}
-		}
-	};
+		})
+	// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, []);
+
 	const productObj = useAPI<Product[]>('/save_product_in_cart', {}, 'POST');
 	const productUpdateObj = useAPI<Product[]>('/change_product_quantity_in_cart', {}, 'POST');
 
 	const addProductToPopup = (product: Product, storeID: string) => {
-		console.log(storesToProducts);
-
 		let found = false;
 		let quantity = 1;
-		for (var i = 0; i < Object.values(productsInCart).length; i++) {
-			if (Object.values(productsInCart)[i].id === product.id) {
-				Object.values(productsInCart)[i].quantity += 1;
-				quantity = productsInCart[i].quantity + 1;
-				found = true;
+		console.log(storesToProducts)
+		for (var i = 0; i < Object.values(storesToProducts.current).length; i++) {
+			let tuplesArr = Object.values(storesToProducts.current)[i];
+			for (var j = 0; j < tuplesArr.length; j++) {
+				if(tuplesArr[j][0].id === product.id){
+					quantity =tuplesArr[j][1] + 1;
+					found = true;
+				}
 			}
 		}
 		if (!found) {
@@ -102,8 +98,7 @@ function App() {
 			} else {
 				storesToProducts.current[storeID] = [[newProduct, 1]];
 			}
-			console.log(storeID);
-			productObj
+			return productObj
 				.request({
 					cookie: cookie,
 					store_id: storeID,
@@ -113,22 +108,15 @@ function App() {
 				.then(({ data, error, errorMsg }) => {
 					if (!error && data !== null) {
 						// do nothing
-						void 0;
+						return true;
 					} else {
 						alert(errorMsg);
+						return false;
 					}
 				});
-			setProducts((oldArray) => [...oldArray, newProduct]);
-		} else {
-			let tuplesArr = storesToProducts.current[storeID];
-			for (var i = 0; i < tuplesArr.length; i++) {
-				if (tuplesArr[i][0].id === product.id) {
-					tuplesArr[i][1] += 1;
-				}
-			}
-			storesToProducts.current[storeID] = tuplesArr;
-
-			productUpdateObj
+		}
+		else {
+			return productUpdateObj
 				.request({
 					cookie: cookie,
 					store_id: storeID,
@@ -137,18 +125,55 @@ function App() {
 				})
 				.then(({ data, error, errorMsg }) => {
 					if (!error && data !== null) {
-						// do nothing
-						void 0;
-					} else {
+
+						let tuplesArr = storesToProducts.current[storeID];
+						for (var i = 0; i < tuplesArr.length; i++) {
+							if (tuplesArr[i][0].id === product.id) {
+								tuplesArr[i][1] += 1;
+							}
+						}
+						storesToProducts.current[storeID] = tuplesArr;
+						return true;
+					} 
+					else {
+						console.log("now here")
 						alert(errorMsg);
+						return false;
 					}
 				});
 		}
 	};
+
+	const propUpdateStores = (map:StoreToSearchedProducts)=>{
+		storesToProducts.current = map;
+	}
+	const productQuantityObj = useAPI<void>('/change_product_quantity_in_cart',{},'POST');
+    const changeQuantity = (storeID:string, productID: string, newQuantity: number)=>{
+        return productQuantityObj.request({cookie:cookie,store_id:storeID,product_id:productID,quantity:newQuantity}).then(({data,error,errorMsg})=>{
+            if(!error && data!==null){
+
+				let tuplesArr = storesToProducts.current[storeID];
+				for (var i = 0; i < tuplesArr.length; i++) {
+					if (tuplesArr[i][0].id === productID) {
+						tuplesArr[i][1]  = newQuantity;
+					}
+				}
+				storesToProducts.current[storeID] = tuplesArr;
+                return true;
+            }
+            else{
+                alert(errorMsg);
+				return false;
+            }
+        })
+    }
 	const getQuantityOfProduct = (productID: string) => {
-		for (var i = 0; i < productsInCart.length; i++) {
-			if (productsInCart[i].id === productID) {
-				return productsInCart[i].quantity;
+		for (var i = 0; i < Object.values(storesToProducts.current).length; i++) {
+			let tuplesArr = Object.values(storesToProducts.current)[i];
+			for (var j = 0; j < tuplesArr.length; j++) {
+				if(tuplesArr[j][0].id === productID){
+					return tuplesArr[j][1] ;
+				}
 			}
 		}
 	};
@@ -156,7 +181,7 @@ function App() {
 	const productRemoveObj = useAPI<Product[]>('/remove_product_from_cart', {}, 'POST');
 	const handleDeleteProduct = (product: Product | null, storeID: string) => {
 		if (product !== null) {
-			productRemoveObj
+			return productRemoveObj
 				.request({
 					cookie: cookie,
 					product_id: product.id,
@@ -165,34 +190,50 @@ function App() {
 				})
 				.then(({ data, error, errorMsg }) => {
 					if (!error && data !== null) {
-						// do nothing
-						void 0;
+						let tupleArr = storesToProducts.current[storeID];
+						if(tupleArr.length === 1){ // removed the only item from this bag
+							tupleArr = [];
+						}
+						else{
+							let index = 0;
+							for (var i = 0; i < tupleArr.length; i++) {
+								if (tupleArr[i][0].id === product.id) {
+									index = i;
+								}
+							}
+							tupleArr.splice(index, 1);
+						}
+						storesToProducts.current[storeID] = tupleArr;
+						return true;
 					}
-					alert(errorMsg);
+					else{
+						alert(errorMsg);
+						return false;
+					}
 				});
-			setProducts(Object.values(productsInCart).filter((item) => item.id !== product.id));
-			let tupleArr = storesToProducts.current[storeID];
-			for (var i = 0; i < tupleArr.length; i++) {
-				if (tupleArr[i][0].id === product.id) {
-					tupleArr[i][1] = 0;
-				}
-			}
-			storesToProducts.current[storeID] = tupleArr;
+			
 		}
+		return false;
 	};
 
 	const getCookie = () => {
-		request({}, (data, error) => {
+		return request({}).then(({data, error}) => {
 			if (!error && data !== null) {
 				setCookie(data.data.cookie);
+				return data.data.cookie;
 			}
 		});
 	};
 
-	useEffect(() => {
-		getCookie();
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, []);
+	const getPropsCookie = ()=>{
+		return cookie;
+	}
+
+	// useEffect(() => {
+	// 	getCookie();
+	// 	// eslint-disable-next-line react-hooks/exhaustive-deps
+	// }, []);
+	
 
 	return cookie !== '' ? (
 		<ThemeProvider theme={theme}>
@@ -200,16 +241,16 @@ function App() {
 				<BrowserRouter>
 					<Navbar
 						signedIn={signedIn}
-						products={productsInCart}
 						storesToProducts={storesToProducts.current}
 						propHandleDelete={handleDeleteProduct}
-						propHandleAdd={addProductToPopup}
 						notifications={notifications}
+						changeQuantity={changeQuantity}
 						logout={() => {
 							setSignedIn(false);
 							setCookie('');
 							getCookie();
 						}}
+						propUpdateStores={propUpdateStores}
 					/>
 					<Switch>
 						<Route path="/" exact component={Home} />
@@ -219,9 +260,12 @@ function App() {
 							render={(props) => (
 								<Cart
 									{...props}
-									products={productsInCart}
 									storesToProducts={storesToProducts.current}
 									handleDeleteProduct={handleDeleteProduct}
+									propHandleAdd={addProductToPopup}								
+									changeQuantity={changeQuantity}
+									getPropsCookie={getPropsCookie}
+									propUpdateStores={propUpdateStores}
 								/>
 							)}
 						/>
@@ -251,6 +295,7 @@ function App() {
 							)}
 						/>
 						<Route path="/Purchase" exact component={Purchase} />
+						<Route path="/Notifications" exact component={Notifications} />
 						<Route path="/searchPage" exact component={SearchPage} />
 						{signedIn ? (
 							<Route
