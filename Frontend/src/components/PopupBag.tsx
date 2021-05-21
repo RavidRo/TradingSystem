@@ -31,6 +31,7 @@ const PopupBag: FC<PopupBagProps> = ({storeID,products,propHandleDelete,changeQu
             else{
                 alert(errorMsg);
             }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     })},[]);
 
     const shouldPresent = ()=>{

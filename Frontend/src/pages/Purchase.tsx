@@ -1,5 +1,5 @@
 import { Button, TextField } from '@material-ui/core';
-import React, { FC,useState, useEffect} from 'react';
+import React, { FC,useState, useEffect, useRef} from 'react';
 import '../styles/Purchase.scss';
 import Timer from '../components/Timer';
 import useAPI from '../hooks/useAPI';
@@ -12,7 +12,7 @@ type PurchaseProps = {
 };
 
 const Purchase: FC<PurchaseProps> = ({location}) => {
-	const [totalAmount,setTotal] = useState<number>(location.state!==undefined?location.state.totalAmount:0);
+	const totalAmount = useRef<number>(location.state!==undefined?location.state.totalAmount:0);
     const [credit,setCredit] = useState<string>("");
     const [address,setAddress] = useState<string>("");
     // const [age,setAge] = useState<string>("");
@@ -27,6 +27,7 @@ const Purchase: FC<PurchaseProps> = ({location}) => {
     useEffect(() => {
         window.addEventListener("beforeunload", handleUnload);
         return () => window.removeEventListener("beforeunload", handleUnload);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
       }, [handleUnload]);
 
    
@@ -87,7 +88,7 @@ const Purchase: FC<PurchaseProps> = ({location}) => {
                    
                 </div>
                 <h3 className="totalPurchase">
-                    Total amount : {totalAmount}
+                    Total amount : {totalAmount.current}
                 </h3>
                 <div className="buttonsDiv">
                     <Button 

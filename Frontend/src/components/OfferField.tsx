@@ -1,5 +1,5 @@
 import { Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, TextField } from '@material-ui/core';
-import React ,{FC, useEffect, useState,useRef} from 'react';
+import React ,{FC, useState} from 'react';
 import '../styles/OfferField.scss';
 
 

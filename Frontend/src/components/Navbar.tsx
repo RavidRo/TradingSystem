@@ -12,7 +12,7 @@ import {
 import '../styles/Navbar.scss';
 import config from '../config';
 import PopupCart from '../components/PopupCart';
-import { Product, ProductQuantity, StoreToSearchedProducts } from '../types';
+import { Product, StoreToSearchedProducts } from '../types';
 import { Badge, IconButton} from '@material-ui/core';
 
 type NavBarProps = {

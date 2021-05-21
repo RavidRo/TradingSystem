@@ -28,11 +28,13 @@ const Bag: FC<BagProps> = ({storeID,products,propHandleDelete,changeQuantity,pro
             else{
                 alert(errorMsg);
             }
+	// eslint-disable-next-line react-hooks/exhaustive-deps
     })},[]);
 
     useEffect(()=>{
         setProducts(products);
 		setTotal(calculateTotal());
+	// eslint-disable-next-line react-hooks/exhaustive-deps
     },[products]);
 
 	const calculateTotal = ()=>{

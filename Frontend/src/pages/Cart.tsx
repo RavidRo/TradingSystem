@@ -2,7 +2,7 @@ import React, { FC, useState , useEffect} from 'react';
 import '../styles/Cart.scss';
 import Bag from '../components/Bag';
 import { Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, TextField } from '@material-ui/core';
-import {Product,ProductQuantity,ShoppingCart,ShoppingBag,StoreToSearchedProducts, ProductToQuantity} from '../types';
+import {Product,ShoppingCart,StoreToSearchedProducts, ProductToQuantity} from '../types';
 import useAPI from '../hooks/useAPI';
 import { useHistory } from "react-router-dom";
 import Swal from 'sweetalert2';
@@ -66,6 +66,7 @@ const Cart: FC<CartProps> = ({storesToProducts,handleDeleteProduct, propHandleAd
                 alert(errorMsg)
             }
         })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     },[storesToProducts]);
 
     const calculateTotal = ()=>{

@@ -1,10 +1,9 @@
-import React ,{FC, useEffect, useState,useRef} from 'react';
+import React ,{FC, useEffect, useState} from 'react';
 import FormControl from '@material-ui/core/FormControl';
 import Select from '@material-ui/core/Select';
 import MenuItem from '@material-ui/core/MenuItem';
 import '../styles/StoresView.scss';
 import ProductSearch from '../components/ProductSearch';
-import storesToProducts from '../components/storesProductsMap';
 import useAPI from '../hooks/useAPI';
 import {Product,Store,ProductQuantity} from '../types';
 import Swal from 'sweetalert2';
@@ -71,6 +70,7 @@ const StoresView: FC<StoresViewProps> = ({propsAddProduct,location}: StoresViewP
                 
             })
         }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     },[storeID, storeName]);
 
     const storesObj = useAPI<Store[]>('/get_stores_details');
@@ -84,6 +84,7 @@ const StoresView: FC<StoresViewProps> = ({propsAddProduct,location}: StoresViewP
             }
             
         })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     },[]);
 
     const clickAddProduct = (cell:any, storeID:string)=>{
@@ -128,7 +129,7 @@ const StoresView: FC<StoresViewProps> = ({propsAddProduct,location}: StoresViewP
                 >
                    {stores.map((store)=>{
                       return(
-                        <MenuItem value={store.id} key={Object.keys(storesToProducts).indexOf(store.name)}>{store.name}</MenuItem>
+                        <MenuItem value={store.id} key={stores.indexOf(store)}>{store.name}</MenuItem>
                       )
                    })}
                 </Select>

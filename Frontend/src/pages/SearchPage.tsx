@@ -5,7 +5,7 @@ import FilterMenu from '../components/FilterMenu';
 import SearchCategory from '../components/SearchCategory';
 import Keywards from '../components/Keywards';
 import useAPI from '../hooks/useAPI';
-import {Product,ProductQuantity,Store,StoreToSearchedProducts} from '../types';
+import {Product,ProductQuantity,StoreToSearchedProducts} from '../types';
 import Swal from 'sweetalert2';
 
 type SearchPageProps = {
@@ -26,8 +26,6 @@ const SearchPage: FC<SearchPageProps> = ({location,propsAddProduct}) => {
 
     const storeToSearchedProducts = useRef<StoreToSearchedProducts>({});
     const [productsToPresent,setProducts] = useState<ProductQuantity[]>([]);
-    const [stores,setStores] = useState<Store[]>([]);
-    const firstRender = useRef<boolean>(true);
    
     const allCategories = useRef<string[]>([]);
     const storesToProductsObj = useAPI<StoreToSearchedProducts>('/search_products');
@@ -64,6 +62,7 @@ const SearchPage: FC<SearchPageProps> = ({location,propsAddProduct}) => {
                 alert(errorMsg)
             }
         })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     },[searchProduct,category,fromInput,toInput,keyWords]);
 
 

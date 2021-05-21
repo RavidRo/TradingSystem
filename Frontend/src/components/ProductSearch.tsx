@@ -1,5 +1,5 @@
 import { Button, Card, CardContent, Typography } from '@material-ui/core';
-import React, {FC,useEffect,useRef, useState} from 'react';
+import React, {FC,useEffect, useState} from 'react';
 import '../styles/ProductSearch.scss';
 import { Link } from 'react-router-dom';
 import useAPI from '../hooks/useAPI';
@@ -33,6 +33,7 @@ const ProductSearch: FC<ProductSearchProps> = ({storeID,content,price,quantity,c
                 
             })
         }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     },[storeID]);
 
 	return (

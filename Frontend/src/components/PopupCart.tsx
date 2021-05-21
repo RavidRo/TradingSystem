@@ -1,8 +1,8 @@
 
-import React ,{FC, useEffect, useState,useRef} from 'react';
+import React ,{FC, useEffect, useState} from 'react';
 import '../styles/PopupCart.scss';
 import PopupBag from '../components/PopupBag';
-import {Product,ProductQuantity,ShoppingBag,ShoppingCart,ProductToQuantity,StoreToSearchedProducts,Store} from '../types';
+import {Product,ProductQuantity,ShoppingCart,ProductToQuantity,StoreToSearchedProducts} from '../types';
 import useAPI from '../hooks/useAPI';
 
 type PopupCartProps = {
@@ -91,6 +91,7 @@ const PopupCart: FC<PopupCartProps> = ({storesToProducts,propHandleDelete,change
                 alert(errorMsg)
             }
         })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     },[storesToProducts]);
 
     return (

@@ -1,7 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { BrowserRouter, Switch, Route, Redirect } from 'react-router-dom';
 import { createMuiTheme, ThemeProvider } from '@material-ui/core';
-import { w3cwebsocket as W3CWebSocket } from 'websocket';
 
 import Home from './Home';
 import Cart from './Cart';
@@ -12,7 +11,7 @@ import MyStores from './MyStores';
 import SearchPage from './SearchPage';
 import StoresView from '../pages/StoresView';
 import Purchase from '../pages/Purchase';
-import { Product, ProductQuantity, StoreToSearchedProducts } from '../types';
+import { Product, StoreToSearchedProducts } from '../types';
 import useAPI from '../hooks/useAPI';
 import { CookieContext } from '../contexts';
 import Notifications from '../pages/Notifications';
@@ -47,11 +46,7 @@ function App() {
 	const [notifications, setNotifications] = useState<string[]>([]);
 	const storesToProducts = useRef<StoreToSearchedProducts>({});
 
-	type storesToProductsMapType = {
-		[key: string]: Product[];
-	};
 
-	const storesProducts = useAPI<storesToProductsMapType>('/search_product', {});
 	useEffect(() => {
 		getCookie().then((cookie)=>{
 			if(cookie){
@@ -69,6 +64,7 @@ function App() {
 				}
 			}
 		})
+	// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
 
 	const productObj = useAPI<Product[]>('/save_product_in_cart', {}, 'POST');
