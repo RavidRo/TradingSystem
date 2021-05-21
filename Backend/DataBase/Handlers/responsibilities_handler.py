@@ -15,7 +15,7 @@
 #         super().__init__(ReadWriteLock())
 #
 #         self.__responsibilities = Table('responsibilities', Base.metadata,
-#                                         Column('user_name', String(50), ForeignKey('members.username'),
+#                                         Column('username', String(50), ForeignKey('members.username'),
 #                                                primary_key=True),
 #                                         Column('store_id', String(50), ForeignKey('stores.store_id'), primary_key=True),
 #                                         Column('parent_user_name', String(50)),

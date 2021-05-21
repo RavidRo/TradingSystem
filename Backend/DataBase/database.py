@@ -1,7 +1,7 @@
 from datetime import date
 
 from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker, declarative_base, scoped_session
+from sqlalchemy.orm import sessionmaker, declarative_base
 
 # create an engine
 
@@ -11,7 +11,6 @@ SQLAlchemy_DATABASE_URI = 'postgresql://nklfongbputsdr' \
 engine = create_engine(SQLAlchemy_DATABASE_URI)
 
 # create a configured "Session" class
-Session = scoped_session(sessionmaker(bind=engine, autocommit=False, autoflush=False))
-""":type: sqlalchemy.orm.scoped_session"""
+Session = sessionmaker(bind=engine, autocommit=False, autoflush=False)
 
 Base = declarative_base()

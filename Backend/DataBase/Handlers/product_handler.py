@@ -141,3 +141,11 @@ class ProductHandler(IHandler):
             session.close()
             self._rwlock.release_read()
             return res
+
+
+# if __name__ == '__main__':
+#     product_handler = ProductHandler.get_instance()
+#     # product_handler.save(Product("Watermelon", "Fruit", 5, ["Watery"]), quantity=8, store_id="c6ba8b7c-c284-4334-baa1-346827534068")
+#     res = product_handler.load_products_by_store("c6ba8b7c-c284-4334-baa1-346827534068")
+#     if not res.succeeded():
+#         print(res.get_msg())

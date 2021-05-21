@@ -50,6 +50,9 @@ class Responsibility(Parsable):
             self._store.subscribe(subscriber)
         self._appointed: list[Responsibility] = []
 
+    def get_user_state(self):
+        return self._user_state
+
     # 4.1
     # Creating a new product a the store
     def add_product(

@@ -18,7 +18,7 @@ class PurchaseDetailsHandler(IHandler):
         super().__init__(ReadWriteLock())
 
         self.__purchase_details = Table('purchase_details', Base.metadata,
-                                        Column('user_name', String(50), ForeignKey('members.username'),
+                                        Column('username', String(50), ForeignKey('members.username'),
                                                primary_key=True),
                                         Column('store_id', String(50), ForeignKey('stores.store_id'), primary_key=True),
                                         Column('store_name', String(50)),
@@ -28,7 +28,7 @@ class PurchaseDetailsHandler(IHandler):
                                         )
 
         mapper(PurchaseDetails, self.__purchase_details, properties={
-            'user_name': self.__purchase_details.c.user_name,
+            'username': self.__purchase_details.c.username,
             'store_name': self.__purchase_details.c.store_name,
             'store_id': self.__purchase_details.c.store_id,
             'product_names': self.__purchase_details.c.product_names,
@@ -50,7 +50,7 @@ class PurchaseDetailsHandler(IHandler):
         session = Session(expire_on_commit=False)
         res = Response(True)
         try:
-            stmt = insert(self.__purchase_details).values(user_name=obj.user_name,
+            stmt = insert(self.__purchase_details).values(username=obj.username,
                                                           store_id=obj.store_id,
                                                           store_name=obj.store_name,
                                                           product_names=obj.product_names,
@@ -76,7 +76,7 @@ class PurchaseDetailsHandler(IHandler):
         session = Session(expire_on_commit=False)
         res = Response(True)
         try:
-            user = session.query(PurchaseDetails).filter(PurchaseDetails.user_name == user_name).all()
+            user = session.query(PurchaseDetails).filter(PurchaseDetails.username == user_name).all()
             session.commit()
             res = Response(True, user)
         except Exception as e:

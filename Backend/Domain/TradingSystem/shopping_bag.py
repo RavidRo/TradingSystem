@@ -153,7 +153,7 @@ class ShoppingBag(IShoppingBag):
             prod.get_name() for product_id, (prod, quantity) in self.__pending_products_to_quantity.items()
         ]
         self.__pending_products_to_quantity.clear()
-        purchase_details = PurchaseDetails(user_name, self.__store.get_name(), product_names, datetime.now(),
+        purchase_details = PurchaseDetails(user_name, self.__store.get_name(), self.__store.get_id(), product_names, datetime.now(),
                                            self.__pending_price)
         self.__store.update_store_history(purchase_details)
         return purchase_details
