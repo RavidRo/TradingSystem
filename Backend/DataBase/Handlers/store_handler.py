@@ -24,7 +24,6 @@ class StoreHandler(IHandler):
         mapper(Store, self.__stores, properties={
             "_Store__id": self.__stores.c.store_id,
             "_Store__name": self.__stores.c.store_name,
-            "_Store__responsibility": relationship(Responsibility, uselist=False)
         })
 
     @staticmethod

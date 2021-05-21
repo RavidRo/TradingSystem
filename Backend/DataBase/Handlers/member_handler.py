@@ -1,6 +1,6 @@
 from threading import Lock
 
-from sqlalchemy import Table, Column, String, Boolean, insert, ForeignKey
+from sqlalchemy import Table, Column, String, Boolean, insert, ForeignKey, ARRAY
 from sqlalchemy.orm import mapper, relationship
 
 from Backend.DataBase.IHandler import IHandler
@@ -28,6 +28,7 @@ class MemberHandler(IHandler):
                                Column('username', String(50), primary_key=True),
                                Column('password', String(50)),
                                Column('is_admin', Boolean(20)),
+                               Column('notifications', ARRAY(String(256)))
                                )
 
         mapper(Member, self.__members, properties={
