@@ -50,7 +50,7 @@ const StoresView: FC<StoresViewProps> = ({ propsAddProduct, location }: StoresVi
 	useEffect(() => {
 		if (storeID !== '') {
 			setStoreName(gerStoreNameByID(storeID));
-			productsObj.request({ store_id: storeID }).then(({ data, error, errorMsg }) => {
+			productsObj.request({ store_id: storeID }).then(({ data, error }) => {
 				if (!error && data !== null) {
 					let productsArray: Product[] = data.data;
 					let productQuantityArr: ProductQuantity[] = productsArray.map((product) => {
@@ -64,8 +64,6 @@ const StoresView: FC<StoresViewProps> = ({ propsAddProduct, location }: StoresVi
 						};
 					});
 					setProducts(productQuantityArr);
-				} else {
-					alert(errorMsg);
 				}
 			});
 		}
@@ -74,11 +72,9 @@ const StoresView: FC<StoresViewProps> = ({ propsAddProduct, location }: StoresVi
 
 	const storesObj = useAPI<Store[]>('/get_stores_details');
 	useEffect(() => {
-		storesObj.request().then(({ data, error, errorMsg }) => {
+		storesObj.request().then(({ data, error }) => {
 			if (!error && data !== null) {
 				setStores(data.data);
-			} else {
-				alert(errorMsg);
 			}
 		});
 		// eslint-disable-next-line react-hooks/exhaustive-deps

@@ -35,7 +35,7 @@ const SearchPage: FC<SearchPageProps> = ({ location, propsAddProduct }) => {
 				max_price: toInput,
 				kwargs: keyWords,
 			})
-			.then(({ data, error, errorMsg }) => {
+			.then(({ data, error }) => {
 				if (!error && data !== null) {
 					storeToSearchedProducts.current = data.data;
 					let productsToQuantities: ProductQuantity[] = [];
@@ -56,8 +56,6 @@ const SearchPage: FC<SearchPageProps> = ({ location, propsAddProduct }) => {
 						}
 					}
 					setProducts(productsToQuantities);
-				} else {
-					alert(errorMsg);
 				}
 			});
 		// eslint-disable-next-line react-hooks/exhaustive-deps

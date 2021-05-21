@@ -43,7 +43,7 @@ const Cart: FC<CartProps> = ({
 	const cartObj = useAPI<ShoppingCart>('/get_cart_details');
 	const productObj = useAPI<Product>('/get_product');
 	useEffect(() => {
-		cartObj.request().then(({ data, error, errorMsg }) => {
+		cartObj.request().then(({ data, error }) => {
 			if (!error && data !== null) {
 				let bags = data.data.bags;
 				let map: { [storeID: string]: ProductToQuantity[] } = {};
@@ -59,12 +59,10 @@ const Cart: FC<CartProps> = ({
 
 						let promise = productObj
 							.request({ product_id: productID, store_id: storeID })
-							.then(({ data, error, errorMsg }) => {
+							.then(({ data, error }) => {
 								if (!error && data !== null) {
 									let product = data.data;
 									tuplesArr.push([product, quantity]);
-								} else {
-									alert(errorMsg);
 								}
 							});
 						promises.push(promise);
@@ -76,8 +74,6 @@ const Cart: FC<CartProps> = ({
 					propUpdateStores(map);
 					setTotalAmount(calculateTotal());
 				});
-			} else {
-				alert(errorMsg);
 			}
 		});
 		// eslint-disable-next-line react-hooks/exhaustive-deps
@@ -168,7 +164,7 @@ const Cart: FC<CartProps> = ({
 	);
 
 	const handleOK = () => {
-		discountObj.request().then(({ data, error, errorMsg }) => {
+		discountObj.request().then(({ data, error }) => {
 			if (!error && data !== null) {
 				let prevCost = totalAmount;
 				if (data.data < prevCost) {
@@ -179,8 +175,6 @@ const Cart: FC<CartProps> = ({
 					alert('No discount for you :(');
 					setLink(true);
 				}
-			} else {
-				alert(errorMsg);
 			}
 		});
 		setOpen(false);

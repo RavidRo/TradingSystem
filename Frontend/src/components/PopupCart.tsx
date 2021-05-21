@@ -86,8 +86,6 @@ const PopupCart: FC<PopupCartProps> = ({
 								if (!error && data !== null) {
 									let product = data.data;
 									tuplesArr.push([product, quantity]);
-								} else {
-									alert(errorMsg);
 								}
 							});
 						promises.push(promise);
@@ -98,8 +96,6 @@ const PopupCart: FC<PopupCartProps> = ({
 					setStoresProducts(map);
 					propUpdateStores(map);
 				});
-			} else {
-				alert(errorMsg);
 			}
 		});
 		// eslint-disable-next-line react-hooks/exhaustive-deps

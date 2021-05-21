@@ -62,8 +62,6 @@ const Purchase: FC<PurchaseProps> = ({ location }) => {
 			if (!error && data !== null) {
 				// go back to cart
 				history.goBack();
-			} else {
-				alert(errorMsg);
 			}
 		});
 	};

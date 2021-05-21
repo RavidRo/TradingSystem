@@ -28,12 +28,10 @@ const Bag: FC<BagProps> = ({
 		storeIDToNameObj.request().then(({ data, error, errorMsg }) => {
 			if (!error && data !== null) {
 				setStoreName(data.data.name);
-			} else {
-				alert(errorMsg);
 			}
-			// eslint-disable-next-line react-hooks/exhaustive-deps
 		});
-	}, []);
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [storeIDToNameObj]);
 
 	useEffect(() => {
 		setProducts(products);

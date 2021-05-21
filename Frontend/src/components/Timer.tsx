@@ -1,5 +1,5 @@
 import React, { FC, useState } from 'react';
-import useInterval from '../components/useInterval';
+import useInterval from '../hooks/useInterval';
 import '../styles/Timer.scss';
 
 type TimerProps = {};
@@ -24,11 +24,11 @@ const Timer: FC<TimerProps> = () => {
 		}
 	};
 	return (
-		<div className="timerDiv">
+		<div className='timerDiv'>
 			<h3>
 				Time left for entering details:
 				<div
-					className="timer"
+					className='timer'
 					style={{ border: '#ff0000', borderWidth: '3px', borderStyle: 'solid' }}
 				>
 					<h3>{stringOfTime()}</h3>

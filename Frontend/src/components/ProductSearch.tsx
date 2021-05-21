@@ -31,8 +31,6 @@ const ProductSearch: FC<ProductSearchProps> = ({
 			storeObj.request().then(({ data, error, errorMsg }) => {
 				if (!error && data !== null) {
 					setStoreName(data.data.name);
-				} else {
-					alert(errorMsg);
 				}
 			});
 		}

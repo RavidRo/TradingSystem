@@ -51,15 +51,15 @@ function App() {
 			if (cookie) {
 				const client = new WebSocket('ws://127.0.0.1:5000/connect');
 				client.onopen = () => {
-					alert('WebSocket Client Opened');
+					// alert('WebSocket Client Opened');
 					client.send(cookie); // have to be here - else socket.receive in server gets stuck
 				};
 				client.onmessage = (messageEvent) => {
 					setNotifications((old) => [...old, messageEvent.data]);
-					alert('received socket message');
+					// alert('received socket message');
 				};
 				client.onclose = () => {
-					alert('connection closed!');
+					// alert('connection closed!');
 				};
 			}
 		});
@@ -109,7 +109,6 @@ function App() {
 						// do nothing
 						return true;
 					} else {
-						alert(errorMsg);
 						return false;
 					}
 				});
@@ -132,7 +131,6 @@ function App() {
 						storesToProducts.current[storeID] = tuplesArr;
 						return true;
 					} else {
-						alert(errorMsg);
 						return false;
 					}
 				});
@@ -162,7 +160,6 @@ function App() {
 					storesToProducts.current[storeID] = tuplesArr;
 					return true;
 				} else {
-					alert(errorMsg);
 					return false;
 				}
 			});
@@ -188,7 +185,7 @@ function App() {
 					store_id: storeID,
 					quantity: getQuantityOfProduct(product.id),
 				})
-				.then(({ data, error, errorMsg }) => {
+				.then(({ data, error }) => {
 					if (!error && data !== null) {
 						let tupleArr = storesToProducts.current[storeID];
 						if (tupleArr.length === 1) {
@@ -206,7 +203,6 @@ function App() {
 						storesToProducts.current[storeID] = tupleArr;
 						return true;
 					} else {
-						alert(errorMsg);
 						return false;
 					}
 				});
