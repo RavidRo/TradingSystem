@@ -24,7 +24,7 @@ const PopupCart: FC<PopupCartProps> = ({
 }: PopupCartProps) => {
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	const [storesToProductsMy, setStoresProducts] =
-		useState<StoreToSearchedProducts>(storesToProducts);
+		useState<StoreToSearchedProducts>({});
 
 	//helper function to present the products and give the to bag nicely
 	const productQuantityOfTuples = (tuples: ProductToQuantity[]) => {
@@ -66,7 +66,7 @@ const PopupCart: FC<PopupCartProps> = ({
 	const cartObj = useAPI<ShoppingCart>('/get_cart_details');
 	const productObj = useAPI<Product>('/get_product');
 	useEffect(() => {
-		cartObj.request().then(({ data, error, errorMsg }) => {
+		cartObj.request().then(({ data, error }) => {
 			if (!error && data !== null) {
 				let bags = data.data.bags;
 				let map: { [storeID: string]: ProductToQuantity[] } = {};
@@ -82,7 +82,7 @@ const PopupCart: FC<PopupCartProps> = ({
 
 						let promise = productObj
 							.request({ product_id: productID, store_id: storeID })
-							.then(({ data, error, errorMsg }) => {
+							.then(({ data, error }) => {
 								if (!error && data !== null) {
 									let product = data.data;
 									tuplesArr.push([product, quantity]);
