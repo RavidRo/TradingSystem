@@ -1,14 +1,15 @@
 import React, { FC } from 'react';
 
-import { IconButton, ListItem, ListItemSecondaryAction, ListItemText } from '@material-ui/core';
+import { ListItem, ListItemSecondaryAction, ListItemText } from '@material-ui/core';
 import DeleteForeverOutlinedIcon from '@material-ui/icons/DeleteForeverOutlined';
+import EditIcon from '@material-ui/icons/Edit';
 
 import useAPI from '../../hooks/useAPI';
 import { ProductQuantity } from '../../types';
 import ProductDetails from '../DetailsWindows/ProductDetails';
-import CreateProductForm from '../FormWindows/CreateProductForm';
-// import '../styles/ProductsList.scss';
+import ProductForm from '../FormWindows/ProductForm';
 import GenericList from './GenericList';
+import SecondaryActionButton from './SecondaryActionButton';
 
 type ProductsListProps = {
 	products: ProductQuantity[];
@@ -29,6 +30,12 @@ const ProductsList: FC<ProductsListProps> = ({
 
 	const deleteProductAPI = useAPI<null>(
 		'/remove_product_from_store',
+		{ store_id: storeId },
+		'POST'
+	);
+	const editProductAPI = useAPI<null>('/edit_product_details', { store_id: storeId }, 'POST');
+	const editProductQuantityAPI = useAPI<null>(
+		'/change_product_quantity',
 		{ store_id: storeId },
 		'POST'
 	);
@@ -65,9 +72,88 @@ const ProductsList: FC<ProductsListProps> = ({
 				}
 			});
 	};
+	const handleEditProduct = (
+		id: string,
+		name: string,
+		price: number,
+		quantity: number,
+		category: string,
+		keywords: string[]
+	) => {
+		editProductAPI
+			.request({
+				product_id: id,
+				store_id: storeId,
+				new_name: name,
+				new_price: price,
+				new_category: category,
+				keywords: keywords,
+			})
+			.then((createProduct) => {
+				if (!createProduct.error && createProduct.data !== null) {
+					setProducts(
+						products.map((product) =>
+							product.id === id
+								? {
+										id,
+										category,
+										keywords,
+										name,
+										price,
+										quantity: product.quantity,
+								  }
+								: product
+						)
+					);
+				}
+				editProductQuantityAPI
+					.request({
+						product_id: id,
+						quantity,
+					})
+					.then((editProduct) => {
+						if (!editProduct.error && editProduct.data !== null) {
+							setProducts(
+								products.map((product) =>
+									product.id === id
+										? {
+												id,
+												category,
+												keywords,
+												name,
+												price,
+												quantity,
+										  }
+										: product
+								)
+							);
+						}
+					});
+			});
+	};
 
-	const openProductForm = () => {
-		openTab(() => <CreateProductForm onSubmit={handleCreateProduct} />, '');
+	const openProductForm = (productToEdit: ProductQuantity | undefined = undefined) => {
+		openTab(
+			() => (
+				<ProductForm
+					onSubmit={
+						productToEdit
+							? (name, price, quantity, category, keywords) =>
+									handleEditProduct(
+										productToEdit.id,
+										name,
+										price,
+										quantity,
+										category,
+										keywords
+									)
+							: handleCreateProduct
+					}
+					productEditing={productToEdit}
+				/>
+			),
+			''
+		);
 	};
 
 	const onSelectProduct = (product: ProductQuantity) => {
@@ -87,12 +173,12 @@ const ProductsList: FC<ProductsListProps> = ({
 	return (
 		<GenericList
 			data={products}
-			onCreate={openProductForm}
+			onCreate={() => openProductForm()}
 			header="Products"
 			createTxt="+ Add a new product"
 			narrow
 		>
-			{(product) => (
+			{(product: ProductQuantity) => (
 				<ListItem
 					key={product.id}
 					selected={selectedItem === product.id}
@@ -101,10 +187,13 @@ const ProductsList: FC<ProductsListProps> = ({
 				>
 					<ListItemText primary={product.name} className="first-field" />
 					<ListItemText primary={`in stock: ${product.quantity}`} />
-					<ListItemSecondaryAction onClick={() => onDelete(product.id)}>
-						<IconButton edge="end" aria-label="delete">
+					<ListItemSecondaryAction>
+						<SecondaryActionButton onClick={() => openProductForm(product)}>
+							<EditIcon />
+						</SecondaryActionButton>
+						<SecondaryActionButton onClick={() => onDelete(product.id)}>
 							<DeleteForeverOutlinedIcon />
-						</IconButton>
+						</SecondaryActionButton>
 					</ListItemSecondaryAction>
 				</ListItem>
 			)}

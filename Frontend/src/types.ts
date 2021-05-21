@@ -6,12 +6,15 @@ export type Product = {
 	keywords: string[];
 };
 export type ProductQuantity = Product & { quantity: number };
-export type StoreToSearchedProducts = {[storeID:string] : ProductToQuantity[]};
-export type ProductToQuantity = [Product,number];
+export type StoreToSearchedProducts = { [storeID: string]: ProductToQuantity[] };
+export type ProductToQuantity = [Product, number];
 export type Store = { id: string; name: string; ids_to_quantities: { [key: string]: number } };
-export type ShoppingCart = {bags:ShoppingBag[]};
-export type ShoppingBag = {store_id: string, store_name:string, product_ids_to_quantities: {[productId:string] : number}};
-
+export type ShoppingCart = { bags: ShoppingBag[] };
+export type ShoppingBag = {
+	store_id: string;
+	store_name: string;
+	product_ids_to_quantities: { [productId: string]: number };
+};
 
 export type Permission =
 	| 'manage products'
@@ -34,6 +37,19 @@ export const allPermissions: Permission[] = [
 	'manage discount policy',
 ];
 
+export function permissionToString(permission: Permission) {
+	const map: { [key in Permission]: string } = {
+		'appoint manager': 'Appoint managers',
+		'get appointments': 'Get appointments',
+		'get history': 'Get purchase history',
+		'manage products': 'Manager products',
+		'remove manager': 'Remove managers',
+		'manage purchase policy': 'Manager purchase policy',
+		'manage discount policy': 'Manager discount policy',
+	};
+	return map[permission];
+}
+
 export type Role = 'Founder' | 'Owner' | 'Manager';
 export type Appointee = {
 	store_id: string;
@@ -42,7 +58,7 @@ export type Appointee = {
 	role: Role;
 	appointees: Appointee[];
 	permissions: Permission[];
-	isManager: boolean;
+	is_manager: boolean;
 };
 
 // * Condition

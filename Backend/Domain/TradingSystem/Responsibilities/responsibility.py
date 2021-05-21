@@ -28,13 +28,13 @@ Permission = enum.Enum(
 )
 
 name_to_permission: dict[str, Permission] = {
-    "manage_products": Permission.MANAGE_PRODUCTS,
-    "get_appointments": Permission.GET_APPOINTMENTS,
-    "appoint_manager": Permission.APPOINT_MANAGER,
-    "remove_manager": Permission.REMOVE_MANAGER,
-    "get_history": Permission.GET_HISTORY,
-    "manage_purchase_policy": Permission.MANAGE_PURCHASE_POLICY,
-    "manage_discount_policy": Permission.MANAGE_DISCOUNT_POLICY,
+    "manage products": Permission.MANAGE_PRODUCTS,
+    "get appointments": Permission.GET_APPOINTMENTS,
+    "appoint manager": Permission.APPOINT_MANAGER,
+    "remove manager": Permission.REMOVE_MANAGER,
+    "get history": Permission.GET_HISTORY,
+    "manage purchase policy": Permission.MANAGE_PURCHASE_POLICY,
+    "manage discount policy": Permission.MANAGE_DISCOUNT_POLICY,
 }
 
 

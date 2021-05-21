@@ -46,25 +46,24 @@ function App() {
 	const [notifications, setNotifications] = useState<string[]>([]);
 	const storesToProducts = useRef<StoreToSearchedProducts>({});
 
-
 	useEffect(() => {
-		getCookie().then((cookie)=>{
-			if(cookie){
+		getCookie().then((cookie) => {
+			if (cookie) {
 				const client = new WebSocket('ws://127.0.0.1:5000/connect');
 				client.onopen = () => {
-					alert('WebSocket Client Opened');
+					// alert('WebSocket Client Opened');
 					client.send(cookie); // have to be here - else socket.receive in server gets stuck
 				};
 				client.onmessage = (messageEvent) => {
 					setNotifications((old) => [...old, messageEvent.data]);
-					alert("received socket message");
+					// alert('received socket message');
 				};
-				client.onclose = ()=>{
-					alert("connection closed!");
-				}
+				client.onclose = () => {
+					// alert('connection closed!');
+				};
 			}
-		})
-	// eslint-disable-next-line react-hooks/exhaustive-deps
+		});
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
 
 	const productObj = useAPI<Product[]>('/save_product_in_cart', {}, 'POST');
@@ -73,12 +72,12 @@ function App() {
 	const addProductToPopup = (product: Product, storeID: string) => {
 		let found = false;
 		let quantity = 1;
-		console.log(storesToProducts)
+		console.log(storesToProducts);
 		for (var i = 0; i < Object.values(storesToProducts.current).length; i++) {
 			let tuplesArr = Object.values(storesToProducts.current)[i];
 			for (var j = 0; j < tuplesArr.length; j++) {
-				if(tuplesArr[j][0].id === product.id){
-					quantity =tuplesArr[j][1] + 1;
+				if (tuplesArr[j][0].id === product.id) {
+					quantity = tuplesArr[j][1] + 1;
 					found = true;
 				}
 			}
@@ -110,12 +109,10 @@ function App() {
 						// do nothing
 						return true;
 					} else {
-						alert(errorMsg);
 						return false;
 					}
 				});
-		}
-		else {
+		} else {
 			return productUpdateObj
 				.request({
 					cookie: cookie,
@@ -125,7 +122,6 @@ function App() {
 				})
 				.then(({ data, error, errorMsg }) => {
 					if (!error && data !== null) {
-
 						let tuplesArr = storesToProducts.current[storeID];
 						for (var i = 0; i < tuplesArr.length; i++) {
 							if (tuplesArr[i][0].id === product.id) {
@@ -134,45 +130,46 @@ function App() {
 						}
 						storesToProducts.current[storeID] = tuplesArr;
 						return true;
-					} 
-					else {
-						console.log("now here")
-						alert(errorMsg);
+					} else {
 						return false;
 					}
 				});
 		}
 	};
 
-	const propUpdateStores = (map:StoreToSearchedProducts)=>{
+	const propUpdateStores = (map: StoreToSearchedProducts) => {
 		storesToProducts.current = map;
-	}
-	const productQuantityObj = useAPI<void>('/change_product_quantity_in_cart',{},'POST');
-    const changeQuantity = (storeID:string, productID: string, newQuantity: number)=>{
-        return productQuantityObj.request({cookie:cookie,store_id:storeID,product_id:productID,quantity:newQuantity}).then(({data,error,errorMsg})=>{
-            if(!error && data!==null){
-
-				let tuplesArr = storesToProducts.current[storeID];
-				for (var i = 0; i < tuplesArr.length; i++) {
-					if (tuplesArr[i][0].id === productID) {
-						tuplesArr[i][1]  = newQuantity;
+	};
+	const productQuantityObj = useAPI<void>('/change_product_quantity_in_cart', {}, 'POST');
+	const changeQuantity = (storeID: string, productID: string, newQuantity: number) => {
+		return productQuantityObj
+			.request({
+				cookie: cookie,
+				store_id: storeID,
+				product_id: productID,
+				quantity: newQuantity,
+			})
+			.then(({ data, error, errorMsg }) => {
+				if (!error && data !== null) {
+					let tuplesArr = storesToProducts.current[storeID];
+					for (var i = 0; i < tuplesArr.length; i++) {
+						if (tuplesArr[i][0].id === productID) {
+							tuplesArr[i][1] = newQuantity;
+						}
 					}
+					storesToProducts.current[storeID] = tuplesArr;
+					return true;
+				} else {
+					return false;
 				}
-				storesToProducts.current[storeID] = tuplesArr;
-                return true;
-            }
-            else{
-                alert(errorMsg);
-				return false;
-            }
-        })
-    }
+			});
+	};
 	const getQuantityOfProduct = (productID: string) => {
 		for (var i = 0; i < Object.values(storesToProducts.current).length; i++) {
 			let tuplesArr = Object.values(storesToProducts.current)[i];
 			for (var j = 0; j < tuplesArr.length; j++) {
-				if(tuplesArr[j][0].id === productID){
-					return tuplesArr[j][1] ;
+				if (tuplesArr[j][0].id === productID) {
+					return tuplesArr[j][1];
 				}
 			}
 		}
@@ -188,13 +185,13 @@ function App() {
 					store_id: storeID,
 					quantity: getQuantityOfProduct(product.id),
 				})
-				.then(({ data, error, errorMsg }) => {
+				.then(({ data, error }) => {
 					if (!error && data !== null) {
 						let tupleArr = storesToProducts.current[storeID];
-						if(tupleArr.length === 1){ // removed the only item from this bag
+						if (tupleArr.length === 1) {
+							// removed the only item from this bag
 							tupleArr = [];
-						}
-						else{
+						} else {
 							let index = 0;
 							for (var i = 0; i < tupleArr.length; i++) {
 								if (tupleArr[i][0].id === product.id) {
@@ -205,19 +202,16 @@ function App() {
 						}
 						storesToProducts.current[storeID] = tupleArr;
 						return true;
-					}
-					else{
-						alert(errorMsg);
+					} else {
 						return false;
 					}
 				});
-			
 		}
 		return false;
 	};
 
 	const getCookie = () => {
-		return request({}).then(({data, error}) => {
+		return request({}).then(({ data, error }) => {
 			if (!error && data !== null) {
 				setCookie(data.data.cookie);
 				return data.data.cookie;
@@ -225,15 +219,14 @@ function App() {
 		});
 	};
 
-	const getPropsCookie = ()=>{
+	const getPropsCookie = () => {
 		return cookie;
-	}
+	};
 
 	// useEffect(() => {
 	// 	getCookie();
 	// 	// eslint-disable-next-line react-hooks/exhaustive-deps
 	// }, []);
-	
 
 	return cookie !== '' ? (
 		<ThemeProvider theme={theme}>
@@ -253,23 +246,23 @@ function App() {
 						propUpdateStores={propUpdateStores}
 					/>
 					<Switch>
-						<Route path="/" exact component={Home} />
+						<Route path='/' exact component={Home} />
 						<Route
-							path="/cart"
+							path='/cart'
 							exact
 							render={(props) => (
 								<Cart
 									{...props}
 									storesToProducts={storesToProducts.current}
 									handleDeleteProduct={handleDeleteProduct}
-									propHandleAdd={addProductToPopup}								
+									propHandleAdd={addProductToPopup}
 									changeQuantity={changeQuantity}
 									getPropsCookie={getPropsCookie}
 									propUpdateStores={propUpdateStores}
 								/>
 							)}
 						/>
-						<Route path="/sign-in" exact>
+						<Route path='/sign-in' exact>
 							{() => (
 								<SignIn
 									onSignIn={(username) => {
@@ -279,32 +272,32 @@ function App() {
 								/>
 							)}
 						</Route>
-						<Route path="/sign-up" exact component={SignUp} />
+						<Route path='/sign-up' exact component={SignUp} />
 						<Route
-							path="/searchPage"
+							path='/searchPage'
 							exact
 							render={(props) => (
 								<SearchPage {...props} propsAddProduct={addProductToPopup} />
 							)}
 						/>
 						<Route
-							path="/storesView"
+							path='/storesView'
 							exact
 							render={(props) => (
 								<StoresView {...props} propsAddProduct={addProductToPopup} />
 							)}
 						/>
-						<Route path="/Purchase" exact component={Purchase} />
-						<Route path="/Notifications" exact component={Notifications} />
-						<Route path="/searchPage" exact component={SearchPage} />
+						<Route path='/Purchase' exact component={Purchase} />
+						<Route path='/Notifications' exact component={Notifications} />
+						<Route path='/searchPage' exact component={SearchPage} />
 						{signedIn ? (
 							<Route
-								path="/my-stores"
+								path='/my-stores'
 								exact
 								render={(props) => <MyStores {...props} username={username} />}
 							/>
 						) : (
-							<Redirect to="/" />
+							<Redirect to='/' />
 						)}
 						<Route render={() => <h1>404: page not found</h1>} />
 					</Switch>
