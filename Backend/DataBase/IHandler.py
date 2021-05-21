@@ -21,7 +21,7 @@ class IHandler(ABC):
             session.rollback()
             res = Response(False, msg=str(e))
         finally:
-            Session.remove()
+            session.close()
             self._rwlock.release_write()
             return res
 
@@ -36,7 +36,7 @@ class IHandler(ABC):
             session.rollback()
             res = Response(False, msg=str(e))
         finally:
-            Session.remove()
+            session.close()
             self._rwlock.release_write()
             return res
 

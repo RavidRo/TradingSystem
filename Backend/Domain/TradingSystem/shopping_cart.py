@@ -23,6 +23,9 @@ class ShoppingCart(IShoppingCart):
     def get_shopping_bags(self):
         return self.__shopping_bags
 
+    def add_bags(self, bags: dict[str, ShoppingBag]):
+        self.__shopping_bags.update(bags)
+
     def cancel_timer(self):
         self.__timer.cancel()
 
