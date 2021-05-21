@@ -1,15 +1,15 @@
-import React, { FC, useEffect, useState, useRef } from 'react';
+import React, { FC, useEffect, useState } from 'react';
 import FormControl from '@material-ui/core/FormControl';
 import Select from '@material-ui/core/Select';
 import MenuItem from '@material-ui/core/MenuItem';
 import '../styles/StoresView.scss';
 import ProductSearch from '../components/ProductSearch';
-import storesToProducts from '../components/storesProductsMap';
 import useAPI from '../hooks/useAPI';
 import { Product, Store, ProductQuantity } from '../types';
+import Swal from 'sweetalert2';
 
 type StoresViewProps = {
-	propsAddProduct: (product: Product, storeID: string) => void;
+	propsAddProduct: (product: Product, storeID: string) => Promise<boolean>;
 	location: any;
 };
 
@@ -17,36 +17,39 @@ const StoresView: FC<StoresViewProps> = ({ propsAddProduct, location }: StoresVi
 	const [presentProducts, setProducts] = useState<ProductQuantity[]>([]);
 	const [stores, setStores] = useState<Store[]>([]);
 
+	const gerStoreNameByID = (storeID: string) => {
+		for (var i = 0; i < stores.length; i++) {
+			if (stores[i].id === storeID) {
+				return stores[i].name;
+			}
+		}
+		return '';
+	};
 	// storeID
 	const [storeID, setStoreID] = useState<string>(
 		location.state !== undefined ? location.state.storeID : ''
 	);
-	const storeName = useRef<string>('');
+	const [storeName, setStoreName] = useState<string>(
+		location.state !== undefined ? gerStoreNameByID(storeID) : ''
+	);
 	const productsObj = useAPI<Product[]>('/get_products_by_store');
-	useEffect(() => {
-		const getQuantityOfProduct = (productID: string, storeID: string) => {
-			for (var i = 0; i < stores.length; i++) {
-				if (stores[i].id === storeID) {
-					for (var j = 0; j < Object.keys(stores[i].ids_to_quantities).length; j++) {
-						if (Object.keys(stores[i].ids_to_quantities)[j] === productID) {
-							return Object.values(stores[i].ids_to_quantities)[j];
-						}
+
+	const getQuantityOfProduct = (productID: string, storeID: string) => {
+		for (var i = 0; i < stores.length; i++) {
+			if (stores[i].id === storeID) {
+				for (var j = 0; j < Object.keys(stores[i].ids_to_quantities).length; j++) {
+					if (Object.keys(stores[i].ids_to_quantities)[j] === productID) {
+						return Object.values(stores[i].ids_to_quantities)[j];
 					}
 				}
 			}
-			return 0;
-		};
-		const gerStoreNameByID = (storeID: string) => {
-			for (var i = 0; i < stores.length; i++) {
-				if (stores[i].id === storeID) {
-					return stores[i].name;
-				}
-			}
-			return '';
-		};
+		}
+		return 0;
+	};
 
-		storeName.current = gerStoreNameByID(storeID);
-		if (storeName.current !== '') {
+	useEffect(() => {
+		if (storeID !== '') {
+			setStoreName(gerStoreNameByID(storeID));
 			productsObj.request({ store_id: storeID }).then(({ data, error, errorMsg }) => {
 				if (!error && data !== null) {
 					let productsArray: Product[] = data.data;
@@ -62,12 +65,12 @@ const StoresView: FC<StoresViewProps> = ({ propsAddProduct, location }: StoresVi
 					});
 					setProducts(productQuantityArr);
 				} else {
-					// alert(errorMsg);
+					alert(errorMsg);
 				}
 			});
 		}
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [storeID]);
+	}, [storeID, storeName]);
 
 	const storesObj = useAPI<Store[]>('/get_stores_details');
 	useEffect(() => {
@@ -75,11 +78,24 @@ const StoresView: FC<StoresViewProps> = ({ propsAddProduct, location }: StoresVi
 			if (!error && data !== null) {
 				setStores(data.data);
 			} else {
-				// alert(errorMsg);
+				alert(errorMsg);
 			}
 		});
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
+
+	const clickAddProduct = (cell: any, storeID: string) => {
+		let response = propsAddProduct(cell, storeID);
+		response.then((result) => {
+			if (result === true) {
+				Swal.fire({
+					icon: 'success',
+					title: 'Congratulations!',
+					text: 'The item added to cart successfully',
+				});
+			}
+		});
+	};
 
 	const handleChange = (e: any) => {
 		setStoreID(e.target.value);
@@ -99,7 +115,7 @@ const StoresView: FC<StoresViewProps> = ({ propsAddProduct, location }: StoresVi
 		return matrix;
 	};
 	return (
-		<div className="StoresDiv">
+		<div className='StoresDiv'>
 			<FormControl
 				style={{ marginLeft: '5%', width: '100%', fontSize: 'large', height: '94%' }}
 			>
@@ -111,20 +127,17 @@ const StoresView: FC<StoresViewProps> = ({ propsAddProduct, location }: StoresVi
 				>
 					{stores.map((store) => {
 						return (
-							<MenuItem
-								value={store.id}
-								key={Object.keys(storesToProducts).indexOf(store.name)}
-							>
+							<MenuItem value={store.id} key={stores.indexOf(store)}>
 								{store.name}
 							</MenuItem>
 						);
 					})}
 				</Select>
-				<div className="productCards">
-					{storeName.current !== '' ? (
+				<div className='productCards'>
+					{storeID !== '' ? (
 						setProductsInMatrix().map((row, i) => {
 							return (
-								<div className="cardsRow">
+								<div className='cardsRow'>
 									{row.map((cell, j) => {
 										return (
 											<ProductSearch
@@ -134,8 +147,9 @@ const StoresView: FC<StoresViewProps> = ({ propsAddProduct, location }: StoresVi
 												price={cell !== undefined ? cell.price : 0}
 												quantity={cell !== undefined ? cell.quantity : 0}
 												category={cell !== undefined ? cell.category : ''}
+												keywords={cell !== undefined ? cell.keywords : ''}
 												clickAddProduct={() =>
-													propsAddProduct(cell, storeID)
+													clickAddProduct(cell, storeID)
 												}
 											></ProductSearch>
 										);
@@ -144,7 +158,7 @@ const StoresView: FC<StoresViewProps> = ({ propsAddProduct, location }: StoresVi
 							);
 						})
 					) : (
-						<div className="placeHolder"></div>
+						<div className='placeHolder'></div>
 					)}
 				</div>
 			</FormControl>

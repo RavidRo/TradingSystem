@@ -12,35 +12,33 @@ import {
 import '../styles/Navbar.scss';
 import config from '../config';
 import PopupCart from '../components/PopupCart';
-import { Product, ProductQuantity, StoreToSearchedProducts } from '../types';
-import { Badge, Divider, Fade, IconButton, List, ListItemText, Paper } from '@material-ui/core';
+import { Product, StoreToSearchedProducts } from '../types';
+import { Badge, IconButton} from '@material-ui/core';
 
 type NavBarProps = {
 	signedIn: boolean;
-	products: ProductQuantity[];
 	storesToProducts: StoreToSearchedProducts;
-	propHandleDelete: (product: Product, storeID: string) => void;
-	propHandleAdd: (product: Product, storeID: string) => void;
+	propHandleDelete: (product: Product, storeID: string) => Promise<boolean> | boolean;
 	notifications: string[];
+	changeQuantity:(store:string,product:string,quan:number)=>Promise<boolean>;
 	logout: () => void;
+	propUpdateStores:(map:StoreToSearchedProducts)=>void,
 };
 
-const Navbar: FC<NavBarProps> = ({
-	signedIn,
-	products,
-	storesToProducts,
-	propHandleDelete,
-	notifications,
-	propHandleAdd,
-	logout,
-}) => {
+const Navbar: FC<NavBarProps> = ({signedIn,storesToProducts,propHandleDelete,notifications,changeQuantity,logout,propUpdateStores}) => {
 	const [hoverCart, setHoverCart] = useState<boolean>(false);
-	const [productsInCart, setProducts] = useState<ProductQuantity[]>(products);
-	const [openNotifications, setOpenNotifications] = useState<boolean>(false);
+    const [storesToProductsMy,setStoresProducts] = useState<StoreToSearchedProducts>(storesToProducts);
+	const [myNotifications, setNotifications] = useState<string[]>(notifications);
 
-	useEffect(() => {
-		setProducts(products);
-	}, [products]);
+	useEffect(()=>{
+		setNotifications((old)=>[...old, ...notifications]);
+	},[notifications]);
+
+
+	useEffect(()=>{
+		setStoresProducts(storesToProducts);
+	},[storesToProducts]);
+
 
 	return (
 		<div className="navbar">
@@ -60,10 +58,10 @@ const Navbar: FC<NavBarProps> = ({
 					</Link>
 					{hoverCart ? (
 						<PopupCart
-							products={productsInCart}
-							storesToProducts={storesToProducts}
-							propHandleAdd={propHandleAdd}
+							storesToProducts={storesToProductsMy}
 							propHandleDelete={propHandleDelete}
+							changeQuantity={changeQuantity}
+							propUpdateStores={propUpdateStores}
 						/>
 					) : null}
 				</div>
@@ -94,30 +92,21 @@ const Navbar: FC<NavBarProps> = ({
 					)}
 				</div>
 				<div className="navbar-item">
-					<IconButton
-						color={'inherit'}
-						onClick={() => setOpenNotifications((open) => !open)}
+					<Link 
+						className="item-link" 
+						to={{
+                            pathname: '/Notifications',
+                            state: {
+                                notifications: myNotifications
+                            },
+                            }}
 					>
-						<Badge badgeContent={notifications.length} showZero color="primary">
-							<FontAwesomeIcon className="item-icon" icon={faBell} />
-						</Badge>
-					</IconButton>
-					<Fade in={openNotifications}>
-						<Paper className="notification-cont">
-							<List component="ul">
-								{notifications.map((notification, index) => (
-									<>
-										<ListItemText
-											primary={notification}
-											className="notification"
-											key={index}
-										/>
-										<Divider key={index} />
-									</>
-								))}
-							</List>
-						</Paper>
-					</Fade>
+						<IconButton color={'inherit'}>
+							<Badge badgeContent={myNotifications.length} showZero color="primary">
+								<FontAwesomeIcon className="item-icon" icon={faBell} />
+							</Badge>
+						</IconButton>
+					</Link>
 				</div>
 			</nav>
 		</div>

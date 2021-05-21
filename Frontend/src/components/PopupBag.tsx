@@ -2,28 +2,51 @@
 import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@material-ui/core';
 import React ,{FC, useEffect, useState} from 'react';
 import ProductPopup from '../components/ProductPopup';
-import {Product,ProductQuantity} from '../types';
+import {Product,ProductQuantity,Store} from '../types';
+import useAPI from '../hooks/useAPI';
 
 type PopupBagProps = {
-    storeName:string,
     storeID:string,
     products:ProductQuantity[],
-    propHandleDelete:(productID:string)=>void,
-    propHandleAdd:(product:Product,storeID:string)=>void;
+    propHandleDelete:(product:Product)=>Promise<boolean> | boolean,
+    changeQuantity:(store:string,product:string,quan:number)=>Promise<boolean>,
 
    
 };
-const PopupBag: FC<PopupBagProps> = ({storeName,storeID,products,propHandleAdd,propHandleDelete}:PopupBagProps) => {
+const PopupBag: FC<PopupBagProps> = ({storeID,products,propHandleDelete,changeQuantity}:PopupBagProps) => {
 
     const [productsInCart,setProducts] = useState<ProductQuantity[]>(products);
+    const [storeName,setStoreName] =  useState<string>("");
 	
     useEffect(()=>{
         setProducts(products);
     },[products]);
 
+    const storeIDToNameObj = useAPI<Store>('/get_store',{store_id:storeID});
+    useEffect(()=>{
+        storeIDToNameObj.request().then(({ data, error, errorMsg }) => {
+            if (!error && data !== null) {
+                setStoreName(data.data.name);
+            }
+            else{
+                alert(errorMsg);
+            }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    })},[]);
+
+    const shouldPresent = ()=>{
+        for(var i=0; i<productsInCart.length; i++){
+            if(productsInCart[i].quantity>0){
+                return true;
+            }
+        }
+        return false; //all products in cart have quantity 0
+    }
+   
+ 
 
     return (
-		
+        shouldPresent()?
 		<div className="PopupBag">
             <h3>
                 {storeName}
@@ -48,7 +71,7 @@ const PopupBag: FC<PopupBagProps> = ({storeName,storeID,products,propHandleAdd,p
                                 keywords={p.keywords}
                                 category={p.category}
                                 propHandleDelete={propHandleDelete}
-                                propHandleAdd={(product:Product)=>propHandleAdd(product,storeID)}
+                                changeQuantity={(productID,newQuantity)=>changeQuantity(storeID,productID,newQuantity)}
                                 key={Object.values(productsInCart).indexOf(p)}
                                 />
                             ))}
@@ -58,6 +81,7 @@ const PopupBag: FC<PopupBagProps> = ({storeName,storeID,products,propHandleAdd,p
             </h3>
             
 		</div>
+        :null
 	);
 }
 
