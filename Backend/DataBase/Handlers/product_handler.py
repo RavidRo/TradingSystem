@@ -133,10 +133,10 @@ class ProductHandler(IHandler):
         try:
             products = session.query(Product).filter_by(store_id=store_id).all()
             session.commit()
-            res = Response(True, ParsableList(products))
+            res = {product.get_id(): (product, product.quantity) for product in products}
         except Exception as e:
             session.rollback()
-            res = Response(False, msg=str(e))
+            res = str(e)
         finally:
             session.close()
             self._rwlock.release_read()

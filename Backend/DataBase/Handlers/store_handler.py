@@ -1,17 +1,13 @@
 from datetime import date
 
-from sqlalchemy import Table, Column, String, insert
+from sqlalchemy import Table, Column, String
 from sqlalchemy.orm import mapper, relationship
-
-from Backend.DataBase.Handlers.member_handler import MemberHandler
 from Backend.DataBase.Handlers.product_handler import ProductHandler
-from Backend.DataBase.Handlers.purchase_details_handler import PurchaseDetailsHandler
 from Backend.DataBase.IHandler import IHandler
-from Backend.DataBase.database import Base, Session, engine
-from Backend.Domain.TradingSystem.Responsibilities.responsibility import Responsibility
+from Backend.DataBase.database import Base, Session
 from Backend.Domain.TradingSystem.purchase_details import PurchaseDetails
 from Backend.Domain.TradingSystem.store import Store
-from Backend.response import Response
+from Backend.response import Response, ParsableList
 
 from Backend.rw_lock import ReadWriteLock
 from threading import Lock
@@ -89,8 +85,15 @@ class StoreHandler(IHandler):
 
             # TODO: load root rule using purchase_rule_handler.load(), add it to store
 
-            session.commit()
-            res = Response(True, store)
+            loaded_products = self.__product_handler.load_products_by_store(id)
+            if type(loaded_products) != str:
+                store.set_products(loaded_products)
+                res = Response(True, store)
+                session.commit()
+
+            else:
+                res = Response(False, msg=loaded_products)
+                session.rollback()
         except Exception as e:
             session.rollback()
             res = Response(False, msg=str(e))
@@ -100,27 +103,62 @@ class StoreHandler(IHandler):
             return res
 
     def load_all(self):
-        pass
+        self._rwlock.acquire_read()
+        session = Session(expire_on_commit=False)
+        res = Response(True)
+        try:
+            stores = session.query(Store).all()
+            succesfully_loaded = True
+            for store in stores:
+                # TODO: load responsibility using responsibility_handler.load_by_store_id(), add it to store
+
+                # TODO: load root discount using discount_handler.load(), add it to store
+
+                # TODO: load root rule using purchase_rule_handler.load(), add it to store
+
+                loaded_products = self.__product_handler.load_products_by_store(store.get_id())
+                if type(loaded_products) != str:
+                    store.set_products(loaded_products)
+
+                else:
+                    session.rollback()
+                    succesfully_loaded = False
+                    res = Response(False, msg=loaded_products)
+                    break
+            if succesfully_loaded:
+                res = Response(True, obj= ParsableList(stores))
+                session.commit()
+
+            else:
+                session.rollback()
+
+        except Exception as e:
+            session.rollback()
+            res = Response(False, msg=str(e))
+        finally:
+            session.close()
+            self._rwlock.release_read()
+            return res
 
 
-if __name__ == "__main__":
-    store_handler = StoreHandler.get_instance()
-    purchase_details_handler = PurchaseDetailsHandler.get_instance()
-    member_handler = MemberHandler.get_instance()
-    Base.metadata.create_all(engine)
-    # store = Store("store")
-    # store._Store__purchase_history = [
-    #     PurchaseDetails("Sean", "store", "abc", ["Banana", "Melon"], date(2000, 4, 13), 22),
-    #     PurchaseDetails("Inon", "store", "abc", ["PineApple", "Grapes"], date(2000, 4, 14), 25)]
-    #
-    # store.add_product("Oranges", "Fruit", 5, 8, ["Yummy", "Orange"])
-    # res = store_handler.save(store)
-
-    res = store_handler.load("c6ba8b7c-c284-4334-baa1-346827534068")
-    if not res.succeeded():
-        print(res.get_msg())
-    else:
-        print(res.get_obj())
+# if __name__ == "__main__":
+#     store_handler = StoreHandler.get_instance()
+#     purchase_details_handler = PurchaseDetailsHandler.get_instance()
+#     member_handler = MemberHandler.get_instance()
+#     Base.metadata.create_all(engine)
+#     # store = Store("store")
+#     # store._Store__purchase_history = [
+#     #     PurchaseDetails("Sean", "store", "abc", ["Banana", "Melon"], date(2000, 4, 13), 22),
+#     #     PurchaseDetails("Inon", "store", "abc", ["PineApple", "Grapes"], date(2000, 4, 14), 25)]
+#     #
+#     # store.add_product("Oranges", "Fruit", 5, 8, ["Yummy", "Orange"])
+#     # res = store_handler.save(store)
+#
+#     res = store_handler.load("c6ba8b7c-c284-4334-baa1-346827534068")
+#     if not res.succeeded():
+#         print(res.get_msg())
+#     else:
+#         print(res.get_obj())
 
     # purchase_details_hadnler = PurchaseDetailsHandler()
     # member_handler = MemberHandler.get_instance()

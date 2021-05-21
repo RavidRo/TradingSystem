@@ -13,6 +13,7 @@ class UserState(ABC):
     def set_user(self, user):
         self._user = user
 
+
     @abstractmethod
     def get_username(self):
         return Response(False, msg="Abstract Method")

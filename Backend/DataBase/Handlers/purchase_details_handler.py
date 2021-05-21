@@ -62,7 +62,7 @@ class PurchaseDetailsHandler(IHandler):
             session.rollback()
             res = Response(False, msg=str(e))
         finally:
-            Session.remove()
+            session.close()
             self._rwlock.release_write()
             return res
 
@@ -83,7 +83,7 @@ class PurchaseDetailsHandler(IHandler):
             session.rollback()
             res = Response(False, PrimitiveParsable(str(e)))
         finally:
-            Session.remove()
+            session.close()
             self._rwlock.release_write()
             return res
 
@@ -100,7 +100,7 @@ class PurchaseDetailsHandler(IHandler):
             session.rollback()
             res = Response(False, PrimitiveParsable(str(e)))
         finally:
-            Session.remove()
+            session.close()
             self._rwlock.release_write()
             return res
 
@@ -123,6 +123,6 @@ class PurchaseDetailsHandler(IHandler):
             session.rollback()
             res = Response(False, PrimitiveParsable(str(e)))
         finally:
-            Session.remove()
+            session.close()
             self._rwlock.release_write()
             return res

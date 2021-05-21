@@ -35,6 +35,9 @@ class Store(Parsable):
     def get_responsibility(self) -> Responsibility:
         return self.__responsibility
 
+    def set_products(self, products_to_quantities: dict[str, tuple[Product, int]]):
+        self._products_to_quantities = products_to_quantities
+
     def parse(self):
         id_to_quantity = {}
         for id, (_, quantity) in self._products_to_quantities.items():

@@ -1,8 +1,8 @@
 from threading import Lock
-
-from sqlalchemy import Table, Column, String, Boolean, insert, ForeignKey, ARRAY
+from sqlalchemy import Table, Column, String, Boolean, insert, ARRAY
 from sqlalchemy.orm import mapper, relationship
-
+from Backend.DataBase.Handlers.purchase_details_handler import PurchaseDetailsHandler
+from Backend.DataBase.Handlers.store_handler import StoreHandler
 from Backend.DataBase.IHandler import IHandler
 from Backend.DataBase.database import Base, Session, engine
 from Backend.Domain.TradingSystem.States.member import Member
@@ -17,13 +17,6 @@ class MemberHandler(IHandler):
 
     def __init__(self):
         super().__init__(ReadWriteLock())
-
-        # self.__notifications = Table('notifications', Base.metadata,
-        #                              Column('id', String(50), primary_key=True, autoincrement=True),
-        #                              Column('receiver_username', String(50), ForeignKey('members.username')),
-        #                              Column('msg', String(50))
-        #                              )
-
         self.__members = Table('members', Base.metadata,
                                Column('username', String(50), primary_key=True),
                                Column('password', String(50)),
@@ -32,11 +25,9 @@ class MemberHandler(IHandler):
                                )
 
         mapper(Member, self.__members, properties={
-            '_Member__username': self.__members.c.username,
+            '_username': self.__members.c.username,
             # '_Member__responsibilities': relationship(Base.metadata.tables['responsibilities'], cascade="all, delete",
             #                                           passive_deletes=True, lazy='joined'),
-            # '_Member__notifications': relationship(Base.metadata.tables['notifications'], cascade="all, delete",
-            #                                        passive_deletes=True, lazy='joined'),
             '_Member__purchase_details': relationship(PurchaseDetails, cascade="all, delete",
                                                       passive_deletes=True, lazy='joined'),
         })
@@ -51,38 +42,22 @@ class MemberHandler(IHandler):
     """Note: member is saved in db in register so all of his lists are empty and not the object is saved"""
 
     # region save
-    def save_user(self, username: str, password: str):
+    def save_user(self, username: str, password: str, is_admin=False):
         self._rwlock.acquire_write()
         session = Session(expire_on_commit=False)
         res = Response(True)
         try:
             stmt = insert(self.__members).values(username=username,
                                                  password=password,
-                                                 is_admin=False)
+                                                 is_admin=is_admin,
+                                                 notifications=[])
             session.execute(stmt)
             session.commit()
         except Exception as e:
             session.rollback()
             res = Response(False, msg=str(e))
         finally:
-            Session.remove()
-            self._rwlock.release_write()
-            return res
-
-    def save_notification(self, username: str, notification_msg: str):
-        self._rwlock.acquire_write()
-        session = Session(expire_on_commit=False)
-        res = Response(True)
-        try:
-            stmt = insert(self.__notifications).values(receiver_username=username,
-                                                       msg=notification_msg)
-            session.execute(stmt)
-            session.commit()
-        except Exception as e:
-            session.rollback()
-            res = Response(False, msg=str(e))
-        finally:
-            Session.remove()
+            session.close()
             self._rwlock.release_write()
             return res
 
@@ -102,7 +77,7 @@ class MemberHandler(IHandler):
             session.rollback()
             res = Response(False, msg=str(e))
         finally:
-            Session.remove()
+            session.close()
             self._rwlock.release_write()
             return res
 
@@ -111,18 +86,19 @@ class MemberHandler(IHandler):
     def update(self, id, update_dict):
         pass
 
-    def remove_notifications(self, username):
+    def update_notifications(self, username: str, notifications: list[str]):
         self._rwlock.acquire_write()
         session = Session(expire_on_commit=False)
         res = Response(True)
         try:
-            session.query(self.__notifications).filter_by(username=username).delete()
+            member = session.query(Member).filter_by(_username=username).one()
+            member.notifications = notifications
             session.commit()
         except Exception as e:
             session.rollback()
             res = Response(False, msg=str(e))
         finally:
-            Session.remove()
+            session.close()
             self._rwlock.release_write()
             return res
 
@@ -142,7 +118,7 @@ class MemberHandler(IHandler):
             session.rollback()
             res = Response(False, msg=str(e))
         finally:
-            Session.remove()
+            session.close()
             self._rwlock.release_write()
             return res
 
@@ -158,6 +134,16 @@ class MemberHandler(IHandler):
             session.rollback()
             res = Response(False, msg=str(e))
         finally:
-            Session.remove()
+            session.close()
             self._rwlock.release_write()
             return res
+
+
+# if __name__ == '__main__':
+#     print("asfsa")
+#     purchase_details_handler = PurchaseDetailsHandler.get_instance()
+#     member_handler = MemberHandler.get_instance()
+#     stores_handler = StoreHandler.get_instance()
+#     Base.metadata.create_all(engine)
+#     # member_handler.save_user("Sean", "Pikulin")
+#     member_handler.update_notifications("Sean", ["saasf", "afasfsafasfas"])
