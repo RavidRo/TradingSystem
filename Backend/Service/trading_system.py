@@ -1,12 +1,16 @@
 """ this class is responsible to communicate with the trading __system manager"""
 from __future__ import annotations
-import threading
 from typing import Callable
-from Backend.Domain.Payment.payment_manager import PaymentManager
-from Backend.Service.DataObjects.shopping_cart_data import ShoppingCartData
-import Backend.Service.logs as log
-from Backend.Domain.TradingSystem.trading_system_manager import TradingSystemManager
+import threading
+
 from Backend.response import Response
+
+import Backend.Service.logs as log
+from Backend.Service.DataObjects.shopping_cart_data import ShoppingCartData
+
+from Backend.Domain.Payment.payment_manager import PaymentManager
+from Backend.Domain.TradingSystem.offer import Offer
+from Backend.Domain.TradingSystem.trading_system_manager import TradingSystemManager
 
 
 class TradingSystem(object):
@@ -333,37 +337,41 @@ class TradingSystem(object):
     # ==================
 
     @log.loging(to_hide=[1])
-    def get_user_offers(self, cookie):
-        pass
+    def get_user_offers(self, cookie) -> Response[list[Offer]]:
+        return TradingSystemManager.get_user_offers(cookie)
 
     @log.loging(to_hide=[1])
-    def get_store_offers(self, cookie):
-        pass
+    def get_store_offers(self, cookie, store_id) -> Response[list[Offer]]:
+        return TradingSystemManager.get_store_offers(cookie, store_id)
 
     @log.loging(to_hide=[1])
-    def create_offer(self, cookie, store_id, product_id):
-        pass
+    def create_offer(self, cookie, store_id, product_id) -> Response[None]:
+        return TradingSystemManager.create_offer(cookie, store_id, product_id)
 
     @log.loging(to_hide=[1])
-    def declare_price(self, cookie, offer_id, price):
-        pass
+    def declare_price(self, cookie, offer_id, price) -> Response[None]:
+        return TradingSystemManager.declare_price(cookie, offer_id, price)
 
     @log.loging(to_hide=[1])
-    def suggest_counter_offer(self, cookie, store_id, offer_id, price):
-        pass
+    def suggest_counter_offer(
+        self, cookie, store_id, product_id, offer_id, price
+    ) -> Response[None]:
+        return TradingSystemManager.suggest_counter_offer(
+            cookie, store_id, product_id, offer_id, price
+        )
 
     @log.loging(to_hide=[1])
-    def approve_manager_offer(self, cookie, offer_id):
-        pass
+    def approve_manager_offer(self, cookie, offer_id) -> Response[None]:
+        return TradingSystemManager.approve_manager_offer(cookie, offer_id)
 
     @log.loging(to_hide=[1])
-    def approve_user_offer(self, cookie, store_id, offer_id):
-        pass
+    def approve_user_offer(self, cookie, store_id, product_id, offer_id) -> Response[None]:
+        return TradingSystemManager.approve_user_offer(cookie, store_id, product_id, offer_id)
 
     @log.loging(to_hide=[1])
-    def reject_user_offer(self, cookie, store_id, offer_id):
-        pass
+    def reject_user_offer(self, cookie, store_id, product_id, offer_id) -> Response[None]:
+        return TradingSystemManager.reject_user_offer(cookie, store_id, product_id, offer_id)
 
     @log.loging(to_hide=[1])
-    def cancel_offer(self, cookie, offer_id):
-        pass
+    def cancel_offer(self, cookie, offer_id) -> Response[None]:
+        return TradingSystemManager.cancel_offer(cookie, offer_id)

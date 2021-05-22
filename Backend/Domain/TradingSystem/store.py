@@ -1,3 +1,4 @@
+from Backend.Domain.TradingSystem.offer import Offer
 from Backend.Domain.TradingSystem.Interfaces.Subscriber import Subscriber
 import uuid
 
@@ -396,5 +397,37 @@ class Store(Parsable, Subscriber):
     def get_purchase_policy(self):
         return self.__purchase_policy.get_purchase_rules()
 
-    def parse_purchase_policiy(self):
+    def parse_purchase_policy(self):
         return self.__purchase_policy.parse()
+
+    # Offers
+    # ======================
+
+    def get_store_offers(self) -> Response[ParsableList[Offer]]:
+        product_offers = [
+            product.get_offers() for product, _ in self._products_to_quantities.values()
+        ]
+        # Flattening the list
+        offers = [offer for sublist in product_offers for offer in sublist]
+        return Response(True, ParsableList(offers))
+
+    def suggest_counter_offer(self, product_id, offer_id, price) -> Response[None]:
+        if product_id not in self._products_to_quantities:
+            return Response(False, msg=f"The product with id: {product_id} isn't in the inventory!")
+
+        product = self._products_to_quantities[product_id][0]
+        return product.suggest_counter_offer(offer_id, price)
+
+    def approve_user_offer(self, product_id, offer_id) -> Response[None]:
+        if product_id not in self._products_to_quantities:
+            return Response(False, msg=f"The product with id: {product_id} isn't in the inventory!")
+
+        product = self._products_to_quantities[product_id][0]
+        return product.approve_user_offer(offer_id)
+
+    def reject_user_offer(self, product_id, offer_id) -> Response[None]:
+        if product_id not in self._products_to_quantities:
+            return Response(False, msg=f"The product with id: {product_id} isn't in the inventory!")
+
+        product = self._products_to_quantities[product_id][0]
+        return product.reject_user_offer(offer_id)

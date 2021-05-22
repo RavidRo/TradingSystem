@@ -10,7 +10,7 @@ class CartStub(ShoppingCart):
         self.buy_cart = False
         self.remove_after_purchase = False
 
-    def add_product(self, store_id: str, product_id: str, quantity: int) -> Response[None]:
+    def add_product(self, store_id: str, product_id: str, quantity: int, store) -> Response[None]:
         self.save_product = True
         return Response(True)
 
@@ -29,4 +29,5 @@ class CartStub(ShoppingCart):
     def delete_products_after_purchase(self, user_name: str = "guest") -> Response[ParsableList]:
         self.remove_after_purchase = True
         from Backend.Domain.TradingSystem.purchase_details import PurchaseDetails
+
         return Response(True, obj=ParsableList([PurchaseDetails("a", "a", [], None, 0.0)]))

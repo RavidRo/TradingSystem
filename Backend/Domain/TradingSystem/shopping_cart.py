@@ -47,8 +47,6 @@ class ShoppingCart(IShoppingCart):
             return self.__shopping_bags[store_id].add_product(product_id, quantity)
 
         # no bag for store with store_id
-        store = self.get_store_by_id(store_id)
-
         new_bag = self.create_new_bag(store)
         return new_bag.add_product(product_id, quantity)
 
@@ -184,4 +182,4 @@ class ShoppingCart(IShoppingCart):
         for bag in self.__shopping_bags.values():
             bag.send_back()
         self.__transaction_lock.release()
-        return Response(True, msg="Purchase was cacneled succesfully")
+        return Response(True, msg="Purchase was cancled successfully")

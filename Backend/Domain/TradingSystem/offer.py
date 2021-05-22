@@ -3,19 +3,18 @@ from uuid import uuid4
 
 from Backend.response import Parsable, Response
 
-from Backend.Domain.TradingSystem.product import Product
-from Backend.Domain.TradingSystem.store import Store
-from Backend.Domain.TradingSystem.Interfaces.IUser import IUser
 from Backend.Domain.Notifications.Publisher import Publisher
 
 
 class Offer(Parsable):
-    def __init__(self, user: IUser, store: Store, product: Product) -> None:
-        self.__id = uuid4.uuid4()
+    def __init__(self, user, store, product) -> None:
+        self.__id: str = uuid4.uuid4()
         self.__price: float = None
         self.__status: OfferStatus = UndeclaredOffer(self)
+        product.add_offer(self)
 
         # used for parsing
+        self.__store_name = store.get_name()
         self.__product_name = product.get_name()
         self.__product_id = product.get_id()
         self.__username = user.get_username()
@@ -66,6 +65,7 @@ class Offer(Parsable):
             self.__id,
             self.__price,
             self.__status.get_name(),
+            self.__store_name,
             self.__product_id,
             self.__product_name,
             self.__username,
