@@ -8,7 +8,7 @@ from Backend.Domain.Notifications.Publisher import Publisher
 
 class Offer(Parsable):
     def __init__(self, user, store, product) -> None:
-        self.__id: str = uuid4.uuid4()
+        self.__id: str = uuid4()
         self.__price: float = None
         self.__status: OfferStatus = UndeclaredOffer(self)
         product.add_offer(self)
@@ -84,7 +84,7 @@ class Offer(Parsable):
 
 class OfferStatus:
     def __init__(self, offer: Offer) -> None:
-        self.__offer = offer
+        self._offer = offer
 
     def declare_price(self, price) -> Response[None]:
         return Response(
@@ -126,13 +126,13 @@ class OfferStatus:
         raise NotImplementedError
 
     def change_status(self, status_class) -> Response[None]:
-        self.__offer.change_status(status_class(self.__offer))
+        self._offer.change_status(status_class(self._offer))
         return Response(True)
 
 
 class UndeclaredOffer(OfferStatus):
     def declare_price(self, price) -> Response[None]:
-        response = self.__offer.set_price(price)
+        response = self._offer.set_price(price)
         if not response.succeeded():
             return response
         return self.change_status(AwaitingApprovalOffer)
@@ -140,13 +140,13 @@ class UndeclaredOffer(OfferStatus):
     def cancel_offer(self) -> Response[None]:
         return self.change_status(CancledOffer)
 
-    def get_status_name(self) -> str:
+    def get_name(self) -> str:
         return "undeclared"
 
 
 class AwaitingApprovalOffer(OfferStatus):
     def suggest_counter_offer(self, price) -> Response[None]:
-        response = self.__offer.set_price(price)
+        response = self._offer.set_price(price)
         if not response.succeeded():
             return response
         return self.change_status(CounteredOffer)
@@ -160,13 +160,13 @@ class AwaitingApprovalOffer(OfferStatus):
     def cancel_offer(self) -> Response[None]:
         return self.change_status(CancledOffer)
 
-    def get_status_name(self) -> str:
+    def get_name(self) -> str:
         return "awaiting manager approval"
 
 
 class CounteredOffer(OfferStatus):
     def declare_price(self, price) -> Response[None]:
-        response = self.__offer.set_price(price)
+        response = self._offer.set_price(price)
         if not response.succeeded():
             return response
         return self.change_status(AwaitingApprovalOffer)
@@ -177,20 +177,20 @@ class CounteredOffer(OfferStatus):
     def cancel_offer(self) -> Response[None]:
         return self.change_status(CancledOffer)
 
-    def get_status_name(self) -> str:
+    def get_name(self) -> str:
         return "counter offered"
 
 
 class ApprovedOffer(OfferStatus):
-    def get_status_name(self) -> str:
+    def get_name(self) -> str:
         return "approved"
 
 
 class RejectedOffer(OfferStatus):
-    def get_status_name(self) -> str:
+    def get_name(self) -> str:
         return "rejected"
 
 
 class CancledOffer(OfferStatus):
-    def get_status_name(self) -> str:
+    def get_name(self) -> str:
         return "cancled"

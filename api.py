@@ -902,6 +902,13 @@ async def get_user_offers():
     answer = await __async_call(system.get_user_offers, cookie)
     return __responseToJson(cookie, answer)
 
+@app.route("/get_user_offers", methods=["GET"])
+async def get_user_offers():
+    cookie = request.args.get("cookie")
+    if cookie is None:
+        cookie = await __async_call(system.enter_system)
+    answer = await __async_call(system.get_user_offers, cookie)
+    return __responseToJson(cookie, answer)
 
 @app.route("/get_store_offers", methods=["GET"])
 async def get_store_offers():

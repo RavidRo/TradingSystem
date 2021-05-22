@@ -32,7 +32,7 @@ class Store(Parsable, Subscriber):
         self.__publisher: Publisher = Publisher()
 
     def notify(self, message: str) -> bool:
-        raise self.__publisher.notify_all(message)
+        return self.__publisher.notify_all(message)
 
     def get_discount_policy(self):
         return self.__discount_policy
