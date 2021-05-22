@@ -26,7 +26,13 @@ class UserState(ABC):
         return Response(False, msg="Abstract Method")
 
     def save_product_in_cart(self, store_id, product_id, quantity):
-        return self._cart.add_product(store_id, product_id, quantity)
+        from Backend.Domain.TradingSystem.stores_manager import StoresManager
+
+        store = StoresManager.get_store(store_id).object
+        if store is None:
+            return Response(False, msg=f"There is no such store with store_id: {store_id}")
+
+        return self._cart.add_product(store_id, product_id, quantity, store)
 
     def show_cart(self):
         return Response[ShoppingCart](True, obj=self._cart, msg="got cart successfully")

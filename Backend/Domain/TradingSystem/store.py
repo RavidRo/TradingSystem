@@ -195,12 +195,19 @@ class Store(Parsable):
     def remove_discount(self, discount_id: str):
         return self.__discount_policy.remove_discount(discount_id)
 
-    def edit_simple_discount(self, discount_id: str, percentage: float = None,
-                             context: dict = None, duration=None):
-        return self.__discount_policy.edit_simple_discount(discount_id, percentage, context, duration)
+    def edit_simple_discount(
+        self, discount_id: str, percentage: float = None, context: dict = None, duration=None
+    ):
+        return self.__discount_policy.edit_simple_discount(
+            discount_id, percentage, context, duration
+        )
 
-    def edit_complex_discount(self, discount_id: str, complex_type: str = None, decision_rule: str = None):
-        return self.__discount_policy.edit_complex_discount(discount_id, complex_type, decision_rule)
+    def edit_complex_discount(
+        self, discount_id: str, complex_type: str = None, decision_rule: str = None
+    ):
+        return self.__discount_policy.edit_complex_discount(
+            discount_id, complex_type, decision_rule
+        )
 
     def get_personnel_info(self) -> Response[Responsibility]:
         from Backend.Domain.TradingSystem.Responsibilities.responsibility import Responsibility
@@ -300,8 +307,12 @@ class Store(Parsable):
         return self.__purchase_policy.checkPolicy(products_to_quantities, user_age)
 
     def apply_discounts(self, product_to_quantity: dict, user_age: int):
-        non_discount_prices = [prod.get_price() * quantity for prod_id, (prod, quantity) in product_to_quantity.items()]
-        total_discount = self.__discount_policy.applyDiscount(products_to_quantities=product_to_quantity, user_age=user_age)
+        non_discount_prices = [
+            prod.get_price() * quantity for prod_id, (prod, quantity) in product_to_quantity.items()
+        ]
+        total_discount = self.__discount_policy.applyDiscount(
+            products_to_quantities=product_to_quantity, user_age=user_age
+        )
         final_price = sum(non_discount_prices) - total_discount
         return final_price if final_price >= 0 else 0
 
@@ -329,11 +340,20 @@ class Store(Parsable):
         self._products_lock.release_read()
         return True
 
-    def add_purchase_rule(self, rule_details: dict, rule_type: str, parent_id: str, clause: str = None, discount_id=None):
+    def add_purchase_rule(
+        self,
+        rule_details: dict,
+        rule_type: str,
+        parent_id: str,
+        clause: str = None,
+        discount_id=None,
+    ):
         if discount_id is not None:
             discount = self.__discount_policy.get_discount_by_id(discount_id)
             if discount is not None:
-                return discount.get_conditions_policy().add_purchase_rule(rule_details, rule_type, parent_id, clause)
+                return discount.get_conditions_policy().add_purchase_rule(
+                    rule_details, rule_type, parent_id, clause
+                )
             else:
                 return Response(False, msg=f"There is no discount with discount id{discount_id}")
         return self.__purchase_policy.add_purchase_rule(rule_details, rule_type, parent_id, clause)
@@ -347,11 +367,15 @@ class Store(Parsable):
                 return Response(False, msg=f"There is no discount with discount id{discount_id}")
         return self.__purchase_policy.remove_purchase_rule(rule_id)
 
-    def edit_purchase_rule(self, rule_details: dict, rule_id: str, rule_type: str, discount_id=None):
+    def edit_purchase_rule(
+        self, rule_details: dict, rule_id: str, rule_type: str, discount_id=None
+    ):
         if discount_id is not None:
             discount = self.__discount_policy.get_discount_by_id(discount_id)
             if discount is not None:
-                return discount.get_conditions_policy().edit_purchase_rule(rule_details, rule_id, rule_type)
+                return discount.get_conditions_policy().edit_purchase_rule(
+                    rule_details, rule_id, rule_type
+                )
             else:
                 return Response(False, msg=f"There is no discount with discount id{discount_id}")
         return self.__purchase_policy.edit_purchase_rule(rule_details, rule_id, rule_type)

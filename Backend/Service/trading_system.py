@@ -328,3 +328,42 @@ class TradingSystem(object):
     @log.loging(to_hide=[1])
     def get_purchase_policy(self, cookie, store_id):
         return TradingSystemManager.get_purchase_policy(cookie, store_id)
+
+    # Offers
+    # ==================
+
+    @log.loging(to_hide=[1])
+    def get_user_offers(self, cookie):
+        pass
+
+    @log.loging(to_hide=[1])
+    def get_store_offers(self, cookie):
+        pass
+
+    @log.loging(to_hide=[1])
+    def create_offer(self, cookie, store_id, product_id):
+        pass
+
+    @log.loging(to_hide=[1])
+    def declare_price(self, cookie, offer_id, price):
+        pass
+
+    @log.loging(to_hide=[1])
+    def suggest_counter_offer(self, cookie, store_id, offer_id, price):
+        pass
+
+    @log.loging(to_hide=[1])
+    def approve_manager_offer(self, cookie, offer_id):
+        pass
+
+    @log.loging(to_hide=[1])
+    def approve_user_offer(self, cookie, store_id, offer_id):
+        pass
+
+    @log.loging(to_hide=[1])
+    def reject_user_offer(self, cookie, store_id, offer_id):
+        pass
+
+    @log.loging(to_hide=[1])
+    def cancel_offer(self, cookie, offer_id):
+        pass
