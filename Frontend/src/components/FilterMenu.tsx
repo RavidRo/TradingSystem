@@ -17,7 +17,6 @@ const FilterMenu: FC<FilterMenuProps> = ({handleFilter}) => {
     const handleApply = ()=>{
         handleFilter(parseInt(fromInput),parseInt(toInput),
         productRating!==null?productRating:0, storeRating!==null?storeRating:0)
-        // console.log(fromInput, toInput, productRating, storeRating);
     }
       
 	return (

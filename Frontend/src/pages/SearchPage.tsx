@@ -6,10 +6,11 @@ import SearchCategory from '../components/SearchCategory';
 import Keywards from '../components/Keywards';
 import useAPI from '../hooks/useAPI';
 import { Product, ProductQuantity, StoreToSearchedProducts } from '../types';
+import Swal from 'sweetalert2';
 
 type SearchPageProps = {
 	location: any;
-	propsAddProduct: (product: Product, storeID: string) => void;
+	propsAddProduct: (product: Product, storeID: string) => Promise<boolean>;
 };
 
 const SearchPage: FC<SearchPageProps> = ({ location, propsAddProduct }) => {
@@ -22,7 +23,6 @@ const SearchPage: FC<SearchPageProps> = ({ location, propsAddProduct }) => {
 
 	const storeToSearchedProducts = useRef<StoreToSearchedProducts>({});
 	const [productsToPresent, setProducts] = useState<ProductQuantity[]>([]);
-	const firstRender = useRef<boolean>(true);
 
 	const allCategories = useRef<string[]>([]);
 	const storesToProductsObj = useAPI<StoreToSearchedProducts>('/search_products');
@@ -35,7 +35,7 @@ const SearchPage: FC<SearchPageProps> = ({ location, propsAddProduct }) => {
 				max_price: toInput,
 				kwargs: keyWords,
 			})
-			.then(({ data, error, errorMsg }) => {
+			.then(({ data, error }) => {
 				if (!error && data !== null) {
 					storeToSearchedProducts.current = data.data;
 					let productsToQuantities: ProductQuantity[] = [];
@@ -54,16 +54,8 @@ const SearchPage: FC<SearchPageProps> = ({ location, propsAddProduct }) => {
 								allCategories.current.push(productQuantities[j][0].category);
 							}
 						}
-						if (firstRender.current === false) {
-							setProducts(productsToQuantities);
-						} else {
-							setProducts((old) => [...old, ...productsToQuantities]);
-						}
-
-						firstRender.current = false;
 					}
-				} else {
-					// alert(errorMsg);
+					setProducts(productsToQuantities);
 				}
 			});
 		// eslint-disable-next-line react-hooks/exhaustive-deps
@@ -82,9 +74,7 @@ const SearchPage: FC<SearchPageProps> = ({ location, propsAddProduct }) => {
 		// all the set methods make useEffect to re-render and ask for server
 		// to send new products
 	};
-	const clickAddProduct = (key: number, storeID: string) => {
-		propsAddProduct(productsToPresent[key], storeID);
-	};
+
 	const updateKeyWords = (keyWords: string[]) => {
 		setKeyWards(keyWords);
 		// all the set methods make useEffect to re-render and ask for server
@@ -102,6 +92,19 @@ const SearchPage: FC<SearchPageProps> = ({ location, propsAddProduct }) => {
 			}
 		}
 		return matrix;
+	};
+
+	const clickAddProduct = (key: number, storeID: string) => {
+		let response = propsAddProduct(productsToPresent[key], storeID);
+		response.then((result) => {
+			if (result === true) {
+				Swal.fire({
+					icon: 'success',
+					title: 'Congratulations!',
+					text: 'The item added to cart successfully',
+				});
+			}
+		});
 	};
 	const findBagIDByProductID = (id: string) => {
 		for (var i = 0; i < Object.keys(storeToSearchedProducts.current).length; i++) {
@@ -122,7 +125,7 @@ const SearchPage: FC<SearchPageProps> = ({ location, propsAddProduct }) => {
 	};
 
 	return (
-		<div className="SearchPageDiv">
+		<div className='SearchPageDiv'>
 			<SearchCategory
 				searchProduct={searchProduct}
 				categories={allCategories.current}
@@ -130,14 +133,14 @@ const SearchPage: FC<SearchPageProps> = ({ location, propsAddProduct }) => {
 			/>
 			<Keywards updateKeyWords={updateKeyWords}></Keywards>
 
-			<div className="mainArea">
-				<div className="filterArea">
+			<div className='mainArea'>
+				<div className='filterArea'>
 					<FilterMenu handleFilter={handleFilter} />
 				</div>
-				<div className="productCards">
+				<div className='productCards'>
 					{setProductsInMatrix().map((row, i) => {
 						return (
-							<div className="cardsRow">
+							<div className='cardsRow'>
 								{row.map((cell, j) => {
 									return (
 										<ProductSearch
@@ -151,6 +154,7 @@ const SearchPage: FC<SearchPageProps> = ({ location, propsAddProduct }) => {
 											price={cell !== undefined ? cell.price : 0}
 											quantity={cell !== undefined ? cell.quantity : 0}
 											category={cell !== undefined ? cell.category : ''}
+											keywords={cell !== undefined ? cell.keywords : ''}
 											clickAddProduct={() =>
 												handleAddToCart(
 													cell !== undefined
