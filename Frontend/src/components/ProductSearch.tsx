@@ -1,5 +1,5 @@
 import { Button, Card, CardContent, Typography } from '@material-ui/core';
-import React, { FC, useEffect, useRef } from 'react';
+import React, { FC, useEffect, useState } from 'react';
 import '../styles/ProductSearch.scss';
 import { Link } from 'react-router-dom';
 import useAPI from '../hooks/useAPI';
@@ -11,6 +11,7 @@ type ProductSearchProps = {
 	storeID: string;
 	quantity: number;
 	category: string;
+	keywords: string[];
 	clickAddProduct: () => void;
 };
 
@@ -20,40 +21,45 @@ const ProductSearch: FC<ProductSearchProps> = ({
 	price,
 	quantity,
 	category,
+	keywords,
 	clickAddProduct,
 }) => {
-	const storeName = useRef<string>('');
-	const { request } = useAPI<Store>('/get_store', { store_id: storeID });
+	const [storeName, setStoreName] = useState<string>('');
+	const storeObj = useAPI<Store>('/get_store', { store_id: storeID });
 	useEffect(() => {
 		if (storeID !== '') {
-			request().then(({ data, error, errorMsg }) => {
+			storeObj.request().then(({ data, error, errorMsg }) => {
 				if (!error && data !== null) {
-					storeName.current = data.data.name;
-				} else {
-					// alert(errorMsg);
+					setStoreName(data.data.name);
 				}
 			});
 		}
-	}, [storeID, request]);
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [storeID]);
 
 	return (
-		<div className="ProductSearchCard">
+		<div className='ProductSearchCard'>
 			{content !== '' ? (
 				<Card
-					className="prodCard"
+					className='prodCard'
 					style={{
 						backgroundColor: '#83f1e8',
 					}}
 				>
-					<CardContent className="cardContent">
+					<CardContent className='cardContent'>
 						<Typography style={{ fontSize: 'large', fontWeight: 'bold' }}>
 							{content}
 						</Typography>
 						<Typography style={{ marginTop: '5%' }}>{price}$</Typography>
 						<Typography style={{ marginTop: '5%' }}>Quantity: {quantity}</Typography>
 						<Typography style={{ marginTop: '5%' }}>Category: {category}</Typography>
+						{keywords.length !== 0 ? (
+							<Typography style={{ marginTop: '5%' }}>
+								Keywords: {keywords}
+							</Typography>
+						) : null}
 					</CardContent>
-					<div className="buttonLink">
+					<div className='buttonLink'>
 						<Button
 							style={{
 								color: 'blue',
@@ -65,7 +71,7 @@ const ProductSearch: FC<ProductSearchProps> = ({
 							Add To Cart
 						</Button>
 						<Link
-							className="linkStore"
+							className='linkStore'
 							to={{
 								pathname: '/storesView',
 								state: {
@@ -73,7 +79,7 @@ const ProductSearch: FC<ProductSearchProps> = ({
 								},
 							}}
 						>
-							{storeName.current}
+							{storeName}
 						</Link>
 					</div>
 				</Card>

@@ -4,11 +4,8 @@ import {
 	Badge,
 	Button,
 	ClickAwayListener,
-	Divider,
-	Fade,
 	Grow,
 	IconButton,
-	List,
 	ListItemIcon,
 	ListItemText,
 	MenuItem,
@@ -33,37 +30,42 @@ import {
 import '../styles/Navbar.scss';
 import config from '../config';
 import PopupCart from '../components/PopupCart';
-import { Product, ProductQuantity, StoreToSearchedProducts } from '../types';
+import { Product, StoreToSearchedProducts } from '../types';
 
 type NavBarProps = {
 	signedIn: boolean;
-	products: ProductQuantity[];
 	storesToProducts: StoreToSearchedProducts;
-	propHandleDelete: (product: Product, storeID: string) => void;
-	propHandleAdd: (product: Product, storeID: string) => void;
+	propHandleDelete: (product: Product, storeID: string) => Promise<boolean> | boolean;
 	notifications: string[];
+	changeQuantity: (store: string, product: string, quantity: number) => Promise<boolean>;
 	logout: () => void;
+	propUpdateStores: (map: StoreToSearchedProducts) => void;
 };
 
 const Navbar: FC<NavBarProps> = ({
 	signedIn,
-	products,
 	storesToProducts,
 	propHandleDelete,
 	notifications,
-	propHandleAdd,
+	changeQuantity,
 	logout,
+	propUpdateStores,
 }) => {
 	const [hoverCart, setHoverCart] = useState<boolean>(false);
-	const [productsInCart, setProducts] = useState<ProductQuantity[]>(products);
-	const [openNotifications, setOpenNotifications] = useState<boolean>(false);
+	const [storesToProductsMy, setStoresProducts] =
+		useState<StoreToSearchedProducts>(storesToProducts);
+	const [myNotifications, setNotifications] = useState<string[]>(notifications);
 	const [accountMenuOpen, setAccountMenuOpen] = useState<boolean>(false);
 	const accountMenuRef = React.useRef<HTMLButtonElement>(null);
 	const history = useHistory();
 
 	useEffect(() => {
-		setProducts(products);
-	}, [products]);
+		setNotifications((old) => [...old, ...notifications]);
+	}, [notifications]);
+	useEffect(() => {
+		setStoresProducts(storesToProducts);
+	}, [storesToProducts]);
+
 	const handleCloseMenu = () => setAccountMenuOpen(false);
 
 	const AccountMenuItem: FC<{ onClick?: () => void; text: string }> = ({
@@ -85,43 +87,43 @@ const Navbar: FC<NavBarProps> = ({
 	};
 
 	return (
-		<div className="navbar">
+		<div className='navbar'>
 			<nav>
-				<Link className="nameLink" to="/">
+				<Link className='nameLink' to='/'>
 					{config.website_name}!
 				</Link>
 
 				<div
-					className="navbar-item"
+					className='navbar-item'
 					onMouseOver={() => setHoverCart(true)}
 					onMouseLeave={() => setHoverCart(false)}
 				>
-					<FontAwesomeIcon className="item-icon" icon={faShoppingCart} />
-					<Link className="item-link" to="/cart">
+					<FontAwesomeIcon className='item-icon' icon={faShoppingCart} />
+					<Link className='item-link' to='/cart'>
 						My Cart
 					</Link>
 					{hoverCart ? (
 						<PopupCart
-							products={productsInCart}
-							storesToProducts={storesToProducts}
-							propHandleAdd={propHandleAdd}
+							storesToProducts={storesToProductsMy}
 							propHandleDelete={propHandleDelete}
+							changeQuantity={changeQuantity}
+							propUpdateStores={propUpdateStores}
 						/>
 					) : null}
 				</div>
-				<div className="navbar-item">
-					<FontAwesomeIcon className="item-icon" icon={faSearch} />
-					<Link className="item-link" to="/storesView">
+				<div className='navbar-item'>
+					<FontAwesomeIcon className='item-icon' icon={faSearch} />
+					<Link className='item-link' to='/storesView'>
 						Stores
 					</Link>
 				</div>
-				<div className="navbar-item">
+				<div className='navbar-item'>
 					{signedIn ? (
 						<>
-							<FontAwesomeIcon className="item-icon" icon={faCaretDown} />
+							<FontAwesomeIcon className='item-icon' icon={faCaretDown} />
 							<Button
 								ref={accountMenuRef}
-								className="item-link"
+								className='item-link'
 								onClick={() => setAccountMenuOpen((prevOpen) => !prevOpen)}
 							>
 								Account&Stores
@@ -129,8 +131,8 @@ const Navbar: FC<NavBarProps> = ({
 						</>
 					) : (
 						<>
-							<FontAwesomeIcon className="item-icon" icon={faSignInAlt} />
-							<Link className="item-link" to="/sign-in">
+							<FontAwesomeIcon className='item-icon' icon={faSignInAlt} />
+							<Link className='item-link' to='/sign-in'>
 								Sign In
 							</Link>
 						</>
@@ -148,18 +150,18 @@ const Navbar: FC<NavBarProps> = ({
 								<ClickAwayListener onClickAway={handleCloseMenu}>
 									<MenuList autoFocusItem={accountMenuOpen} onKeyDown={() => {}}>
 										<AccountMenuItem
-											text="My stores"
+											text='My stores'
 											onClick={() => history.push('/my-stores')}
 										>
 											<StoreIcon />
 										</AccountMenuItem>
 										<AccountMenuItem
-											text="My account"
+											text='My account'
 											onClick={() => history.push('/my-account')}
 										>
 											<SupervisorAccountIcon />
 										</AccountMenuItem>
-										<AccountMenuItem text="Logout" onClick={logout}>
+										<AccountMenuItem text='Logout' onClick={logout}>
 											<ExitToAppIcon />
 										</AccountMenuItem>
 									</MenuList>
@@ -168,31 +170,22 @@ const Navbar: FC<NavBarProps> = ({
 						</Grow>
 					)}
 				</Popper>
-				<div className="navbar-item">
-					<IconButton
-						color={'inherit'}
-						onClick={() => setOpenNotifications((open) => !open)}
+				<div className='navbar-item'>
+					<Link
+						className='item-link'
+						to={{
+							pathname: '/Notifications',
+							state: {
+								notifications: myNotifications,
+							},
+						}}
 					>
-						<Badge badgeContent={notifications.length} color="primary">
-							<FontAwesomeIcon className="item-icon" icon={faBell} />
-						</Badge>
-					</IconButton>
-					<Fade in={openNotifications}>
-						<Paper className="notification-cont">
-							<List component="ul">
-								{notifications.map((notification, index) => (
-									<>
-										<ListItemText
-											primary={notification}
-											className="notification"
-											key={index}
-										/>
-										<Divider key={index} />
-									</>
-								))}
-							</List>
-						</Paper>
-					</Fade>
+						<IconButton color={'inherit'}>
+							<Badge badgeContent={myNotifications.length} showZero color='primary'>
+								<FontAwesomeIcon className='item-icon' icon={faBell} />
+							</Badge>
+						</IconButton>
+					</Link>
 				</div>
 			</nav>
 		</div>

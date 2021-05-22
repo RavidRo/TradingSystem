@@ -60,14 +60,46 @@ async def get_cookie():
         }
     )
 
-
 @app.websocket("/connect")
-def connect():
-    cookie = request.args.get("cookie")
-    if cookie is None:
-        cookie = system.enter_system()
-    answer = system.connect(cookie, lambda messages: websocket.send(messages))
-    return __responseToJson(cookie, answer)
+async def connect():
+    cookie = await websocket.receive()
+    print("got cookie from client")
+    queue = []
+
+    # queue = asyncio.Queue()
+
+    # loop = asyncio.get_running_loop()
+    open = True
+    # def send_messages(messages):
+    #     loop = asyncio.new_event_loop()
+    #     asyncio.set_event_loop(loop)
+    #     loop.call_soon(queue.put_nowait, messages)
+    #     return open
+
+    def send_messages(messages):
+        print("Recieved messages", messages)
+        queue.append(messages)
+        return open
+        
+
+    system.connect(cookie, send_messages)
+    print("Connection started")
+    while True:
+        try:
+            await asyncio.sleep(10)
+            while len(queue) > 0:
+                messages = queue.pop()
+                for message in messages:
+                    print("Sending message", message)
+                    await websocket.send(message)
+            # messages = await queue.get()
+            # print("Sending messages to socket", messages)
+            # for message in messages:
+            #     await websocket.send(message)
+        except:
+            print("Socket disconnected")
+            open = False
+            return
 
 
 @app.route("/register", methods=["POST"])
@@ -136,7 +168,8 @@ async def search_products():
     category = request.args.get("category")
     min_price = request.args.get("min_price")
     max_price = request.args.get("max_price")
-    kwargs = request.args.get("kwargs")
+    kwargs = request.args.getlist("kwargs[]")
+
     answer = await __async_call(
         system.search_products, product_name, category, float(min_price), float(max_price), kwargs
     )
@@ -185,10 +218,13 @@ async def remove_product_from_cart():
         cookie = request_json["cookie"]
     if "product_id" not in request_json:
         missing_args += " product_id"
+    if "store_id" not in request_json:
+        missing_args += " store_id"
     if missing_args != "":
         return __missing_args(cookie, missing_args)
     product_id = request_json["product_id"]
-    answer = await __async_call(system.remove_product_from_cart, cookie, product_id)
+    store_id = request_json["store_id"]
+    answer = await __async_call(system.remove_product_from_cart, cookie, store_id, product_id)
     return __responseToJson(cookie, answer)
 
 
@@ -417,6 +453,15 @@ async def edit_product_details():
         keywords,
     )
     return __responseToJson(cookie, answer)
+
+
+@app.route("/get_product", methods=["GET"])
+async def get_product():
+    store_id = request.args.get("store_id")
+    product_id = request.args.get("product_id")
+
+    answer = await __async_call(system.get_product, store_id, product_id)
+    return __responseToJson(None, answer)
 
 
 @app.route("/add_discount", methods=["POST"])
