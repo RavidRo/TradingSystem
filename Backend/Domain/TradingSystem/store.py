@@ -1,3 +1,4 @@
+from Backend.Domain.TradingSystem.Interfaces.Subscriber import Subscriber
 import uuid
 
 from Backend.Domain.Notifications.Publisher import Publisher
@@ -7,7 +8,7 @@ from Backend.Service.DataObjects.store_data import StoreData
 from Backend.rw_lock import ReadWriteLock
 
 
-class Store(Parsable):
+class Store(Parsable, Subscriber):
     from Backend.Domain.TradingSystem.Responsibilities.responsibility import Responsibility
     from Backend.Domain.TradingSystem.purchase_details import PurchaseDetails
     from Backend.Domain.TradingSystem.Interfaces.IUser import IUser
@@ -28,6 +29,9 @@ class Store(Parsable):
         self._products_lock = ReadWriteLock()
         self.__history_lock = ReadWriteLock()
         self.__publisher: Publisher = Publisher()
+
+    def notify(self, message: str) -> bool:
+        raise self.__publisher.notify_all(message)
 
     def get_discount_policy(self):
         return self.__discount_policy
