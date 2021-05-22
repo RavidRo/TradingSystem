@@ -14,12 +14,11 @@ type MyAccountProps = {};
 
 const MyAccount: FC<MyAccountProps> = () => {
 	const { request } = useAPI<PurchaseDetails[]>('/get_purchase_history');
-	const offersObj= useAPI2(getUserOffers);
 	
-
 	const username = useContext(UsernameContext);
 
 	const [purchaseHistory, setPurchaseHistory] = useState<PurchaseDetails[]>([]);
+	
 
 	useEffect(() => {
 		request({}, (data, error) => {
@@ -27,7 +26,6 @@ const MyAccount: FC<MyAccountProps> = () => {
 				setPurchaseHistory(data.data);
 			}
 		});
-		offersObj.request();
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
 
@@ -39,14 +37,15 @@ const MyAccount: FC<MyAccountProps> = () => {
 				</Typography>
 				<PurchaseHistoryTable history={purchaseHistory} />
 			</Paper>
-			{offersObj.data!==null?
+			{/* {offersObj.data!==null? */}
 				<Paper className="offers-cont">
 					<Typography variant="h6" gutterBottom>
 						your offers:
 					</Typography>
-					<OffersTable offers={offersObj.data} />
+					{/* <OffersTable offers={offersObj.data} /> */}
+					<OffersTable username={username}/>
 				</Paper>
-			:null}
+			{/* :null} */}
 		</Container>
 	);
 };
