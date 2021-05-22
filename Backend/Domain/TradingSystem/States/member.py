@@ -74,7 +74,7 @@ class Member(UserState):
         self.__purchase_details += response.object.values
         return response
 
-    def open_store(self, store_name):
+    def open_store(self, store_name) -> Response:
         store = Store(store_name)
         store.set_responsibility(Founder(self, store, self._user))
         return Response[Store](True, obj=store, msg="Store opened successfully")

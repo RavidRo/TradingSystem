@@ -1,12 +1,18 @@
 from datetime import date
 
-from sqlalchemy import Table, Column, String
+from sqlalchemy import Table, Column, String, insert
 from sqlalchemy.orm import mapper, relationship
+
+from Backend.DataBase.Handlers.member_handler import MemberHandler
 from Backend.DataBase.Handlers.product_handler import ProductHandler
+from Backend.DataBase.Handlers.purchase_details_handler import PurchaseDetailsHandler
+from Backend.DataBase.Handlers.responsibilities_handler import ResponsibilitiesHandler
 from Backend.DataBase.IHandler import IHandler
-from Backend.DataBase.database import Base, Session
+from Backend.DataBase.database import Base, Session, engine
+from Backend.Domain.TradingSystem.States.member import Member
 from Backend.Domain.TradingSystem.purchase_details import PurchaseDetails
 from Backend.Domain.TradingSystem.store import Store
+from Backend.Domain.TradingSystem.user import User
 from Backend.response import Response, ParsableList
 
 from Backend.rw_lock import ReadWriteLock
@@ -45,9 +51,10 @@ class StoreHandler(IHandler):
         res = Response(True)
         try:
             session.add(obj)
-
+            responsibility = obj.get_responsibility()
+            session.add(responsibility)
             # stmt = insert(Base.metadata.tables['responsibilities']).values(
-            #     username=obj.get_responsibility().get_user_state().get_username().get_obj(),
+            #     username=obj.get_responsibility().get_user_state().get_username().get_obj().get_val(),
             #     store_id=obj.get_id(),
             #     parent_id=None,
             #     responsibility_type="F")
@@ -141,18 +148,14 @@ class StoreHandler(IHandler):
             return res
 
 
-# if __name__ == "__main__":
-#     store_handler = StoreHandler.get_instance()
-#     purchase_details_handler = PurchaseDetailsHandler.get_instance()
-#     member_handler = MemberHandler.get_instance()
-#     Base.metadata.create_all(engine)
-#     # store = Store("store")
+if __name__ == "__main__":
+    pass
+
 #     # store._Store__purchase_history = [
 #     #     PurchaseDetails("Sean", "store", "abc", ["Banana", "Melon"], date(2000, 4, 13), 22),
 #     #     PurchaseDetails("Inon", "store", "abc", ["PineApple", "Grapes"], date(2000, 4, 14), 25)]
 #     #
 #     # store.add_product("Oranges", "Fruit", 5, 8, ["Yummy", "Orange"])
-#     # res = store_handler.save(store)
 #
 #     res = store_handler.load("c6ba8b7c-c284-4334-baa1-346827534068")
 #     if not res.succeeded():
@@ -160,13 +163,13 @@ class StoreHandler(IHandler):
 #     else:
 #         print(res.get_obj())
 
-    # purchase_details_hadnler = PurchaseDetailsHandler()
-    # member_handler = MemberHandler.get_instance()
-    # Base.metadata.create_all(engine)
-    # member_handler.save_user("Sean", "Pikulin")
-    # user = member_handler.load("Sean").get_obj()
-    # det = PurchaseDetails("Sean", "store", "abc", ["Banana", "Melon"], date(2000, 4, 13), 22)
-    # user.add_purchase_rule_history(det)
-    # purchase_details_hadnler.save(det)
-    # user_after = member_handler.load("Sean").get_obj()
-    # print("sfa")
+# purchase_details_hadnler = PurchaseDetailsHandler()
+# member_handler = MemberHandler.get_instance()
+# Base.metadata.create_all(engine)
+# member_handler.save_user("Sean", "Pikulin")
+# user = member_handler.load("Sean").get_obj()
+# det = PurchaseDetails("Sean", "store", "abc", ["Banana", "Melon"], date(2000, 4, 13), 22)
+# user.add_purchase_rule_history(det)
+# purchase_details_hadnler.save(det)
+# user_after = member_handler.load("Sean").get_obj()
+# print("sfa")

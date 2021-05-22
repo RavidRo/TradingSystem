@@ -1,15 +1,14 @@
 from threading import Lock
 from sqlalchemy import Table, Column, String, Boolean, insert, ARRAY
 from sqlalchemy.orm import mapper, relationship
-from Backend.DataBase.Handlers.purchase_details_handler import PurchaseDetailsHandler
-from Backend.DataBase.Handlers.store_handler import StoreHandler
 from Backend.DataBase.IHandler import IHandler
-from Backend.DataBase.database import Base, Session, engine
+from Backend.DataBase.database import Base, Session
+from Backend.Domain.TradingSystem.Responsibilities.responsibility import Responsibility
 from Backend.Domain.TradingSystem.States.member import Member
 from Backend.Domain.TradingSystem.purchase_details import PurchaseDetails
-from Backend.response import Response, PrimitiveParsable
+from Backend.response import Response
 from Backend.rw_lock import ReadWriteLock
-
+from sqlalchemy.orm.collections import attribute_mapped_collection
 
 class MemberHandler(IHandler):
     _lock = Lock()
@@ -26,8 +25,9 @@ class MemberHandler(IHandler):
 
         mapper(Member, self.__members, properties={
             '_username': self.__members.c.username,
-            # '_Member__responsibilities': relationship(Base.metadata.tables['responsibilities'], cascade="all, delete",
-            #                                           passive_deletes=True, lazy='joined'),
+            '_Member__responsibilities': relationship(Responsibility, cascade="all, delete",
+                                                      collection_class=attribute_mapped_collection('store_id'),
+                                                      passive_deletes=True, lazy='joined', back_populates="_user_state"),
             '_Member__purchase_details': relationship(PurchaseDetails, cascade="all, delete",
                                                       passive_deletes=True, lazy='joined'),
         })
@@ -81,10 +81,42 @@ class MemberHandler(IHandler):
             self._rwlock.release_write()
             return res
 
-    """remove notifications will remove"""
+    # def remove_responsibility(self, username: str, responsibility: Responsibility):
+    #     self._rwlock.acquire_write()
+    #     session = Session(expire_on_commit=False)
+    #     res = Response(True)
+    #     try:
+    #         member = session.query(Member).filter_by(_username=username).one()
+    #         member.get_responsibilities().append(responsibility)
+    #         session.commit()
+    #     except Exception as e:
+    #         session.rollback()
+    #         res = Response(False, msg=str(e))
+    #     finally:
+    #         session.close()
+    #         self._rwlock.release_write()
+    #         return res
+    #
 
     def update(self, id, update_dict):
         pass
+
+    #TODO: check if append here is on same object as in the domain!
+    def update_responsibility(self, username: str, responsibility: Responsibility):
+        self._rwlock.acquire_write()
+        session = Session(expire_on_commit=False)
+        res = Response(True)
+        try:
+            member = session.query(Member).filter_by(_username=username).one()
+            member.get_responsibilities().append(responsibility)
+            session.commit()
+        except Exception as e:
+            session.rollback()
+            res = Response(False, msg=str(e))
+        finally:
+            session.close()
+            self._rwlock.release_write()
+            return res
 
     def update_notifications(self, username: str, notifications: list[str]):
         self._rwlock.acquire_write()
@@ -138,12 +170,3 @@ class MemberHandler(IHandler):
             self._rwlock.release_write()
             return res
 
-
-# if __name__ == '__main__':
-#     print("asfsa")
-#     purchase_details_handler = PurchaseDetailsHandler.get_instance()
-#     member_handler = MemberHandler.get_instance()
-#     stores_handler = StoreHandler.get_instance()
-#     Base.metadata.create_all(engine)
-#     # member_handler.save_user("Sean", "Pikulin")
-#     member_handler.update_notifications("Sean", ["saasf", "afasfsafasfas"])

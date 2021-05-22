@@ -236,7 +236,7 @@ class Store(Parsable):
         return self.__id
 
     def set_responsibility(self, responsibility: Responsibility):
-        self.responsibility = responsibility
+        self.__responsibility = responsibility
 
     def check_existing_product(self, product_name: str):
         for (prod, quantity) in self._products_to_quantities.values():
