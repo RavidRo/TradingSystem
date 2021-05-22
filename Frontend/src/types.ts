@@ -22,6 +22,15 @@ export type PurchaseDetails = {
 	date: Date;
 	total_price: number;
 };
+export type Offer = {
+	id: string;
+    price: number;
+    status: string;
+    product_id: string;
+    product_name: string;
+	store_name: string;
+    username: string;
+}
 
 export type Permission =
 	| 'manage products'
