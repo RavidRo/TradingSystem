@@ -25,7 +25,12 @@ class Offer(Parsable):
         self.__managers_publisher.subscribe(store)
 
     def declare_price(self, price) -> Response[None]:
-        return self.__status.declare_price(price)
+        response = self.__status.declare_price(price)
+        if response.succeeded():
+            self.__managers_publisher.notify_all(
+                f"{self.__username} as submitted a price offer for {self.__product_name}"
+            )
+        return response
 
     def suggest_counter_offer(self, price) -> Response[None]:
         return self.__status.suggest_counter_offer(price)
@@ -37,7 +42,12 @@ class Offer(Parsable):
         return self.__status.approve_user_offer()
 
     def reject_user_offer(self) -> Response[None]:
-        return self.__status.reject_user_offer()
+        response = self.__status.reject_user_offer()
+        if response.succeeded():
+            self.__managers_publisher.notify_all(
+                f"Your price offer for {self.__product_name} as been rejected"
+            )
+        return response
 
     def cancel_offer(self) -> Response[None]:
         return self.__status.cancel_offer()
