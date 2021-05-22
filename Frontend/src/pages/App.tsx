@@ -65,7 +65,6 @@ function App() {
 	const addProductToPopup = (product: Product, storeID: string) => {
 		let found = false;
 		let quantity = 1;
-		console.log(storesToProducts);
 		for (var i = 0; i < Object.values(storesToProducts.current).length; i++) {
 			let tuplesArr = Object.values(storesToProducts.current)[i];
 			for (var j = 0; j < tuplesArr.length; j++) {
@@ -97,7 +96,7 @@ function App() {
 					product_id: product.id,
 					quantity: quantity,
 				})
-				.then(({ data, error, errorMsg }) => {
+				.then(({ data, error }) => {
 					if (!error && data !== null) {
 						// do nothing
 						return true;
@@ -113,7 +112,7 @@ function App() {
 					product_id: product.id,
 					quantity: quantity,
 				})
-				.then(({ data, error, errorMsg }) => {
+				.then(({ data, error }) => {
 					if (!error && data !== null) {
 						let tuplesArr = storesToProducts.current[storeID];
 						for (var i = 0; i < tuplesArr.length; i++) {
