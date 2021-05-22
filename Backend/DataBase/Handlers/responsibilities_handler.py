@@ -48,9 +48,11 @@ class ResponsibilitiesHandler(IHandler):
                                        passive_deletes=True, lazy='joined',
                                        remote_side=[self.__responsibilities.c.username,
                                                     self.__responsibilities.c.store_id], overlaps="_store"),
-            '_user_state': relationship(Member, uselist=False, lazy='joined',
-                                        back_populates="_Member__responsibilities"),
-            '_store': relationship(Store, uselist=False, lazy='joined', overlaps="_appointed")
+            # '_user_state': relationship(Member, uselist=False, lazy='joined',
+            #                             back_populates="_Member__responsibilities"),
+            '_store': relationship(Store, uselist=False, lazy='joined', overlaps="_appointed"),
+            '_store_id': self.__responsibilities.c.store_id,
+            '_username': self.__responsibilities.c.username
         }, polymorphic_on=self.__responsibilities.c.responsibility_type, polymorphic_identity='R')
 
         mapper(Founder, self.__responsibilities, polymorphic_identity='F')

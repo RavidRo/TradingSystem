@@ -26,10 +26,11 @@ class MemberHandler(IHandler):
         mapper(Member, self.__members, properties={
             '_username': self.__members.c.username,
             '_Member__responsibilities': relationship(Responsibility, cascade="all, delete",
-                                                      collection_class=attribute_mapped_collection('store_id'),
-                                                      passive_deletes=True, lazy='joined', back_populates="_user_state"),
+                                                      collection_class=attribute_mapped_collection('_store_id'),
+                                                      passive_deletes=True,
+                                                      backref="_user_state"),
             '_Member__purchase_details': relationship(PurchaseDetails, cascade="all, delete",
-                                                      passive_deletes=True, lazy='joined'),
+                                                      passive_deletes=True),
         })
 
     @staticmethod

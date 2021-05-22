@@ -42,6 +42,7 @@ class Responsibility(Parsable):
     ERROR_MESSAGE = "Responsibility is an interface, function not implemented"
 
     def __init__(self, user_state, store, subscriber=None) -> None:
+        self._store_id = store.get_id()
         self._user_state = user_state
         user_state.add_responsibility(self, store.get_id())
         self._store = store
@@ -49,6 +50,8 @@ class Responsibility(Parsable):
         if subscriber:
             self._store.subscribe(subscriber)
         self._appointed: list[Responsibility] = []
+
+        self._username = user_state.get_username().get_obj().get_val()
 
     def get_user_state(self):
         return self._user_state
