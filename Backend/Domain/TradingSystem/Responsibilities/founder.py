@@ -117,9 +117,6 @@ class Founder(Responsibility):
         from Backend.Domain.TradingSystem.Responsibilities.manager import Manager
 
         # We don't to appoint a user to the same store twice
-        print("My user name", self._user_state.get_username())
-        print("To appoint username, ", user.get_username())
-
         with user.get_appointment_lock():
             appointed_response = user.is_appointed(self._store.get_id())
             if not appointed_response.succeeded():

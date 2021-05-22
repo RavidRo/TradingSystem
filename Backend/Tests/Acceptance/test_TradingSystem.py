@@ -5,13 +5,21 @@ from queue import Queue
 from unittest import mock
 from unittest.mock import patch, MagicMock
 from Backend.Domain.Payment.OutsideSystems.outside_cashing import OutsideCashing
+from Backend.Domain.Payment.OutsideSystems.outside_supplyment import OutsideSupplyment
 from Backend.Domain.TradingSystem.Interfaces.IUserState import IUserState
 from Backend.Domain.TradingSystem.States.member import Member
 from Backend.Domain.TradingSystem.States.user_state import UserState
+from Backend.Domain.TradingSystem.TypesPolicies.discount_policy import DefaultDiscountPolicy
+from Backend.Domain.TradingSystem.TypesPolicies.purchase_policy import (
+    PurchasePolicy,
+    DefaultPurchasePolicy,
+)
 from Backend.Domain.TradingSystem.shopping_cart import ShoppingCart
+from Backend.Domain.TradingSystem.store import Store
 from Backend.Domain.TradingSystem.user import User
 from Backend.Domain.TradingSystem.user_manager import UserManager
 from Backend.Service.trading_system import TradingSystem
+from Backend.response import Response
 
 system = TradingSystem.getInstance()
 username_number = 0
@@ -374,6 +382,18 @@ def test_edit_product_details_negative_price_fail():
         cookie, store_id, product_id, new_name, new_category, new_price
     )
     assert not res.succeeded()
+
+
+def test_get_product_success():
+    cookie, username, password, store_name, store_id = _initialize_info(
+        _generate_username(), "aaa", _generate_store_name()
+    )
+    product_id, product_name, category, price, quantity = _create_product(
+        cookie, store_id, _generate_product_name(), "A", 5.50, 10
+    )
+
+    prod_data_res = system.get_product(store_id, product_id)
+    assert prod_data_res.succeeded() and prod_data_res.get_obj().name == product_name
 
 
 # 2.6 https://github.com/SeanPikulin/TradingSystem/blob/main/Documentation/Use%20Cases.md#26-Filter-search-results
@@ -803,6 +823,31 @@ def test_send_payment_before_purchase_cart_fail():
 
 # bad scenarios
 @patch.multiple(ShoppingCart, interval_time=MagicMock(return_value=5))
+def test_try_paying_after_time_passed():
+    import time
+
+    cookie, username, password, store_name, store_id = _initialize_info(
+        _generate_username(), "aaa", _generate_store_name()
+    )
+    product_id, product_name, category, price, quantity = _create_product(
+        cookie, store_id, _generate_product_name(), "A", 5.50, 10
+    )
+    system.save_product_in_cart(cookie, store_id, product_id, 1)
+    user_age = 25
+    system.purchase_cart(cookie, user_age)
+    time.sleep(6)
+    res1 = system.send_payment(cookie, "", "")
+    res2 = system.get_store(store_id)
+    res3 = system.get_cart_details(cookie)
+    assert (
+        not res1.succeeded()
+        and res2.object.ids_to_quantities[product_id] == 10
+        and res3.object.bags[0].product_ids_to_quantities[product_id] == 1
+    )
+
+
+# region payment system mocks
+@patch.multiple(ShoppingCart, interval_time=MagicMock(return_value=5))
 def test_send_payment_failed():
     with mock.patch.object(OutsideCashing, "pay", return_value=False):
         cookie, username, password, store_name, store_id = _initialize_info(
@@ -825,30 +870,6 @@ def test_send_payment_failed():
             and res2.object.ids_to_quantities[product_id] == 10
             and res3.object.bags[0].product_ids_to_quantities[product_id] == 1
         )
-
-
-@patch.multiple(ShoppingCart, interval_time=MagicMock(return_value=5))
-def test_try_paying_after_time_passed():
-    import time
-
-    cookie, username, password, store_name, store_id = _initialize_info(
-        _generate_username(), "aaa", _generate_store_name()
-    )
-    product_id, product_name, category, price, quantity = _create_product(
-        cookie, store_id, _generate_product_name(), "A", 5.50, 10
-    )
-    system.save_product_in_cart(cookie, store_id, product_id, 1)
-    user_age = 25
-    system.purchase_cart(cookie, user_age)
-    time.sleep(6)
-    res1 = system.send_payment(cookie, "", "")
-    res2 = system.get_store(store_id)
-    res3 = system.get_cart_details(cookie)
-    assert (
-        not res1.succeeded()
-        and res2.object.ids_to_quantities[product_id] == 10
-        and res3.object.bags[0].product_ids_to_quantities[product_id] == 1
-    )
 
 
 @patch.multiple(ShoppingCart, interval_time=MagicMock(return_value=5))
@@ -894,6 +915,83 @@ def test_try_paying_first_time_incorrect_info_second_time_timer_over():
     try_again_response = system.send_payment(cookie, "", "")
     get_response = system.get_store(store_id).object.ids_to_quantities[product_id]
     assert not response.succeeded() and not try_again_response.succeeded() and get_response == 10
+
+
+# endregion
+
+# region supply systems mocks
+@patch.multiple(ShoppingCart, interval_time=MagicMock(return_value=5))
+def test_supply_order_failed():
+    with mock.patch.object(OutsideSupplyment, "deliver", return_value=False):
+        cookie, username, password, store_name, store_id = _initialize_info(
+            _generate_username(), "aaa", _generate_store_name()
+        )
+        product_id, product_name, category, price, quantity = _create_product(
+            cookie, store_id, _generate_product_name(), "A", 5.50, 10
+        )
+        system.save_product_in_cart(cookie, store_id, product_id, 1)
+        user_age = 25
+        system.purchase_cart(cookie, user_age)
+        res1 = system.send_payment(cookie, "", "")
+        # this line is added since the user might cancel the purchase after unsuccessful payment
+        res_cancel = system.cancel_purchase(cookie)
+        res2 = system.get_store(store_id)
+        res3 = system.get_cart_details(cookie)
+        assert (
+            res_cancel.succeeded()
+            and not res1.succeeded()
+            and res2.object.ids_to_quantities[product_id] == 10
+            and res3.object.bags[0].product_ids_to_quantities[product_id] == 1
+        )
+
+
+@patch.multiple(ShoppingCart, interval_time=MagicMock(return_value=5))
+def test_try_supply_first_time_failed_than_success():
+    with mock.patch.object(OutsideSupplyment, "deliver", return_value=False):
+        cookie, username, password, store_name, store_id = _initialize_info(
+            _generate_username(), "aaa", _generate_store_name()
+        )
+        product_id, product_name, category, price, quantity = _create_product(
+            cookie, store_id, _generate_product_name(), "A", 5.50, 10
+        )
+        system.save_product_in_cart(cookie, store_id, product_id, 1)
+        user_age = 25
+        system.purchase_cart(cookie, user_age)
+        response = system.send_payment(cookie, "", "")
+
+    try_again_response = system.send_payment(cookie, "", "")
+    get_response = system.get_store(store_id)
+    assert (
+        not response.succeeded()
+        and try_again_response.succeeded()
+        and get_response.object.ids_to_quantities[product_id] == 9
+    )
+
+
+# todo: make this test pass
+@patch.multiple(ShoppingCart, interval_time=MagicMock(return_value=5))
+def test_try_supply_first_time_exception_second_time_timer_over():
+    import time
+
+    with mock.patch.object(OutsideSupplyment, "deliver", return_value=Exception()):
+        cookie, username, password, store_name, store_id = _initialize_info(
+            _generate_username(), "aaa", _generate_store_name()
+        )
+        product_id, product_name, category, price, quantity = _create_product(
+            cookie, store_id, _generate_product_name(), "A", 5.50, 10
+        )
+        system.save_product_in_cart(cookie, store_id, product_id, 1)
+        user_age = 25
+        system.purchase_cart(cookie, user_age)
+        response = system.send_payment(cookie, "", "")
+
+    time.sleep(6)
+    try_again_response = system.send_payment(cookie, "", "")
+    get_response = system.get_store(store_id).object.ids_to_quantities[product_id]
+    assert not response.succeeded() and not try_again_response.succeeded() and get_response == 10
+
+
+# endregion
 
 
 # 3.7 https://github.com/SeanPikulin/TradingSystem/blob/main/Documentation/Use%20Cases.md#37-Get-personal-purchase-history
@@ -3814,6 +3912,65 @@ def test_move_discount_to_leaf_as_parent_fail():
     assert not response_move.succeeded()
 
 
+# region scenarios with mocks to purchase and discount policies
+
+
+@patch.multiple(ShoppingCart, interval_time=MagicMock(return_value=2))
+@patch.multiple(
+    Store,
+    check_purchase=MagicMock(return_value=Response(True)),
+    apply_discounts=MagicMock(return_value=10),
+)
+def test_purchase_success_with_mocked_policices():
+    cookie, username, password, store_name, store_id = _initialize_info(
+        _generate_username(), "aaa", _generate_store_name()
+    )
+    product_id, product_name, category, price, quantity = _create_product(
+        cookie, store_id, _generate_product_name(), "A", 5.50, 10
+    )
+    system.save_product_in_cart(cookie, store_id, product_id, 1)
+    user_age = 25
+    response = system.purchase_cart(cookie, user_age)
+    store_res = system.get_store(store_id)
+    cart_res = system.get_cart_details(cookie)
+
+    assert (
+        response.succeeded()
+        and store_res.object.ids_to_quantities[product_id] == 9
+        and cart_res.succeeded()
+        and response.object.value == 10
+    ), response.get_msg()
+
+
+@patch.multiple(ShoppingCart, interval_time=MagicMock(return_value=2))
+@patch.multiple(
+    Store,
+    check_purchase=MagicMock(return_value=Response(False)),
+    apply_discounts=MagicMock(return_value=10),
+)
+def test_purchase_success_with_mocked_policices():
+    cookie, username, password, store_name, store_id = _initialize_info(
+        _generate_username(), "aaa", _generate_store_name()
+    )
+    product_id, product_name, category, price, quantity = _create_product(
+        cookie, store_id, _generate_product_name(), "A", 5.50, 10
+    )
+    system.save_product_in_cart(cookie, store_id, product_id, 1)
+    user_age = 25
+    response = system.purchase_cart(cookie, user_age)
+    store_res = system.get_store(store_id)
+    cart_res = system.get_cart_details(cookie)
+    response_sent = system.send_payment(cookie, "", "")
+    assert (
+        not response.succeeded()
+        and response_sent.succeeded()
+        and store_res.object.ids_to_quantities[product_id] == 9
+        and cart_res.succeeded()
+        and response.object.value == 10
+    ), response.get_msg()
+
+
+# endregion
 # endregion
 
 # region buy_products with discount no conditions rules
@@ -4056,6 +4213,237 @@ def test_purchase_cart_discount_changed_due_to_discount_move():
 # endregion
 
 # endregion
+
+
+# region payment system mocks
+@patch.multiple(ShoppingCart, interval_time=MagicMock(return_value=5))
+def test_send_payment_failed():
+    with mock.patch.object(OutsideCashing, "pay", return_value=False):
+        cookie, username, password, store_name, store_id = _initialize_info(
+            _generate_username(), "aaa", _generate_store_name()
+        )
+        product_id, product_name, category, price, quantity = _create_product(
+            cookie, store_id, _generate_product_name(), "A", 5.50, 10
+        )
+        system.save_product_in_cart(cookie, store_id, product_id, 1)
+        user_age = 25
+        system.purchase_cart(cookie, user_age)
+        res1 = system.send_payment(cookie, "", "")
+        # this line is added since the user might cancel the purchase after unsuccessful payment
+        res_cancel = system.cancel_purchase(cookie)
+        res2 = system.get_store(store_id)
+        res3 = system.get_cart_details(cookie)
+        assert (
+            res_cancel.succeeded()
+            and not res1.succeeded()
+            and res2.object.ids_to_quantities[product_id] == 10
+            and res3.object.bags[0].product_ids_to_quantities[product_id] == 1
+        )
+
+
+@patch.multiple(ShoppingCart, interval_time=MagicMock(return_value=5))
+def test_try_paying_first_time_failed_than_success():
+    with mock.patch.object(OutsideCashing, "pay", return_value=False):
+        cookie, username, password, store_name, store_id = _initialize_info(
+            _generate_username(), "aaa", _generate_store_name()
+        )
+        product_id, product_name, category, price, quantity = _create_product(
+            cookie, store_id, _generate_product_name(), "A", 5.50, 10
+        )
+        system.save_product_in_cart(cookie, store_id, product_id, 1)
+        user_age = 25
+        system.purchase_cart(cookie, user_age)
+        response = system.send_payment(cookie, "", "")
+
+    try_again_response = system.send_payment(cookie, "", "")
+    get_response = system.get_store(store_id)
+    assert (
+        not response.succeeded()
+        and try_again_response.succeeded()
+        and get_response.object.ids_to_quantities[product_id] == 9
+    )
+
+
+@patch.multiple(ShoppingCart, interval_time=MagicMock(return_value=5))
+def test_try_paying_first_time_incorrect_info_second_time_timer_over():
+    import time
+
+    with mock.patch.object(OutsideCashing, "pay", return_value=False):
+        cookie, username, password, store_name, store_id = _initialize_info(
+            _generate_username(), "aaa", _generate_store_name()
+        )
+        product_id, product_name, category, price, quantity = _create_product(
+            cookie, store_id, _generate_product_name(), "A", 5.50, 10
+        )
+        system.save_product_in_cart(cookie, store_id, product_id, 1)
+        user_age = 25
+        system.purchase_cart(cookie, user_age)
+        response = system.send_payment(cookie, "", "")
+
+    time.sleep(6)
+    try_again_response = system.send_payment(cookie, "", "")
+    get_response = system.get_store(store_id).object.ids_to_quantities[product_id]
+    assert not response.succeeded() and not try_again_response.succeeded() and get_response == 10
+
+
+# endregion
+
+# region supply systems mocks
+@patch.multiple(ShoppingCart, interval_time=MagicMock(return_value=5))
+def test_supply_order_failed():
+    with mock.patch.object(OutsideSupplyment, "deliver", return_value=False):
+        cookie, username, password, store_name, store_id = _initialize_info(
+            _generate_username(), "aaa", _generate_store_name()
+        )
+        product_id, product_name, category, price, quantity = _create_product(
+            cookie, store_id, _generate_product_name(), "A", 5.50, 10
+        )
+        system.save_product_in_cart(cookie, store_id, product_id, 1)
+        user_age = 25
+        system.purchase_cart(cookie, user_age)
+        res1 = system.send_payment(cookie, "", "")
+        # this line is added since the user might cancel the purchase after unsuccessful payment
+        res_cancel = system.cancel_purchase(cookie)
+        res2 = system.get_store(store_id)
+        res3 = system.get_cart_details(cookie)
+        assert (
+            res_cancel.succeeded()
+            and not res1.succeeded()
+            and res2.object.ids_to_quantities[product_id] == 10
+            and res3.object.bags[0].product_ids_to_quantities[product_id] == 1
+        )
+
+
+@patch.multiple(ShoppingCart, interval_time=MagicMock(return_value=5))
+def test_try_supply_first_time_failed_than_success():
+    with mock.patch.object(OutsideSupplyment, "deliver", return_value=False):
+        cookie, username, password, store_name, store_id = _initialize_info(
+            _generate_username(), "aaa", _generate_store_name()
+        )
+        product_id, product_name, category, price, quantity = _create_product(
+            cookie, store_id, _generate_product_name(), "A", 5.50, 10
+        )
+        system.save_product_in_cart(cookie, store_id, product_id, 1)
+        user_age = 25
+        system.purchase_cart(cookie, user_age)
+        response = system.send_payment(cookie, "", "")
+
+    try_again_response = system.send_payment(cookie, "", "")
+    get_response = system.get_store(store_id)
+    assert (
+        not response.succeeded()
+        and try_again_response.succeeded()
+        and get_response.object.ids_to_quantities[product_id] == 9
+    )
+
+
+# todo: make this test pass
+@patch.multiple(ShoppingCart, interval_time=MagicMock(return_value=5))
+def test_try_supply_first_time_exception_second_time_timer_over():
+    import time
+
+    with mock.patch.object(OutsideSupplyment, "deliver", side_effect=Exception()):
+        cookie, username, password, store_name, store_id = _initialize_info(
+            _generate_username(), "aaa", _generate_store_name()
+        )
+        product_id, product_name, category, price, quantity = _create_product(
+            cookie, store_id, _generate_product_name(), "A", 5.50, 10
+        )
+        system.save_product_in_cart(cookie, store_id, product_id, 1)
+        user_age = 25
+        system.purchase_cart(cookie, user_age)
+        response = system.send_payment(cookie, "", "")
+
+    time.sleep(6)
+    try_again_response = system.send_payment(cookie, "", "")
+    get_response = system.get_store(store_id).object.ids_to_quantities[product_id]
+    assert not response.succeeded() and not try_again_response.succeeded() and get_response == 10
+
+
+# endregion
+
+# region scenarios with mocks to purchase and discount policies
+
+
+@patch.multiple(ShoppingCart, interval_time=MagicMock(return_value=2))
+@patch.multiple(
+    Store,
+    check_purchase=MagicMock(return_value=Response(True)),
+    apply_discounts=MagicMock(return_value=10),
+)
+def test_purchase_success_with_mocked_policices():
+    cookie, username, password, store_name, store_id = _initialize_info(
+        _generate_username(), "aaa", _generate_store_name()
+    )
+    product_id, product_name, category, price, quantity = _create_product(
+        cookie, store_id, _generate_product_name(), "A", 5.50, 10
+    )
+    system.save_product_in_cart(cookie, store_id, product_id, 1)
+    user_age = 25
+    response = system.purchase_cart(cookie, user_age)
+    store_res = system.get_store(store_id)
+    cart_res = system.get_cart_details(cookie)
+    response_sent = system.send_payment(cookie, "", "")
+    assert (
+        response.succeeded()
+        and response_sent.succeeded()
+        and store_res.object.ids_to_quantities[product_id] == 9
+        and cart_res.succeeded()
+        and response.object.value == 10
+    ), response.get_msg()
+
+
+@patch.multiple(ShoppingCart, interval_time=MagicMock(return_value=2))
+@patch.multiple(
+    Store,
+    check_purchase=MagicMock(return_value=Response(False)),
+    apply_discounts=MagicMock(return_value=10),
+)
+def test_purchase_fail_with_mocked_policy_false():
+    cookie, username, password, store_name, store_id = _initialize_info(
+        _generate_username(), "aaa", _generate_store_name()
+    )
+    product_id, product_name, category, price, quantity = _create_product(
+        cookie, store_id, _generate_product_name(), "A", 5.50, 10
+    )
+    system.save_product_in_cart(cookie, store_id, product_id, 1)
+    user_age = 25
+    response = system.purchase_cart(cookie, user_age)
+    store_res = system.get_store(store_id)
+    assert (
+        not response.succeeded() and store_res.object.ids_to_quantities[product_id] == 10
+    ), response.get_msg()
+
+
+@patch.multiple(ShoppingCart, interval_time=MagicMock(return_value=2))
+@patch.multiple(
+    Store,
+    check_purchase=MagicMock(return_value=Response(False)),
+    apply_discounts=MagicMock(return_value=10),
+)
+def test_purchase_fail_with_mocked_policy_false_than_true():
+    cookie, username, password, store_name, store_id = _initialize_info(
+        _generate_username(), "aaa", _generate_store_name()
+    )
+    product_id, product_name, category, price, quantity = _create_product(
+        cookie, store_id, _generate_product_name(), "A", 5.50, 10
+    )
+    system.save_product_in_cart(cookie, store_id, product_id, 1)
+    user_age = 25
+    response = system.purchase_cart(cookie, user_age)
+    system.change_product_quantity_in_cart(cookie, store_id, product_id, 2)
+    with patch.multiple(Store, check_purchase=MagicMock(return_value=Response(True))):
+        response_after_change = system.purchase_cart(cookie, user_age)
+        store_res = system.get_store(store_id)
+    assert (
+        not response.succeeded()
+        and response_after_change.succeeded()
+        and store_res.object.ids_to_quantities[product_id] == 8
+    ), response.get_msg()
+
+
+# endregion
+
 
 # region test_full_purchase_with_discounts_and_purchase_policy
 
