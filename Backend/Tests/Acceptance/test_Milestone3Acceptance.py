@@ -1,13 +1,11 @@
 import threading
+from Backend.Tests.Acceptance.test_TradingSystem import username_number, store_number, product_number
 
 from Backend.Service.trading_system import TradingSystem
 
 system = TradingSystem.getInstance()
-username_number = 0
 user_lock = threading.Lock()
-store_number = 0
 store_lock = threading.Lock()
-product_number = 0
 product_lock = threading.Lock()
 
 
@@ -36,7 +34,8 @@ def _generate_username() -> str:
     global username_number
     user_lock.acquire()
     username_number += 1
-    username = str(username_number)
+    username = "test_MileStone3Acceptance" + str(username_number)
+    print(username)
     user_lock.release()
     return username
 
@@ -45,7 +44,7 @@ def _generate_store_name() -> str:
     global store_number
     store_lock.acquire()
     store_number += 1
-    store = str(store_number)
+    store = "test_MileStone3Acceptance" + str(store_number)
     store_lock.release()
     return store
 
@@ -134,7 +133,7 @@ def _generate_product_name() -> str:
     global product_number
     product_lock.acquire()
     product_number += 1
-    product = str(product_number)
+    product = "test_MileStone3Acceptance" + str(product_number)
     product_lock.release()
     return product
 
