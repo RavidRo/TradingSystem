@@ -1,133 +1,127 @@
-
-import React ,{FC, useEffect, useState,useRef} from 'react';
+import React, { FC, useContext, useEffect, useState } from 'react';
 import '../styles/PopupCart.scss';
-import storesProductsMap from '../components/storesProductsMap';
 import PopupBag from '../components/PopupBag';
-import {Product,ProductQuantity,ShoppingBag,ShoppingCart,ProductToQuantity,StoreToSearchedProducts,Store} from '../types';
+import {
+	Product,
+	ProductQuantity,
+	ShoppingCart,
+	ProductToQuantity,
+	StoreToSearchedProducts,
+} from '../types';
 import useAPI from '../hooks/useAPI';
+import { UsernameContext } from '../contexts';
 
 type PopupCartProps = {
-    products:ProductQuantity[],
-    storesToProducts:StoreToSearchedProducts,
-    propHandleDelete:(product:Product,storeID:string)=>void,
-	propHandleAdd:(product:Product,storeID:string)=>void;
-   
+	storesToProducts: StoreToSearchedProducts;
+	propHandleDelete: (product: Product, storeID: string) => Promise<boolean> | boolean;
+	changeQuantity: (store: string, product: string, quan: number) => Promise<boolean>;
+	propUpdateStores: (map: StoreToSearchedProducts) => void;
 };
-const PopupCart: FC<PopupCartProps> = ({products,propHandleAdd,storesToProducts,propHandleDelete}: PopupCartProps) => {
-
-    const [bagsToProducts,setShoppingBags] = useState<ShoppingBag[]>([]);
-
-    const [storesToProductsMy,setStoresProducts] = useState<StoreToSearchedProducts>(storesToProducts);
-
-    const productQuantityOfTuples = (tuples:ProductToQuantity[])=>{
-        let prodQuantities:ProductQuantity[] = tuples.map(tuple=>{
-                                                            return {
-                                                                id:tuple[0].id,
-                                                                name:tuple[0].name,
-                                                                category:tuple[0].category,
-                                                                price:tuple[0].price,
-                                                                keywords:tuple[0].keywords,
-                                                                quantity:tuple[1]}})
-         return prodQuantities;           
-
-    }
-    const handleDeleteProductMy = (id:string,bagID:string)=>{
-        let product:Product= {} as Product;
-        for(var i=0;i<bagsToProducts.length;i++){
-            for(var j=0;j<bagsToProducts[i].prodQuantities.length;j++){
-                if(bagsToProducts[i].prodQuantities[j][0].id===id){
-                    product=bagsToProducts[i].prodQuantities[j][0];
-                    // change product quantity in bag to 0
-                    bagsToProducts[i].prodQuantities[j][1] = 0;
-                }
-            }
-        }
-        propHandleDelete(product,bagID);
-	}
-    const findBagByProductID = (productID:string)=>{
-        for(var i=0;i<bagsToProducts.length;i++){
-            for(var j=0;j<bagsToProducts[i].prodQuantities.length;j++){
-                if(bagsToProducts[i].prodQuantities[j][0].id===productID){
-                    return bagsToProducts[i].storeID;
-                }
-            }
-        }
-    }
-    const productUpdateObj = useAPI<void>('/change_product_quantity_in_cart',{},'POST');
-    const changeQuantity = (id: string, newQuantity: number)=>{
-        for(var i=0;i<bagsToProducts.length;i++){
-            for(var j=0;j<bagsToProducts[i].prodQuantities.length;j++){
-                if(bagsToProducts[i].prodQuantities[j][0].id===id){
-                    // change product quantity in bag to newQuantity
-                    bagsToProducts[i].prodQuantities[j][1] = newQuantity;
-                }
-            }
-        }
-
-        productUpdateObj.request({store_id:findBagByProductID(id),product_id:id,quantity:newQuantity}).then(({data,error,errorMsg})=>{
-            if(!error && data!==null){
-                // do nothing
-                void(0);
-            }
-            else{
-                alert(errorMsg);
-            }
-        })
-    }
- 
-
-    const storeObj = useAPI<Store>('/get_store');
-    const getStoreNameByID = (storeID:string)=>{
-        storeObj.request({store_id:storeID}).then(({data,error,errorMsg})=>{
-                
-            if(!error && data!==null){
-                console.log(data.data.name);
-                return data.data.name;
-            }
-            else{
-                alert(errorMsg);
-                return "";
-            }
-        })
-    }
-    
-    const bagIDToName = useRef<{[storeID: string]: ShoppingBag}>({});
-    const cartObj = useAPI<ShoppingCart>('/get_cart_details');
-    useEffect(()=>{
-        cartObj.request().then(({data,error,errorMsg})=>{
-            if(!error && data!==null){
-                let bags = data.data.bags;
-                for(var i=0;i<bags.length;i++){
-                    bagIDToName.current[bags[i].storeID] = bags[i];
-                }
-                setShoppingBags(data.data.bags);
-            }
-            else{
-                alert(errorMsg)
-            }
-        })
-    },[]);
-
-    return (
+const PopupCart: FC<PopupCartProps> = ({
+	storesToProducts,
+	propHandleDelete,
+	changeQuantity,
+	propUpdateStores,
+}: PopupCartProps) => {
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars
+	const [storesToProductsMy, setStoresProducts] =
+		useState<StoreToSearchedProducts>({});
 		
-		<div className="popupCart">
-            {Object.keys(storesToProductsMy).map((bagID)=>{
-                let index = Object.keys(storesToProductsMy).indexOf(bagID);
-                return (
-                <PopupBag
-                key={bagID}
-                // storeName={Object.values(bagIDToName.current)[index].storeName}
-                storeName={bagID}
-                storeID={bagID}
-                products={productQuantityOfTuples(storesToProductsMy[bagID])}
-                propHandleDelete={(productID:string)=>handleDeleteProductMy(productID,bagID)}
-                propHandleAdd={propHandleAdd}
-                />)
-                    
-            })}
-            
+	const username = useContext(UsernameContext);
+
+
+	//helper function to present the products and give the to bag nicely
+	const productQuantityOfTuples = (tuples: ProductToQuantity[]) => {
+		let prodQuantities: ProductQuantity[] = tuples.map((tuple) => {
+			return {
+				id: tuple[0].id,
+				name: tuple[0].name,
+				category: tuple[0].category,
+				price: tuple[0].price,
+				keywords: tuple[0].keywords,
+				quantity: tuple[1],
+			};
+		});
+		return prodQuantities;
+	};
+	//need to delete product from cart and update the server
+	const handleDeleteProductMy = (product: Product, bagID: string) => {
+		let answer = propHandleDelete(product, bagID); //update the server
+		if (answer !== false && answer !== true) {
+			answer.then((result) => {
+				if (result === true) {
+					for (var i = 0; i < Object.keys(storesToProductsMy).length; i++) {
+						let tupleArr = Object.values(storesToProductsMy)[i];
+						for (var j = 0; j < tupleArr.length; j++) {
+							if (tupleArr[j][0].id === product.id) {
+								// change product quantity in bag to 0
+								tupleArr[j][1] = 0;
+								Object.values(storesToProductsMy)[i] = tupleArr;
+							}
+						}
+					}
+				}
+			});
+		}
+
+		return answer;
+	};
+	//load the cart when user enters the website
+	const cartObj = useAPI<ShoppingCart>('/get_cart_details');
+	const productObj = useAPI<Product>('/get_product');
+	useEffect(() => {
+		cartObj.request().then(({ data, error }) => {
+			if (!error && data !== null) {
+				let bags = data.data.bags;
+				let map: { [storeID: string]: ProductToQuantity[] } = {};
+				let promises: Promise<void>[] = [];
+				for (var i = 0; i < bags.length; i++) {
+					let bag = bags[i];
+					let storeID = bag.store_id;
+					let productQuantitiesMap = bag.product_ids_to_quantities;
+					let tuplesArr: ProductToQuantity[] = [];
+					for (var j = 0; j < Object.keys(productQuantitiesMap).length; j++) {
+						let productID: string = Object.keys(productQuantitiesMap)[j];
+						let quantity: number = Object.values(productQuantitiesMap)[j];
+
+						let promise = productObj
+							.request({ product_id: productID, store_id: storeID, username:username})
+							.then(({ data, error }) => {
+								if (!error && data !== null) {
+									let product = data.data;
+									tuplesArr.push([product, quantity]);
+								}
+							});
+						promises.push(promise);
+					}
+					map[storeID] = tuplesArr;
+				}
+				Promise.allSettled(promises).then(() => {
+					setStoresProducts(map);
+					propUpdateStores(map);
+				});
+			}
+		});
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [storesToProducts]);
+
+	return (
+		<div className='popupCart'>
+			{Object.keys(storesToProductsMy).map((bagID) => {
+				return (
+					<PopupBag
+						key={bagID}
+						storeID={bagID}
+						products={productQuantityOfTuples(storesToProductsMy[bagID])}
+						propHandleDelete={(product: Product) =>
+							handleDeleteProductMy(product, bagID)
+						}
+						changeQuantity={changeQuantity}
+					/>
+				);
+			})}
 		</div>
 	);
-}
+};
 
 export default PopupCart;

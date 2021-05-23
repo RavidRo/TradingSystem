@@ -1,17 +1,12 @@
 import React, { FC } from 'react';
 
-import {
-	List,
-	ListItem,
-	ListItemText,
-	Collapse,
-	ListItemSecondaryAction,
-	IconButton,
-} from '@material-ui/core';
+import { List, ListItem, ListItemText, Collapse, ListItemSecondaryAction } from '@material-ui/core';
 import { ExpandLess, ExpandMore } from '@material-ui/icons';
 import DeleteForeverOutlinedIcon from '@material-ui/icons/DeleteForeverOutlined';
+import EditIcon from '@material-ui/icons/Edit';
 
 import { Appointee } from '../../types';
+import SecondaryActionButton from './SecondaryActionButton';
 // import '../styles/AppointeeTree.scss';
 
 type AppointeeNodeProps = {
@@ -19,9 +14,16 @@ type AppointeeNodeProps = {
 	isSelected: (appointee: Appointee) => boolean;
 	onClick: (appointee: Appointee) => void;
 	onDelete?: (appointeeUsername: string) => void;
+	onEdit?: (appointee: Appointee) => void;
 };
 
-const AppointeeNode: FC<AppointeeNodeProps> = ({ appointee, isSelected, onClick, onDelete }) => {
+const AppointeeNode: FC<AppointeeNodeProps> = ({
+	appointee,
+	isSelected,
+	onClick,
+	onDelete,
+	onEdit,
+}) => {
 	const [open, setOpen] = React.useState(true);
 
 	const handleClick = () => {
@@ -31,30 +33,25 @@ const AppointeeNode: FC<AppointeeNodeProps> = ({ appointee, isSelected, onClick,
 	return (
 		<>
 			<ListItem button selected={isSelected(appointee)} onClick={() => onClick(appointee)}>
-				<ListItemText
-					key="details"
-					primary={`${appointee.username} - ${appointee.role}`}
-					// className="first-field"
-				/>
+				<ListItemText key="details" primary={`${appointee.username} - ${appointee.role}`} />
 
-				{appointee.appointees.length > 0 && (
-					<ListItemSecondaryAction key="expandAndDelete">
-						{onDelete && (
-							<span className="secondary-second-action">
-								<IconButton
-									edge="end"
-									aria-label="delete"
-									onClick={() => onDelete(appointee.username)}
-								>
-									<DeleteForeverOutlinedIcon />
-								</IconButton>
-							</span>
-						)}
-						<IconButton edge="start" aria-label="expand" onClick={handleClick}>
+				<ListItemSecondaryAction key="expandAndDelete">
+					{onEdit && appointee.is_manager && (
+						<SecondaryActionButton onClick={() => onEdit(appointee)}>
+							<EditIcon />
+						</SecondaryActionButton>
+					)}
+					{onDelete && (
+						<SecondaryActionButton onClick={() => onDelete(appointee.username)}>
+							<DeleteForeverOutlinedIcon />
+						</SecondaryActionButton>
+					)}
+					{appointee.appointees.length > 0 && (
+						<SecondaryActionButton onClick={handleClick}>
 							{open ? <ExpandLess /> : <ExpandMore />}
-						</IconButton>
-					</ListItemSecondaryAction>
-				)}
+						</SecondaryActionButton>
+					)}
+				</ListItemSecondaryAction>
 			</ListItem>
 
 			<Collapse in={open} timeout="auto">
@@ -65,6 +62,7 @@ const AppointeeNode: FC<AppointeeNodeProps> = ({ appointee, isSelected, onClick,
 							appointee={appointee}
 							isSelected={isSelected}
 							onClick={onClick}
+							onEdit={onEdit}
 						/>
 					))}
 				</List>

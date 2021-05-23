@@ -20,7 +20,7 @@ def admin_username(config_path):
 def admin_password(config_path):
     with open(config_path, "r") as read_file:
         data = json.load(read_file)
-        return data["admin-password"]
+        return data["password"]
 
 
 def test_login_all_good():

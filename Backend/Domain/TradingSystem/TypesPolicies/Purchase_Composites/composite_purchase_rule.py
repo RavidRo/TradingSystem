@@ -14,6 +14,9 @@ class PurchaseRule(ABC):
     complex objects of a composition.
     """
 
+    def __init__(self, identifier):
+        self.id = identifier
+
     @property
     def id(self) -> str:
         return self._id

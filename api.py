@@ -62,12 +62,39 @@ async def get_cookie():
 
 
 @app.websocket("/connect")
-def connect():
-    cookie = request.args.get("cookie")
-    if cookie is None:
-        cookie = system.enter_system()
-    answer = system.connect(cookie, lambda messages: websocket.send(messages))
-    return __responseToJson(cookie, answer)
+async def connect():
+    cookie = await websocket.receive()
+    queue = []
+
+    # queue = asyncio.Queue()
+
+    # loop = asyncio.get_running_loop()
+    open = True
+    # def send_messages(messages):
+    #     loop = asyncio.new_event_loop()
+    #     asyncio.set_event_loop(loop)
+    #     loop.call_soon(queue.put_nowait, messages)
+    #     return open
+
+    def send_messages(messages):
+        queue.append(messages)
+        return open
+
+    system.connect(cookie, send_messages)
+    while True:
+        try:
+            await asyncio.sleep(10)
+            while len(queue) > 0:
+                messages = queue.pop()
+                for message in messages:
+                    await websocket.send(message)
+            # messages = await queue.get()
+            # print("Sending messages to socket", messages)
+            # for message in messages:
+            #     await websocket.send(message)
+        except:
+            open = False
+            return
 
 
 @app.route("/register", methods=["POST"])
@@ -136,7 +163,8 @@ async def search_products():
     category = request.args.get("category")
     min_price = request.args.get("min_price")
     max_price = request.args.get("max_price")
-    kwargs = request.args.get("kwargs")
+    kwargs = request.args.getlist("kwargs[]")
+
     answer = await __async_call(
         system.search_products, product_name, category, float(min_price), float(max_price), kwargs
     )
@@ -185,10 +213,13 @@ async def remove_product_from_cart():
         cookie = request_json["cookie"]
     if "product_id" not in request_json:
         missing_args += " product_id"
+    if "store_id" not in request_json:
+        missing_args += " store_id"
     if missing_args != "":
         return __missing_args(cookie, missing_args)
     product_id = request_json["product_id"]
-    answer = await __async_call(system.remove_product_from_cart, cookie, product_id)
+    store_id = request_json["store_id"]
+    answer = await __async_call(system.remove_product_from_cart, cookie, store_id, product_id)
     return __responseToJson(cookie, answer)
 
 
@@ -317,8 +348,6 @@ async def create_product():
         missing_args += " quantity"
     if "category" not in request_json:
         missing_args += " category"
-    if "keywords" not in request_json:
-        missing_args += " keywords"
     if missing_args != "":
         return __missing_args(cookie, missing_args)
     store_id = (await request.get_json())["store_id"]
@@ -326,7 +355,7 @@ async def create_product():
     price = request_json["price"]
     quantity = request_json["quantity"]
     category = request_json["category"]
-    keywords = request_json["keywords"]
+    keywords = request_json["keywords"] if "keywords" in request_json else None
     answer = await __async_call(
         system.create_product, cookie, store_id, name, category, price, quantity, keywords
     )
@@ -390,22 +419,14 @@ async def edit_product_details():
         missing_args += " store_id"
     if "product_id" not in request_json:
         missing_args += " product_id"
-    if "new_name" not in request_json:
-        missing_args += " new_name"
-    if "new_category" not in request_json:
-        missing_args += " new_category"
-    if "new_price" not in request_json:
-        missing_args += " new_price"
-    if "keywords" not in request_json:
-        missing_args += " keywords"
     if missing_args != "":
         return __missing_args(cookie, missing_args)
     store_id = request_json["store_id"]
     product_id = request_json["product_id"]
-    new_name = request_json["new_name"]
-    new_category = request_json["new_category"]
-    new_price = request_json["new_price"]
-    keywords = request_json["keywords"]
+    new_name = request_json["new_name"] if "new_name" in request_json else None
+    new_category = request_json["new_category"] if "new_category" in request_json else None
+    new_price = request_json["new_price"] if "new_price" in request_json else None
+    keywords = request_json["keywords"] if "keywords" in request_json else None
     answer = await __async_call(
         system.edit_product_details,
         cookie,
@@ -420,11 +441,11 @@ async def edit_product_details():
 
 
 @app.route("/get_product", methods=["GET"])
-async def get_purchase_history():
+async def get_product():
     store_id = request.args.get("store_id")
     product_id = request.args.get("product_id")
-
-    answer = await __async_call(system.get_product, store_id, product_id)
+    username = request.args.get("username")
+    answer = await __async_call(system.get_product, store_id, product_id, username)
     return __responseToJson(None, answer)
 
 
@@ -522,8 +543,6 @@ async def edit_simple_discount():
         missing_args += " condition"
     if "context" not in request_json:
         missing_args += " context"
-    if "duration" not in request_json:
-        missing_args += " duration"
     if missing_args != "":
         return __missing_args(cookie, missing_args)
     store_id = request_json["store_id"]
@@ -531,7 +550,7 @@ async def edit_simple_discount():
     percentage = request_json["percentage"]
     condition = request_json["condition"]
     context = request_json["context"]
-    duration = request_json["duration"]
+    duration = request_json["duration"] if "duration" in request_json else None
     answer = await __async_call(
         system.edit_simple_discount,
         cookie,
@@ -557,16 +576,12 @@ async def edit_complex_discount():
         missing_args += " store_id"
     if "discount_id" not in request_json:
         missing_args += " discount_id"
-    if "complex_type" not in request_json:
-        missing_args += " complex_type"
-    if "decision_rule" not in request_json:
-        missing_args += " decision_rule"
     if missing_args != "":
         return __missing_args(cookie, missing_args)
     store_id = request_json["store_id"]
     discount_id = request_json["discount_id"]
-    complex_type = request_json["complex_type"]
-    decision_rule = request_json["decision_rule"]
+    complex_type = request_json["complex_type"] if "complex_type" in request_json else None
+    decision_rule = request_json["decision_rule"] if "decision_rule" in request_json else None
     answer = await __async_call(
         system.edit_complex_discount, cookie, store_id, discount_id, complex_type, decision_rule
     )
@@ -625,13 +640,13 @@ async def add_manager_permission():
         missing_args += " store_id"
     if "username" not in request_json:
         missing_args += " username"
-    if "permission_number" not in request_json:
-        missing_args += " permission_number"
+    if "permission" not in request_json:
+        missing_args += " permission"
     if missing_args != "":
         return __missing_args(cookie, missing_args)
     store_id = request_json["store_id"]
     username = request_json["username"]
-    permission_number = request_json["permission_number"]
+    permission_number = request_json["permission"]
     answer = await __async_call(
         system.add_manager_permission, cookie, store_id, username, permission_number
     )
@@ -650,13 +665,13 @@ async def remove_manager_permission():
         missing_args += " store_id"
     if "username" not in request_json:
         missing_args += " username"
-    if "permission_number" not in request_json:
-        missing_args += " permission_number"
+    if "permission" not in request_json:
+        missing_args += " permission"
     if missing_args != "":
         return __missing_args(cookie, missing_args)
     store_id = request_json["store_id"]
     username = request_json["username"]
-    permission_number = request_json["permission_number"]
+    permission_number = request_json["permission"]
     answer = await __async_call(
         system.remove_manager_permission, cookie, store_id, username, permission_number
     )
@@ -775,7 +790,7 @@ async def edit_purchase_rule():
     rule_type = request_json["rule_type"]
     rule_id = request_json["rule_id"]
     answer = await __async_call(
-        system.edit_purchase_rule, cookie, store_id, rule_details, rule_type, rule_id
+        system.edit_purchase_rule, cookie, store_id, rule_details, rule_id, rule_type
     )
     return __responseToJson(cookie, answer)
 
@@ -855,6 +870,174 @@ async def get_purchase_policy():
         cookie = await __async_call(system.enter_system)
     store_id = request.args.get("store_id")
     answer = await __async_call(system.get_purchase_policy, cookie, store_id)
+    return __responseToJson(cookie, answer)
+
+
+@app.route("/get_user_offers", methods=["GET"])
+async def get_user_offers():
+    cookie = request.args.get("cookie")
+    if cookie is None:
+        cookie = await __async_call(system.enter_system)
+    answer = await __async_call(system.get_user_offers, cookie)
+    return __responseToJson(cookie, answer, lambda obj: obj.values)
+
+
+
+@app.route("/get_store_offers", methods=["GET"])
+async def get_store_offers():
+    cookie = request.args.get("cookie")
+    if cookie is None:
+        cookie = await __async_call(system.enter_system)
+    store_id = request.args.get("store_id")
+    answer = await __async_call(system.get_store_offers, cookie, store_id)
+    return __responseToJson(cookie, answer, lambda obj: obj.values)
+
+
+@app.route("/create_offer", methods=["POST"])
+async def create_offer():
+    request_json = await request.get_json()
+    missing_args = ""
+    if "cookie" not in request_json:
+        cookie = await __async_call(system.enter_system)
+    else:
+        cookie = request_json["cookie"]
+    if "store_id" not in request_json:
+        missing_args += " store_id"
+    if "product_id" not in request_json:
+        missing_args += " product_id"
+    if missing_args != "":
+        return __missing_args(cookie, missing_args)
+    store_id = request_json["store_id"]
+    product_id = request_json["product_id"]
+    answer = await __async_call(system.create_offer, cookie, store_id, product_id)
+    return __responseToJson(cookie, answer)
+
+
+@app.route("/declare_price", methods=["POST"])
+async def declare_price():
+    request_json = await request.get_json()
+    missing_args = ""
+    if "cookie" not in request_json:
+        cookie = await __async_call(system.enter_system)
+    else:
+        cookie = request_json["cookie"]
+    if "offer_id" not in request_json:
+        missing_args += " offer_id"
+    if "price" not in request_json:
+        missing_args += " price"
+    if missing_args != "":
+        return __missing_args(cookie, missing_args)
+    offer_id = request_json["offer_id"]
+    price = request_json["price"]
+    answer = await __async_call(system.declare_price, cookie, offer_id, price)
+    return __responseToJson(cookie, answer)
+
+
+@app.route("/suggest_counter_offer", methods=["POST"])
+async def suggest_counter_offer():
+    request_json = await request.get_json()
+    missing_args = ""
+    if "cookie" not in request_json:
+        cookie = await __async_call(system.enter_system)
+    else:
+        cookie = request_json["cookie"]
+    if "store_id" not in request_json:
+        missing_args += " store_id"
+    if "product_id" not in request_json:
+        missing_args += " product_id"
+    if "offer_id" not in request_json:
+        missing_args += " offer_id"
+    if "price" not in request_json:
+        missing_args += " price"
+    if missing_args != "":
+        return __missing_args(cookie, missing_args)
+    store_id = request_json["store_id"]
+    product_id = request_json["product_id"]
+    offer_id = request_json["offer_id"]
+    price = request_json["price"]
+    answer = await __async_call(
+        system.suggest_counter_offer, cookie, store_id, product_id, offer_id, price
+    )
+    return __responseToJson(cookie, answer)
+
+
+@app.route("/approve_manager_offer", methods=["POST"])
+async def approve_manager_offer():
+    request_json = await request.get_json()
+    missing_args = ""
+    if "cookie" not in request_json:
+        cookie = await __async_call(system.enter_system)
+    else:
+        cookie = request_json["cookie"]
+    if "offer_id" not in request_json:
+        missing_args += " offer_id"
+    if missing_args != "":
+        return __missing_args(cookie, missing_args)
+    offer_id = request_json["offer_id"]
+    answer = await __async_call(system.approve_manager_offer, cookie, offer_id)
+    return __responseToJson(cookie, answer)
+
+
+@app.route("/approve_user_offer", methods=["POST"])
+async def approve_user_offer():
+    request_json = await request.get_json()
+    missing_args = ""
+    if "cookie" not in request_json:
+        cookie = await __async_call(system.enter_system)
+    else:
+        cookie = request_json["cookie"]
+    if "store_id" not in request_json:
+        missing_args += " store_id"
+    if "product_id" not in request_json:
+        missing_args += " product_id"
+    if "offer_id" not in request_json:
+        missing_args += " offer_id"
+    if missing_args != "":
+        return __missing_args(cookie, missing_args)
+    store_id = request_json["store_id"]
+    product_id = request_json["product_id"]
+    offer_id = request_json["offer_id"]
+    answer = await __async_call(system.approve_user_offer, cookie, store_id, product_id, offer_id)
+    return __responseToJson(cookie, answer)
+
+
+@app.route("/reject_user_offer", methods=["POST"])
+async def reject_user_offer():
+    request_json = await request.get_json()
+    missing_args = ""
+    if "cookie" not in request_json:
+        cookie = await __async_call(system.enter_system)
+    else:
+        cookie = request_json["cookie"]
+    if "store_id" not in request_json:
+        missing_args += " store_id"
+    if "product_id" not in request_json:
+        missing_args += " product_id"
+    if "offer_id" not in request_json:
+        missing_args += " offer_id"
+    if missing_args != "":
+        return __missing_args(cookie, missing_args)
+    store_id = request_json["store_id"]
+    product_id = request_json["product_id"]
+    offer_id = request_json["offer_id"]
+    answer = await __async_call(system.reject_user_offer, cookie, store_id, product_id, offer_id)
+    return __responseToJson(cookie, answer)
+
+
+@app.route("/cancel_offer", methods=["POST"])
+async def cancel_offer():
+    request_json = await request.get_json()
+    missing_args = ""
+    if "cookie" not in request_json:
+        cookie = await __async_call(system.enter_system)
+    else:
+        cookie = request_json["cookie"]
+    if "offer_id" not in request_json:
+        missing_args += " offer_id"
+    if missing_args != "":
+        return __missing_args(cookie, missing_args)
+    offer_id = request_json["offer_id"]
+    answer = await __async_call(system.cancel_offer, cookie, offer_id)
     return __responseToJson(cookie, answer)
 
 

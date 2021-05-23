@@ -1,3 +1,4 @@
+from Backend.Domain.TradingSystem.offer import Offer
 from Backend.Domain.TradingSystem.Responsibilities.founder import Founder
 from Backend.Domain.TradingSystem.store import Store
 
@@ -35,6 +36,7 @@ class Member(UserState):
         self._username = username
         self.__responsibilities = responsibilities
         self.__purchase_details = purchase_details
+        self.__offers: dict[str, Offer] = {}
         # get cart data from DB
 
     def login(self, username, password):
@@ -233,3 +235,59 @@ class Member(UserState):
     # 4.2
     def get_purchase_policy(self, store_id):
         return self.__responsibilities[store_id].get_purchase_policy()
+
+    # Offers
+    # ==================
+
+    def get_user_offers(self) -> Response[ParsableList[Offer]]:
+        return Response(True, ParsableList(list(self.__offers.values())))
+
+    def get_store_offers(self, store_id) -> Response[ParsableList[Offer]]:
+        if store_id not in self.__responsibilities:
+            return Response(False, msg=f"this member do not own/manage store {store_id}")
+        return self.__responsibilities[store_id].get_store_offers()
+
+    def create_offer(self, user, store_id, product_id) -> Response[str]:
+        from Backend.Domain.TradingSystem.stores_manager import StoresManager
+
+        response_get_store = StoresManager.get_store(store_id)
+        if not response_get_store.succeeded():
+            return response_get_store
+
+        response_get_product = StoresManager.get_product(store_id, product_id)
+        if not response_get_product.succeeded():
+            return response_get_product
+
+        offer = Offer(user, response_get_store.object, response_get_product.object)
+        self.__offers[offer.get_id()] = offer
+        return Response(True, offer.get_id())
+
+    def declare_price(self, offer_id, price) -> Response[None]:
+        if offer_id not in self.__offers:
+            return Response(False, msg=f"Offer with offer id {offer_id} does not exist")
+        return self.__offers[offer_id].declare_price(price)
+
+    def suggest_counter_offer(self, store_id, product_id, offer_id, price) -> Response[None]:
+        if store_id not in self.__responsibilities:
+            return Response(False, msg=f"this member do not own/manage store {store_id}")
+        return self.__responsibilities[store_id].suggest_counter_offer(product_id, offer_id, price)
+
+    def approve_manager_offer(self, offer_id) -> Response[None]:
+        if offer_id not in self.__offers:
+            return Response(False, msg=f"Offer with offer id {offer_id} does not exist")
+        return self.__offers[offer_id].approve_manager_offer()
+
+    def approve_user_offer(self, store_id, product_id, offer_id) -> Response[None]:
+        if store_id not in self.__responsibilities:
+            return Response(False, msg=f"this member do not own/manage store {store_id}")
+        return self.__responsibilities[store_id].approve_user_offer(product_id, offer_id)
+
+    def reject_user_offer(self, store_id, product_id, offer_id) -> Response[None]:
+        if store_id not in self.__responsibilities:
+            return Response(False, msg=f"this member do not own/manage store {store_id}")
+        return self.__responsibilities[store_id].reject_user_offer(product_id, offer_id)
+
+    def cancel_offer(self, offer_id) -> Response[None]:
+        if offer_id not in self.__offers:
+            return Response(False, msg=f"Offer with offer id {offer_id} does not exist")
+        return self.__offers[offer_id].cancel_offer()

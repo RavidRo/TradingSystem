@@ -41,6 +41,7 @@ class UserStub(IUser):
         self._create_product = False
         self._remove_manager_permission = False
         self._get_store_purchase_history = False
+        self.notified = False
 
     def is_appointed(self, store_id):
         return Response(True, self.state.is_appointed(store_id))
@@ -106,7 +107,13 @@ class UserStub(IUser):
         return Response(True)
 
     def create_product(
-        self, store_id: str, name: str, category: str, price: float, quantity: int, keywords: list[str]
+        self,
+        store_id: str,
+        name: str,
+        category: str,
+        price: float,
+        quantity: int,
+        keywords: list[str],
     ) -> Response[None]:
         self._create_product = True
         return Response(True)
@@ -118,7 +125,13 @@ class UserStub(IUser):
         return Response(True)
 
     def edit_product_details(
-        self, store_id: str, product_id: str, new_name: str, category: str, new_price: float, keywords: list[str]
+        self,
+        store_id: str,
+        product_id: str,
+        new_name: str,
+        category: str,
+        new_price: float,
+        keywords: list[str],
     ) -> Response[None]:
         self._edit_product_details = True
         return Response(True)
@@ -176,3 +189,7 @@ class UserStub(IUser):
 
     def change_state(self, new_state: UserState) -> None:
         self.state = new_state
+
+    def notify(self, message: str) -> bool:
+        self.notified = True
+        return True

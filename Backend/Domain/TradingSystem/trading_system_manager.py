@@ -1,3 +1,4 @@
+from Backend.Domain.TradingSystem.offer import Offer
 from typing import Callable
 
 from Backend.Domain.TradingSystem.stores_manager import StoresManager
@@ -164,8 +165,8 @@ class TradingSystemManager:
         )
 
     @staticmethod
-    def get_product(store_id: str, product_id: str) -> ProductData:
-        return StoresManager.get_product(store_id, product_id).parse()
+    def get_product(store_id: str, product_id: str, username: str) -> ProductData:
+        return StoresManager.get_product_with_price(store_id, product_id, username).parse()
 
     # 4.2
     @staticmethod
@@ -346,3 +347,42 @@ class TradingSystemManager:
     @staticmethod
     def empty_notifications(cookie):
         return UserManager.empty_notifications(cookie)
+
+    # Offers
+    # ==================
+
+    @staticmethod
+    def get_user_offers(cookie) -> Response[list[Offer]]:
+        return UserManager.get_user_offers(cookie).parse()
+
+    @staticmethod
+    def get_store_offers(cookie, store_id) -> Response[list[Offer]]:
+        return UserManager.get_store_offers(cookie, store_id).parse()
+
+    @staticmethod
+    def create_offer(cookie, store_id, product_id) -> Response[str]:
+        return UserManager.create_offer(cookie, store_id, product_id)
+
+    @staticmethod
+    def declare_price(cookie, offer_id, price) -> Response[None]:
+        return UserManager.declare_price(cookie, offer_id, price)
+
+    @staticmethod
+    def suggest_counter_offer(cookie, store_id, product_id, offer_id, price) -> Response[None]:
+        return UserManager.suggest_counter_offer(cookie, store_id, product_id, offer_id, price)
+
+    @staticmethod
+    def approve_manager_offer(cookie, offer_id) -> Response[None]:
+        return UserManager.approve_manager_offer(cookie, offer_id)
+
+    @staticmethod
+    def approve_user_offer(cookie, store_id, product_id, offer_id) -> Response[None]:
+        return UserManager.approve_user_offer(cookie, store_id, product_id, offer_id)
+
+    @staticmethod
+    def reject_user_offer(cookie, store_id, product_id, offer_id) -> Response[None]:
+        return UserManager.reject_user_offer(cookie, store_id, product_id, offer_id)
+
+    @staticmethod
+    def cancel_offer(cookie, offer_id) -> Response[None]:
+        return UserManager.cancel_offer(cookie, offer_id)
