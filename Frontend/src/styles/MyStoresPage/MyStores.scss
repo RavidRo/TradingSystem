@@ -43,9 +43,10 @@
 			flex: 0.3;
 		}
 
-		.secondary-second-action{
-			padding-right: 30px;
+		.second-action{
+			padding-left: 15px;
 		}
+
 		.details-window {
 			.divider {
 				margin-bottom: 20px;
@@ -74,14 +75,13 @@
 
 // Forms
 .form-cont {
-	width: 50%;
-	padding: 20px;
+	width: 100%;
+	padding: 3%;
 	min-width: 200px;
 	h2 {
 		white-space: nowrap;
 	}
 	.create-form {
-		max-width: 400px;
 		width: 100%;
 	}
 	.create-btn {
@@ -98,4 +98,8 @@
 	.keyword-input {
 		flex: 1
 	}
+}
+
+.discount-node, .condition-node{
+	cursor: move !important;
 }

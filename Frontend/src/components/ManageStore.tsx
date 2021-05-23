@@ -1,4 +1,4 @@
-import React, { FC, useEffect, useState } from 'react';
+import React, { FC, useContext, useEffect, useState } from 'react';
 
 import { Appointee, Product, Store, ProductQuantity } from '../types';
 import AppointeeDetails from './DetailsWindows/AppointeeDetails';
@@ -8,106 +8,21 @@ import MyAppointeesList from './Lists/MyAppointeesList';
 import AppointeesList from './Lists/AppointeesList';
 import DiscountsList from './Lists/DiscountsList';
 import ConditionsList from './Lists/ConditionsList';
-
-// const tree: Appointee[] = [
-// 	{
-// 		id: '11',
-// 		name: 'Me',
-// 		role: 'Founder',
-// 		children: [
-// 			{
-// 				id: '12',
-// 				name: 'Sean',
-// 				role: 'Owner',
-// 				children: [
-// 					{
-// 						id: '10',
-// 						name: 'Tali',
-// 						role: 'Owner',
-// 						children: [],
-// 					},
-// 					{
-// 						id: '14',
-// 						name: 'Omer',
-// 						role: 'Manager',
-// 						permissions: {
-// 							appoint_manager: true,
-// 							get_appointments: false,
-// 							get_history: false,
-// 							manage_products: true,
-// 							remove_manager: true,
-// 						},
-// 						children: [],
-// 					},
-// 				],
-// 			},
-// 			{
-// 				id: '13',
-// 				name: 'Inon',
-// 				role: 'Manager',
-// 				children: [],
-// 				permissions: {
-// 					appoint_manager: true,
-// 					get_appointments: false,
-// 					get_history: false,
-// 					manage_products: true,
-// 					remove_manager: true,
-// 				},
-// 			},
-// 		],
-// 	},
-// ];
-
-// const discounts: Discount[] = [
-// 	{
-// 		id: '26',
-// 		rule: {
-// 			type: {
-// 				operator: 'xor',
-// 				decision_rule: 'max',
-// 			},
-// 			operands: [
-// 				{
-// 					id: '27',
-// 					rule: {
-// 						percentage: 20,
-// 						context: {
-// 							obj: 'store',
-// 						},
-// 					},
-// 				},
-// 			],
-// 		},
-// 	},
-// ];
-
-// const conditions: Condition[] = [
-// 	{
-// 		id: '31',
-// 		rule: {
-// 			operator: 'conditioning',
-// 			test: {
-// 				id: '32',
-// 				rule: {
-// 					context: {
-// 						obj: 'user',
-// 					},
-// 					operator: 'great-equals',
-// 					target: 18,
-// 				},
-// 			},
-// 		},
-// 	},
-// ];
+import StorePurchaseHistory from './Lists/StorePurchaseHistory';
+import { UsernameContext } from '../contexts';
+import OffersTable from './OffersTable';
+import '../styles/ManageStore.scss';
 
 type ManageStoreProps = {
 	storeId: string;
 	appointment: Appointee;
+	setAppointment: (storeId: string, appointment: Appointee) => void;
 };
 
-const ManageStore: FC<ManageStoreProps> = ({ storeId, appointment }) => {
+const ManageStore: FC<ManageStoreProps> = ({ storeId, appointment, setAppointment }) => {
 	const [products, setProducts] = useState<ProductQuantity[]>([]);
 	const [store, setStore] = useState<Store | null>(null);
+	const username = useContext(UsernameContext);
 
 	const getProductsByStore = useAPI<Product[]>('/get_products_by_store', {
 		store_id: storeId,
@@ -187,6 +102,7 @@ const ManageStore: FC<ManageStoreProps> = ({ storeId, appointment }) => {
 							storeId={store.id}
 							store_name={store.name}
 							appointment={appointment}
+							setAppointment={setAppointment}
 						/>
 						{appointment.permissions.includes('get appointments') && (
 							<AppointeesList
@@ -209,6 +125,12 @@ const ManageStore: FC<ManageStoreProps> = ({ storeId, appointment }) => {
 								storeId={store.id}
 							/>
 						)}
+						{appointment.permissions.includes('get history') && (
+							<StorePurchaseHistory storeId={store.id} />
+						)}
+						<div className="offersTable">
+							<OffersTable  username={username} isManager={true} store_id={storeId}/>
+						</div>
 					</>
 				)}
 			</div>

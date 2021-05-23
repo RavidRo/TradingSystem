@@ -2,7 +2,7 @@ import React, { FC, useState } from 'react';
 
 import { TextField } from '@material-ui/core';
 
-import FormWindow from './FormWindow';
+import FormWindow from '../FormWindow';
 
 type CreateStoreFormProps = {
 	onSubmit: (name: string) => void;
@@ -15,7 +15,7 @@ const CreateStoreForm: FC<CreateStoreFormProps> = ({ onSubmit }) => {
 		onSubmit(name);
 	}
 	return (
-		<FormWindow handleSubmit={handleSubmit} createText="Open Store!" header="New store">
+		<FormWindow handleSubmit={handleSubmit} submitText="Open Store!" header="New store">
 			<TextField
 				required
 				margin="normal"
