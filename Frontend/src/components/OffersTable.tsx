@@ -20,15 +20,15 @@ const OffersTable: FC<OffersTableProps> = ({username, isManager, store_id}) => {
    
     const [offers, setOffers] = useState<Offer[]>([]);
     useEffect(()=>{
-        // isManager===false?userOffersObj.request().then(({data, error})=>{
-        //     if (!error && data) {
-        //         setOffers(data.data);
-        //     }
-        // }):managerOffersObj.request().then(({data, error})=>{
-        //     if (!error && data) {
-        //         setOffers(data.data);
-        //     }
-        // })
+        isManager===false?userOffersObj.request().then(({data, error})=>{
+            if (!error && data) {
+                setOffers(data.data);
+            }
+        }):managerOffersObj.request().then(({data, error})=>{
+            if (!error && data) {
+                setOffers(data.data);
+            }
+        })
       
     }, [])
 	return (
@@ -42,7 +42,7 @@ const OffersTable: FC<OffersTableProps> = ({username, isManager, store_id}) => {
                 </TableRow>
             </TableHead>
             <TableBody>
-                {dummyOffers.map((offer) => (
+                {offers.map((offer) => (
                    <OfferRow
                    offer={offer}
                    isManager={isManager}
