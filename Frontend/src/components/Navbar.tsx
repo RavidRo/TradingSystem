@@ -28,14 +28,14 @@ import { Link, useHistory } from 'react-router-dom';
 import '../styles/Navbar.scss';
 import config from '../config';
 import PopupCart from '../components/PopupCart';
-import { Product, StoreToSearchedProducts } from '../types';
+import { Product, StoreToSearchedProducts, notificationTime } from '../types';
 import { AdminsContext, UsernameContext } from '../contexts';
 
 type NavBarProps = {
 	signedIn: boolean;
 	storesToProducts: StoreToSearchedProducts;
 	propHandleDelete: (product: Product, storeID: string) => Promise<boolean> | boolean;
-	notifications: string[];
+	notifications: notificationTime[];
 	changeQuantity: (store: string, product: string, quantity: number) => Promise<boolean>;
 	logout: () => void;
 	propUpdateStores: (map: StoreToSearchedProducts) => void;
@@ -53,7 +53,7 @@ const Navbar: FC<NavBarProps> = ({
 	const [hoverCart, setHoverCart] = useState<boolean>(false);
 	const [storesToProductsMy, setStoresProducts] =
 		useState<StoreToSearchedProducts>(storesToProducts);
-	const [myNotifications, setNotifications] = useState<string[]>(notifications);
+	const [myNotifications, setNotifications] = useState<notificationTime[]>(notifications);
 	const [accountMenuOpen, setAccountMenuOpen] = useState<boolean>(false);
 	const accountMenuRef = React.useRef<HTMLButtonElement>(null);
 	const history = useHistory();
@@ -61,7 +61,7 @@ const Navbar: FC<NavBarProps> = ({
 	const admins = useContext(AdminsContext);
 
 	useEffect(() => {
-		setNotifications((old) => [...old, ...notifications]);
+		setNotifications(notifications);
 	}, [notifications]);
 	useEffect(() => {
 		setStoresProducts(storesToProducts);
