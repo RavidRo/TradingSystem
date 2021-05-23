@@ -18,6 +18,22 @@
 
 # Documentation
 
+### Config file format:
+```javascript
+{
+	"admins": <list-of-admin-usernames (list[str])>,
+	"password": <admins-password (str)>,
+	"timer_length": <length-of-timer (int)>,
+	"payment_system": <payment-system (str)>,
+	"supply_system": <supply-system> (str),
+	"DB": <database (str)>
+}
+```
+
+### State file format:
+
+![image](https://user-images.githubusercontent.com/48616609/119277382-f976f000-bc27-11eb-9aaa-feb60954412f.png)
+
 ### [Use Cases](Documentation/Use%20Cases.md)
 
 ## Class Diagram
