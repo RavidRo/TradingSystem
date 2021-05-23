@@ -8,3 +8,6 @@ class ProductData:
     category: str
     price: float
     keywords: list[str]
+
+    def parse(self):
+        return self

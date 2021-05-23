@@ -1,19 +1,21 @@
-from Backend.Service.DataObjects.offer_data import OfferData
-from uuid import uuid4
+import uuid
 
 from Backend.response import Parsable, Response
+
+from Backend.Service.DataObjects.offer_data import OfferData
 
 from Backend.Domain.Notifications.Publisher import Publisher
 
 
 class Offer(Parsable):
     def __init__(self, user, store, product) -> None:
-        self.__id: str = uuid4()
+        self.__id: str = str(uuid.uuid4())
         self.__price: float = None
         self.__status: OfferStatus = UndeclaredOffer(self)
         product.add_offer(self)
 
         # used for parsing
+        self.__store_id = store.get_id()
         self.__store_name = store.get_name()
         self.__product_name = product.get_name()
         self.__product_id = product.get_id()
@@ -52,6 +54,12 @@ class Offer(Parsable):
     def cancel_offer(self) -> Response[None]:
         return self.__status.cancel_offer()
 
+    def use(self) -> Response[None]:
+        return self.__status.use()
+
+    def is_approved(self) -> bool:
+        return self.__status.is_approveD()
+
     def get_status_name(self) -> str:
         return self.__status.get_name()
 
@@ -70,11 +78,15 @@ class Offer(Parsable):
     def get_price(self) -> float:
         return self.__price
 
+    def get_username(self) -> str:
+        return self.__username
+
     def parse(self):
-        OfferData(
+        return OfferData(
             self.__id,
             self.__price,
             self.__status.get_name(),
+            self.__store_id,
             self.__store_name,
             self.__product_id,
             self.__product_name,
@@ -122,8 +134,17 @@ class OfferStatus:
             msg=f"Can't cancel an offer with {self.get_name()} status",
         )
 
+    def use(self) -> Response[None]:
+        return Response(
+            False,
+            msg=f"Can't use an offer with {self.get_name()} status",
+        )
+
     def get_name(self) -> str:
         raise NotImplementedError
+
+    def is_approved(self) -> bool:
+        return False
 
     def change_status(self, status_class) -> Response[None]:
         self._offer.change_status(status_class(self._offer))
@@ -182,13 +203,24 @@ class CounteredOffer(OfferStatus):
 
 
 class ApprovedOffer(OfferStatus):
+    def use(self) -> Response[None]:
+        return self.change_status(UsedOffer)
+
     def get_name(self) -> str:
         return "approved"
+
+    def is_approved(self) -> bool:
+        return True
 
 
 class RejectedOffer(OfferStatus):
     def get_name(self) -> str:
         return "rejected"
+
+
+class UsedOffer(OfferStatus):
+    def get_name(self) -> str:
+        return "used"
 
 
 class CancledOffer(OfferStatus):

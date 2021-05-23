@@ -454,8 +454,8 @@ async def edit_product_details():
 async def get_product():
     store_id = request.args.get("store_id")
     product_id = request.args.get("product_id")
-
-    answer = await __async_call(system.get_product, store_id, product_id)
+    username = request.args.get("username")
+    answer = await __async_call(system.get_product, store_id, product_id, username)
     return __responseToJson(None, answer)
 
 
@@ -889,29 +889,23 @@ async def get_purchase_policy():
     return __responseToJson(cookie, answer)
 
 
-@app.route("/get_purchase_policy", methods=["GET"])
-async def get_user_offers():
-    cookie = request.args.get("cookie")
-    if cookie is None:
-        cookie = await __async_call(system.enter_system)
-    answer = await __async_call(system.get_user_offers, cookie)
-    return __responseToJson(cookie, answer)
-
 @app.route("/get_user_offers", methods=["GET"])
 async def get_user_offers():
     cookie = request.args.get("cookie")
     if cookie is None:
         cookie = await __async_call(system.enter_system)
     answer = await __async_call(system.get_user_offers, cookie)
-    return __responseToJson(cookie, answer)
+    return __responseToJson(cookie, answer, lambda obj: obj.values)
+
 
 @app.route("/get_store_offers", methods=["GET"])
 async def get_store_offers():
     cookie = request.args.get("cookie")
     if cookie is None:
         cookie = await __async_call(system.enter_system)
-    answer = await __async_call(system.get_store_offers, cookie)
-    return __responseToJson(cookie, answer)
+    store_id = request.args.get("store_id")
+    answer = await __async_call(system.get_store_offers, cookie, store_id)
+    return __responseToJson(cookie, answer, lambda obj: obj.values)
 
 
 @app.route("/create_offer", methods=["POST"])

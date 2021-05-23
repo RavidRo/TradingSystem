@@ -468,7 +468,7 @@ class UserManager:
         return UserManager.__deligate_to_user(cookie, func)
 
     @staticmethod
-    def create_offer(cookie, store_id, product_id) -> Response[None]:
+    def create_offer(cookie, store_id, product_id) -> Response[str]:
         func: Callable[[User], Response] = lambda user: user.create_offer(store_id, product_id)
         return UserManager.__deligate_to_user(cookie, func)
 
