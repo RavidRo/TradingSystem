@@ -5,8 +5,8 @@
 **SLO** - Flexible and adjusting content based on screen size.  
 **SLI**
 
--   For all resolutions, there will not be 2 graphic elements which overlap.
--   For all resolutions, no information will be lost
+-   For full computer screen resolution, there will not be 2 graphic elements which overlap.
+-   For full computer screen resolution, no information will be lost
 
 ---
 
@@ -41,11 +41,10 @@
 
 ---
 
-**SLO** - User can easily keep track of his state.  
+**SLO** - Users can easily keep track of their state.  
 **SLI**
 
--   Persistent feedback on his actions and events.
--   Pages will contain breadcrumbs which will indicate the relative user location to the size.
+-   Persistent feedback on actions and events.
 
 ## Accessibility
 

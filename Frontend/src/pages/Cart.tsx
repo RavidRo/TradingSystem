@@ -1,4 +1,4 @@
-import React, { FC, useState, useEffect } from 'react';
+import React, { FC, useState, useEffect, useContext } from 'react';
 import '../styles/Cart.scss';
 import Bag from '../components/Bag';
 import {
@@ -14,6 +14,7 @@ import { Product, ShoppingCart, StoreToSearchedProducts, ProductToQuantity } fro
 import useAPI from '../hooks/useAPI';
 import { useHistory } from 'react-router-dom';
 import Swal from 'sweetalert2';
+import { UsernameContext } from '../contexts';
 
 type CartProps = {
 	storesToProducts: StoreToSearchedProducts;
@@ -38,6 +39,10 @@ const Cart: FC<CartProps> = ({
 	const [storesToProductsMy, setStoresProducts] =
 		useState<StoreToSearchedProducts>(storesToProducts);
 	const history = useHistory();
+	const username = useContext(UsernameContext);
+
+
+	
 
 	//loas the cart of user when enters the cart page
 	const cartObj = useAPI<ShoppingCart>('/get_cart_details');
@@ -58,7 +63,7 @@ const Cart: FC<CartProps> = ({
 						let quantity: number = Object.values(productQuantitiesMap)[j];
 
 						let promise = productObj
-							.request({ product_id: productID, store_id: storeID })
+							.request({ product_id: productID, store_id: storeID, username: username })
 							.then(({ data, error }) => {
 								if (!error && data !== null) {
 									let product = data.data;

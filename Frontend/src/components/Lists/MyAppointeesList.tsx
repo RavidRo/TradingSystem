@@ -1,4 +1,5 @@
 import React, { FC, useState } from 'react';
+import { areYouSure, confirm } from '../../decorators';
 
 import useAPI from '../../hooks/useAPI';
 import { allPermissions, Appointee, defaultPermissions, Permission, Role } from '../../types';
@@ -57,7 +58,7 @@ const MyAppointeesList: FC<MyAppointeesListProps> = ({
 	};
 	const onAppoint = (username: string, role: Role) => {
 		const request = role === 'Manager' ? appointManager : appointOwner;
-		request.request({ username: username }).then((request) => {
+		return request.request({ username: username }).then((request) => {
 			if (!request.error && request.data !== null && request.data.succeeded) {
 				setAppointees([
 					{
@@ -71,6 +72,7 @@ const MyAppointeesList: FC<MyAppointeesListProps> = ({
 					},
 					...myAppointees,
 				]);
+				confirm('Appointed!', `${username} was successfully appointed :)`);
 			}
 		});
 	};
@@ -79,17 +81,22 @@ const MyAppointeesList: FC<MyAppointeesListProps> = ({
 		openTab(() => <CreateAppointeeForm onSubmit={onAppoint} />, '');
 	};
 
-	const onDelete = (appointeeUsername: string) => {
-		removeAppointment.request({ username: appointeeUsername }, (data, error) => {
-			if (!error && data !== null) {
-				setAppointees(
-					appointment.appointees.filter(
-						(myAppointee) => myAppointee.username !== appointeeUsername
-					)
-				);
-			}
-		});
-	};
+	const onDelete = areYouSure(
+		(appointeeUsername: string) => {
+			removeAppointment.request({ username: appointeeUsername }, (data, error) => {
+				if (!error && data !== null) {
+					setAppointees(
+						appointment.appointees.filter(
+							(myAppointee) => myAppointee.username !== appointeeUsername
+						)
+					);
+					confirm('Removed!', `${appointeeUsername} was removed successfully `);
+				}
+			});
+		},
+		"You won't be able to revert this!",
+		'Yes, remove appointment!'
+	);
 	const addPermission = useAPI('/add_manager_permission', { store_id: storeId }, 'POST');
 	const removePermission = useAPI('/remove_manager_permission', { store_id: storeId }, 'POST');
 	const onEditAppointeeForm = (appointee: Appointee) => {
@@ -122,6 +129,7 @@ const MyAppointeesList: FC<MyAppointeesListProps> = ({
 					];
 					setAppointees(newAppointees);
 				}
+				confirm('Permissions Changed!');
 			});
 		};
 		openTab(() => <EditPermissionsForm onSubmit={onEdit} appointee={appointee} />, '');

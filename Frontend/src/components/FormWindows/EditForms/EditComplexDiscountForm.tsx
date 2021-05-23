@@ -1,6 +1,6 @@
 import React, { FC, useState } from 'react';
 
-import { DecisionRule, DiscountComplex, Operator } from '../../../types';
+import { DecisionRule, DiscountComplex, DiscountComplexType } from '../../../types';
 import ComplexDiscountForm from '../ComplexDiscountForm';
 import FormWindow from '../FormWindow';
 
@@ -13,7 +13,7 @@ const EditComplexDiscountForm: FC<EditComplexDiscountFormProps> = ({
 	onSubmit,
 	discountToEdit,
 }) => {
-	const [operator, setOperator] = useState<Operator>(discountToEdit.type);
+	const [operator, setOperator] = useState<DiscountComplexType>(discountToEdit.type);
 	const [decisionRule, setDecisionRule] = useState<DecisionRule | ''>(
 		discountToEdit.type === 'xor' ? discountToEdit.decision_rule : ''
 	);
