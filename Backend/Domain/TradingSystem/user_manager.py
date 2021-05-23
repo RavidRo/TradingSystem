@@ -15,7 +15,6 @@ from Backend.settings import Settings
 def at_least_one_admin():
     settings = Settings.get_instance()
     admins = settings.get_admins()
-    password = settings.get__password()
     if len(admins) <= 0:
         raise Exception(
             "At least one admin should be at the system. Check config.json to add admins."
