@@ -183,11 +183,13 @@ async def save_product_in_cart():
         missing_args += " store_id"
     if "product_id" not in request_json:
         missing_args += " product_id"
+    if "quantity" not in request_json:
+        missing_args += " quantity"
     if missing_args != "":
         return __missing_args(cookie, missing_args)
     store_id = request_json["store_id"]
     product_id = request_json["product_id"]
-    quantity = request_json["quantity"] if "quantity" in request_json else 0
+    quantity = request_json["quantity"]
     answer = await __async_call(system.save_product_in_cart, cookie, store_id, product_id, quantity)
     return __responseToJson(cookie, answer)
 
@@ -535,15 +537,19 @@ async def edit_simple_discount():
         missing_args += " store_id"
     if "discount_id" not in request_json:
         missing_args += " discount_id"
+    if "percentage" not in request_json:
+        missing_args += " percentage"
     if "condition" not in request_json:
         missing_args += " condition"
+    if "context" not in request_json:
+        missing_args += " context"
     if missing_args != "":
         return __missing_args(cookie, missing_args)
     store_id = request_json["store_id"]
     discount_id = request_json["discount_id"]
-    percentage = request_json["percentage"] if "percentage" in request_json else None
+    percentage = request_json["percentage"]
     condition = request_json["condition"]
-    context = request_json["context"] if "context" in request_json else None
+    context = request_json["context"]
     duration = request_json["duration"] if "duration" in request_json else None
     answer = await __async_call(
         system.edit_simple_discount,
