@@ -12,11 +12,13 @@
 .mainArea{
     display: flex;
     flex-direction: row;
+    height: 50%;
+    align-items: center;
 }
 .filterArea{
     width: 20%;
-    margin-top: 10%;
     margin-left: 0.5%;
+    height: 20%;
 }
 .productCards{
     width: 80%;

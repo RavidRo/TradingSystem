@@ -5,7 +5,7 @@ import { createMuiTheme, ThemeProvider } from '@material-ui/core';
 import Navbar from '../components/Navbar';
 import Routes from './Routes';
 
-import { Product, StoreToSearchedProducts } from '../types';
+import { Product, StoreToSearchedProducts, notificationTime } from '../types';
 import useAPI from '../hooks/useAPI';
 import { AdminsContext, CookieContext, UsernameContext } from '../contexts';
 
@@ -36,7 +36,7 @@ function App() {
 	const [username, setUsername] = useState<string>('Guest');
 	const { request } = useAPI<{ cookie: string }>('/get_cookie');
 	const [cookie, setCookie] = useState<string>('');
-	const [notifications, setNotifications] = useState<string[]>([]);
+	const [notifications, setNotifications] = useState<notificationTime[]>([]);
 	const storesToProducts = useRef<StoreToSearchedProducts>({});
 
 	useEffect(() => {
@@ -48,7 +48,7 @@ function App() {
 					client.send(cookie); // have to be here - else socket.receive in server gets stuck
 				};
 				client.onmessage = (messageEvent) => {
-					setNotifications((old) => [...old, messageEvent.data]);
+					setNotifications((old)=>[...old, [messageEvent.data, new Date().toUTCString()]]);
 					// alert('received socket message');
 				};
 				client.onclose = () => {

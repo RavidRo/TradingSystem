@@ -1,25 +1,18 @@
+import pytest
 import json
 import threading
-from collections import Callable
 from queue import Queue
 from unittest import mock
 from unittest.mock import patch, MagicMock
-from Backend.Domain.Payment.OutsideSystems.outside_cashing import OutsideCashing
-from Backend.Domain.Payment.OutsideSystems.outside_supplyment import OutsideSupplyment
-from Backend.Domain.TradingSystem.Interfaces.IUserState import IUserState
-from Backend.Domain.TradingSystem.States.member import Member
-from Backend.Domain.TradingSystem.States.user_state import UserState
-from Backend.Domain.TradingSystem.TypesPolicies.discount_policy import DefaultDiscountPolicy
-from Backend.Domain.TradingSystem.TypesPolicies.purchase_policy import (
-    PurchasePolicy,
-    DefaultPurchasePolicy,
-)
-from Backend.Domain.TradingSystem.shopping_cart import ShoppingCart
-from Backend.Domain.TradingSystem.store import Store
-from Backend.Domain.TradingSystem.user import User
-from Backend.Domain.TradingSystem.user_manager import UserManager
+
 from Backend.Service.trading_system import TradingSystem
 from Backend.response import Response
+from Backend.Domain.Payment.Adapters.cashing_adapter import CashingAdapter
+from Backend.Domain.Payment.Adapters.supply_adapter import SupplyAdapter
+from Backend.Domain.Payment.OutsideSystems.outside_cashing import OutsideCashing
+from Backend.Domain.Payment.OutsideSystems.outside_supplyment import OutsideSupplyment
+from Backend.Domain.TradingSystem.shopping_cart import ShoppingCart
+from Backend.Domain.TradingSystem.store import Store
 
 system = TradingSystem.getInstance()
 username_number = 0
@@ -28,6 +21,15 @@ store_number = 0
 store_lock = threading.Lock()
 product_number = 0
 product_lock = threading.Lock()
+
+
+@pytest.fixture(scope="function", autouse=True)
+def set_up():
+    CashingAdapter.use_stub = True
+    SupplyAdapter.use_stub = True
+    yield
+    CashingAdapter.use_stub = False
+    SupplyAdapter.use_stub = False
 
 
 def _initialize_info(
@@ -4218,7 +4220,7 @@ def test_purchase_cart_discount_changed_due_to_discount_move():
 # region payment system mocks
 @patch.multiple(ShoppingCart, interval_time=MagicMock(return_value=5))
 def test_send_payment_failed():
-    with mock.patch.object(OutsideCashing, "pay", return_value=False):
+    with mock.patch.object(OutsideCashing, "pay", return_value="-1"):
         cookie, username, password, store_name, store_id = _initialize_info(
             _generate_username(), "aaa", _generate_store_name()
         )
@@ -4243,7 +4245,7 @@ def test_send_payment_failed():
 
 @patch.multiple(ShoppingCart, interval_time=MagicMock(return_value=5))
 def test_try_paying_first_time_failed_than_success():
-    with mock.patch.object(OutsideCashing, "pay", return_value=False):
+    with mock.patch.object(OutsideCashing, "pay", return_value="-1"):
         cookie, username, password, store_name, store_id = _initialize_info(
             _generate_username(), "aaa", _generate_store_name()
         )
@@ -4268,7 +4270,7 @@ def test_try_paying_first_time_failed_than_success():
 def test_try_paying_first_time_incorrect_info_second_time_timer_over():
     import time
 
-    with mock.patch.object(OutsideCashing, "pay", return_value=False):
+    with mock.patch.object(OutsideCashing, "pay", return_value="-1"):
         cookie, username, password, store_name, store_id = _initialize_info(
             _generate_username(), "aaa", _generate_store_name()
         )
@@ -4291,7 +4293,7 @@ def test_try_paying_first_time_incorrect_info_second_time_timer_over():
 # region supply systems mocks
 @patch.multiple(ShoppingCart, interval_time=MagicMock(return_value=5))
 def test_supply_order_failed():
-    with mock.patch.object(OutsideSupplyment, "deliver", return_value=False):
+    with mock.patch.object(OutsideSupplyment, "deliver", return_value="-1"):
         cookie, username, password, store_name, store_id = _initialize_info(
             _generate_username(), "aaa", _generate_store_name()
         )
@@ -4316,7 +4318,7 @@ def test_supply_order_failed():
 
 @patch.multiple(ShoppingCart, interval_time=MagicMock(return_value=5))
 def test_try_supply_first_time_failed_than_success():
-    with mock.patch.object(OutsideSupplyment, "deliver", return_value=False):
+    with mock.patch.object(OutsideSupplyment, "deliver", return_value="-1"):
         cookie, username, password, store_name, store_id = _initialize_info(
             _generate_username(), "aaa", _generate_store_name()
         )

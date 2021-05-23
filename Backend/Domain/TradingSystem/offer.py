@@ -30,7 +30,7 @@ class Offer(Parsable):
         response = self.__status.declare_price(price)
         if response.succeeded():
             self.__managers_publisher.notify_all(
-                f"{self.__username} as submitted a price offer for {self.__product_name}"
+                f"{self.__username} has submitted a price offer for {self.__product_name}"
             )
         return response
 
