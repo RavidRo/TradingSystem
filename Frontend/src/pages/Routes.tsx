@@ -1,7 +1,9 @@
-import React, { FC } from 'react';
+import React, { FC, useContext } from 'react';
 
 import { Redirect, Route, Switch } from 'react-router';
+import { AdminsContext, UsernameContext } from '../contexts';
 import { Product, StoreToSearchedProducts } from '../types';
+import AdminPage from './AdminPage';
 
 import Cart from './Cart';
 import Home from './Home';
@@ -24,7 +26,6 @@ type RoutesProps = {
 	propsAddProduct: (product: Product, storeID: string) => Promise<boolean>;
 
 	signedIn: boolean;
-	username: string;
 	setSignedIn: (isSignedIn: boolean) => void;
 	setUsername: (username: string) => void;
 };
@@ -41,9 +42,11 @@ const Routes: FC<RoutesProps> = ({
 
 	signedIn,
 	setSignedIn,
-	username,
 	setUsername,
 }) => {
+	const username = useContext(UsernameContext);
+	const admins = useContext(AdminsContext);
+
 	return (
 		<Switch>
 			<Route path='/' exact component={Home} />
@@ -88,18 +91,17 @@ const Routes: FC<RoutesProps> = ({
 			<Route path='/Purchase' exact component={Purchase} />
 			<Route path='/searchPage' exact component={SearchPage} />
 			{signedIn ? (
-				<Route
-					path='/my-stores'
-					exact
-					render={(props) => <MyStores {...props} username={username} />}
-				/>
+				<Route path='/my-stores' exact component={MyStores} />
 			) : (
 				<Redirect to='/' />
 			)}
 			{signedIn ? (
-				<Route path='/my-account' exact>
-					{(props) => <MyAccount {...props} username={username} />}
-				</Route>
+				<Route path='/my-account' exact component={MyAccount} />
+			) : (
+				<Redirect to='/' />
+			)}
+			{signedIn && admins.includes(username) ? (
+				<Route path='/admin' exact component={AdminPage} />
 			) : (
 				<Redirect to='/' />
 			)}

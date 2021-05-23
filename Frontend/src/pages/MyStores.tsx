@@ -1,4 +1,4 @@
-import React, { FC, useEffect, useState } from 'react';
+import React, { FC, useContext, useEffect, useState } from 'react';
 
 import { ListItem } from '@material-ui/core';
 import ListItemText from '@material-ui/core/ListItemText';
@@ -9,14 +9,14 @@ import CreateStoreForm from '../components/FormWindows/CreateForms/CreateStoreFo
 import ManageStore from '../components/ManageStore';
 import GenericList from '../components/Lists/GenericList';
 import useAPI from '../hooks/useAPI';
+import { UsernameContext } from '../contexts';
 
-type MyStoresProps = {
-	username: string;
-};
+type MyStoresProps = {};
 
 type MyStore = { id: string; name: string; role: string; appointment: Appointee };
 
-const MyStores: FC<MyStoresProps> = ({ username }) => {
+const MyStores: FC<MyStoresProps> = () => {
+	const username = useContext(UsernameContext);
 	const myResponsibilities = useAPI<Appointee[]>('/get_my_appointments');
 	const openStore = useAPI<string>('/create_store', {}, 'POST');
 	useEffect(() => {

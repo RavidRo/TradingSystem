@@ -7,7 +7,7 @@ import Routes from './Routes';
 
 import { Product, StoreToSearchedProducts } from '../types';
 import useAPI from '../hooks/useAPI';
-import { CookieContext } from '../contexts';
+import { AdminsContext, CookieContext, UsernameContext } from '../contexts';
 
 const theme = createMuiTheme({
 	typography: {
@@ -223,34 +223,37 @@ function App() {
 	return cookie !== '' ? (
 		<ThemeProvider theme={theme}>
 			<CookieContext.Provider value={cookie}>
-				<BrowserRouter>
-					<Navbar
-						signedIn={signedIn}
-						storesToProducts={storesToProducts.current}
-						propHandleDelete={handleDeleteProduct}
-						notifications={notifications}
-						changeQuantity={changeQuantity}
-						logout={() => {
-							setSignedIn(false);
-							setCookie('');
-							getCookie();
-						}}
-						propUpdateStores={propUpdateStores}
-					/>
-					<Routes
-						handleDeleteProduct={handleDeleteProduct}
-						setSignedIn={setSignedIn}
-						setUsername={setUsername}
-						signedIn={signedIn}
-						storesToProducts={storesToProducts}
-						username={username}
-						changeQuantity={changeQuantity}
-						getPropsCookie={getPropsCookie}
-						propHandleAdd={addProductToPopup}
-						propUpdateStores={propUpdateStores}
-						propsAddProduct={addProductToPopup}
-					/>
-				</BrowserRouter>
+				<AdminsContext.Provider value={['tali', 'ravid', 'inon', 'sean', 'omer']}>
+					<UsernameContext.Provider value={username}>
+						<BrowserRouter>
+							<Navbar
+								signedIn={signedIn}
+								storesToProducts={storesToProducts.current}
+								propHandleDelete={handleDeleteProduct}
+								notifications={notifications}
+								changeQuantity={changeQuantity}
+								logout={() => {
+									setSignedIn(false);
+									setCookie('');
+									getCookie();
+								}}
+								propUpdateStores={propUpdateStores}
+							/>
+							<Routes
+								handleDeleteProduct={handleDeleteProduct}
+								setSignedIn={setSignedIn}
+								setUsername={setUsername}
+								signedIn={signedIn}
+								storesToProducts={storesToProducts}
+								changeQuantity={changeQuantity}
+								getPropsCookie={getPropsCookie}
+								propHandleAdd={addProductToPopup}
+								propUpdateStores={propUpdateStores}
+								propsAddProduct={addProductToPopup}
+							/>
+						</BrowserRouter>
+					</UsernameContext.Provider>
+				</AdminsContext.Provider>
 			</CookieContext.Provider>
 		</ThemeProvider>
 	) : (

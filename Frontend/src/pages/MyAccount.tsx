@@ -1,16 +1,18 @@
+import React, { FC, useContext, useEffect, useState } from 'react';
+
 import { Container, Paper, Typography } from '@material-ui/core';
-import React, { FC, useEffect, useState } from 'react';
+
 import PurchaseHistoryTable from '../components/Lists/PurchaseHistoryTable';
+import { UsernameContext } from '../contexts';
 import useAPI from '../hooks/useAPI';
 import '../styles/MyAccount.scss';
 import { PurchaseDetails } from '../types';
 
-type MyAccountProps = {
-	username: string;
-};
+type MyAccountProps = {};
 
-const MyAccount: FC<MyAccountProps> = ({ username }) => {
+const MyAccount: FC<MyAccountProps> = () => {
 	const { request } = useAPI<PurchaseDetails[]>('/get_purchase_history');
+	const username = useContext(UsernameContext);
 
 	const [purchaseHistory, setPurchaseHistory] = useState<PurchaseDetails[]>([]);
 	useEffect(() => {
