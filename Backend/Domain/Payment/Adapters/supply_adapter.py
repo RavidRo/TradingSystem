@@ -11,7 +11,7 @@ class SupplyAdapter:
     use_stub = False
 
     def __init__(self):
-        self.__outside_supplyment = OutsideSupplyment()
+        self.__outside_supplyment = OutsideSupplyment.getInstance()
         response = self.__send_handshake()
         if response.status_code != 200 or response.text != "OK":
             raise "Could not connect properly to outside systems"
