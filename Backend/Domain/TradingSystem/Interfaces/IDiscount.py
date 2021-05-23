@@ -11,7 +11,6 @@ class IDiscount(Parsable, ABC):
     def __init__(self, id):
         self._parent = None
         self._id = id
-        self.discount_func = None
         self._conditions_policy = DefaultPurchasePolicy()
 
     def get_parent(self) -> IDiscount:
@@ -66,8 +65,14 @@ class IDiscount(Parsable, ABC):
     def apply_discount(self, products_to_quantities: dict, user_age: int, username) -> float:
         raise NotImplementedError
 
+    @abstractmethod
+    def discount_func(self, products_to_quantities: dict, username) -> float:
+        raise NotImplementedError
+
     def parse(self):
         discount = dict()
-        discount["id"] = self._id
-        # discount['condition'] = self._condition.parse()
+        discount['id'] = self._id
+        condition_parse = self._conditions_policy.parse()
+        if len(condition_parse['children']) > 0:
+            discount['condition'] = condition_parse
         return discount
