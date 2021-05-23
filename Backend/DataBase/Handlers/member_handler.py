@@ -1,6 +1,6 @@
 from threading import Lock
 from sqlalchemy import Table, Column, String, Boolean, insert, ARRAY, ForeignKey
-from sqlalchemy.orm import mapper, relationship
+from sqlalchemy.orm import mapper, relationship, backref
 from Backend.DataBase.IHandler import IHandler
 from Backend.DataBase.database import Base, Session
 from Backend.Domain.TradingSystem.Responsibilities.founder import Founder
@@ -30,11 +30,10 @@ class MemberHandler(IHandler):
 
         mapper(Member, self.__members, properties={
             '_username': self.__members.c.username,
-            '_Member__responsibilities': relationship(Founder, cascade="all, delete",
+            '_Member__responsibilities': relationship(Responsibility, cascade="all, delete",
                                                       collection_class=attribute_mapped_collection('_store_id'),
                                                       passive_deletes=True,
-                                                      backref="_user_state",
-                                                      lazy='subquery'),
+                                                      backref="_user_state"),
             '_Member__purchase_details': relationship(PurchaseDetails, cascade="all, delete",
                                                       passive_deletes=True),
         })
@@ -50,7 +49,7 @@ class MemberHandler(IHandler):
 
     def save(self, obj, **kwargs) -> Response[None]:
         self._rwlock.acquire_write()
-        session = Session()
+        session = Session(expire_on_commit=False)
         res = Response(True)
         try:
             session.add(obj)
@@ -59,7 +58,6 @@ class MemberHandler(IHandler):
             session.rollback()
             res = Response(False, msg=str(e))
         finally:
-            session.expunge_all()
             session.close()
             self._rwlock.release_write()
             return res
@@ -130,7 +128,8 @@ class MemberHandler(IHandler):
         res = Response(True)
         try:
             member = session.query(Member).filter_by(_username=username).one()
-            member.get_responsibilities()[responsibility.get_store_id()] = responsibility
+            responsibilities = member.get_responsibilities()
+            responsibilities[responsibility.get_store_id()] = responsibility
             session.commit()
         except Exception as e:
             session.rollback()

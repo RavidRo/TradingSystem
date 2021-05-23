@@ -15,6 +15,7 @@ if __name__ == '__main__':
     purchase_details_handler = PurchaseDetailsHandler.get_instance()
     store_handler = StoreHandler.get_instance()
     responsibility_handler = ResponsibilitiesHandler.get_instance()
+    Base.metadata.drop_all(engine)
     Base.metadata.create_all(engine)
 
     user = User()

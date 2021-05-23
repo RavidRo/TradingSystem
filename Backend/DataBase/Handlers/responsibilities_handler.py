@@ -43,8 +43,8 @@ class ResponsibilitiesHandler(IHandler):
                                                                 ['responsibilities.username',
                                                                  'responsibilities.store_id']))
 
-        mapper(Responsibility, self.__responsibilities, properties={
-            '_appointed': relationship(Responsibility, cascade="all, delete",
+        responsibility_mapper = mapper(Responsibility, self.__responsibilities, properties={
+            '_appointed': relationship(Responsibility, uselist=True, cascade="all, delete",
                                        passive_deletes=True,
                                        remote_side=[self.__responsibilities.c.username,
                                                     self.__responsibilities.c.store_id], overlaps="_store"),
@@ -53,8 +53,8 @@ class ResponsibilitiesHandler(IHandler):
             # '_store': relationship(Store, uselist=False, lazy='joined', overlaps="_appointed"),
         }, polymorphic_on=self.__responsibilities.c.responsibility_type, polymorphic_identity='R')
 
-        mapper(Founder, self.__responsibilities, polymorphic_identity='F')
-        mapper(Owner, self.__responsibilities, polymorphic_identity='O')
+        mapper(Founder, self.__responsibilities, inherits=responsibility_mapper, polymorphic_identity='F')
+        mapper(Owner, self.__responsibilities, inherits=responsibility_mapper, polymorphic_identity='O')
         mapper(Manager, join(self.__responsibilities, self.__manager_permissions), polymorphic_identity='M',
                properties={
                    '_Manager__permissions': self.__manager_permissions.c.permissions
