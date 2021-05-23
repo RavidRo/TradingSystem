@@ -1,3 +1,4 @@
+from Backend.Domain.TradingSystem.offer import Offer
 from Backend.Domain.TradingSystem.Interfaces.IUser import IUser
 from Backend.Domain.TradingSystem.Responsibilities.responsibility import Permission, Responsibility
 
@@ -170,3 +171,18 @@ class Founder(Responsibility):
     # 4.11
     def get_store_purchase_history(self) -> Response[ParsableList[PurchaseDetails]]:
         return self._store.get_purchase_history()
+
+    # Offers
+    # ======================
+
+    def get_store_offers(self) -> Response[ParsableList[Offer]]:
+        return self._store.get_store_offers()
+
+    def suggest_counter_offer(self, product_id, offer_id, price) -> Response[None]:
+        return self._store.suggest_counter_offer(product_id, offer_id, price)
+
+    def approve_user_offer(self, product_id, offer_id) -> Response[None]:
+        return self._store.approve_user_offer(product_id, offer_id)
+
+    def reject_user_offer(self, product_id, offer_id) -> Response[None]:
+        return self._store.reject_user_offer(product_id, offer_id)

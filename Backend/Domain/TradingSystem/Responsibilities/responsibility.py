@@ -1,6 +1,7 @@
 from __future__ import annotations
 import enum
 
+from Backend.Domain.TradingSystem.offer import Offer
 from Backend.Service.DataObjects.responsibilities_data import ResponsibilitiesData
 from Backend.Domain.TradingSystem.Interfaces.IUser import IUser
 from Backend.Domain.TradingSystem.purchase_details import PurchaseDetails
@@ -211,3 +212,18 @@ class Responsibility(Parsable):
 
     def _permissions(self) -> list[str]:
         return [per.name for per in Permission]
+
+    # Offers
+    # ======================
+
+    def get_store_offers(self) -> Response[ParsableList[Offer]]:
+        raise Exception(Responsibility.ERROR_MESSAGE)
+
+    def suggest_counter_offer(self, product_id, offer_id, price) -> Response[None]:
+        raise Exception(Responsibility.ERROR_MESSAGE)
+
+    def approve_user_offer(self, product_id, offer_id) -> Response[None]:
+        raise Exception(Responsibility.ERROR_MESSAGE)
+
+    def reject_user_offer(self, product_id, offer_id) -> Response[None]:
+        raise Exception(Responsibility.ERROR_MESSAGE)
