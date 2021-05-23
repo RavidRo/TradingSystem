@@ -9,7 +9,7 @@ from Backend.Domain.Notifications.Publisher import Publisher
 
 class Offer(Parsable):
     def __init__(self, user, store, product) -> None:
-        self.__id: str = uuid.uuid4()
+        self.__id: str = str(uuid.uuid4())
         self.__price: float = None
         self.__status: OfferStatus = UndeclaredOffer(self)
         product.add_offer(self)
