@@ -53,6 +53,9 @@ class Offer(Parsable):
     def cancel_offer(self) -> Response[None]:
         return self.__status.cancel_offer()
 
+    def use(self) -> Response[None]:
+        return self.__status.use()
+
     def is_approved(self) -> bool:
         return self.__status.is_approveD()
 
@@ -130,6 +133,12 @@ class OfferStatus:
             msg=f"Can't cancel an offer with {self.get_name()} status",
         )
 
+    def use(self) -> Response[None]:
+        return Response(
+            False,
+            msg=f"Can't use an offer with {self.get_name()} status",
+        )
+
     def get_name(self) -> str:
         raise NotImplementedError
 
@@ -193,6 +202,9 @@ class CounteredOffer(OfferStatus):
 
 
 class ApprovedOffer(OfferStatus):
+    def use(self) -> Response[None]:
+        return self.change_status(UsedOffer)
+
     def get_name(self) -> str:
         return "approved"
 
@@ -203,6 +215,11 @@ class ApprovedOffer(OfferStatus):
 class RejectedOffer(OfferStatus):
     def get_name(self) -> str:
         return "rejected"
+
+
+class UsedOffer(OfferStatus):
+    def get_name(self) -> str:
+        return "used"
 
 
 class CancledOffer(OfferStatus):

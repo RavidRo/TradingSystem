@@ -43,6 +43,11 @@ class Product(IProduct):
                 return offer.get_price()
         return self.__price
 
+    def clear_offers(self, username):
+        for offer in self.__offers.values():
+            if offer.get_username() == username:
+                offer.use()
+
     def get_price(self):
         return self.__price
 

@@ -162,9 +162,11 @@ class ShoppingBag(IShoppingBag):
     def delete_products_after_purchase(self, user_name="guest") -> PurchaseDetails:
         # for now this function will only return details, in the future there will be specific deletion
         product_names = [
-            prod.get_name()
-            for product_id, (prod, quantity) in self.__pending_products_to_quantity.items()
+            prod.get_name() for _, (prod, _) in self.__pending_products_to_quantity.items()
         ]
+        product_ids = [product_id for product_id in self.__pending_products_to_quantity]
+        self.__store.clear_offers(product_ids, user_name)
+
         self.__pending_products_to_quantity.clear()
         purchase_details = PurchaseDetails(
             user_name, self.__store.get_name(), product_names, datetime.now(), self.__pending_price

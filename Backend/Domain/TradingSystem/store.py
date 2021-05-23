@@ -323,6 +323,11 @@ class Store(Parsable, Subscriber):
         final_price = sum(non_discount_prices) - total_discount
         return final_price if final_price >= 0 else 0
 
+    def clear_offers(self, product_ids: list[str], username):
+        for product_id in product_ids:
+            product = self._products_to_quantities[product_id][0]
+            product.clear_offers(username)
+
     def get_product(self, product_id: str):
         self._products_lock.acquire_read()
         prod = self._products_to_quantities.get(product_id)[0]
