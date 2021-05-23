@@ -49,7 +49,6 @@ const SignUp: FC<{}> = (props) => {
 	const [password, setPassword] = useState<string>('');
 
 	const handleSubmit = (event: any) => {
-		console.log({ username, password });
 		signUp.request({ username, password }, (data, error) => {
 			if (!error && data !== null && data.succeeded) {
 				history.push('/sign-in');
@@ -60,13 +59,13 @@ const SignUp: FC<{}> = (props) => {
 	};
 
 	return (
-		<Container component="main" maxWidth="xs">
+		<Container component='main' maxWidth='xs'>
 			<CssBaseline />
 			<div className={classes.paper}>
 				<Avatar className={classes.avatar}>
 					<LockOutlinedIcon />
 				</Avatar>
-				<Typography component="h1" variant="h5">
+				<Typography component='h1' variant='h5'>
 					Sign up
 				</Typography>
 				<form className={classes.form} onSubmit={handleSubmit}>
@@ -96,27 +95,27 @@ const SignUp: FC<{}> = (props) => {
 						</Grid> */}
 						<Grid item xs={12}>
 							<TextField
-								variant="outlined"
+								variant='outlined'
 								required
 								fullWidth
-								id="username"
-								label="Username"
-								name="username"
-								autoComplete="username"
+								id='username'
+								label='Username'
+								name='username'
+								autoComplete='username'
 								onChange={(event) => setUsername(event.currentTarget.value)}
 								autoFocus
 							/>
 						</Grid>
 						<Grid item xs={12}>
 							<TextField
-								variant="outlined"
+								variant='outlined'
 								required
 								fullWidth
-								name="password"
-								label="Password"
-								type="password"
-								id="password"
-								autoComplete="current-password"
+								name='password'
+								label='Password'
+								type='password'
+								id='password'
+								autoComplete='current-password'
 								onChange={(event) => setPassword(event.currentTarget.value)}
 							/>
 						</Grid>
@@ -128,17 +127,17 @@ const SignUp: FC<{}> = (props) => {
 						</Grid> */}
 					</Grid>
 					<Button
-						type="submit"
+						type='submit'
 						fullWidth
-						variant="contained"
-						color="primary"
+						variant='contained'
+						color='primary'
 						className={classes.submit}
 					>
 						Sign Up
 					</Button>
-					<Grid container justify="flex-end">
+					<Grid container justify='flex-end'>
 						<Grid item>
-							<Link to="/sign-in">Already have an account? Sign in</Link>
+							<Link to='/sign-in'>Already have an account? Sign in</Link>
 						</Grid>
 					</Grid>
 				</form>

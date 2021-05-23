@@ -1,4 +1,5 @@
 import React, { FC, useState } from 'react';
+
 import Avatar from '@material-ui/core/Avatar';
 import Button from '@material-ui/core/Button';
 import CssBaseline from '@material-ui/core/CssBaseline';
@@ -9,6 +10,7 @@ import LockOutlinedIcon from '@material-ui/icons/LockOutlined';
 import Typography from '@material-ui/core/Typography';
 import { makeStyles } from '@material-ui/core/styles';
 import Container from '@material-ui/core/Container';
+
 import { Link, useHistory } from 'react-router-dom';
 
 import Copyright from '../components/Copyright';
@@ -50,13 +52,9 @@ const SignIn: FC<SignInProps> = ({ onSignIn }) => {
 
 	const handleSubmit = (event: any) => {
 		signUp.request({ username, password }, (data, error) => {
-			// console.log('REQUESTEDDDDDDDD');
 			if (!error && data !== null && data.succeeded) {
-				// console.log('SUCESSSSSSSSSSSSSSSSSSSSSS');
 				onSignIn(username);
 				history.push('/');
-			} else {
-				// console.log('FAILLLLLLLLLLLLLLLLLLLLLLL');
 			}
 		});
 		event.preventDefault();

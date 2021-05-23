@@ -39,7 +39,7 @@ class ShoppingCart(IShoppingCart):
        3. If there is no existing bag, check if store with store_id exits.
        4. If store exists -> create new bag and add product"""
 
-    def add_product(self, store_id: str, product_id: str, quantity: int) -> Response[None]:
+    def add_product(self, store_id: str, product_id: str, quantity: int, store) -> Response[None]:
         if quantity <= 0:
             return Response(False, msg="Product's quantity must be positive!")
 
@@ -47,17 +47,8 @@ class ShoppingCart(IShoppingCart):
             return self.__shopping_bags[store_id].add_product(product_id, quantity)
 
         # no bag for store with store_id
-        store = self.get_store_by_id(store_id)
-        if store is None:
-            return Response(False, msg=f"There is no such store with store_id: {store_id}")
-
         new_bag = self.create_new_bag(store)
         return new_bag.add_product(product_id, quantity)
-
-    def get_store_by_id(self, store_id: str):
-        from Backend.Domain.TradingSystem.stores_manager import StoresManager
-
-        return StoresManager.get_store(store_id).object
 
     def create_new_bag(self, store):
         new_bag = ShoppingBag(store)
@@ -96,7 +87,9 @@ class ShoppingCart(IShoppingCart):
 
     """notice: if buy_products of any bag fails -> return acquired products to stores"""
     # products_purchase_info -a dict between store_id to list of tuples tuple (product_id to purchase_type)
-    def buy_products(self, user_age: int, products_purchase_info=None) -> Response[PrimitiveParsable[float]]:
+    def buy_products(
+        self, user_age: int, products_purchase_info=None, username="Guest"
+    ) -> Response[PrimitiveParsable[float]]:
         if products_purchase_info is None:
             products_purchase_info = {}
         if self.__pending_purchase:
@@ -104,7 +97,7 @@ class ShoppingCart(IShoppingCart):
         if not self.__shopping_bags:
             return Response(False, msg="Cant buy an empty cart")
 
-        sum_amount : float = 0
+        sum_amount: float = 0
         succeeded_bags: list[ShoppingBag] = []
         # this if will be deleted in the version with purchase types
         if not products_purchase_info:
@@ -116,7 +109,7 @@ class ShoppingCart(IShoppingCart):
             # this is the function call in the version with purchase types
             # result = self.shopping_bags[store_id].buy_products(products_purchase_info[store_id], user)
             # this is the current function call with default empty products_purchase_info
-            result = self.__shopping_bags[store_id].buy_products(user_age)
+            result = self.__shopping_bags[store_id].buy_products(user_age, username=username)
             if not result.success:
                 for bag in succeeded_bags:
                     bag.send_back()
@@ -159,6 +152,7 @@ class ShoppingCart(IShoppingCart):
         )
 
     """notice: I use a flag that marks the time passed for the purchase"""
+
     def send_back(self):
         self.__transaction_lock.acquire()
         if self.__pending_purchase:
@@ -189,4 +183,4 @@ class ShoppingCart(IShoppingCart):
         for bag in self.__shopping_bags.values():
             bag.send_back()
         self.__transaction_lock.release()
-        return Response(True, msg="Purchase was cacneled succesfully")
+        return Response(True, msg="Purchase was cancled successfully")

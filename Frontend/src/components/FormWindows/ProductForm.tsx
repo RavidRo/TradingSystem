@@ -4,8 +4,9 @@ import { Chip, Fab, TextField } from '@material-ui/core';
 import AddIcon from '@material-ui/icons/Add';
 
 import FormWindow from './FormWindow';
+import { ProductQuantity } from '../../types';
 
-type CreateProductFormProps = {
+type ProductFormProps = {
 	onSubmit: (
 		name: string,
 		price: number,
@@ -13,14 +14,19 @@ type CreateProductFormProps = {
 		category: string,
 		keywords: string[]
 	) => void;
+	productEditing?: ProductQuantity;
 };
 
-const CreateProductForm: FC<CreateProductFormProps> = ({ onSubmit }) => {
-	const [name, setName] = useState<string>('');
-	const [price, setPrice] = useState<string>('');
-	const [quantity, setQuantity] = useState<string>('');
-	const [category, setCategory] = useState<string>('');
-	const [keywords, setKeywords] = useState<string[]>([]);
+const ProductForm: FC<ProductFormProps> = ({ onSubmit, productEditing }) => {
+	const [name, setName] = useState<string>(productEditing ? productEditing.name : '');
+	const [price, setPrice] = useState<string>(productEditing ? `${productEditing.price}` : '');
+	const [quantity, setQuantity] = useState<string>(
+		productEditing ? `${productEditing.quantity}` : ''
+	);
+	const [category, setCategory] = useState<string>(productEditing ? productEditing.category : '');
+	const [keywords, setKeywords] = useState<string[]>(
+		productEditing ? productEditing.keywords : []
+	);
 
 	const currentKeyword = useRef<HTMLInputElement>(null);
 
@@ -36,66 +42,73 @@ const CreateProductForm: FC<CreateProductFormProps> = ({ onSubmit }) => {
 		}
 	}
 	return (
-		<FormWindow createText="Add Product!" handleSubmit={handleSubmit} header="New product">
+		<FormWindow
+			submitText={productEditing ? 'Edit Product' : 'Add Product!'}
+			handleSubmit={handleSubmit}
+			header={productEditing ? 'Confirm' : 'New product'}
+		>
 			<TextField
 				required
-				margin="normal"
-				id="name"
+				margin='normal'
+				id='name'
 				fullWidth
 				label="Product's name"
 				onChange={(event) => setName(event.currentTarget.value)}
+				defaultValue={productEditing?.name}
 			/>
 			<TextField
 				required
-				margin="normal"
-				id="price"
+				margin='normal'
+				id='price'
 				fullWidth
 				label="Product's price"
 				onChange={(event) => setPrice(event.currentTarget.value)}
-				inputMode="decimal"
+				inputMode='decimal'
 				error={priceError}
+				defaultValue={productEditing?.price}
 			/>
 			<TextField
 				required
-				margin="normal"
-				id="quantity"
+				margin='normal'
+				id='quantity'
 				fullWidth
 				label="Product's quantity"
 				onChange={(event) => setQuantity(event.currentTarget.value)}
-				inputMode="numeric"
-				type="number"
+				inputMode='numeric'
+				type='number'
 				error={quantityError}
+				defaultValue={productEditing?.quantity}
 			/>
 			<TextField
 				required
-				margin="normal"
-				id="category"
+				margin='normal'
+				id='category'
 				fullWidth
 				label="Product's category"
 				onChange={(event) => setCategory(event.currentTarget.value)}
+				defaultValue={productEditing?.category}
 			/>
-			<div className="enter-keywords">
-				<div className="keyword-input">
+			<div className='enter-keywords'>
+				<div className='keyword-input'>
 					<TextField
-						margin="normal"
-						id="keyword"
-						label="Keyword"
+						margin='normal'
+						id='keyword'
+						label='Keyword'
 						fullWidth
 						inputRef={currentKeyword}
 					/>
 				</div>
 				<Fab
-					color="primary"
-					aria-label="add"
+					color='primary'
+					aria-label='add'
 					onClick={() => {
 						if (currentKeyword.current && currentKeyword.current.value !== '') {
-							console.log(currentKeyword.current);
 							setKeywords([currentKeyword.current.value, ...keywords]);
 							currentKeyword.current.value = '';
 							currentKeyword.current.focus();
 						}
 					}}
-					size="small"
+					size='small'
 				>
 					<AddIcon />
 				</Fab>
@@ -116,4 +129,4 @@ const CreateProductForm: FC<CreateProductFormProps> = ({ onSubmit }) => {
 	);
 };
 
-export default CreateProductForm;
+export default ProductForm;
