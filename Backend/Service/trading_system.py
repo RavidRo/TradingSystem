@@ -1,5 +1,7 @@
 """ this class is responsible to communicate with the trading __system manager"""
 from __future__ import annotations
+
+import json
 from typing import Callable
 import threading
 
@@ -34,6 +36,15 @@ class TradingSystem(object):
         else:
             TradingSystem.__instance = self
             self.payment_manager = PaymentManager()
+            with open("state.json", "r") as read_file:
+                data = json.load(read_file)
+                cases = data["cases"]
+                for case in cases:
+                    actions = case["actions"]
+                    for action in actions:
+                        func = action["function"]
+                        args = action["args"]
+                        result = self.__getattribute__(func)(args)
 
     def enter_system(self):
         return TradingSystemManager.enter_system()
