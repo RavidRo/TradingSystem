@@ -4,22 +4,11 @@ from Backend.Domain.TradingSystem.States.user_state import UserState
 from Backend.response import ParsableList, Response
 import json
 
-admins = []
-
-
-def register_admins() -> None:
-    global admins
-    with open("config.json", "r") as read_file:
-        data = json.load(read_file)
-        admins = data["admins"]
-
-
-register_admins()
+from Backend.settings import Settings
 
 
 def is_username_admin(username) -> bool:
-    global admins
-    return username in admins
+    return username in Settings.get_instance().get_admins()
 
 
 class Guest(UserState):

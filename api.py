@@ -348,8 +348,6 @@ async def create_product():
         missing_args += " quantity"
     if "category" not in request_json:
         missing_args += " category"
-    if "keywords" not in request_json:
-        missing_args += " keywords"
     if missing_args != "":
         return __missing_args(cookie, missing_args)
     store_id = (await request.get_json())["store_id"]
@@ -357,7 +355,7 @@ async def create_product():
     price = request_json["price"]
     quantity = request_json["quantity"]
     category = request_json["category"]
-    keywords = request_json["keywords"]
+    keywords = request_json["keywords"] if "keywords" in request_json else None
     answer = await __async_call(
         system.create_product, cookie, store_id, name, category, price, quantity, keywords
     )
@@ -421,22 +419,14 @@ async def edit_product_details():
         missing_args += " store_id"
     if "product_id" not in request_json:
         missing_args += " product_id"
-    if "new_name" not in request_json:
-        missing_args += " new_name"
-    if "new_category" not in request_json:
-        missing_args += " new_category"
-    if "new_price" not in request_json:
-        missing_args += " new_price"
-    if "keywords" not in request_json:
-        missing_args += " keywords"
     if missing_args != "":
         return __missing_args(cookie, missing_args)
     store_id = request_json["store_id"]
     product_id = request_json["product_id"]
-    new_name = request_json["new_name"]
-    new_category = request_json["new_category"]
-    new_price = request_json["new_price"]
-    keywords = request_json["keywords"]
+    new_name = request_json["new_name"] if "new_name" in request_json else None
+    new_category = request_json["new_category"] if "new_category" in request_json else None
+    new_price = request_json["new_price"] if "new_price" in request_json else None
+    keywords = request_json["keywords"] if "keywords" in request_json else None
     answer = await __async_call(
         system.edit_product_details,
         cookie,
@@ -553,8 +543,6 @@ async def edit_simple_discount():
         missing_args += " condition"
     if "context" not in request_json:
         missing_args += " context"
-    if "duration" not in request_json:
-        missing_args += " duration"
     if missing_args != "":
         return __missing_args(cookie, missing_args)
     store_id = request_json["store_id"]
@@ -562,7 +550,7 @@ async def edit_simple_discount():
     percentage = request_json["percentage"]
     condition = request_json["condition"]
     context = request_json["context"]
-    duration = request_json["duration"]
+    duration = request_json["duration"] if "duration" in request_json else None
     answer = await __async_call(
         system.edit_simple_discount,
         cookie,
@@ -588,16 +576,12 @@ async def edit_complex_discount():
         missing_args += " store_id"
     if "discount_id" not in request_json:
         missing_args += " discount_id"
-    if "complex_type" not in request_json:
-        missing_args += " complex_type"
-    if "decision_rule" not in request_json:
-        missing_args += " decision_rule"
     if missing_args != "":
         return __missing_args(cookie, missing_args)
     store_id = request_json["store_id"]
     discount_id = request_json["discount_id"]
-    complex_type = request_json["complex_type"]
-    decision_rule = request_json["decision_rule"]
+    complex_type = request_json["complex_type"] if "complex_type" in request_json else None
+    decision_rule = request_json["decision_rule"] if "decision_rule" in request_json else None
     answer = await __async_call(
         system.edit_complex_discount, cookie, store_id, discount_id, complex_type, decision_rule
     )

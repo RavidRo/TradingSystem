@@ -5,6 +5,7 @@ from Backend.response import Response, PrimitiveParsable, ParsableList
 from Backend.Service.DataObjects.shopping_cart_data import ShoppingCartData
 from Backend.Domain.TradingSystem.shopping_bag import ShoppingBag
 from Backend.Domain.TradingSystem.Interfaces.IShoppingCart import IShoppingCart
+from Backend.settings import Settings
 
 
 class ShoppingCart(IShoppingCart):
@@ -18,7 +19,8 @@ class ShoppingCart(IShoppingCart):
         self.__transaction_lock = threading.Lock()
 
     def interval_time(self):
-        return 10 * 60
+        settings = Settings.get_instance()
+        return settings.get_timer_length()
 
     def get_shopping_bags(self):
         return self.__shopping_bags
