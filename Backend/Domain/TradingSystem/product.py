@@ -22,11 +22,26 @@ class Product(IProduct):
             self.__id, self.__product_name, self.__category, self.__price, self.__keywords
         )
 
+    def parse_with_price(self, username):
+        return ProductData(
+            self.__id,
+            self.__product_name,
+            self.__category,
+            self.get_offered_price(username),
+            self.__keywords,
+        )
+
     def set_product_name(self, new_name):
         self.__product_name = new_name
 
     def get_id(self):
         return self.__id
+
+    def get_offered_price(self, username):
+        for offer in self.__offers.values():
+            if offer.get_username() == username and offer.is_approved():
+                return offer.get_price()
+        return self.__price
 
     def get_price(self):
         return self.__price

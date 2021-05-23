@@ -165,8 +165,8 @@ class TradingSystemManager:
         )
 
     @staticmethod
-    def get_product(store_id: str, product_id: str) -> ProductData:
-        return StoresManager.get_product(store_id, product_id).parse()
+    def get_product(store_id: str, product_id: str, username: str) -> ProductData:
+        return StoresManager.get_product_with_price(store_id, product_id, username).parse()
 
     # 4.2
     @staticmethod

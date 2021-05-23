@@ -311,9 +311,11 @@ class Store(Parsable, Subscriber):
     def check_purchase(self, products_to_quantities: dict, user_age: int) -> Response[None]:
         return self.__purchase_policy.checkPolicy(products_to_quantities, user_age)
 
-    def apply_discounts(self, product_to_quantity: dict, user_age: int):
+    def apply_discounts(self, product_to_quantity: dict, user_age: int, username="Guest"):
+
         non_discount_prices = [
-            prod.get_price() * quantity for prod_id, (prod, quantity) in product_to_quantity.items()
+            prod.get_offered_price(username) * quantity
+            for _, (prod, quantity) in product_to_quantity.items()
         ]
         total_discount = self.__discount_policy.applyDiscount(
             products_to_quantities=product_to_quantity, user_age=user_age
