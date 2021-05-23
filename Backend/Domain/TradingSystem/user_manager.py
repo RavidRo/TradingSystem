@@ -445,23 +445,6 @@ class UserManager:
         func: Callable[[User], bool] = lambda user: user.empty_notifications()
         return UserManager.__deligate_to_user(cookie, func)
 
-def register_admins() -> None:
-    with open("config.json", "r") as read_file:
-        data = json.load(read_file)
-
-        # Should be at the system at least one admin
-        if "admins" not in data or len(data["admins"]) <= 0:
-            raise Exception(
-                "At least one admin should be at the system. Check config.json to add admins."
-            )
-
-        cookie = UserManager.enter_system()
-        for username in data["admins"]:
-            UserManager.register(username, data["admin-password"], cookie)
-
-
-register_admins()
-
     # Offers
     # ==================
 
@@ -515,3 +498,21 @@ register_admins()
     def cancel_offer(cookie, offer_id) -> Response[None]:
         func: Callable[[User], Response] = lambda user: user.cancel_offer(offer_id)
         return UserManager.__deligate_to_user(cookie, func)
+
+
+def register_admins() -> None:
+    with open("config.json", "r") as read_file:
+        data = json.load(read_file)
+
+        # Should be at the system at least one admin
+        if "admins" not in data or len(data["admins"]) <= 0:
+            raise Exception(
+                "At least one admin should be at the system. Check config.json to add admins."
+            )
+
+        cookie = UserManager.enter_system()
+        for username in data["admins"]:
+            UserManager.register(username, data["admin-password"], cookie)
+
+
+register_admins()
