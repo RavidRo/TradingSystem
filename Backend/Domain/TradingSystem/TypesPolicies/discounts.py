@@ -81,12 +81,19 @@ class SimpleDiscount(IDiscount):
         self._duration = duration
 
     def apply_discount(self, products_to_quantities: dict, user_age: int, username) -> float:
+        self.wrlock.acquire_read()
         if self._conditions_policy.checkPolicy(products_to_quantities, user_age).succeeded():
-            return self._discount_strategy.discount_func(products_to_quantities, username)
-        return 0.0
+            discount = self._discount_strategy.discount_func(products_to_quantities, username)
+        else:
+            discount = 0.0
+        self.wrlock.release_read()
+        return discount
 
     def discount_func(self, products_to_quantities: dict, username) -> float:
-        return self._discount_strategy.discount_func(products_to_quantities, username)
+        self.wrlock.acquire_read()
+        discount = self._discount_strategy.discount_func(products_to_quantities, username)
+        self.wrlock.release_read()
+        return discount
 
     def get_discount_by_id(self, exist_id: str):
         if self._id == exist_id:
@@ -337,6 +344,7 @@ class MaximumCompositeDiscount(CompositeDiscount):
     def apply_discount(self, products_to_quantities: dict, user_age: int, username) -> float:
         self.wrlock.acquire_read()
         if len(self._children) == 0:
+            self.wrlock.release_read()
             return 0.0
         discount = max(
             [child.apply_discount(products_to_quantities, user_age, username) for child in self._children]
@@ -350,17 +358,22 @@ class MaximumCompositeDiscount(CompositeDiscount):
         return discounts
 
     def discount_func(self, products_to_quantities: dict, username) -> float:
+        self.wrlock.acquire_read()
         if len(self._children) == 0:
-            return 0.0
-        return max(
-            [
-                child.discount_func(products_to_quantities, username)
-                for child in self._children
-            ]
-        )
+            discount = 0.0
+        else:
+            discount = max(
+                [
+                    child.discount_func(products_to_quantities, username)
+                    for child in self._children
+                ]
+            )
+        self.wrlock.release_read()
+        return discount
 
 
 class AddCompositeDiscount(CompositeDiscount):
+
     def __init__(self, children: list[IDiscount] = None, new_id="1"):
         super().__init__(children, new_id)
 
@@ -368,6 +381,14 @@ class AddCompositeDiscount(CompositeDiscount):
         self.wrlock.acquire_read()
         discount = sum(
             [child.apply_discount(products_to_quantities, user_age, username) for child in self._children]
+        )
+        self.wrlock.release_read()
+        return discount
+
+    def discount_func(self, products_to_quantities: dict, username) -> float:
+        self.wrlock.acquire_read()
+        discount = sum(
+            [child.discount_func(products_to_quantities, username) for child in self._children]
         )
         self.wrlock.release_read()
         return discount
@@ -399,10 +420,14 @@ class XorCompositeDiscount(CompositeDiscount):
         return discount
 
     def discount_func(self, products_to_quantities: dict, username):
+        self.wrlock.acquire_read()
         prices = [
             child.discount_func(products_to_quantities, username)
             for child in self._children
         ]
+        discount = XorCompositeDiscount.decision_dict[self.__desicion_rule](prices)
+        self.wrlock.release_read()
+        return discount
 
     def parse(self):
         discounts = super().parse()
@@ -431,9 +456,12 @@ class AndConditionDiscount(CompositeDiscount):
         return discount
 
     def discount_func(self, products_to_quantities: dict, username) -> float:
-        return sum(
+        self.wrlock.acquire_read()
+        discount = sum(
                 [child.discount_func(products_to_quantities, username) for child in self._children]
             )
+        self.wrlock.release_read()
+        return discount
 
     def parse(self):
         discounts = super().parse()
@@ -461,9 +489,12 @@ class OrConditionDiscount(CompositeDiscount):
         return discount
 
     def discount_func(self, products_to_quantities: dict, username) -> float:
-        return sum(
+        self.wrlock.acquire_read()
+        discount = sum(
                 [child.discount_func(products_to_quantities, username) for child in self._children]
             )
+        self.wrlock.release_read()
+        return discount
 
     def parse(self):
         discounts = super().parse()
