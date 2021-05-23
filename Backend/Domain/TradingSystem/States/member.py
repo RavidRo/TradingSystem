@@ -280,12 +280,12 @@ class Member(UserState):
     def approve_user_offer(self, store_id, product_id, offer_id) -> Response[None]:
         if store_id not in self.__responsibilities:
             return Response(False, msg=f"this member do not own/manage store {store_id}")
-        return self.__responsibilities[store_id].suggest_counter_offer(product_id, offer_id)
+        return self.__responsibilities[store_id].approve_user_offer(product_id, offer_id)
 
     def reject_user_offer(self, store_id, product_id, offer_id) -> Response[None]:
         if store_id not in self.__responsibilities:
             return Response(False, msg=f"this member do not own/manage store {store_id}")
-        return self.__responsibilities[store_id].suggest_counter_offer(product_id, offer_id)
+        return self.__responsibilities[store_id].reject_user_offer(product_id, offer_id)
 
     def cancel_offer(self, offer_id) -> Response[None]:
         if offer_id not in self.__offers:

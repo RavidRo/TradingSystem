@@ -26,7 +26,7 @@ const OffersRow: FC<OffersRowProps> = ({offer, isManager}) => {
     const handleDeclare = ()=>{
         setWindowInput(true);
     }
-    const cancelOfferObj = useAPI<void>('/cancel_offer');
+    const cancelOfferObj = useAPI<void>('/cancel_offer', {}, 'POST');
     const handleCancel = ()=>{
         cancelOfferObj.request({offer_id: offer.id}).then(({data, error})=>{
             if (!error && data) {
@@ -35,12 +35,14 @@ const OffersRow: FC<OffersRowProps> = ({offer, isManager}) => {
 					title: 'Congratulations!',
 					text: 'Your offer was canceled successfully!',
 				});
+                setCurrentOffer((offer)=>{
+                    return {id:offer.id, price:offerInput, status: 'cancled', product_id:offer.product_id, product_name:offer.product_name, 
+                    store_id:offer.store_id, store_name:offer.store_name, username:offer.username}});
             }
         })
     }
     const declareOfferObj = useAPI<void>('/declare_price', {}, 'POST');
     const handleOK = ()=>{
-        setWindowInput(false);
         declareOfferObj.request({cookie: cookie, offer_id: offer.id, price: offerInput}).then(({data, error})=>{
             if (!error && data) {
                 Swal.fire({
@@ -59,7 +61,7 @@ const OffersRow: FC<OffersRowProps> = ({offer, isManager}) => {
                 setCurrentOffer((offer)=>{
                     return {id:offer.id, price:offerInput, status: 'awaiting manager approval', product_id:offer.product_id, product_name:offer.product_name, 
                     store_id:offer.store_id, store_name:offer.store_name, username:offer.username}});
-                
+                setWindowInput(false);
             }
         })
     }
@@ -71,7 +73,7 @@ const OffersRow: FC<OffersRowProps> = ({offer, isManager}) => {
                 Swal.fire({
                     icon: 'success',
                     title: 'Congratulations!',
-                    text: 'Your counter offer was sent to the '+isManager?'user':'manager'+', we will notify you when answer is received !',
+                    text: 'Your counter offer was sent to the user, we will notify you when answer is received !'
                 });
                 setCurrentOffer((offer)=>{
                     return {id:offer.id, price:counterInput, status:'awaiting manager approval', product_id:offer.product_id, product_name:offer.product_name, 
@@ -88,9 +90,6 @@ const OffersRow: FC<OffersRowProps> = ({offer, isManager}) => {
 					title: 'Congratulations!',
 					text: 'The offered price on the item was approved, you can move the item to cart now !',
 				});
-                setCurrentOffer((offer)=>{
-                    return {id:offer.id, price:counterInput, status:'approved', product_id:offer.product_id, product_name:offer.product_name, 
-                    store_id:offer.store_id, store_name:offer.store_name, username:offer.username}});
             }
         })
     }
@@ -146,60 +145,57 @@ const OffersRow: FC<OffersRowProps> = ({offer, isManager}) => {
 return (
         <TableRow key={offer.id}>
             <TableCell component="th" scope="row">
-                {offer.product_name}
+                {currentOffer.product_name}
             </TableCell>
             <TableCell component="th" scope="row">
-                {offer.store_name}
+                {currentOffer.store_name}
             </TableCell>
             <TableCell component="th" scope="row">
-                {offer.price}
+                {currentOffer.price}
             </TableCell>
             <TableCell component="th" scope="row">
-                {offer.status}
+                {currentOffer.status}
             </TableCell>
                 <TableCell component="th" scope="row">
                     {isManager===false?
-                    <button disabled={offer.status!=='undeclared'} onClick={handleDeclare}>
+                    <button disabled={currentOffer.status!=='undeclared' && currentOffer.status!=='counter offered'} onClick={handleDeclare}>
                         Declare new price
                     </button>
-                    :<button disabled={offer.status!=='awaiting manager approval'} onClick={handleApprove}>
+                    :<button disabled={currentOffer.status!=='awaiting manager approval' && currentOffer.status!=='cancled'} onClick={handleApprove}>
                         Approve
                     </button>
                     }
                 </TableCell>
                 <TableCell component="th" scope="row">
                     {isManager===false?
-                    <button onClick={handleCancel}>
+                    <button disabled={currentOffer.status==='cancled'} onClick={handleCancel}>
                         Cancel Offer
                     </button>
-                    :<button disabled={offer.status!=='awaiting manager approval'} onClick={handleReject}>
+                    :<button disabled={currentOffer.status!=='awaiting manager approval' && currentOffer.status!=='cancled'} onClick={handleReject}>
                         Reject
                     </button>
                     }
                 </TableCell>
                 {isManager===false?
                 <TableCell component="th" scope="row">
-                    <button disabled={offer.status !== 'counter offered'} onClick={handleAccept}>
+                    <button disabled={currentOffer.status !== 'counter offered'} onClick={handleAccept}>
                         Accept Manager Offer
                     </button>
                 </TableCell>
                 :null}
                 {isManager===false?
                 <TableCell component="th" scope="row">
-                    <button disabled={offer.status !== 'approved'} onClick={handleMoveToCart}>
+                    <button disabled={currentOffer.status !== 'approved'} onClick={handleMoveToCart}>
                         Move To Cart
                     </button>
                 </TableCell>
                 :null}
                 <TableCell component="th" scope="row">
-                {isManager===false?
-                    <button disabled={offer.status !== 'counter offered'} onClick={()=>setCounterWindow(true)}>
-                        Suggest Counter Offer
-                    </button>
-                : <button disabled={offer.status !== 'counter offered' && offer.status!== 'awaiting manager approval'} onClick={()=>setCounterWindow(true)}>
+                {isManager===true?
+                <button disabled={currentOffer.status !== 'counter offered' && currentOffer.status!== 'awaiting manager approval'} onClick={()=>setCounterWindow(true)}>
                     Suggest Counter Offer
                 </button>
-                }
+                :null}
                 </TableCell>
 
             {/* for the first offer on an undeclared offer */}
