@@ -311,15 +311,22 @@ class Store(Parsable, Subscriber):
     def check_purchase(self, products_to_quantities: dict, user_age: int) -> Response[None]:
         return self.__purchase_policy.checkPolicy(products_to_quantities, user_age)
 
-    def apply_discounts(self, product_to_quantity: dict, user_age: int):
+    def apply_discounts(self, product_to_quantity: dict, user_age: int, username="Guest"):
+
         non_discount_prices = [
-            prod.get_price() * quantity for prod_id, (prod, quantity) in product_to_quantity.items()
+            prod.get_offered_price(username) * quantity
+            for _, (prod, quantity) in product_to_quantity.items()
         ]
         total_discount = self.__discount_policy.applyDiscount(
-            products_to_quantities=product_to_quantity, user_age=user_age
+            products_to_quantities=product_to_quantity, user_age=user_age, username=username
         )
         final_price = sum(non_discount_prices) - total_discount
         return final_price if final_price >= 0 else 0
+
+    def clear_offers(self, product_ids: list[str], username):
+        for product_id in product_ids:
+            product = self._products_to_quantities[product_id][0]
+            product.clear_offers(username)
 
     def get_product(self, product_id: str):
         self._products_lock.acquire_read()
