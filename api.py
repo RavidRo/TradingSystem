@@ -889,14 +889,6 @@ async def get_purchase_policy():
     return __responseToJson(cookie, answer)
 
 
-@app.route("/get_purchase_policy", methods=["GET"])
-async def get_user_offers():
-    cookie = request.args.get("cookie")
-    if cookie is None:
-        cookie = await __async_call(system.enter_system)
-    answer = await __async_call(system.get_user_offers, cookie)
-    return __responseToJson(cookie, answer)
-
 @app.route("/get_user_offers", methods=["GET"])
 async def get_user_offers():
     cookie = request.args.get("cookie")
@@ -904,6 +896,7 @@ async def get_user_offers():
         cookie = await __async_call(system.enter_system)
     answer = await __async_call(system.get_user_offers, cookie)
     return __responseToJson(cookie, answer)
+
 
 @app.route("/get_store_offers", methods=["GET"])
 async def get_store_offers():
