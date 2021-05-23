@@ -19,7 +19,7 @@ const SearchPage: FC<SearchPageProps> = ({ location, propsAddProduct }) => {
 	const [keyWords, setKeyWards] = useState<string[]>([]);
 
 	const [fromInput, setFromInput] = useState<number>(0);
-	const [toInput, setToInput] = useState<number>(1000);
+	const [toInput, setToInput] = useState<number>(Number.MAX_SAFE_INTEGER);
 
 	const storeToSearchedProducts = useRef<StoreToSearchedProducts>({});
 	const [productsToPresent, setProducts] = useState<ProductQuantity[]>([]);
@@ -55,6 +55,7 @@ const SearchPage: FC<SearchPageProps> = ({ location, propsAddProduct }) => {
 							}
 						}
 					}
+					console.log(productsToQuantities);
 					setProducts(productsToQuantities);
 				}
 			});

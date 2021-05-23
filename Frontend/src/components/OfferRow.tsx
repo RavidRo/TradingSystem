@@ -4,7 +4,7 @@ import Swal from 'sweetalert2';
 import useAPI from '../hooks/useAPI';
 import { Offer } from '../types';
 import { CookieContext } from '../contexts';
-
+import '../styles/OfferRow.scss';
 
 type OffersRowProps = {
     offer: Offer,
@@ -151,48 +151,48 @@ return (
                 {currentOffer.store_name}
             </TableCell>
             <TableCell component="th" scope="row">
-                {currentOffer.price}
+                {currentOffer.price===null?"---":currentOffer.price}
             </TableCell>
             <TableCell component="th" scope="row">
                 {currentOffer.status}
             </TableCell>
                 <TableCell component="th" scope="row">
                     {isManager===false?
-                    <button disabled={currentOffer.status!=='undeclared' && currentOffer.status!=='counter offered'} onClick={handleDeclare}>
+                    <button className="rowBtn" disabled={currentOffer.status!=='undeclared' && currentOffer.status!=='counter offered'} onClick={handleDeclare}>
                         Declare new price
                     </button>
-                    :<button disabled={currentOffer.status!=='awaiting manager approval' && currentOffer.status!=='cancled'} onClick={handleApprove}>
+                    :<button className="rowBtn" disabled={currentOffer.status!=='awaiting manager approval' && currentOffer.status!=='cancled'} onClick={handleApprove}>
                         Approve
                     </button>
                     }
                 </TableCell>
                 <TableCell component="th" scope="row">
                     {isManager===false?
-                    <button disabled={currentOffer.status==='cancled'} onClick={handleCancel}>
+                    <button className="rowBtn" disabled={currentOffer.status==='cancled'} onClick={handleCancel}>
                         Cancel Offer
                     </button>
-                    :<button disabled={currentOffer.status!=='awaiting manager approval' && currentOffer.status!=='cancled'} onClick={handleReject}>
+                    :<button className="rowBtn" disabled={currentOffer.status!=='awaiting manager approval' && currentOffer.status!=='cancled'} onClick={handleReject}>
                         Reject
                     </button>
                     }
                 </TableCell>
                 {isManager===false?
                 <TableCell component="th" scope="row">
-                    <button disabled={currentOffer.status !== 'counter offered'} onClick={handleAccept}>
+                    <button className="rowBtn" disabled={currentOffer.status !== 'counter offered'} onClick={handleAccept}>
                         Accept Manager Offer
                     </button>
                 </TableCell>
                 :null}
                 {isManager===false?
                 <TableCell component="th" scope="row">
-                    <button disabled={currentOffer.status !== 'approved'} onClick={handleMoveToCart}>
+                    <button className="rowBtn" disabled={currentOffer.status !== 'approved'} onClick={handleMoveToCart}>
                         Move To Cart
                     </button>
                 </TableCell>
                 :null}
                 <TableCell component="th" scope="row">
                 {isManager===true?
-                <button disabled={currentOffer.status !== 'counter offered' && currentOffer.status!== 'awaiting manager approval'} onClick={()=>setCounterWindow(true)}>
+                <button className="rowBtn" disabled={currentOffer.status !== 'counter offered' && currentOffer.status!== 'awaiting manager approval'} onClick={()=>setCounterWindow(true)}>
                     Suggest Counter Offer
                 </button>
                 :null}
