@@ -33,7 +33,7 @@ class ResponsibilitiesHandler(IHandler):
                                         Column('responsibility_type', String(10), nullable=False, default='R'),
                                         ForeignKeyConstraint(('parent_username', 'store_id'),
                                                              ['responsibilities.username',
-                                                              'responsibilities.store_id']))
+                                                              'responsibilities.store_id'], name="fk_self_reference"))
 
         self.__manager_permissions = Table('manager_permissions', Base.metadata,
                                            Column('manager_store_id', String(50), primary_key=True),
@@ -45,14 +45,12 @@ class ResponsibilitiesHandler(IHandler):
 
         mapper(Responsibility, self.__responsibilities, properties={
             '_appointed': relationship(Responsibility, cascade="all, delete",
-                                       passive_deletes=True, lazy='joined',
+                                       passive_deletes=True,
                                        remote_side=[self.__responsibilities.c.username,
                                                     self.__responsibilities.c.store_id], overlaps="_store"),
             # '_user_state': relationship(Member, uselist=False, lazy='joined',
             #                             back_populates="_Member__responsibilities"),
-            '_store': relationship(Store, uselist=False, lazy='joined', overlaps="_appointed"),
-            '_store_id': self.__responsibilities.c.store_id,
-            '_username': self.__responsibilities.c.username
+            # '_store': relationship(Store, uselist=False, lazy='joined', overlaps="_appointed"),
         }, polymorphic_on=self.__responsibilities.c.responsibility_type, polymorphic_identity='R')
 
         mapper(Founder, self.__responsibilities, polymorphic_identity='F')

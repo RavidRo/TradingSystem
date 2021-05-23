@@ -38,7 +38,7 @@ class ShoppingBagHandler(IHandler):
                                      Column("username", String(50), ForeignKey("members.username"), primary_key=True))
 
         mapper(ShoppingBag, self.__shopping_bags, properties={
-            "_ShoppingBag__store": relationship(Store, passive_deletes=True, lazy='joined'),
+            "_ShoppingBag__store": relationship(Store, passive_deletes=True),
         })
 
     @staticmethod

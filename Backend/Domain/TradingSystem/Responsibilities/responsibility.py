@@ -56,6 +56,9 @@ class Responsibility(Parsable):
     def get_user_state(self):
         return self._user_state
 
+    def get_store_id(self):
+        return self._store.get_id()
+
     # 4.1
     # Creating a new product a the store
     def add_product(

@@ -9,6 +9,8 @@ from Backend.DataBase.Handlers.purchase_details_handler import PurchaseDetailsHa
 from Backend.DataBase.Handlers.responsibilities_handler import ResponsibilitiesHandler
 from Backend.DataBase.IHandler import IHandler
 from Backend.DataBase.database import Base, Session, engine
+from Backend.Domain.TradingSystem.Responsibilities.founder import Founder
+from Backend.Domain.TradingSystem.Responsibilities.responsibility import Responsibility
 from Backend.Domain.TradingSystem.States.member import Member
 from Backend.Domain.TradingSystem.purchase_details import PurchaseDetails
 from Backend.Domain.TradingSystem.store import Store
@@ -33,7 +35,8 @@ class StoreHandler(IHandler):
         mapper(Store, self.__stores, properties={
             "_Store__id": self.__stores.c.store_id,
             "_Store__name": self.__stores.c.store_name,
-            "_Store__purchase_history": relationship(PurchaseDetails, lazy='joined')
+            "_Store__purchase_history": relationship(PurchaseDetails),
+            "_Store__responsibility": relationship(Founder, uselist=False, overlaps="_appointed", backref="_store")
         })
 
         self.__product_handler = ProductHandler.get_instance()
@@ -51,8 +54,6 @@ class StoreHandler(IHandler):
         res = Response(True)
         try:
             session.add(obj)
-            responsibility = obj.get_responsibility()
-            session.add(responsibility)
             # stmt = insert(Base.metadata.tables['responsibilities']).values(
             #     username=obj.get_responsibility().get_user_state().get_username().get_obj().get_val(),
             #     store_id=obj.get_id(),

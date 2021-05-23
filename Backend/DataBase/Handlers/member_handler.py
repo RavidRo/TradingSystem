@@ -1,8 +1,9 @@
 from threading import Lock
-from sqlalchemy import Table, Column, String, Boolean, insert, ARRAY
+from sqlalchemy import Table, Column, String, Boolean, insert, ARRAY, ForeignKey
 from sqlalchemy.orm import mapper, relationship
 from Backend.DataBase.IHandler import IHandler
 from Backend.DataBase.database import Base, Session
+from Backend.Domain.TradingSystem.Responsibilities.founder import Founder
 from Backend.Domain.TradingSystem.Responsibilities.responsibility import Responsibility
 from Backend.Domain.TradingSystem.States.member import Member
 from Backend.Domain.TradingSystem.purchase_details import PurchaseDetails
@@ -10,25 +11,30 @@ from Backend.response import Response
 from Backend.rw_lock import ReadWriteLock
 from sqlalchemy.orm.collections import attribute_mapped_collection
 
+
 class MemberHandler(IHandler):
     _lock = Lock()
     _instance = None
 
     def __init__(self):
         super().__init__(ReadWriteLock())
+        self.__credentials = Table("credentials", Base.metadata,
+                                   Column('username', String(50), primary_key=True),
+                                   Column('password', String(50)),
+                                   Column('is_admin', Boolean(20)))
+
         self.__members = Table('members', Base.metadata,
-                               Column('username', String(50), primary_key=True),
-                               Column('password', String(50)),
-                               Column('is_admin', Boolean(20)),
+                               Column('username', String(50), ForeignKey("credentials.username"), primary_key=True),
                                Column('notifications', ARRAY(String(256)))
                                )
 
         mapper(Member, self.__members, properties={
             '_username': self.__members.c.username,
-            '_Member__responsibilities': relationship(Responsibility, cascade="all, delete",
+            '_Member__responsibilities': relationship(Founder, cascade="all, delete",
                                                       collection_class=attribute_mapped_collection('_store_id'),
                                                       passive_deletes=True,
-                                                      backref="_user_state"),
+                                                      backref="_user_state",
+                                                      lazy='subquery'),
             '_Member__purchase_details': relationship(PurchaseDetails, cascade="all, delete",
                                                       passive_deletes=True),
         })
@@ -42,16 +48,31 @@ class MemberHandler(IHandler):
 
     """Note: member is saved in db in register so all of his lists are empty and not the object is saved"""
 
+    def save(self, obj, **kwargs) -> Response[None]:
+        self._rwlock.acquire_write()
+        session = Session()
+        res = Response(True)
+        try:
+            session.add(obj)
+            session.commit()
+        except Exception as e:
+            session.rollback()
+            res = Response(False, msg=str(e))
+        finally:
+            session.expunge_all()
+            session.close()
+            self._rwlock.release_write()
+            return res
+
     # region save
-    def save_user(self, username: str, password: str, is_admin=False):
+    def save_user_credentials(self, username: str, password: str, is_admin=False):
         self._rwlock.acquire_write()
         session = Session(expire_on_commit=False)
         res = Response(True)
         try:
-            stmt = insert(self.__members).values(username=username,
-                                                 password=password,
-                                                 is_admin=is_admin,
-                                                 notifications=[])
+            stmt = insert(self.__credentials).values(username=username,
+                                                     password=password,
+                                                     is_admin=is_admin)
             session.execute(stmt)
             session.commit()
         except Exception as e:
@@ -102,14 +123,14 @@ class MemberHandler(IHandler):
     def update(self, id, update_dict):
         pass
 
-    #TODO: check if append here is on same object as in the domain!
+    # TODO: check if append here is on same object as in the domain!
     def update_responsibility(self, username: str, responsibility: Responsibility):
         self._rwlock.acquire_write()
         session = Session(expire_on_commit=False)
         res = Response(True)
         try:
             member = session.query(Member).filter_by(_username=username).one()
-            member.get_responsibilities().append(responsibility)
+            member.get_responsibilities()[responsibility.get_store_id()] = responsibility
             session.commit()
         except Exception as e:
             session.rollback()
@@ -170,4 +191,3 @@ class MemberHandler(IHandler):
             session.close()
             self._rwlock.release_write()
             return res
-
