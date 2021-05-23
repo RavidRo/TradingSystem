@@ -1,5 +1,7 @@
 import requests
 
+# from werkzeug.security import generate_password_hash
+# hashed_details = generate_password_hash(payment_info, method="sha256")
 from Backend.response import Response
 from Backend.Domain.Payment.OutsideSystems.outside_cashing import OutsideCashing
 
@@ -32,9 +34,17 @@ class CashingAdapter:
     def __send_cancel_supply(self, transaction_id):
         return self.__send("cancel_supply", {transaction_id})
 
-    def pay(self, price, payment_details):
-        # Temporal implementation, will be change with the real implementation of OutsideCashing
-        # Assuming outside cashing returns boolean, wrapping with response to include message later.
+    def pay(self, price, payment_details) -> Response[str]:
+        if (
+            "card_number" not in payment_details
+            or "month" not in payment_details
+            or "year" not in payment_details
+            or "holder" not in payment_details
+            or "cvv" not in payment_details
+            or "id" not in payment_details
+        ):
+            return Response(False, msg="Payment details was missing a required argument")
+
         response = self.__send_pay(
             payment_details["card_number"],
             payment_details["month"],
@@ -47,6 +57,8 @@ class CashingAdapter:
             return Response(False, "Transaction has failed")
         return Response(True, response.text)
 
-    def cancel_payment(self, payment_details):
-
-        return self.__outside_cashing.get_balance(payment_details)
+    def cancel_payment(self, transaction_id) -> Response[None]:
+        response = self.__send_cancel_pay(transaction_id)
+        if response.status_code != 200 or response.text == "-1":
+            return Response(False, "Transaction cancelation has failed")
+        return Response(True)
