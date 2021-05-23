@@ -1,26 +1,53 @@
+import requests
+
 from Backend.response import Response
-from werkzeug.security import generate_password_hash
 from Backend.Domain.Payment.OutsideSystems.outside_cashing import OutsideCashing
 
 
-class CashingAdapter:
+domain = "https://cs-bgu-wsep.herokuapp.com/"
 
-    def __init__(self, ):
+
+class CashingAdapter:
+    def __init__(self):
         self.__outside_cashing = OutsideCashing()
-        self.__hashes = dict()
+        response = self.__send_handshake()
+        if response.status_code != 200 or response.text != "OK":
+            raise "Could not connect properly to outside systems"
+
+    def __send(self, action_type, paramaters={}):
+        return requests.post(domain, data=({"action_type": action_type} | paramaters))
+
+    def __send_handshake(self):
+        return self.__send("handshake")
+
+    def __send_pay(self, card_number, month, year, holder, cvv, id):
+        return self.__send("pay", {card_number, month, year, holder, cvv, id})
+
+    def __send_cancel_pay(self, transaction_id):
+        return self.__send("cancel_pay", {transaction_id})
+
+    def __send_supply(self, name, address, city, country, zip):
+        return self.__send("supply", {name, address, city, country, zip})
+
+    def __send_cancel_supply(self, transaction_id):
+        return self.__send("cancel_supply", {transaction_id})
 
     def pay(self, price, payment_info):
         # Temporal implementation, will be change with the real implementation of OutsideCashing
         # Assuming outside cashing returns boolean, wrapping with response to include message later.
-        hashed_details = generate_password_hash(payment_info, method="sha256")
-        if payment_info not in self.__hashes:
-            self.__hashes[payment_info] = hashed_details
-        answer = self.__outside_cashing.pay(price, self.__hashes[payment_info])
-        return Response(success=answer)
+        response = self.__send_pay(
+            payment_info["card_number"],
+            payment_info["month"],
+            payment_info["year"],
+            payment_info["holder"],
+            payment_info["cvv"],
+            payment_info["id"],
+        )
+        if response.status_code != 200 or response.text == "-1":
+            return Response(False, "Transaction has failed")
+        return Response(True, response.text)
 
     # test function:
     def get_balance(self, payment_details):
-        hashed_details = generate_password_hash(payment_details, method="sha256")
-        if payment_details not in self.__hashes:
-            self.__hashes[payment_details] = hashed_details
-        return self.__outside_cashing.get_balance(self.__hashes[payment_details])
+
+        return self.__outside_cashing.get_balance(payment_details)
