@@ -21,8 +21,6 @@ const Purchase: FC<PurchaseProps> = ({ location }) => {
 
 	const handleUnload = (e: any) => {
 		e.preventDefault();
-		console.log('hey');
-		alert('HEY');
 	};
 
 	useEffect(() => {
@@ -39,26 +37,19 @@ const Purchase: FC<PurchaseProps> = ({ location }) => {
 				payment_details: { credit },
 				address: address,
 			})
-			.then(({ data, error, errorMsg }) => {
+			.then(({ data, error }) => {
 				if (!error && data !== null) {
 					Swal.fire({
 						icon: 'success',
 						title: 'Congratulations!',
 						text: data.data.toString(),
 					});
-				} else {
-					// TODO: after pulling Ravid's version - remove this because it is in API already
-					Swal.fire({
-						icon: 'error',
-						title: 'Oops...!',
-						text: errorMsg,
-					});
 				}
 			});
 	};
 	const cancelObj = useAPI<number>('/cancel_purchase', {}, 'POST');
 	const handleCancel = () => {
-		cancelObj.request({ cookie: location.state.cookie }).then(({ data, error, errorMsg }) => {
+		cancelObj.request({ cookie: location.state.cookie }).then(({ data, error }) => {
 			if (!error && data !== null) {
 				// go back to cart
 				history.goBack();

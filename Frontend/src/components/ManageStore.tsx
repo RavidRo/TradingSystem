@@ -8,6 +8,7 @@ import MyAppointeesList from './Lists/MyAppointeesList';
 import AppointeesList from './Lists/AppointeesList';
 import DiscountsList from './Lists/DiscountsList';
 import ConditionsList from './Lists/ConditionsList';
+import StorePurchaseHistory from './Lists/StorePurchaseHistory';
 
 type ManageStoreProps = {
 	storeId: string;
@@ -119,6 +120,9 @@ const ManageStore: FC<ManageStoreProps> = ({ storeId, appointment, setAppointmen
 								products={products}
 								storeId={store.id}
 							/>
+						)}
+						{appointment.permissions.includes('get history') && (
+							<StorePurchaseHistory storeId={store.id} />
 						)}
 					</>
 				)}

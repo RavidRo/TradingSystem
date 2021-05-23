@@ -15,6 +15,13 @@ export type ShoppingBag = {
 	store_name: string;
 	product_ids_to_quantities: { [productId: string]: number };
 };
+export type PurchaseDetails = {
+	username: string;
+	store_name: string;
+	product_names: string[];
+	date: Date;
+	total_price: number;
+};
 
 export type Permission =
 	| 'manage products'

@@ -64,7 +64,6 @@ async def get_cookie():
 @app.websocket("/connect")
 async def connect():
     cookie = await websocket.receive()
-    print("got cookie from client")
     queue = []
 
     # queue = asyncio.Queue()
@@ -78,26 +77,22 @@ async def connect():
     #     return open
 
     def send_messages(messages):
-        print("Recieved messages", messages)
         queue.append(messages)
         return open
 
     system.connect(cookie, send_messages)
-    print("Connection started")
     while True:
         try:
             await asyncio.sleep(10)
             while len(queue) > 0:
                 messages = queue.pop()
                 for message in messages:
-                    print("Sending message", message)
                     await websocket.send(message)
             # messages = await queue.get()
             # print("Sending messages to socket", messages)
             # for message in messages:
             #     await websocket.send(message)
         except:
-            print("Socket disconnected")
             open = False
             return
 

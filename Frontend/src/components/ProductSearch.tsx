@@ -28,7 +28,7 @@ const ProductSearch: FC<ProductSearchProps> = ({
 	const storeObj = useAPI<Store>('/get_store', { store_id: storeID });
 	useEffect(() => {
 		if (storeID !== '') {
-			storeObj.request().then(({ data, error, errorMsg }) => {
+			storeObj.request().then(({ data, error }) => {
 				if (!error && data !== null) {
 					setStoreName(data.data.name);
 				}
