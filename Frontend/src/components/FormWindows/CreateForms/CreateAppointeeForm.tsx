@@ -1,7 +1,7 @@
 import React, { FC, useState } from 'react';
 import { FormControl, InputLabel, MenuItem, Select, TextField } from '@material-ui/core';
-import FormWindow from './FormWindow';
-import { Role } from '../../types';
+import FormWindow from '../FormWindow';
+import { Role } from '../../../types';
 
 type CreateAppointeeFormProps = {
 	onSubmit: (appointeeUsername: string, role: Role) => void;
@@ -22,7 +22,7 @@ const CreateAppointeeForm: FC<CreateAppointeeFormProps> = ({ onSubmit }) => {
 	};
 
 	return (
-		<FormWindow createText="Add appointee!" handleSubmit={handleSubmit} header="New appointee">
+		<FormWindow submitText="Add appointee!" handleSubmit={handleSubmit} header="New appointee">
 			<TextField
 				required
 				margin="normal"

@@ -1,14 +1,22 @@
 import React, { FC } from 'react';
 
-import { IconButton, ListItem, ListItemSecondaryAction, ListItemText } from '@material-ui/core';
+import { ListItem, ListItemSecondaryAction, ListItemText } from '@material-ui/core';
 import DeleteForeverOutlinedIcon from '@material-ui/icons/DeleteForeverOutlined';
+import EditIcon from '@material-ui/icons/Edit';
 
-import useAPI from '../../hooks/useAPI';
+import { useAPI2 } from '../../hooks/useAPI';
+import {
+	changeProductQuantity,
+	createProduct,
+	editProductDetails,
+	removeProductFromStore,
+} from '../../api';
 import { ProductQuantity } from '../../types';
 import ProductDetails from '../DetailsWindows/ProductDetails';
-import CreateProductForm from '../FormWindows/CreateProductForm';
-// import '../styles/ProductsList.scss';
+import ProductForm from '../FormWindows/ProductForm';
 import GenericList from './GenericList';
+import SecondaryActionButton from './SecondaryActionButton';
+import { areYouSure, confirmOnSuccess, confirm } from '../../decorators';
 
 type ProductsListProps = {
 	products: ProductQuantity[];
@@ -25,13 +33,19 @@ const ProductsList: FC<ProductsListProps> = ({
 	setProducts,
 	storeId,
 }) => {
-	const createProduct = useAPI<string>('/create_product', {}, 'POST');
+	const createProductAPI = useAPI2(createProduct);
+	const deleteProductAPI = useAPI2(removeProductFromStore);
+	const editProductAPI = useAPI2(editProductDetails);
+	const editProductQuantityAPI = useAPI2(changeProductQuantity);
 
-	const deleteProductAPI = useAPI<null>(
-		'/remove_product_from_store',
-		{ store_id: storeId },
-		'POST'
-	);
+	const addProduct = (product: ProductQuantity) => {
+		setProducts([product, ...products]);
+	};
+	const editProduct = (editedProduct: ProductQuantity) => {
+		setProducts(
+			products.map((product) => (product.id === editedProduct.id ? editedProduct : product))
+		);
+	};
 
 	const handleCreateProduct = (
 		name: string,
@@ -40,34 +54,76 @@ const ProductsList: FC<ProductsListProps> = ({
 		category: string,
 		keywords: string[]
 	) => {
-		createProduct
-			.request({
-				store_id: storeId,
-				name,
-				price,
-				quantity,
-				category,
-				keywords,
-			})
-			.then((createProduct) => {
-				if (!createProduct.error && createProduct.data !== null) {
-					setProducts([
-						{
-							id: createProduct.data.data,
-							name,
-							price,
-							category,
-							keywords,
-							quantity,
-						},
-						...products,
-					]);
-				}
+		createProductAPI
+			.request(storeId, name, price, quantity, category, keywords)
+			.then((newProductId) => {
+				addProduct({
+					id: newProductId,
+					name,
+					price,
+					category,
+					keywords,
+					quantity,
+				});
 			});
 	};
 
-	const openProductForm = () => {
-		openTab(() => <CreateProductForm onSubmit={handleCreateProduct} />, '');
+	const handleEditProduct = confirmOnSuccess(
+		(
+			id: string,
+			name: string,
+			price: number,
+			quantity: number,
+			category: string,
+			keywords: string[]
+		) => {
+			return editProductAPI.request(storeId, id, name, category, price, keywords).then(() => {
+				editProduct({
+					id,
+					category,
+					keywords,
+					name,
+					price,
+					quantity: products.find((product) => product.id === id)?.quantity || 0,
+				});
+				editProductQuantityAPI.request(storeId, id, quantity).then(() => {
+					editProduct({
+						id,
+						category,
+						keywords,
+						name,
+						price,
+						quantity,
+					});
+				});
+			});
+		},
+		'Edited!',
+		'The product was edited successfully!'
+	);
+
+	const openProductForm = (productToEdit: ProductQuantity | undefined = undefined) => {
+		openTab(
+			() => (
+				<ProductForm
+					onSubmit={
+						productToEdit
+							? (name, price, quantity, category, keywords) =>
+									handleEditProduct(
+										productToEdit.id,
+										name,
+										price,
+										quantity,
+										category,
+										keywords
+									)
+							: handleCreateProduct
+					}
+					productEditing={productToEdit}
+				/>
+			),
+			''
+		);
 	};
 
 	const onSelectProduct = (product: ProductQuantity) => {
@@ -76,23 +132,26 @@ const ProductsList: FC<ProductsListProps> = ({
 		}
 	};
 
-	const onDelete = (productId: string) => {
-		deleteProductAPI.request({ product_id: productId }, (data, error) => {
-			if (!error && data !== null) {
+	const onDelete = areYouSure(
+		(productId: string) => {
+			deleteProductAPI.request(storeId, productId).then(() => {
 				setProducts(products.filter((product) => product.id !== productId));
-			}
-		});
-	};
+				confirm('Deleted!', 'Product was deleted successfully');
+			});
+		},
+		"You won't be able to revert this!",
+		'Yes, delete product!'
+	);
 
 	return (
 		<GenericList
 			data={products}
-			onCreate={openProductForm}
+			onCreate={() => openProductForm()}
 			header="Products"
 			createTxt="+ Add a new product"
 			narrow
 		>
-			{(product) => (
+			{(product: ProductQuantity) => (
 				<ListItem
 					key={product.id}
 					selected={selectedItem === product.id}
@@ -101,10 +160,13 @@ const ProductsList: FC<ProductsListProps> = ({
 				>
 					<ListItemText primary={product.name} className="first-field" />
 					<ListItemText primary={`in stock: ${product.quantity}`} />
-					<ListItemSecondaryAction onClick={() => onDelete(product.id)}>
-						<IconButton edge="end" aria-label="delete">
+					<ListItemSecondaryAction>
+						<SecondaryActionButton onClick={() => openProductForm(product)}>
+							<EditIcon />
+						</SecondaryActionButton>
+						<SecondaryActionButton onClick={() => onDelete(product.id)}>
 							<DeleteForeverOutlinedIcon />
-						</IconButton>
+						</SecondaryActionButton>
 					</ListItemSecondaryAction>
 				</ListItem>
 			)}

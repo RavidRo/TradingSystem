@@ -1,51 +1,89 @@
-from abc import ABC
+from abc import ABC, abstractmethod
 from typing import Union
 
 from Backend.Domain.TradingSystem.Interfaces.IDiscount import IDiscount
 from Backend.response import Response
 
 
+class Discounter(ABC):
+    def __init__(self, id, percentage):
+        self._id = id
+        self.multiplier = percentage / 100.0
+
+    @abstractmethod
+    def discount_func(self, products_to_quantities, username):
+        raise NotImplementedError
+
+    def set_id(self, id):
+        self._id = id
+
+
+class ProductDiscountStrategy(Discounter):
+    def __init__(self, id, percentage):
+        super().__init__(id, percentage)
+
+    def discount_func(self, products_to_quantities, username):
+        return sum(
+            [
+                prod.get_offered_price(username) * quantity * self.multiplier
+                if prod_id == self._id
+                else 0
+                for prod_id, (prod, quantity) in products_to_quantities.items()
+            ]
+        )
+
+
+class CategoryDiscountStrategy(Discounter):
+    def __init__(self, id, percentage):
+        super().__init__(id, percentage)
+
+    def discount_func(self, products_to_quantities, username):
+        return sum(
+            [
+                prod.get_offered_price(username) * quantity * self.multiplier
+                if prod.get_category() == self._id
+                else 0
+                for _, (prod, quantity) in products_to_quantities.items()
+            ]
+        )
+
+
+class StoreDiscountStrategy(Discounter):
+    def __init__(self, percentage):
+        super().__init__(None, percentage)
+
+    def discount_func(self, products_to_quantities, username):
+        return sum(
+            [
+                prod.get_offered_price(username) * quantity * self.multiplier
+                for _, (prod, quantity) in products_to_quantities.items()
+            ]
+        )
+
+
 class SimpleDiscount(IDiscount):
+    strategy_generator = {
+        "product": lambda id, percentage: ProductDiscountStrategy(id, percentage),
+        "category": lambda id, percentage: CategoryDiscountStrategy(id, percentage),
+        "store": lambda id, percentage: StoreDiscountStrategy(percentage),
+    }
+
     def get_context(self):
         return self._context
 
     def __init__(self, discount_data, id, duration=None):  # Add duration in later milestones
         super().__init__(id)
-        self._multiplier = discount_data["percentage"] / 100.0
         self._parent = None
         self._context = discount_data["context"]
-        self.duration = duration
+        self._discount_strategy = SimpleDiscount.strategy_generator[
+            discount_data["context"]["obj"]
+        ](discount_data["context"].get("id"), discount_data["percentage"])
+        self._duration = duration
 
-        def discount_func(products_to_quantities) -> float:
-            if discount_data["context"]["obj"] == "product":
-                return sum(
-                    [
-                        prod.get_price() * quantity * self._multiplier
-                        if prod_id == discount_data["context"]["id"]
-                        else 0
-                        for prod_id, (prod, quantity) in products_to_quantities.items()
-                    ]
-                )
-            if discount_data["context"]["obj"] == "category":
-                return sum(
-                    [
-                        prod.get_price() * quantity * self._multiplier
-                        if prod.get_category() == discount_data["context"]["id"]
-                        else 0
-                        for _, (prod, quantity) in products_to_quantities.items()
-                    ]
-                )
-            if discount_data["context"]["obj"] == "store":
-                return sum(
-                    [
-                        prod.get_price() * quantity * self._multiplier
-                        for _, (prod, quantity) in products_to_quantities.items()
-                    ]
-                )
-
-            raise RuntimeError("This shouldn't happen!")
-
-        self.discount_func = discount_func
+    def apply_discount(self, products_to_quantities: dict, user_age: int, username) -> float:
+        if self._conditions_policy.checkPolicy(products_to_quantities, user_age):
+            return self._discount_strategy.discount_func(products_to_quantities, username)
+        return 0.0
 
     def get_discount_by_id(self, exist_id: str):
         if self._id == exist_id:
@@ -57,7 +95,7 @@ class SimpleDiscount(IDiscount):
 
     def parse(self):
         discount = super().parse()
-        discount["percentage"] = self._multiplier * 100
+        discount["percentage"] = self._discount_strategy.multiplier * 100
         discount["context"] = self._context
         discount["discount_type"] = "simple"
         return discount
@@ -77,7 +115,7 @@ class SimpleDiscount(IDiscount):
             else:
                 if context["obj"] not in ("product", "category", "store"):
                     msg += "context object must be one of the following: 'product', 'category', 'store'\n"
-            if "id" not in context:
+            if context["obj"] != "store" and ("id" not in context):
                 msg += "context must include 'id' key\n"
 
         # add conditions on duration in later milestones
@@ -85,11 +123,24 @@ class SimpleDiscount(IDiscount):
         if msg != "":
             return Response(False, msg=msg)
 
-        if percentage is not None:
-            self._multiplier = percentage / 100
-
         if context is not None:
-            self._context = context
+            if self._context["obj"] == context["obj"]:
+                self._context["id"] = context.get("id")
+                self._discount_strategy.set_id(context.get("id"))
+            else:
+                self._discount_strategy = SimpleDiscount.strategy_generator[context["obj"]](
+                    context.get("id"),
+                    percentage
+                    if percentage is not None
+                    else self._discount_strategy.multiplier * 100,
+                )
+                self._context = context
+
+        if percentage is not None:
+            self._discount_strategy.multiplier = percentage / 100
+
+        if duration is not None:
+            self._duration = duration
 
         return Response(True)
 
@@ -106,6 +157,9 @@ class SimpleDiscount(IDiscount):
 
     def get_children(self) -> Union[list[IDiscount], None]:
         return None
+
+    def get_parent(self) -> IDiscount:
+        return self._parent
 
     def add_child(self, child: IDiscount) -> Response[None]:
         return Response(False, msg="Cannot add new discount to simple discount")
@@ -244,11 +298,14 @@ class MaximumCompositeDiscount(CompositeDiscount):
     def __init__(self, children: list[IDiscount] = None, new_id="1"):
         super().__init__(children, new_id)
 
-    def apply_discount(self, products_to_quantities: dict, user_age: int) -> float:
+    def apply_discount(self, products_to_quantities: dict, user_age: int, username) -> float:
         if len(self._children) == 0:
             return 0.0
         return max(
-            [child.apply_discount(products_to_quantities, user_age) for child in self._children]
+            [
+                child.apply_discount(products_to_quantities, user_age, username)
+                for child in self._children
+            ]
         )
 
     def parse(self):
@@ -261,9 +318,12 @@ class AddCompositeDiscount(CompositeDiscount):
     def __init__(self, children: list[IDiscount] = None, new_id="1"):
         super().__init__(children, new_id)
 
-    def apply_discount(self, products_to_quantities: dict, user_age: int) -> float:
+    def apply_discount(self, products_to_quantities: dict, user_age: int, username) -> float:
         return sum(
-            [child.apply_discount(products_to_quantities, user_age) for child in self._children]
+            [
+                child.apply_discount(products_to_quantities, user_age, username)
+                for child in self._children
+            ]
         )
 
     def parse(self):
@@ -273,7 +333,6 @@ class AddCompositeDiscount(CompositeDiscount):
 
 
 class XorCompositeDiscount(CompositeDiscount):
-
     decision_dict = {
         "first": lambda prices: prices[0] if len(prices) > 0 else 0.0,
         "max": lambda prices: max(prices) if len(prices) > 0 else 0.0,
@@ -284,9 +343,10 @@ class XorCompositeDiscount(CompositeDiscount):
         super().__init__(children, new_id)
         self.__desicion_rule = decision_rule
 
-    def apply_discount(self, products_to_quantities: dict, user_age: int) -> float:
+    def apply_discount(self, products_to_quantities: dict, user_age: int, username) -> float:
         prices = [
-            child.apply_discount(products_to_quantities, user_age) for child in self._children
+            child.apply_discount(products_to_quantities, user_age, username)
+            for child in self._children
         ]
         return XorCompositeDiscount.decision_dict[self.__desicion_rule](prices)
 
@@ -301,14 +361,16 @@ class AndConditionDiscount(CompositeDiscount):
     def __init__(self, children: list[IDiscount] = None, new_id="1"):
         super().__init__(children, new_id)
 
-    def apply_discount(self, products_to_quantities: dict, user_age: int) -> float:
+    def apply_discount(self, products_to_quantities: dict, user_age: int, username) -> float:
         if all(
             [
                 child._conditions_policy.checkPolicy(products_to_quantities, user_age)
                 for child in self._children
             ]
         ):
-            return sum([child.discount_func(products_to_quantities) for child in self._children])
+            return sum(
+                [child.discount_func(products_to_quantities, username) for child in self._children]
+            )
         return 0.0
 
     def parse(self):
@@ -321,14 +383,16 @@ class OrConditionDiscount(CompositeDiscount):
     def __init__(self, children: list[IDiscount] = None, new_id="1"):
         super().__init__(children, new_id)
 
-    def apply_discount(self, products_to_quantities: dict, user_age: int) -> float:
+    def apply_discount(self, products_to_quantities: dict, user_age: int, username) -> float:
         if any(
             [
                 child._conditions_policy.checkPolicy(products_to_quantities, user_age)
                 for child in self._children
             ]
         ):
-            return sum([child.discount_func(products_to_quantities) for child in self._children])
+            return sum(
+                [child.discount_func(products_to_quantities, username) for child in self._children]
+            )
         return 0.0
 
     def parse(self):

@@ -252,6 +252,7 @@
         3. <ins>System</ins>: If the type is “immediate purchase”:
             1. <ins>System</ins>: apply discount policy on the product and sum up its price.
             2. <ins>System</ins>: else, move the product to the other product’s section in the bag (for example, bid offer).
+        4. else, add the product's approved offer price to the total sum.
     2. <ins>System</ins>: removes all the products that were acquired from the store.
 5. <ins>System</ins>: start timer (10 minutes)
 6. <ins>System</ins>: ask for user the payment information and address.
@@ -277,6 +278,49 @@
 -   <ins>_Sad Path_</ins>: User chooses to purchase products in her cart, the system applies discounts . When the system asks for payment information, the user enters her details but the cashing system declines the process and generates an error message.
 -   <ins>_Sad Path_</ins>: User chooses to purchase products in her cart, the system applies discounts . When the system asks for payment information, user inserts all needed but then she goes and disappears for 15 minutes so the system gets into timeout and generates an error message.
 -   <ins>_Sad Path_</ins>: User chooses to purchase products in her cart, the system applies discounts . When the system asks for payment information, user inserts all needed and then the system turns to supplyment system that rejects the process and generates an error message.
+
+## purchase type: offer use cases:
+**watch user offers**:
+1. <ins>user</ins>: enters "my account" and can watch all his previous offers.
+
+**create offer**:
+1. <ins>user</ins>: searches products in stores.
+2. <ins>user</ins>: clicks on "add to offers" on some product.
+3. <ins>system</ins>: offer is created for the current user, the current item and the store.
+
+**declare price**:
+1. <ins>user</ins>: enters "my account" -> "my offers".
+2. <ins>user</ins>: clicks on an offer with status "uninitialized".
+3. <ins>user</ins>: enters offer price.
+    1. if user clicked "ok": <ins>system</ins>: sets new offer price on product.
+    2. else, do nothing and cancel the offer window.
+
+**suggest counter offer on user's offer**:
+1. <ins>store manager</ins>: enters to his "waiting offers".
+2. <ins>store manager</ins>: updates user's offer with his higher counter offer.
+3. <ins>system</ins>: send notification to the user that offered the original price.
+
+**approve manager's offer**:
+1. <ins>user</ins>: gets a notification on an update in his offers.
+2. <ins>user</ins>: enters "my account" -> "my offers" and sees the new counter offer of the store manager.
+3. <ins>user</ins>: approves the counter offer.
+
+**approve user's offer**:
+1. <ins>store manager</ins>: gets a notification on a new offer on some item in his store.
+2. <ins>store manager</ins>: enters "my account" -> "my offers" and sees the new counter offer of the store manager.
+3. <ins>store manager</ins>: approves the offer.
+3. <ins>system</ins>: send notification to the user.
+
+**reject user's offer**:
+1. <ins>store manager</ins>: gets a notification on a new offer on some item in his store.
+2. <ins>store manager</ins>: enters "my account" -> "my offers" and sees the new counter offer of the store manager.
+3. <ins>store manager</ins>: rejects the offer.
+3. <ins>system</ins>: send notification to the user.
+
+**cancel offer**:
+1. <ins>user</ins>: enters to "my account" -> "my offers".
+2. <ins>user</ins>: clicks on "cancel" on a "pending" offer.
+3. <ins>system</ins>: cancels the offer and changes offer status.
 
 ## Member
 
