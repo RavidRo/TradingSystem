@@ -223,7 +223,7 @@ function App() {
 	return cookie !== '' ? (
 		<ThemeProvider theme={theme}>
 			<CookieContext.Provider value={cookie}>
-				<AdminsContext.Provider value={['tali', 'ravid', 'inon', 'sean', 'omer']}>
+				<AdminsContext.Provider value={require('../../../config.json').admins}>
 					<UsernameContext.Provider value={username}>
 						<BrowserRouter>
 							<Navbar
