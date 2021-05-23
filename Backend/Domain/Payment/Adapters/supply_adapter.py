@@ -8,6 +8,8 @@ domain = "https://cs-bgu-wsep.herokuapp.com/"
 
 
 class SupplyAdapter:
+    use_stub = False
+
     def __init__(self):
         self.__outside_supplyment = OutsideSupplyment()
         response = self.__send_handshake()
@@ -27,6 +29,12 @@ class SupplyAdapter:
         return self.__send("cancel_supply", {transaction_id})
 
     def deliver(self, product_ids_to_quantity, address):
+        if SupplyAdapter.use_stub:
+            response = self.__outside_supplyment.deliver(product_ids_to_quantity, address)
+            if response == "-1":
+                return Response(False, msg="Delivery dispatching failed")
+            return Response(True, response)
+
         if (
             "name" not in address
             or "address" not in address
@@ -49,6 +57,9 @@ class SupplyAdapter:
         return Response(True, response.text)
 
     def cancel_delivery(self, transaction_id) -> Response[None]:
+        if SupplyAdapter.use_stub:
+            return Response(self.__outside_supplyment.cancel_delivery(transaction_id))
+
         response = self.__send_cancel_supply(transaction_id)
         if response.status_code != 200 or response.text == "-1":
             return Response(False, "Delivery cancelation has failed")

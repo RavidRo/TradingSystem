@@ -1,7 +1,5 @@
 import requests
 
-# from werkzeug.security import generate_password_hash
-# hashed_details = generate_password_hash(payment_info, method="sha256")
 from Backend.response import Response
 from Backend.Domain.Payment.OutsideSystems.outside_cashing import OutsideCashing
 
@@ -10,8 +8,10 @@ domain = "https://cs-bgu-wsep.herokuapp.com/"
 
 
 class CashingAdapter:
+    use_stub = False
+
     def __init__(self):
-        self.__outside_cashing = OutsideCashing()
+        self.__outside_cashing = OutsideCashing.getInstance()
         response = self.__send_handshake()
         if response.status_code != 200 or response.text != "OK":
             raise "Could not connect properly to outside systems"
@@ -28,13 +28,13 @@ class CashingAdapter:
     def __send_cancel_pay(self, transaction_id):
         return self.__send("cancel_pay", {transaction_id})
 
-    def __send_supply(self, name, address, city, country, zip):
-        return self.__send("supply", {name, address, city, country, zip})
-
-    def __send_cancel_supply(self, transaction_id):
-        return self.__send("cancel_supply", {transaction_id})
-
     def pay(self, price, payment_details) -> Response[str]:
+        if CashingAdapter.use_stub:
+            response = self.__outside_cashing.pay(price, payment_details)
+            if response == "-1":
+                return Response(False, msg="Transaction has failed")
+            return Response(True, response)
+
         if (
             "card_number" not in payment_details
             or "month" not in payment_details
@@ -58,6 +58,9 @@ class CashingAdapter:
         return Response(True, response.text)
 
     def cancel_payment(self, transaction_id) -> Response[None]:
+        if CashingAdapter.use_stub:
+            return Response(self.__outside_cashing.cancel_payment(transaction_id))
+
         response = self.__send_cancel_pay(transaction_id)
         if response.status_code != 200 or response.text == "-1":
             return Response(False, "Transaction cancelation has failed")
