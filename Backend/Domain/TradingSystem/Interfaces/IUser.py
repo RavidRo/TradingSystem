@@ -1,7 +1,7 @@
 from __future__ import annotations
-
 from typing import Callable
 
+from Backend.Domain.TradingSystem.offer import Offer
 from Backend.Domain.TradingSystem.Interfaces.Subscriber import Subscriber
 from Backend.response import Response, ParsableList, PrimitiveParsable
 from Backend.Domain.TradingSystem.shopping_cart import ShoppingCart
@@ -85,7 +85,13 @@ class IUser(Subscriber):
     # 4.1
     # Creating a new product a the store and setting its quantity to 0
     def create_product(
-        self, store_id: str, name: str, category: str, price: float, quantity: int, keywords: list[str]
+        self,
+        store_id: str,
+        name: str,
+        category: str,
+        price: float,
+        quantity: int,
+        keywords: list[str],
     ) -> Response[None]:
         raise NotImplementedError
 
@@ -101,7 +107,13 @@ class IUser(Subscriber):
 
     # 4.1
     def edit_product_details(
-        self, store_id: str, product_id: str, new_name: str, new_category: str, new_price: float, keywords: list[str]
+        self,
+        store_id: str,
+        product_id: str,
+        new_name: str,
+        new_category: str,
+        new_price: float,
+        keywords: list[str],
     ) -> Response[None]:
         raise NotImplementedError
 
@@ -164,4 +176,34 @@ class IUser(Subscriber):
         raise NotImplementedError
 
     def notify(self, message: str) -> bool:
+        raise NotImplementedError
+
+    # Offers
+    # ==================
+
+    def get_user_offers(self) -> Response[ParsableList[Offer]]:
+        raise NotImplementedError
+
+    def get_store_offers(self, store_id) -> Response[ParsableList[Offer]]:
+        raise NotImplementedError
+
+    def create_offer(self, store_id, product_id) -> Response[None]:
+        raise NotImplementedError
+
+    def declare_price(self, offer_id, price) -> Response[None]:
+        raise NotImplementedError
+
+    def suggest_counter_offer(self, store_id, product_id, offer_id, price) -> Response[None]:
+        raise NotImplementedError
+
+    def approve_manager_offer(self, offer_id) -> Response[None]:
+        raise NotImplementedError
+
+    def approve_user_offer(self, store_id, product_id, offer_id) -> Response[None]:
+        raise NotImplementedError
+
+    def reject_user_offer(self, store_id, product_id, offer_id) -> Response[None]:
+        raise NotImplementedError
+
+    def cancel_offer(self, offer_id) -> Response[None]:
         raise NotImplementedError
