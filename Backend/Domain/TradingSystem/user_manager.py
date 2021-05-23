@@ -1,3 +1,4 @@
+from Backend.Domain.TradingSystem.offer import Offer
 from typing import Callable
 import uuid
 import json
@@ -445,19 +446,74 @@ class UserManager:
         return UserManager.__deligate_to_user(cookie, func)
 
 
-def register_admins() -> None:
-    with open("config.json", "r") as read_file:
-        data = json.load(read_file)
 
-        # Should be at the system at least one admin
-        if "admins" not in data or len(data["admins"]) <= 0:
-            raise Exception(
-                "At least one admin should be at the system. Check config.json to add admins."
-            )
+    # Offers
+    # ==================
 
-        cookie = UserManager.enter_system()
-        for username in data["admins"]:
-            UserManager.register(username, data["admin-password"], cookie)
+    @staticmethod
+    def get_user_offers(cookie) -> Response[ParsableList[Offer]]:
+        func: Callable[[User], Response] = lambda user: user.get_user_offers()
+        return UserManager.__deligate_to_user(cookie, func)
+
+    @staticmethod
+    def get_store_offers(cookie, store_id) -> Response[ParsableList[Offer]]:
+        func: Callable[[User], Response] = lambda user: user.get_store_offers(store_id)
+        return UserManager.__deligate_to_user(cookie, func)
+
+    @staticmethod
+    def create_offer(cookie, store_id, product_id) -> Response[None]:
+        func: Callable[[User], Response] = lambda user: user.create_offer(store_id, product_id)
+        return UserManager.__deligate_to_user(cookie, func)
+
+    @staticmethod
+    def declare_price(cookie, offer_id, price) -> Response[None]:
+        func: Callable[[User], Response] = lambda user: user.declare_price(offer_id, price)
+        return UserManager.__deligate_to_user(cookie, func)
+
+    @staticmethod
+    def suggest_counter_offer(cookie, store_id, product_id, offer_id, price) -> Response[None]:
+        func: Callable[[User], Response] = lambda user: user.suggest_counter_offer(
+            store_id, product_id, offer_id, price
+        )
+        return UserManager.__deligate_to_user(cookie, func)
+
+    @staticmethod
+    def approve_manager_offer(cookie, offer_id) -> Response[None]:
+        func: Callable[[User], Response] = lambda user: user.approve_manager_offer(offer_id)
+        return UserManager.__deligate_to_user(cookie, func)
+
+    @staticmethod
+    def approve_user_offer(cookie, store_id, product_id, offer_id) -> Response[None]:
+        func: Callable[[User], Response] = lambda user: user.approve_user_offer(
+            store_id, product_id, offer_id
+        )
+        return UserManager.__deligate_to_user(cookie, func)
+
+    @staticmethod
+    def reject_user_offer(cookie, store_id, product_id, offer_id) -> Response[None]:
+        func: Callable[[User], Response] = lambda user: user.reject_user_offer(
+            store_id, product_id, offer_id
+        )
+        return UserManager.__deligate_to_user(cookie, func)
+
+    @staticmethod
+    def cancel_offer(cookie, offer_id) -> Response[None]:
+        func: Callable[[User], Response] = lambda user: user.cancel_offer(offer_id)
+        return UserManager.__deligate_to_user(cookie, func)
+
+    def register_admins() -> None:
+        with open("config.json", "r") as read_file:
+            data = json.load(read_file)
+
+            # Should be at the system at least one admin
+            if "admins" not in data or len(data["admins"]) <= 0:
+                raise Exception(
+                    "At least one admin should be at the system. Check config.json to add admins."
+                )
+
+            cookie = UserManager.enter_system()
+            for username in data["admins"]:
+                UserManager.register(username, data["admin-password"], cookie)
 
 
-register_admins()
+    register_admins()
