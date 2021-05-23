@@ -1,3 +1,4 @@
+from Backend.Domain.TradingSystem.offer import Offer
 from typing import Callable
 import uuid
 import json
@@ -451,4 +452,58 @@ class UserManager:
     @staticmethod
     def empty_notifications(cookie):
         func: Callable[[User], bool] = lambda user: user.empty_notifications()
+        return UserManager.__deligate_to_user(cookie, func)
+
+    # Offers
+    # ==================
+
+    @staticmethod
+    def get_user_offers(cookie) -> Response[ParsableList[Offer]]:
+        func: Callable[[User], Response] = lambda user: user.get_user_offers()
+        return UserManager.__deligate_to_user(cookie, func)
+
+    @staticmethod
+    def get_store_offers(cookie, store_id) -> Response[ParsableList[Offer]]:
+        func: Callable[[User], Response] = lambda user: user.get_store_offers(store_id)
+        return UserManager.__deligate_to_user(cookie, func)
+
+    @staticmethod
+    def create_offer(cookie, store_id, product_id) -> Response[str]:
+        func: Callable[[User], Response] = lambda user: user.create_offer(store_id, product_id)
+        return UserManager.__deligate_to_user(cookie, func)
+
+    @staticmethod
+    def declare_price(cookie, offer_id, price) -> Response[None]:
+        func: Callable[[User], Response] = lambda user: user.declare_price(offer_id, price)
+        return UserManager.__deligate_to_user(cookie, func)
+
+    @staticmethod
+    def suggest_counter_offer(cookie, store_id, product_id, offer_id, price) -> Response[None]:
+        func: Callable[[User], Response] = lambda user: user.suggest_counter_offer(
+            store_id, product_id, offer_id, price
+        )
+        return UserManager.__deligate_to_user(cookie, func)
+
+    @staticmethod
+    def approve_manager_offer(cookie, offer_id) -> Response[None]:
+        func: Callable[[User], Response] = lambda user: user.approve_manager_offer(offer_id)
+        return UserManager.__deligate_to_user(cookie, func)
+
+    @staticmethod
+    def approve_user_offer(cookie, store_id, product_id, offer_id) -> Response[None]:
+        func: Callable[[User], Response] = lambda user: user.approve_user_offer(
+            store_id, product_id, offer_id
+        )
+        return UserManager.__deligate_to_user(cookie, func)
+
+    @staticmethod
+    def reject_user_offer(cookie, store_id, product_id, offer_id) -> Response[None]:
+        func: Callable[[User], Response] = lambda user: user.reject_user_offer(
+            store_id, product_id, offer_id
+        )
+        return UserManager.__deligate_to_user(cookie, func)
+
+    @staticmethod
+    def cancel_offer(cookie, offer_id) -> Response[None]:
+        func: Callable[[User], Response] = lambda user: user.cancel_offer(offer_id)
         return UserManager.__deligate_to_user(cookie, func)

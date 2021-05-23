@@ -1,59 +1,109 @@
-import React, { FC, useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import React, { FC, useState, useEffect, useContext } from 'react';
+
+import {
+	Badge,
+	Button,
+	ClickAwayListener,
+	Grow,
+	IconButton,
+	ListItemIcon,
+	ListItemText,
+	MenuItem,
+	MenuList,
+	Paper,
+	Popper,
+} from '@material-ui/core';
+import ExitToAppIcon from '@material-ui/icons/ExitToApp';
+import StoreIcon from '@material-ui/icons/Store';
+import SupervisorAccountIcon from '@material-ui/icons/SupervisorAccount';
+import PersonIcon from '@material-ui/icons/Person';
+
+import { Link, useHistory } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
 	faShoppingCart,
 	faSignInAlt,
 	faSearch,
 	faBell,
-	faSignOutAlt,
+	faCaretDown,
 } from '@fortawesome/free-solid-svg-icons';
 
 import '../styles/Navbar.scss';
 import config from '../config';
 import PopupCart from '../components/PopupCart';
 import { Product, StoreToSearchedProducts } from '../types';
-import { Badge, IconButton} from '@material-ui/core';
+import { AdminsContext, UsernameContext } from '../contexts';
 
 type NavBarProps = {
 	signedIn: boolean;
 	storesToProducts: StoreToSearchedProducts;
 	propHandleDelete: (product: Product, storeID: string) => Promise<boolean> | boolean;
 	notifications: string[];
-	changeQuantity:(store:string,product:string,quan:number)=>Promise<boolean>;
+	changeQuantity: (store: string, product: string, quantity: number) => Promise<boolean>;
 	logout: () => void;
-	propUpdateStores:(map:StoreToSearchedProducts)=>void,
+	propUpdateStores: (map: StoreToSearchedProducts) => void;
 };
 
-const Navbar: FC<NavBarProps> = ({signedIn,storesToProducts,propHandleDelete,notifications,changeQuantity,logout,propUpdateStores}) => {
+const Navbar: FC<NavBarProps> = ({
+	signedIn,
+	storesToProducts,
+	propHandleDelete,
+	notifications,
+	changeQuantity,
+	logout,
+	propUpdateStores,
+}) => {
 	const [hoverCart, setHoverCart] = useState<boolean>(false);
-    const [storesToProductsMy,setStoresProducts] = useState<StoreToSearchedProducts>(storesToProducts);
+	const [storesToProductsMy, setStoresProducts] =
+		useState<StoreToSearchedProducts>(storesToProducts);
 	const [myNotifications, setNotifications] = useState<string[]>(notifications);
+	const [accountMenuOpen, setAccountMenuOpen] = useState<boolean>(false);
+	const accountMenuRef = React.useRef<HTMLButtonElement>(null);
+	const history = useHistory();
+	const username = useContext(UsernameContext);
+	const admins = useContext(AdminsContext);
 
-	useEffect(()=>{
-		setNotifications((old)=>[...old, ...notifications]);
-	},[notifications]);
-
-
-	useEffect(()=>{
+	useEffect(() => {
+		setNotifications((old) => [...old, ...notifications]);
+	}, [notifications]);
+	useEffect(() => {
 		setStoresProducts(storesToProducts);
-	},[storesToProducts]);
+	}, [storesToProducts]);
 
+	const handleCloseMenu = () => setAccountMenuOpen(false);
+
+	const AccountMenuItem: FC<{ onClick?: () => void; text: string }> = ({
+		onClick,
+		text,
+		children,
+	}) => {
+		return (
+			<MenuItem
+				onClick={() => {
+					handleCloseMenu();
+					onClick && onClick();
+				}}
+			>
+				{children && <ListItemIcon>{children}</ListItemIcon>}
+				<ListItemText primary={text} />
+			</MenuItem>
+		);
+	};
 
 	return (
-		<div className="navbar">
+		<div className='navbar'>
 			<nav>
-				<Link className="nameLink" to="/">
+				<Link className='nameLink' to='/'>
 					{config.website_name}!
 				</Link>
 
 				<div
-					className="navbar-item"
+					className='navbar-item'
 					onMouseOver={() => setHoverCart(true)}
 					onMouseLeave={() => setHoverCart(false)}
 				>
-					<FontAwesomeIcon className="item-icon" icon={faShoppingCart} />
-					<Link className="item-link" to="/cart">
+					<FontAwesomeIcon className='item-icon' icon={faShoppingCart} />
+					<Link className='item-link' to='/cart'>
 						My Cart
 					</Link>
 					{hoverCart ? (
@@ -65,45 +115,86 @@ const Navbar: FC<NavBarProps> = ({signedIn,storesToProducts,propHandleDelete,not
 						/>
 					) : null}
 				</div>
-				<div className="navbar-item">
-					<FontAwesomeIcon className="item-icon" icon={faSearch} />
-					<Link className="item-link" to="/storesView">
+				<div className='navbar-item'>
+					<FontAwesomeIcon className='item-icon' icon={faSearch} />
+					<Link className='item-link' to='/storesView'>
 						Stores
 					</Link>
 				</div>
-				{signedIn && (
-					<div className="navbar-item">
-						<FontAwesomeIcon className="item-icon" icon={faSignOutAlt} />
-						<Link className="item-link" to="/" onClick={() => logout()}>
-							Logout
-						</Link>
-					</div>
-				)}
-				<div className="navbar-item">
-					<FontAwesomeIcon className="item-icon" icon={faSignInAlt} />
+				<div className='navbar-item'>
 					{signedIn ? (
-						<Link className="item-link" to="/my-stores">
-							Account&Stores
-						</Link>
+						<>
+							<FontAwesomeIcon className='item-icon' icon={faCaretDown} />
+							<Button
+								ref={accountMenuRef}
+								className='item-link'
+								onClick={() => setAccountMenuOpen((prevOpen) => !prevOpen)}
+							>
+								Account&Stores
+							</Button>
+						</>
 					) : (
-						<Link className="item-link" to="/sign-in">
-							Sign In
-						</Link>
+						<>
+							<FontAwesomeIcon className='item-icon' icon={faSignInAlt} />
+							<Link className='item-link' to='/sign-in'>
+								Sign In
+							</Link>
+						</>
 					)}
 				</div>
-				<div className="navbar-item">
-					<Link 
-						className="item-link" 
+				<Popper
+					open={accountMenuOpen}
+					anchorEl={accountMenuRef.current}
+					transition
+					// disablePortal
+				>
+					{({ TransitionProps }) => (
+						<Grow {...TransitionProps}>
+							<Paper>
+								<ClickAwayListener onClickAway={handleCloseMenu}>
+									<MenuList autoFocusItem={accountMenuOpen} onKeyDown={() => {}}>
+										<AccountMenuItem
+											text='My stores'
+											onClick={() => history.push('/my-stores')}
+										>
+											<StoreIcon />
+										</AccountMenuItem>
+										<AccountMenuItem
+											text='My account'
+											onClick={() => history.push('/my-account')}
+										>
+											<PersonIcon />
+										</AccountMenuItem>
+										{admins.includes(username) && (
+											<AccountMenuItem
+												text='Admin page'
+												onClick={() => history.push('/admin')}
+											>
+												<SupervisorAccountIcon />
+											</AccountMenuItem>
+										)}
+										<AccountMenuItem text='Logout' onClick={logout}>
+											<ExitToAppIcon />
+										</AccountMenuItem>
+									</MenuList>
+								</ClickAwayListener>
+							</Paper>
+						</Grow>
+					)}
+				</Popper>
+				<div className='navbar-item'>
+					<Link
+						className='item-link'
 						to={{
-                            pathname: '/Notifications',
-                            state: {
-                                notifications: myNotifications
-                            },
-                            }}
+							pathname: '/Notifications',
+							state: {
+								notifications: myNotifications,
+							},
+						}}
 					>
 						<IconButton color={'inherit'}>
-							<Badge badgeContent={myNotifications.length} showZero color="primary">
-								<FontAwesomeIcon className="item-icon" icon={faBell} />
+							<Badge badgeContent={myNotifications.length} showZero color='primary'>
+								<FontAwesomeIcon className='item-icon' icon={faBell} />
 							</Badge>
 						</IconButton>
 					</Link>
