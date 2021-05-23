@@ -208,7 +208,7 @@ class UserState(ABC):
         return Response(False, msg="Abstract Method")
 
     @abstractmethod
-    def create_offer(self, user, store_id, product_id) -> Response[None]:
+    def create_offer(self, user, store_id, product_id) -> Response[str]:
         return Response(False, msg="Abstract Method")
 
     @abstractmethod

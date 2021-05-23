@@ -271,7 +271,7 @@ class User(IUser):
     def get_store_offers(self, store_id) -> Response[ParsableList[Offer]]:
         return self.state.get_store_offers(store_id)
 
-    def create_offer(self, store_id, product_id) -> Response[None]:
+    def create_offer(self, store_id, product_id) -> Response[str]:
         return self.state.create_offer(self, store_id, product_id)
 
     def declare_price(self, offer_id, price) -> Response[None]:

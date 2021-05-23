@@ -360,7 +360,7 @@ class TradingSystemManager:
         return UserManager.get_store_offers(cookie, store_id).parse()
 
     @staticmethod
-    def create_offer(cookie, store_id, product_id) -> Response[None]:
+    def create_offer(cookie, store_id, product_id) -> Response[str]:
         return UserManager.create_offer(cookie, store_id, product_id)
 
     @staticmethod
