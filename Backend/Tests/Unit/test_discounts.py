@@ -368,6 +368,20 @@ def test_edit_simple_discount_success(store, product_discount, current_root_id):
     assert res.succeeded() and store.get_discounts().get_obj().parse() == expected
 
 
+def test_edit_simple_to_store_discount(store, product_discount, current_root_id):
+    # assume add_discount works
+    store.add_discount(product_discount, current_root_id)
+    res = store.edit_simple_discount(str(int(current_root_id) + 1), 25.0,
+                                     {'obj': 'store'}, None)
+    expected = {'type': 'add', 'discount_type': 'complex', 'discounts': [], 'id': current_root_id}
+    expected['discounts'].append(copy.copy(product_discount))
+    expected['discounts'][0]['id'] = str(int(current_root_id) + 1)
+    expected['discounts'][0]['percentage'] = 25.0
+    expected['discounts'][0]['context'] = {'obj': 'store'}
+
+    assert res.succeeded() and store.get_discounts().get_obj().parse() == expected
+
+
 def test_edit_simple_not_all_args_success(store, product_discount, current_root_id):
     # assume add_discount works
     store.add_discount(product_discount, current_root_id)

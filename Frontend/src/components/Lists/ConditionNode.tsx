@@ -11,6 +11,7 @@ import {
 } from '@material-ui/core';
 import { ExpandLess, ExpandMore } from '@material-ui/icons';
 import DeleteForeverOutlinedIcon from '@material-ui/icons/DeleteForeverOutlined';
+import EditIcon from '@material-ui/icons/Edit';
 
 import {
 	Condition,
@@ -21,13 +22,16 @@ import {
 	SimpleOperator,
 } from '../../types';
 import GenericList from './GenericList';
+import SecondaryActionButton from './SecondaryActionButton';
 // import '../styles/ConditionNode.scss';
 
 type ConditionNodeProps = {
 	condition: Condition;
 	onCreate: (fatherId: string, conditioning?: 'test' | 'then' | undefined) => void;
-	onDelete?: (conditionId: string) => void;
+	onDelete: (conditionId: string) => void;
 	productIdToName: (productId: string) => string;
+	onEdit: (condition: Condition) => void;
+	onMove: (conditionId: string, newParentId: string) => void;
 };
 
 function operatorToString(operator: SimpleOperator): string {
@@ -46,6 +50,8 @@ const ConditionNode: FC<ConditionNodeProps> = ({
 	onCreate,
 	onDelete,
 	productIdToName,
+	onEdit,
+	onMove,
 }) => {
 	const [open, setOpen] = React.useState(true);
 	const handleClick = () => {
@@ -74,23 +80,52 @@ const ConditionNode: FC<ConditionNodeProps> = ({
 		}
 	};
 
+	const onDragStart = (event: React.DragEvent) => {
+		event.dataTransfer.setData('text', condition.id);
+		// Disabling the drag ghost image
+		const img = new Image();
+		img.src = 'data:image/gif;base64,R0lGODlhAQABAIAAAAUEBAAAACwAAAAAAQABAAACAkQBADs=';
+		event.dataTransfer.setDragImage(img, 0, 0);
+	};
+	const onDragOverBasicRule = (event: React.DragEvent) => {
+		if (isConditionComplex(condition) && isBasicRule(condition)) {
+			event.preventDefault();
+		}
+	};
+	const onDrop = (event: React.DragEvent<HTMLDivElement>) => {
+		if (isConditionComplex(condition) && isBasicRule(condition)) {
+			event.preventDefault();
+			const draggableElementData = event.dataTransfer.getData('text');
+			onMove(draggableElementData, condition.id);
+		}
+	};
+
 	return (
 		<>
-			<ListItem button onClick={handleClick}>
-				{isConditionComplex(condition) && (
-					<IconButton edge="start" aria-label="delete">
-						{open ? <ExpandLess /> : <ExpandMore />}
-					</IconButton>
-				)}
-				<ListItemText primary={conditionToString(condition)} />
-				{onDelete && (
-					<ListItemSecondaryAction onClick={() => onDelete(condition.id)}>
-						<IconButton edge="end" aria-label="delete">
-							<DeleteForeverOutlinedIcon />
+			<div
+				draggable
+				onDragStart={onDragStart}
+				onDragOver={onDragOverBasicRule}
+				onDrop={onDrop}
+			>
+				<ListItem button onClick={handleClick} className="condition-node">
+					{isConditionComplex(condition) && (
+						<IconButton edge="start" aria-label="delete">
+							{open ? <ExpandLess /> : <ExpandMore />}
 						</IconButton>
+					)}
+					<ListItemText primary={conditionToString(condition)} />
+
+					<ListItemSecondaryAction>
+						<SecondaryActionButton onClick={() => onEdit(condition)}>
+							<EditIcon />
+						</SecondaryActionButton>
+						<SecondaryActionButton onClick={() => onDelete(condition.id)}>
+							<DeleteForeverOutlinedIcon />
+						</SecondaryActionButton>
 					</ListItemSecondaryAction>
-				)}
-			</ListItem>
+				</ListItem>
+			</div>
 			{isConditionComplex(condition) && (
 				<Collapse in={open} timeout="auto">
 					{isBasicRule(condition) ? (
@@ -107,6 +142,8 @@ const ConditionNode: FC<ConditionNodeProps> = ({
 									onCreate={onCreate}
 									onDelete={onDelete}
 									productIdToName={productIdToName}
+									onEdit={onEdit}
+									onMove={onMove}
 								/>
 							)}
 						</GenericList>
@@ -121,6 +158,8 @@ const ConditionNode: FC<ConditionNodeProps> = ({
 										onCreate={onCreate}
 										onDelete={onDelete}
 										productIdToName={productIdToName}
+										onEdit={onEdit}
+										onMove={onMove}
 									/>
 								) : (
 									<ListItem button onClick={() => onCreate(condition.id, 'then')}>
@@ -135,6 +174,8 @@ const ConditionNode: FC<ConditionNodeProps> = ({
 										onCreate={onCreate}
 										onDelete={onDelete}
 										productIdToName={productIdToName}
+										onEdit={onEdit}
+										onMove={onMove}
 									/>
 								) : (
 									<ListItem button onClick={() => onCreate(condition.id, 'test')}>

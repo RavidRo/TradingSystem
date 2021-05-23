@@ -3,13 +3,14 @@ from Backend.response import Response
 
 
 class ProductStub(Product):
-
-    def __init__(self, name: str, id: str = '0') -> None:
+    def __init__(self, name: str, id: str = "0") -> None:
         self.product_edited = False
         self.name = name
         self.id = id
 
-    def edit_product_details(self, product_name: str, category: str, price: float, keywords: list[str] = None):
+    def edit_product_details(
+        self, product_name: str, category: str, price: float, keywords: list[str] = None
+    ):
         self.product_edited = True
         return Response(True)
 
@@ -27,3 +28,6 @@ class ProductStub(Product):
 
     def get_keywords(self):
         return ["white"]
+
+    def add_offer(self, _):
+        pass

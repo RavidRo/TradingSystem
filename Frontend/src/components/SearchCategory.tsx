@@ -33,7 +33,7 @@ const SearchCategory: FC<SearchCategoryProps> = ({searchProduct, categories,hand
                 </button>
                 {menuOpen?
                     <ul className="categoryList">
-                        {categories.map((category)=>{
+                        {["All",...categories].map((category)=>{
                             return (
                                 <button className="btn" onClick={()=>setCategoryName(category)}>
                                     {category}

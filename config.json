@@ -1,4 +1,8 @@
 {
 	"admins": ["tali", "ravid", "inon", "sean", "omer"],
-	"admin-password": "cool-kidz"
+	"password": "cool-kidz",
+	"timer_length": 600,
+	"payment_system": "pay-sys",
+	"supply_system": "sup-sys",
+	"DB": "db"
 }

@@ -38,33 +38,29 @@ def user_stub():
 @patch.multiple(
     ShoppingCart,
     create_new_bag=MagicMock(return_value=ShoppingBagStub()),
-    get_store_by_id=MagicMock(return_value=StoreStub()),
 )
-def test_add_product_valid_not_existing_bag(shopping_cart: ShoppingCart):
-    result = shopping_cart.add_product("0", "0", 5)
+def test_add_product_valid_not_existing_bag(shopping_cart: ShoppingCart, store_stub):
+    result = shopping_cart.add_product("0", "0", 5, store_stub)
     assert result.success == True
 
 
-@patch.multiple(ShoppingCart, get_store_by_id=MagicMock(return_value=StoreStub()))
-def test_add_product_valid_existing_bag(
-    shopping_cart: ShoppingCart, shopping_bag_stub: ShoppingBagStub
-):
+def test_add_product_valid_existing_bag(shopping_cart: ShoppingCart, store_stub):
     with patch.dict(shopping_cart.get_shopping_bags(), {"0": ShoppingBagStub()}):
-        result = shopping_cart.add_product("0", "0", 5)
+        result = shopping_cart.add_product("0", "0", 5, store_stub)
         assert result.success == True
 
 
-def test_add_product_negative_quantity(shopping_cart: ShoppingCart):
+def test_add_product_negative_quantity(shopping_cart: ShoppingCart, store_stub):
     with patch.dict(shopping_cart.get_shopping_bags(), {"0": ShoppingBagStub()}):
-        result = shopping_cart.add_product("0", "0", -1)
+        result = shopping_cart.add_product("0", "0", -1, store_stub)
         assert result.success == False
 
 
-@patch.multiple(ShoppingCart, get_store_by_id=MagicMock(return_value=None))
-def test_add_product_from_not_existing_store(shopping_cart: ShoppingCart):
-    with patch.dict(shopping_cart.get_shopping_bags(), {"0": ShoppingBagStub()}):
-        result = shopping_cart.add_product("1", "0", 1)
-        assert result.success == False
+# @patch.multiple(ShoppingCart, get_store_by_id=MagicMock(return_value=None))
+# def test_add_product_from_not_existing_store(shopping_cart: ShoppingCart):
+#     with patch.dict(shopping_cart.get_shopping_bags(), {"0": ShoppingBagStub()}):
+#         result = shopping_cart.add_product("1", "0", 1)
+#         assert result.success == False
 
 
 # * remove product
@@ -104,7 +100,9 @@ def test_change_product_quantity_not_valid_amount(shopping_cart: ShoppingCart):
 # * buy products
 # * ====================================================
 def test_buy_products(shopping_cart: ShoppingCart, user_stub: UserStub):
-    with patch.dict(shopping_cart.get_shopping_bags(), {"0": ShoppingBagStub(), "1": ShoppingBagStub()}):
+    with patch.dict(
+        shopping_cart.get_shopping_bags(), {"0": ShoppingBagStub(), "1": ShoppingBagStub()}
+    ):
         result = shopping_cart.buy_products(user_stub)
         assert result.object.value == 10
         assert result.success == True

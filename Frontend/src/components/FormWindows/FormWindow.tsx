@@ -3,11 +3,16 @@ import { Button } from '@material-ui/core';
 
 type FormWindowProps = {
 	handleSubmit: () => void;
-	createText: string;
+	submitText: string;
 	header: string;
 };
 
-const FormWindow: FC<FormWindowProps> = ({ handleSubmit, createText, children, header }) => {
+const FormWindow: FC<FormWindowProps> = ({
+	handleSubmit,
+	submitText: createText,
+	children,
+	header,
+}) => {
 	return (
 		<div className="form-cont">
 			<h3>{header}</h3>

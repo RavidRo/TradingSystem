@@ -34,6 +34,7 @@ ops = {'great-than': operator.gt,
        'less-equals': operator.le,
        'equals': operator.eq}
 
+
 # endregion
 
 
@@ -70,7 +71,7 @@ class DefaultPurchasePolicy(PurchasePolicy):
     def check_keys_in_rule_details(self, keys: list[str], rule_details: dict):
         for key in keys:
             if key not in rule_details.keys():
-                return Response(False, msg= f"Missing {key} in details!")
+                return Response(False, msg=f"Missing {key} in details!")
         return Response(True, msg="all keys exist")
 
     def check_simple_rule_details_validity(self, rule_details: dict) -> Response[None]:

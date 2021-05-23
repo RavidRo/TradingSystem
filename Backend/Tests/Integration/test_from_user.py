@@ -44,7 +44,7 @@ def user_admin():
     user = User()
     with open("config.json", "r") as read_file:
         data = json.load(read_file)
-        user.login(data["admins"][0], data["admin-password"])
+        user.login(data["admins"][0], data["password"])
     return user
 
 
@@ -53,7 +53,7 @@ def user_admin2():
     user = User()
     with open("config.json", "r") as read_file:
         data = json.load(read_file)
-        user.login(data["admins"][1], data["admin-password"])
+        user.login(data["admins"][1], data["password"])
     return user
 
 
@@ -62,7 +62,7 @@ def user_admin3():
     user = User()
     with open("config.json", "r") as read_file:
         data = json.load(read_file)
-        user.login(data["admins"][2], data["admin-password"])
+        user.login(data["admins"][2], data["password"])
     return user
 
 

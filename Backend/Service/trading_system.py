@@ -1,12 +1,18 @@
 """ this class is responsible to communicate with the trading __system manager"""
 from __future__ import annotations
-import threading
+
+import json
 from typing import Callable
-from Backend.Domain.Payment.payment_manager import PaymentManager
-from Backend.Service.DataObjects.shopping_cart_data import ShoppingCartData
-import Backend.Service.logs as log
-from Backend.Domain.TradingSystem.trading_system_manager import TradingSystemManager
+import threading
+
 from Backend.response import Response
+
+import Backend.Service.logs as log
+from Backend.Service.DataObjects.shopping_cart_data import ShoppingCartData
+
+from Backend.Domain.Payment.payment_manager import PaymentManager
+from Backend.Domain.TradingSystem.offer import Offer
+from Backend.Domain.TradingSystem.trading_system_manager import TradingSystemManager
 
 
 class TradingSystem(object):
@@ -30,6 +36,15 @@ class TradingSystem(object):
         else:
             TradingSystem.__instance = self
             self.payment_manager = PaymentManager()
+            with open("state.json", "r") as read_file:
+                data = json.load(read_file)
+                cases = data["cases"]
+                for case in cases:
+                    actions = case["actions"]
+                    for action in actions:
+                        func = action["function"]
+                        args = action["args"]
+                        result = self.__getattribute__(func)(args)
 
     def enter_system(self):
         return TradingSystemManager.enter_system()
@@ -185,6 +200,10 @@ class TradingSystem(object):
             cookie, store_id, product_id, new_name, new_category, new_price, keywords
         )
 
+    @log.loging()
+    def get_product(self, store_id: str, product_id: str, username="Guest"):
+        return TradingSystemManager.get_product(store_id, product_id, username)
+
     @log.loging(to_hide=[1])
     def add_discount(
         self,
@@ -324,3 +343,46 @@ class TradingSystem(object):
     @log.loging(to_hide=[1])
     def get_purchase_policy(self, cookie, store_id):
         return TradingSystemManager.get_purchase_policy(cookie, store_id)
+
+    # Offers
+    # ==================
+
+    @log.loging(to_hide=[1])
+    def get_user_offers(self, cookie) -> Response[list[Offer]]:
+        return TradingSystemManager.get_user_offers(cookie)
+
+    @log.loging(to_hide=[1])
+    def get_store_offers(self, cookie, store_id) -> Response[list[Offer]]:
+        return TradingSystemManager.get_store_offers(cookie, store_id)
+
+    @log.loging(to_hide=[1])
+    def create_offer(self, cookie, store_id, product_id) -> Response[str]:
+        return TradingSystemManager.create_offer(cookie, store_id, product_id)
+
+    @log.loging(to_hide=[1])
+    def declare_price(self, cookie, offer_id, price) -> Response[None]:
+        return TradingSystemManager.declare_price(cookie, offer_id, price)
+
+    @log.loging(to_hide=[1])
+    def suggest_counter_offer(
+        self, cookie, store_id, product_id, offer_id, price
+    ) -> Response[None]:
+        return TradingSystemManager.suggest_counter_offer(
+            cookie, store_id, product_id, offer_id, price
+        )
+
+    @log.loging(to_hide=[1])
+    def approve_manager_offer(self, cookie, offer_id) -> Response[None]:
+        return TradingSystemManager.approve_manager_offer(cookie, offer_id)
+
+    @log.loging(to_hide=[1])
+    def approve_user_offer(self, cookie, store_id, product_id, offer_id) -> Response[None]:
+        return TradingSystemManager.approve_user_offer(cookie, store_id, product_id, offer_id)
+
+    @log.loging(to_hide=[1])
+    def reject_user_offer(self, cookie, store_id, product_id, offer_id) -> Response[None]:
+        return TradingSystemManager.reject_user_offer(cookie, store_id, product_id, offer_id)
+
+    @log.loging(to_hide=[1])
+    def cancel_offer(self, cookie, offer_id) -> Response[None]:
+        return TradingSystemManager.cancel_offer(cookie, offer_id)

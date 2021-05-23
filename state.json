@@ -1,0 +1,16 @@
+{
+	"cases": [
+		{
+			"actions": 	[
+				{
+					"function": "register",
+					"args": {
+						"cookie": "abcdef",
+						"username": "username1",
+						"password": "password1"
+					}
+				}
+			]
+		}
+	]
+}
