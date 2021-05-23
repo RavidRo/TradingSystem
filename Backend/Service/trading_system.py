@@ -345,7 +345,7 @@ class TradingSystem(object):
         return TradingSystemManager.get_store_offers(cookie, store_id)
 
     @log.loging(to_hide=[1])
-    def create_offer(self, cookie, store_id, product_id) -> Response[None]:
+    def create_offer(self, cookie, store_id, product_id) -> Response[str]:
         return TradingSystemManager.create_offer(cookie, store_id, product_id)
 
     @log.loging(to_hide=[1])
