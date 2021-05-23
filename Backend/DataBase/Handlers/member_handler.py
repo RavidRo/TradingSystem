@@ -30,10 +30,9 @@ class MemberHandler(IHandler):
 
         mapper(Member, self.__members, properties={
             '_username': self.__members.c.username,
-            '_Member__responsibilities': relationship(Responsibility, cascade="all, delete",
-                                                      collection_class=attribute_mapped_collection('_store_id'),
-                                                      passive_deletes=True,
-                                                      backref="_user_state"),
+            # '_Member__responsibilities': relationship(Responsibility, cascade="all, delete",
+            #                                           collection_class=attribute_mapped_collection('_store_id'),
+            #                                           passive_deletes=True),
             '_Member__purchase_details': relationship(PurchaseDetails, cascade="all, delete",
                                                       passive_deletes=True),
         })
@@ -121,23 +120,23 @@ class MemberHandler(IHandler):
     def update(self, id, update_dict):
         pass
 
-    # TODO: check if append here is on same object as in the domain!
-    def update_responsibility(self, username: str, responsibility: Responsibility):
-        self._rwlock.acquire_write()
-        session = Session(expire_on_commit=False)
-        res = Response(True)
-        try:
-            member = session.query(Member).filter_by(_username=username).one()
-            responsibilities = member.get_responsibilities()
-            responsibilities[responsibility.get_store_id()] = responsibility
-            session.commit()
-        except Exception as e:
-            session.rollback()
-            res = Response(False, msg=str(e))
-        finally:
-            session.close()
-            self._rwlock.release_write()
-            return res
+    # # TODO: check if append here is on same object as in the domain!
+    # def update_responsibility(self, username: str, responsibility: Responsibility):
+    #     self._rwlock.acquire_write()
+    #     session = Session(expire_on_commit=False)
+    #     res = Response(True)
+    #     try:
+    #         member = session.query(Member).filter_by(_username=username).one()
+    #         responsibilities = member.get_responsibilities()
+    #         responsibilities[responsibility.get_store_id()] = responsibility
+    #         session.commit()
+    #     except Exception as e:
+    #         session.rollback()
+    #         res = Response(False, msg=str(e))
+    #     finally:
+    #         session.close()
+    #         self._rwlock.release_write()
+    #         return res
 
     def update_notifications(self, username: str, notifications: list[str]):
         self._rwlock.acquire_write()

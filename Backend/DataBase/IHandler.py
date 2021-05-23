@@ -12,7 +12,7 @@ class IHandler(ABC):
 
     def save(self, obj, **kwargs) -> Response[None]:
         self._rwlock.acquire_write()
-        session = Session()
+        session = Session(expire_on_commit=False)
         res = Response(True)
         try:
             session.add(obj)
@@ -26,7 +26,7 @@ class IHandler(ABC):
             return res
 
     def remove(self, obj, **kwargs) -> Response[None]:
-        session = Session()
+        session = Session(expire_on_commit=False)
         self._rwlock.acquire_write()
         res = Response(True)
         try:

@@ -1,7 +1,7 @@
 from datetime import date
 
 from sqlalchemy import Table, Column, String, insert
-from sqlalchemy.orm import mapper, relationship
+from sqlalchemy.orm import mapper, relationship, backref
 
 from Backend.DataBase.Handlers.member_handler import MemberHandler
 from Backend.DataBase.Handlers.product_handler import ProductHandler
@@ -36,7 +36,7 @@ class StoreHandler(IHandler):
             "_Store__id": self.__stores.c.store_id,
             "_Store__name": self.__stores.c.store_name,
             "_Store__purchase_history": relationship(PurchaseDetails),
-            "_Store__responsibility": relationship(Founder, uselist=False, overlaps="_appointed", backref="_store")
+            # "_Store__responsibility": relationship(Founder, uselist=False, overlaps="_appointed", backref=backref("_store", uselist=False))
         })
 
         self.__product_handler = ProductHandler.get_instance()
@@ -50,7 +50,7 @@ class StoreHandler(IHandler):
 
     def save(self, obj: Store, **kwargs) -> Response[None]:
         self._rwlock.acquire_write()
-        session = Session()
+        session = Session(expire_on_commit=False)
         res = Response(True)
         try:
             session.add(obj)

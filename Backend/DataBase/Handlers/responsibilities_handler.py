@@ -1,10 +1,11 @@
 import json
 
 import sqlalchemy
+from sqlalchemy.orm.collections import attribute_mapped_collection
 
 from Backend.DataBase.IHandler import IHandler
 from threading import Lock
-from Backend.DataBase.database import Base
+from Backend.DataBase.database import Base, Session
 from Backend.Domain.TradingSystem.Responsibilities.founder import Founder
 from Backend.Domain.TradingSystem.Responsibilities.manager import Manager
 from Backend.Domain.TradingSystem.Responsibilities.owner import Owner
@@ -12,10 +13,12 @@ from Backend.Domain.TradingSystem.Responsibilities.responsibility import Respons
 from Backend.Domain.TradingSystem.States.member import Member
 from Backend.Domain.TradingSystem.store import Store
 from sqlalchemy.types import TypeDecorator
+
+from Backend.response import Response
 from Backend.rw_lock import ReadWriteLock
 from sqlalchemy import Table, Column, String, Boolean, insert, ForeignKey, Date, Float, ARRAY, ForeignKeyConstraint, \
     join
-from sqlalchemy.orm import mapper, relationship
+from sqlalchemy.orm import mapper, relationship, backref
 
 
 class ResponsibilitiesHandler(IHandler):
@@ -44,13 +47,15 @@ class ResponsibilitiesHandler(IHandler):
                                                                  'responsibilities.store_id']))
 
         responsibility_mapper = mapper(Responsibility, self.__responsibilities, properties={
-            '_appointed': relationship(Responsibility, uselist=True, cascade="all, delete",
+            '_appointed': relationship(Responsibility, uselist=True, cascade="all",
                                        passive_deletes=True,
                                        remote_side=[self.__responsibilities.c.username,
                                                     self.__responsibilities.c.store_id], overlaps="_store"),
-            # '_user_state': relationship(Member, uselist=False, lazy='joined',
-            #                             back_populates="_Member__responsibilities"),
-            # '_store': relationship(Store, uselist=False, lazy='joined', overlaps="_appointed"),
+            '_user_state': relationship(Member, uselist=False, lazy='joined',
+                                        backref=backref("_Member__responsibilities", cascade="all, delete, delete-orphan",
+                                                        collection_class=attribute_mapped_collection('_store_id'),
+                                                        passive_deletes=True)),
+            '_store': relationship(Store, uselist=False, backref=backref("_Store__responsibility", uselist=False, overlaps="_appointed")),
         }, polymorphic_on=self.__responsibilities.c.responsibility_type, polymorphic_identity='R')
 
         mapper(Founder, self.__responsibilities, inherits=responsibility_mapper, polymorphic_identity='F')
@@ -69,6 +74,22 @@ class ResponsibilitiesHandler(IHandler):
 
     def update(self, id, update_dict):
         pass
+
+    def update_child(self, appointer_username, store_id, responsibility):
+        self._rwlock.acquire_write()
+        session = Session(expire_on_commit=False)
+        res = Response(True)
+        try:
+            appointer: Responsibility = session.query(Responsibility).filter_by(username=appointer_username, store_id=store_id).one()
+            appointer._appointed.append(responsibility)
+            session.commit()
+        except Exception as e:
+            session.rollback()
+            res = Response(False, msg=str(e))
+        finally:
+            session.close()
+            self._rwlock.release_write()
+            return res
 
     def load(self, id):
         pass

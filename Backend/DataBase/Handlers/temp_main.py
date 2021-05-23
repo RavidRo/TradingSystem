@@ -20,16 +20,16 @@ if __name__ == '__main__':
 
     user = User()
     user.register("user", "password")
-    user.login("user", "password")
     res = member_handler.save_user_credentials("user", "password")
     if not res.succeeded():
         print("save credentials: " + res.get_msg())
+    user.login("user", "password")
     res = member_handler.save(user.state)
     if not res.succeeded():
         print("save user: " + res.get_msg())
     store_res = user.create_store("The Store")
     if res.succeeded():
-        res = member_handler.update_responsibility("user", store_res.get_obj().get_responsibility())
+        res = responsibility_handler.save(store_res.get_obj().get_responsibility())
         if not res.succeeded():
             print("update responsibility: " + res.get_msg())
 
@@ -37,6 +37,23 @@ if __name__ == '__main__':
         if not res.succeeded():
             print("save store: " + res.get_msg())
 
+    user2 = User()
+    user2.register("user2", "password2")
+    res = member_handler.save_user_credentials("user2", "password2")
+    if not res.succeeded():
+        print("save credentials: " + res.get_msg())
+    user2.login("user2", "password2")
+
+    res = member_handler.save(user2.state)
+    if not res.succeeded():
+        print("save user: " + res.get_msg())
+
+    user.appoint_owner(store_res.get_obj().get_id(), user2)
+
+    res = responsibility_handler.update_child("user", store_res.get_obj().get_id(), user2.state._Member__responsibilities[store_res.get_obj().get_id()])
+    # res = responsibility_handler.save(user2.state._Member__responsibilities[store_res.get_obj().get_id()])
+    if not res.succeeded():
+        print("save responsibility: " + res.get_msg())
     # store = Store("Me Store")
     # member = Member(User(), "Me")
     # responsibility = Responsibility(member, store)
