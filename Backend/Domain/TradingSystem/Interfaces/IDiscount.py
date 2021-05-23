@@ -3,6 +3,7 @@ from __future__ import annotations  # for self type annotating
 from abc import ABC, abstractmethod
 
 from Backend.Domain.TradingSystem.TypesPolicies.purchase_policy import DefaultPurchasePolicy
+from Backend.rw_lock import ReadWriteLock
 from Backend.response import Response, Parsable
 
 
@@ -12,6 +13,7 @@ class IDiscount(Parsable, ABC):
         self._parent = None
         self._id = id
         self._conditions_policy = DefaultPurchasePolicy()
+        self.wrlock = ReadWriteLock()
 
     def get_parent(self) -> IDiscount:
         return self._parent
