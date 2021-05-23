@@ -190,8 +190,8 @@ class TradingSystem(object):
         )
 
     @log.loging()
-    def get_product(self, store_id: str, product_id: str):
-        return TradingSystemManager.get_product(store_id, product_id)
+    def get_product(self, store_id: str, product_id: str, username="Guest"):
+        return TradingSystemManager.get_product(store_id, product_id, username)
 
     @log.loging(to_hide=[1])
     def add_discount(
@@ -345,7 +345,7 @@ class TradingSystem(object):
         return TradingSystemManager.get_store_offers(cookie, store_id)
 
     @log.loging(to_hide=[1])
-    def create_offer(self, cookie, store_id, product_id) -> Response[None]:
+    def create_offer(self, cookie, store_id, product_id) -> Response[str]:
         return TradingSystemManager.create_offer(cookie, store_id, product_id)
 
     @log.loging(to_hide=[1])

@@ -164,7 +164,7 @@ class Guest(UserState):
     def get_store_offers(self, store_id) -> Response[ParsableList[Offer]]:
         return Response(False, msg="Guests cannot have price offers")
 
-    def create_offer(self, user, store_id, product_id) -> Response[None]:
+    def create_offer(self, user, store_id, product_id) -> Response[str]:
         return Response(False, msg="Guests cannot have price offers")
 
     def declare_price(self, offer_id, price) -> Response[None]:
