@@ -1,20 +1,13 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { BrowserRouter, Switch, Route, Redirect } from 'react-router-dom';
+import { BrowserRouter } from 'react-router-dom';
 import { createMuiTheme, ThemeProvider } from '@material-ui/core';
 
-import Home from './Home';
-import Cart from './Cart';
 import Navbar from '../components/Navbar';
-import SignIn from './SignIn';
-import SignUp from './SignUp';
-import MyStores from './MyStores';
-import SearchPage from './SearchPage';
-import StoresView from '../pages/StoresView';
-import Purchase from '../pages/Purchase';
+import Routes from './Routes';
+
 import { Product, StoreToSearchedProducts } from '../types';
 import useAPI from '../hooks/useAPI';
-import { CookieContext } from '../contexts';
-import Notifications from '../pages/Notifications';
+import { AdminsContext, CookieContext, UsernameContext } from '../contexts';
 
 const theme = createMuiTheme({
 	typography: {
@@ -72,7 +65,6 @@ function App() {
 	const addProductToPopup = (product: Product, storeID: string) => {
 		let found = false;
 		let quantity = 1;
-		console.log(storesToProducts);
 		for (var i = 0; i < Object.values(storesToProducts.current).length; i++) {
 			let tuplesArr = Object.values(storesToProducts.current)[i];
 			for (var j = 0; j < tuplesArr.length; j++) {
@@ -104,7 +96,7 @@ function App() {
 					product_id: product.id,
 					quantity: quantity,
 				})
-				.then(({ data, error, errorMsg }) => {
+				.then(({ data, error }) => {
 					if (!error && data !== null) {
 						// do nothing
 						return true;
@@ -120,7 +112,7 @@ function App() {
 					product_id: product.id,
 					quantity: quantity,
 				})
-				.then(({ data, error, errorMsg }) => {
+				.then(({ data, error }) => {
 					if (!error && data !== null) {
 						let tuplesArr = storesToProducts.current[storeID];
 						for (var i = 0; i < tuplesArr.length; i++) {
@@ -149,7 +141,7 @@ function App() {
 				product_id: productID,
 				quantity: newQuantity,
 			})
-			.then(({ data, error, errorMsg }) => {
+			.then(({ data, error }) => {
 				if (!error && data !== null) {
 					let tuplesArr = storesToProducts.current[storeID];
 					for (var i = 0; i < tuplesArr.length; i++) {
@@ -231,77 +223,37 @@ function App() {
 	return cookie !== '' ? (
 		<ThemeProvider theme={theme}>
 			<CookieContext.Provider value={cookie}>
-				<BrowserRouter>
-					<Navbar
-						signedIn={signedIn}
-						storesToProducts={storesToProducts.current}
-						propHandleDelete={handleDeleteProduct}
-						notifications={notifications}
-						changeQuantity={changeQuantity}
-						logout={() => {
-							setSignedIn(false);
-							setCookie('');
-							getCookie();
-						}}
-						propUpdateStores={propUpdateStores}
-					/>
-					<Switch>
-						<Route path='/' exact component={Home} />
-						<Route
-							path='/cart'
-							exact
-							render={(props) => (
-								<Cart
-									{...props}
-									storesToProducts={storesToProducts.current}
-									handleDeleteProduct={handleDeleteProduct}
-									propHandleAdd={addProductToPopup}
-									changeQuantity={changeQuantity}
-									getPropsCookie={getPropsCookie}
-									propUpdateStores={propUpdateStores}
-								/>
-							)}
-						/>
-						<Route path='/sign-in' exact>
-							{() => (
-								<SignIn
-									onSignIn={(username) => {
-										setSignedIn(true);
-										setUsername(username);
-									}}
-								/>
-							)}
-						</Route>
-						<Route path='/sign-up' exact component={SignUp} />
-						<Route
-							path='/searchPage'
-							exact
-							render={(props) => (
-								<SearchPage {...props} propsAddProduct={addProductToPopup} />
-							)}
-						/>
-						<Route
-							path='/storesView'
-							exact
-							render={(props) => (
-								<StoresView {...props} propsAddProduct={addProductToPopup} />
-							)}
-						/>
-						<Route path='/Purchase' exact component={Purchase} />
-						<Route path='/Notifications' exact component={Notifications} />
-						<Route path='/searchPage' exact component={SearchPage} />
-						{signedIn ? (
-							<Route
-								path='/my-stores'
-								exact
-								render={(props) => <MyStores {...props} username={username} />}
+				<AdminsContext.Provider value={require('../../../config.json').admins}>
+					<UsernameContext.Provider value={username}>
+						<BrowserRouter>
+							<Navbar
+								signedIn={signedIn}
+								storesToProducts={storesToProducts.current}
+								propHandleDelete={handleDeleteProduct}
+								notifications={notifications}
+								changeQuantity={changeQuantity}
+								logout={() => {
+									setSignedIn(false);
+									setCookie('');
+									getCookie();
+								}}
+								propUpdateStores={propUpdateStores}
 							/>
-						) : (
-							<Redirect to='/' />
-						)}
-						<Route render={() => <h1>404: page not found</h1>} />
-					</Switch>
-				</BrowserRouter>
+							<Routes
+								handleDeleteProduct={handleDeleteProduct}
+								setSignedIn={setSignedIn}
+								setUsername={setUsername}
+								signedIn={signedIn}
+								storesToProducts={storesToProducts}
+								changeQuantity={changeQuantity}
+								getPropsCookie={getPropsCookie}
+								propHandleAdd={addProductToPopup}
+								propUpdateStores={propUpdateStores}
+								propsAddProduct={addProductToPopup}
+							/>
+						</BrowserRouter>
+					</UsernameContext.Provider>
+				</AdminsContext.Provider>
 			</CookieContext.Provider>
 		</ThemeProvider>
 	) : (

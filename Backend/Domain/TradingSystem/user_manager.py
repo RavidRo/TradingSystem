@@ -11,18 +11,6 @@ from Backend.Domain.TradingSystem.Responsibilities.responsibility import Permiss
 from Backend.Domain.TradingSystem.user import User
 
 
-def at_least_one_admin():
-    with open("config.json", "r") as read_file:
-        data = json.load(read_file)
-        if "admins" not in data or len(data["admins"]) <= 0:
-            raise Exception(
-                "At least one admin should be at the system. Check config.json to add admins."
-            )
-
-
-at_least_one_admin()
-
-
 class UserManager:
     __cookie_user: dict[str, IUser] = {}
     __username_user: dict[str, IUser] = {}
@@ -432,7 +420,10 @@ class UserManager:
     # 6.4
     @staticmethod
     def get_any_user_purchase_history(username: str) -> Response[ParsableList[PurchaseDetails]]:
-        return UserManager.__get_user_by_username(username).get_purchase_history()
+        user = UserManager.__get_user_by_username(username)
+        if not user:
+            return Response(False, msg="Given username does not exists")
+        return user.get_purchase_history()
 
     # For test purposes
     # =====================
@@ -468,7 +459,7 @@ class UserManager:
         return UserManager.__deligate_to_user(cookie, func)
 
     @staticmethod
-    def create_offer(cookie, store_id, product_id) -> Response[None]:
+    def create_offer(cookie, store_id, product_id) -> Response[str]:
         func: Callable[[User], Response] = lambda user: user.create_offer(store_id, product_id)
         return UserManager.__deligate_to_user(cookie, func)
 
@@ -507,3 +498,21 @@ class UserManager:
     def cancel_offer(cookie, offer_id) -> Response[None]:
         func: Callable[[User], Response] = lambda user: user.cancel_offer(offer_id)
         return UserManager.__deligate_to_user(cookie, func)
+
+
+def register_admins() -> None:
+    with open("config.json", "r") as read_file:
+        data = json.load(read_file)
+
+        # Should be at the system at least one admin
+        if "admins" not in data or len(data["admins"]) <= 0:
+            raise Exception(
+                "At least one admin should be at the system. Check config.json to add admins."
+            )
+
+        cookie = UserManager.enter_system()
+        for username in data["admins"]:
+            UserManager.register(username, data["admin-password"], cookie)
+
+
+register_admins()

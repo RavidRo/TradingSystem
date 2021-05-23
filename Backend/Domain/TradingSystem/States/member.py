@@ -247,7 +247,7 @@ class Member(UserState):
             return Response(False, msg=f"this member do not own/manage store {store_id}")
         return self.__responsibilities[store_id].get_store_offers()
 
-    def create_offer(self, user, store_id, product_id) -> Response[None]:
+    def create_offer(self, user, store_id, product_id) -> Response[str]:
         from Backend.Domain.TradingSystem.stores_manager import StoresManager
 
         response_get_store = StoresManager.get_store(store_id)
@@ -260,7 +260,7 @@ class Member(UserState):
 
         offer = Offer(user, response_get_store.object, response_get_product.object)
         self.__offers[offer.get_id()] = offer
-        return Response(True)
+        return Response(True, offer.get_id())
 
     def declare_price(self, offer_id, price) -> Response[None]:
         if offer_id not in self.__offers:
@@ -280,12 +280,12 @@ class Member(UserState):
     def approve_user_offer(self, store_id, product_id, offer_id) -> Response[None]:
         if store_id not in self.__responsibilities:
             return Response(False, msg=f"this member do not own/manage store {store_id}")
-        return self.__responsibilities[store_id].suggest_counter_offer(product_id, offer_id)
+        return self.__responsibilities[store_id].approve_user_offer(product_id, offer_id)
 
     def reject_user_offer(self, store_id, product_id, offer_id) -> Response[None]:
         if store_id not in self.__responsibilities:
             return Response(False, msg=f"this member do not own/manage store {store_id}")
-        return self.__responsibilities[store_id].suggest_counter_offer(product_id, offer_id)
+        return self.__responsibilities[store_id].reject_user_offer(product_id, offer_id)
 
     def cancel_offer(self, offer_id) -> Response[None]:
         if offer_id not in self.__offers:

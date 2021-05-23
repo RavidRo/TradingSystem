@@ -1,4 +1,4 @@
-from __future__ import annotations      # for self type annotating
+from __future__ import annotations  # for self type annotating
 
 from abc import ABC, abstractmethod
 
@@ -7,7 +7,6 @@ from Backend.response import Response, Parsable
 
 
 class IDiscount(Parsable, ABC):
-
     @abstractmethod
     def __init__(self, id):
         self._parent = None
@@ -32,11 +31,15 @@ class IDiscount(Parsable, ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def edit_simple_discount(self, discount_id, percentage=None, context=None, duration=None) -> Response[None]:
+    def edit_simple_discount(
+        self, discount_id, percentage=None, context=None, duration=None
+    ) -> Response[None]:
         raise NotImplementedError
 
     @abstractmethod
-    def edit_complex_discount(self, discount_id, new_id, complex_type=None, decision_rule=None) -> Response[None]:
+    def edit_complex_discount(
+        self, discount_id, new_id, complex_type=None, decision_rule=None
+    ) -> Response[None]:
         raise NotImplementedError
 
     @abstractmethod
@@ -60,11 +63,11 @@ class IDiscount(Parsable, ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def apply_discount(self, products_to_quantities: dict, user_age: int) -> float:
+    def apply_discount(self, products_to_quantities: dict, user_age: int, username) -> float:
         raise NotImplementedError
 
     def parse(self):
         discount = dict()
-        discount['id'] = self._id
+        discount["id"] = self._id
         # discount['condition'] = self._condition.parse()
         return discount

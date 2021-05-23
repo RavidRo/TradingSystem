@@ -88,7 +88,7 @@ class ShoppingCart(IShoppingCart):
     """notice: if buy_products of any bag fails -> return acquired products to stores"""
     # products_purchase_info -a dict between store_id to list of tuples tuple (product_id to purchase_type)
     def buy_products(
-        self, user_age: int, products_purchase_info=None
+        self, user_age: int, products_purchase_info=None, username="Guest"
     ) -> Response[PrimitiveParsable[float]]:
         if products_purchase_info is None:
             products_purchase_info = {}
@@ -109,7 +109,7 @@ class ShoppingCart(IShoppingCart):
             # this is the function call in the version with purchase types
             # result = self.shopping_bags[store_id].buy_products(products_purchase_info[store_id], user)
             # this is the current function call with default empty products_purchase_info
-            result = self.__shopping_bags[store_id].buy_products(user_age)
+            result = self.__shopping_bags[store_id].buy_products(user_age, username=username)
             if not result.success:
                 for bag in succeeded_bags:
                     bag.send_back()

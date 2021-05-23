@@ -45,7 +45,7 @@ class UserState(ABC):
         return self._cart.change_product_quantity(store_id, product_id, new_amount)
 
     def buy_cart(self, user_age: int):
-        return self._cart.buy_products(user_age)
+        return self._cart.buy_products(user_age, username=self.get_username())
 
     def get_cart_price(self):
         return self._cart.get_price()
@@ -208,7 +208,7 @@ class UserState(ABC):
         return Response(False, msg="Abstract Method")
 
     @abstractmethod
-    def create_offer(self, user, store_id, product_id) -> Response[None]:
+    def create_offer(self, user, store_id, product_id) -> Response[str]:
         return Response(False, msg="Abstract Method")
 
     @abstractmethod

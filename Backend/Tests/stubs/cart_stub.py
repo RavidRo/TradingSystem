@@ -22,7 +22,9 @@ class CartStub(ShoppingCart):
         self.change_quantity = True
         return Response(True)
 
-    def buy_products(self, user, products_purchase_info={}) -> Response[PrimitiveParsable]:
+    def buy_products(
+        self, user, products_purchase_info={}, username="Guest"
+    ) -> Response[PrimitiveParsable]:
         self.buy_cart = True
         return Response(True)
 

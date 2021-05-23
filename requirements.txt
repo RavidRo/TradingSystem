@@ -27,3 +27,5 @@ Hypercorn==0.11.2
 asyncio~=3.4.3
 asgiref~=3.3.4
 alt-pytest-asyncio==0.5.4
+SQLAlchemy == 1.4.15
+psycopg2==2.8.6

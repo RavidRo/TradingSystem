@@ -1,11 +1,11 @@
 import { FormControl, InputLabel, MenuItem, Select } from '@material-ui/core';
 import React, { FC } from 'react';
-import { DecisionRule, DiscountComplex, Operator } from '../../types';
+import { DecisionRule, DiscountComplex, DiscountComplexType } from '../../types';
 
 type ComplexDiscountFormProps = {
-	operator: Operator | '';
+	operator: DiscountComplexType | '';
 	decisionRule: DecisionRule | '';
-	setOperator: (operator: Operator) => void;
+	setOperator: (operator: DiscountComplexType) => void;
 	setDecisionRule: (decisionRule: DecisionRule) => void;
 	defaultDiscount?: DiscountComplex;
 };
@@ -18,7 +18,7 @@ const ComplexDiscountForm: FC<ComplexDiscountFormProps> = ({
 	defaultDiscount,
 }) => {
 	const handleOperatorChange = (event: React.ChangeEvent<{ value: unknown }>) => {
-		setOperator(event.target.value as Operator);
+		setOperator(event.target.value as DiscountComplexType);
 	};
 	const handleDecisionRuleChange = (event: React.ChangeEvent<{ value: unknown }>) => {
 		setDecisionRule(event.target.value as DecisionRule);

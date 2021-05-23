@@ -8,17 +8,17 @@ admins = []
 
 
 def register_admins() -> None:
+    global admins
     with open("config.json", "r") as read_file:
         data = json.load(read_file)
-        for username in data["admins"]:
-            authentication.register(username, data["admin-password"])
-            admins.append(username)
+        admins = data["admins"]
 
 
 register_admins()
 
 
 def is_username_admin(username) -> bool:
+    global admins
     return username in admins
 
 
@@ -164,7 +164,7 @@ class Guest(UserState):
     def get_store_offers(self, store_id) -> Response[ParsableList[Offer]]:
         return Response(False, msg="Guests cannot have price offers")
 
-    def create_offer(self, user, store_id, product_id) -> Response[None]:
+    def create_offer(self, user, store_id, product_id) -> Response[str]:
         return Response(False, msg="Guests cannot have price offers")
 
     def declare_price(self, offer_id, price) -> Response[None]:

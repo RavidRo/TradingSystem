@@ -25,13 +25,13 @@ const Bag: FC<BagProps> = ({
 
 	const storeIDToNameObj = useAPI<Store>('/get_store', { store_id: storeID });
 	useEffect(() => {
-		storeIDToNameObj.request().then(({ data, error, errorMsg }) => {
+		storeIDToNameObj.request().then(({ data, error }) => {
 			if (!error && data !== null) {
 				setStoreName(data.data.name);
 			}
 		});
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [storeIDToNameObj]);
+	}, [storeID]);
 
 	useEffect(() => {
 		setProducts(products);
