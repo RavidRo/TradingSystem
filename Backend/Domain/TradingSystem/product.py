@@ -23,7 +23,6 @@ class Product(IProduct):
         )
 
     def parse_with_price(self, username):
-        print("im here!!!")
         return ProductData(
             self.__id,
             self.__product_name,
@@ -39,11 +38,7 @@ class Product(IProduct):
         return self.__id
 
     def get_offered_price(self, username):
-        print("hiiii")
-        print(username)
         for offer in self.__offers.values():
-            print(offer.is_approved())
-            print(offer.get_username())
             if offer.get_username() == username and offer.is_approved():
                 return offer.get_price()
         return self.__price
