@@ -512,7 +512,7 @@ def register_admins() -> None:
 
         cookie = UserManager.enter_system()
         for username in data["admins"]:
-            UserManager.register(username, data["admin-password"], cookie)
+            UserManager.register(username, data["password"], cookie)
 
 
 register_admins()
