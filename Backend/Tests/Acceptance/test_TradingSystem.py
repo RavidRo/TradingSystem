@@ -57,7 +57,7 @@ def _generate_username() -> str:
     global username_number
     user_lock.acquire()
     username_number += 1
-    username = str(username_number)
+    username = "test_TradingSystem" + str(username_number)
     user_lock.release()
     return username
 
@@ -66,7 +66,7 @@ def _generate_store_name() -> str:
     global store_number
     store_lock.acquire()
     store_number += 1
-    store = str(store_number)
+    store = "test_TradingSystem" + str(store_number)
     store_lock.release()
     return store
 
@@ -155,7 +155,7 @@ def _generate_product_name() -> str:
     global product_number
     product_lock.acquire()
     product_number += 1
-    product = str(product_number)
+    product = "test_TradingSystem" + str(product_number)
     product_lock.release()
     return product
 
