@@ -71,7 +71,7 @@ const CartProduct: FC<CartProductProps> = ({
 			<IconButton aria-label='remove' onClick={() => onRemove(product)}>
 				<CancelIcon />
 			</IconButton>
-			<Select
+			{/* <Select
 				style={{ fontSize: '1rem', width: '30%' }}
 				value={currentType}
 				onChange={(e) => handleChangeType(e)}
@@ -87,7 +87,7 @@ const CartProduct: FC<CartProductProps> = ({
 			{currentType === 'offer' ? (
 				//TODO: should be offer value from server
 				<OfferField offer={0} />
-			) : null}
+			) : null} */}
 		</div>
 	) : null;
 };

@@ -31,7 +31,7 @@ const Bag: FC<BagProps> = ({
 			}
 		});
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [storeIDToNameObj]);
+	}, [storeID]);
 
 	useEffect(() => {
 		setProducts(products);
