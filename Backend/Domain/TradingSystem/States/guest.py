@@ -8,17 +8,17 @@ admins = []
 
 
 def register_admins() -> None:
+    global admins
     with open("config.json", "r") as read_file:
         data = json.load(read_file)
-        for username in data["admins"]:
-            authentication.register(username, data["admin-password"])
-            admins.append(username)
+        admins = data["admins"]
 
 
 register_admins()
 
 
 def is_username_admin(username) -> bool:
+    global admins
     return username in admins
 
 

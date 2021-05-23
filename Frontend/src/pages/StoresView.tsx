@@ -144,6 +144,7 @@ const StoresView: FC<StoresViewProps> = ({ propsAddProduct, location }: StoresVi
 												quantity={cell !== undefined ? cell.quantity : 0}
 												category={cell !== undefined ? cell.category : ''}
 												keywords={cell !== undefined ? cell.keywords : ''}
+												id={cell !== undefined ? cell.id : ''}
 												clickAddProduct={() =>
 													clickAddProduct(cell, storeID)
 												}

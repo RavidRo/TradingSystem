@@ -898,6 +898,7 @@ async def get_user_offers():
     return __responseToJson(cookie, answer, lambda obj: obj.values)
 
 
+
 @app.route("/get_store_offers", methods=["GET"])
 async def get_store_offers():
     cookie = request.args.get("cookie")

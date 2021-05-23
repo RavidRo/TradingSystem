@@ -155,6 +155,7 @@ const SearchPage: FC<SearchPageProps> = ({ location, propsAddProduct }) => {
 											quantity={cell !== undefined ? cell.quantity : 0}
 											category={cell !== undefined ? cell.category : ''}
 											keywords={cell !== undefined ? cell.keywords : ''}
+											id={cell !== undefined ? cell.id : ''}
 											clickAddProduct={() =>
 												handleAddToCart(
 													cell !== undefined

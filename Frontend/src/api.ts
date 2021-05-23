@@ -15,6 +15,7 @@ import {
 	PurchaseDetails,
 	ShoppingCart,
 	Store,
+	Offer,
 } from './types';
 
 function request<T>(endPoint: string, params: object, GET = true) {
@@ -381,4 +382,8 @@ export function emptyNotifications(cookie: string) {
 export function getPurchasePolicy(cookie: string, storeId: string) {
 	const params = { cookie, store_id: storeId };
 	return get<Condition>('get_purchase_policy', params);
+}
+export function getUserOffers(cookie: string) {
+	const params = { cookie };
+	return get<Offer[]>('get_user_offers', params);
 }

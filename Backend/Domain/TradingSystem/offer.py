@@ -19,7 +19,7 @@ class Offer(Parsable):
         self.__store_name = store.get_name()
         self.__product_name = product.get_name()
         self.__product_id = product.get_id()
-        self.__username = user.get_username()
+        self.__username = user.get_username().get_obj().value
 
         self.__user_publisher = Publisher()
         self.__user_publisher.subscribe(user)
@@ -35,19 +35,29 @@ class Offer(Parsable):
         return response
 
     def suggest_counter_offer(self, price) -> Response[None]:
-        return self.__status.suggest_counter_offer(price)
+        response = self.__status.suggest_counter_offer(price)
+        if response.succeeded():
+            self.__user_publisher.notify_all(
+                f"Your price offer for {self.__product_name} has been countered"
+            )
+        return response
 
     def approve_manager_offer(self) -> Response[None]:
         return self.__status.approve_manager_offer()
 
     def approve_user_offer(self) -> Response[None]:
-        return self.__status.approve_user_offer()
+        response = self.__status.approve_user_offer()
+        if response.succeeded():
+            self.__user_publisher.notify_all(
+                f"Your price offer for {self.__product_name} has been approved"
+            )
+        return response
 
     def reject_user_offer(self) -> Response[None]:
         response = self.__status.reject_user_offer()
         if response.succeeded():
-            self.__managers_publisher.notify_all(
-                f"Your price offer for {self.__product_name} as been rejected"
+            self.__user_publisher.notify_all(
+                f"Your price offer for {self.__product_name} has been rejected"
             )
         return response
 
@@ -58,7 +68,7 @@ class Offer(Parsable):
         return self.__status.use()
 
     def is_approved(self) -> bool:
-        return self.__status.is_approveD()
+        return self.__status.is_approved()
 
     def get_status_name(self) -> str:
         return self.__status.get_name()
