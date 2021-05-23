@@ -9,6 +9,20 @@ from Backend.Domain.TradingSystem.shopping_cart import ShoppingCart
 from Backend.Domain.TradingSystem.purchase_details import PurchaseDetails
 from Backend.Domain.TradingSystem.Responsibilities.responsibility import Permission, Responsibility
 from Backend.Domain.TradingSystem.user import User
+from Backend.settings import Settings
+
+
+def at_least_one_admin():
+    settings = Settings.get_instance()
+    admins = settings.get_admins()
+    if len(admins) <= 0:
+        raise Exception(
+            "At least one admin should be at the system. Check config.json to add admins."
+        )
+
+
+
+at_least_one_admin()
 
 
 class UserManager:
