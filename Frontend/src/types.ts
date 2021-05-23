@@ -28,6 +28,7 @@ export type Offer = {
     status: string;
     product_id: string;
     product_name: string;
+	store_id:string;
 	store_name: string;
     username: string;
 }

@@ -1,4 +1,4 @@
-import React, { FC, useEffect, useState } from 'react';
+import React, { FC, useContext, useEffect, useState } from 'react';
 import '../styles/PopupCart.scss';
 import PopupBag from '../components/PopupBag';
 import {
@@ -9,6 +9,7 @@ import {
 	StoreToSearchedProducts,
 } from '../types';
 import useAPI from '../hooks/useAPI';
+import { UsernameContext } from '../contexts';
 
 type PopupCartProps = {
 	storesToProducts: StoreToSearchedProducts;
@@ -25,6 +26,9 @@ const PopupCart: FC<PopupCartProps> = ({
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	const [storesToProductsMy, setStoresProducts] =
 		useState<StoreToSearchedProducts>({});
+		
+	const username = useContext(UsernameContext);
+
 
 	//helper function to present the products and give the to bag nicely
 	const productQuantityOfTuples = (tuples: ProductToQuantity[]) => {
@@ -81,7 +85,7 @@ const PopupCart: FC<PopupCartProps> = ({
 						let quantity: number = Object.values(productQuantitiesMap)[j];
 
 						let promise = productObj
-							.request({ product_id: productID, store_id: storeID })
+							.request({ product_id: productID, store_id: storeID, username:username})
 							.then(({ data, error }) => {
 								if (!error && data !== null) {
 									let product = data.data;

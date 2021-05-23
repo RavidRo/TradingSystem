@@ -43,7 +43,7 @@ const MyAccount: FC<MyAccountProps> = () => {
 						your offers:
 					</Typography>
 					{/* <OffersTable offers={offersObj.data} /> */}
-					<OffersTable username={username}/>
+					<OffersTable username={username} isManager={false} store_id={""}/>
 				</Paper>
 			{/* :null} */}
 		</Container>
