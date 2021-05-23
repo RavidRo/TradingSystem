@@ -1,14 +1,15 @@
-from Backend.Service.DataObjects.offer_data import OfferData
-from uuid import uuid4
+import uuid
 
 from Backend.response import Parsable, Response
+
+from Backend.Service.DataObjects.offer_data import OfferData
 
 from Backend.Domain.Notifications.Publisher import Publisher
 
 
 class Offer(Parsable):
     def __init__(self, user, store, product) -> None:
-        self.__id: str = uuid4()
+        self.__id: str = uuid.uuid4()
         self.__price: float = None
         self.__status: OfferStatus = UndeclaredOffer(self)
         product.add_offer(self)
@@ -81,7 +82,7 @@ class Offer(Parsable):
         return self.__username
 
     def parse(self):
-        OfferData(
+        return OfferData(
             self.__id,
             self.__price,
             self.__status.get_name(),
