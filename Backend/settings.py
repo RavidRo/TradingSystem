@@ -31,16 +31,16 @@ class Settings:
     def get_admins(self):
         return self.__admins
 
-    def get__password(self):
+    def get_password(self):
         return self.__password
 
     def get_timer_length(self):
         return self.__timer_length
 
-    def get__payment_system(self):
+    def get_payment_system(self):
         return self.__payment_system
 
-    def get__supply_system(self):
+    def get_supply_system(self):
         return self.__supply_system
 
     def get_DB(self):

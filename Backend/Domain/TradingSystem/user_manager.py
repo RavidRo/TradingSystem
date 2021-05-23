@@ -12,19 +12,6 @@ from Backend.Domain.TradingSystem.user import User
 from Backend.settings import Settings
 
 
-def at_least_one_admin():
-    settings = Settings.get_instance()
-    admins = settings.get_admins()
-    if len(admins) <= 0:
-        raise Exception(
-            "At least one admin should be at the system. Check config.json to add admins."
-        )
-
-
-
-at_least_one_admin()
-
-
 class UserManager:
     __cookie_user: dict[str, IUser] = {}
     __username_user: dict[str, IUser] = {}
@@ -515,18 +502,15 @@ class UserManager:
 
 
 def register_admins() -> None:
-    with open("config.json", "r") as read_file:
-        data = json.load(read_file)
-
-        # Should be at the system at least one admin
-        if "admins" not in data or len(data["admins"]) <= 0:
-            raise Exception(
-                "At least one admin should be at the system. Check config.json to add admins."
-            )
-
+    settings = Settings.get_instance()
+    admins = settings.get_admins()
+    if len(admins) <= 0:
+        raise Exception(
+            "At least one admin should be at the system. Check config.json to add admins."
+        )
+    for admin in admins:
         cookie = UserManager.enter_system()
-        for username in data["admins"]:
-            UserManager.register(username, data["password"], cookie)
+        UserManager.register(admin, settings.get_password(), cookie)
 
 
 register_admins()
