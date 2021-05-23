@@ -24,8 +24,8 @@
 	"admins": <list-of-admin-usernames (list[str])>,
 	"password": <admins-password (str)>,
 	"timer_length": <length-of-timer (int)>,
-	"payment_system": <payment-system (str)>,
-	"supply_system": <supply-system> (str),
+	"payment_system": <payment-system-domain (str)>,
+	"supply_system": <supply-system-domain> (str),
 	"DB": <database (str)>
 }
 ```
