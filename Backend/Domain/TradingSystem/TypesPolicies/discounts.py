@@ -316,6 +316,16 @@ class MaximumCompositeDiscount(CompositeDiscount):
         discounts["type"] = "max"
         return discounts
 
+    def discount_func(self, products_to_quantities: dict, username) -> float:
+        if len(self._children) == 0:
+            return 0.0
+        return max(
+            [
+                child.discount_func(products_to_quantities, username)
+                for child in self._children
+            ]
+        )
+
 
 class AddCompositeDiscount(CompositeDiscount):
     def __init__(self, children: list[IDiscount] = None, new_id="1"):
@@ -325,6 +335,14 @@ class AddCompositeDiscount(CompositeDiscount):
         return sum(
             [
                 child.apply_discount(products_to_quantities, user_age, username)
+                for child in self._children
+            ]
+        )
+
+    def discount_func(self, products_to_quantities: dict, username) -> float:
+        return sum(
+            [
+                child.discount_func(products_to_quantities, username)
                 for child in self._children
             ]
         )
@@ -353,6 +371,13 @@ class XorCompositeDiscount(CompositeDiscount):
         ]
         return XorCompositeDiscount.decision_dict[self.__desicion_rule](prices)
 
+    def discount_func(self, products_to_quantities: dict, username):
+        prices = [
+            child.discount_func(products_to_quantities, username)
+            for child in self._children
+        ]
+        return XorCompositeDiscount.decision_dict[self.__desicion_rule](prices)
+
     def parse(self):
         discounts = super().parse()
         discounts["type"] = "xor"
@@ -376,6 +401,11 @@ class AndConditionDiscount(CompositeDiscount):
             )
         return 0.0
 
+    def discount_func(self, products_to_quantities: dict, username) -> float:
+        return sum(
+                [child.discount_func(products_to_quantities, username) for child in self._children]
+            )
+
     def parse(self):
         discounts = super().parse()
         discounts["type"] = "and"
@@ -397,6 +427,11 @@ class OrConditionDiscount(CompositeDiscount):
                 [child.discount_func(products_to_quantities, username) for child in self._children]
             )
         return 0.0
+
+    def discount_func(self, products_to_quantities: dict, username) -> float:
+        return sum(
+                [child.discount_func(products_to_quantities, username) for child in self._children]
+            )
 
     def parse(self):
         discounts = super().parse()

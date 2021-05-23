@@ -113,7 +113,7 @@ def test_purchase_success(system, cookie, store_id, store, product_ids, products
         system.save_product_in_cart(cookie, store_id, product_id, 2)
 
     system.purchase_cart(cookie, 12)
-    res = system.send_payment(cookie, "", "")
+    res = system.send_payment(cookie, {}, {})
     assert res.succeeded() and len(system.get_cart_details(cookie).object.bags) == 0 \
            and all(list(
         map(lambda after_data, before_data: before_data[3] - after_data == 2 and before_data[0] == store.get_product(
@@ -126,7 +126,7 @@ def fail_purchase_payment_case(system, cookie, store_id, store, product_ids, pro
         system.save_product_in_cart(cookie, store_id, product_id, 2)
 
     system.purchase_cart(cookie, 12)
-    res = system.send_payment(cookie, "", "")
+    res = system.send_payment(cookie, {}, {})
     system.cancel_purchase(cookie)
     assert not res.succeeded() and len(system.get_cart_details(cookie).object.bags[0].product_ids_to_quantities) == 3 \
            and all(list(
@@ -184,7 +184,7 @@ def test_purchase_rule_fail_blocking_rule(system, cookie, store_id, store, produ
         system.save_product_in_cart(cookie, store_id, product_id, 2)
 
     system.purchase_cart(cookie, 12)
-    res = system.send_payment(cookie, "", "")
+    res = system.send_payment(cookie, {}, {})
     cart_res = system.get_cart_details(cookie)
     system.cancel_purchase(cookie)
     assert not res.succeeded() and len(cart_res.object.bags[0].product_ids_to_quantities) == 3 \
@@ -203,7 +203,7 @@ def test_simple_conditional_discount_true_cond(system, cookie, store_id, store, 
 
     system.add_discount(cookie, store_id, simple_product_true_conditional_discount, "1", "simple")
     price_res = system.purchase_cart(cookie, 12)
-    res = system.send_payment(cookie, "", "")
+    res = system.send_payment(cookie, {}, {})
     assert res.succeeded() and len(system.get_cart_details(cookie).object.bags) == 0 \
            and all(list(
         map(lambda after_data, before_data: before_data[3] - after_data == 2 and before_data[0] == store.get_product(
@@ -222,7 +222,7 @@ def test_simple_conditional_discount_false_cond(system, cookie, store_id, store,
     simple_product_true_conditional_discount['condition']['operator'] = 'great-than'
     system.add_discount(cookie, store_id, simple_product_true_conditional_discount, "1", "simple")
     price_res = system.purchase_cart(cookie, 12)
-    res = system.send_payment(cookie, "", "")
+    res = system.send_payment(cookie, {}, {})
     assert res.succeeded() and len(system.get_cart_details(cookie).object.bags) == 0 \
            and all(list(
         map(lambda after_data, before_data: before_data[3] - after_data == 2 and before_data[0] == store.get_product(
@@ -244,7 +244,7 @@ def test_and_conditional_discount_false(system, cookie, store_id, store, product
 
     system.add_discount(cookie, store_id, simple_category_false_conditional_discount, "2", "simple")
     price_res = system.purchase_cart(cookie, 12)
-    res = system.send_payment(cookie, "", "")
+    res = system.send_payment(cookie, {}, {})
     assert res.succeeded() and len(system.get_cart_details(cookie).object.bags) == 0 \
            and all(list(
         map(lambda after_data, before_data: before_data[3] - after_data == 2 and before_data[0] == store.get_product(
@@ -268,7 +268,7 @@ def test_and_conditional_discount_true(system, cookie, store_id, store, product_
 
     system.add_discount(cookie, store_id, simple_category_false_conditional_discount, "2", "simple")
     price_res = system.purchase_cart(cookie, 12)
-    res = system.send_payment(cookie, "", "")
+    res = system.send_payment(cookie, {}, {})
     assert res.succeeded() and len(system.get_cart_details(cookie).object.bags) == 0 \
            and all(list(
         map(lambda after_data, before_data: before_data[3] - after_data == 2 and before_data[0] == store.get_product(
@@ -290,7 +290,7 @@ def test_or_conditional_discount_true(system, cookie, store_id, store, product_i
 
     system.add_discount(cookie, store_id, simple_category_false_conditional_discount, "2", "simple")
     price_res = system.purchase_cart(cookie, 12)
-    res = system.send_payment(cookie, "", "")
+    res = system.send_payment(cookie, {}, {})
     assert res.succeeded() and len(system.get_cart_details(cookie).object.bags) == 0 \
            and all(list(
         map(lambda after_data, before_data: before_data[3] - after_data == 2 and before_data[0] == store.get_product(
@@ -314,7 +314,7 @@ def test_or_conditional_discount_false(system, cookie, store_id, store, product_
 
     system.add_discount(cookie, store_id, simple_product_true_conditional_discount, "2", "simple")
     price_res = system.purchase_cart(cookie, 12)
-    res = system.send_payment(cookie, "", "")
+    res = system.send_payment(cookie, {}, {})
 
     assert res.succeeded() and len(system.get_cart_details(cookie).object.bags) == 0 \
            and all(list(
@@ -333,7 +333,7 @@ def test_try_paying_after_time_passed(system, cookie, store_id, store, product_i
         system.save_product_in_cart(cookie, store_id, product_id, 2)
     system.purchase_cart(cookie, 18)
     time.sleep(2)
-    res = system.send_payment(cookie, "", "")
+    res = system.send_payment(cookie, {}, {})
 
     assert not res.succeeded() and len(system.get_cart_details(cookie).object.bags[0].product_ids_to_quantities) == 3 \
            and all(list(
@@ -342,6 +342,7 @@ def test_try_paying_after_time_passed(system, cookie, store_id, store, product_i
             store.ids_to_quantities, products_data)))
 
 
+@patch.multiple(SupplyAdapter, deliver=MagicMock(return_value=Response(True)))
 def test_try_paying_first_time_failed_than_success(system, cookie, store_id, store, product_ids, products_data):
     with patch.object(CashingAdapter, 'pay', return_value=Response(False)):
         for product_id in product_ids:
@@ -349,7 +350,7 @@ def test_try_paying_first_time_failed_than_success(system, cookie, store_id, sto
 
         user_age = 25
         system.purchase_cart(cookie, user_age)
-        res = system.send_payment(cookie, "", "")
+        res = system.send_payment(cookie, {}, {})
 
     assert not res.succeeded() and len(
         system.get_cart_details(cookie).object.bags[0].product_ids_to_quantities) == 3 and all(list(
@@ -358,7 +359,7 @@ def test_try_paying_first_time_failed_than_success(system, cookie, store_id, sto
             store.ids_to_quantities, products_data)))
 
     with patch.object(CashingAdapter, 'pay', return_value=Response(True)):
-        res = system.send_payment(cookie, "", "")
+        res = system.send_payment(cookie, {}, {})
 
     assert res.succeeded() and len(system.get_cart_details(cookie).object.bags) == 0 \
            and all(list(
@@ -368,6 +369,7 @@ def test_try_paying_first_time_failed_than_success(system, cookie, store_id, sto
             products_data)))
 
 
+@patch.multiple(SupplyAdapter, deliver=MagicMock(return_value=Response(True)))
 def test_try_paying_first_time_fail_second_time_timer_over(system, cookie, store_id, store, product_ids,
                                                            products_data):
     import time
@@ -376,11 +378,11 @@ def test_try_paying_first_time_fail_second_time_timer_over(system, cookie, store
             system.save_product_in_cart(cookie, store_id, product_id, 2)
         user_age = 25
         system.purchase_cart(cookie, user_age)
-        system.send_payment(cookie, "", "")
+        system.send_payment(cookie, {}, {})
 
     time.sleep(2)
     with patch.object(CashingAdapter, 'pay', return_value=Response(False)):
-        res = system.send_payment(cookie, "", "")
+        res = system.send_payment(cookie, {}, {})
 
     assert not res.succeeded() and len(
         system.get_cart_details(cookie).object.bags[0].product_ids_to_quantities) == 3 and all(list(

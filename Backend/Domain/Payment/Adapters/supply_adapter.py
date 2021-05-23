@@ -26,7 +26,7 @@ class SupplyAdapter:
         return self.__send("supply", {name, address, city, country, zip})
 
     def __send_cancel_supply(self, transaction_id):
-        return self.__send("cancel_supply", {transaction_id})
+        return self.__send("cancel_supply", {"transaction_id": transaction_id})
 
     def deliver(self, product_ids_to_quantity, address):
         if SupplyAdapter.use_stub:

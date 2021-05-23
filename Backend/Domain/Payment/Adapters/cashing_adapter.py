@@ -26,7 +26,7 @@ class CashingAdapter:
         return self.__send("pay", {card_number, month, year, holder, cvv, id})
 
     def __send_cancel_pay(self, transaction_id):
-        return self.__send("cancel_pay", {transaction_id})
+        return self.__send("cancel_pay", {"transaction_id": transaction_id})
 
     def pay(self, price, payment_details) -> Response[str]:
         if CashingAdapter.use_stub:
