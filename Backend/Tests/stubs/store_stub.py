@@ -18,7 +18,9 @@ class StoreStub(Store):
 
     # 4.1
     # Creating a new product a the store
-    def add_product(self, name: str, category: str, price: float, quantity: int, keywords: list[str] = None) -> Response[None]:
+    def add_product(
+        self, name: str, category: str, price: float, quantity: int, keywords: list[str] = None
+    ) -> Response[None]:
         self.product_added = True
         return Response(True)
 
@@ -34,7 +36,12 @@ class StoreStub(Store):
 
     # 4.1
     def edit_product_details(
-        self, product_id: str = None, new_name: str = None, new_category: str = None, new_price: float = None, keywords: list[str] = None
+        self,
+        product_id: str = None,
+        new_name: str = None,
+        new_category: str = None,
+        new_price: float = None,
+        keywords: list[str] = None,
     ) -> Response[None]:
         self.product_details_changed = True
         return Response(True)
@@ -75,4 +82,7 @@ class StoreStub(Store):
         return Response(True)
 
     def subscribe(self, subscriber):
+        return True
+
+    def notify(self, message: str) -> bool:
         return True

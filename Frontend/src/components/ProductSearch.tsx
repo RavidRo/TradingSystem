@@ -4,6 +4,7 @@ import '../styles/ProductSearch.scss';
 import { Link } from 'react-router-dom';
 import useAPI from '../hooks/useAPI';
 import { Store } from '../types';
+import Swal from 'sweetalert2';
 
 type ProductSearchProps = {
 	content: string;
@@ -12,7 +13,9 @@ type ProductSearchProps = {
 	quantity: number;
 	category: string;
 	keywords: string[];
+	id:string;
 	clickAddProduct: () => void;
+
 };
 
 const ProductSearch: FC<ProductSearchProps> = ({
@@ -22,13 +25,14 @@ const ProductSearch: FC<ProductSearchProps> = ({
 	quantity,
 	category,
 	keywords,
+	id,
 	clickAddProduct,
 }) => {
 	const [storeName, setStoreName] = useState<string>('');
 	const storeObj = useAPI<Store>('/get_store', { store_id: storeID });
 	useEffect(() => {
 		if (storeID !== '') {
-			storeObj.request().then(({ data, error, errorMsg }) => {
+			storeObj.request().then(({ data, error }) => {
 				if (!error && data !== null) {
 					setStoreName(data.data.name);
 				}
@@ -36,6 +40,20 @@ const ProductSearch: FC<ProductSearchProps> = ({
 		}
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [storeID]);
+
+	const createOfferObj = useAPI<void>('/create_offer', {store_id: storeID, product_id: id}, 'POST');
+	const clickCreateOffer = ()=>{
+		createOfferObj.request().then(({data, error})=>{
+			if (!error && data !== null) {
+				Swal.fire({
+					icon: 'success',
+					title: 'Congratulations!',
+					text: 'The item added to offers in \"My Account\" ',
+				});
+			}
+		})
+	}
+
 
 	return (
 		<div className='ProductSearchCard'>
@@ -65,10 +83,23 @@ const ProductSearch: FC<ProductSearchProps> = ({
 								color: 'blue',
 								background: '#ffffff',
 								marginTop: '10%',
+								padding: '0%',
 							}}
 							onClick={() => clickAddProduct()}
 						>
 							Add To Cart
+						</Button>
+						<Button
+							style={{
+								color: 'blue',
+								background: '#ffffff',
+								marginTop: '10%',
+								marginLeft: '30%',
+								padding: '0%',
+							}}
+							onClick={() => clickCreateOffer()}
+						>
+							Add To Offers
 						</Button>
 						<Link
 							className='linkStore'

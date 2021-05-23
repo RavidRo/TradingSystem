@@ -1,11 +1,10 @@
 import React, { FC, useState, useRef } from 'react';
-import { IconButton, MenuItem, Select } from '@material-ui/core';
+import { IconButton} from '@material-ui/core';
 import CancelIcon from '@material-ui/icons/Close';
 
 import IncrementField from './IncrementField';
 import { Product } from '../types';
 import '../styles/CardProduct.scss';
-import OfferField from '../components/OfferField';
 
 type CartProductProps = {
 	product: Product;
@@ -71,23 +70,6 @@ const CartProduct: FC<CartProductProps> = ({
 			<IconButton aria-label='remove' onClick={() => onRemove(product)}>
 				<CancelIcon />
 			</IconButton>
-			<Select
-				style={{ fontSize: '1rem', width: '30%' }}
-				value={currentType}
-				onChange={(e) => handleChangeType(e)}
-			>
-				{purchaseTypes.current.map((type) => {
-					return (
-						<MenuItem value={type} key={purchaseTypes.current.indexOf(type)}>
-							{type}
-						</MenuItem>
-					);
-				})}
-			</Select>
-			{currentType === 'offer' ? (
-				//TODO: should be offer value from server
-				<OfferField offer={0} />
-			) : null}
 		</div>
 	) : null;
 };

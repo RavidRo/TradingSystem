@@ -1,9 +1,11 @@
 from __future__ import annotations
+
 import threading
 from typing import Callable
 
 from Backend.response import Response, ParsableList, PrimitiveParsable
 
+from Backend.Domain.TradingSystem.offer import Offer
 from Backend.Domain.TradingSystem.Interfaces.IUser import IUser
 from Backend.Domain.TradingSystem.Interfaces.IUserState import IUserState
 from Backend.Domain.TradingSystem.store import Store
@@ -18,7 +20,7 @@ class User(IUser):
         self.state: UserState = IUserState.create_guest(self)
         self.appointment_lock = threading.Lock()
         self.__notifications: list[str] = []
-        self.__communicate: Callable[[list[str]], bool] = lambda msgs: False
+        self.__communicate: Callable[[list[str]], bool] = lambda _: False
 
     def __notify_self(self) -> bool:
         answer = self.__communicate(self.__notifications)
@@ -259,3 +261,33 @@ class User(IUser):
     def notify(self, message: str) -> bool:
         self.__notifications.append(message)
         return self.__notify_self()
+
+    # Offers
+    # ==================
+
+    def get_user_offers(self) -> Response[ParsableList[Offer]]:
+        return self.state.get_user_offers()
+
+    def get_store_offers(self, store_id) -> Response[ParsableList[Offer]]:
+        return self.state.get_store_offers(store_id)
+
+    def create_offer(self, store_id, product_id) -> Response[str]:
+        return self.state.create_offer(self, store_id, product_id)
+
+    def declare_price(self, offer_id, price) -> Response[None]:
+        return self.state.declare_price(offer_id, price)
+
+    def suggest_counter_offer(self, store_id, product_id, offer_id, price) -> Response[None]:
+        return self.state.suggest_counter_offer(store_id, product_id, offer_id, price)
+
+    def approve_manager_offer(self, offer_id) -> Response[None]:
+        return self.state.approve_manager_offer(offer_id)
+
+    def approve_user_offer(self, store_id, product_id, offer_id) -> Response[None]:
+        return self.state.approve_user_offer(store_id, product_id, offer_id)
+
+    def reject_user_offer(self, store_id, product_id, offer_id) -> Response[None]:
+        return self.state.reject_user_offer(store_id, product_id, offer_id)
+
+    def cancel_offer(self, offer_id) -> Response[None]:
+        return self.state.cancel_offer(offer_id)
