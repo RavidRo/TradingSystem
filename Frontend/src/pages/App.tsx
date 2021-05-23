@@ -49,7 +49,6 @@ function App() {
 				};
 				client.onmessage = (messageEvent) => {
 					setNotifications((old) => [...old, messageEvent.data]);
-					console.log(messageEvent.data)
 					// alert('received socket message');
 				};
 				client.onclose = () => {
