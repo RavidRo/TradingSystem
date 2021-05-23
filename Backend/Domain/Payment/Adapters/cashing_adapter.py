@@ -1,10 +1,8 @@
+from Backend.settings import Settings
 import requests
 
 from Backend.response import Response
 from Backend.Domain.Payment.OutsideSystems.outside_cashing import OutsideCashing
-
-
-domain = "https://cs-bgu-wsep.herokuapp.com/"
 
 
 class CashingAdapter:
@@ -17,7 +15,10 @@ class CashingAdapter:
             raise "Could not connect properly to outside systems"
 
     def __send(self, action_type, paramaters={}):
-        return requests.post(domain, data=({"action_type": action_type} | paramaters))
+        return requests.post(
+            Settings.get_instance().get_payment_system(),
+            data=({"action_type": action_type} | paramaters),
+        )
 
     def __send_handshake(self):
         return self.__send("handshake")
