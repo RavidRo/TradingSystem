@@ -201,7 +201,7 @@ export function addDiscount(
 	discount: DiscountSimple | DiscountComplex,
 	fatherId: string
 ) {
-	const params = { cookie, store_id: storeId, discount_data: discount, exists_id: fatherId };
+	const params = { cookie, store_id: storeId, discount_data: discount, exist_id: fatherId };
 	return post<string>('add_discount', params);
 }
 
