@@ -24,7 +24,10 @@ class CashingAdapter:
         return self.__send("handshake")
 
     def __send_pay(self, card_number, month, year, holder, cvv, id):
-        return self.__send("pay", {card_number, month, year, holder, cvv, id})
+        return self.__send(
+            "pay",
+            {card_number: card_number, month: month, year: year, holder: holder, cvv: cvv, id: id},
+        )
 
     def __send_cancel_pay(self, transaction_id):
         return self.__send("cancel_pay", {"transaction_id": transaction_id})
@@ -55,7 +58,7 @@ class CashingAdapter:
             payment_details["id"],
         )
         if response.status_code != 200 or response.text == "-1":
-            return Response(False, "Transaction has failed")
+            return Response(False, msg="Transaction has failed")
         return Response(True, response.text)
 
     def cancel_payment(self, transaction_id) -> Response[None]:
@@ -64,5 +67,5 @@ class CashingAdapter:
 
         response = self.__send_cancel_pay(transaction_id)
         if response.status_code != 200 or response.text == "-1":
-            return Response(False, "Transaction cancelation has failed")
+            return Response(False, msg="Transaction cancelation has failed")
         return Response(True)

@@ -4,13 +4,31 @@
     width: 100%;
 }
 
-.formDiv{
-    display: flex;
-    flex-direction: column;
-    width: 70%;
-    align-self: center;
-    margin-left: 35%;
+.formDiv-container {
+    margin: 0 20%;
+
+    .formDiv{
+        display: flex;
+        flex-wrap: wrap;
+        flex-direction: row;
+        align-self: center;
+        align-items: center;
+        justify-content: flex-start;
+    
+        .section-title { 
+            width: 100%;
+            margin: 5% 0 0;
+            padding: 0;
+            text-align: center;
+        }
+    
+        .text-field { 
+            flex-grow: 1;
+            margin: 2% 2% 2%;
+        }
+    }
 }
+
 .purchaseBtn{
     background:'#7FFF00';
     height:'50px';
@@ -18,7 +36,7 @@
     font-size:'large';
     margin-top:'10%';
     align-self:'center';
-    margin-left:'50%';
+    margin-left: '50%';
 }
 
 .totalPurchase{

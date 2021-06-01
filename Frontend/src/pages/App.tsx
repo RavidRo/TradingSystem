@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { BrowserRouter } from 'react-router-dom';
 import { createMuiTheme, ThemeProvider } from '@material-ui/core';
+import DateFnsUtils from '@date-io/date-fns';
 
 import Navbar from '../components/Navbar';
 import Routes from './Routes';
@@ -8,6 +9,7 @@ import Routes from './Routes';
 import { Product, StoreToSearchedProducts, notificationTime } from '../types';
 import useAPI from '../hooks/useAPI';
 import { AdminsContext, CookieContext, UsernameContext } from '../contexts';
+import { MuiPickersUtilsProvider } from '@material-ui/pickers';
 
 const theme = createMuiTheme({
 	typography: {
@@ -48,7 +50,10 @@ function App() {
 					client.send(cookie); // have to be here - else socket.receive in server gets stuck
 				};
 				client.onmessage = (messageEvent) => {
-					setNotifications((old)=>[...old, [messageEvent.data, new Date().toUTCString()]]);
+					setNotifications((old) => [
+						...old,
+						[messageEvent.data, new Date().toUTCString()],
+					]);
 					// alert('received socket message');
 				};
 				client.onclose = () => {
@@ -221,41 +226,43 @@ function App() {
 	// }, []);
 
 	return cookie !== '' ? (
-		<ThemeProvider theme={theme}>
-			<CookieContext.Provider value={cookie}>
-				<AdminsContext.Provider value={require('../../../config.json').admins}>
-					<UsernameContext.Provider value={username}>
-						<BrowserRouter>
-							<Navbar
-								signedIn={signedIn}
-								storesToProducts={storesToProducts.current}
-								propHandleDelete={handleDeleteProduct}
-								notifications={notifications}
-								changeQuantity={changeQuantity}
-								logout={() => {
-									setSignedIn(false);
-									setCookie('');
-									getCookie();
-								}}
-								propUpdateStores={propUpdateStores}
-							/>
-							<Routes
-								handleDeleteProduct={handleDeleteProduct}
-								setSignedIn={setSignedIn}
-								setUsername={setUsername}
-								signedIn={signedIn}
-								storesToProducts={storesToProducts}
-								changeQuantity={changeQuantity}
-								getPropsCookie={getPropsCookie}
-								propHandleAdd={addProductToPopup}
-								propUpdateStores={propUpdateStores}
-								propsAddProduct={addProductToPopup}
-							/>
-						</BrowserRouter>
-					</UsernameContext.Provider>
-				</AdminsContext.Provider>
-			</CookieContext.Provider>
-		</ThemeProvider>
+		<MuiPickersUtilsProvider utils={DateFnsUtils}>
+			<ThemeProvider theme={theme}>
+				<CookieContext.Provider value={cookie}>
+					<AdminsContext.Provider value={require('../../../config.json').admins}>
+						<UsernameContext.Provider value={username}>
+							<BrowserRouter>
+								<Navbar
+									signedIn={signedIn}
+									storesToProducts={storesToProducts.current}
+									propHandleDelete={handleDeleteProduct}
+									notifications={notifications}
+									changeQuantity={changeQuantity}
+									logout={() => {
+										setSignedIn(false);
+										setCookie('');
+										getCookie();
+									}}
+									propUpdateStores={propUpdateStores}
+								/>
+								<Routes
+									handleDeleteProduct={handleDeleteProduct}
+									setSignedIn={setSignedIn}
+									setUsername={setUsername}
+									signedIn={signedIn}
+									storesToProducts={storesToProducts}
+									changeQuantity={changeQuantity}
+									getPropsCookie={getPropsCookie}
+									propHandleAdd={addProductToPopup}
+									propUpdateStores={propUpdateStores}
+									propsAddProduct={addProductToPopup}
+								/>
+							</BrowserRouter>
+						</UsernameContext.Provider>
+					</AdminsContext.Provider>
+				</CookieContext.Provider>
+			</ThemeProvider>
+		</MuiPickersUtilsProvider>
 	) : (
 		<h1>LOADING</h1>
 	);
