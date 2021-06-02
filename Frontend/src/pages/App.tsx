@@ -42,13 +42,20 @@ function App() {
 	useEffect(() => {
 		getCookie().then((cookie) => {
 			if (cookie) {
-				const client = new WebSocket('ws://127.0.0.1:5000/connect');
+				const domain =
+					process.env.NODE_ENV === 'production'
+						? 'trading-system-workshop.herokuapp.com'
+						: '127.0.0.1:5000';
+				const client = new WebSocket(`ws://${domain}/connect`);
 				client.onopen = () => {
 					// alert('WebSocket Client Opened');
 					client.send(cookie); // have to be here - else socket.receive in server gets stuck
 				};
 				client.onmessage = (messageEvent) => {
-					setNotifications((old)=>[...old, [messageEvent.data, new Date().toUTCString()]]);
+					setNotifications((old) => [
+						...old,
+						[messageEvent.data, new Date().toUTCString()],
+					]);
 					// alert('received socket message');
 				};
 				client.onclose = () => {
