@@ -75,13 +75,13 @@ const ConditionsList: FC<ConditionsListProps> = ({ openTab, products, storeId })
 				)
 				.then(() => {
 					getConditions();
-					confirm('Created!', 'New discount was created successfully (0-0)');
+					confirm('Created!', 'New condition was created successfully (0-0)');
 				});
 		openTab(() => <CreateConditionForm onSubmit={onAddCondition} products={products} />, '');
 	};
 
 	const onEditConditionForm = (condition: Condition) => {
-		const successMessage = 'Discount was edited successfully';
+		const successMessage = 'Condition was edited successfully';
 		const onEditConditionSimple = confirmOnSuccess(
 			(newCondition: ConditionSimple) =>
 				editConditionAPI
@@ -141,10 +141,10 @@ const ConditionsList: FC<ConditionsListProps> = ({ openTab, products, storeId })
 		rootCondition && (
 			<GenericList
 				data={(rootCondition as BasicRule).children}
-				header="Users can buy products if:"
+				header='Users can buy products if:'
 				narrow
 				onCreate={() => openConditionForm(rootCondition.id)}
-				createTxt="+ Add condition"
+				createTxt='+ Add condition'
 				onDrop={onDropRoot}
 			>
 				{(condition: Condition) => (
