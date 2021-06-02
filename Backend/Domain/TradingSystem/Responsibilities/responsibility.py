@@ -49,6 +49,9 @@ class Responsibility(Parsable):
         self.__subscriber = subscriber
         if subscriber:
             self._store.subscribe(subscriber)
+            subscriber.notify(
+                f"You have been appointer to {store.get_name()} as {self.__class__.__name__}"
+            )
         self._appointed: list[Responsibility] = []
 
     # 4.1
