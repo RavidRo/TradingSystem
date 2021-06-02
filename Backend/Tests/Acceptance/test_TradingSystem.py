@@ -2048,7 +2048,8 @@ def test_connect_after_get_notification():
         first_queue_before_connect_empty
         and not pending_before_connect_empty
         and not first_owner_queue.empty()
-        and system.empty_notifications(cookie)
+        # I (Ravid) am adding a not here. The new user got notifications for being appointed and removed.
+        and not system.empty_notifications(cookie)
     )
 
 
