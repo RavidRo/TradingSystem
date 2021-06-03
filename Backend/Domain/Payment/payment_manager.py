@@ -13,7 +13,6 @@ class PaymentManager:
         try:
             payment_response = self.__cashing_adapter.pay(price, payment_details)
         except Exception as e:
-            print(e)
             critical(e)
             return Response(success=False, msg="Something went wrong with Outside Cashing")
         if payment_response.success:
@@ -24,7 +23,6 @@ class PaymentManager:
                     self.__rollback(transaction_id)
                 return supply_response
             except Exception as e:
-                print(e)
                 critical(e)
                 self.__rollback(transaction_id)
                 return Response(success=False, msg="Something went wrong with Outside Supplyment")

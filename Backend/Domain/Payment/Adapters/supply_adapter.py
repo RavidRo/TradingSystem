@@ -18,6 +18,7 @@ class SupplyAdapter:
         return requests.post(
             Settings.get_instance().get_supply_system(),
             data=({"action_type": action_type} | paramaters),
+            timeout=4,
         )
 
     def __send_handshake(self):
@@ -25,7 +26,8 @@ class SupplyAdapter:
 
     def __send_supply(self, name, address, city, country, zip):
         return self.__send(
-            "supply", {name: name, address: address, city: city, country: country, zip: zip}
+            "supply",
+            {"name": name, "address": address, "city": city, "country": country, "zip": zip},
         )
 
     def __send_cancel_supply(self, transaction_id):

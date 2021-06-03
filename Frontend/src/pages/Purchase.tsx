@@ -42,7 +42,7 @@ const Purchase: FC<PurchaseProps> = ({ location }) => {
 	);
 
 	// address: name, address, city, country, zip
-	// purchase_details: card_number, month, year, holder, cvv, id
+	// purchase_details: card_number, month, year, holder, ccv, id
 
 	// Address
 	const [name, setName] = useState<string>('');
@@ -54,7 +54,7 @@ const Purchase: FC<PurchaseProps> = ({ location }) => {
 	// Payment
 	const [cardNumber, setCardNumber] = useState<string>('');
 	const [holderName, setHolderName] = useState<string>('');
-	const [cvv, setCvv] = useState<string>('');
+	const [ccv, setCcv] = useState<string>('');
 	const [id, setId] = useState<string>('');
 	const [expiringDate, setExpiringDate] = useState(new Date());
 
@@ -75,7 +75,7 @@ const Purchase: FC<PurchaseProps> = ({ location }) => {
 				{
 					card_number: cardNumber,
 					holder: holderName,
-					cvv,
+					ccv: ccv,
 					id,
 					month: expiringDate.getMonth(),
 					year: expiringDate.getFullYear(),
@@ -109,7 +109,7 @@ const Purchase: FC<PurchaseProps> = ({ location }) => {
 							width='30%'
 							numeric
 						/>
-						<MyTextField name='CVV' setValue={setCvv} width='30%' numeric />
+						<MyTextField name='CCV' setValue={setCcv} width='30%' numeric />
 						<DatePicker
 							variant='inline'
 							openTo='year'

@@ -18,15 +18,23 @@ class CashingAdapter:
         return requests.post(
             Settings.get_instance().get_payment_system(),
             data=({"action_type": action_type} | paramaters),
+            timeout=4,
         )
 
     def __send_handshake(self):
         return self.__send("handshake")
 
-    def __send_pay(self, card_number, month, year, holder, cvv, id):
+    def __send_pay(self, card_number, month, year, holder, ccv, id):
         return self.__send(
             "pay",
-            {card_number: card_number, month: month, year: year, holder: holder, cvv: cvv, id: id},
+            {
+                "card_number": card_number,
+                "month": month,
+                "year": year,
+                "holder": holder,
+                "ccv": ccv,
+                "id": id,
+            },
         )
 
     def __send_cancel_pay(self, transaction_id):
@@ -44,7 +52,7 @@ class CashingAdapter:
             or "month" not in payment_details
             or "year" not in payment_details
             or "holder" not in payment_details
-            or "cvv" not in payment_details
+            or "ccv" not in payment_details
             or "id" not in payment_details
         ):
             return Response(False, msg="Payment details was missing a required argument")
@@ -54,7 +62,7 @@ class CashingAdapter:
             payment_details["month"],
             payment_details["year"],
             payment_details["holder"],
-            payment_details["cvv"],
+            payment_details["ccv"],
             payment_details["id"],
         )
         if response.status_code != 200 or response.text == "-1":

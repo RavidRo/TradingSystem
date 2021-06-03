@@ -20,19 +20,19 @@ export type PurchaseDetails = {
 	username: string;
 	store_name: string;
 	product_names: string[];
-	date: Date;
+	date: string;
 	total_price: number;
 };
 export type Offer = {
 	id: string;
-    price: number;
-    status: string;
-    product_id: string;
-    product_name: string;
-	store_id:string;
+	price: number;
+	status: string;
+	product_id: string;
+	product_name: string;
+	store_id: string;
 	store_name: string;
-    username: string;
-}
+	username: string;
+};
 
 export type Permission =
 	| 'manage products'
