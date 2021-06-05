@@ -1,10 +1,10 @@
 from threading import Lock
 
 from sqlalchemy import Table, Column, String, Boolean, insert, ForeignKey, Date, Float, ARRAY
-from sqlalchemy.orm import mapper, relationship
+from sqlalchemy.orm import mapper
 
 from Backend.DataBase.IHandler import IHandler
-from Backend.DataBase.database import Base, Session
+from Backend.DataBase.database import Base, session
 from Backend.Domain.TradingSystem.purchase_details import PurchaseDetails
 from Backend.response import Response, PrimitiveParsable
 from Backend.rw_lock import ReadWriteLock
@@ -47,7 +47,6 @@ class PurchaseDetailsHandler(IHandler):
 
     def save(self, obj: PurchaseDetails, **kwargs) -> Response[None]:
         self._rwlock.acquire_write()
-        session = Session(expire_on_commit=False)
         res = Response(True)
         try:
             stmt = insert(self.__purchase_details).values(username=obj.username,
@@ -62,7 +61,6 @@ class PurchaseDetailsHandler(IHandler):
             session.rollback()
             res = Response(False, msg=str(e))
         finally:
-            session.close()
             self._rwlock.release_write()
             return res
 
@@ -73,7 +71,6 @@ class PurchaseDetailsHandler(IHandler):
     """This will be used by User to load all of his purchases"""
     def load_by_username(self, user_name: str):
         self._rwlock.acquire_write()
-        session = Session(expire_on_commit=False)
         res = Response(True)
         try:
             user = session.query(PurchaseDetails).filter(PurchaseDetails.username == user_name).all()
@@ -83,14 +80,12 @@ class PurchaseDetailsHandler(IHandler):
             session.rollback()
             res = Response(False, PrimitiveParsable(str(e)))
         finally:
-            session.close()
             self._rwlock.release_write()
             return res
 
     """This will be used by Store to load all its purchases"""
     def load_by_store_id(self, store_id: str):
         self._rwlock.acquire_write()
-        session = Session(expire_on_commit=False)
         res = Response(True)
         try:
             user = session.query(PurchaseDetails).filter(PurchaseDetails.store_id == store_id).all()
@@ -100,7 +95,6 @@ class PurchaseDetailsHandler(IHandler):
             session.rollback()
             res = Response(False, PrimitiveParsable(str(e)))
         finally:
-            session.close()
             self._rwlock.release_write()
             return res
 
@@ -113,7 +107,6 @@ class PurchaseDetailsHandler(IHandler):
 
     def load_all(self):
         self._rwlock.acquire_write()
-        session = Session(expire_on_commit=False)
         res = Response(True)
         try:
             user = session.query(PurchaseDetails).all()
@@ -123,6 +116,5 @@ class PurchaseDetailsHandler(IHandler):
             session.rollback()
             res = Response(False, PrimitiveParsable(str(e)))
         finally:
-            session.close()
             self._rwlock.release_write()
             return res

@@ -2,7 +2,7 @@ from sqlalchemy import Table, Column, String, Float, Integer, CheckConstraint, i
 from sqlalchemy.orm import mapper
 
 from Backend.DataBase.IHandler import IHandler
-from Backend.DataBase.database import Base, Session
+from Backend.DataBase.database import Base, session
 from Backend.Domain.TradingSystem.product import Product
 from Backend.response import Response, ParsableList
 
@@ -44,7 +44,6 @@ class ProductHandler(IHandler):
 
     def save(self, obj: Product, **kwargs) -> Response[None]:
         self._rwlock.acquire_write()
-        session = Session()
         res = Response(True)
         try:
             stmt = insert(self.__products).values(product_id=obj.get_id(),
@@ -60,13 +59,11 @@ class ProductHandler(IHandler):
             session.rollback()
             res = Response(False, msg=str(e))
         finally:
-            session.close()
             self._rwlock.release_write()
             return res
 
     def remove(self, obj, **kwargs) -> Response[None]:
         self._rwlock.acquire_write()
-        session = Session()
         res = Response(True)
         try:
             session.query(Product).filter_by(_Product__id=obj.get_id()).delete()
@@ -75,13 +72,11 @@ class ProductHandler(IHandler):
             session.rollback()
             res = Response(False, msg=str(e))
         finally:
-            session.close()
             self._rwlock.release_write()
             return res
 
     def update(self, id, update_dict):
         self._rwlock.acquire_write()
-        session = Session()
         res = Response(True)
         try:
             session.query(Product).filter_by(_Product__id=id).update(update_dict)
@@ -90,13 +85,11 @@ class ProductHandler(IHandler):
             session.rollback()
             res = Response(False, msg=str(e))
         finally:
-            session.close()
             self._rwlock.release_write()
             return res
 
     def load(self, id):
         self._rwlock.acquire_read()
-        session = Session(expire_on_commit=False)
         res = Response(True)
         try:
             product = session.query(Product).get(id)
@@ -106,13 +99,11 @@ class ProductHandler(IHandler):
             session.rollback()
             res = Response(False, msg=str(e))
         finally:
-            session.close()
             self._rwlock.release_read()
             return res
 
     def load_all(self):
         self._rwlock.acquire_read()
-        session = Session(expire_on_commit=False)
         res = Response(True)
         try:
             products = session.query(Product).all()
@@ -122,13 +113,11 @@ class ProductHandler(IHandler):
             session.rollback()
             res = Response(False, msg=str(e))
         finally:
-            session.close()
             self._rwlock.release_read()
             return res
 
     def load_products_by_store(self, store_id):
         self._rwlock.acquire_read()
-        session = Session(expire_on_commit=False)
         res = Response(True)
         try:
             products = session.query(Product).filter_by(store_id=store_id).all()
@@ -138,7 +127,6 @@ class ProductHandler(IHandler):
             session.rollback()
             res = str(e)
         finally:
-            session.close()
             self._rwlock.release_read()
             return res
 

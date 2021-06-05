@@ -5,7 +5,7 @@ from sqlalchemy.orm.collections import attribute_mapped_collection
 
 from Backend.DataBase.IHandler import IHandler
 from threading import Lock
-from Backend.DataBase.database import Base, Session
+from Backend.DataBase.database import Base, session
 from Backend.Domain.TradingSystem.Responsibilities.founder import Founder
 from Backend.Domain.TradingSystem.Responsibilities.manager import Manager
 from Backend.Domain.TradingSystem.Responsibilities.owner import Owner
@@ -77,7 +77,6 @@ class ResponsibilitiesHandler(IHandler):
 
     def update_child(self, appointer_username, store_id, responsibility):
         self._rwlock.acquire_write()
-        session = Session(expire_on_commit=False)
         res = Response(True)
         try:
             appointer: Responsibility = session.query(Responsibility).filter_by(username=appointer_username, store_id=store_id).one()
@@ -87,7 +86,6 @@ class ResponsibilitiesHandler(IHandler):
             session.rollback()
             res = Response(False, msg=str(e))
         finally:
-            session.close()
             self._rwlock.release_write()
             return res
 

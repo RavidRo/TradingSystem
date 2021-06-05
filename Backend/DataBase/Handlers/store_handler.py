@@ -8,7 +8,7 @@ from Backend.DataBase.Handlers.product_handler import ProductHandler
 from Backend.DataBase.Handlers.purchase_details_handler import PurchaseDetailsHandler
 from Backend.DataBase.Handlers.responsibilities_handler import ResponsibilitiesHandler
 from Backend.DataBase.IHandler import IHandler
-from Backend.DataBase.database import Base, Session, engine
+from Backend.DataBase.database import Base, session, engine
 from Backend.Domain.TradingSystem.Responsibilities.founder import Founder
 from Backend.Domain.TradingSystem.Responsibilities.responsibility import Responsibility
 from Backend.Domain.TradingSystem.States.member import Member
@@ -50,7 +50,6 @@ class StoreHandler(IHandler):
 
     def save(self, obj: Store, **kwargs) -> Response[None]:
         self._rwlock.acquire_write()
-        session = Session(expire_on_commit=False)
         res = Response(True)
         try:
             session.add(obj)
@@ -70,7 +69,6 @@ class StoreHandler(IHandler):
             session.rollback()
             res = Response(False, msg=str(e))
         finally:
-            session.close()
             self._rwlock.release_write()
             return res
 
@@ -82,7 +80,6 @@ class StoreHandler(IHandler):
 
     def load(self, id):
         self._rwlock.acquire_read()
-        session = Session(expire_on_commit=False)
         res = Response(True)
         try:
             store = session.query(Store).get(id)
@@ -106,13 +103,11 @@ class StoreHandler(IHandler):
             session.rollback()
             res = Response(False, msg=str(e))
         finally:
-            session.close()
             self._rwlock.release_read()
             return res
 
     def load_all(self):
         self._rwlock.acquire_read()
-        session = Session(expire_on_commit=False)
         res = Response(True)
         try:
             stores = session.query(Store).all()
@@ -144,7 +139,6 @@ class StoreHandler(IHandler):
             session.rollback()
             res = Response(False, msg=str(e))
         finally:
-            session.close()
             self._rwlock.release_read()
             return res
 

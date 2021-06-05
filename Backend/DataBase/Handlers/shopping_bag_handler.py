@@ -3,7 +3,7 @@ from sqlalchemy import Table, Column, String, Integer, ForeignKey, CheckConstrai
 from sqlalchemy.orm import mapper, relationship
 
 from Backend.DataBase.IHandler import IHandler
-from Backend.DataBase.database import Base, Session
+from Backend.DataBase.database import Base, session
 from Backend.Domain.TradingSystem.shopping_bag import ShoppingBag
 from Backend.Domain.TradingSystem.shopping_cart import ShoppingCart
 from Backend.Domain.TradingSystem.store import Store
@@ -50,7 +50,6 @@ class ShoppingBagHandler(IHandler):
 
     def save(self, obj: ShoppingBag, **kwargs) -> Response[None]:
         self._rwlock.acquire_write()
-        session = Session()
         res = Response(True)
         try:
             stmt = insert(self.__shopping_bags).values(store_id=obj.get_store_ID(),
@@ -69,13 +68,11 @@ class ShoppingBagHandler(IHandler):
             session.rollback()
             res = Response(False, msg=str(e))
         finally:
-            session.close()
             self._rwlock.release_write()
             return res
 
     def remove(self, obj: ShoppingBag, **kwargs) -> Response[None]:
         self._rwlock.acquire_write()
-        session = Session()
         res = Response(True)
         try:
             session.query(ProductInShoppingBag).filter_by(store_id=obj.get_store_ID(), username=kwargs['username']).delete()
@@ -85,7 +82,6 @@ class ShoppingBagHandler(IHandler):
             session.rollback()
             res = Response(False, msg=str(e))
         finally:
-            session.close()
             self._rwlock.release_write()
             return res
 
@@ -100,7 +96,6 @@ class ShoppingBagHandler(IHandler):
 
     def update_quantity(self, username, store_id, product_id, new_quantity):
         self._rwlock.acquire_write()
-        session = Session()
         res = Response(True)
         try:
             product_in_bag = session.query(ProductInShoppingBag).filter_by(store_id=store_id, username=username, product_id=product_id).one()
@@ -110,13 +105,11 @@ class ShoppingBagHandler(IHandler):
             session.rollback()
             res = Response(False, msg=str(e))
         finally:
-            session.close()
             self._rwlock.release_write()
             return res
 
     def load_cart(self, username):
         self._rwlock.acquire_read()
-        session = Session()
         res = Response(True)
         try:
             bags: list[ShoppingBag] = session.query(ShoppingBag).filter_by(username=username).all()
@@ -133,7 +126,6 @@ class ShoppingBagHandler(IHandler):
             session.rollback()
             res = Response(False, msg=str(e))
         finally:
-            session.close()
             self._rwlock.release_read()
             return res
 

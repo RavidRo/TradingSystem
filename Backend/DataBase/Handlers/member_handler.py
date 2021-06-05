@@ -2,7 +2,7 @@ from threading import Lock
 from sqlalchemy import Table, Column, String, Boolean, insert, ARRAY, ForeignKey
 from sqlalchemy.orm import mapper, relationship, backref
 from Backend.DataBase.IHandler import IHandler
-from Backend.DataBase.database import Base, Session
+from Backend.DataBase.database import Base, session
 from Backend.Domain.TradingSystem.Responsibilities.founder import Founder
 from Backend.Domain.TradingSystem.Responsibilities.responsibility import Responsibility
 from Backend.Domain.TradingSystem.States.member import Member
@@ -48,7 +48,6 @@ class MemberHandler(IHandler):
 
     def save(self, obj, **kwargs) -> Response[None]:
         self._rwlock.acquire_write()
-        session = Session(expire_on_commit=False)
         res = Response(True)
         try:
             session.add(obj)
@@ -57,14 +56,12 @@ class MemberHandler(IHandler):
             session.rollback()
             res = Response(False, msg=str(e))
         finally:
-            session.close()
             self._rwlock.release_write()
             return res
 
     # region save
     def save_user_credentials(self, username: str, password: str, is_admin=False):
         self._rwlock.acquire_write()
-        session = Session(expire_on_commit=False)
         res = Response(True)
         try:
             stmt = insert(self.__credentials).values(username=username,
@@ -76,7 +73,6 @@ class MemberHandler(IHandler):
             session.rollback()
             res = Response(False, msg=str(e))
         finally:
-            session.close()
             self._rwlock.release_write()
             return res
 
@@ -87,7 +83,6 @@ class MemberHandler(IHandler):
     # TODO: don't know if it's a use_case but need to check
     def remove_user(self, username):
         self._rwlock.acquire_write()
-        session = Session(expire_on_commit=False)
         res = Response(True)
         try:
             session.query(self.__members).filter(self.__members.c.username == username).delete()
@@ -96,13 +91,11 @@ class MemberHandler(IHandler):
             session.rollback()
             res = Response(False, msg=str(e))
         finally:
-            session.close()
             self._rwlock.release_write()
             return res
 
     # def remove_responsibility(self, username: str, responsibility: Responsibility):
     #     self._rwlock.acquire_write()
-    #     session = Session(expire_on_commit=False)
     #     res = Response(True)
     #     try:
     #         member = session.query(Member).filter_by(_username=username).one()
@@ -112,7 +105,6 @@ class MemberHandler(IHandler):
     #         session.rollback()
     #         res = Response(False, msg=str(e))
     #     finally:
-    #         session.close()
     #         self._rwlock.release_write()
     #         return res
     #
@@ -123,7 +115,6 @@ class MemberHandler(IHandler):
     # # TODO: check if append here is on same object as in the domain!
     # def update_responsibility(self, username: str, responsibility: Responsibility):
     #     self._rwlock.acquire_write()
-    #     session = Session(expire_on_commit=False)
     #     res = Response(True)
     #     try:
     #         member = session.query(Member).filter_by(_username=username).one()
@@ -134,13 +125,11 @@ class MemberHandler(IHandler):
     #         session.rollback()
     #         res = Response(False, msg=str(e))
     #     finally:
-    #         session.close()
     #         self._rwlock.release_write()
     #         return res
 
     def update_notifications(self, username: str, notifications: list[str]):
         self._rwlock.acquire_write()
-        session = Session(expire_on_commit=False)
         res = Response(True)
         try:
             member = session.query(Member).filter_by(_username=username).one()
@@ -150,7 +139,6 @@ class MemberHandler(IHandler):
             session.rollback()
             res = Response(False, msg=str(e))
         finally:
-            session.close()
             self._rwlock.release_write()
             return res
 
@@ -160,7 +148,6 @@ class MemberHandler(IHandler):
 
     def load(self, username):
         self._rwlock.acquire_write()
-        session = Session(expire_on_commit=False)
         res = Response(True)
         try:
             user = session.query(Member).get(username)
@@ -170,13 +157,11 @@ class MemberHandler(IHandler):
             session.rollback()
             res = Response(False, msg=str(e))
         finally:
-            session.close()
             self._rwlock.release_write()
             return res
 
     def load_all(self):
         self._rwlock.acquire_write()
-        session = Session(expire_on_commit=False)
         res = Response(True)
         try:
             user = session.query(self.__members).all()
@@ -186,6 +171,5 @@ class MemberHandler(IHandler):
             session.rollback()
             res = Response(False, msg=str(e))
         finally:
-            session.close()
             self._rwlock.release_write()
             return res

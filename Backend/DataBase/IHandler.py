@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 
-from Backend.DataBase.database import Session
+from Backend.DataBase.database import session
 from Backend.response import Response, PrimitiveParsable
 from Backend.rw_lock import ReadWriteLock
 
@@ -12,7 +12,6 @@ class IHandler(ABC):
 
     def save(self, obj, **kwargs) -> Response[None]:
         self._rwlock.acquire_write()
-        session = Session(expire_on_commit=False)
         res = Response(True)
         try:
             session.add(obj)
@@ -21,12 +20,10 @@ class IHandler(ABC):
             session.rollback()
             res = Response(False, msg=str(e))
         finally:
-            session.close()
             self._rwlock.release_write()
             return res
 
     def remove(self, obj, **kwargs) -> Response[None]:
-        session = Session(expire_on_commit=False)
         self._rwlock.acquire_write()
         res = Response(True)
         try:
@@ -36,7 +33,6 @@ class IHandler(ABC):
             session.rollback()
             res = Response(False, msg=str(e))
         finally:
-            session.close()
             self._rwlock.release_write()
             return res
 
