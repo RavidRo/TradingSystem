@@ -1,5 +1,5 @@
 from threading import Lock
-from sqlalchemy import Table, Column, String, Boolean, insert, ARRAY, ForeignKey
+from sqlalchemy import Table, Column, String, Boolean, insert, ARRAY, ForeignKey, select
 from sqlalchemy.orm import mapper, relationship, backref
 from Backend.DataBase.IHandler import IHandler
 from Backend.DataBase.database import Base, session
@@ -20,7 +20,7 @@ class MemberHandler(IHandler):
         super().__init__(ReadWriteLock())
         self.__credentials = Table("credentials", Base.metadata,
                                    Column('username', String(50), primary_key=True),
-                                   Column('password', String(50)),
+                                   Column('password', String(256)),
                                    Column('is_admin', Boolean(20)))
 
         self.__members = Table('members', Base.metadata,
@@ -146,8 +146,23 @@ class MemberHandler(IHandler):
 
     # region load
 
+    def load_credentials(self, username):
+        self._rwlock.acquire_read()
+        res = Response(True)
+        try:
+            stmt = select([self.__credentials.c.username, self.__credentials.c.password, self.__credentials.c.is_admin]).where(self.__credentials.c.username == username)
+            res = session.execute(stmt).one()
+            session.commit()
+            res = Response(True, res)
+        except Exception as e:
+            session.rollback()
+            res = Response(False, msg=str(e))
+        finally:
+            self._rwlock.release_read()
+            return res
+
     def load(self, username):
-        self._rwlock.acquire_write()
+        self._rwlock.acquire_read()
         res = Response(True)
         try:
             user = session.query(Member).get(username)
@@ -157,11 +172,11 @@ class MemberHandler(IHandler):
             session.rollback()
             res = Response(False, msg=str(e))
         finally:
-            self._rwlock.release_write()
+            self._rwlock.release_read()
             return res
 
     def load_all(self):
-        self._rwlock.acquire_write()
+        self._rwlock.acquire_read()
         res = Response(True)
         try:
             user = session.query(self.__members).all()
@@ -171,5 +186,5 @@ class MemberHandler(IHandler):
             session.rollback()
             res = Response(False, msg=str(e))
         finally:
-            self._rwlock.release_write()
+            self._rwlock.release_read()
             return res

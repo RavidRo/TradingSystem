@@ -45,24 +45,26 @@ class PurchaseDetailsHandler(IHandler):
 
     # region save
 
-    def save(self, obj: PurchaseDetails, **kwargs) -> Response[None]:
-        self._rwlock.acquire_write()
-        res = Response(True)
-        try:
-            stmt = insert(self.__purchase_details).values(username=obj.username,
-                                                          store_id=obj.store_id,
-                                                          store_name=obj.store_name,
-                                                          product_names=obj.product_names,
-                                                          date=obj.date,
-                                                          total_price=obj.total_price)
-            session.execute(stmt)
-            session.commit()
-        except Exception as e:
-            session.rollback()
-            res = Response(False, msg=str(e))
-        finally:
-            self._rwlock.release_write()
-            return res
+    # def save(self, obj: PurchaseDetails, **kwargs) -> Response[None]:
+    #     self._rwlock.acquire_write()
+    #     session = Session(expire_on_commit=False)
+    #     res = Response(True)
+    #     try:
+    #         stmt = insert(self.__purchase_details).values(username=obj.username,
+    #                                                       store_id=obj.store_id,
+    #                                                       store_name=obj.store_name,
+    #                                                       product_names=obj.product_names,
+    #                                                       date=obj.date,
+    #                                                       total_price=obj.total_price)
+    #         session.execute(stmt)
+    #         session.commit()
+    #     except Exception as e:
+    #         session.rollback()
+    #         res = Response(False, msg=str(e))
+    #     finally:
+    #         session.close()
+    #         self._rwlock.release_write()
+    #         return res
 
     # endregion
 

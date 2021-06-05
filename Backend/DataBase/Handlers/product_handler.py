@@ -1,4 +1,4 @@
-from sqlalchemy import Table, Column, String, Float, Integer, CheckConstraint, insert, ARRAY
+from sqlalchemy import Table, Column, String, Float, Integer, CheckConstraint, insert, ARRAY, ForeignKey
 from sqlalchemy.orm import mapper
 
 from Backend.DataBase.IHandler import IHandler
@@ -22,7 +22,7 @@ class ProductHandler(IHandler):
                                 Column('product_name', String(50)),
                                 Column('category', String(50)),
                                 Column('price', Float),
-                                Column('store_id', String(50)),     # add foreign key to stores when it will be created
+                                Column('store_id', String(50), ForeignKey("stores.store_id")),     # add foreign key to stores when it will be created
                                 Column('quantity', Integer, CheckConstraint('quantity>0')),
                                 Column('keywords', ARRAY(String(30)))
                                 )
@@ -32,7 +32,8 @@ class ProductHandler(IHandler):
             '_Product__product_name': self.__products.c.product_name,
             '_Product__category': self.__products.c.category,
             '_Product__price': self.__products.c.price,
-            '_Product__keywords': self.__products.c.keywords
+            '_Product__keywords': self.__products.c.keywords,
+            'quantity': self.__products.c.quantity,
         })
 
     @staticmethod

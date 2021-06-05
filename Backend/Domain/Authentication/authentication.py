@@ -1,38 +1,55 @@
 import threading
 from werkzeug.security import generate_password_hash, check_password_hash
 
+from Backend.DataBase.Handlers.member_handler import MemberHandler
 from Backend.response import Response, PrimitiveParsable
 
-users = {}
+users = dict()
 register_lock = threading.Lock()
+member_handler = MemberHandler.get_instance()
 
 
-def register(username, password) -> Response[None]:
+def register(username, password, is_admin=False) -> Response[None]:
     # We don't want to register to users with the same username
     with register_lock:
         if username in users:
             return Response(False, msg="username already exists")
+        credentials = member_handler.load_credentials(username)
+        if not credentials.succeeded():
+            res = __add_user_to_db(username, password, is_admin)
+            if not res:
+                return Response(False, msg="DB error")
+        else:
+            users[username] = {'password': credentials.get_obj()[1],
+                               'is_admin': credentials.get_obj()[2]}
+            return Response(False, msg="username already_exists")
 
-        __add_user_to_db(username, password)
         return Response(True, msg="registration succeeded")
 
 
 # Fail if login failed and returns true if the user logged into is an admin
 def login(username, password) -> Response[PrimitiveParsable[bool]]:
     if username not in users:
-        return Response(False, msg="username doesn't exist in the system")
+        credentials = member_handler.load_credentials(username)
+        if not credentials.succeeded():
+            return Response(False, msg="username doesn't exist in the system")
+        users[username] = {'password': credentials.get_obj()[1],
+                           'is_admin': credentials.get_obj()[2]}
 
     if not __is_password_match(password, username):
-        return Response(False, msg="password incorrect")
+        return Response(False, msg="incorrect password")
 
-    # is_admin = self.__is_username_admin(username)
     return Response(True, msg="login succeeded")
 
 
-def __add_user_to_db(username, password) -> None:
-    users[username] = {
-        "password": generate_password_hash(password, method="sha256")
-    }
+def __add_user_to_db(username, password, is_admin) -> bool:
+    res = member_handler.save_user_credentials(username, generate_password_hash(password, method="sha256"), is_admin)
+    if res.succeeded():
+        users[username] = {'password': generate_password_hash(password, method="sha256"),
+                           'is_admin': is_admin}
+        return True
+    else:
+        return False
 
 
 def __is_password_match(given_password, username) -> bool:
