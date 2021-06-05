@@ -19,23 +19,15 @@ if __name__ == '__main__':
     Base.metadata.create_all(engine)
 
     user = User()
-    user.register("user", "password")
-    res = member_handler.save_user_credentials("user", "password")
+    res = user.register("user", "password")
     if not res.succeeded():
-        print("save credentials: " + res.get_msg())
-    user.login("user", "password")
-    res = member_handler.save(user.state)
+        print("register: " + res.get_msg())
+    res = user.login("user", "password")
     if not res.succeeded():
-        print("save user: " + res.get_msg())
+        print("login: " + res.get_msg())
     store_res = user.create_store("The Store")
-    if res.succeeded():
-        res = responsibility_handler.save(store_res.get_obj().get_responsibility())
-        if not res.succeeded():
-            print("update responsibility: " + res.get_msg())
-
-        res = store_handler.save(store_res.get_obj())
-        if not res.succeeded():
-            print("save store: " + res.get_msg())
+    if not store_res.succeeded():
+        print("open_store: " + store_res.get_msg())
 
     user2 = User()
     user2.register("user2", "password2")

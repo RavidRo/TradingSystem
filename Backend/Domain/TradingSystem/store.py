@@ -28,6 +28,8 @@ class Store(Parsable):
         self._products_lock = ReadWriteLock()
         self.__history_lock = ReadWriteLock()
         self.__publisher: Publisher = Publisher()
+        from Backend.DataBase.Handlers.store_handler import StoreHandler
+        self.__store_handler = StoreHandler.get_instance()
 
     def get_discount_policy(self):
         return self.__discount_policy
@@ -123,7 +125,10 @@ class Store(Parsable):
             product_name=product_name, category=category, price=price, keywords=keywords
         )
         product_id = product.get_id()
+
+        self.__store_handler.update_quantity(product, quantity)
         self._products_to_quantities[product_id] = (product, quantity)
+        self.__store_handler.update(self.get_id(), {'_products_to_quantities': self._products_to_quantities})
         self._products_lock.release_write()
         return Response(True, product_id, msg=f"The product {product_name} successfully added")
 
@@ -237,6 +242,9 @@ class Store(Parsable):
 
     def set_responsibility(self, responsibility: Responsibility):
         self.__responsibility = responsibility
+
+    def save(self):
+        return self.__store_handler.save(self)
 
     def check_existing_product(self, product_name: str):
         for (prod, quantity) in self._products_to_quantities.values():

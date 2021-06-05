@@ -10,7 +10,7 @@ def register_admins() -> None:
     with open("config.json", "r") as read_file:
         data = json.load(read_file)
         for username in data["admins"]:
-            authentication.register(username, data["admin-password"])
+            authentication.register(username, data["admin-password"], True)
             admins.append(username)
 
 

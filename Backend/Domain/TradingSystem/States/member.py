@@ -20,6 +20,9 @@ class Member(UserState):
     def add_responsibility(self, responsibility, store_id):
         self.__responsibilities[store_id] = responsibility
 
+    def remove_responsibility(self, store_id):
+        del self.__responsibilities[store_id]
+
     def get_purchase_details(self):
         return self.__purchase_details
 
@@ -77,6 +80,10 @@ class Member(UserState):
     def open_store(self, store_name) -> Response:
         store = Store(store_name)
         store.set_responsibility(Founder(self, store, self._user))
+        res = store.save()
+        if not res.succeeded():
+            self.remove_responsibility(store.get_id())
+            return Response(False, msg="DB Error")
         return Response[Store](True, obj=store, msg="Store opened successfully")
 
     def get_purchase_history(self):
