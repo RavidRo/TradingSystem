@@ -25,8 +25,14 @@ class Offer(Parsable):
         self.__user_publisher.subscribe(user)
         self.__managers_publisher = Publisher()
         self.__managers_publisher.subscribe(store)
+        self.__pending_owners_approval = {}
+        owners_names = store.get_owners_names()
+        for id in owners_names:
+            self.__pending_owners_approval[id] = False
 
     def declare_price(self, price) -> Response[None]:
+        for id in self.__pending_owners_approval:
+            self.__pending_owners_approval[id] = False
         response = self.__status.declare_price(price)
         if response.succeeded():
             self.__managers_publisher.notify_all(
@@ -45,8 +51,9 @@ class Offer(Parsable):
     def approve_manager_offer(self) -> Response[None]:
         return self.__status.approve_manager_offer()
 
-    def approve_user_offer(self) -> Response[None]:
-        response = self.__status.approve_user_offer()
+    def approve_user_offer(self, owner_id) -> Response[None]:
+        self.__pending_owners_approval[owner_id] = True
+        response = self.__status.approve_user_offer(self.__pending_owners_approval)
         if response.succeeded():
             self.__user_publisher.notify_all(
                 f"Your price offer for {self.__product_name} has been approved"
@@ -182,8 +189,11 @@ class AwaitingApprovalOffer(OfferStatus):
             return response
         return self.change_status(CounteredOffer)
 
-    def approve_user_offer(self) -> Response[None]:
-        return self.change_status(ApprovedOffer)
+    def approve_user_offer(self, owners_dict) -> Response[None]:
+        if all(owners_dict.values):
+            return self.change_status(ApprovedOffer)
+        else:
+            return Response(True)
 
     def reject_user_offer(self) -> Response[None]:
         return self.change_status(RejectedOffer)

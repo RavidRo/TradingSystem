@@ -75,11 +75,11 @@ class Product(IProduct):
 
         return self.__offers[offer_id].suggest_counter_offer(price)
 
-    def approve_user_offer(self, offer_id) -> Response[None]:
+    def approve_user_offer(self, offer_id, username) -> Response[None]:
         if offer_id not in self.__offers:
             return Response(False, msg=f"The offer with id {offer_id} does not exist")
 
-        return self.__offers[offer_id].approve_user_offer()
+        return self.__offers[offer_id].approve_user_offer(username)
 
     def reject_user_offer(self, offer_id) -> Response[None]:
         if offer_id not in self.__offers:

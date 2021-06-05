@@ -266,7 +266,7 @@ def test_suggest_counter_offer_success():
     system.declare_price(buyer_cookie, offer_id, 1.0)
     result = system.suggest_counter_offer(cookie, store_id, product_id, offer_id, 1.1)
     offer = system.get_user_offers(buyer_cookie)
-    assert result.succeeded() and offer.get_obj().values[0].price == 1.1
+    assert result.succeeded() and offer.get_obj().values[0].price == 1.1, result.get_msg()
 
 def test_suggest_counter_offer_wrong_offer_fail():
     cookie, username, password, store_name, store_id = _initialize_info(_generate_username(), "pass",
