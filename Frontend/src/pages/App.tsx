@@ -53,10 +53,7 @@ function App() {
 					client.send(cookie); // have to be here - else socket.receive in server gets stuck
 				};
 				client.onmessage = (messageEvent) => {
-					setNotifications((old) => [
-						...old,
-						[messageEvent.data, new Date().toUTCString()],
-					]);
+					setNotifications((old)=>[...old, [messageEvent.data, new Date().toUTCString()]]);
 					// alert('received socket message');
 				};
 				client.onclose = () => {
@@ -228,6 +225,9 @@ function App() {
 	// 	// eslint-disable-next-line react-hooks/exhaustive-deps
 	// }, []);
 
+	const initializeNotifications = ()=>{
+		setNotifications([]);
+	}
 	return cookie !== '' ? (
 		<ThemeProvider theme={theme}>
 			<CookieContext.Provider value={cookie}>
@@ -258,6 +258,7 @@ function App() {
 								propHandleAdd={addProductToPopup}
 								propUpdateStores={propUpdateStores}
 								propsAddProduct={addProductToPopup}
+								initializeNotifications={initializeNotifications}
 							/>
 						</BrowserRouter>
 					</UsernameContext.Provider>
