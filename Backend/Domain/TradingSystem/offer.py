@@ -133,7 +133,7 @@ class OfferStatus:
             msg=f"Can't approve an offer with {self.get_name()} status",
         )
 
-    def approve_user_offer(self) -> Response[None]:
+    def approve_user_offer(self, pending_owners) -> Response[None]:
         return Response(
             False,
             msg=f"Can't approve an offer with {self.get_name()} status",
@@ -190,7 +190,7 @@ class AwaitingApprovalOffer(OfferStatus):
         return self.change_status(CounteredOffer)
 
     def approve_user_offer(self, owners_dict) -> Response[None]:
-        if all(owners_dict.values):
+        if all(owners_dict.values()):
             return self.change_status(ApprovedOffer)
         else:
             return Response(True)

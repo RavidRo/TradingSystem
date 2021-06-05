@@ -217,9 +217,9 @@ class Store(Parsable, Subscriber):
     def get_personnel_info(self) -> Response[Responsibility]:
         from Backend.Domain.TradingSystem.Responsibilities.responsibility import Responsibility
 
-        if self.responsibility is None:
+        if self.__responsibility is None:
             return Response(False, msg="The store doesn't have assigned personnel")
-        return Response[Responsibility](True, self.responsibility, msg="Personnel info")
+        return Response[Responsibility](True, self.__responsibility, msg="Personnel info")
 
     def get_purchase_history(self) -> Response[ParsableList[PurchaseDetails]]:
         self.__history_lock.acquire_read()
@@ -242,7 +242,7 @@ class Store(Parsable, Subscriber):
         return self.__id
 
     def set_responsibility(self, responsibility: Responsibility):
-        self.responsibility = responsibility
+        self.__responsibility = responsibility
 
     def check_existing_product(self, product_name: str):
         for (prod, quantity) in self._products_to_quantities.values():
@@ -438,6 +438,6 @@ class Store(Parsable, Subscriber):
 
         product = self._products_to_quantities[product_id][0]
         return product.reject_user_offer(offer_id)
-    
+
     def get_owners_names(self):
-        self.__responsibility.get_owners_names()
+        return self.__responsibility.get_owners_names()

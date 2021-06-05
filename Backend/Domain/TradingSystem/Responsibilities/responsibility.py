@@ -230,11 +230,12 @@ class Responsibility(Parsable):
 
     def reject_user_offer(self, product_id, offer_id) -> Response[None]:
         raise Exception(Responsibility.ERROR_MESSAGE)
-    
-    def get_owners_names(self):
-        import functools
-        import operator
+
+    def get_owners_names(self) -> list[str]:
+
+        import itertools
+
         my_username = self._user_state.get_username().object.value
         nested_names = [appointee.get_owners_names() for appointee in self._appointed]
-        List_flat = functools.reduce(operator.iconcat, nested_names, []).append(my_username)
-        return List_flat
+        List_flat = list(itertools.chain(*nested_names))
+        return List_flat + [my_username]
