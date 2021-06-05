@@ -15,7 +15,7 @@ class ProductHandler(IHandler):
     _instance = None
 
     def __init__(self):
-        super().__init__(ReadWriteLock())
+        super().__init__(ReadWriteLock(), Product)
 
         self.__products = Table('products', Base.metadata,
                                 Column('product_id', String(50), primary_key=True),
@@ -74,33 +74,6 @@ class ProductHandler(IHandler):
             res = Response(False, msg=str(e))
         finally:
             self._rwlock.release_write()
-            return res
-
-    def update(self, id, update_dict):
-        self._rwlock.acquire_write()
-        res = Response(True)
-        try:
-            session.query(Product).filter_by(_Product__id=id).update(update_dict)
-            session.commit()
-        except Exception as e:
-            session.rollback()
-            res = Response(False, msg=str(e))
-        finally:
-            self._rwlock.release_write()
-            return res
-
-    def load(self, id):
-        self._rwlock.acquire_read()
-        res = Response(True)
-        try:
-            product = session.query(Product).get(id)
-            session.commit()
-            res = Response(True, product)
-        except Exception as e:
-            session.rollback()
-            res = Response(False, msg=str(e))
-        finally:
-            self._rwlock.release_read()
             return res
 
     def load_all(self):

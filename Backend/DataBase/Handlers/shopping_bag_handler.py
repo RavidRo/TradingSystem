@@ -30,7 +30,7 @@ class ShoppingBagHandler(IHandler):
     _instance = None
 
     def __init__(self):
-        super().__init__(ReadWriteLock())
+        super().__init__(ReadWriteLock(), ShoppingBag)
 
         self.__shopping_bags = Table("shopping_bags", Base.metadata,
                                      Column("store_id", String(50), primary_key=True),
@@ -84,12 +84,6 @@ class ShoppingBagHandler(IHandler):
         finally:
             self._rwlock.release_write()
             return res
-
-    def update(self, id, update_dict):
-        pass
-
-    def load(self, id):
-        pass
 
     def load_all(self):
         pass

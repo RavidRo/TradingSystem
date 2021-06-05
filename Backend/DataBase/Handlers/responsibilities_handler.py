@@ -26,7 +26,7 @@ class ResponsibilitiesHandler(IHandler):
     _instance = None
 
     def __init__(self):
-        super().__init__(ReadWriteLock())
+        super().__init__(ReadWriteLock(), Responsibility)
 
         self.__responsibilities = Table('responsibilities', Base.metadata,
                                         Column('username', String(50), ForeignKey('members.username'),
@@ -72,9 +72,6 @@ class ResponsibilitiesHandler(IHandler):
                 ResponsibilitiesHandler._instance = ResponsibilitiesHandler()
         return ResponsibilitiesHandler._instance
 
-    def update(self, id, update_dict):
-        pass
-
     def update_child(self, appointer_username, store_id, responsibility):
         self._rwlock.acquire_write()
         res = Response(True)
@@ -88,9 +85,6 @@ class ResponsibilitiesHandler(IHandler):
         finally:
             self._rwlock.release_write()
             return res
-
-    def load(self, id):
-        pass
 
     def load_all(self):
         pass

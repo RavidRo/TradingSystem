@@ -17,7 +17,7 @@ class MemberHandler(IHandler):
     _instance = None
 
     def __init__(self):
-        super().__init__(ReadWriteLock())
+        super().__init__(ReadWriteLock(), Member)
         self.__credentials = Table("credentials", Base.metadata,
                                    Column('username', String(50), primary_key=True),
                                    Column('password', String(256)),
@@ -109,8 +109,6 @@ class MemberHandler(IHandler):
     #         return res
     #
 
-    def update(self, id, update_dict):
-        pass
 
     # # TODO: check if append here is on same object as in the domain!
     # def update_responsibility(self, username: str, responsibility: Responsibility):
@@ -154,20 +152,6 @@ class MemberHandler(IHandler):
             res = session.execute(stmt).one()
             session.commit()
             res = Response(True, res)
-        except Exception as e:
-            session.rollback()
-            res = Response(False, msg=str(e))
-        finally:
-            self._rwlock.release_read()
-            return res
-
-    def load(self, username):
-        self._rwlock.acquire_read()
-        res = Response(True)
-        try:
-            user = session.query(Member).get(username)
-            session.commit()
-            res = Response(True, user)
         except Exception as e:
             session.rollback()
             res = Response(False, msg=str(e))

@@ -15,7 +15,7 @@ class PurchaseDetailsHandler(IHandler):
     _instance = None
 
     def __init__(self):
-        super().__init__(ReadWriteLock())
+        super().__init__(ReadWriteLock(), PurchaseDetails)
 
         self.__purchase_details = Table('purchase_details', Base.metadata,
                                         Column('username', String(50), ForeignKey('members.username'),
@@ -99,13 +99,6 @@ class PurchaseDetailsHandler(IHandler):
         finally:
             self._rwlock.release_write()
             return res
-
-    def update(self, id, update_dict):
-        pass
-
-    """This function is not needed since only store and member will load"""
-    def load(self, id):
-        pass
 
     def load_all(self):
         self._rwlock.acquire_write()

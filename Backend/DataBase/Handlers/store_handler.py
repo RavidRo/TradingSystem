@@ -90,8 +90,6 @@ class StoreHandler(IHandler):
     def remove(self, obj, **kwargs) -> Response[None]:
         pass
 
-    def update(self, id, update_dict):
-        pass
 
     def update_quantity(self, product, quantity):
         product.quantity = quantity

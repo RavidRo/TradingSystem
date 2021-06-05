@@ -2,6 +2,7 @@ import threading
 from werkzeug.security import generate_password_hash, check_password_hash
 
 from Backend.DataBase.Handlers.member_handler import MemberHandler
+from Backend.DataBase.database import db_fail_response
 from Backend.response import Response, PrimitiveParsable
 
 users = dict()
@@ -16,9 +17,11 @@ def register(username, password, is_admin=False) -> Response[None]:
             return Response(False, msg="username already exists")
         credentials = member_handler.load_credentials(username)
         if not credentials.succeeded():
+            if credentials.get_obj().parse() == 0:
+                return db_fail_response
             res = __add_user_to_db(username, password, is_admin)
             if not res:
-                return Response(False, msg="DB error")
+                return db_fail_response
         else:
             users[username] = {'password': credentials.get_obj()[1],
                                'is_admin': credentials.get_obj()[2]}
@@ -32,6 +35,8 @@ def login(username, password) -> Response[PrimitiveParsable[bool]]:
     if username not in users:
         credentials = member_handler.load_credentials(username)
         if not credentials.succeeded():
+            if credentials.get_obj().parse() == 0:
+                return db_fail_response
             return Response(False, msg="username doesn't exist in the system")
         users[username] = {'password': credentials.get_obj()[1],
                            'is_admin': credentials.get_obj()[2]}

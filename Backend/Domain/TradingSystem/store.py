@@ -1,5 +1,6 @@
 import uuid
 
+from Backend.DataBase.database import db_fail_response
 from Backend.Domain.Notifications.Publisher import Publisher
 from Backend.response import PrimitiveParsable, Response, ParsableList, Parsable
 from Backend.Domain.TradingSystem.product import Product
@@ -128,9 +129,12 @@ class Store(Parsable):
 
         self.__store_handler.update_quantity(product, quantity)
         self._products_to_quantities[product_id] = (product, quantity)
-        self.__store_handler.update(self.get_id(), {'_products_to_quantities': self._products_to_quantities})
+        res = self.__store_handler.update()
         self._products_lock.release_write()
-        return Response(True, product_id, msg=f"The product {product_name} successfully added")
+        if res.succeeded():
+            return Response(True, product_id, msg=f"The product {product_name} successfully added")
+        else:
+            return db_fail_response
 
     """checks need to be made:
        ----------------------
