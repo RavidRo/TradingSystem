@@ -150,7 +150,7 @@ const Purchase: FC<PurchaseProps> = ({ location }) => {
 							alignSelf: 'center',
 							marginLeft: '5%',
 						}}
-						onClick={() => handlePurchase()}
+						onClick={() => handlePurchase().then(() => history.push('/'))}
 					>
 						Check
 					</Button>
