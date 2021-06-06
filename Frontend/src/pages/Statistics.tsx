@@ -8,10 +8,23 @@ import '../styles/Statistics.scss';
 type StatisticsProps = {
 };
 
-const Statistics: FC<StatisticsProps> = ({
-}) => {
+const Statistics: FC<StatisticsProps> = ({}) => {
     const [fromDate, setFromDate] = useState<string>("");
     const [toDate, setToDate] = useState<string>("");
+
+    const styles = {
+        inputRoot: {
+          fontSize: 30
+        },
+        labelRoot: {
+          fontSize: 30,
+          color: "red",
+          "&$labelFocused": {
+            color: "purple"
+          }
+        },
+        labelFocused: {}
+      };
 
     const pickedFrom = (e:any)=>{
         let date = e.target.value
@@ -39,11 +52,11 @@ const Statistics: FC<StatisticsProps> = ({
                     label="From"
                     type="date"
                     defaultValue="2017-05-24"
-                    InputLabelProps={{
-                    shrink: true,
-                    }}
                     onChange={(e)=>pickedFrom(e)}
-                    style={{width: 200, marginRight: 50}}
+                    style={{width: 200, marginRight: 50, marginTop: 30}}
+                    inputProps={{style: {fontSize: 20, marginTop: 20}}} 
+                    InputLabelProps={{style: {fontSize: 30}}}
+                   
                 />
                 <TextField
                     className="toDate"
@@ -51,11 +64,10 @@ const Statistics: FC<StatisticsProps> = ({
                     label="To"
                     type="date"
                     defaultValue="2017-05-24"
-                    InputLabelProps={{
-                    shrink: true,
-                    }}
                     onChange={(e)=>pickedTo(e)}
-                    style={{width: 200}}
+                    style={{width: 200,  marginTop: 30}}
+                    inputProps={{style: {fontSize: 20, marginTop: 20}}} 
+                    InputLabelProps={{style: {fontSize: 30}}}
                 />
             </form>
         </div>
