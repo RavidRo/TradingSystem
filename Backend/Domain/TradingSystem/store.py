@@ -11,7 +11,6 @@ from Backend.rw_lock import ReadWriteLock
 class Store(Parsable):
     from Backend.Domain.TradingSystem.Responsibilities.responsibility import Responsibility
     from Backend.Domain.TradingSystem.purchase_details import PurchaseDetails
-    from Backend.Domain.TradingSystem.Interfaces.IUser import IUser
 
     def __init__(self, store_name: str):
         from Backend.Domain.TradingSystem.TypesPolicies.discount_policy import DefaultDiscountPolicy
@@ -127,8 +126,8 @@ class Store(Parsable):
         )
         product_id = product.get_id()
 
-        self.__store_handler.save_product(product)
-        self.__store_handler.update_products(self, product, quantity)
+        """database saving"""
+        self.__store_handler.add_product(self, product, quantity)
         res = self.__store_handler.commit_changes()
         if not res.succeeded():
             self._products_lock.release_write()
@@ -148,6 +147,7 @@ class Store(Parsable):
         if value is None:
             self._products_lock.release_write()
             return Response(False, msg="The product " + product_id + "is already not in the inventory!")
+        """database saving"""
         self.__store_handler.remove_product(value[0])
         res = self.__store_handler.commit_changes()
         if not res.succeeded():
@@ -196,7 +196,8 @@ class Store(Parsable):
             self._products_lock.release_write()
             return Response(False, msg="quantity must be positive!")
         if product_id in self._products_to_quantities:
-            self.__store_handler.update_products(self, self._products_to_quantities[product_id][0], quantity)
+            """database saving"""
+            self.__store_handler.update_product_quantity(self, self._products_to_quantities[product_id][0], quantity)
             res = self.__store_handler.commit_changes()
             if not res.succeeded():
                 self._products_lock.release_write()

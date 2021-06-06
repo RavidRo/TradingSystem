@@ -6,7 +6,7 @@ class IShoppingBag(Parsable):
     from Backend.Domain.TradingSystem.purchase_details import PurchaseDetails
 
     @abstractmethod
-    def add_product(self, product_id: str, quantity: int) -> Response[None]:
+    def add_product(self, product_id: str, quantity: int, user_name=None) -> Response[None]:
         """Add a product to the bag with specified quantity"""
         raise NotImplementedError
 

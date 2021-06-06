@@ -1,5 +1,6 @@
 from datetime import datetime
 
+from Backend.DataBase.database import db_fail_response
 from Backend.response import Response, PrimitiveParsable
 from Backend.Service.DataObjects.shopping_bag_data import ShoppingBagData
 from Backend.Domain.TradingSystem.Interfaces.IShoppingBag import IShoppingBag
@@ -8,10 +9,12 @@ from Backend.Domain.TradingSystem.purchase_details import PurchaseDetails
 
 class ShoppingBag(IShoppingBag):
     def __init__(self, store):
+        from Backend.DataBase.Handlers.shopping_bag_handler import ShoppingBagHandler
         self.__store = store
         self._products_to_quantity = dict()
         self.__pending_products_to_quantity = dict()
         self.__pending_price = 0
+        self.__shopping_bag_handler = ShoppingBagHandler.get_instance()
 
     def parse(self):
         products_ids_to_quantities = {}
@@ -38,8 +41,7 @@ class ShoppingBag(IShoppingBag):
     def get_pending_price(self):
         return self.__pending_price
 
-    def add_product(self, product_id: str, quantity: int) -> Response[None]:
-
+    def add_product(self, product_id: str, quantity: int, user_name: str = None) -> Response[None]:
         if quantity <= 0:
             return Response(False, msg="quantity must be a positive number!")
 
@@ -59,6 +61,12 @@ class ShoppingBag(IShoppingBag):
             return Response(
                 False, msg=f"A product with id: {product_id} already exists in the store's bag"
             )
+
+        if user_name is not None:
+            self.__shopping_bag_handler.add_product_to_bag(self, self.get_store(), self.__store.get_product(product_id), user_name, quantity)
+            res = self.__shopping_bag_handler.commit_changes()
+            if not res.succeeded():
+                return db_fail_response
 
         self._products_to_quantity.update(
             {product_id: (self.__store.get_product(product_id), quantity)}

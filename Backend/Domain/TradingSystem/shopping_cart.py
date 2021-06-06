@@ -1,6 +1,5 @@
 import threading
 from threading import Timer
-
 from Backend.response import Response, PrimitiveParsable, ParsableList
 from Backend.Service.DataObjects.shopping_cart_data import ShoppingCartData
 from Backend.Domain.TradingSystem.shopping_bag import ShoppingBag
@@ -9,6 +8,7 @@ from Backend.Domain.TradingSystem.Interfaces.IShoppingCart import IShoppingCart
 
 class ShoppingCart(IShoppingCart):
     def __init__(self):
+        from Backend.DataBase.Handlers.shopping_bag_handler import ShoppingBagHandler
         self.__shopping_bags: dict[str, ShoppingBag] = dict()
         self.__timer = None
         self.__INTERVAL_TIME = self.interval_time()
@@ -16,6 +16,7 @@ class ShoppingCart(IShoppingCart):
         self.__price = None
         self.__pending_purchase = False
         self.__transaction_lock = threading.Lock()
+        self.__shopping_bag_handler = ShoppingBagHandler.get_instance()
 
     def interval_time(self):
         return 10 * 60
@@ -37,17 +38,14 @@ class ShoppingCart(IShoppingCart):
 
     """checks need to be made:
        ----------------------
-       1. quantity > 0
-       2. If a bag with store_id already exits, add_product to it.
-       3. If there is no existing bag, check if store with store_id exits.
-       4. If store exists -> create new bag and add product"""
+       1. If a bag with store_id already exits, add_product to it.
+       2. If there is no existing bag, check if store with store_id exits.
+       3. If store exists -> create new bag and add product"""
 
-    def add_product(self, store_id: str, product_id: str, quantity: int) -> Response[None]:
-        if quantity <= 0:
-            return Response(False, msg="Product's quantity must be positive!")
+    def add_product(self, store_id: str, product_id: str, quantity: int, user_name=None) -> Response[None]:
 
         if store_id in self.__shopping_bags:
-            return self.__shopping_bags[store_id].add_product(product_id, quantity)
+            return self.__shopping_bags[store_id].add_product(product_id, quantity, user_name)
 
         # no bag for store with store_id
         store = self.get_store_by_id(store_id)
@@ -55,7 +53,10 @@ class ShoppingCart(IShoppingCart):
             return Response(False, msg=f"There is no such store with store_id: {store_id}")
 
         new_bag = self.create_new_bag(store)
-        return new_bag.add_product(product_id, quantity)
+        res = new_bag.add_product(product_id, quantity, user_name)
+        if not res.succeeded():
+            self.__shopping_bags.pop(store_id)
+        return res
 
     def get_store_by_id(self, store_id: str):
         from Backend.Domain.TradingSystem.stores_manager import StoresManager
@@ -64,6 +65,7 @@ class ShoppingCart(IShoppingCart):
 
     def create_new_bag(self, store):
         new_bag = ShoppingBag(store)
+        self.__shopping_bag_handler.save(new_bag)
         self.__shopping_bags[store.get_id()] = new_bag
         return new_bag
 
@@ -71,7 +73,7 @@ class ShoppingCart(IShoppingCart):
        ----------------------
        1. bag of store with store_id exists"""
 
-    def remove_product(self, store_id: str, product_id: str) -> Response[None]:
+    def remove_product(self, store_id: str, product_id: str, username=None) -> Response[None]:
         bag = self.__shopping_bags.get(store_id)
         if bag is None:
             return Response(
@@ -86,7 +88,7 @@ class ShoppingCart(IShoppingCart):
        2. new_amount > 0"""
 
     def change_product_quantity(
-        self, store_id: str, product_id: str, new_amount: int
+        self, store_id: str, product_id: str, new_amount: int, username=None
     ) -> Response[None]:
         bag = self.__shopping_bags.get(store_id)
         if bag is None:

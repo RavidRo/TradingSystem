@@ -1,5 +1,9 @@
+from Backend.DataBase.Handlers.member_handler import MemberHandler
 from Backend.Domain.Authentication import authentication
+from Backend.Domain.TradingSystem.States.admin import Admin
+from Backend.Domain.TradingSystem.States.member import Member
 from Backend.Domain.TradingSystem.States.user_state import UserState
+from Backend.Domain.TradingSystem.user import User
 from Backend.response import Response
 import json
 
@@ -10,7 +14,9 @@ def register_admins() -> None:
     with open("config.json", "r") as read_file:
         data = json.load(read_file)
         for username in data["admins"]:
-            authentication.register(username, data["admin-password"], True)
+            res = authentication.register(username, data["admin-password"])
+            if res.succeeded():
+                MemberHandler.get_instance().save(Admin(User(), username))
             admins.append(username)
 
 
@@ -35,6 +41,7 @@ class Guest(UserState):
 
         response = authentication.login(username, password)
         if response.succeeded():
+
             if is_username_admin(username):
                 self._user.change_state(
                     Admin(self._user, username)
@@ -44,7 +51,10 @@ class Guest(UserState):
         return response
 
     def register(self, username, password):
-        return authentication.register(username, password)
+        res = authentication.register(username, password)
+        if res.succeeded():
+            self._member_handler.save(Member(self._user, username))
+        return res
 
     def delete_products_after_purchase(self):
         return self._cart.delete_products_after_purchase("guest")

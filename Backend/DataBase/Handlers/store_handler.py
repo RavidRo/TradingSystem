@@ -1,42 +1,22 @@
 from sqlalchemy import Table, Column, String, insert, ForeignKey, CheckConstraint, Integer, PrimaryKeyConstraint
 from sqlalchemy.orm import mapper, relationship, backref
 from sqlalchemy.orm.collections import attribute_mapped_collection, collection
-
 from Backend.DataBase.Handlers.product_handler import ProductHandler
 from Backend.DataBase.IHandler import IHandler
 from Backend.DataBase.database import Base, session, engine
 from Backend.Domain.TradingSystem.Responsibilities.founder import Founder
-from Backend.Domain.TradingSystem.Responsibilities.responsibility import Responsibility
-from Backend.Domain.TradingSystem.States.member import Member
 from Backend.Domain.TradingSystem.product import Product
 from Backend.Domain.TradingSystem.purchase_details import PurchaseDetails
 from Backend.Domain.TradingSystem.store import Store
 from Backend.response import Response, ParsableList
-from sqlalchemy.orm.collections import MappedCollection
-
 from Backend.rw_lock import ReadWriteLock
 from threading import Lock
-
-
-class MyMap(MappedCollection):
-    """Holds 'Node' objects, keyed by the 'name' attribute with insert order maintained."""
-
-    def __init__(self):
-        MappedCollection.__init__(self, keyfunc=lambda product: product.get_id())
-
-    @collection.internally_instrumented
-    def set(self, value, _sa_initiator=None):
-        return super().set((value, value.quantity), _sa_initiator)
-
-    @collection.internally_instrumented
-    def remove(self, value, _sa_initiator=None):
-        return super().remove(value, _sa_initiator)
-
 
 class ProductsOfStores(Base):
     __tablename__ = "products_of_stores"
     store_id = Column(String, ForeignKey("stores.store_id"), primary_key=True)
-    product_id = Column(String, ForeignKey("products.product_id", ondelete="CASCADE", onupdate="CASCADE"), primary_key=True)
+    product_id = Column(String, ForeignKey("products.product_id", ondelete="CASCADE", onupdate="CASCADE"),
+                        primary_key=True)
     quantity = Column(Integer, CheckConstraint('quantity > 0'))
 
     product = relationship(Product, cascade="all")
@@ -66,7 +46,7 @@ class StoreHandler(IHandler):
             #                                         collection_class=MyMap())
             "products": relationship(ProductsOfStores, uselist=True,
                                      collection_class=attribute_mapped_collection("product_id"),
-                                     backref="store")
+                                     backref="store"),
             # "_Store__responsibility": relationship(Founder, uselist=False, overlaps="_appointed", backref=backref("_store", uselist=False))
         })
 
@@ -105,15 +85,17 @@ class StoreHandler(IHandler):
     #         self._rwlock.release_write()
     #         return res
 
-    def save_product(self, product):
-        return self.__product_handler.save(product)
-
     def remove_product(self, product):
         return self.__product_handler.remove(product)
 
-    def update_products(self, store, product, quantity):
+    def add_product(self, store, product, quantity):
+        self.__product_handler.save(product)
         store.products.update({product.get_id(): ProductsOfStores(store.get_id(), product.get_id(), quantity)})
 
+    def update_product_quantity(self, store, product, quantity):
+        product_in_bag = session.query(ProductsOfStores).filter_by(store_id=store.get_id(),
+                                                                   product_id=product.get_id()).one()
+        product_in_bag.quantity = quantity
 
     def load(self, id):
         self._rwlock.acquire_read()

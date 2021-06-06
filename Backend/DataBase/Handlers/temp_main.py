@@ -2,12 +2,14 @@ from Backend.DataBase.Handlers.member_handler import MemberHandler
 from Backend.DataBase.Handlers.product_handler import ProductHandler
 from Backend.DataBase.Handlers.purchase_details_handler import PurchaseDetailsHandler
 from Backend.DataBase.Handlers.responsibilities_handler import ResponsibilitiesHandler
+from Backend.DataBase.Handlers.shopping_bag_handler import ShoppingBagHandler
 from Backend.DataBase.Handlers.store_handler import StoreHandler
 from Backend.DataBase.database import Base, engine
 from Backend.Domain.TradingSystem.Responsibilities.responsibility import Responsibility
 from Backend.Domain.TradingSystem.States.member import Member
 from Backend.Domain.TradingSystem.store import Store
 from Backend.Domain.TradingSystem.user import User
+from Backend.Service.trading_system import TradingSystem
 
 if __name__ == '__main__':
     member_handler = MemberHandler.get_instance()
@@ -15,27 +17,37 @@ if __name__ == '__main__':
     purchase_details_handler = PurchaseDetailsHandler.get_instance()
     store_handler = StoreHandler.get_instance()
     responsibility_handler = ResponsibilitiesHandler.get_instance()
+    shopping_bag_handler = ShoppingBagHandler.get_instance()
     Base.metadata.drop_all(engine)
     Base.metadata.create_all(engine)
 
-    user = User()
-    res = user.register("user", "password")
+    trading_system = TradingSystem.getInstance()
+    cookie = trading_system.enter_system()
+    res = trading_system.register(cookie, "user", "password")
     if not res.succeeded():
         print("register: " + res.get_msg())
-    res = user.login("user", "password")
+
+    res = trading_system.login(cookie, "user", "password")
+
+    res = member_handler.save(user.state)
+    if not res.succeeded():
+        print("save user: " + res.get_msg())
+
     if not res.succeeded():
         print("login: " + res.get_msg())
     store_res = user.create_store("The Store")
     if not store_res.succeeded():
         print("open_store: " + store_res.get_msg())
 
-    res = store_res.get_obj().add_product("The Product", "The Category", 5, 8, ["The Keyword A", "The Keyword B"])
-    if not res.succeeded():
-        print("add_product: " + res.get_msg())
+    product_res = store_res.get_obj().add_product("The Product", "The Category", 5, 8, ["The Keyword A", "The Keyword B"])
+    if not product_res.succeeded():
+        print("add_product: " + product_res.get_msg())
 
     res = store_res.get_obj().change_product_quantity(res.get_obj(), 11)
     if not res.succeeded():
         print("edit product details: " + res.get_msg())
+
+    user.add_to_cart(store_res.get_obj().get_id(), product_res.get_obj(), 2)
 
 
     # user2 = User()

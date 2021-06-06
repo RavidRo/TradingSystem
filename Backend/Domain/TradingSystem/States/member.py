@@ -1,6 +1,6 @@
 import threading
 from datetime import date
-
+from Backend.DataBase.database import db_fail_response
 from Backend.Domain.TradingSystem.Responsibilities.founder import Founder
 from Backend.Domain.TradingSystem.store import Store
 
@@ -43,7 +43,8 @@ class Member(UserState):
         self.__purchase_details = purchase_details
         self.__notifications: list[str] = []
         self.notifications_lock = threading.Lock()
-        # get cart data from DB
+
+        #TODO:get cart data from DB
 
     def login(self, username, password):
         return Response(False, msg="Members cannot re-login")
@@ -52,17 +53,17 @@ class Member(UserState):
         return Response(False, msg="Members cannot re-register")
 
     def save_product_in_cart(self, store_id, product_id, quantity):
-        response = super().save_product_in_cart(store_id, product_id, quantity)
+        response = self._cart.add_product(store_id, product_id, quantity, self._username)
         # update data in DB in later milestones
         return response
 
     def delete_from_cart(self, store_id, product_id):
-        response = super().delete_from_cart(store_id, product_id)
+        response = self._cart.remove_product(store_id, product_id, self._username)
         # update data in DB in later milestones
         return response
 
     def change_product_quantity_in_cart(self, store_id, product_id, new_quantity):
-        response = super().change_product_quantity_in_cart(store_id, product_id, new_quantity)
+        response = self._cart.change_product_quantity_in_cart(store_id, product_id, new_quantity, self._username)
         # update data in DB in later milestones
         return response
 

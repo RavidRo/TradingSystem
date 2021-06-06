@@ -1,12 +1,15 @@
 from threading import Lock
 from sqlalchemy import Table, Column, String, Boolean, insert, ARRAY, ForeignKey, select
 from sqlalchemy.orm import mapper, relationship, backref
+
+from Backend.DataBase.Handlers.shopping_bag_handler import ShoppingBagHandler
 from Backend.DataBase.IHandler import IHandler
 from Backend.DataBase.database import Base, session
 from Backend.Domain.TradingSystem.Responsibilities.founder import Founder
 from Backend.Domain.TradingSystem.Responsibilities.responsibility import Responsibility
 from Backend.Domain.TradingSystem.States.member import Member
 from Backend.Domain.TradingSystem.purchase_details import PurchaseDetails
+from Backend.Domain.TradingSystem.shopping_bag import ShoppingBag
 from Backend.response import Response
 from Backend.rw_lock import ReadWriteLock
 from sqlalchemy.orm.collections import attribute_mapped_collection
@@ -18,10 +21,10 @@ class MemberHandler(IHandler):
 
     def __init__(self):
         super().__init__(ReadWriteLock(), Member)
+        self.__shopping_bag_handler = ShoppingBagHandler.get_instance()
         self.__credentials = Table("credentials", Base.metadata,
                                    Column('username', String(50), primary_key=True),
-                                   Column('password', String(256)),
-                                   Column('is_admin', Boolean(20)))
+                                   Column('password', String(256)))
 
         self.__members = Table('members', Base.metadata,
                                Column('username', String(50), ForeignKey("credentials.username"), primary_key=True),
@@ -35,6 +38,7 @@ class MemberHandler(IHandler):
             #                                           passive_deletes=True),
             '_Member__purchase_details': relationship(PurchaseDetails, cascade="all, delete",
                                                       passive_deletes=True),
+            'shopping_bags': relationship(ShoppingBag, uselist=True, backref=backref("user", uselist=False))
         })
 
     @staticmethod
@@ -60,15 +64,13 @@ class MemberHandler(IHandler):
             return res
 
     # region save
-    def save_user_credentials(self, username: str, password: str, is_admin=False):
+    def save_user_credentials(self, username: str, password: str):
         self._rwlock.acquire_write()
         res = Response(True)
         try:
             stmt = insert(self.__credentials).values(username=username,
-                                                     password=password,
-                                                     is_admin=is_admin)
+                                                     password=password)
             session.execute(stmt)
-            session.commit()
         except Exception as e:
             session.rollback()
             res = Response(False, msg=str(e))
@@ -148,7 +150,7 @@ class MemberHandler(IHandler):
         self._rwlock.acquire_read()
         res = Response(True)
         try:
-            stmt = select([self.__credentials.c.username, self.__credentials.c.password, self.__credentials.c.is_admin]).where(self.__credentials.c.username == username)
+            stmt = select([self.__credentials.c.username, self.__credentials.c.password]).where(self.__credentials.c.username == username)
             res = session.execute(stmt).one()
             session.commit()
             res = Response(True, res)

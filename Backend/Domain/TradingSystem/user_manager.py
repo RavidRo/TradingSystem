@@ -62,6 +62,10 @@ class UserManager:
         func: Callable[[User], Response] = lambda user: user.connect(communicate)
         return UserManager.__deligate_to_user(cookie, func)
 
+
+    #TODO: Ask Ravid about login inside register and in general how to load properly a member from db and also
+    # take care about mapping admins and members with polymorphic type
+
     # 2.3
     @staticmethod
     def register(username: str, password: str, cookie: str) -> Response[None]:

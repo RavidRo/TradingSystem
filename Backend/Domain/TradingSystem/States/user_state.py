@@ -5,10 +5,12 @@ from Backend.response import Response
 
 class UserState(ABC):
     def __init__(self, user, cart=None):
+        from Backend.DataBase.Handlers.member_handler import MemberHandler
         if cart is None:
             cart = ShoppingCart()
         self._cart = cart
         self._user = user
+        self._member_handler = MemberHandler.get_instance()
 
     def set_user(self, user):
         self._user = user
