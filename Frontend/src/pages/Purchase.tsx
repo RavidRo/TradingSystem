@@ -19,6 +19,7 @@ const Purchase: FC<PurchaseProps> = ({ location }) => {
 	// const [age,setAge] = useState<string>("");
 	const history = useHistory();
 
+	// eslint-disable-next-line react-hooks/exhaustive-deps
 	const handleUnload = (e: any) => {
 		e.preventDefault();
 	};

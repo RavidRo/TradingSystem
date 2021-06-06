@@ -25,14 +25,21 @@ export type PurchaseDetails = {
 };
 export type Offer = {
 	id: string;
-    price: number;
-    status: string;
-    product_id: string;
-    product_name: string;
-	store_id:string;
+	price: number;
+	status:
+		| 'undeclared'
+		| 'awaiting manager approval'
+		| 'counter offered'
+		| 'approved'
+		| 'rejected'
+		| 'cancled';
+	product_id: string;
+	product_name: string;
+	store_id: string;
 	store_name: string;
-    username: string;
-}
+	username: string;
+	awaiting_owners: string[];
+};
 
 export type Permission =
 	| 'manage products'
