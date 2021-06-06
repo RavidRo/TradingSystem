@@ -1,3 +1,4 @@
+from Backend.DataBase.database import db_fail_response
 from Backend.response import Response
 import uuid
 
@@ -7,6 +8,7 @@ from Backend.Domain.TradingSystem.Interfaces.IProduct import IProduct
 
 class Product(IProduct):
     def __init__(self, product_name: str, category: str, price: float, keywords=None):
+        from Backend.DataBase.Handlers.product_handler import ProductHandler
         if keywords is None:
             keywords = []
         self.__product_name = product_name
@@ -14,6 +16,7 @@ class Product(IProduct):
         self.__price = price
         self.__id = str(self.id_generator())
         self.__keywords = keywords
+        self.__product_handler = ProductHandler.get_instance()
 
     def parse(self):
         return ProductData(self.__id, self.__product_name, self.__category, self.__price, self.__keywords)
@@ -65,5 +68,9 @@ class Product(IProduct):
 
         if category is not None:
             self.__category = category
+
+        res = self.__product_handler.commit_changes()
+        if not res.succeeded():
+            return db_fail_response
 
         return Response(True, msg=f"Successfully edited product with product id: {self.__id}")

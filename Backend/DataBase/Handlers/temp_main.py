@@ -29,6 +29,13 @@ if __name__ == '__main__':
     if not store_res.succeeded():
         print("open_store: " + store_res.get_msg())
 
+    res = store_res.get_obj().add_product("The Product", "The Category", 5, 8, ["The Keyword A", "The Keyword B"])
+    if not res.succeeded():
+        print("add_product: " + res.get_msg())
+
+    res = store_res.get_obj().change_product_quantity(res.get_obj(), 11)
+    if not res.succeeded():
+        print("edit product details: " + res.get_msg())
 
 
     # user2 = User()

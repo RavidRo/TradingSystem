@@ -127,14 +127,16 @@ class Store(Parsable):
         )
         product_id = product.get_id()
 
-        self.__store_handler.update_quantity(product, quantity)
-        self._products_to_quantities[product_id] = (product, quantity)
-        res = self.__store_handler.update()
-        self._products_lock.release_write()
-        if res.succeeded():
-            return Response(True, product_id, msg=f"The product {product_name} successfully added")
-        else:
+        self.__store_handler.save_product(product)
+        self.__store_handler.update_products(self, product, quantity)
+        res = self.__store_handler.commit_changes()
+        if not res.succeeded():
+            self._products_lock.release_write()
             return db_fail_response
+
+        self._products_to_quantities[product_id] = (product, quantity)
+        self._products_lock.release_write()
+        return Response(True, product_id, msg=f"The product {product_name} successfully added")
 
     """checks need to be made:
        ----------------------
@@ -142,16 +144,20 @@ class Store(Parsable):
 
     def remove_product(self, product_id: str) -> Response[PrimitiveParsable[int]]:
         self._products_lock.acquire_write()
-        result = self._products_to_quantities.pop(product_id, None)
-        if result is None:
+        value = self._products_to_quantities.get(product_id)
+        if value is None:
             self._products_lock.release_write()
-            return Response(
-                False, msg="The product " + product_id + "is already not in the inventory!"
-            )
+            return Response(False, msg="The product " + product_id + "is already not in the inventory!")
+        self.__store_handler.remove_product(value[0])
+        res = self.__store_handler.commit_changes()
+        if not res.succeeded():
+            self._products_lock.release_write()
+            return db_fail_response
+        self._products_to_quantities.pop(product_id, None)
         self._products_lock.release_write()
         return Response(
             True,
-            obj=PrimitiveParsable(result[1]),
+            obj=PrimitiveParsable(value[1]),
             msg="Successfully removed product with product id: " + str(product_id),
         )
 
@@ -190,6 +196,11 @@ class Store(Parsable):
             self._products_lock.release_write()
             return Response(False, msg="quantity must be positive!")
         if product_id in self._products_to_quantities:
+            self.__store_handler.update_products(self, self._products_to_quantities[product_id][0], quantity)
+            res = self.__store_handler.commit_changes()
+            if not res.succeeded():
+                self._products_lock.release_write()
+                return db_fail_response
             new_product_quantity = (self._products_to_quantities[product_id][0], quantity)
             self._products_to_quantities[product_id] = new_product_quantity
             prod_name = self._products_to_quantities[product_id][0].get_name()

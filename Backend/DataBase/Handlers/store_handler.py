@@ -1,4 +1,4 @@
-from sqlalchemy import Table, Column, String, insert
+from sqlalchemy import Table, Column, String, insert, ForeignKey, CheckConstraint, Integer, PrimaryKeyConstraint
 from sqlalchemy.orm import mapper, relationship, backref
 from sqlalchemy.orm.collections import attribute_mapped_collection, collection
 
@@ -8,6 +8,7 @@ from Backend.DataBase.database import Base, session, engine
 from Backend.Domain.TradingSystem.Responsibilities.founder import Founder
 from Backend.Domain.TradingSystem.Responsibilities.responsibility import Responsibility
 from Backend.Domain.TradingSystem.States.member import Member
+from Backend.Domain.TradingSystem.product import Product
 from Backend.Domain.TradingSystem.purchase_details import PurchaseDetails
 from Backend.Domain.TradingSystem.store import Store
 from Backend.response import Response, ParsableList
@@ -32,12 +33,26 @@ class MyMap(MappedCollection):
         return super().remove(value, _sa_initiator)
 
 
+class ProductsOfStores(Base):
+    __tablename__ = "products_of_stores"
+    store_id = Column(String, ForeignKey("stores.store_id"), primary_key=True)
+    product_id = Column(String, ForeignKey("products.product_id", ondelete="CASCADE", onupdate="CASCADE"), primary_key=True)
+    quantity = Column(Integer, CheckConstraint('quantity > 0'))
+
+    product = relationship(Product, cascade="all")
+
+    def __init__(self, store_id, product_id, quantity):
+        self.store_id = store_id
+        self.product_id = product_id
+        self.quantity = quantity
+
+
 class StoreHandler(IHandler):
     _lock = Lock()
     _instance = None
 
     def __init__(self):
-        super().__init__(ReadWriteLock())
+        super().__init__(ReadWriteLock(), Store)
 
         self.__stores = Table("stores", Base.metadata,
                               Column("store_id", String(50), primary_key=True),
@@ -47,8 +62,11 @@ class StoreHandler(IHandler):
             "_Store__id": self.__stores.c.store_id,
             "_Store__name": self.__stores.c.store_name,
             "_Store__purchase_history": relationship(PurchaseDetails),
-            "_products_to_quantities": relationship(Product, uselist=True,
-                                                    collection_class=lambda: MyMap())
+            # "_products_to_quantities": relationship(Product, uselist=True,
+            #                                         collection_class=MyMap())
+            "products": relationship(ProductsOfStores, uselist=True,
+                                     collection_class=attribute_mapped_collection("product_id"),
+                                     backref="store")
             # "_Store__responsibility": relationship(Founder, uselist=False, overlaps="_appointed", backref=backref("_store", uselist=False))
         })
 
@@ -87,12 +105,15 @@ class StoreHandler(IHandler):
     #         self._rwlock.release_write()
     #         return res
 
-    def remove(self, obj, **kwargs) -> Response[None]:
-        pass
+    def save_product(self, product):
+        return self.__product_handler.save(product)
 
+    def remove_product(self, product):
+        return self.__product_handler.remove(product)
 
-    def update_quantity(self, product, quantity):
-        product.quantity = quantity
+    def update_products(self, store, product, quantity):
+        store.products.update({product.get_id(): ProductsOfStores(store.get_id(), product.get_id(), quantity)})
+
 
     def load(self, id):
         self._rwlock.acquire_read()

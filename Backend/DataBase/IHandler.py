@@ -18,7 +18,6 @@ class IHandler(ABC):
         res = Response(True)
         try:
             session.add(obj)
-            session.commit()
         except Exception as e:
             session.rollback()
             res = Response(False, msg=str(e))
@@ -31,7 +30,6 @@ class IHandler(ABC):
         res = Response(True)
         try:
             session.delete(obj)
-            session.commit()
         except Exception as e:
             session.rollback()
             res = Response(False, msg=str(e))
@@ -39,8 +37,7 @@ class IHandler(ABC):
             self._rwlock.release_write()
             return res
 
-    @abstractmethod
-    def update(self):
+    def commit_changes(self):
         self._rwlock.acquire_write()
         res = Response(True)
         try:
@@ -53,7 +50,6 @@ class IHandler(ABC):
             self._rwlock.release_write()
             return res
 
-    @abstractmethod
     def load(self, id):
         self._rwlock.acquire_read()
         res = Response(True)

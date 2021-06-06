@@ -22,8 +22,6 @@ class ProductHandler(IHandler):
                                 Column('product_name', String(50)),
                                 Column('category', String(50)),
                                 Column('price', Float),
-                                Column('store_id', String(50), ForeignKey("stores.store_id")),     # add foreign key to stores when it will be created
-                                Column('quantity', Integer, CheckConstraint('quantity>0')),
                                 Column('keywords', ARRAY(String(30)))
                                 )
 
@@ -33,7 +31,6 @@ class ProductHandler(IHandler):
             '_Product__category': self.__products.c.category,
             '_Product__price': self.__products.c.price,
             '_Product__keywords': self.__products.c.keywords,
-            'quantity': self.__products.c.quantity,
         })
 
     @staticmethod
@@ -43,38 +40,36 @@ class ProductHandler(IHandler):
                 ProductHandler._instance = ProductHandler()
         return ProductHandler._instance
 
-    def save(self, obj: Product, **kwargs) -> Response[None]:
-        self._rwlock.acquire_write()
-        res = Response(True)
-        try:
-            stmt = insert(self.__products).values(product_id=obj.get_id(),
-                                                  product_name=obj.get_name(),
-                                                  category=obj.get_category(),
-                                                  price=obj.get_price(),
-                                                  store_id=kwargs['store_id'],
-                                                  quantity=kwargs['quantity'],
-                                                  keywords=obj.get_keywords())
-            session.execute(stmt)
-            session.commit()
-        except Exception as e:
-            session.rollback()
-            res = Response(False, msg=str(e))
-        finally:
-            self._rwlock.release_write()
-            return res
+    # def save(self, obj: Product, **kwargs) -> Response[None]:
+    #     self._rwlock.acquire_write()
+    #     res = Response(True)
+    #     try:
+    #         stmt = insert(self.__products).values(product_id=obj.get_id(),
+    #                                               product_name=obj.get_name(),
+    #                                               category=obj.get_category(),
+    #                                               price=obj.get_price(),
+    #                                               keywords=obj.get_keywords())
+    #         session.execute(stmt)
+    #         session.commit()
+    #     except Exception as e:
+    #         session.rollback()
+    #         res = Response(False, msg=str(e))
+    #     finally:
+    #         self._rwlock.release_write()
+    #         return res
 
-    def remove(self, obj, **kwargs) -> Response[None]:
-        self._rwlock.acquire_write()
-        res = Response(True)
-        try:
-            session.query(Product).filter_by(_Product__id=obj.get_id()).delete()
-            session.commit()
-        except Exception as e:
-            session.rollback()
-            res = Response(False, msg=str(e))
-        finally:
-            self._rwlock.release_write()
-            return res
+    # def remove(self, obj, **kwargs) -> Response[None]:
+    #     self._rwlock.acquire_write()
+    #     res = Response(True)
+    #     try:
+    #         session.query(Product).filter_by(_Product__id=obj.get_id()).delete()
+    #         session.commit()
+    #     except Exception as e:
+    #         session.rollback()
+    #         res = Response(False, msg=str(e))
+    #     finally:
+    #         self._rwlock.release_write()
+    #         return res
 
     def load_all(self):
         self._rwlock.acquire_read()

@@ -38,7 +38,7 @@ class Guest(UserState):
             if is_username_admin(username):
                 self._user.change_state(
                     Admin(self._user, username)
-                )  # in later milestones, fetch data from DB
+                )  # TODO: in later milestones, fetch data from DB
             else:
                 self._user.change_state(Member(self._user, username))
         return response
