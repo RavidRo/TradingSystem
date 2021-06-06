@@ -31,32 +31,34 @@ const Statistics: FC<StatisticsProps> = ({
     }
 
 	return (
-        <form noValidate>
-            <TextField
-                className="fromDate"
-                id="date"
-                label="From"
-                type="date"
-                defaultValue="2017-05-24"
-                InputLabelProps={{
-                shrink: true,
-                }}
-                onChange={(e)=>pickedFrom(e)}
-                style={{width: 200, marginRight: 50}}
-            />
-            <TextField
-                className="toDate"
-                id="date"
-                label="To"
-                type="date"
-                defaultValue="2017-05-24"
-                InputLabelProps={{
-                shrink: true,
-                }}
-                onChange={(e)=>pickedTo(e)}
-                style={{width: 200}}
-            />
-        </form>
+        <div className="statistics">
+            <form noValidate>
+                <TextField
+                    className="fromDate"
+                    id="date"
+                    label="From"
+                    type="date"
+                    defaultValue="2017-05-24"
+                    InputLabelProps={{
+                    shrink: true,
+                    }}
+                    onChange={(e)=>pickedFrom(e)}
+                    style={{width: 200, marginRight: 50}}
+                />
+                <TextField
+                    className="toDate"
+                    id="date"
+                    label="To"
+                    type="date"
+                    defaultValue="2017-05-24"
+                    InputLabelProps={{
+                    shrink: true,
+                    }}
+                    onChange={(e)=>pickedTo(e)}
+                    style={{width: 200}}
+                />
+            </form>
+        </div>
 
 	);
 };
