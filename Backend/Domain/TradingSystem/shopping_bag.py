@@ -62,9 +62,10 @@ class ShoppingBag(IShoppingBag):
             )
 
         if self._products_to_quantity.get(product_id) is not None:
-            return Response(
-                False, msg=f"A product with id: {product_id} already exists in the store's bag"
-            )
+            return self.change_product_quantity(product_id=product_id, new_amount=self._products_to_quantity[product_id][1] + 1)
+            # return Response(
+            #     False, msg=f"A product with id: {product_id} already exists in the store's bag"
+            # )
 
         self._products_to_quantity.update(
             {product_id: (self.__store.get_product(product_id), quantity)}
