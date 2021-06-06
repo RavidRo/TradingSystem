@@ -19,7 +19,11 @@ class Settings:
         if Settings.__instance is not None:
             raise Exception("This class is a singleton!")
         Settings.__instance = self
-        with open("config.json", "r") as read_file:
+        try:
+            read_file = open("config.json", "r")
+        except OSError:
+            OSError("config.json file is absent")
+        with read_file:
             data = json.load(read_file)
             self.__admins = data["admins"] if "admins" in data else None
             self.__password = data["password"] if "password" in data else None

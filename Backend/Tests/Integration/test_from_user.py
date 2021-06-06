@@ -42,7 +42,11 @@ def user_member3():
 @pytest.fixture
 def user_admin():
     user = User()
-    with open("config.json", "r") as read_file:
+    try:
+        read_file = open("config.json", "r")
+    except OSError:
+        raise OSError("config.json file is absent")
+    with read_file:
         data = json.load(read_file)
         user.login(data["admins"][0], data["password"])
     return user
@@ -51,7 +55,11 @@ def user_admin():
 @pytest.fixture
 def user_admin2():
     user = User()
-    with open("config.json", "r") as read_file:
+    try:
+        read_file = open("config.json", "r")
+    except OSError:
+        raise OSError("config.json file is absent")
+    with read_file:
         data = json.load(read_file)
         user.login(data["admins"][1], data["password"])
     return user
@@ -60,7 +68,11 @@ def user_admin2():
 @pytest.fixture
 def user_admin3():
     user = User()
-    with open("config.json", "r") as read_file:
+    try:
+        read_file = open("config.json", "r")
+    except OSError:
+        raise OSError("config.json file is absent")
+    with read_file:
         data = json.load(read_file)
         user.login(data["admins"][2], data["password"])
     return user

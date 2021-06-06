@@ -1702,7 +1702,11 @@ def test_get_store_purchase_history_no_payment_success():
 
 def _get_admin() -> str:
     admin_cookie = system.enter_system()
-    with open("config.json", "r") as read_file:
+    try:
+        read_file = open("config.json", "r")
+    except OSError:
+        raise OSError("config.json file is absent")
+    with read_file:
         data = json.load(read_file)
         system.login(admin_cookie, data["admins"][0], data["password"])
     return admin_cookie
