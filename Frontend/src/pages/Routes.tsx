@@ -4,7 +4,7 @@ import { Redirect, Route, Switch } from 'react-router';
 import { AdminsContext, UsernameContext } from '../contexts';
 import { Product, StoreToSearchedProducts } from '../types';
 import AdminPage from './AdminPage';
-
+import Statistics from './Statistics';
 import Cart from './Cart';
 import Home from './Home';
 import MyAccount from './MyAccount';
@@ -111,6 +111,11 @@ const Routes: FC<RoutesProps> = ({
 			)}
 			{signedIn && admins.includes(username) ? (
 				<Route path='/admin' exact component={AdminPage} />
+			) : (
+				<Redirect to='/' />
+			)}
+			{signedIn && admins.includes(username) ? (
+				<Route path='/statistics' exact component={Statistics} />
 			) : (
 				<Redirect to='/' />
 			)}
