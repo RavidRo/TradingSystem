@@ -34,7 +34,7 @@ const FilterMenu: FC<FilterMenuProps> = ({handleFilter}) => {
                     defaultValue={2}
                     precision={0.5}
                     emptyIcon={<StarBorderIcon fontSize="inherit" style={{'fill':'black'}}/>}
-                    onChange={(event, newValue) => {
+                    onChange={(_:any, newValue:number) => {
                         setProductRating(newValue);
                     }}
                 />
@@ -47,7 +47,7 @@ const FilterMenu: FC<FilterMenuProps> = ({handleFilter}) => {
                     defaultValue={2}
                     precision={0.5}
                     emptyIcon={<StarBorderIcon fontSize="inherit" style={{'fill':'black'}}/>}
-                    onChange={(event, newValue) => {
+                    onChange={(_:any, newValue:number) => {
                         setStoreRating(newValue);
                     }}
                 />
