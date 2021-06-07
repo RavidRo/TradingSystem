@@ -5,6 +5,7 @@ import json
 from typing import Callable
 import threading
 
+from Backend.Service import logs
 from Backend.response import Response
 
 import Backend.Service.logs as log
@@ -41,7 +42,9 @@ class TradingSystem(object):
             self.payment_manager = PaymentManager()
             try:
                 read_file = open("state.json", "r")
-            except OSError:
+            except:
+                e = FileNotFoundError("state.json file is absent")
+                logs.log_file_errors(e)
                 return
             with read_file:
                 data = json.load(read_file)

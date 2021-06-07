@@ -5,6 +5,7 @@ from queue import Queue
 from unittest import mock
 from unittest.mock import patch, MagicMock
 
+from Backend.Service import logs
 from Backend.Service.trading_system import TradingSystem
 from Backend.response import Response
 from Backend.Domain.Payment.Adapters.cashing_adapter import CashingAdapter
@@ -1704,10 +1705,19 @@ def _get_admin() -> str:
     admin_cookie = system.enter_system()
     try:
         read_file = open("config.json", "r")
-    except OSError:
-        raise OSError("config.json file is absent")
+    except:
+        e = FileNotFoundError("config.json file is absent")
+        logs.log_file_errors(e)
+        raise e
     with read_file:
         data = json.load(read_file)
+        missing_args = ""
+        if "admins" not in data:
+            missing_args += "admins "
+        if "password" not in data:
+            missing_args += "password "
+        if not missing_args == "":
+            raise KeyError("the keys " + missing_args + "are missing from config.json file")
         system.login(admin_cookie, data["admins"][0], data["password"])
     return admin_cookie
 

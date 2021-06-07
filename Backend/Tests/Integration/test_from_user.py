@@ -4,6 +4,7 @@ import json
 from Backend.Domain.TradingSystem.Responsibilities.responsibility import Permission
 from Backend.Domain.TradingSystem.store import Store
 from Backend.Domain.TradingSystem.user import User
+import Backend.Service.logs as logs
 
 """
 In this test file were are testing all the requirements from user which includes authentication and responsibility.
@@ -44,10 +45,19 @@ def user_admin():
     user = User()
     try:
         read_file = open("config.json", "r")
-    except OSError:
-        raise OSError("config.json file is absent")
+    except:
+        e = FileNotFoundError("config.json file is absent")
+        logs.log_file_errors(e)
+        raise e
     with read_file:
         data = json.load(read_file)
+        missing_args = ""
+        if "admins" not in data:
+            missing_args += "admins "
+        if "password" not in data:
+            missing_args += "password "
+        if not missing_args == "":
+            raise KeyError("the keys " + missing_args + "are missing from config.json file")
         user.login(data["admins"][0], data["password"])
     return user
 
@@ -57,10 +67,19 @@ def user_admin2():
     user = User()
     try:
         read_file = open("config.json", "r")
-    except OSError:
-        raise OSError("config.json file is absent")
+    except:
+        e = FileNotFoundError("config.json file is absent")
+        logs.log_file_errors(e)
+        raise e
     with read_file:
         data = json.load(read_file)
+        missing_args = ""
+        if "admins" not in data:
+            missing_args += "admins "
+        if "password" not in data:
+            missing_args += "password "
+        if not missing_args == "":
+            raise KeyError("the keys " + missing_args + "are missing from config.json file")
         user.login(data["admins"][1], data["password"])
     return user
 
@@ -70,10 +89,19 @@ def user_admin3():
     user = User()
     try:
         read_file = open("config.json", "r")
-    except OSError:
-        raise OSError("config.json file is absent")
+    except:
+        e = FileNotFoundError("config.json file is absent")
+        logs.log_file_errors(e)
+        raise e
     with read_file:
         data = json.load(read_file)
+        missing_args = ""
+        if "admins" not in data:
+            missing_args += "admins "
+        if "password" not in data:
+            missing_args += "password "
+        if not missing_args == "":
+            raise KeyError("the keys " + missing_args + "are missing from config.json file")
         user.login(data["admins"][2], data["password"])
     return user
 

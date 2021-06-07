@@ -48,3 +48,6 @@ def loging(to_hide=[]):
         return inner
 
     return decorator
+
+def log_file_errors(error: FileNotFoundError):
+    logging.critical(f"Error: FileNotFoundError - {error}")
