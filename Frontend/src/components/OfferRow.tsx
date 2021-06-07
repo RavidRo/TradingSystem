@@ -168,7 +168,7 @@ return (
                 </TableCell>
                 <TableCell component="th" scope="row">
                     {isManager===false?
-                    <button className="rowBtn" disabled={currentOffer.status==='cancled'} onClick={handleCancel}>
+                    <button className="rowBtn" disabled={currentOffer.status==='cancled' || currentOffer.status==='rejected' || currentOffer.status==='approved'} onClick={handleCancel}>
                         Cancel Offer
                     </button>
                     :<button className="rowBtn" disabled={currentOffer.status!=='awaiting manager approval' && currentOffer.status!=='cancled'} onClick={handleReject}>
