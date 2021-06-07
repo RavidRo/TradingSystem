@@ -8,8 +8,11 @@
 			"function": "register",
 			"args": [
 				"cookie#1",
-				"u1",
-				"password1"
+				"_",
+				"_"
+			],
+			"special": [
+				"admin register"
 			]
 		},
 		{

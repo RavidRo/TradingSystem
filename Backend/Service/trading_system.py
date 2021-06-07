@@ -43,6 +43,13 @@ class TradingSystem(object):
                 data = json.load(read_file)
                 actions = data["actions"]
                 for action in actions:
+                    sp = action.get("special", default=None)
+                    if sp:
+                        if "admin register" in sp:
+                            args = action["args"]
+                            cookie = new_args.append(cookies[int(arg.split('#')[1]) - 1])
+                            self.register(cookie, )
+                            continue
                     func = action["function"]
                     args = action["args"]
                     new_args = []
