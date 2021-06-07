@@ -9,6 +9,7 @@ from Backend.Domain.TradingSystem.Interfaces.IShoppingCart import IShoppingCart
 class ShoppingCart(IShoppingCart):
     def __init__(self):
         from Backend.DataBase.Handlers.shopping_bag_handler import ShoppingBagHandler
+        from Backend.DataBase.Handlers.member_handler import MemberHandler
         self.__shopping_bags: dict[str, ShoppingBag] = dict()
         self.__timer = None
         self.__INTERVAL_TIME = self.interval_time()
@@ -66,6 +67,7 @@ class ShoppingCart(IShoppingCart):
     def create_new_bag(self, store):
         new_bag = ShoppingBag(store)
         self.__shopping_bag_handler.save(new_bag)
+        res = self.__shopping_bag_handler.commit_changes()
         self.__shopping_bags[store.get_id()] = new_bag
         return new_bag
 

@@ -1,6 +1,7 @@
 from threading import Lock
 from sqlalchemy import Table, Column, String, Boolean, insert, ARRAY, ForeignKey, select
-from sqlalchemy.orm import mapper, relationship, backref
+from sqlalchemy.exc import DisconnectionError
+from sqlalchemy.orm import mapper, relationship, backref, with_polymorphic
 
 from Backend.DataBase.Handlers.shopping_bag_handler import ShoppingBagHandler
 from Backend.DataBase.IHandler import IHandler
@@ -10,9 +11,10 @@ from Backend.Domain.TradingSystem.Responsibilities.responsibility import Respons
 from Backend.Domain.TradingSystem.States.member import Member
 from Backend.Domain.TradingSystem.purchase_details import PurchaseDetails
 from Backend.Domain.TradingSystem.shopping_bag import ShoppingBag
-from Backend.response import Response
+from Backend.Domain.TradingSystem.shopping_cart import ShoppingCart
+from Backend.response import Response, PrimitiveParsable
 from Backend.rw_lock import ReadWriteLock
-from sqlalchemy.orm.collections import attribute_mapped_collection
+from sqlalchemy.orm.collections import attribute_mapped_collection, column_mapped_collection
 
 
 class MemberHandler(IHandler):
@@ -20,15 +22,16 @@ class MemberHandler(IHandler):
     _instance = None
 
     def __init__(self):
+        from Backend.Domain.TradingSystem.States.admin import Admin
         super().__init__(ReadWriteLock(), Member)
-        self.__shopping_bag_handler = ShoppingBagHandler.get_instance()
         self.__credentials = Table("credentials", Base.metadata,
                                    Column('username', String(50), primary_key=True),
                                    Column('password', String(256)))
 
         self.__members = Table('members', Base.metadata,
                                Column('username', String(50), ForeignKey("credentials.username"), primary_key=True),
-                               Column('notifications', ARRAY(String(256)))
+                               Column('notifications', ARRAY(String(256))),
+                               Column('member_type', String(10), nullable=False)
                                )
 
         mapper(Member, self.__members, properties={
@@ -38,8 +41,9 @@ class MemberHandler(IHandler):
             #                                           passive_deletes=True),
             '_Member__purchase_details': relationship(PurchaseDetails, cascade="all, delete",
                                                       passive_deletes=True),
-            'shopping_bags': relationship(ShoppingBag, uselist=True, backref=backref("user", uselist=False))
-        })
+        }, polymorphic_on=self.__members.c.member_type, polymorphic_identity='M')
+
+        mapper(Admin, self.__members, inherits=Member, polymorphic_identity='A')
 
     @staticmethod
     def get_instance():
@@ -47,21 +51,6 @@ class MemberHandler(IHandler):
             if MemberHandler._instance is None:
                 MemberHandler._instance = MemberHandler()
         return MemberHandler._instance
-
-    """Note: member is saved in db in register so all of his lists are empty and not the object is saved"""
-
-    def save(self, obj, **kwargs) -> Response[None]:
-        self._rwlock.acquire_write()
-        res = Response(True)
-        try:
-            session.add(obj)
-            session.commit()
-        except Exception as e:
-            session.rollback()
-            res = Response(False, msg=str(e))
-        finally:
-            self._rwlock.release_write()
-            return res
 
     # region save
     def save_user_credentials(self, username: str, password: str):

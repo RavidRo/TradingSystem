@@ -55,7 +55,6 @@ class IHandler(ABC):
         res = Response(True)
         try:
             res_query = session.query(self._class_type).get(id)
-            session.commit()
             res = Response(True, res_query)
 
         except DisconnectionError as err:

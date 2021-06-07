@@ -12,6 +12,7 @@ from Backend.response import Response, ParsableList
 from Backend.rw_lock import ReadWriteLock
 from threading import Lock
 
+
 class ProductsOfStores(Base):
     __tablename__ = "products_of_stores"
     store_id = Column(String, ForeignKey("stores.store_id"), primary_key=True)
@@ -45,8 +46,7 @@ class StoreHandler(IHandler):
             # "_products_to_quantities": relationship(Product, uselist=True,
             #                                         collection_class=MyMap())
             "products": relationship(ProductsOfStores, uselist=True,
-                                     collection_class=attribute_mapped_collection("product_id"),
-                                     backref="store"),
+                                     collection_class=attribute_mapped_collection("product_id")),
             # "_Store__responsibility": relationship(Founder, uselist=False, overlaps="_appointed", backref=backref("_store", uselist=False))
         })
 

@@ -5,7 +5,6 @@ from typing import Callable
 from Backend.response import Response, ParsableList, PrimitiveParsable
 
 from Backend.Domain.TradingSystem.Interfaces.IUser import IUser
-from Backend.Domain.TradingSystem.Interfaces.IUserState import IUserState
 from Backend.Domain.TradingSystem.store import Store
 from Backend.Domain.TradingSystem.shopping_cart import ShoppingCart
 from Backend.Domain.TradingSystem.purchase_details import PurchaseDetails
@@ -15,6 +14,7 @@ from Backend.Domain.TradingSystem.Responsibilities.responsibility import Permiss
 
 class User(IUser):
     def __init__(self):
+        from Backend.Domain.TradingSystem.Interfaces.IUserState import IUserState
         self.state: UserState = IUserState.create_guest(self)
         self.appointment_lock = threading.Lock()
         self.__notifications: list[str] = []

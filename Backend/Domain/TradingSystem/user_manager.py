@@ -1,6 +1,9 @@
 from typing import Callable
 import uuid
 import json
+
+from Backend.DataBase.Handlers.member_handler import MemberHandler
+from Backend.Domain.TradingSystem.States.member import Member
 from Backend.response import Response, ParsableList, PrimitiveParsable
 from Backend.Domain.TradingSystem.Interfaces.IUser import IUser
 from Backend.Domain.TradingSystem.store import Store
@@ -74,6 +77,7 @@ class UserManager:
             if response.succeeded():
                 newUser = User()
                 newUser.login(username, password)
+                newUser.change_state(Member(newUser, username))
                 UserManager.__username_user[username] = newUser
             return response
 
@@ -92,12 +96,20 @@ class UserManager:
                         old_user = UserManager.__username_user[old_username]
                         UserManager.__cookie_user[cookie] = old_user
                         old_user.connect(user.get_communicate())
+                        return response
+                res = MemberHandler.get_instance().load(username)
+                res_commit = MemberHandler.get_instance().commit_changes()
+                if res_commit.succeeded():
+                    res.get_obj().set_user(user)
+                    user.change_state(res.get_obj())
+                    UserManager.__username_user[username] = user
+
+
                 # for user_cookie in UserManager.__cookie_user:
                 #     old_user = UserManager.__cookie_user[user_cookie]
                 #     response_username = old_user.get_username()
                 #     if (
-                #         response_username.succeeded()
-                #         and old_user != user
+                #         response_username.succeeded()i
                 #         and response_username.get_obj().get_val() == username
                 #     ):
                 #         UserManager.__cookie_user[cookie] = old_user

@@ -1,9 +1,9 @@
-from Backend.DataBase.Handlers.member_handler import MemberHandler
+
+from Backend.DataBase.database import db_fail_response
 from Backend.Domain.Authentication import authentication
 from Backend.Domain.TradingSystem.States.admin import Admin
 from Backend.Domain.TradingSystem.States.member import Member
 from Backend.Domain.TradingSystem.States.user_state import UserState
-from Backend.Domain.TradingSystem.user import User
 from Backend.response import Response
 import json
 
@@ -16,7 +16,9 @@ def register_admins() -> None:
         for username in data["admins"]:
             res = authentication.register(username, data["admin-password"])
             if res.succeeded():
-                MemberHandler.get_instance().save(Admin(User(), username))
+                from Backend.DataBase.Handlers.member_handler import MemberHandler
+                MemberHandler.get_instance().save(Admin(None, username))
+                MemberHandler.get_instance().commit_changes()
             admins.append(username)
 
 
@@ -36,24 +38,17 @@ class Guest(UserState):
         super().__init__(user, cart)
 
     def login(self, username, password):
-        from Backend.Domain.TradingSystem.States.member import Member
-        from Backend.Domain.TradingSystem.States.admin import Admin
-
         response = authentication.login(username, password)
-        if response.succeeded():
-
-            if is_username_admin(username):
-                self._user.change_state(
-                    Admin(self._user, username)
-                )  # TODO: in later milestones, fetch data from DB
-            else:
-                self._user.change_state(Member(self._user, username))
         return response
 
     def register(self, username, password):
         res = authentication.register(username, password)
         if res.succeeded():
             self._member_handler.save(Member(self._user, username))
+            save_res = self._member_handler.commit_changes()
+            if not save_res.succeeded():
+                authentication.remove_user_credrnials(username)
+                return db_fail_response
         return res
 
     def delete_products_after_purchase(self):

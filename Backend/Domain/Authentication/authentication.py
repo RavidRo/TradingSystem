@@ -45,10 +45,12 @@ def login(username, password) -> Response[PrimitiveParsable[bool]]:
     return Response(True, msg="login succeeded")
 
 
+def remove_user_credrnials(username: str):
+    users.pop(username)
+
 def __add_user_to_db(username, password) -> bool:
     res = member_handler.save_user_credentials(username, generate_password_hash(password, method="sha256"))
     if res.succeeded():
-
         users[username] = {'password': generate_password_hash(password, method="sha256")}
         return True
     else:

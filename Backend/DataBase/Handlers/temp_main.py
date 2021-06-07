@@ -12,12 +12,13 @@ from Backend.Domain.TradingSystem.user import User
 from Backend.Service.trading_system import TradingSystem
 
 if __name__ == '__main__':
+    shopping_bag_handler = ShoppingBagHandler.get_instance()
     member_handler = MemberHandler.get_instance()
     product_handler = ProductHandler.get_instance()
     purchase_details_handler = PurchaseDetailsHandler.get_instance()
     store_handler = StoreHandler.get_instance()
-    responsibility_handler = ResponsibilitiesHandler.get_instance()
-    shopping_bag_handler = ShoppingBagHandler.get_instance()
+    # responsibility_handler = ResponsibilitiesHandler.get_instance()
+
     Base.metadata.drop_all(engine)
     Base.metadata.create_all(engine)
 
@@ -29,25 +30,21 @@ if __name__ == '__main__':
 
     res = trading_system.login(cookie, "user", "password")
 
-    res = member_handler.save(user.state)
-    if not res.succeeded():
-        print("save user: " + res.get_msg())
-
-    if not res.succeeded():
-        print("login: " + res.get_msg())
-    store_res = user.create_store("The Store")
+    store_res = trading_system.create_store(cookie, "The Store")
     if not store_res.succeeded():
         print("open_store: " + store_res.get_msg())
 
-    product_res = store_res.get_obj().add_product("The Product", "The Category", 5, 8, ["The Keyword A", "The Keyword B"])
+    product_res = trading_system.create_product(cookie, store_res.get_obj(), "The Product", "The Category", 5, 8, ["The Keyword A", "The Keyword B"])
     if not product_res.succeeded():
         print("add_product: " + product_res.get_msg())
 
-    res = store_res.get_obj().change_product_quantity(res.get_obj(), 11)
+    res = trading_system.change_product_quantity_in_store(cookie, store_res.get_obj(), product_res.get_obj(), 11)
     if not res.succeeded():
         print("edit product details: " + res.get_msg())
 
-    user.add_to_cart(store_res.get_obj().get_id(), product_res.get_obj(), 2)
+    res_save_prod = trading_system.save_product_in_cart(cookie, store_res.get_obj(), product_res.get_obj(), 2)
+    if not res_save_prod.succeeded():
+        print("save in card: " + res_save_prod.get_msg())
 
 
     # user2 = User()

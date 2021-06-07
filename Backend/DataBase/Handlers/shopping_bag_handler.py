@@ -1,6 +1,6 @@
 from sqlalchemy import Table, Column, String, Integer, ForeignKey, CheckConstraint, insert, Boolean, \
     ForeignKeyConstraint
-from sqlalchemy.orm import mapper, relationship
+from sqlalchemy.orm import mapper, relationship, backref
 from sqlalchemy.orm.collections import attribute_mapped_collection
 
 from Backend.DataBase.IHandler import IHandler

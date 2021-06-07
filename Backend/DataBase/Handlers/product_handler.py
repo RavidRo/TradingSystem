@@ -40,37 +40,6 @@ class ProductHandler(IHandler):
                 ProductHandler._instance = ProductHandler()
         return ProductHandler._instance
 
-    # def save(self, obj: Product, **kwargs) -> Response[None]:
-    #     self._rwlock.acquire_write()
-    #     res = Response(True)
-    #     try:
-    #         stmt = insert(self.__products).values(product_id=obj.get_id(),
-    #                                               product_name=obj.get_name(),
-    #                                               category=obj.get_category(),
-    #                                               price=obj.get_price(),
-    #                                               keywords=obj.get_keywords())
-    #         session.execute(stmt)
-    #         session.commit()
-    #     except Exception as e:
-    #         session.rollback()
-    #         res = Response(False, msg=str(e))
-    #     finally:
-    #         self._rwlock.release_write()
-    #         return res
-
-    # def remove(self, obj, **kwargs) -> Response[None]:
-    #     self._rwlock.acquire_write()
-    #     res = Response(True)
-    #     try:
-    #         session.query(Product).filter_by(_Product__id=obj.get_id()).delete()
-    #         session.commit()
-    #     except Exception as e:
-    #         session.rollback()
-    #         res = Response(False, msg=str(e))
-    #     finally:
-    #         self._rwlock.release_write()
-    #         return res
-
     def load_all(self):
         self._rwlock.acquire_read()
         res = Response(True)
