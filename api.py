@@ -1047,6 +1047,15 @@ async def cancel_offer():
     return __responseToJson(cookie, answer)
 
 
+@app.route("/get_statistics", methods=["GET"])
+async def get_statistics():
+    cookie = request.args.get("cookie")
+    if cookie is None:
+        cookie = await __async_call(system.enter_system)
+    answer = await __async_call(system.get_statistics, cookie)
+    return __responseToJson(cookie, answer)
+
+
 @app.errorhandler(404)
 async def page_not_found(e):
     return json.dumps({"error": "404 page not found"})

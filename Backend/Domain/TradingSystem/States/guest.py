@@ -1,3 +1,4 @@
+from Backend.Service.DataObjects.statistics_data import StatisticsData
 from Backend.Domain.TradingSystem.offer import Offer
 from Backend.Domain.Authentication import authentication
 from Backend.Domain.TradingSystem.States.user_state import UserState
@@ -144,6 +145,10 @@ class Guest(UserState):
     def get_purchase_policy(self, store_id):
         return self.__responsibilities[store_id].get_purchase_policy()
 
+    # 6.5
+    def register_statistics(self) -> None:
+        self._statistics.register_guest()
+
     # Offers
     # ==================
 
@@ -172,4 +177,7 @@ class Guest(UserState):
         return Response(False, msg="Guests cannot have price offers")
 
     def cancel_offer(self, offer_id) -> Response[None]:
+        return Response(False, msg="Guests cannot have price offers")
+
+    def get_users_statistics(self) -> Response[StatisticsData]:
         return Response(False, msg="Guests cannot have price offers")
