@@ -1,7 +1,7 @@
 from datetime import date
 
 from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker, declarative_base, scoped_session
+from sqlalchemy.orm import sessionmaker, declarative_base, scoped_session, registry
 
 # create an engine
 
@@ -16,5 +16,5 @@ engine = create_engine(SQLAlchemy_DATABASE_URI)
 # create a configured "Session" class
 Session = scoped_session(sessionmaker(bind=engine, autocommit=False, autoflush=False))
 session = Session(expire_on_commit=False)
-Base = declarative_base()
+mapper_registry = registry()
 db_fail_response = Response(False, msg="DB failed, please try again later")

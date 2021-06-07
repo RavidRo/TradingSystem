@@ -4,7 +4,7 @@ from sqlalchemy import Table, Column, String, Boolean, insert, ForeignKey, Date,
 from sqlalchemy.orm import mapper
 
 from Backend.DataBase.IHandler import IHandler
-from Backend.DataBase.database import Base, session
+from Backend.DataBase.database import mapper_registry, session
 from Backend.Domain.TradingSystem.purchase_details import PurchaseDetails
 from Backend.response import Response, PrimitiveParsable
 from Backend.rw_lock import ReadWriteLock
@@ -17,7 +17,7 @@ class PurchaseDetailsHandler(IHandler):
     def __init__(self):
         super().__init__(ReadWriteLock(), PurchaseDetails)
 
-        self.__purchase_details = Table('purchase_details', Base.metadata,
+        self.__purchase_details = Table('purchase_details', mapper_registry.metadata,
                                         Column('username', String(50), ForeignKey('members.username'),
                                                primary_key=True),
                                         Column('store_id', String(50), ForeignKey('stores.store_id'), primary_key=True),
@@ -27,7 +27,7 @@ class PurchaseDetailsHandler(IHandler):
                                         Column('total_price', Float),
                                         )
 
-        mapper(PurchaseDetails, self.__purchase_details, properties={
+        mapper_registry.map_imperatively(PurchaseDetails, self.__purchase_details, properties={
             'username': self.__purchase_details.c.username,
             'store_name': self.__purchase_details.c.store_name,
             'store_id': self.__purchase_details.c.store_id,

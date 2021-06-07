@@ -11,6 +11,7 @@ class ShoppingBag(IShoppingBag):
     def __init__(self, store):
         from Backend.DataBase.Handlers.shopping_bag_handler import ShoppingBagHandler
         self.__store = store
+        # self.store_id = store.get_id()
         self._products_to_quantity = dict()
         self.__pending_products_to_quantity = dict()
         self.__pending_price = 0
@@ -63,7 +64,7 @@ class ShoppingBag(IShoppingBag):
             )
 
         if user_name is not None:
-            self.__shopping_bag_handler.add_product_to_bag(self, self.get_store(), self.__store.get_product(product_id), user_name, quantity)
+            self.__shopping_bag_handler.add_product_to_bag(self.get_store(), self.__store.get_product(product_id), user_name, quantity)
             res = self.__shopping_bag_handler.commit_changes()
             if not res.succeeded():
                 return db_fail_response

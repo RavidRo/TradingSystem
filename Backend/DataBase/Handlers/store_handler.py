@@ -3,7 +3,7 @@ from sqlalchemy.orm import mapper, relationship, backref
 from sqlalchemy.orm.collections import attribute_mapped_collection, collection
 from Backend.DataBase.Handlers.product_handler import ProductHandler
 from Backend.DataBase.IHandler import IHandler
-from Backend.DataBase.database import Base, session, engine
+from Backend.DataBase.database import mapper_registry, session, engine
 from Backend.Domain.TradingSystem.Responsibilities.founder import Founder
 from Backend.Domain.TradingSystem.product import Product
 from Backend.Domain.TradingSystem.purchase_details import PurchaseDetails
@@ -13,15 +13,7 @@ from Backend.rw_lock import ReadWriteLock
 from threading import Lock
 
 
-class ProductsOfStores(Base):
-    __tablename__ = "products_of_stores"
-    store_id = Column(String, ForeignKey("stores.store_id"), primary_key=True)
-    product_id = Column(String, ForeignKey("products.product_id", ondelete="CASCADE", onupdate="CASCADE"),
-                        primary_key=True)
-    quantity = Column(Integer, CheckConstraint('quantity > 0'))
-
-    product = relationship(Product, cascade="all")
-
+class ProductsOfStores:
     def __init__(self, store_id, product_id, quantity):
         self.store_id = store_id
         self.product_id = product_id
@@ -35,11 +27,27 @@ class StoreHandler(IHandler):
     def __init__(self):
         super().__init__(ReadWriteLock(), Store)
 
-        self.__stores = Table("stores", Base.metadata,
+        self.__products_of_stores = Table("products_of_stores", mapper_registry.metadata,
+                                          Column("store_id", String(50), ForeignKey("stores.store_id"),
+                                                 primary_key=True),
+                                          Column("product_id", String(50),
+                                                 ForeignKey("products.product_id", ondelete="CASCADE",
+                                                            onupdate="CASCADE"),
+                                                 primary_key=True),
+                                          Column("quantity", Integer, CheckConstraint('quantity > 0')))
+
+        self.__stores = Table("stores", mapper_registry.metadata,
                               Column("store_id", String(50), primary_key=True),
                               Column("store_name", String(30)))
 
-        mapper(Store, self.__stores, properties={
+        mapper_registry.map_imperatively(ProductsOfStores, self.__products_of_stores, properties={
+            "store_id": self.__products_of_stores.c.store_id,
+            "product_id": self.__products_of_stores.c.product_id,
+            "quantity": self.__products_of_stores.c.quantity,
+            "product": relationship(Product, cascade="all")
+        })
+
+        mapper_registry.map_imperatively(Store, self.__stores, properties={
             "_Store__id": self.__stores.c.store_id,
             "_Store__name": self.__stores.c.store_name,
             "_Store__purchase_history": relationship(PurchaseDetails),

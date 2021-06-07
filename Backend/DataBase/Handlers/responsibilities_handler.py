@@ -5,7 +5,7 @@ from sqlalchemy.orm.collections import attribute_mapped_collection
 
 from Backend.DataBase.IHandler import IHandler
 from threading import Lock
-from Backend.DataBase.database import Base, session
+from Backend.DataBase.database import mapper_registry, session
 from Backend.Domain.TradingSystem.Responsibilities.founder import Founder
 from Backend.Domain.TradingSystem.Responsibilities.manager import Manager
 from Backend.Domain.TradingSystem.Responsibilities.owner import Owner
@@ -28,7 +28,7 @@ class ResponsibilitiesHandler(IHandler):
     def __init__(self):
         super().__init__(ReadWriteLock(), Responsibility)
 
-        self.__responsibilities = Table('responsibilities', Base.metadata,
+        self.__responsibilities = Table('responsibilities', mapper_registry.metadata,
                                         Column('username', String(50), ForeignKey('members.username'),
                                                primary_key=True),
                                         Column('store_id', String(50), ForeignKey('stores.store_id'), primary_key=True),
@@ -38,7 +38,7 @@ class ResponsibilitiesHandler(IHandler):
                                                              ['responsibilities.username',
                                                               'responsibilities.store_id'], name="fk_self_reference"))
 
-        self.__manager_permissions = Table('manager_permissions', Base.metadata,
+        self.__manager_permissions = Table('manager_permissions', mapper_registry.metadata,
                                            Column('manager_store_id', String(50), primary_key=True),
                                            Column('manager_username', String(50), primary_key=True),
                                            Column('permissions', PermissionType()),
@@ -46,7 +46,7 @@ class ResponsibilitiesHandler(IHandler):
                                                                 ['responsibilities.username',
                                                                  'responsibilities.store_id']))
 
-        responsibility_mapper = mapper(Responsibility, self.__responsibilities, properties={
+        responsibility_mapper = mapper_registry.map_imperatively(Responsibility, self.__responsibilities, properties={
             '_appointed': relationship(Responsibility, uselist=True, cascade="all",
                                        passive_deletes=True,
                                        remote_side=[self.__responsibilities.c.username,
@@ -58,9 +58,9 @@ class ResponsibilitiesHandler(IHandler):
             '_store': relationship(Store, uselist=False, backref=backref("_Store__responsibility", uselist=False, overlaps="_appointed")),
         }, polymorphic_on=self.__responsibilities.c.responsibility_type, polymorphic_identity='R')
 
-        mapper(Founder, self.__responsibilities, inherits=responsibility_mapper, polymorphic_identity='F')
-        mapper(Owner, self.__responsibilities, inherits=responsibility_mapper, polymorphic_identity='O')
-        mapper(Manager, join(self.__responsibilities, self.__manager_permissions), polymorphic_identity='M',
+        mapper_registry.map_imperatively(Founder, self.__responsibilities, inherits=responsibility_mapper, polymorphic_identity='F')
+        mapper_registry.map_imperatively(Owner, self.__responsibilities, inherits=responsibility_mapper, polymorphic_identity='O')
+        mapper_registry.map_imperatively(Manager, join(self.__responsibilities, self.__manager_permissions), polymorphic_identity='M',
                properties={
                    '_Manager__permissions': self.__manager_permissions.c.permissions
                })

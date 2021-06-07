@@ -17,8 +17,9 @@ def register_admins() -> None:
             res = authentication.register(username, data["admin-password"])
             if res.succeeded():
                 from Backend.DataBase.Handlers.member_handler import MemberHandler
-                MemberHandler.get_instance().save(Admin(None, username))
-                MemberHandler.get_instance().commit_changes()
+                admin = Admin(None, username)
+                MemberHandler.get_instance().save(admin)
+                res = MemberHandler.get_instance().commit_changes()
             admins.append(username)
 
 
@@ -44,7 +45,8 @@ class Guest(UserState):
     def register(self, username, password):
         res = authentication.register(username, password)
         if res.succeeded():
-            self._member_handler.save(Member(self._user, username))
+            member = Member(self._user, username)
+            self._member_handler.save(member)
             save_res = self._member_handler.commit_changes()
             if not save_res.succeeded():
                 authentication.remove_user_credrnials(username)

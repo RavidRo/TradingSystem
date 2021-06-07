@@ -1,5 +1,7 @@
 import threading
 from threading import Timer
+
+from Backend.DataBase.database import session, db_fail_response
 from Backend.response import Response, PrimitiveParsable, ParsableList
 from Backend.Service.DataObjects.shopping_cart_data import ShoppingCartData
 from Backend.Domain.TradingSystem.shopping_bag import ShoppingBag
@@ -53,7 +55,7 @@ class ShoppingCart(IShoppingCart):
         if store is None:
             return Response(False, msg=f"There is no such store with store_id: {store_id}")
 
-        new_bag = self.create_new_bag(store)
+        new_bag = self.create_new_bag(store, user_name)
         res = new_bag.add_product(product_id, quantity, user_name)
         if not res.succeeded():
             self.__shopping_bags.pop(store_id)
@@ -64,10 +66,13 @@ class ShoppingCart(IShoppingCart):
 
         return StoresManager.get_store(store_id).object
 
-    def create_new_bag(self, store):
+    def create_new_bag(self, store, user_name=None):
         new_bag = ShoppingBag(store)
+        if user_name is not None:
+            self.__shopping_bag_handler.save_bag(user_name, store.get_id())
         self.__shopping_bags.update({store.get_id(): new_bag})
         return new_bag
+
 
     """checks need to be made:
        ----------------------

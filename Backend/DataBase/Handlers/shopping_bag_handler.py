@@ -4,7 +4,7 @@ from sqlalchemy.orm import mapper, relationship, backref
 from sqlalchemy.orm.collections import attribute_mapped_collection, column_mapped_collection
 
 from Backend.DataBase.IHandler import IHandler
-from Backend.DataBase.database import Base, session
+from Backend.DataBase.database import mapper_registry, session
 from Backend.Domain.TradingSystem.States.member import Member
 from Backend.Domain.TradingSystem.product import Product
 from Backend.Domain.TradingSystem.shopping_bag import ShoppingBag
@@ -16,23 +16,12 @@ from Backend.rw_lock import ReadWriteLock
 from threading import Lock
 
 
-class ProductInShoppingBag(Base):
-    __tablename__ = "products_in_shopping_bags"
-    product_id = Column(String(50), ForeignKey("products.product_id", ondelete="CASCADE"), primary_key=True)
-    store_id = Column(String(50), primary_key=True)
-    username = Column(String(30), primary_key=True)
-    quantity = Column(Integer, CheckConstraint('quantity>0'))
-    __table_args__ = (ForeignKeyConstraint(('store_id', 'username'),
-                                                             ['shopping_bags.store_id',
-                                                              'shopping_bags.username']), {})
-
+class ProductInShoppingBag:
     def __init__(self, store_id, product_id, username, quantity):
         self.store_id = store_id
         self.product_id = product_id
         self.username = username
         self.quantity = quantity
-
-    product = relationship(Product, cascade="all")
 
 
 class ShoppingBagHandler(IHandler):
@@ -42,23 +31,35 @@ class ShoppingBagHandler(IHandler):
     def __init__(self):
         super().__init__(ReadWriteLock(), ShoppingBag)
 
-        self.__shopping_bags = Table("shopping_bags", Base.metadata,
+        self.__products_in_shopping_bags = Table("products_in_shopping_bags", mapper_registry.metadata,
+                                                 Column("product_id", String(50),
+                                                        ForeignKey("products.product_id", ondelete="CASCADE"),
+                                                        primary_key=True),
+                                                 Column("store_id", String(50), primary_key=True),
+                                                 Column("username", String(50), primary_key=True),
+                                                 Column("quantity", Integer, CheckConstraint('quantity>0')),
+                                                 ForeignKeyConstraint(('store_id', 'username'),
+                                                                      ['shopping_bags.store_id',
+                                                                       'shopping_bags.username'])
+                                                 )
+
+        self.__shopping_bags = Table("shopping_bags", mapper_registry.metadata,
                                      Column("store_id", String(50), ForeignKey("stores.store_id"), primary_key=True),
-                                     Column("username", String(50), ForeignKey("shopping_carts.username"), primary_key=True))
+                                     Column("username", String(50), ForeignKey("members.username"), primary_key=True))
 
-        mapper(ShoppingBag, self.__shopping_bags, properties={
-            "_ShoppingBag__store": relationship(Store, passive_deletes=True),
-            "products": relationship(ProductInShoppingBag, uselist=True,
-                                     collection_class=attribute_mapped_collection("product_id")),
+        mapper_registry.map_imperatively(ProductInShoppingBag, self.__products_in_shopping_bags, properties={
+            "store_id": self.__products_in_shopping_bags.c.store_id,
+            "product_id": self.__products_in_shopping_bags.c.product_id,
+            "username": self.__products_in_shopping_bags.c.username,
+            "quantity": self.__products_in_shopping_bags.c.quantity,
+            "product": relationship(Product, cascade="all"),
         })
 
-        self.__shopping_carts = Table("shopping_carts", Base.metadata,
-                                      Column("username", String(50), ForeignKey("members.username"), primary_key=True))
-
-        mapper(ShoppingCart, self.__shopping_carts, properties={
-            '_ShoppingCart__shopping_bags': relationship(ShoppingBag, uselist=True,
-                                                         collection_class=column_mapped_collection(Base.metadata.tables['shopping_bags'].c.store_id))
-        })
+        # mapper_registry.map_imperatively(ShoppingBag, self.__shopping_bags, properties={
+        #     # "_ShoppingBag__store": relationship(Store, passive_deletes=True),
+        #     "products": relationship(ProductInShoppingBag, uselist=True,
+        #                              collection_class=attribute_mapped_collection("product_id"))
+        # })
 
     @staticmethod
     def get_instance():
@@ -67,8 +68,38 @@ class ShoppingBagHandler(IHandler):
                 ShoppingBagHandler._instance = ShoppingBagHandler()
         return ShoppingBagHandler._instance
 
-    def add_product_to_bag(self, shopping_bag, store, product, username, quantity):
-        shopping_bag.products.update({product.get_id(): ProductInShoppingBag(store.get_id(), product.get_id(), username, quantity)})
+    def save_bag(self, user_name, store_id):
+        self._rwlock.acquire_write()
+        res = Response(True)
+        try:
+            stmt = insert(self.__shopping_bags).values(store_id=store_id,
+                                                       username=user_name)
+            session.execute(stmt)
+        except Exception as e:
+            session.rollback()
+            res = Response(False, msg=str(e))
+        finally:
+            self._rwlock.release_write()
+            return res
+
+    def add_product_to_bag(self, store, product, username, quantity):
+        self._rwlock.acquire_write()
+        res = Response(True)
+        try:
+            stmt = insert(self.__products_in_shopping_bags).values(store_id=store.get_id(),
+                                                                   username=username,
+                                                                   product_id=product.get_id(),
+                                                                   quantity = quantity)
+            session.execute(stmt)
+        except Exception as e:
+            session.rollback()
+            res = Response(False, msg=str(e))
+        finally:
+            self._rwlock.release_write()
+            return res
+
+        # shopping_bag.products.update(
+        #     {product.get_id(): ProductInShoppingBag(store.get_id(), product.get_id(), username, quantity)})
 
     # def save(self, obj: ShoppingBag, **kwargs) -> Response[None]:
     #     self._rwlock.acquire_write()

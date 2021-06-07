@@ -5,7 +5,7 @@ from sqlalchemy.orm import mapper, relationship, backref, with_polymorphic
 
 from Backend.DataBase.Handlers.shopping_bag_handler import ShoppingBagHandler
 from Backend.DataBase.IHandler import IHandler
-from Backend.DataBase.database import Base, session
+from Backend.DataBase.database import mapper_registry, session
 from Backend.Domain.TradingSystem.Responsibilities.founder import Founder
 from Backend.Domain.TradingSystem.Responsibilities.responsibility import Responsibility
 from Backend.Domain.TradingSystem.States.member import Member
@@ -24,27 +24,27 @@ class MemberHandler(IHandler):
     def __init__(self):
         from Backend.Domain.TradingSystem.States.admin import Admin
         super().__init__(ReadWriteLock(), Member)
-        self.__credentials = Table("credentials", Base.metadata,
+        self.__credentials = Table("credentials", mapper_registry.metadata,
                                    Column('username', String(50), primary_key=True),
                                    Column('password', String(256)))
 
-        self.__members = Table('members', Base.metadata,
+        self.__members = Table('members', mapper_registry.metadata,
                                Column('username', String(50), ForeignKey("credentials.username"), primary_key=True),
                                Column('notifications', ARRAY(String(256))),
                                Column('member_type', String(10), nullable=False)
                                )
 
-        mapper(Member, self.__members, properties={
+        mapper_registry.map_imperatively(Member, self.__members, properties={
             '_username': self.__members.c.username,
             # '_Member__responsibilities': relationship(Responsibility, cascade="all, delete",
             #                                           collection_class=attribute_mapped_collection('_store_id'),
             #                                           passive_deletes=True),
             '_Member__purchase_details': relationship(PurchaseDetails, cascade="all, delete",
                                                       passive_deletes=True),
-            '_cart': relationship(ShoppingCart, uselist=False)
+
         }, polymorphic_on=self.__members.c.member_type, polymorphic_identity='M')
 
-        mapper(Admin, self.__members, inherits=Member, polymorphic_identity='A')
+        mapper_registry.map_imperatively(Admin, self.__members, inherits=Member, polymorphic_identity='A')
 
     @staticmethod
     def get_instance():

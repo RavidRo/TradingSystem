@@ -4,7 +4,7 @@ from Backend.DataBase.Handlers.purchase_details_handler import PurchaseDetailsHa
 from Backend.DataBase.Handlers.responsibilities_handler import ResponsibilitiesHandler
 from Backend.DataBase.Handlers.shopping_bag_handler import ShoppingBagHandler
 from Backend.DataBase.Handlers.store_handler import StoreHandler
-from Backend.DataBase.database import Base, engine
+from Backend.DataBase.database import mapper_registry, engine
 from Backend.Domain.TradingSystem.Responsibilities.responsibility import Responsibility
 from Backend.Domain.TradingSystem.States.member import Member
 from Backend.Domain.TradingSystem.store import Store
@@ -19,8 +19,8 @@ if __name__ == '__main__':
     store_handler = StoreHandler.get_instance()
     # responsibility_handler = ResponsibilitiesHandler.get_instance()
 
-    Base.metadata.drop_all(engine)
-    Base.metadata.create_all(engine)
+    mapper_registry.metadata.drop_all(engine)
+    mapper_registry.metadata.create_all(engine)
 
     trading_system = TradingSystem.getInstance()
     cookie = trading_system.enter_system()

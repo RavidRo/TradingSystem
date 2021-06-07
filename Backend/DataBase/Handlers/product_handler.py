@@ -2,7 +2,7 @@ from sqlalchemy import Table, Column, String, Float, Integer, CheckConstraint, i
 from sqlalchemy.orm import mapper
 
 from Backend.DataBase.IHandler import IHandler
-from Backend.DataBase.database import Base, session
+from Backend.DataBase.database import mapper_registry, session
 from Backend.Domain.TradingSystem.product import Product
 from Backend.response import Response, ParsableList
 
@@ -17,7 +17,7 @@ class ProductHandler(IHandler):
     def __init__(self):
         super().__init__(ReadWriteLock(), Product)
 
-        self.__products = Table('products', Base.metadata,
+        self.__products = Table('products', mapper_registry.metadata,
                                 Column('product_id', String(50), primary_key=True),
                                 Column('product_name', String(50)),
                                 Column('category', String(50)),
@@ -25,7 +25,7 @@ class ProductHandler(IHandler):
                                 Column('keywords', ARRAY(String(30)))
                                 )
 
-        mapper(Product, self.__products, properties={
+        mapper_registry.map_imperatively(Product, self.__products, properties={
             '_Product__id': self.__products.c.product_id,
             '_Product__product_name': self.__products.c.product_name,
             '_Product__category': self.__products.c.category,
