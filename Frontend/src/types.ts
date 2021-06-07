@@ -33,7 +33,17 @@ export type Offer = {
 	store_name: string;
     username: string;
 }
+export type StatisticsCount = {
+    guests: number;
+	passive_member: number;
+    managers: number;
+    super_members: number;
 
+}
+export type StatisticsData = {
+	statistics_per_day: { [date: string]: StatisticsCount };
+
+}
 export type Permission =
 	| 'manage products'
 	| 'get appointments'
