@@ -5,7 +5,7 @@ import { createMuiTheme, ThemeProvider } from '@material-ui/core';
 import Navbar from '../components/Navbar';
 import Routes from './Routes';
 
-import { Product, StoreToSearchedProducts, notificationTime } from '../types';
+import { Product, StoreToSearchedProducts, notificationTime, StatisticsData } from '../types';
 import useAPI from '../hooks/useAPI';
 import { AdminsContext, CookieContext, UsernameContext } from '../contexts';
 
@@ -39,7 +39,7 @@ function App() {
 	const [notifications, setNotifications] = useState<notificationTime[]>([]);
 	const storesToProducts = useRef<StoreToSearchedProducts>({});
 	const [clientSocket, setClientSocker] = useState<WebSocket>();
-
+	const [statistics, setStatistics] = useState<StatisticsData>();
 
 	useEffect(() => {
 		initializeSocket();
@@ -61,7 +61,17 @@ function App() {
 					clientTemp.send(cookie); // have to be here - else socket.receive in server gets stuck
 				};
 				clientTemp.onmessage = (messageEvent) => {
-					setNotifications((old)=>[...old, [messageEvent.data, new Date().toUTCString()]]);
+					let msgObj = messageEvent.data;
+					let subject = msgObj['subject'];
+					let data = msgObj['data'];
+					if(subject === 'message'){
+						// regular notification
+						setNotifications((old)=>[...old, [data, new Date().toUTCString()]]);
+					}
+					else{
+						// notification for statistics
+						setStatistics(data);
+					}
 					// alert('received socket message');
 				};
 				clientTemp.onclose = () => {
@@ -266,6 +276,7 @@ function App() {
 								propUpdateStores={propUpdateStores}
 								propsAddProduct={addProductToPopup}
 								initializeNotifications={initializeNotifications}
+								statistics={statistics}
 							/>
 						</BrowserRouter>
 					</UsernameContext.Provider>

@@ -7,13 +7,21 @@ import useAPI from '../hooks/useAPI';
 import {StatisticsData} from '../types';
 
 type StatisticsProps = {
+  statistics: StatisticsData | undefined
 };
 
-const Statistics: FC<StatisticsProps> = ({}) => {
+const Statistics: FC<StatisticsProps> = ({statistics}) => {
     const [fromDate, setFromDate] = useState<string>("");
     const [toDate, setToDate] = useState<string>("");
+    const [statisticsMy, setStatistics] = useState<StatisticsData>();
+    const statisticsObj = useAPI<StatisticsData>('/get_statistics', {}, 'GET');
 
-    const statistics = useAPI<StatisticsData>('/get_statistics', {}, 'GET');
+    useEffect(()=>{
+      if(statistics !== undefined){
+        setStatistics(statistics);
+      }
+    }, [statistics]);
+
 
     const styles = {
         inputRoot: {
@@ -74,11 +82,11 @@ const Statistics: FC<StatisticsProps> = ({}) => {
                 />
 
                 {fromDate !== "" && toDate !== ""?
-                statistics.request({})
+                statisticsObj.request({})
                 .then(({ data, error }) => {
                   if (!error && data !== null) {
-                      let statistics = data.data;
-                      console.log(statistics);
+                      setStatistics(data.data);
+                      console.log(data.data);
                 }
               }):null}
             </form>
