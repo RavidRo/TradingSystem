@@ -1,7 +1,7 @@
 from sqlalchemy import Table, Column, String, Integer, ForeignKey, CheckConstraint, insert, Boolean, \
     ForeignKeyConstraint
 from sqlalchemy.orm import mapper, relationship, backref
-from sqlalchemy.orm.collections import attribute_mapped_collection
+from sqlalchemy.orm.collections import attribute_mapped_collection, column_mapped_collection
 
 from Backend.DataBase.IHandler import IHandler
 from Backend.DataBase.database import Base, session
@@ -44,12 +44,20 @@ class ShoppingBagHandler(IHandler):
 
         self.__shopping_bags = Table("shopping_bags", Base.metadata,
                                      Column("store_id", String(50), ForeignKey("stores.store_id"), primary_key=True),
-                                     Column("username", String(50), ForeignKey("members.username"), primary_key=True))
+                                     Column("username", String(50), ForeignKey("shopping_carts.username"), primary_key=True))
 
         mapper(ShoppingBag, self.__shopping_bags, properties={
             "_ShoppingBag__store": relationship(Store, passive_deletes=True),
             "products": relationship(ProductInShoppingBag, uselist=True,
                                      collection_class=attribute_mapped_collection("product_id")),
+        })
+
+        self.__shopping_carts = Table("shopping_carts", Base.metadata,
+                                      Column("username", String(50), ForeignKey("members.username"), primary_key=True))
+
+        mapper(ShoppingCart, self.__shopping_carts, properties={
+            '_ShoppingCart__shopping_bags': relationship(ShoppingBag, uselist=True,
+                                                         collection_class=column_mapped_collection(Base.metadata.tables['shopping_bags'].c.store_id))
         })
 
     @staticmethod
@@ -59,7 +67,7 @@ class ShoppingBagHandler(IHandler):
                 ShoppingBagHandler._instance = ShoppingBagHandler()
         return ShoppingBagHandler._instance
 
-    def add_product_to_bag(self, shopping_bag, store, product, username,quantity):
+    def add_product_to_bag(self, shopping_bag, store, product, username, quantity):
         shopping_bag.products.update({product.get_id(): ProductInShoppingBag(store.get_id(), product.get_id(), username, quantity)})
 
     # def save(self, obj: ShoppingBag, **kwargs) -> Response[None]:

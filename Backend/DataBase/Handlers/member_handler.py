@@ -41,6 +41,7 @@ class MemberHandler(IHandler):
             #                                           passive_deletes=True),
             '_Member__purchase_details': relationship(PurchaseDetails, cascade="all, delete",
                                                       passive_deletes=True),
+            '_cart': relationship(ShoppingCart, uselist=False)
         }, polymorphic_on=self.__members.c.member_type, polymorphic_identity='M')
 
         mapper(Admin, self.__members, inherits=Member, polymorphic_identity='A')

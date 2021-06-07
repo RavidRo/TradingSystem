@@ -44,7 +44,7 @@ if __name__ == '__main__':
 
     res_save_prod = trading_system.save_product_in_cart(cookie, store_res.get_obj(), product_res.get_obj(), 2)
     if not res_save_prod.succeeded():
-        print("save in card: " + res_save_prod.get_msg())
+        print("save in cart: " + res_save_prod.get_msg())
 
 
     # user2 = User()

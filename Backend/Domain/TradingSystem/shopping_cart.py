@@ -66,9 +66,7 @@ class ShoppingCart(IShoppingCart):
 
     def create_new_bag(self, store):
         new_bag = ShoppingBag(store)
-        self.__shopping_bag_handler.save(new_bag)
-        res = self.__shopping_bag_handler.commit_changes()
-        self.__shopping_bags[store.get_id()] = new_bag
+        self.__shopping_bags.update({store.get_id(): new_bag})
         return new_bag
 
     """checks need to be made:
