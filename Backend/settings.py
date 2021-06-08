@@ -9,19 +9,19 @@ class Settings:
     __instance = None
 
     @staticmethod
-    def get_instance() -> Settings:
+    def get_instance(is_test: bool) -> Settings:
         if Settings.__instance is None:
             with threading.Lock():
                 if Settings.__instance is None:
-                    Settings()
+                    Settings(is_test)
         return Settings.__instance
 
-    def __init__(self):
+    def __init__(self, is_test: bool):
         if Settings.__instance is not None:
             raise Exception("This class is a singleton!")
         Settings.__instance = self
         try:
-            read_file = open("config.json", "r")
+            read_file = open("config_test.json", "r") if is_test else open("config.json", "r")
         except:
             e = FileNotFoundError("config.json file is absent")
             logs.log_file_errors(e)

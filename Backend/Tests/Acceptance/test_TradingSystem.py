@@ -14,6 +14,7 @@ from Backend.Domain.Payment.OutsideSystems.outside_cashing import OutsideCashing
 from Backend.Domain.Payment.OutsideSystems.outside_supplyment import OutsideSupplyment
 from Backend.Domain.TradingSystem.shopping_cart import ShoppingCart
 from Backend.Domain.TradingSystem.store import Store
+from Backend.settings import Settings
 
 system = TradingSystem.getInstance()
 username_number = 0
@@ -31,6 +32,7 @@ def set_up():
     yield
     CashingAdapter.use_stub = False
     SupplyAdapter.use_stub = False
+    Settings.get_instance(True)
 
 
 def _initialize_info(
@@ -1700,25 +1702,10 @@ def test_get_store_purchase_history_no_payment_success():
 
 # # 6.4 https://github.com/SeanPikulin/TradingSystem/blob/main/Documentation/Use%20Cases.md#64-Get-store-purchase-history-system-manager
 
-
 def _get_admin() -> str:
     admin_cookie = system.enter_system()
-    try:
-        read_file = open("config.json", "r")
-    except:
-        e = FileNotFoundError("config.json file is absent")
-        logs.log_file_errors(e)
-        raise e
-    with read_file:
-        data = json.load(read_file)
-        missing_args = ""
-        if "admins" not in data:
-            missing_args += "admins "
-        if "password" not in data:
-            missing_args += "password "
-        if not missing_args == "":
-            raise KeyError("the keys " + missing_args + "are missing from config.json file")
-        system.login(admin_cookie, data["admins"][0], data["password"])
+    settings = Settings.get_instance(True)
+    system.login(admin_cookie, settings.get_admins()[0], settings.get_password())
     return admin_cookie
 
 

@@ -16,7 +16,7 @@ class CashingAdapter:
 
     def __send(self, action_type, paramaters={}):
         return requests.post(
-            Settings.get_instance().get_payment_system(),
+            Settings.get_instance(False).get_payment_system(),
             data=({"action_type": action_type} | paramaters),
         )
 

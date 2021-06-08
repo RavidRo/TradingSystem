@@ -16,7 +16,7 @@ class SupplyAdapter:
 
     def __send(self, action_type, paramaters={}):
         return requests.post(
-            Settings.get_instance().get_supply_system(),
+            Settings.get_instance(False).get_supply_system(),
             data=({"action_type": action_type} | paramaters),
         )
 
