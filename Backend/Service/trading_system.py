@@ -44,26 +44,6 @@ class TradingSystem(object):
                 data = json.load(read_file)
                 actions = data["actions"]
                 for action in actions:
-                    sp = action.get("special")
-                    if sp:
-                        if "admin login" in sp:
-                            try:
-                                read_file = open("config.json", "r")
-                            except:
-                                e = FileNotFoundError("config.json file is absent")
-                                logs.log_file_errors(e)
-                                raise e
-                            with read_file:
-                                args = action["args"]
-                                data = json.load(read_file)
-                                missing_args = ""
-                                if "password" not in data:
-                                    missing_args += "password "
-                                if not missing_args == "":
-                                    raise KeyError("the keys " + missing_args + "are missing from config.json file")
-                                cookie = cookies[int(args[0].split('#')[1]) - 1]
-                                self.login(cookie, args[1], data["password"])
-                            continue
                     func = action["function"]
                     args = action["args"]
                     new_args = []

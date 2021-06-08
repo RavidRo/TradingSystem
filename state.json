@@ -5,17 +5,6 @@
 			"args": []
 		},
 		{
-			"function": "login",
-			"args": [
-				"cookie#1",
-				"u1",
-				"_"
-			],
-			"special": [
-				"admin login"
-			]
-		},
-		{
 			"function": "enter_system",
 			"args": []
 		},
