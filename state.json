@@ -8,7 +8,7 @@
 			"function": "login",
 			"args": [
 				"cookie#1",
-				"omer",
+				"u1",
 				"_"
 			],
 			"special": [

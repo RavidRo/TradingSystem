@@ -1,5 +1,5 @@
 {
-	"admins": ["tali", "ravid", "inon", "sean", "omer"],
+	"admins": ["tali", "ravid", "inon", "sean", "omer", "u1"],
 	"password": "cool-kidz",
 	"timer_length": 600,
 	"payment_system": "https://cs-bgu-wsep.herokuapp.com/",
