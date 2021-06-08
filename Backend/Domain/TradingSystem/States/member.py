@@ -74,8 +74,9 @@ class Member(UserState):
 
     def delete_products_after_purchase(self):
         response = self._cart.delete_products_after_purchase(self._username)
+        if response.succeeded():
         # update data in DB in later milestones
-        self.__purchase_details += response.object.values
+            self.__purchase_details += response.object.values
         return response
 
     def open_store(self, store_name) -> Response:

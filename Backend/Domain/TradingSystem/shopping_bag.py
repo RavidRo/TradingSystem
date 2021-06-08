@@ -169,9 +169,10 @@ class ShoppingBag(IShoppingBag):
 
     def delete_products_after_purchase(self, user_name="guest") -> PurchaseDetails:
         # for now this function will only return details, in the future there will be specific deletion
-        # res = self.__shopping_bag_handler.commit_changes()
-        # if not res.succeeded():
-        #
+        res = self.__shopping_bag_handler.commit_changes()
+        if not res.succeeded():
+            self.__shopping_bag_handler.rollback_changes()
+            return None
         product_names = [
             prod.get_name() for product_id, (prod, quantity) in self.__pending_products_to_quantity.items()
         ]

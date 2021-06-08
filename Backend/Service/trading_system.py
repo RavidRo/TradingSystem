@@ -120,7 +120,10 @@ class TradingSystem(object):
         )
         if res.succeeded():
             TradingSystemManager.release_cart(cookie)
-            return TradingSystemManager.purchase_completed(cookie)
+            delete_res = TradingSystemManager.purchase_completed(cookie)
+            if not delete_res.succeeded():
+                self.payment_manager.rollback()
+            return delete_res
         else:
             TradingSystemManager.release_cart(cookie)
             return res

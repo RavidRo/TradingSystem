@@ -160,8 +160,11 @@ class ShoppingCart(IShoppingCart):
         self.__price = None
         purchase_cart_details = []
         for store_id in self.__shopping_bags:
+            purchase_detail = self.__shopping_bags[store_id].delete_products_after_purchase(user_name)
+            if purchase_detail is None:
+                return db_fail_response
             purchase_cart_details.append(
-                self.__shopping_bags[store_id].delete_products_after_purchase(user_name)
+                purchase_detail
             )
         self.__shopping_bags.clear()
         return Response[ParsableList](
