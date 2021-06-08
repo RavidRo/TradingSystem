@@ -46,6 +46,8 @@ class MemberHandler(IHandler):
 
         mapper_registry.map_imperatively(Admin, self.__members, inherits=Member, polymorphic_identity='A')
 
+        self.__shopping_bag_handler = ShoppingBagHandler.get_instance()
+
     @staticmethod
     def get_instance():
         with MemberHandler._lock:
@@ -150,6 +152,9 @@ class MemberHandler(IHandler):
         finally:
             self._rwlock.release_read()
             return res
+
+    def load_cart(self, username):
+        return self.__shopping_bag_handler.load_cart(username)
 
     def load_all(self):
         self._rwlock.acquire_read()

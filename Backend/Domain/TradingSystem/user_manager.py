@@ -103,6 +103,7 @@ class UserManager:
                     res.get_obj().set_user(user)
                     user.change_state(res.get_obj())
                     UserManager.__username_user[username] = user
+                    res.get_obj().load_cart()
 
 
                 # for user_cookie in UserManager.__cookie_user:

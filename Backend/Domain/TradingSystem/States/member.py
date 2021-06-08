@@ -29,10 +29,12 @@ class Member(UserState):
     def get_responsibilities(self):
         return self.__responsibilities
 
+    def load_cart(self):
+        self._cart = self._member_handler.load_cart(self._username)
+
     def __init__(
-        self, user, username, responsibilities=None, purchase_details=None, cart=None
-    ):  # for DB
-        # initialization
+            self, user, username, responsibilities=None, purchase_details=None, cart=None
+    ):
         super().__init__(user, cart)
         if purchase_details is None:
             purchase_details = []
@@ -43,8 +45,6 @@ class Member(UserState):
         self.__purchase_details = purchase_details
         self.__notifications: list[str] = []
         self.notifications_lock = threading.Lock()
-
-        #TODO:get cart data from DB
 
     def login(self, username, password):
         return Response(False, msg="Members cannot re-login")
@@ -75,7 +75,7 @@ class Member(UserState):
     def delete_products_after_purchase(self):
         response = self._cart.delete_products_after_purchase(self._username)
         if response.succeeded():
-        # update data in DB in later milestones
+            # update data in DB in later milestones
             self.__purchase_details += response.object.values
         return response
 
@@ -97,7 +97,7 @@ class Member(UserState):
         )
 
     def add_new_product(
-        self, store_id, product_name, category, product_price, quantity, keywords=None
+            self, store_id, product_name, category, product_price, quantity, keywords=None
     ):
         if store_id not in self.__responsibilities:
             return Response(False, msg=f"this member do not own/manage store {store_id}")
@@ -118,7 +118,7 @@ class Member(UserState):
         )
 
     def edit_product_details(
-        self, store_id, product_id, new_name, new_category, new_price, keywords=None
+            self, store_id, product_id, new_name, new_category, new_price, keywords=None
     ):
         if store_id not in self.__responsibilities:
             return Response(False, msg=f"this member do not own/manage store {store_id}")
@@ -127,7 +127,7 @@ class Member(UserState):
         )
 
     def add_discount(
-        self, store_id: str, discount_data: dict, exist_id: str, condition_type: str = None
+            self, store_id: str, discount_data: dict, exist_id: str, condition_type: str = None
     ):
         if store_id not in self.__responsibilities:
             return Response(False, msg=f"this member do not own/manage store {store_id}")
@@ -151,12 +151,12 @@ class Member(UserState):
         return self.__responsibilities[store_id].remove_discount(discount_id)
 
     def edit_simple_discount(
-        self,
-        store_id: str,
-        discount_id: str,
-        percentage: float = None,
-        context: dict = None,
-        duration=None,
+            self,
+            store_id: str,
+            discount_id: str,
+            percentage: float = None,
+            context: dict = None,
+            duration=None,
     ):
         if store_id not in self.__responsibilities:
             return Response(False, msg=f"this member do not own/manage store {store_id}")
@@ -165,7 +165,7 @@ class Member(UserState):
         )
 
     def edit_complex_discount(
-        self, store_id: str, discount_id: str, complex_type: str = None, decision_rule: str = None
+            self, store_id: str, discount_id: str, complex_type: str = None, decision_rule: str = None
     ):
         if store_id not in self.__responsibilities:
             return Response(False, msg=f"this member do not own/manage store {store_id}")
@@ -225,7 +225,7 @@ class Member(UserState):
 
     # 4.2
     def add_purchase_rule(
-        self, store_id: str, rule_details: dict, rule_type: str, parent_id: str, clause: str = None
+            self, store_id: str, rule_details: dict, rule_type: str, parent_id: str, clause: str = None
     ):
         return self.__responsibilities[store_id].add_purchase_rule(
             rule_details, rule_type, parent_id, clause
@@ -248,7 +248,6 @@ class Member(UserState):
     # 4.2
     def get_purchase_policy(self, store_id):
         return self.__responsibilities[store_id].get_purchase_policy()
-
 
     def add_purchase_rule_history(self, purchase):
         self.__purchase_details.append(purchase)

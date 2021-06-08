@@ -176,25 +176,11 @@ class ShoppingBagHandler(IHandler):
     def load_all(self):
         pass
 
-    def update_quantity(self, username, store_id, product_id, new_quantity):
-        self._rwlock.acquire_write()
-        res = Response(True)
-        try:
-            product_in_bag = session.query(ProductInShoppingBag).filter_by(store_id=store_id, username=username,
-                                                                           product_id=product_id).one()
-            product_in_bag.quantity = new_quantity
-            session.commit()
-        except Exception as e:
-            session.rollback()
-            res = Response(False, msg=str(e))
-        finally:
-            self._rwlock.release_write()
-            return res
-
     def load_cart(self, username):
         self._rwlock.acquire_read()
         res = Response(True)
         try:
+            bags_list = self.__shopping_bags.select().where(...)
             bags: list[ShoppingBag] = session.query(ShoppingBag).filter_by(username=username).all()
 
             for bag in bags:
@@ -204,7 +190,6 @@ class ShoppingBagHandler(IHandler):
 
             cart = ShoppingCart()
             cart.add_bags({bag.get_store_ID(): bag for bag in bags})
-            session.commit()
             res = Response(True, cart)
         except Exception as e:
             session.rollback()
