@@ -5,14 +5,14 @@
 			"args": []
 		},
 		{
-			"function": "register",
+			"function": "login",
 			"args": [
 				"cookie#1",
-				"_",
+				"omer",
 				"_"
 			],
 			"special": [
-				"admin register"
+				"admin login"
 			]
 		},
 		{

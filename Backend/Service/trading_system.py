@@ -5,6 +5,7 @@ import json
 from typing import Callable
 import threading
 
+from Backend.Service import logs
 from Backend.response import Response
 
 import Backend.Service.logs as log
@@ -45,10 +46,23 @@ class TradingSystem(object):
                 for action in actions:
                     sp = action.get("special", default=None)
                     if sp:
-                        if "admin register" in sp:
-                            args = action["args"]
-                            cookie = new_args.append(cookies[int(arg.split('#')[1]) - 1])
-                            self.register(cookie, )
+                        if "admin login" in sp:
+                            try:
+                                read_file = open("config.json", "r")
+                            except:
+                                e = FileNotFoundError("config.json file is absent")
+                                logs.log_file_errors(e)
+                                raise e
+                            with read_file:
+                                args = action["args"]
+                                data = json.load(read_file)
+                                missing_args = ""
+                                if "password" not in data:
+                                    missing_args += "password "
+                                if not missing_args == "":
+                                    raise KeyError("the keys " + missing_args + "are missing from config.json file")
+                                cookie = cookies[int(args[0].split('#')[1]) - 1]
+                                self.login(cookie, args[1], data["password"])
                             continue
                     func = action["function"]
                     args = action["args"]
