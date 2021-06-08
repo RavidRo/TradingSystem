@@ -177,6 +177,7 @@ class ShoppingCart(IShoppingCart):
         if self.__pending_purchase:
             self.__price = None
             self.__purchase_time_passed = True
+            self.__shopping_bag_handler.rollback_changes()
             for bag in self.__shopping_bags.values():
                 bag.send_back()
         self.__transaction_lock.release()
@@ -198,6 +199,7 @@ class ShoppingCart(IShoppingCart):
         self.__timer = None
         self.__pending_purchase = False
         self.__price = None
+        self.__shopping_bag_handler.rollback_changes()
         for bag in self.__shopping_bags.values():
             bag.send_back()
         self.__transaction_lock.release()
