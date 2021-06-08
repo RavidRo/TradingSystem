@@ -44,7 +44,7 @@ class TradingSystem(object):
                 data = json.load(read_file)
                 actions = data["actions"]
                 for action in actions:
-                    sp = action.get("special", default=None)
+                    sp = action.get("special")
                     if sp:
                         if "admin login" in sp:
                             try:
