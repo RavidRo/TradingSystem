@@ -299,3 +299,4 @@ class User(IUser):
 
     def get_users_statistics(self) -> Response[StatisticsData]:
         return self.state.get_users_statistics()
+        
