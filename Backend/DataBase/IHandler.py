@@ -50,6 +50,11 @@ class IHandler(ABC):
             self._rwlock.release_write()
             return res
 
+    def rollback_changes(self):
+        self._rwlock.acquire_write()
+        session.rollback()
+        self._rwlock.release_write()
+
     def load(self, id):
         self._rwlock.acquire_read()
         res = Response(True)

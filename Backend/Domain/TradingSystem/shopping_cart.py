@@ -78,6 +78,7 @@ class ShoppingCart(IShoppingCart):
        ----------------------
        1. bag of store with store_id exists"""
 
+    #TODO: What happens if it was the last product in the bag?
     def remove_product(self, store_id: str, product_id: str, username=None) -> Response[None]:
         bag = self.__shopping_bags.get(store_id)
         if bag is None:
@@ -85,7 +86,7 @@ class ShoppingCart(IShoppingCart):
                 False, msg="There is no existing bag for store with store id: " + str(store_id)
             )
 
-        return bag.remove_product(product_id)
+        return bag.remove_product(product_id, username)
 
     """checks need to be made:
        ----------------------
@@ -93,8 +94,7 @@ class ShoppingCart(IShoppingCart):
        2. new_amount > 0"""
 
     def change_product_quantity(
-        self, store_id: str, product_id: str, new_amount: int, username=None
-    ) -> Response[None]:
+        self, store_id: str, product_id: str, new_amount: int, username=None) -> Response[None]:
         bag = self.__shopping_bags.get(store_id)
         if bag is None:
             return Response(
@@ -102,7 +102,7 @@ class ShoppingCart(IShoppingCart):
             )
         if new_amount <= 0:
             return Response(False, msg="Amount can't be negative!")
-        return bag.change_product_quantity(product_id, new_amount)
+        return bag.change_product_quantity(product_id, new_amount, username)
 
     """notice: if buy_products of any bag fails -> return acquired products to stores"""
     # products_purchase_info -a dict between store_id to list of tuples tuple (product_id to purchase_type)

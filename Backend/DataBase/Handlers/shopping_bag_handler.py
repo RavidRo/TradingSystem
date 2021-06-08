@@ -1,5 +1,5 @@
 from sqlalchemy import Table, Column, String, Integer, ForeignKey, CheckConstraint, insert, Boolean, \
-    ForeignKeyConstraint
+    ForeignKeyConstraint, delete, update, and_
 from sqlalchemy.orm import mapper, relationship, backref
 from sqlalchemy.orm.collections import attribute_mapped_collection, column_mapped_collection
 
@@ -89,7 +89,7 @@ class ShoppingBagHandler(IHandler):
             stmt = insert(self.__products_in_shopping_bags).values(store_id=store.get_id(),
                                                                    username=username,
                                                                    product_id=product.get_id(),
-                                                                   quantity = quantity)
+                                                                   quantity=quantity)
             session.execute(stmt)
         except Exception as e:
             session.rollback()
@@ -97,6 +97,40 @@ class ShoppingBagHandler(IHandler):
         finally:
             self._rwlock.release_write()
             return res
+
+    def remove_product_from_bag(self, store, product_id, user_name):
+        self._rwlock.acquire_write()
+        res = Response(True)
+        try:
+            d = delete(self.__products_in_shopping_bags).where(
+                self.__products_in_shopping_bags.c.store_id == store.get_id()).where(
+                self.__products_in_shopping_bags.c.product_id == product_id).where(
+                self.__products_in_shopping_bags.c.username == user_name)
+            session.execute(d)
+        except Exception as e:
+            session.rollback()
+            res = Response(False, msg=str(e))
+        finally:
+            self._rwlock.release_write()
+            return res
+
+    def change_product_quantity_in_bag(self, store, product_id, user_name, amount):
+        self._rwlock.acquire_write()
+        res = Response(True)
+        try:
+            stmt = update(self.__products_in_shopping_bags).where(
+                and_(self.__products_in_shopping_bags.c.store_id == store.get_id(),
+                     self.__products_in_shopping_bags.c.product_id == product_id,
+                     self.__products_in_shopping_bags.c.username == user_name)).values(quantity=amount)
+            session.execute(stmt)
+        except Exception as e:
+            session.rollback()
+            res = Response(False, msg=str(e))
+        finally:
+            self._rwlock.release_write()
+            return res
+
+
 
         # shopping_bag.products.update(
         #     {product.get_id(): ProductInShoppingBag(store.get_id(), product.get_id(), username, quantity)})

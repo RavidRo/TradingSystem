@@ -63,7 +63,7 @@ class Member(UserState):
         return response
 
     def change_product_quantity_in_cart(self, store_id, product_id, new_quantity):
-        response = self._cart.change_product_quantity_in_cart(store_id, product_id, new_quantity, self._username)
+        response = self._cart.change_product_quantity(store_id, product_id, new_quantity, self._username)
         # update data in DB in later milestones
         return response
 

@@ -79,13 +79,18 @@ class ShoppingBag(IShoppingBag):
        1. product with product_id exists in bag 
                                             """
 
-    def remove_product(self, product_id: str) -> Response[None]:
+    def remove_product(self, product_id: str, user_name: str = None) -> Response[None]:
 
         if self._products_to_quantity.get(product_id) is None:
             return Response(
                 False, msg=f"No such product in the bag of ths store{self.__store.get_name()}"
             )
         else:
+            if user_name is not None:
+                self.__shopping_bag_handler.remove_product_from_bag(self.get_store(), product_id, user_name)
+                res = self.__shopping_bag_handler.commit_changes()
+                if not res.succeeded():
+                    return db_fail_response
             self._products_to_quantity.pop(product_id)
         return Response(True, msg="Successfully removed product with id: " + str(product_id))
 
@@ -140,7 +145,7 @@ class ShoppingBag(IShoppingBag):
        2. product with product_id exists in the bag 
                                                 """
 
-    def change_product_quantity(self, product_id: str, new_amount: int) -> Response[None]:
+    def change_product_quantity(self, product_id: str, new_amount: int, user_name=None) -> Response[None]:
         if new_amount <= 0:
             return Response(False, msg="Amount can't be negative!")
         if self._products_to_quantity.get(product_id) is None:
@@ -150,6 +155,12 @@ class ShoppingBag(IShoppingBag):
                 False,
                 msg="A product with id: " + str(product_id) + " no in inventory enough",
             )
+        if user_name is not None:
+            self.__shopping_bag_handler.change_product_quantity_in_bag(self.get_store(), product_id, user_name, new_amount)
+            res = self.__shopping_bag_handler.commit_changes()
+            if not res.succeeded():
+                return db_fail_response
+
         self._products_to_quantity[product_id] = (
             self._products_to_quantity.get(product_id)[0],
             new_amount,
@@ -158,6 +169,9 @@ class ShoppingBag(IShoppingBag):
 
     def delete_products_after_purchase(self, user_name="guest") -> PurchaseDetails:
         # for now this function will only return details, in the future there will be specific deletion
+        # res = self.__shopping_bag_handler.commit_changes()
+        # if not res.succeeded():
+        #
         product_names = [
             prod.get_name() for product_id, (prod, quantity) in self.__pending_products_to_quantity.items()
         ]

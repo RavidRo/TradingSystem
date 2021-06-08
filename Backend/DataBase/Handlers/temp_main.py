@@ -38,6 +38,11 @@ if __name__ == '__main__':
     if not product_res.succeeded():
         print("add_product: " + product_res.get_msg())
 
+    product2_res = trading_system.create_product(cookie, store_res.get_obj(), "The Product2", "The Category2", 10, 16,
+                                                ["The Keyword A2", "The Keyword B2"])
+    if not product2_res.succeeded():
+        print("add_product: " + product2_res.get_msg())
+
     res = trading_system.change_product_quantity_in_store(cookie, store_res.get_obj(), product_res.get_obj(), 11)
     if not res.succeeded():
         print("edit product details: " + res.get_msg())
@@ -46,6 +51,17 @@ if __name__ == '__main__':
     if not res_save_prod.succeeded():
         print("save in cart: " + res_save_prod.get_msg())
 
+    res_save_prod = trading_system.save_product_in_cart(cookie, store_res.get_obj(), product2_res.get_obj(), 5)
+    if not res_save_prod.succeeded():
+        print("save in cart: " + res_save_prod.get_msg())
+
+    res_del_prod = trading_system.remove_product_from_cart(cookie, store_res.get_obj(), product_res.get_obj())
+    if not res_del_prod.succeeded():
+        print("del from cart: " + res_del_prod.get_msg())
+
+    change_prod_quantity = trading_system.change_product_quantity_in_cart(cookie, store_res.get_obj(), product2_res.get_obj(), 4)
+    if not change_prod_quantity.succeeded():
+        print("change quantity in cart: " + change_prod_quantity.get_msg())
 
     # user2 = User()
     # user2.register("user2", "password2")

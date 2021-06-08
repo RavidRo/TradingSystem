@@ -276,6 +276,7 @@ class Store(Parsable):
 
     def send_back(self, products_to_quantities: dict):
         self._products_lock.acquire_write()
+        self.__store_handler.rollback_changes()
         for prod_id, (product, quantity) in products_to_quantities.items():
             if self._products_to_quantities.get(prod_id) is None:
                 self._products_to_quantities.update({prod_id: (product, quantity)})
@@ -290,7 +291,7 @@ class Store(Parsable):
     def check_and_acquire_available_products(self, products_to_quantities: dict) -> Response[None]:
         acquired_product_ids_to_quantities = {}
         self._products_lock.acquire_write()
-        for prod_id, (_, quantity) in products_to_quantities.items():
+        for prod_id, (prod, quantity) in products_to_quantities.items():
             prod_to_current_quantity = self._products_to_quantities.get(prod_id)
             if prod_to_current_quantity is None:
                 self.__restore_products(acquired_product_ids_to_quantities)
@@ -310,10 +311,11 @@ class Store(Parsable):
 
             current_quantity = self._products_to_quantities.get(prod_id)[1]
             if current_quantity == quantity:
+                self.__store_handler.remove_product(prod)
                 self._products_to_quantities.pop(prod_id)
             else:
-                product = self._products_to_quantities.get(prod_id)[0]
-                self._products_to_quantities[prod_id] = (product, current_quantity - quantity)
+                self.__store_handler.update_product_quantity(self, prod, current_quantity - quantity)
+                self._products_to_quantities[prod_id] = (prod, current_quantity - quantity)
 
             acquired_product_ids_to_quantities[prod_id] = quantity
 
@@ -321,6 +323,7 @@ class Store(Parsable):
         return Response(True, msg="All products are available")
 
     def __restore_products(self, acquires_product_ids_to_quantities: dict):
+        self.__store_handler.rollback_changes()
         for product_id, quantity in acquires_product_ids_to_quantities.items():
             prod, current_quantity = self._products_to_quantities.get(product_id)
             self._products_to_quantities[product_id] = (prod, current_quantity + quantity)
