@@ -20,7 +20,7 @@ class User(IUser):
     def __init__(self):
         self.state: UserState = IUserState.create_guest(self)
         self.appointment_lock = threading.Lock()
-        self.__notifications: list[str] = []
+        self.__notifications: list[object] = []
         self.__communicate: Callable[[list[object]], bool] = lambda _: False
 
     def __notify_self(self) -> bool:
@@ -266,7 +266,7 @@ class User(IUser):
     def empty_notifications(self):
         return len(self.__notifications) == 0
 
-    def notify(self, message: str) -> bool:
+    def notify(self, message: object) -> bool:
         self.__notifications.append(message)
         return self.__notify_self()
 
@@ -302,4 +302,3 @@ class User(IUser):
 
     def get_users_statistics(self) -> Response[StatisticsData]:
         return self.state.get_users_statistics()
-        
