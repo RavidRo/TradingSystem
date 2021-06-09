@@ -1,61 +1,92 @@
 import React, { FC, useState, useEffect, useContext } from 'react';
-import DateFnsUtils from "@date-io/date-fns"; // import
-import { DatePicker, MuiPickersUtilsProvider } from "@material-ui/pickers";
+// import DateFnsUtils from "@date-io/date-fns"; // import
+// import { DatePicker, MuiPickersUtilsProvider } from "@material-ui/pickers";
 import { TextField } from '@material-ui/core';
 import '../styles/Statistics.scss';
 import useAPI from '../hooks/useAPI';
 import {StatisticsData, StatisticsCount} from '../types';
+import Chart from "react-google-charts";
+
 
 type StatisticsProps = {
   statistics: StatisticsData | undefined
 };
 
 const Statistics: FC<StatisticsProps> = ({statistics}) => {
-    const [fromDate, setFromDate] = useState<string>("2021-06-07");
-    const [toDate, setToDate] = useState<string>("2021-06-07");
-    const [statisticsMy, setStatistics] = useState<{ [date: string]: StatisticsCount }>();
+    let fromDate = "2021-06-07";
+    let toDate = "2021-06-07";
     const statisticsObj = useAPI<StatisticsData>('/get_statistics', {}, 'GET');
+    const [dataGraph, setDataGraph] = useState<any[]>([]);
 
     useEffect(()=>{
       if(statistics !== undefined){
-        setStatistics(statistics.statistics_per_day);
       }
     }, [statistics]);
 
 
-    const styles = {
-        inputRoot: {
-          fontSize: 30
-        },
-        labelRoot: {
-          fontSize: 30,
-          color: "red",
-          "&$labelFocused": {
-            color: "purple"
-          }
-        },
-        labelFocused: {}
-      };
-
     const pickedFrom = (e:any)=>{
-        let date = e.target.value
-        setFromDate(date);
+        let date = e.target.value;
+        fromDate = date;
         statisticsObj.request().then(({ data, error }) => {
           if (!error && data !== null) {
-              setStatistics(data.data.statistics_per_day);
+              let dataGraphResult = setDataToChart(data.data.statistics_per_day, fromDate, toDate);
+              setDataGraph(dataGraphResult);
+              console.log(data.data.statistics_per_day);
+              console.log(dataGraphResult);
           }
         })
     }
 
     const pickedTo = (e:any)=>{
-        let date = e.target.value
-        setToDate(date);
+        let date = e.target.value;
+        toDate = date;
         statisticsObj.request().then(({ data, error }) => {
           if (!error && data !== null) {
-              setStatistics(data.data.statistics_per_day);
+              let dataGraphResult = setDataToChart(data.data.statistics_per_day, fromDate, toDate);
+              setDataGraph(dataGraphResult);
+              console.log(data.data.statistics_per_day);
+              console.log(dataGraphResult);
           }
         })
     }
+
+    // data={[
+    //   ['Statistics', 'guests', 'passive members', 'users', 'managers', 'owners', 'super members'],
+    //   ['2021-06-09', 1000, 400, 200, 0,0 , 0],
+    //   ['2021-06-10', 1170, 460, 250,0, 0 , 0],
+    //   ['2021-06-08', 660, 1120, 300, 0,0 , 0],
+    //   ['2021-06-07', 1030, 540, 350,0, 0 , 0],
+    // ]}
+
+    const usersTypes = ['guest', 'passive_members', 'users', 'managers', 'owners', 'super_members'];
+    const setDataToChart = (dataJson: { [date: string]: StatisticsCount }, fromDate: string, toDate: string)=>{
+        return Object.keys(dataJson).map((date)=>{
+          let small = fromDate.valueOf();
+          let big = toDate.valueOf();
+          let between = date.valueOf();
+          console.log(small <= between);
+          console.log(between <= big);
+          if(small <= between && between <= big){
+            let specificDateArr = [];
+            specificDateArr.push(date); //first arg - date
+            let statisticsJson = dataJson[date];
+            for(var i=0; i<usersTypes.length; i++){
+              let userType = usersTypes[i];
+              if(statisticsJson.hasOwnProperty(userType)){ // user type is in this date, add it's value
+                let index = Object.keys(statisticsJson).indexOf(userType);
+                let userTypeValue = Object.values(statisticsJson)[index];
+                specificDateArr.push(userTypeValue);
+              }
+              else{//no user type in this date, add 0
+                specificDateArr.push(0);
+              }
+            }
+            return specificDateArr;
+          }
+          return [];
+      })
+    }
+
 
 	return (
         <div className="statistics">
@@ -83,33 +114,26 @@ const Statistics: FC<StatisticsProps> = ({statistics}) => {
                     inputProps={{style: {fontSize: 20, marginTop: 20}}} 
                     InputLabelProps={{style: {fontSize: 30}}}
                 />
-                <ul>
-                  {statisticsMy!==undefined ? Object.keys(statisticsMy).map((date)=>{
-                    console.log(date);
-                    console.log(toDate);
-                    console.log(fromDate);
-                    let small = fromDate.valueOf();
-                    let big = toDate.valueOf();
-                    let between = date.valueOf();
-
-                    if(small <= between && between <= big){
-                      let day_json = statisticsMy[date];
-                      return (
-                        <div>
-                          <p>{date}</p>
-                          {Object.keys(day_json).map((type, index)=>{
-                            return (
-                              <li key={index}>
-                                {type} : {Object.values(day_json)[index]}
-                              </li>
-                            )
-                          })}
-                        </div>
-                      )
-                    }
-                    
-                  }):"No data"}
-                </ul>
+                <Chart
+                    width={'2000px'}
+                    height={'600px'}
+                    style={{marginTop: '8%', marginLeft: '5%'}}
+                    chartType="Bar"
+                    loader={<div>Loading Chart</div>}
+                    data={[
+                      ['Statistics', 'guests', 'passive members', 'users', 'managers', 'owners', 'super members'],
+                      ...dataGraph
+                    ]}
+                    options={{
+                      // Material design options
+                      chart: {
+                        title: 'Website Statistics',
+                        subtitle: 'guests, passive members, users, managers, owners, super members',
+                      },
+                    }}
+                    // For tests
+                    rootProps={{ 'data-testid': '2' }}
+                  />
             </form>
         </div>
 
