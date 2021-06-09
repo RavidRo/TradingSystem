@@ -81,8 +81,11 @@ class Member(UserState):
 
     def open_store(self, store_name) -> Response:
         store = Store(store_name)
-        store.set_responsibility(Founder(self, store, self._user))
+        founder = Founder(self, store, self._user)
+        store.set_responsibility(founder)
         store.save()
+        founder.save()
+        self.add_responsibility(founder, store.get_id())
         res = self._member_handler.commit_changes()
         if not res.succeeded():
             self.remove_responsibility(store.get_id())

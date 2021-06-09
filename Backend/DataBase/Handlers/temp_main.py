@@ -17,7 +17,7 @@ if __name__ == '__main__':
     product_handler = ProductHandler.get_instance()
     purchase_details_handler = PurchaseDetailsHandler.get_instance()
     store_handler = StoreHandler.get_instance()
-    # responsibility_handler = ResponsibilitiesHandler.get_instance()
+    responsibility_handler = ResponsibilitiesHandler.get_instance()
 
     mapper_registry.metadata.drop_all(engine)
     mapper_registry.metadata.create_all(engine)
@@ -29,6 +29,14 @@ if __name__ == '__main__':
         print("register: " + res.get_msg())
 
     res = trading_system.login(cookie, "user", "password")
+
+    cookie2 = trading_system.enter_system()
+    res2 = trading_system.register(cookie2, "user2", "password2")
+    if not res2.succeeded():
+        print("register2: " + res.get_msg())
+
+    res2 = trading_system.login(cookie2, "user2", "password")
+
 
     store_res = trading_system.create_store(cookie, "The Store")
     if not store_res.succeeded():
@@ -62,6 +70,14 @@ if __name__ == '__main__':
     change_prod_quantity = trading_system.change_product_quantity_in_cart(cookie, store_res.get_obj(), product2_res.get_obj(), 4)
     if not change_prod_quantity.succeeded():
         print("change quantity in cart: " + change_prod_quantity.get_msg())
+
+
+    res_appoint_owner = trading_system.appoint_owner(cookie, store_res.get_obj(),"user2")
+    if not res_appoint_owner.succeeded():
+        print("appoint owner: " + res_appoint_owner.get_msg())
+    # res = shopping_bag_handler.load_cart("user")
+    # if not res.succeeded():
+    #     print("load cart: " + res.get_msg())
 
     # user2 = User()
     # user2.register("user2", "password2")

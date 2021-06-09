@@ -47,15 +47,18 @@ class ResponsibilitiesHandler(IHandler):
                                                                  'responsibilities.store_id']))
 
         responsibility_mapper = mapper_registry.map_imperatively(Responsibility, self.__responsibilities, properties={
+            '_username': self.__responsibilities.c.username,
             '_appointed': relationship(Responsibility, uselist=True, cascade="all",
                                        passive_deletes=True,
                                        remote_side=[self.__responsibilities.c.username,
                                                     self.__responsibilities.c.store_id], overlaps="_store"),
-            '_user_state': relationship(Member, uselist=False, lazy='joined',
-                                        backref=backref("_Member__responsibilities", cascade="all, delete, delete-orphan",
-                                                        collection_class=attribute_mapped_collection('_store_id'),
-                                                        passive_deletes=True)),
-            '_store': relationship(Store, uselist=False, backref=backref("_Store__responsibility", uselist=False, overlaps="_appointed")),
+
+            # '_user_state': relationship(Member, uselist=False, lazy='joined',
+            #                             backref=backref("_Member__responsibilities", cascade="all, delete, delete-orphan",
+            #                                             collection_class=attribute_mapped_collection('_store_id'),
+            #                                             passive_deletes=True)),
+
+            # '_store': relationship(Store, uselist=False, backref=backref("_Store__responsibility", uselist=False, overlaps="_appointed")),
         }, polymorphic_on=self.__responsibilities.c.responsibility_type, polymorphic_identity='R')
 
         mapper_registry.map_imperatively(Founder, self.__responsibilities, inherits=responsibility_mapper, polymorphic_identity='F')

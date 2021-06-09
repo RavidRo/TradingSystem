@@ -1,7 +1,6 @@
 import threading
 from threading import Timer
-
-from Backend.DataBase.database import session, db_fail_response
+from Backend.DataBase.database import db_fail_response
 from Backend.response import Response, PrimitiveParsable, ParsableList
 from Backend.Service.DataObjects.shopping_cart_data import ShoppingCartData
 from Backend.Domain.TradingSystem.shopping_bag import ShoppingBag
@@ -11,7 +10,6 @@ from Backend.Domain.TradingSystem.Interfaces.IShoppingCart import IShoppingCart
 class ShoppingCart(IShoppingCart):
     def __init__(self):
         from Backend.DataBase.Handlers.shopping_bag_handler import ShoppingBagHandler
-        from Backend.DataBase.Handlers.member_handler import MemberHandler
         self.__shopping_bags: dict[str, ShoppingBag] = dict()
         self.__timer = None
         self.__INTERVAL_TIME = self.interval_time()

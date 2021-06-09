@@ -1,6 +1,5 @@
 from __future__ import annotations
 import enum
-
 from Backend.Service.DataObjects.responsibilities_data import ResponsibilitiesData
 from Backend.Domain.TradingSystem.Interfaces.IUser import IUser
 from Backend.Domain.TradingSystem.purchase_details import PurchaseDetails
@@ -42,9 +41,10 @@ class Responsibility(Parsable):
     ERROR_MESSAGE = "Responsibility is an interface, function not implemented"
 
     def __init__(self, user_state, store, subscriber=None) -> None:
+        from Backend.DataBase.Handlers.responsibilities_handler import ResponsibilitiesHandler
         self._store_id = store.get_id()
         self._user_state = user_state
-        user_state.add_responsibility(self, store.get_id())
+        # user_state.add_responsibility(self, store.get_id())
         self._store = store
         self.__subscriber = subscriber
         if subscriber:
@@ -52,7 +52,7 @@ class Responsibility(Parsable):
         self._appointed: list[Responsibility] = []
 
         self._username = user_state.get_username().get_obj().get_val()
-
+        self._responsibilities_handler = ResponsibilitiesHandler.get_instance()
     def get_user_state(self):
         return self._user_state
 
@@ -220,3 +220,6 @@ class Responsibility(Parsable):
 
     def _permissions(self) -> list[str]:
         return [per.name for per in Permission]
+
+    def save(self):
+        self._responsibilities_handler.save(self)

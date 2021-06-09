@@ -1,5 +1,5 @@
 from sqlalchemy import Table, Column, String, Integer, ForeignKey, CheckConstraint, insert, Boolean, \
-    ForeignKeyConstraint, delete, update, and_
+    ForeignKeyConstraint, delete, update, and_, select
 from sqlalchemy.orm import mapper, relationship, backref
 from sqlalchemy.orm.collections import attribute_mapped_collection, column_mapped_collection
 
@@ -176,27 +176,28 @@ class ShoppingBagHandler(IHandler):
     def load_all(self):
         pass
 
-    def load_cart(self, username):
-        self._rwlock.acquire_read()
-        res = Response(True)
-        try:
-            bags_list = self.__shopping_bags.select().where(...)
-            bags: list[ShoppingBag] = session.query(ShoppingBag).filter_by(username=username).all()
-
-            for bag in bags:
-                products_in_bag: ProductInShoppingBag = session.query(ProductInShoppingBag).filter_by(username=username,
-                                                                                                      store_id=bag.get_store_ID()).all()
-                bag.add_product(products_in_bag.product_id, products_in_bag.quantity)
-
-            cart = ShoppingCart()
-            cart.add_bags({bag.get_store_ID(): bag for bag in bags})
-            res = Response(True, cart)
-        except Exception as e:
-            session.rollback()
-            res = Response(False, msg=str(e))
-        finally:
-            self._rwlock.release_read()
-            return res
+    # def load_cart(self, username):
+    #     # self._rwlock.acquire_read()
+    #     res = Response(True)
+    #     try:
+    #         stmt = select(self.__shopping_bags.c.store_id).where(self.__shopping_bags.c.username == username)
+    #         bags_store_ids = session.execute(stmt).all()
+    #         for bag_store_id in bags_store_ids:
+    #
+    #             bag = ShoppingBag()
+    #             products_in_bag: ProductInShoppingBag = session.query(ProductInShoppingBag).filter_by(username=username,
+    #                                                                                                   store_id=bag.get_store_ID()).all()
+    #             bag.add_product(products_in_bag.product_id, products_in_bag.quantity)
+    #
+    #         cart = ShoppingCart()
+    #         cart.add_bags({bag.get_store_ID(): bag for bag in bags})
+    #         res = Response(True, cart)
+    #     except Exception as e:
+    #         session.rollback()
+    #         res = Response(False, msg=str(e))
+    #     finally:
+    #         self._rwlock.release_read()
+    #         return res
 
 # if __name__ == "__main__":
 #     bags_handler = ShoppingBagHandler.get_instance()

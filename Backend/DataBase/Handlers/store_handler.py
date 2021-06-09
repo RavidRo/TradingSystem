@@ -5,6 +5,7 @@ from Backend.DataBase.Handlers.product_handler import ProductHandler
 from Backend.DataBase.IHandler import IHandler
 from Backend.DataBase.database import mapper_registry, session, engine
 from Backend.Domain.TradingSystem.Responsibilities.founder import Founder
+from Backend.Domain.TradingSystem.Responsibilities.responsibility import Responsibility
 from Backend.Domain.TradingSystem.product import Product
 from Backend.Domain.TradingSystem.purchase_details import PurchaseDetails
 from Backend.Domain.TradingSystem.store import Store
@@ -55,7 +56,7 @@ class StoreHandler(IHandler):
             #                                         collection_class=MyMap())
             "products": relationship(ProductsOfStores, uselist=True,
                                      collection_class=attribute_mapped_collection("product_id")),
-            # "_Store__responsibility": relationship(Founder, uselist=False, overlaps="_appointed", backref=backref("_store", uselist=False))
+            "_Store__responsibility": relationship(Responsibility, uselist=False, overlaps="_appointed", backref=backref("_store", uselist=False))
         })
 
         self.__product_handler = ProductHandler.get_instance()

@@ -107,6 +107,7 @@ class Founder(Responsibility):
                 #! (guest does not hae a username)
                 newResponsibility = Owner(user.state, self._store, user)
                 self._appointed.append(newResponsibility)
+                res = self._responsibilities_handler.commit_changes()
                 result = Response(True)
 
         return result
@@ -173,3 +174,4 @@ class Founder(Responsibility):
     # 4.11
     def get_store_purchase_history(self) -> Response[ParsableList[PurchaseDetails]]:
         return self._store.get_purchase_history()
+
