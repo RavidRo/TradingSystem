@@ -1,5 +1,6 @@
 import uuid
 
+from Backend.DataBase.database import db_fail_response
 from Backend.response import Parsable, Response
 
 from Backend.Service.DataObjects.offer_data import OfferData
@@ -9,6 +10,7 @@ from Backend.Domain.Notifications.Publisher import Publisher
 
 class Offer(Parsable):
     def __init__(self, user, store, product) -> None:
+        from Backend.DataBase.Handlers.offer_handler import OfferHandler
         self.__id: str = str(uuid.uuid4())
         self.__price: float = None
         self.__status: OfferStatus = UndeclaredOffer(self)
@@ -26,12 +28,17 @@ class Offer(Parsable):
         self.__managers_publisher = Publisher()
         self.__managers_publisher.subscribe(store)
 
+        self.__offer_handler = OfferHandler.get_instance()
+
     def declare_price(self, price) -> Response[None]:
         response = self.__status.declare_price(price)
         if response.succeeded():
             self.__managers_publisher.notify_all(
                 f"{self.__username} has submitted a price offer for {self.__product_name}"
             )
+            res = self.__offer_handler.commit_changes()
+            if not res.succeeded():
+                return db_fail_response
         return response
 
     def suggest_counter_offer(self, price) -> Response[None]:
@@ -40,6 +47,9 @@ class Offer(Parsable):
             self.__user_publisher.notify_all(
                 f"Your price offer for {self.__product_name} has been countered"
             )
+            res = self.__offer_handler.commit_changes()
+            if not res.succeeded():
+                return db_fail_response
         return response
 
     def approve_manager_offer(self) -> Response[None]:
@@ -51,6 +61,9 @@ class Offer(Parsable):
             self.__user_publisher.notify_all(
                 f"Your price offer for {self.__product_name} has been approved"
             )
+            res = self.__offer_handler.commit_changes()
+            if not res.succeeded():
+                return db_fail_response
         return response
 
     def reject_user_offer(self) -> Response[None]:
@@ -75,6 +88,10 @@ class Offer(Parsable):
 
     def change_status(self, status):
         self.__status = status
+        res = self.__offer_handler.commit_changes()
+        if not res.succeeded():
+            return db_fail_response
+        return Response(True)
 
     def get_id(self) -> str:
         return self.__id
@@ -90,6 +107,9 @@ class Offer(Parsable):
 
     def get_username(self) -> str:
         return self.__username
+
+    def get_offer_handler(self):
+        return self.__offer_handler
 
     def parse(self):
         return OfferData(
@@ -157,8 +177,7 @@ class OfferStatus:
         return False
 
     def change_status(self, status_class) -> Response[None]:
-        self._offer.change_status(status_class(self._offer))
-        return Response(True)
+        return self._offer.change_status(status_class(self._offer))
 
 
 class UndeclaredOffer(OfferStatus):
@@ -169,7 +188,7 @@ class UndeclaredOffer(OfferStatus):
         return self.change_status(AwaitingApprovalOffer)
 
     def cancel_offer(self) -> Response[None]:
-        return self.change_status(CancledOffer)
+        return self.change_status(CanceledOffer)
 
     def get_name(self) -> str:
         return "undeclared"
@@ -189,7 +208,7 @@ class AwaitingApprovalOffer(OfferStatus):
         return self.change_status(RejectedOffer)
 
     def cancel_offer(self) -> Response[None]:
-        return self.change_status(CancledOffer)
+        return self.change_status(CanceledOffer)
 
     def get_name(self) -> str:
         return "awaiting manager approval"
@@ -206,7 +225,7 @@ class CounteredOffer(OfferStatus):
         return self.change_status(ApprovedOffer)
 
     def cancel_offer(self) -> Response[None]:
-        return self.change_status(CancledOffer)
+        return self.change_status(CanceledOffer)
 
     def get_name(self) -> str:
         return "counter offered"
@@ -233,6 +252,6 @@ class UsedOffer(OfferStatus):
         return "used"
 
 
-class CancledOffer(OfferStatus):
+class CanceledOffer(OfferStatus):
     def get_name(self) -> str:
-        return "cancled"
+        return "canceled"

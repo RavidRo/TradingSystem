@@ -10,6 +10,7 @@ from Backend.Domain.TradingSystem.Interfaces.IProduct import IProduct
 class Product(IProduct):
     def __init__(self, product_name: str, category: str, price: float, keywords=None):
         from Backend.DataBase.Handlers.product_handler import ProductHandler
+        from Backend.Domain.TradingSystem.offer import Offer
         if keywords is None:
             keywords = []
         self.__product_name = product_name

@@ -9,6 +9,7 @@ from Backend.DataBase.database import mapper_registry, session
 from Backend.Domain.TradingSystem.Responsibilities.founder import Founder
 from Backend.Domain.TradingSystem.Responsibilities.responsibility import Responsibility
 from Backend.Domain.TradingSystem.States.member import Member
+from Backend.Domain.TradingSystem.offer import Offer
 from Backend.Domain.TradingSystem.purchase_details import PurchaseDetails
 from Backend.Domain.TradingSystem.shopping_bag import ShoppingBag
 from Backend.Domain.TradingSystem.shopping_cart import ShoppingCart
@@ -36,11 +37,11 @@ class MemberHandler(IHandler):
 
         mapper_registry.map_imperatively(Member, self.__members, properties={
             '_username': self.__members.c.username,
-            '_Member__responsibilities': relationship(Responsibility, cascade="all, delete",
-                                                      collection_class=attribute_mapped_collection('_store_id'),
-                                                      passive_deletes=True),
-            '_Member__purchase_details': relationship(PurchaseDetails, cascade="all, delete",
-                                                      passive_deletes=True),
+            '_Member__responsibilities': relationship(Responsibility, cascade="all, delete-orphan",
+                                                      collection_class=attribute_mapped_collection('_store_id'), overlaps="_store",
+                                                      passive_updates=False),
+            '_Member__purchase_details': relationship(PurchaseDetails, cascade="all, delete-orphan"),
+            '_Member__offers': relationship(Offer, collection_class=attribute_mapped_collection('_Offer__id'))
 
         }, polymorphic_on=self.__members.c.member_type, polymorphic_identity='M')
 

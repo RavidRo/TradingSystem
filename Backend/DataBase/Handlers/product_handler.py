@@ -1,8 +1,10 @@
 from sqlalchemy import Table, Column, String, Float, Integer, CheckConstraint, insert, ARRAY, ForeignKey
-from sqlalchemy.orm import mapper
+from sqlalchemy.orm import mapper, relationship
+from sqlalchemy.orm.collections import attribute_mapped_collection
 
 from Backend.DataBase.IHandler import IHandler
 from Backend.DataBase.database import mapper_registry, session
+from Backend.Domain.TradingSystem.offer import Offer
 from Backend.Domain.TradingSystem.product import Product
 from Backend.response import Response, ParsableList
 
@@ -31,6 +33,7 @@ class ProductHandler(IHandler):
             '_Product__category': self.__products.c.category,
             '_Product__price': self.__products.c.price,
             '_Product__keywords': self.__products.c.keywords,
+            '_Product__offers': relationship(Offer, collection_class=attribute_mapped_collection('_Offer__id'))
         })
 
     @staticmethod

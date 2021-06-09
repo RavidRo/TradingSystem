@@ -1,15 +1,12 @@
-from sqlalchemy import Table, Column, String, Integer, ForeignKey, CheckConstraint, insert, Boolean, \
+from sqlalchemy import Table, Column, String, Integer, ForeignKey, CheckConstraint, insert, \
     ForeignKeyConstraint, delete, update, and_, select
-from sqlalchemy.orm import mapper, relationship, backref
-from sqlalchemy.orm.collections import attribute_mapped_collection, column_mapped_collection
+from sqlalchemy.orm import relationship
 
 from Backend.DataBase.IHandler import IHandler
 from Backend.DataBase.database import mapper_registry, session
-from Backend.Domain.TradingSystem.States.member import Member
 from Backend.Domain.TradingSystem.product import Product
 from Backend.Domain.TradingSystem.shopping_bag import ShoppingBag
 from Backend.Domain.TradingSystem.shopping_cart import ShoppingCart
-from Backend.Domain.TradingSystem.store import Store
 from Backend.Domain.TradingSystem.stores_manager import StoresManager
 from Backend.response import Response
 

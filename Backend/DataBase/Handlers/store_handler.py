@@ -57,7 +57,7 @@ class StoreHandler(IHandler):
             #                                         collection_class=MyMap())
             "products": relationship(ProductsOfStores, uselist=True,
                                      collection_class=attribute_mapped_collection("product_id")),
-            "_Store__responsibility": relationship(Responsibility, uselist=False, overlaps="_appointed", backref=backref("_store", uselist=False))
+            "_Store__responsibility": relationship(Responsibility, uselist=False, overlaps='_appointed', cascade="save-update, delete, delete-orphan", backref=backref("_store", uselist=False))
         })
 
         self.__product_handler = ProductHandler.get_instance()

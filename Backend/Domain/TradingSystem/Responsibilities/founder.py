@@ -1,3 +1,4 @@
+from Backend.DataBase.database import session
 from Backend.Domain.TradingSystem.offer import Offer
 from Backend.Domain.TradingSystem.Interfaces.IUser import IUser
 from Backend.Domain.TradingSystem.Responsibilities.responsibility import Permission, Responsibility
@@ -106,11 +107,12 @@ class Founder(Responsibility):
             else:
                 #! I am guessing that user.state is of type member because at user_manager, with a given username he found a user object
                 #! (guest does not hae a username)
-                newResponsibility = Owner(user.state, self._store, user)
-                newResponsibility.save()
-                # self._appointed.append(newResponsibility)
+                new_responsibility = Owner(user.state, self._store, user)
+                founder = session.query(Responsibility).get((self._user_state.get_username().get_obj().get_val(), self.get_store_id()))
+                founder._appointed.append(new_responsibility)
+                # self._appointed.append(new_responsibility)
                 res = self._responsibilities_handler.commit_changes()
-                result = Response(True)
+                return res
 
         return result
 

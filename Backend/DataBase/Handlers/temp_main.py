@@ -1,4 +1,5 @@
 from Backend.DataBase.Handlers.member_handler import MemberHandler
+from Backend.DataBase.Handlers.offer_handler import OfferHandler
 from Backend.DataBase.Handlers.product_handler import ProductHandler
 from Backend.DataBase.Handlers.purchase_details_handler import PurchaseDetailsHandler
 from Backend.DataBase.Handlers.responsibilities_handler import ResponsibilitiesHandler
@@ -39,7 +40,6 @@ def save():
     if not product2_res.succeeded():
         print("add_product: " + product2_res.get_msg())
 
-
     res_save_prod = trading_system.save_product_in_cart(cookie2, store_res.get_obj(), product_res.get_obj(), 2)
     if not res_save_prod.succeeded():
         print("save in cart: " + res_save_prod.get_msg())
@@ -48,6 +48,17 @@ def save():
     if not res_save_prod2.succeeded():
         print("save in cart: " + res_save_prod.get_msg())
 
+    res_create_offer = trading_system.create_offer(cookie2, store_res.get_obj(), product2_res.get_obj())
+    if not res_create_offer.succeeded():
+        print("create offer: " + res_create_offer.get_msg())
+
+    res_declare_price = trading_system.declare_price(cookie2, res_create_offer.get_obj(), 1.0)
+    if not res_declare_price.succeeded():
+        print("create offer: " + res_declare_price.get_msg())
+
+    res_appoint_owner = trading_system.appoint_owner(cookie, store_res.get_obj(), "user2")
+    if not res_appoint_owner.succeeded():
+        print("appoint owner: " + res_appoint_owner.get_msg())
 
 if __name__ == '__main__':
     shopping_bag_handler = ShoppingBagHandler.get_instance()
@@ -56,16 +67,17 @@ if __name__ == '__main__':
     purchase_details_handler = PurchaseDetailsHandler.get_instance()
     store_handler = StoreHandler.get_instance()
     responsibility_handler = ResponsibilitiesHandler.get_instance()
-    # save()
+    offer_handler = OfferHandler.get_instance()
+    save()
 
-    trading_system = TradingSystem.getInstance()
-    cookie2 = trading_system.enter_system()
-    res2 = trading_system.login(cookie2, "user2", "password2")
-    res_cart = trading_system.get_cart_details(cookie2)
-    print(res_cart.get_obj())
-    price_res = trading_system.purchase_cart(cookie2, 17)
-    res_pay = trading_system.send_payment(cookie2, "", "")
-    print(res_pay.get_msg())
+    # trading_system = TradingSystem.getInstance()
+    # cookie2 = trading_system.enter_system()
+    # res2 = trading_system.login(cookie2, "user2", "password2")
+    # res_cart = trading_system.get_cart_details(cookie2)
+    # print(res_cart.get_obj())
+    # price_res = trading_system.purchase_cart(cookie2, 17)
+    # res_pay = trading_system.send_payment(cookie2, "", "")
+    # print(res_pay.get_msg())
 
     # res_del_prod = trading_system.remove_product_from_cart(cookie, store_res.get_obj(), product_res.get_obj())
     # if not res_del_prod.succeeded():
@@ -76,9 +88,6 @@ if __name__ == '__main__':
     #     print("change quantity in cart: " + change_prod_quantity.get_msg())
     #
     #
-    # res_appoint_owner = trading_system.appoint_owner(cookie, store_res.get_obj(),"user2")
-    # if not res_appoint_owner.succeeded():
-    #     print("appoint owner: " + res_appoint_owner.get_msg())
     # res = shopping_bag_handler.load_cart("user")
     # if not res.succeeded():
     #     print("load cart: " + res.get_msg())

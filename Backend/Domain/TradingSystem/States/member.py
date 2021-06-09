@@ -93,7 +93,7 @@ class Member(UserState):
         founder = Founder(self, store, self._user)
         store.set_responsibility(founder)
         store.save()
-        founder.save()
+        # founder.save()
         self.add_responsibility(founder, store.get_id())
         res = self._member_handler.commit_changes()
         if not res.succeeded():
@@ -288,6 +288,9 @@ class Member(UserState):
 
         offer = Offer(user, response_get_store.object, response_get_product.object)
         self.__offers[offer.get_id()] = offer
+        res = self._member_handler.commit_changes()
+        if not res.succeeded():
+            return db_fail_response
         return Response(True, offer.get_id())
 
     def declare_price(self, offer_id, price) -> Response[None]:

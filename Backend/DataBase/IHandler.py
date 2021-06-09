@@ -74,7 +74,3 @@ class IHandler(ABC):
             self._rwlock.release_read()
             return res
 
-    @abstractmethod
-    def load_all(self):
-        pass
-
