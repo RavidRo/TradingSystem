@@ -80,6 +80,16 @@ const Statistics: FC<StatisticsProps> = ({statistics}) => {
                     inputProps={{style: {fontSize: 20, marginTop: 20}}} 
                     InputLabelProps={{style: {fontSize: 30}}}
                 />
+                <ul>
+                  {statisticsMy!==undefined ? Object.keys(statisticsMy).map((date)=>{
+                    let index = Object.keys(statisticsMy).indexOf(date);
+                    return (
+                      <li>
+                        {Object.values(statisticsMy)[index]}
+                      </li>
+                    )
+                  }):"No data"}
+                </ul>
 
                 {fromDate !== "" && toDate !== ""?
                 statisticsObj.request({})
