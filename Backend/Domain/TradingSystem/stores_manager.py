@@ -50,7 +50,7 @@ class StoresManager:
         for store in StoresManager.__stores:
             if store.get_id() == store_id:
                 return Response[Store](True, obj=store)
-        store_res = StoresManager.__store_handler.load_store()
+        store_res = StoresManager.__store_handler.load_store(store_id)
         if not store_res.succeeded():
             if store_res.get_obj() is None:
                 return Response(False, msg=f"No store with the ID {store_id} exists")

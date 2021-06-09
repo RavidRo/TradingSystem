@@ -180,17 +180,19 @@ class ShoppingBagHandler(IHandler):
     def load_cart(self, username):
         res = Response(True)
         try:
-            stmt = select([self.__shopping_bags.c.store_id]).where(self.__shopping_bags.c.username == username)
+            cart = ShoppingCart()
+            stmt = select(self.__shopping_bags.c.store_id).where(self.__shopping_bags.c.username == username)
             bags_store_ids = session.execute(stmt).all()
+            store_id_to_bag = dict()
             for bag_store_id in bags_store_ids:
-                store = StoresManager.get_store(bag_store_id)
+                store = StoresManager.get_store(bag_store_id[0])
                 bag = ShoppingBag(store)
                 products_in_bag: list[ProductInShoppingBag] = session.query(ProductInShoppingBag).filter_by(username=username,
-                                                                                                            store_id=bag_store_id).all()
+                                                                                                            store_id=bag_store_id[0]).all()
                 bag.set_products({product_in_bag.product_id: (product_in_bag.product, product_in_bag.quantity) for product_in_bag in products_in_bag})
+                store_id_to_bag.update({bag_store_id[0]: bag})
 
-            cart = ShoppingCart()
-            cart.add_bags({bag.get_store_ID(): bag for bag in bags})
+            cart.add_bags(store_id_to_bag)
             res = Response(True, cart)
         except Exception as e:
             session.rollback()

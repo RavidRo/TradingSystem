@@ -98,12 +98,12 @@ class UserManager:
                         old_user.connect(user.get_communicate())
                         return response
                 res = MemberHandler.get_instance().load(username)
+                res.get_obj().load_cart()
                 res_commit = MemberHandler.get_instance().commit_changes()
                 if res_commit.succeeded():
                     res.get_obj().set_user(user)
                     user.change_state(res.get_obj())
                     UserManager.__username_user[username] = user
-                    res.get_obj().load_cart()
 
 
                 # for user_cookie in UserManager.__cookie_user:

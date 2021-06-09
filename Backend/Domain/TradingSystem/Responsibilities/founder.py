@@ -106,7 +106,8 @@ class Founder(Responsibility):
                 #! I am guessing that user.state is of type member because at user_manager, with a given username he found a user object
                 #! (guest does not hae a username)
                 newResponsibility = Owner(user.state, self._store, user)
-                self._appointed.append(newResponsibility)
+                newResponsibility.save()
+                # self._appointed.append(newResponsibility)
                 res = self._responsibilities_handler.commit_changes()
                 result = Response(True)
 

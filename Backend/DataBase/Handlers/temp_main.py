@@ -19,13 +19,12 @@ if __name__ == '__main__':
     store_handler = StoreHandler.get_instance()
     responsibility_handler = ResponsibilitiesHandler.get_instance()
 
-    # mapper_registry.metadata.drop_all(engine)
-    # mapper_registry.metadata.create_all(engine)
+    mapper_registry.metadata.drop_all(engine)
+    mapper_registry.metadata.create_all(engine)
+
 
     trading_system = TradingSystem.getInstance()
 
-    store_res = store_handler.load_store('f9729a4f-fe95-407d-9d9b-47af160aed61')
-    print(store_res.get_obj())
     # cookie = trading_system.enter_system()
     # res = trading_system.register(cookie, "user", "password")
     # if not res.succeeded():
@@ -33,12 +32,14 @@ if __name__ == '__main__':
     #
     # res = trading_system.login(cookie, "user", "password")
     #
-    # cookie2 = trading_system.enter_system()
+    cookie2 = trading_system.enter_system()
     # res2 = trading_system.register(cookie2, "user2", "password2")
     # if not res2.succeeded():
     #     print("register2: " + res.get_msg())
     #
-    # res2 = trading_system.login(cookie2, "user2", "password")
+    res2 = trading_system.login(cookie2, "user2", "password2")
+    res_cart = trading_system.get_cart_details(cookie2)
+    print(res_cart.get_msg())
     #
     #
     # store_res = trading_system.create_store(cookie, "The Store")
@@ -54,18 +55,19 @@ if __name__ == '__main__':
     # if not product2_res.succeeded():
     #     print("add_product: " + product2_res.get_msg())
     #
-    # res = trading_system.change_product_quantity_in_store(cookie, store_res.get_obj(), product_res.get_obj(), 11)
-    # if not res.succeeded():
-    #     print("edit product details: " + res.get_msg())
     #
-    # res_save_prod = trading_system.save_product_in_cart(cookie, store_res.get_obj(), product_res.get_obj(), 2)
+    # # res = trading_system.change_product_quantity_in_store(cookie, store_res.get_obj(), product_res.get_obj(), 11)
+    # # if not res.succeeded():
+    # #     print("edit product details: " + res.get_msg())
+    #
+    # res_save_prod = trading_system.save_product_in_cart(cookie2, store_res.get_obj(), product_res.get_obj(), 2)
     # if not res_save_prod.succeeded():
     #     print("save in cart: " + res_save_prod.get_msg())
     #
-    # res_save_prod = trading_system.save_product_in_cart(cookie, store_res.get_obj(), product2_res.get_obj(), 5)
-    # if not res_save_prod.succeeded():
+    # res_save_prod2 = trading_system.save_product_in_cart(cookie2, store_res.get_obj(), product2_res.get_obj(), 5)
+    # if not res_save_prod2.succeeded():
     #     print("save in cart: " + res_save_prod.get_msg())
-    #
+
     # res_del_prod = trading_system.remove_product_from_cart(cookie, store_res.get_obj(), product_res.get_obj())
     # if not res_del_prod.succeeded():
     #     print("del from cart: " + res_del_prod.get_msg())
@@ -117,3 +119,11 @@ if __name__ == '__main__':
     # res = responsibility_handler.save(responsibility)
     # if not res.succeeded():
     #     print(res.get_msg())
+
+    # res_cart = shopping_bag_handler.load_cart("user2")
+    # if not res_cart.succeeded():
+    #     print("load cart: " + res_cart.get_msg())
+    #
+    # # store_res = store_handler.load_store('f9729a4f-fe95-407d-9d9b-47af160aed61')
+    # # print(store_res.get_obj())
+    #
