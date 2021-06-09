@@ -1,4 +1,4 @@
-from Backend.Domain.TradingSystem import statistics
+from Backend.Domain.TradingSystem.statistics import Statistics
 from Backend.Service.DataObjects.statistics_data import StatisticsData
 from Backend.Domain.TradingSystem.offer import Offer
 from typing import Callable
