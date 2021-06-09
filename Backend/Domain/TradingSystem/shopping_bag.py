@@ -21,10 +21,16 @@ class ShoppingBag(IShoppingBag):
 
     def parse(self):
         products_ids_to_quantities = {}
-        self_prods_to_quantites = self._products_to_quantity if self._products_to_quantity != {} else self.__pending_products_to_quantity
+        self_prods_to_quantites = (
+            self._products_to_quantity
+            if self._products_to_quantity != {}
+            else self.__pending_products_to_quantity
+        )
         for product_id in self_prods_to_quantites:
             products_ids_to_quantities[product_id] = self_prods_to_quantites[product_id][1]
-        return ShoppingBagData(self.__store.get_id(), self.__store.get_name(), products_ids_to_quantities)
+        return ShoppingBagData(
+            self.__store.get_id(), self.__store.get_name(), products_ids_to_quantities
+        )
 
     """checks need to be made:
        ----------------------
@@ -64,9 +70,10 @@ class ShoppingBag(IShoppingBag):
             )
 
         if self._products_to_quantity.get(product_id) is not None:
-            return Response(
-                False, msg=f"A product with id: {product_id} already exists in the store's bag"
-            )
+            return self.change_product_quantity(product_id=product_id, new_amount=self._products_to_quantity[product_id][1] + quantity)
+            # return Response(
+            #     False, msg=f"A product with id: {product_id} already exists in the store's bag"
+            # )
 
         if user_name is not None:
             self.__shopping_bag_handler.add_product_to_bag(self.get_store(), self.__store.get_product(product_id), user_name, quantity)
@@ -106,7 +113,9 @@ class ShoppingBag(IShoppingBag):
                                             """
 
     # product info - list of tuples (product_id to purchase_type)
-    def buy_products(self, user_age: int, products_info=None) -> Response[PrimitiveParsable[float]]:
+    def buy_products(
+        self, user_age: int, products_info=None, username="Guest"
+    ) -> Response[PrimitiveParsable[float]]:
 
         """first step - check if all of the products exist in the store and acquire"""
         if products_info is None:
@@ -122,7 +131,7 @@ class ShoppingBag(IShoppingBag):
             return purchase_policy_check
 
         """third step - check and apply the discount """
-        self.discount_apply(user_age)
+        self.discount_apply(user_age, username)
         return Response[PrimitiveParsable[float]](
             True,
             PrimitiveParsable(self.__pending_price),
@@ -139,8 +148,10 @@ class ShoppingBag(IShoppingBag):
 
         return Response(True, msg="The cart passed the purchase policy check!")
 
-    def discount_apply(self, user_age: int):
-        self.__pending_price = self.__store.apply_discounts(self._products_to_quantity, user_age)
+    def discount_apply(self, user_age: int, username="Guest"):
+        self.__pending_price = self.__store.apply_discounts(
+            self._products_to_quantity, user_age, username
+        )
         self.__pending_products_to_quantity = self._products_to_quantity.copy()
         self._products_to_quantity.clear()
 
@@ -185,6 +196,8 @@ class ShoppingBag(IShoppingBag):
 
     def delete_products_after_purchase(self, purchase_details,  user_name="guest"):
         # for now this function will only return details, in the future there will be specific deletion
+        product_ids = [product_id for product_id in self.__pending_products_to_quantity]
+        self.__store.clear_offers(product_ids, user_name)
         self.__store.update_store_history(purchase_details)
         self.__pending_products_to_quantity.clear()
 

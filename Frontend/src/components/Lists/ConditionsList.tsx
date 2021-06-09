@@ -1,6 +1,14 @@
-import React, { FC, useEffect, useState } from 'react';
+import React, { FC, useEffect } from 'react';
+import {
+	addPurchaseRule,
+	editPurchaseRule,
+	getPurchasePolicy,
+	movePurchaseRule,
+	removePurchaseRule,
+} from '../../api';
+import { areYouSure, confirm, confirmOnSuccess } from '../../decorators';
 
-import useAPI from '../../hooks/useAPI';
+import { useAPI2 } from '../../hooks/useAPI';
 import {
 	BasicRule,
 	Condition,
@@ -9,7 +17,9 @@ import {
 	isConditionComplex,
 	ProductQuantity,
 } from '../../types';
-import CreateConditionForm from '../FormWindows/CreateConditionForm';
+import CreateConditionForm from '../FormWindows/CreateForms/CreateConditionForm';
+import EditComplexConditionForm from '../FormWindows/EditForms/EditComplexConditionForm';
+import EditSimpleConditionForm from '../FormWindows/EditForms/EditSimpleConditionForm';
 import ConditionNode from './ConditionNode';
 import GenericList from './GenericList';
 
@@ -20,19 +30,11 @@ type ConditionsListProps = {
 };
 
 const ConditionsList: FC<ConditionsListProps> = ({ openTab, products, storeId }) => {
-	const getConditionsAPI = useAPI<Condition>('/get_purchase_policy', { store_id: storeId });
-	const addCondition = useAPI<{ cookie: string; condition_id: string }>(
-		'/add_purchase_rule',
-		{ store_id: storeId },
-		'POST'
-	);
-	const removeConditionAPI = useAPI<{ cookie: string; answer: string; succeeded: boolean }>(
-		'/remove_purchase_rule',
-		{ store_id: storeId },
-		'POST'
-	);
-	const [rootId, setRootId] = useState<string>('');
-	const [conditions, setConditions] = useState<Condition[]>([]);
+	const { request: getConditionsRequest, data: rootCondition } = useAPI2(getPurchasePolicy);
+	const addConditionAPI = useAPI2(addPurchaseRule);
+	const removeConditionAPI = useAPI2(removePurchaseRule);
+	const editConditionAPI = useAPI2(editPurchaseRule);
+	const moveConditionAPI = useAPI2(movePurchaseRule);
 
 	const productIdToString = (productId: string) => {
 		for (const product of products) {
@@ -43,62 +45,120 @@ const ConditionsList: FC<ConditionsListProps> = ({ openTab, products, storeId })
 		return '';
 	};
 
-	const getConditions = () =>
-		getConditionsAPI.request().then((getConditionsAPI) => {
-			if (!getConditionsAPI.error && getConditionsAPI.data !== null) {
-				setRootId(getConditionsAPI.data.data.id);
-				setConditions((getConditionsAPI.data.data as BasicRule).children);
-			}
-		});
+	const getConditions = () => getConditionsRequest(storeId);
 
 	useEffect(() => {
 		getConditions();
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
 
-	const onDelete = (conditionId: string) => {
-		removeConditionAPI.request({ rule_id: conditionId }, (data, error) => {
-			if (!error && data !== null && data.succeeded) {
-				getConditions();
-			}
-		});
-	};
+	const onDelete = areYouSure(
+		confirmOnSuccess(
+			(conditionId: string) =>
+				removeConditionAPI.request(storeId, conditionId).then(getConditions),
+			'Deleted!',
+			'Condition was removed successfully'
+		),
+		"You won't be able to revert this!",
+		'Yes, remove condition!'
+	);
 
-	const openConditionForm = (fatherId: string, conditioning?: 'test' | 'then' | undefined) => {
-		const onAddCondition = (rule: ConditionSimple | ConditionComplex): void => {
-			addCondition
-				.request({
-					parent_id: fatherId,
-					rule_details: rule,
-					clause: conditioning,
-					rule_type: isConditionComplex(rule) ? 'complex' : 'simple',
-				})
-				.then((addCondition) => {
-					if (!addCondition.error && addCondition.data !== null) {
-						getConditions();
-					}
+	const openConditionForm = (fatherId: string, conditioning?: 'test' | 'then') => {
+		const onAddCondition = (rule: ConditionSimple | ConditionComplex) =>
+			addConditionAPI
+				.request(
+					storeId,
+					rule,
+					isConditionComplex(rule) ? 'complex' : 'simple',
+					fatherId,
+					conditioning
+				)
+				.then(() => {
+					getConditions();
+					confirm('Created!', 'New condition was created successfully (0-0)');
 				});
-		};
 		openTab(() => <CreateConditionForm onSubmit={onAddCondition} products={products} />, '');
 	};
 
+	const onEditConditionForm = (condition: Condition) => {
+		const successMessage = 'Condition was edited successfully';
+		const onEditConditionSimple = confirmOnSuccess(
+			(newCondition: ConditionSimple) =>
+				editConditionAPI
+					.request(storeId, newCondition, condition.id, 'simple')
+					.then(getConditions),
+			'Edited',
+			successMessage
+		);
+		const onEditConditionComplex = confirmOnSuccess(
+			(newCondition: ConditionComplex) =>
+				editConditionAPI
+					.request(storeId, newCondition, condition.id, 'complex')
+					.then(getConditions),
+			'Edited!',
+			successMessage
+		);
+		if (isConditionComplex(condition)) {
+			openTab(
+				() => (
+					<EditComplexConditionForm
+						onSubmit={onEditConditionComplex}
+						conditionToEdit={condition}
+					/>
+				),
+				''
+			);
+		} else {
+			openTab(
+				() => (
+					<EditSimpleConditionForm
+						onSubmit={onEditConditionSimple}
+						conditionToEdit={condition}
+						products={products}
+					/>
+				),
+				''
+			);
+		}
+	};
+
+	const onMove = confirmOnSuccess(
+		(conditionId: string, newParentId: string) =>
+			moveConditionAPI.request(storeId, conditionId, newParentId).then(getConditions),
+		'Move',
+		'Condition was moved successfully'
+	);
+
+	const onDropRoot = (event: React.DragEvent) => {
+		if (rootCondition != null) {
+			event.preventDefault();
+			const draggableElementData = event.dataTransfer.getData('text');
+			onMove(draggableElementData, rootCondition.id);
+		}
+	};
+
 	return (
-		<GenericList
-			data={conditions}
-			header="Users can buy products if:"
-			narrow
-			onCreate={() => openConditionForm(rootId)}
-			createTxt="+ Add condition"
-		>
-			{(condition: Condition) => (
-				<ConditionNode
-					condition={condition}
-					onCreate={openConditionForm}
-					onDelete={onDelete}
-					productIdToName={productIdToString}
-				/>
-			)}
-		</GenericList>
+		rootCondition && (
+			<GenericList
+				data={(rootCondition as BasicRule).children}
+				header='Users can buy products if:'
+				narrow
+				onCreate={() => openConditionForm(rootCondition.id)}
+				createTxt='+ Add condition'
+				onDrop={onDropRoot}
+			>
+				{(condition: Condition) => (
+					<ConditionNode
+						condition={condition}
+						onCreate={openConditionForm}
+						onDelete={onDelete}
+						productIdToName={productIdToString}
+						onEdit={onEditConditionForm}
+						onMove={onMove}
+					/>
+				)}
+			</GenericList>
+		)
 	);
 };
 

@@ -1,12 +1,13 @@
-
+from Backend.Domain.TradingSystem.offer import Offer
 from Backend.DataBase.database import db_fail_response
 from Backend.Domain.Authentication import authentication
 from Backend.Domain.TradingSystem.States.admin import Admin
 from Backend.Domain.TradingSystem.States.member import Member
 from Backend.Domain.TradingSystem.States.user_state import UserState
-from Backend.response import Response
+from Backend.response import ParsableList, Response
 import json
 
+from Backend.settings import Settings
 admins = []
 
 
@@ -27,11 +28,10 @@ register_admins()
 
 
 def is_username_admin(username) -> bool:
-    return username in admins
+    return username in Settings.get_instance().get_admins()
 
 
 class Guest(UserState):
-
     def get_username(self):
         return Response(False, msg="Guests don't have username")
 
@@ -146,3 +146,33 @@ class Guest(UserState):
     # 4.2
     def get_purchase_policy(self, store_id):
         return self.__responsibilities[store_id].get_purchase_policy()
+
+    # Offers
+    # ==================
+
+    def get_user_offers(self) -> Response[ParsableList[Offer]]:
+        return Response(False, msg="Guests cannot have price offers")
+
+    def get_store_offers(self, store_id) -> Response[ParsableList[Offer]]:
+        return Response(False, msg="Guests cannot have price offers")
+
+    def create_offer(self, user, store_id, product_id) -> Response[str]:
+        return Response(False, msg="Guests cannot have price offers")
+
+    def declare_price(self, offer_id, price) -> Response[None]:
+        return Response(False, msg="Guests cannot have price offers")
+
+    def suggest_counter_offer(self, store_id, product_id, offer_id, price) -> Response[None]:
+        return Response(False, msg="Guests cannot have price offers")
+
+    def approve_manager_offer(self, offer_id) -> Response[None]:
+        return Response(False, msg="Guests cannot have price offers")
+
+    def approve_user_offer(self, store_id, product_id, offer_id) -> Response[None]:
+        return Response(False, msg="Guests cannot have price offers")
+
+    def reject_user_offer(self, store_id, product_id, offer_id) -> Response[None]:
+        return Response(False, msg="Guests cannot have price offers")
+
+    def cancel_offer(self, offer_id) -> Response[None]:
+        return Response(False, msg="Guests cannot have price offers")

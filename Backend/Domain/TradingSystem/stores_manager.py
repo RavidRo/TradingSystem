@@ -57,13 +57,20 @@ class StoresManager:
             return db_fail_response
         return Response[Store](True, obj=store_res.get_obj())
 
-    # used in 4.1
     @staticmethod
     def get_product(store_id: str, product_id: str) -> Response:
         store_res = StoresManager.get_store(store_id)
         if store_res.succeeded():
             return Response(True, store_res.get_obj().get_product(product_id))
         return store_res
+
+    # used in 4.1
+    @staticmethod
+    def get_product_with_price(store_id: str, product_id: str, username: str) -> Response:
+        response = StoresManager.get_product(store_id, product_id)
+        if not response.succeeded():
+            return response
+        return Response(True, response.get_obj().parse_with_price(username))
 
     # 6.4
     @staticmethod

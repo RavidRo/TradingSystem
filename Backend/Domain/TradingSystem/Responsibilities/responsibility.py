@@ -1,5 +1,6 @@
 from __future__ import annotations
 import enum
+from Backend.Domain.TradingSystem.offer import Offer
 from Backend.Service.DataObjects.responsibilities_data import ResponsibilitiesData
 from Backend.Domain.TradingSystem.Interfaces.IUser import IUser
 from Backend.Domain.TradingSystem.purchase_details import PurchaseDetails
@@ -27,13 +28,13 @@ Permission = enum.Enum(
 )
 
 name_to_permission: dict[str, Permission] = {
-    "manage_products": Permission.MANAGE_PRODUCTS,
-    "get_appointments": Permission.GET_APPOINTMENTS,
-    "appoint_manager": Permission.APPOINT_MANAGER,
-    "remove_manager": Permission.REMOVE_MANAGER,
-    "get_history": Permission.GET_HISTORY,
-    "manage_purchase_policy": Permission.MANAGE_PURCHASE_POLICY,
-    "manage_discount_policy": Permission.MANAGE_DISCOUNT_POLICY,
+    "manage products": Permission.MANAGE_PRODUCTS,
+    "get appointments": Permission.GET_APPOINTMENTS,
+    "appoint manager": Permission.APPOINT_MANAGER,
+    "remove manager": Permission.REMOVE_MANAGER,
+    "get history": Permission.GET_HISTORY,
+    "manage purchase policy": Permission.MANAGE_PURCHASE_POLICY,
+    "manage discount policy": Permission.MANAGE_DISCOUNT_POLICY,
 }
 
 
@@ -49,6 +50,9 @@ class Responsibility(Parsable):
         self.__subscriber = subscriber
         if subscriber:
             self._store.subscribe(subscriber)
+            subscriber.notify(
+                f"You have been appointer to {store.get_name()} as {self.__class__.__name__}"
+            )
         self._appointed: list[Responsibility] = []
 
         self._username = user_state.get_username().get_obj().get_val()
@@ -223,3 +227,18 @@ class Responsibility(Parsable):
 
     def save(self):
         self._responsibilities_handler.save(self)
+
+    # Offers
+    # ======================
+
+    def get_store_offers(self) -> Response[ParsableList[Offer]]:
+        raise Exception(Responsibility.ERROR_MESSAGE)
+
+    def suggest_counter_offer(self, product_id, offer_id, price) -> Response[None]:
+        raise Exception(Responsibility.ERROR_MESSAGE)
+
+    def approve_user_offer(self, product_id, offer_id) -> Response[None]:
+        raise Exception(Responsibility.ERROR_MESSAGE)
+
+    def reject_user_offer(self, product_id, offer_id) -> Response[None]:
+        raise Exception(Responsibility.ERROR_MESSAGE)

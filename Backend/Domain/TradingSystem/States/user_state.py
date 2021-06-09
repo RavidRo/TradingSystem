@@ -1,6 +1,7 @@
+from Backend.Domain.TradingSystem.offer import Offer
 from abc import ABC, abstractmethod
 from Backend.Domain.TradingSystem.shopping_cart import ShoppingCart
-from Backend.response import Response
+from Backend.response import ParsableList, Response
 
 
 class UserState(ABC):
@@ -29,7 +30,13 @@ class UserState(ABC):
         return Response(False, msg="Abstract Method")
 
     def save_product_in_cart(self, store_id, product_id, quantity):
-        return self._cart.add_product(store_id, product_id, quantity)
+        from Backend.Domain.TradingSystem.stores_manager import StoresManager
+
+        response = StoresManager.get_store(store_id)
+        if not response.succeeded():
+            return response
+
+        return self._cart.add_product(store_id, product_id, quantity, response.object)
 
     def show_cart(self):
         return Response[ShoppingCart](True, obj=self._cart, msg="got cart successfully")
@@ -41,7 +48,7 @@ class UserState(ABC):
         return self._cart.change_product_quantity(store_id, product_id, new_amount)
 
     def buy_cart(self, user_age: int):
-        return self._cart.buy_products(user_age)
+        return self._cart.buy_products(user_age, username=self.get_username())
 
     def get_cart_price(self):
         return self._cart.get_price()
@@ -191,4 +198,42 @@ class UserState(ABC):
     # 4.2
     @abstractmethod
     def get_purchase_policy(self, store_id: str):
+        return Response(False, msg="Abstract Method")
+
+    # Offers
+    # ==================
+    @abstractmethod
+    def get_user_offers(self) -> Response[ParsableList[Offer]]:
+        return Response(False, msg="Abstract Method")
+
+    @abstractmethod
+    def get_store_offers(self, store_id) -> Response[ParsableList[Offer]]:
+        return Response(False, msg="Abstract Method")
+
+    @abstractmethod
+    def create_offer(self, user, store_id, product_id) -> Response[str]:
+        return Response(False, msg="Abstract Method")
+
+    @abstractmethod
+    def declare_price(self, offer_id, price) -> Response[None]:
+        return Response(False, msg="Abstract Method")
+
+    @abstractmethod
+    def suggest_counter_offer(self, store_id, product_id, offer_id, price) -> Response[None]:
+        return Response(False, msg="Abstract Method")
+
+    @abstractmethod
+    def approve_manager_offer(self, offer_id) -> Response[None]:
+        return Response(False, msg="Abstract Method")
+
+    @abstractmethod
+    def approve_user_offer(self, store_id, product_id, offer_id) -> Response[None]:
+        return Response(False, msg="Abstract Method")
+
+    @abstractmethod
+    def reject_user_offer(self, store_id, product_id, offer_id) -> Response[None]:
+        return Response(False, msg="Abstract Method")
+
+    @abstractmethod
+    def cancel_offer(self, offer_id) -> Response[None]:
         return Response(False, msg="Abstract Method")

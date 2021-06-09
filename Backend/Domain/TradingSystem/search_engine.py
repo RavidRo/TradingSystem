@@ -34,8 +34,7 @@ class SearchEngine:
             if max_price and max_price < price:
                 return False
 
-            if keywords:
-                fit = True
+            if keywords is not None:
                 for keyword in keywords:
                     if keyword not in product.get_keywords():
                         return False

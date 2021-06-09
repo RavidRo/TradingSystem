@@ -1,14 +1,13 @@
 .keywards{
     display: flex;
     flex-direction: row;
-    height: 100%;
     width: 100%;
-    align-items: center;
+    align-items: flex-start;
 }
 .keywordInput{
     margin-left: 3%;
-    margin-top: 2%;
     height: 30px;
+    margin-top: 2%;
 }
 .wardsDiv{
     display: flex;
@@ -19,7 +18,7 @@
     display: inline;
 }
 .keyBtn{
-    height: 36px;
+    height: 32px;
     width: 8%;
     margin-top: 2%;
 }

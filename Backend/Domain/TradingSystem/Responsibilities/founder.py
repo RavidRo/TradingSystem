@@ -1,3 +1,4 @@
+from Backend.Domain.TradingSystem.offer import Offer
 from Backend.Domain.TradingSystem.Interfaces.IUser import IUser
 from Backend.Domain.TradingSystem.Responsibilities.responsibility import Permission, Responsibility
 
@@ -119,9 +120,6 @@ class Founder(Responsibility):
         from Backend.Domain.TradingSystem.Responsibilities.manager import Manager
 
         # We don't to appoint a user to the same store twice
-        print("My user name", self._user_state.get_username())
-        print("To appoint username, ", user.get_username())
-
         with user.get_appointment_lock():
             appointed_response = user.is_appointed(self._store.get_id())
             if not appointed_response.succeeded():
@@ -176,3 +174,17 @@ class Founder(Responsibility):
     def get_store_purchase_history(self) -> Response[ParsableList[PurchaseDetails]]:
         return self._store.get_purchase_history()
 
+    # Offers
+    # ======================
+
+    def get_store_offers(self) -> Response[ParsableList[Offer]]:
+        return self._store.get_store_offers()
+
+    def suggest_counter_offer(self, product_id, offer_id, price) -> Response[None]:
+        return self._store.suggest_counter_offer(product_id, offer_id, price)
+
+    def approve_user_offer(self, product_id, offer_id) -> Response[None]:
+        return self._store.approve_user_offer(product_id, offer_id)
+
+    def reject_user_offer(self, product_id, offer_id) -> Response[None]:
+        return self._store.reject_user_offer(product_id, offer_id)

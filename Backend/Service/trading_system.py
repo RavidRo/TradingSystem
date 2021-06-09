@@ -1,12 +1,19 @@
 """ this class is responsible to communicate with the trading __system manager"""
 from __future__ import annotations
-import threading
+
+import json
 from typing import Callable
-from Backend.Domain.Payment.payment_manager import PaymentManager
-from Backend.Service.DataObjects.shopping_cart_data import ShoppingCartData
-import Backend.Service.logs as log
-from Backend.Domain.TradingSystem.trading_system_manager import TradingSystemManager
+import threading
+
+from Backend.Service import logs
 from Backend.response import Response
+
+import Backend.Service.logs as log
+from Backend.Service.DataObjects.shopping_cart_data import ShoppingCartData
+
+from Backend.Domain.Payment.payment_manager import PaymentManager
+from Backend.Domain.TradingSystem.offer import Offer
+from Backend.Domain.TradingSystem.trading_system_manager import TradingSystemManager
 
 
 class TradingSystem(object):
@@ -24,12 +31,47 @@ class TradingSystem(object):
         return TradingSystem.__instance
 
     def __init__(self):
+        cookies = []
+        store_ids = []
+        product_ids = []
         """Virtually private constructor."""
         if TradingSystem.__instance is not None:
             raise Exception("This class is a singleton!")
         else:
             TradingSystem.__instance = self
             self.payment_manager = PaymentManager()
+            with open("state.json", "r") as read_file:
+                data = json.load(read_file)
+                actions = data["actions"]
+                for action in actions:
+                    func = action["function"]
+                    args = action["args"]
+                    new_args = []
+                    for arg in args:
+                        if isinstance(arg, str):
+                            if arg.split('#')[0] == 'cookie':
+                                new_args.append(cookies[int(arg.split('#')[1]) - 1])
+                            elif arg.split('#')[0] == 'store_id':
+                                new_args.append(store_ids[int(arg.split('#')[1]) - 1])
+                            elif arg.split('#')[0] == 'product_id':
+                                new_args.append(product_ids[int(arg.split('#')[1]) - 1])
+                            else:
+                                new_args.append(arg)
+                        else:
+                            new_args.append(arg)
+                    result = self.__getattribute__(func)(*new_args)
+                    if func == "enter_system":
+                        cookies.append(result)
+                    elif func == "create_store":
+                        if not result.succeeded():
+                            raise Exception(f"initializing using state.json failed on function - {func}, args - {new_args}")
+                        store_ids.append(result.get_obj())
+                    elif func == "create_product":
+                        if not result.succeeded():
+                            raise Exception(f"initializing using state.json failed on function - {func}, args - {new_args}")
+                        product_ids.append(result.get_obj())
+                    elif not result.succeeded():
+                        raise Exception(f"initializing using state.json failed on function - {func}, args - {new_args}")
 
     def enter_system(self):
         return TradingSystemManager.enter_system()
@@ -190,8 +232,8 @@ class TradingSystem(object):
         )
 
     @log.loging()
-    def get_product(self, store_id: str, product_id: str):
-        return TradingSystemManager.get_product(store_id, product_id)
+    def get_product(self, store_id: str, product_id: str, username="Guest"):
+        return TradingSystemManager.get_product(store_id, product_id, username)
 
     @log.loging(to_hide=[1])
     def add_discount(
@@ -332,3 +374,46 @@ class TradingSystem(object):
     @log.loging(to_hide=[1])
     def get_purchase_policy(self, cookie, store_id):
         return TradingSystemManager.get_purchase_policy(cookie, store_id)
+
+    # Offers
+    # ==================
+
+    @log.loging(to_hide=[1])
+    def get_user_offers(self, cookie) -> Response[list[Offer]]:
+        return TradingSystemManager.get_user_offers(cookie)
+
+    @log.loging(to_hide=[1])
+    def get_store_offers(self, cookie, store_id) -> Response[list[Offer]]:
+        return TradingSystemManager.get_store_offers(cookie, store_id)
+
+    @log.loging(to_hide=[1])
+    def create_offer(self, cookie, store_id, product_id) -> Response[str]:
+        return TradingSystemManager.create_offer(cookie, store_id, product_id)
+
+    @log.loging(to_hide=[1])
+    def declare_price(self, cookie, offer_id, price) -> Response[None]:
+        return TradingSystemManager.declare_price(cookie, offer_id, price)
+
+    @log.loging(to_hide=[1])
+    def suggest_counter_offer(
+        self, cookie, store_id, product_id, offer_id, price
+    ) -> Response[None]:
+        return TradingSystemManager.suggest_counter_offer(
+            cookie, store_id, product_id, offer_id, price
+        )
+
+    @log.loging(to_hide=[1])
+    def approve_manager_offer(self, cookie, offer_id) -> Response[None]:
+        return TradingSystemManager.approve_manager_offer(cookie, offer_id)
+
+    @log.loging(to_hide=[1])
+    def approve_user_offer(self, cookie, store_id, product_id, offer_id) -> Response[None]:
+        return TradingSystemManager.approve_user_offer(cookie, store_id, product_id, offer_id)
+
+    @log.loging(to_hide=[1])
+    def reject_user_offer(self, cookie, store_id, product_id, offer_id) -> Response[None]:
+        return TradingSystemManager.reject_user_offer(cookie, store_id, product_id, offer_id)
+
+    @log.loging(to_hide=[1])
+    def cancel_offer(self, cookie, offer_id) -> Response[None]:
+        return TradingSystemManager.cancel_offer(cookie, offer_id)

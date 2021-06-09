@@ -1,4 +1,7 @@
+from Backend.Tests.Unit.test_shopping_bag import store_stub
+from Backend.Domain.TradingSystem.stores_manager import StoresManager
 from typing import List
+from unittest.mock import MagicMock, patch
 
 import pytest
 from Backend.Domain.TradingSystem.States.member import Member
@@ -8,7 +11,7 @@ from Backend.Tests.stubs.cart_stub import CartStub
 from Backend.Tests.stubs.responsibility_stub import ResponsibilityStub
 from Backend.Tests.stubs.store_stub import StoreStub
 from Backend.Tests.stubs.user_stub import UserStub
-from Backend.response import ParsableList
+from Backend.response import ParsableList, Response
 
 
 # * fixtures
@@ -127,6 +130,7 @@ def test_guest_turns_to_admin(guest_user):
 
     assert isinstance(guest_user.state, Admin)
 
+
 # def test_login_as_none_admin_returns_false(auth: Authentication):
 #     auth.register(
 #         "test_login_as_none_admin_returns_false", "test_login_as_none_admin_returns_false"
@@ -140,16 +144,19 @@ def test_guest_turns_to_admin(guest_user):
 # * =================================================================
 
 
+@patch.multiple(StoresManager, get_store=MagicMock(return_value=Response(True, None)))
 def test_guest_save_products_delegate(guest_user):
     guest_user.state.save_product_in_cart("0", "0", 3)
     assert guest_user.state._cart.save_product
 
 
+@patch.multiple(StoresManager, get_store=MagicMock(return_value=Response(True, None)))
 def test_member_save_products_delegate(member_user_with_responsibility):
     member_user_with_responsibility.state.save_product_in_cart("0", "0", 3)
     assert member_user_with_responsibility.state._cart.save_product
 
 
+@patch.multiple(StoresManager, get_store=MagicMock(return_value=Response(True, None)))
 def test_admin_save_products_delegate(admin_user):
     admin_user.state.save_product_in_cart("0", "0", 3)
     assert admin_user.state._cart.save_product
@@ -210,9 +217,9 @@ def test_open_store_return_type(member_user_with_responsibility):
 def test_open_store_really_added(member_user_with_responsibility):
     response = member_user_with_responsibility.state.open_store("store_name")
     assert (
-            len(member_user_with_responsibility.state.get_responsibilities()) > 0
-            and member_user_with_responsibility.state.get_responsibilities()[response.object.get_id()]
-            is not None
+        len(member_user_with_responsibility.state.get_responsibilities()) > 0
+        and member_user_with_responsibility.state.get_responsibilities()[response.object.get_id()]
+        is not None
     )
 
 
@@ -239,17 +246,19 @@ def test_get_personal_history_return_type(member_user_with_responsibility):
 
 
 def test_guest_cannot_add_product(guest_user):
-    response = guest_user.state.add_new_product("0", "productA", '', 1, 4, None)
+    response = guest_user.state.add_new_product("0", "productA", "", 1, 4, None)
     assert not response.succeeded()
 
 
 def test_member_need_responsibility_to_add_product(member_user_without_responsibility):
-    response = member_user_without_responsibility.state.add_new_product("0", "productA", '', 1, 4, None)
+    response = member_user_without_responsibility.state.add_new_product(
+        "0", "productA", "", 1, 4, None
+    )
     assert not response.succeeded()
 
 
 def test_member_add_product_delegated(member_user_with_responsibility):
-    member_user_with_responsibility.state.add_new_product("0", "productA", 'CategoryA', 1, 4, None)
+    member_user_with_responsibility.state.add_new_product("0", "productA", "CategoryA", 1, 4, None)
     assert member_user_with_responsibility.state.get_responsibilities()["0"].add_product_delegated
 
 
@@ -265,7 +274,9 @@ def test_member_need_responsibility_to_remove_product(member_user_without_respon
 
 def test_member_remove_product_delegated(member_user_with_responsibility):
     member_user_with_responsibility.state.remove_product("0", "")
-    assert member_user_with_responsibility.state.get_responsibilities()["0"].remove_product_delegated
+    assert member_user_with_responsibility.state.get_responsibilities()[
+        "0"
+    ].remove_product_delegated
 
 
 def test_guest_cannot_change_product_quantity(guest_user):
@@ -286,17 +297,19 @@ def test_member_change_quantity_delegated(member_user_with_responsibility):
 
 
 def test_guest_cannot_edit_product_details(guest_user):
-    response = guest_user.state.edit_product_details("0", "", "productB", 'CategoryB', "", None)
+    response = guest_user.state.edit_product_details("0", "", "productB", "CategoryB", "", None)
     assert not response.succeeded()
 
 
 def test_member_need_responsibility_to_edit_details(member_user_without_responsibility):
-    response = member_user_without_responsibility.state.edit_product_details("0", "", "productB", '', "", None)
+    response = member_user_without_responsibility.state.edit_product_details(
+        "0", "", "productB", "", "", None
+    )
     assert not response.succeeded()
 
 
 def test_member_edit_details_delegated(member_user_with_responsibility):
-    member_user_with_responsibility.state.edit_product_details("0", "", "productB", '', "", None)
+    member_user_with_responsibility.state.edit_product_details("0", "", "productB", "", "", None)
     assert member_user_with_responsibility.state.get_responsibilities()[
         "0"
     ].edit_product_details_delegated
@@ -337,7 +350,9 @@ def test_member_need_responsibility_to_appoint_manager(member_user_without_respo
 
 def test_member_appoint_manager_delegate(member_user_with_responsibility):
     member_user_with_responsibility.state.appoint_new_store_manager("0", "")
-    assert member_user_with_responsibility.state.get_responsibilities()["0"].appoint_manager_delegated
+    assert member_user_with_responsibility.state.get_responsibilities()[
+        "0"
+    ].appoint_manager_delegated
 
 
 # * Manage Permissions (4.6)
@@ -356,7 +371,9 @@ def test_member_need_responsibility_to_add_permission(member_user_without_respon
 
 def test_member_add_permission_delegated(member_user_with_responsibility):
     member_user_with_responsibility.state.add_manager_permission("0", "inon", 0)
-    assert member_user_with_responsibility.state.get_responsibilities()["0"].add_permission_delegated
+    assert member_user_with_responsibility.state.get_responsibilities()[
+        "0"
+    ].add_permission_delegated
 
 
 def test_guest_cannot_remove_permission(guest_user):
@@ -371,7 +388,9 @@ def test_member_need_responsibility_to_remove_permission(member_user_without_res
 
 def test_member_remove_permission_delegated(member_user_with_responsibility):
     member_user_with_responsibility.state.remove_manager_permission("0", "inon", 0)
-    assert member_user_with_responsibility.state.get_responsibilities()["0"].remove_permission_delegated
+    assert member_user_with_responsibility.state.get_responsibilities()[
+        "0"
+    ].remove_permission_delegated
 
 
 # * Dismiss Appointment (4.4, 4.7)
@@ -409,7 +428,9 @@ def test_member_need_responsibility_to_get_personnel_info(member_user_without_re
 
 def test_member_get_personnel_info_delegated(member_user_with_responsibility):
     member_user_with_responsibility.state.get_store_personnel_info("0")
-    assert member_user_with_responsibility.state.get_responsibilities()["0"].get_personnel_info_delegated
+    assert member_user_with_responsibility.state.get_responsibilities()[
+        "0"
+    ].get_personnel_info_delegated
 
 
 # * Get Store Purchase History (4.11)
