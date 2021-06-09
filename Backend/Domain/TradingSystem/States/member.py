@@ -82,6 +82,7 @@ class Member(UserState):
         if response.succeeded():
             # update data in DB in later milestones
             self.__purchase_details += response.object.values
+
         return response
 
     def open_store(self, store_name) -> Response:

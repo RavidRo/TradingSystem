@@ -1,5 +1,6 @@
 from datetime import datetime
 
+from Backend.DataBase.Handlers.purchase_details_handler import PurchaseDetailsHandler
 from Backend.DataBase.database import db_fail_response
 from Backend.Domain.TradingSystem.product import Product
 from Backend.response import Response, PrimitiveParsable
@@ -171,20 +172,22 @@ class ShoppingBag(IShoppingBag):
         )
         return Response(True, msg="amount changed successfully")
 
-    def delete_products_after_purchase(self, user_name="guest") -> PurchaseDetails:
-        # for now this function will only return details, in the future there will be specific deletion
-        res = self.__shopping_bag_handler.commit_changes()
-        if not res.succeeded():
-            self.__shopping_bag_handler.rollback_changes()
-            return None
-        product_names = [
-            prod.get_name() for product_id, (prod, quantity) in self.__pending_products_to_quantity.items()
-        ]
-        self.__pending_products_to_quantity.clear()
-        purchase_details = PurchaseDetails(user_name, self.__store.get_name(), self.__store.get_id(), product_names, datetime.now(),
+    def create_purchase_details_after_purchase(self, user_name="guest"):
+        product_names = [prod.get_name() for product_id, (prod, quantity) in
+                         self.__pending_products_to_quantity.items()]
+        purchase_details = PurchaseDetails(user_name, self.__store.get_name(), self.__store.get_id(), product_names,
+                                           datetime.now(),
                                            self.__pending_price)
+        res = PurchaseDetailsHandler.get_instance().save(purchase_details)
+        if res.succeeded():
+            return purchase_details
+        return None
+
+    def delete_products_after_purchase(self, purchase_details,  user_name="guest"):
+        # for now this function will only return details, in the future there will be specific deletion
         self.__store.update_store_history(purchase_details)
-        return purchase_details
+        self.__pending_products_to_quantity.clear()
+
 
     def send_back(self):
         self._products_to_quantity = self.__pending_products_to_quantity.copy()

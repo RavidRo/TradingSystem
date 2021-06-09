@@ -40,6 +40,17 @@ class Store(Parsable):
     def set_products(self, products_to_quantities: dict[str, tuple[Product, int]]):
         self._products_to_quantities = products_to_quantities
 
+    def init_fields(self):
+        from Backend.Domain.TradingSystem.TypesPolicies.discount_policy import DefaultDiscountPolicy
+        from Backend.Domain.TradingSystem.TypesPolicies.purchase_policy import DefaultPurchasePolicy
+        from Backend.DataBase.Handlers.store_handler import StoreHandler
+        self._products_lock = ReadWriteLock()
+        self.__history_lock = ReadWriteLock()
+        self.__publisher: Publisher = Publisher()
+        self.__discount_policy = DefaultDiscountPolicy()
+        self.__purchase_policy = DefaultPurchasePolicy()
+        self.__store_handler = StoreHandler.get_instance()
+
     def parse(self):
         id_to_quantity = {}
         for id, (_, quantity) in self._products_to_quantities.items():

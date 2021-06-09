@@ -141,6 +141,7 @@ class StoreHandler(IHandler):
         try:
             store = session.query(Store).get(store_id)
             store.set_products({prod_id: (store_product.product, store_product.quantity) for prod_id, store_product in store.products.items()})
+            store.init_fields()
             res.object = store
         except DisconnectionError as e:
             session.rollback()

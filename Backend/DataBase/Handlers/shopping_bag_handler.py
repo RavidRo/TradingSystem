@@ -41,7 +41,7 @@ class ShoppingBagHandler(IHandler):
                                                  Column("quantity", Integer, CheckConstraint('quantity>0')),
                                                  ForeignKeyConstraint(('store_id', 'username'),
                                                                       ['shopping_bags.store_id',
-                                                                       'shopping_bags.username'])
+                                                                       'shopping_bags.username'], ondelete="CASCADE")
                                                  )
 
         self.__shopping_bags = Table("shopping_bags", mapper_registry.metadata,
@@ -159,14 +159,13 @@ class ShoppingBagHandler(IHandler):
     #         self._rwlock.release_write()
     #         return res
 
-    def remove(self, obj: ShoppingBag, **kwargs) -> Response[None]:
+    def remove_bags(self,username) -> Response[None]:
         self._rwlock.acquire_write()
         res = Response(True)
         try:
-            session.query(ProductInShoppingBag).filter_by(store_id=obj.get_store_ID(),
-                                                          username=kwargs['username']).delete()
-            session.query(ShoppingBag).filter_by(store_id=obj.get_store_ID(), username=kwargs['username']).delete()
-            session.commit()
+            d = delete(self.__shopping_bags).where(
+                self.__shopping_bags.c.username == username)
+            session.execute(d)
         except Exception as e:
             session.rollback()
             res = Response(False, msg=str(e))
