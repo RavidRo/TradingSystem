@@ -22,7 +22,7 @@ const Notifications: FC<NotificationProps> = ({ location, initializeNotification
 	}, []);
 
 	return (
-		<div className='NotificationsDiv' {...console.log(notifications)}>
+		<div className='NotificationsDiv'>
 			<GridList cellHeight={130} cols={1}>
 				{notifications.map((_, index) => (
 					<Box className='box' color='black' bgcolor='#fbd1b7' m={1}>

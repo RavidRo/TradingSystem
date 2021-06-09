@@ -60,9 +60,13 @@ function App() {
 				setClientSocker(clientTemp);
 				clientTemp.onopen = () => {
 					// alert('WebSocket Client Opened');
+					console.log("here ??? ");
 					clientTemp.send(cookie); // have to be here - else socket.receive in server gets stuck
 				};
 				clientTemp.onmessage = (messageEvent) => {
+					console.log(messageEvent);
+
+					console.log("hereeeeeeeeeeee !!!!!!!!!!!!!!");
 					let msgObj = messageEvent.data;
 					let subject = msgObj['subject'];
 					let data = msgObj['data'];
