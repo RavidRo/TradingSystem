@@ -1,4 +1,5 @@
-from sqlalchemy import Table, Column, String, insert, ForeignKey, CheckConstraint, Integer, PrimaryKeyConstraint
+from sqlalchemy import Table, Column, String, insert, ForeignKey, CheckConstraint, Integer, PrimaryKeyConstraint, select
+from sqlalchemy.exc import DisconnectionError
 from sqlalchemy.orm import mapper, relationship, backref
 from sqlalchemy.orm.collections import attribute_mapped_collection, collection
 from Backend.DataBase.Handlers.product_handler import ProductHandler
@@ -9,7 +10,7 @@ from Backend.Domain.TradingSystem.Responsibilities.responsibility import Respons
 from Backend.Domain.TradingSystem.product import Product
 from Backend.Domain.TradingSystem.purchase_details import PurchaseDetails
 from Backend.Domain.TradingSystem.store import Store
-from Backend.response import Response, ParsableList
+from Backend.response import Response, ParsableList, PrimitiveParsable
 from Backend.rw_lock import ReadWriteLock
 from threading import Lock
 
@@ -45,7 +46,7 @@ class StoreHandler(IHandler):
             "store_id": self.__products_of_stores.c.store_id,
             "product_id": self.__products_of_stores.c.product_id,
             "quantity": self.__products_of_stores.c.quantity,
-            "product": relationship(Product, cascade="all")
+            "product": relationship(Product, cascade="all", uselist=False)
         })
 
         mapper_registry.map_imperatively(Store, self.__stores, properties={
@@ -127,6 +128,23 @@ class StoreHandler(IHandler):
             else:
                 res = Response(False, msg=loaded_products)
                 session.rollback()
+        except Exception as e:
+            session.rollback()
+            res = Response(False, msg=str(e))
+        finally:
+            self._rwlock.release_read()
+            return res
+
+    def load_store(self, store_id):
+        self._rwlock.acquire_read()
+        res = Response(True)
+        try:
+            store = session.query(Store).get(store_id)
+            store.set_products({prod_id: (store_product.product, store_product.quantity) for prod_id, store_product in store.products.items()})
+            res.object = store
+        except DisconnectionError as e:
+            session.rollback()
+            res = Response(False, PrimitiveParsable(0), msg=str(e))
         except Exception as e:
             session.rollback()
             res = Response(False, msg=str(e))

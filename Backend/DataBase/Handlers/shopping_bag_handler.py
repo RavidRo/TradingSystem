@@ -10,6 +10,7 @@ from Backend.Domain.TradingSystem.product import Product
 from Backend.Domain.TradingSystem.shopping_bag import ShoppingBag
 from Backend.Domain.TradingSystem.shopping_cart import ShoppingCart
 from Backend.Domain.TradingSystem.store import Store
+from Backend.Domain.TradingSystem.stores_manager import StoresManager
 from Backend.response import Response
 
 from Backend.rw_lock import ReadWriteLock
@@ -52,7 +53,7 @@ class ShoppingBagHandler(IHandler):
             "product_id": self.__products_in_shopping_bags.c.product_id,
             "username": self.__products_in_shopping_bags.c.username,
             "quantity": self.__products_in_shopping_bags.c.quantity,
-            "product": relationship(Product, cascade="all"),
+            "product": relationship(Product, cascade="all", uselist=False),
         })
 
         # mapper_registry.map_imperatively(ShoppingBag, self.__shopping_bags, properties={
@@ -176,28 +177,26 @@ class ShoppingBagHandler(IHandler):
     def load_all(self):
         pass
 
-    # def load_cart(self, username):
-    #     # self._rwlock.acquire_read()
-    #     res = Response(True)
-    #     try:
-    #         stmt = select(self.__shopping_bags.c.store_id).where(self.__shopping_bags.c.username == username)
-    #         bags_store_ids = session.execute(stmt).all()
-    #         for bag_store_id in bags_store_ids:
-    #
-    #             bag = ShoppingBag()
-    #             products_in_bag: ProductInShoppingBag = session.query(ProductInShoppingBag).filter_by(username=username,
-    #                                                                                                   store_id=bag.get_store_ID()).all()
-    #             bag.add_product(products_in_bag.product_id, products_in_bag.quantity)
-    #
-    #         cart = ShoppingCart()
-    #         cart.add_bags({bag.get_store_ID(): bag for bag in bags})
-    #         res = Response(True, cart)
-    #     except Exception as e:
-    #         session.rollback()
-    #         res = Response(False, msg=str(e))
-    #     finally:
-    #         self._rwlock.release_read()
-    #         return res
+    def load_cart(self, username):
+        res = Response(True)
+        try:
+            stmt = select([self.__shopping_bags.c.store_id]).where(self.__shopping_bags.c.username == username)
+            bags_store_ids = session.execute(stmt).all()
+            for bag_store_id in bags_store_ids:
+                store = StoresManager.get_store(bag_store_id)
+                bag = ShoppingBag(store)
+                products_in_bag: list[ProductInShoppingBag] = session.query(ProductInShoppingBag).filter_by(username=username,
+                                                                                                            store_id=bag_store_id).all()
+                bag.set_products({product_in_bag.product_id: (product_in_bag.product, product_in_bag.quantity) for product_in_bag in products_in_bag})
+
+            cart = ShoppingCart()
+            cart.add_bags({bag.get_store_ID(): bag for bag in bags})
+            res = Response(True, cart)
+        except Exception as e:
+            session.rollback()
+            res = Response(False, msg=str(e))
+        finally:
+            return res
 
 # if __name__ == "__main__":
 #     bags_handler = ShoppingBagHandler.get_instance()

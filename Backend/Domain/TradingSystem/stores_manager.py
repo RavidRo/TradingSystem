@@ -1,3 +1,5 @@
+from Backend.DataBase.Handlers.store_handler import StoreHandler
+from Backend.DataBase.database import db_fail_response
 from Backend.Domain.TradingSystem.product import Product
 from Backend.Domain.TradingSystem.store import Store
 from Backend.response import Response
@@ -6,6 +8,7 @@ from Backend.Domain.TradingSystem.purchase_details import PurchaseDetails
 
 
 class StoresManager:
+    __store_handler = StoreHandler.get_instance()
     __stores: list[Store] = []
 
     # 2.5
@@ -47,7 +50,12 @@ class StoresManager:
         for store in StoresManager.__stores:
             if store.get_id() == store_id:
                 return Response[Store](True, obj=store)
-        return Response(False, msg=f"No store with the ID {store_id} exists")
+        store_res = StoresManager.__store_handler.load_store()
+        if not store_res.succeeded():
+            if store_res.get_obj() is None:
+                return Response(False, msg=f"No store with the ID {store_id} exists")
+            return db_fail_response
+        return Response[Store](True, obj=store_res.get_obj())
 
     # used in 4.1
     @staticmethod

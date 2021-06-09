@@ -1,6 +1,7 @@
 from datetime import datetime
 
 from Backend.DataBase.database import db_fail_response
+from Backend.Domain.TradingSystem.product import Product
 from Backend.response import Response, PrimitiveParsable
 from Backend.Service.DataObjects.shopping_bag_data import ShoppingBagData
 from Backend.Domain.TradingSystem.Interfaces.IShoppingBag import IShoppingBag
@@ -35,6 +36,9 @@ class ShoppingBag(IShoppingBag):
 
     def get_products_to_quantity(self):
         return self._products_to_quantity
+
+    def set_products(self, products_to_quantities: dict[str, tuple[Product, int]]):
+        self._products_to_quantities = products_to_quantities
 
     def get_pending_products_to_quantity(self):
         return self.__pending_products_to_quantity

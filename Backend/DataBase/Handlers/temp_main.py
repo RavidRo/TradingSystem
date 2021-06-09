@@ -19,62 +19,65 @@ if __name__ == '__main__':
     store_handler = StoreHandler.get_instance()
     responsibility_handler = ResponsibilitiesHandler.get_instance()
 
-    mapper_registry.metadata.drop_all(engine)
-    mapper_registry.metadata.create_all(engine)
+    # mapper_registry.metadata.drop_all(engine)
+    # mapper_registry.metadata.create_all(engine)
 
     trading_system = TradingSystem.getInstance()
-    cookie = trading_system.enter_system()
-    res = trading_system.register(cookie, "user", "password")
-    if not res.succeeded():
-        print("register: " + res.get_msg())
 
-    res = trading_system.login(cookie, "user", "password")
-
-    cookie2 = trading_system.enter_system()
-    res2 = trading_system.register(cookie2, "user2", "password2")
-    if not res2.succeeded():
-        print("register2: " + res.get_msg())
-
-    res2 = trading_system.login(cookie2, "user2", "password")
-
-
-    store_res = trading_system.create_store(cookie, "The Store")
-    if not store_res.succeeded():
-        print("open_store: " + store_res.get_msg())
-
-    product_res = trading_system.create_product(cookie, store_res.get_obj(), "The Product", "The Category", 5, 8, ["The Keyword A", "The Keyword B"])
-    if not product_res.succeeded():
-        print("add_product: " + product_res.get_msg())
-
-    product2_res = trading_system.create_product(cookie, store_res.get_obj(), "The Product2", "The Category2", 10, 16,
-                                                ["The Keyword A2", "The Keyword B2"])
-    if not product2_res.succeeded():
-        print("add_product: " + product2_res.get_msg())
-
-    res = trading_system.change_product_quantity_in_store(cookie, store_res.get_obj(), product_res.get_obj(), 11)
-    if not res.succeeded():
-        print("edit product details: " + res.get_msg())
-
-    res_save_prod = trading_system.save_product_in_cart(cookie, store_res.get_obj(), product_res.get_obj(), 2)
-    if not res_save_prod.succeeded():
-        print("save in cart: " + res_save_prod.get_msg())
-
-    res_save_prod = trading_system.save_product_in_cart(cookie, store_res.get_obj(), product2_res.get_obj(), 5)
-    if not res_save_prod.succeeded():
-        print("save in cart: " + res_save_prod.get_msg())
-
-    res_del_prod = trading_system.remove_product_from_cart(cookie, store_res.get_obj(), product_res.get_obj())
-    if not res_del_prod.succeeded():
-        print("del from cart: " + res_del_prod.get_msg())
-
-    change_prod_quantity = trading_system.change_product_quantity_in_cart(cookie, store_res.get_obj(), product2_res.get_obj(), 4)
-    if not change_prod_quantity.succeeded():
-        print("change quantity in cart: " + change_prod_quantity.get_msg())
-
-
-    res_appoint_owner = trading_system.appoint_owner(cookie, store_res.get_obj(),"user2")
-    if not res_appoint_owner.succeeded():
-        print("appoint owner: " + res_appoint_owner.get_msg())
+    store_res = store_handler.load_store('f9729a4f-fe95-407d-9d9b-47af160aed61')
+    print(store_res.get_obj())
+    # cookie = trading_system.enter_system()
+    # res = trading_system.register(cookie, "user", "password")
+    # if not res.succeeded():
+    #     print("register: " + res.get_msg())
+    #
+    # res = trading_system.login(cookie, "user", "password")
+    #
+    # cookie2 = trading_system.enter_system()
+    # res2 = trading_system.register(cookie2, "user2", "password2")
+    # if not res2.succeeded():
+    #     print("register2: " + res.get_msg())
+    #
+    # res2 = trading_system.login(cookie2, "user2", "password")
+    #
+    #
+    # store_res = trading_system.create_store(cookie, "The Store")
+    # if not store_res.succeeded():
+    #     print("open_store: " + store_res.get_msg())
+    #
+    # product_res = trading_system.create_product(cookie, store_res.get_obj(), "The Product", "The Category", 5, 8, ["The Keyword A", "The Keyword B"])
+    # if not product_res.succeeded():
+    #     print("add_product: " + product_res.get_msg())
+    #
+    # product2_res = trading_system.create_product(cookie, store_res.get_obj(), "The Product2", "The Category2", 10, 16,
+    #                                             ["The Keyword A2", "The Keyword B2"])
+    # if not product2_res.succeeded():
+    #     print("add_product: " + product2_res.get_msg())
+    #
+    # res = trading_system.change_product_quantity_in_store(cookie, store_res.get_obj(), product_res.get_obj(), 11)
+    # if not res.succeeded():
+    #     print("edit product details: " + res.get_msg())
+    #
+    # res_save_prod = trading_system.save_product_in_cart(cookie, store_res.get_obj(), product_res.get_obj(), 2)
+    # if not res_save_prod.succeeded():
+    #     print("save in cart: " + res_save_prod.get_msg())
+    #
+    # res_save_prod = trading_system.save_product_in_cart(cookie, store_res.get_obj(), product2_res.get_obj(), 5)
+    # if not res_save_prod.succeeded():
+    #     print("save in cart: " + res_save_prod.get_msg())
+    #
+    # res_del_prod = trading_system.remove_product_from_cart(cookie, store_res.get_obj(), product_res.get_obj())
+    # if not res_del_prod.succeeded():
+    #     print("del from cart: " + res_del_prod.get_msg())
+    #
+    # change_prod_quantity = trading_system.change_product_quantity_in_cart(cookie, store_res.get_obj(), product2_res.get_obj(), 4)
+    # if not change_prod_quantity.succeeded():
+    #     print("change quantity in cart: " + change_prod_quantity.get_msg())
+    #
+    #
+    # res_appoint_owner = trading_system.appoint_owner(cookie, store_res.get_obj(),"user2")
+    # if not res_appoint_owner.succeeded():
+    #     print("appoint owner: " + res_appoint_owner.get_msg())
     # res = shopping_bag_handler.load_cart("user")
     # if not res.succeeded():
     #     print("load cart: " + res.get_msg())
