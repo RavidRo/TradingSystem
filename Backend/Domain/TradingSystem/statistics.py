@@ -36,7 +36,7 @@ class Statistics:
         self.__admins_publisher.subscribe(subscriber)
 
     def __today(self) -> date:
-        current = date.today()
+        current = date.today().__str__()
         if current not in self.__statistics_per_day:
             self.__statistics_per_day[current] = Counter()
         return current
@@ -44,7 +44,7 @@ class Statistics:
     def __update(self, name):
         today = self.__today()
         self.__statistics_per_day[today].update({name: 1})
-        self.__admins_publisher.notify_all(self.get_statistics(), "statistics")
+        self.__admins_publisher.notify_all(self.__statistics_per_day, "statistics")
 
     def register_guest(self) -> None:
         self.__update("guest")

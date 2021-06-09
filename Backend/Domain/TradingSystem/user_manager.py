@@ -44,10 +44,11 @@ class UserManager:
     # 2.1
     # returns the guest newly created cookie
     @staticmethod
-    def enter_system() -> str:
+    def enter_system(register=True) -> str:
         cookie = UserManager.__create_cookie()
         UserManager.__cookie_user[cookie] = IUser.create_user()
-        UserManager.__cookie_user[cookie].register_statistics()
+        if register:
+            UserManager.__cookie_user[cookie].register_statistics()
         return cookie
 
     @staticmethod
@@ -517,7 +518,7 @@ def register_admins() -> None:
             "At least one admin should be at the system. Check config.json to add admins."
         )
     for admin in admins:
-        cookie = UserManager.enter_system()
+        cookie = UserManager.enter_system(False)
         UserManager.register(admin, settings.get_password(), cookie)
         Statistics.getInstance().subscribe(UserManager._get_user_by_username(admin))
 
