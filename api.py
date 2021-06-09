@@ -1052,7 +1052,7 @@ async def get_statistics():
     cookie = request.args.get("cookie")
     if cookie is None:
         cookie = await __async_call(system.enter_system)
-    answer = await __async_call(system.get_statistics, cookie)
+    answer = await __async_call(system.get_users_statistics, cookie)
     return __responseToJson(cookie, answer)
 
 

@@ -395,4 +395,4 @@ class TradingSystemManager:
 
     @staticmethod
     def get_users_statistics_admin() -> Response[StatisticsData]:
-        return Response(True, statistics.getInstance().get_statistics())
+        return Response(True, statistics.Statistics.getInstance().get_statistics())

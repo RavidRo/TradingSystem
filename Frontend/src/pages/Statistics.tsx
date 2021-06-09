@@ -4,7 +4,7 @@ import { DatePicker, MuiPickersUtilsProvider } from "@material-ui/pickers";
 import { TextField } from '@material-ui/core';
 import '../styles/Statistics.scss';
 import useAPI from '../hooks/useAPI';
-import {StatisticsData} from '../types';
+import {StatisticsData, StatisticsCount} from '../types';
 
 type StatisticsProps = {
   statistics: StatisticsData | undefined
@@ -13,12 +13,12 @@ type StatisticsProps = {
 const Statistics: FC<StatisticsProps> = ({statistics}) => {
     const [fromDate, setFromDate] = useState<string>("");
     const [toDate, setToDate] = useState<string>("");
-    const [statisticsMy, setStatistics] = useState<StatisticsData>();
+    const [statisticsMy, setStatistics] = useState<{ [date: string]: StatisticsCount }>();
     const statisticsObj = useAPI<StatisticsData>('/get_statistics', {}, 'GET');
 
     useEffect(()=>{
       if(statistics !== undefined){
-        setStatistics(statistics);
+        setStatistics(statistics.statistics_per_day);
       }
     }, [statistics]);
 
@@ -42,16 +42,32 @@ const Statistics: FC<StatisticsProps> = ({statistics}) => {
         console.log(date);
         setFromDate(date);
         var dateObject = new Date(date);
-        console.log(dateObject)
-
+        console.log(dateObject);
+        if(toDate !== ""){
+          statisticsObj.request().then(({ data, error }) => {
+            if (!error && data !== null) {
+                setStatistics(data.data.statistics_per_day);
+                console.log(data.data);
+            }
+          })
+        }
     }
+
     const pickedTo = (e:any)=>{
         let date = e.target.value
         console.log(date);
         setToDate(date);
         var dateObject = new Date(date);
-        console.log(dateObject)
+        console.log(dateObject);
 
+        if(fromDate !== ""){
+          statisticsObj.request().then(({ data, error }) => {
+            if (!error && data !== null) {
+                setStatistics(data.data.statistics_per_day);
+                console.log(data.data);
+            }
+          })
+        }
     }
 
 	return (
@@ -82,23 +98,21 @@ const Statistics: FC<StatisticsProps> = ({statistics}) => {
                 />
                 <ul>
                   {statisticsMy!==undefined ? Object.keys(statisticsMy).map((date)=>{
-                    let index = Object.keys(statisticsMy).indexOf(date);
+                    let day_json = statisticsMy[date];
                     return (
-                      <li>
-                        {Object.values(statisticsMy)[index]}
-                      </li>
+                      <div>
+                        <p>{date}</p>
+                        {Object.keys(day_json).map((type, index)=>{
+                          return (
+                            <li key={index}>
+                              {type} : {Object.values(day_json)[index]}
+                            </li>
+                          )
+                        })}
+                      </div>
                     )
                   }):"No data"}
                 </ul>
-
-                {fromDate !== "" && toDate !== ""?
-                statisticsObj.request({})
-                .then(({ data, error }) => {
-                  if (!error && data !== null) {
-                      setStatistics(data.data);
-                      console.log(data.data);
-                }
-              }):null}
             </form>
         </div>
 

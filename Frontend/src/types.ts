@@ -41,7 +41,6 @@ export type StatisticsCount = {
 	username: string;
 };
 
-}
 export type StatisticsData = {
 	statistics_per_day: { [date: string]: StatisticsCount };
 
