@@ -9,26 +9,6 @@ import threading
 from collections import Counter
 
 
-class UsersCounter:
-    def __init__(self):
-        self.__guests = 0
-        self.__passive_member = 0
-        self.__managers = 0
-        self.__super_users = 0
-
-    def register_guest(self) -> None:
-        self.__guests += 1
-
-    def register_passive(self) -> None:
-        self.__passive_member += 1
-
-    def register_manager(self) -> None:
-        self.__managers += 1
-
-    def register_super(self) -> None:
-        self.__super_users += 1
-
-
 class Statistics:
     __instance = None
 
@@ -74,6 +54,9 @@ class Statistics:
 
     def register_manager(self) -> None:
         self.__update("managers")
+
+    def register_owner(self) -> None:
+        self.__update("owners")
 
     def register_super(self) -> None:
         self.__update("super_members")

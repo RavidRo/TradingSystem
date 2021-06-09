@@ -180,4 +180,4 @@ class Guest(UserState):
         return Response(False, msg="Guests cannot have price offers")
 
     def get_users_statistics(self) -> Response[StatisticsData]:
-        return Response(False, msg="Guests cannot have price offers")
+        return Response(False, msg="Guests cannot see users' statistics")

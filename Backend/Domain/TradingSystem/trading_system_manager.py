@@ -1,4 +1,4 @@
-from Backend.Domain.TradingSystem import statistics
+from Backend.Domain.TradingSystem.statistics import Statistics
 from Backend.Service.DataObjects.statistics_data import StatisticsData
 from Backend.Domain.TradingSystem.offer import Offer
 from typing import Callable
@@ -395,4 +395,4 @@ class TradingSystemManager:
 
     @staticmethod
     def get_users_statistics_admin() -> Response[StatisticsData]:
-        return Response(True, statistics.Statistics.getInstance().get_statistics())
+        return Response(True, Statistics.getInstance().get_statistics())

@@ -243,9 +243,9 @@ class Member(UserState):
             return self._statistics.register_passive()
 
         responsibilities = self.__responsibilities.values()
-        isFounder = any([responsibility.is_founder() for responsibility in responsibilities])
-        if isFounder:
-            return self._statistics.register_super()
+        isOwner = any([responsibility.is_owner() for responsibility in responsibilities])
+        if isOwner:
+            return self._statistics.register_owner()
 
         return self._statistics.register_manager()
 

@@ -154,7 +154,7 @@ class Responsibility(Parsable):
     def get_store_purchase_history(self) -> Response[ParsableList[PurchaseDetails]]:
         raise Exception(Responsibility.ERROR_MESSAGE)
 
-    def is_founder(self) -> bool:
+    def is_owner(self) -> bool:
         raise Exception(Responsibility.ERROR_MESSAGE)
 
     def _add_permission(self, username: str, permission: Permission) -> bool:
