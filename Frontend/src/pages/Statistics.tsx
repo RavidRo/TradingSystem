@@ -11,8 +11,8 @@ type StatisticsProps = {
 };
 
 const Statistics: FC<StatisticsProps> = ({statistics}) => {
-    const [fromDate, setFromDate] = useState<string>("");
-    const [toDate, setToDate] = useState<string>("");
+    const [fromDate, setFromDate] = useState<string>("2021-06-07");
+    const [toDate, setToDate] = useState<string>("2021-06-07");
     const [statisticsMy, setStatistics] = useState<{ [date: string]: StatisticsCount }>();
     const statisticsObj = useAPI<StatisticsData>('/get_statistics', {}, 'GET');
 
@@ -40,28 +40,21 @@ const Statistics: FC<StatisticsProps> = ({statistics}) => {
     const pickedFrom = (e:any)=>{
         let date = e.target.value
         setFromDate(date);
-        var dateObject = new Date(date);
-        if(toDate !== ""){
-          statisticsObj.request().then(({ data, error }) => {
-            if (!error && data !== null) {
-                setStatistics(data.data.statistics_per_day);
-            }
-          })
-        }
+        statisticsObj.request().then(({ data, error }) => {
+          if (!error && data !== null) {
+              setStatistics(data.data.statistics_per_day);
+          }
+        })
     }
 
     const pickedTo = (e:any)=>{
         let date = e.target.value
         setToDate(date);
-        var dateObject = new Date(date);
-
-        if(fromDate !== ""){
-          statisticsObj.request().then(({ data, error }) => {
-            if (!error && data !== null) {
-                setStatistics(data.data.statistics_per_day);
-            }
-          })
-        }
+        statisticsObj.request().then(({ data, error }) => {
+          if (!error && data !== null) {
+              setStatistics(data.data.statistics_per_day);
+          }
+        })
     }
 
 	return (
