@@ -6,7 +6,7 @@ from Backend.Domain.Payment.OutsideSystems.outside_supplyment import OutsideSupp
 
 
 class SupplyAdapter:
-    use_stub = False
+    use_stub = Settings.get_instance(False).get_supply_system() == ""
 
     def __init__(self):
         self.__outside_supplyment = OutsideSupplyment.getInstance()
