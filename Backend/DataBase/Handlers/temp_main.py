@@ -19,9 +19,8 @@ if __name__ == '__main__':
     store_handler = StoreHandler.get_instance()
     responsibility_handler = ResponsibilitiesHandler.get_instance()
 
-    mapper_registry.metadata.drop_all(engine)
-    mapper_registry.metadata.create_all(engine)
-
+    # mapper_registry.metadata.drop_all(engine)
+    # mapper_registry.metadata.create_all(engine)
 
     trading_system = TradingSystem.getInstance()
 
@@ -39,7 +38,7 @@ if __name__ == '__main__':
     #
     res2 = trading_system.login(cookie2, "user2", "password2")
     res_cart = trading_system.get_cart_details(cookie2)
-    print(res_cart.get_msg())
+    print(res_cart.get_obj())
     #
     #
     # store_res = trading_system.create_store(cookie, "The Store")

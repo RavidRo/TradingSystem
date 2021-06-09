@@ -30,7 +30,12 @@ class Member(UserState):
         return self.__responsibilities
 
     def load_cart(self):
-        self._cart = self._member_handler.load_cart(self._username)
+        from Backend.DataBase.Handlers.member_handler import MemberHandler
+        self._member_handler = MemberHandler.get_instance()
+        cart_res = self._member_handler.load_cart(self._username)
+        if cart_res.succeeded():
+            self._cart = cart_res.get_obj()
+        return cart_res
 
     def __init__(
             self, user, username, responsibilities=None, purchase_details=None, cart=None

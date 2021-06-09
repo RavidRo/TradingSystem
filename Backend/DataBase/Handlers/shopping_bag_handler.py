@@ -185,8 +185,10 @@ class ShoppingBagHandler(IHandler):
             bags_store_ids = session.execute(stmt).all()
             store_id_to_bag = dict()
             for bag_store_id in bags_store_ids:
-                store = StoresManager.get_store(bag_store_id[0])
-                bag = ShoppingBag(store)
+                store_res = StoresManager.get_store(bag_store_id[0])
+                if not store_res.succeeded():
+                    raise Exception
+                bag = ShoppingBag(store_res.get_obj())
                 products_in_bag: list[ProductInShoppingBag] = session.query(ProductInShoppingBag).filter_by(username=username,
                                                                                                             store_id=bag_store_id[0]).all()
                 bag.set_products({product_in_bag.product_id: (product_in_bag.product, product_in_bag.quantity) for product_in_bag in products_in_bag})
