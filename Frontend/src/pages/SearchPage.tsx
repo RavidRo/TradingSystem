@@ -135,9 +135,6 @@ const SearchPage: FC<SearchPageProps> = ({ location, propsAddProduct }) => {
 			<Keywards updateKeyWords={updateKeyWords}></Keywards>
 
 			<div className='mainArea'>
-				<div className='filterArea'>
-					<FilterMenu handleFilter={handleFilter} />
-				</div>
 				<div className='productCards'>
 					{setProductsInMatrix().map((row, i) => {
 						return (
