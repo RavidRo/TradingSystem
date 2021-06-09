@@ -5,6 +5,7 @@ import json
 from typing import Callable
 import threading
 
+from Backend.Service import logs
 from Backend.response import Response
 
 import Backend.Service.logs as log
@@ -30,6 +31,9 @@ class TradingSystem(object):
         return TradingSystem.__instance
 
     def __init__(self):
+        cookies = []
+        store_ids = []
+        product_ids = []
         """Virtually private constructor."""
         if TradingSystem.__instance is not None:
             raise Exception("This class is a singleton!")
@@ -38,13 +42,36 @@ class TradingSystem(object):
             self.payment_manager = PaymentManager()
             with open("state.json", "r") as read_file:
                 data = json.load(read_file)
-                cases = data["cases"]
-                for case in cases:
-                    actions = case["actions"]
-                    for action in actions:
-                        func = action["function"]
-                        args = action["args"]
-                        result = self.__getattribute__(func)(args)
+                actions = data["actions"]
+                for action in actions:
+                    func = action["function"]
+                    args = action["args"]
+                    new_args = []
+                    for arg in args:
+                        if isinstance(arg, str):
+                            if arg.split('#')[0] == 'cookie':
+                                new_args.append(cookies[int(arg.split('#')[1]) - 1])
+                            elif arg.split('#')[0] == 'store_id':
+                                new_args.append(store_ids[int(arg.split('#')[1]) - 1])
+                            elif arg.split('#')[0] == 'product_id':
+                                new_args.append(product_ids[int(arg.split('#')[1]) - 1])
+                            else:
+                                new_args.append(arg)
+                        else:
+                            new_args.append(arg)
+                    result = self.__getattribute__(func)(*new_args)
+                    if func == "enter_system":
+                        cookies.append(result)
+                    elif func == "create_store":
+                        if not result.succeeded():
+                            raise Exception(f"initializing using state.json failed on function - {func}, args - {new_args}")
+                        store_ids.append(result.get_obj())
+                    elif func == "create_product":
+                        if not result.succeeded():
+                            raise Exception(f"initializing using state.json failed on function - {func}, args - {new_args}")
+                        product_ids.append(result.get_obj())
+                    elif not result.succeeded():
+                        raise Exception(f"initializing using state.json failed on function - {func}, args - {new_args}")
 
     def enter_system(self):
         return TradingSystemManager.enter_system()
