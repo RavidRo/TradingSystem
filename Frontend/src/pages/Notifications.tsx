@@ -8,16 +8,18 @@ import { notificationTime } from '../types';
 
 type NotificationProps = {
 	location: any;
+	initializeNotifications: () => void;
 };
 
-const Notifications: FC<NotificationProps> = ({ location }) => {
+const Notifications: FC<NotificationProps> = ({ location, initializeNotifications }) => {
 	const [notifications, setNotifications] = useState<notificationTime>(
 		location.state.notifications
 	);
 
 	useEffect(() => {
-		setNotifications(location.state.notifications);
-	}, [location.state.notifications]);
+		initializeNotifications();
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, []);
 
 	return (
 		<div className='NotificationsDiv' {...console.log(notifications)}>
