@@ -72,6 +72,7 @@ function App() {
 					}
 					else{
 						// notification for statistics
+						console.log("new statistics !!!");
 						setStatistics(data);
 					}
 					// alert('received socket message');

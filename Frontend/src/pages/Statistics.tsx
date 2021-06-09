@@ -39,15 +39,12 @@ const Statistics: FC<StatisticsProps> = ({statistics}) => {
 
     const pickedFrom = (e:any)=>{
         let date = e.target.value
-        console.log(date);
         setFromDate(date);
         var dateObject = new Date(date);
-        console.log(dateObject);
         if(toDate !== ""){
           statisticsObj.request().then(({ data, error }) => {
             if (!error && data !== null) {
                 setStatistics(data.data.statistics_per_day);
-                console.log(data.data);
             }
           })
         }
@@ -55,16 +52,13 @@ const Statistics: FC<StatisticsProps> = ({statistics}) => {
 
     const pickedTo = (e:any)=>{
         let date = e.target.value
-        console.log(date);
         setToDate(date);
         var dateObject = new Date(date);
-        console.log(dateObject);
 
         if(fromDate !== ""){
           statisticsObj.request().then(({ data, error }) => {
             if (!error && data !== null) {
                 setStatistics(data.data.statistics_per_day);
-                console.log(data.data);
             }
           })
         }
@@ -98,19 +92,29 @@ const Statistics: FC<StatisticsProps> = ({statistics}) => {
                 />
                 <ul>
                   {statisticsMy!==undefined ? Object.keys(statisticsMy).map((date)=>{
-                    let day_json = statisticsMy[date];
-                    return (
-                      <div>
-                        <p>{date}</p>
-                        {Object.keys(day_json).map((type, index)=>{
-                          return (
-                            <li key={index}>
-                              {type} : {Object.values(day_json)[index]}
-                            </li>
-                          )
-                        })}
-                      </div>
-                    )
+                    console.log(date);
+                    console.log(toDate);
+                    console.log(fromDate);
+                    let small = fromDate.valueOf();
+                    let big = toDate.valueOf();
+                    let between = date.valueOf();
+
+                    if(small <= between && between <= big){
+                      let day_json = statisticsMy[date];
+                      return (
+                        <div>
+                          <p>{date}</p>
+                          {Object.keys(day_json).map((type, index)=>{
+                            return (
+                              <li key={index}>
+                                {type} : {Object.values(day_json)[index]}
+                              </li>
+                            )
+                          })}
+                        </div>
+                      )
+                    }
+                    
                   }):"No data"}
                 </ul>
             </form>
