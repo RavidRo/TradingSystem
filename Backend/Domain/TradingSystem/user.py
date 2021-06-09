@@ -27,7 +27,6 @@ class User(IUser):
         answer = self.__communicate(self.__notifications)
         print(answer)
         print(self.get_username().get_obj().value)
-        print(self.__notifications)
         if answer:
             self.__notifications = []
         return answer

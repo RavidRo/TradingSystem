@@ -14,6 +14,7 @@ class Publisher:
 
     def notify_all(self, data, subject="message"):
         for subscriber in self.__subscribers:
+            print({"subject": subject, "data": data})
             subscriber.notify({"subject": subject, "data": data})
 
     def get_subscribers(self):

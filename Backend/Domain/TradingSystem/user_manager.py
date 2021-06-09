@@ -47,6 +47,7 @@ class UserManager:
     def enter_system(register=True) -> str:
         cookie = UserManager.__create_cookie()
         UserManager.__cookie_user[cookie] = IUser.create_user()
+        print(register)
         if register == True:
             UserManager.__cookie_user[cookie].register_statistics()
         return cookie
@@ -518,7 +519,7 @@ def register_admins() -> None:
             "At least one admin should be at the system. Check config.json to add admins."
         )
     for admin in admins:
-        cookie = UserManager.enter_system(False)
+        cookie = UserManager.enter_system(register=False)
         UserManager.register(admin, settings.get_password(), cookie)
         Statistics.getInstance().subscribe(UserManager._get_user_by_username(admin))
 

@@ -60,29 +60,25 @@ function App() {
 				setClientSocker(clientTemp);
 				clientTemp.onopen = () => {
 					// alert('WebSocket Client Opened');
-					console.log("here ??? ");
 					clientTemp.send(cookie); // have to be here - else socket.receive in server gets stuck
 				};
 				clientTemp.onmessage = (messageEvent) => {
-					console.log(messageEvent);
+					let messageJson = JSON.parse(messageEvent.data);
+					let subject = messageJson['subject'];
+					let msg = messageJson['message'];
 
-					console.log("hereeeeeeeeeeee !!!!!!!!!!!!!!");
-					let msgObj = messageEvent.data;
-					let subject = msgObj['subject'];
-					let data = msgObj['data'];
 					if(subject === 'message'){
 						// regular notification
-						setNotifications((old)=>[...old, [data, new Date().toUTCString()]]);
+						setNotifications((old)=>[...old, [msg, new Date().toUTCString()]]);
 					}
 					else{
 						// notification for statistics
-						console.log("new statistics !!!");
-						setStatistics(data);
+						setStatistics(msg);
 					}
 					// alert('received socket message');
 				};
 				clientTemp.onclose = () => {
-					// alert('connection closed!');
+					alert('connection closed!');
 				};
 			}
 		});
