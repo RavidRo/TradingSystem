@@ -162,7 +162,7 @@ class OfferStatus:
         )
 
     def get_name(self) -> str:
-        raise NotImplementedError
+        raise Exception("Called an abstract method")
 
     def is_approved(self) -> bool:
         return False
