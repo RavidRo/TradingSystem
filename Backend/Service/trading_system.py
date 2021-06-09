@@ -40,7 +40,8 @@ class TradingSystem(object):
         else:
             TradingSystem.__instance = self
             self.payment_manager = PaymentManager()
-            with open("state.json", "r") as read_file:
+            # TODO: change back to state.json
+            with open("empty_state.json", "r") as read_file:
                 data = json.load(read_file)
                 actions = data["actions"]
                 for action in actions:

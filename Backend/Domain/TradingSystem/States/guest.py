@@ -5,23 +5,23 @@ from Backend.Domain.TradingSystem.States.admin import Admin
 from Backend.Domain.TradingSystem.States.member import Member
 from Backend.Domain.TradingSystem.States.user_state import UserState
 from Backend.response import ParsableList, Response
-import json
-
 from Backend.settings import Settings
-admins = []
 
 
 def register_admins() -> None:
-    with open("config.json", "r") as read_file:
-        data = json.load(read_file)
-        for username in data["admins"]:
-            res = authentication.register(username, data["admin-password"])
-            if res.succeeded():
-                from Backend.DataBase.Handlers.member_handler import MemberHandler
-                admin = Admin(None, username)
-                MemberHandler.get_instance().save(admin)
-                res = MemberHandler.get_instance().commit_changes()
-            admins.append(username)
+    settings = Settings.get_instance()
+    admins = settings.get_admins()
+    if len(admins) <= 0:
+        raise Exception(
+            "At least one admin should be at the system. Check config.json to add admins."
+        )
+    from Backend.DataBase.Handlers.member_handler import MemberHandler
+    for username in admins:
+        res = authentication.register(username, settings.get_password())
+        if res.succeeded():
+            admin = Admin(None, username)
+            MemberHandler.get_instance().save(admin)
+    MemberHandler.get_instance().commit_changes()
 
 
 register_admins()

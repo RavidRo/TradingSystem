@@ -55,10 +55,6 @@ class UserManager:
         func: Callable[[User], Response] = lambda user: user.connect(communicate)
         return UserManager.__deligate_to_user(cookie, func)
 
-
-    #TODO: Ask Ravid about login inside register and in general how to load properly a member from db and also
-    # take care about mapping admins and members with polymorphic type
-
     # 2.3
     @staticmethod
     def register(username: str, password: str, cookie: str) -> Response[None]:
@@ -66,7 +62,6 @@ class UserManager:
             response = user.register(username, password)
             if response.succeeded():
                 newUser = User()
-                newUser.login(username, password)
                 newUser.change_state(Member(newUser, username))
                 UserManager.__username_user[username] = newUser
             return response
@@ -517,17 +512,3 @@ class UserManager:
         func: Callable[[User], Response] = lambda user: user.cancel_offer(offer_id)
         return UserManager.__deligate_to_user(cookie, func)
 
-
-def register_admins() -> None:
-    settings = Settings.get_instance()
-    admins = settings.get_admins()
-    if len(admins) <= 0:
-        raise Exception(
-            "At least one admin should be at the system. Check config.json to add admins."
-        )
-    for admin in admins:
-        cookie = UserManager.enter_system()
-        UserManager.register(admin, settings.get_password(), cookie)
-
-
-register_admins()
