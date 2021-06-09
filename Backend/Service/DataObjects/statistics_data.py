@@ -7,6 +7,7 @@ class StatisticsCounts:
     guests: int
     passive_member: int
     managers: int
+    owners: int
     super_members: int
 
 
