@@ -94,7 +94,7 @@ async def connect():
             while len(queue) > 0:
                 messages = queue.pop()
                 for message in messages:
-                    await websocket.send(message)
+                    await websocket.send_json(message)
             # messages = await queue.get()
             # print("Sending messages to socket", messages)
             # for message in messages:
