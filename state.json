@@ -5,6 +5,22 @@
 			"args": []
 		},
 		{
+			"function": "register",
+			"args": [
+				"cookie#1",
+				"u1",
+				"password1"
+			]
+		},
+		{
+			"function": "login",
+			"args": [
+				"cookie#1",
+				"u1",
+				"password1"
+			]
+		},
+		{
 			"function": "enter_system",
 			"args": []
 		},
@@ -29,38 +45,41 @@
 			]
 		},
 		{
+			"function": "enter_system",
+			"args": []
+		},
+		{
+			"function": "register",
+			"args": [
+				"cookie#4",
+				"u4",
+				"password4"
+			]
+		},
+		{
 			"function": "create_store",
 			"args": [
-				"cookie#2",
+				"cookie#1",
 				"s1"
 			]
 		},
 		{
 			"function": "create_product",
 			"args": [
-				"cookie#2",
+				"cookie#1",
 				"store_id#1",
-				"Bamba",
+				"Wine",
 				"category",
 				30.0,
-				20
+				40
 			]
 		},
 		{
-			"function": "appoint_manager",
+			"function": "appoint_owner",
 			"args": [
-				"cookie#2",
+				"cookie#1",
 				"store_id#1",
-				"u3"
-			]
-		},
-		{
-			"function": "add_manager_permission",
-			"args": [
-				"cookie#2",
-				"store_id#1",
-				"u3",
-				"manage products"
+				"u4"
 			]
 		}
 	]
