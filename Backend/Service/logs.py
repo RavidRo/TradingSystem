@@ -48,3 +48,7 @@ def loging(to_hide=[]):
         return inner
 
     return decorator
+
+
+def critical(error: Exception):
+    logging.critical("exception - " + str(error))

@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { BrowserRouter } from 'react-router-dom';
 import { createMuiTheme, ThemeProvider } from '@material-ui/core';
+import DateFnsUtils from '@date-io/date-fns';
 
 import Navbar from '../components/Navbar';
 import Routes from './Routes';
@@ -8,6 +9,7 @@ import Routes from './Routes';
 import { Product, StoreToSearchedProducts, notificationTime, StatisticsData } from '../types';
 import useAPI from '../hooks/useAPI';
 import { AdminsContext, CookieContext, UsernameContext } from '../contexts';
+import { MuiPickersUtilsProvider } from '@material-ui/pickers';
 
 const theme = createMuiTheme({
 	typography: {
@@ -46,7 +48,7 @@ function App() {
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
 
-	const initializeSocket = ()=>{
+	const initializeSocket = () => {
 		getCookie().then((cookie) => {
 			if (cookie) {
 				const secured = process.env.NODE_ENV === 'production' ? 'wss' : 'ws';
@@ -79,7 +81,7 @@ function App() {
 				};
 			}
 		});
-	}
+	};
 	const productObj = useAPI<Product[]>('/save_product_in_cart', {}, 'POST');
 	const productUpdateObj = useAPI<Product[]>('/change_product_quantity_in_cart', {}, 'POST');
 
@@ -241,48 +243,50 @@ function App() {
 	// 	// eslint-disable-next-line react-hooks/exhaustive-deps
 	// }, []);
 
-	const initializeNotifications = ()=>{
+	const initializeNotifications = () => {
 		setNotifications([]);
-	}
-	return cookie !== '' &&  clientSocket!==undefined ? (
-		<ThemeProvider theme={theme}>
-			<CookieContext.Provider value={cookie}>
-				<AdminsContext.Provider value={require('../../../config.json').admins}>
-					<UsernameContext.Provider value={username}>
-						<BrowserRouter>
-							<Navbar
-								signedIn={signedIn}
-								storesToProducts={storesToProducts.current}
-								propHandleDelete={handleDeleteProduct}
-								notifications={notifications}
-								changeQuantity={changeQuantity}
-								logout={() => {
-									setSignedIn(false);
-									setCookie('');
-									clientSocket.close();
-									initializeSocket();
-								}}
-								propUpdateStores={propUpdateStores}
-							/>
-							<Routes
-								handleDeleteProduct={handleDeleteProduct}
-								setSignedIn={setSignedIn}
-								setUsername={setUsername}
-								signedIn={signedIn}
-								storesToProducts={storesToProducts}
-								changeQuantity={changeQuantity}
-								getPropsCookie={getPropsCookie}
-								propHandleAdd={addProductToPopup}
-								propUpdateStores={propUpdateStores}
-								propsAddProduct={addProductToPopup}
-								initializeNotifications={initializeNotifications}
-								statistics={statistics}
-							/>
-						</BrowserRouter>
-					</UsernameContext.Provider>
-				</AdminsContext.Provider>
-			</CookieContext.Provider>
-		</ThemeProvider>
+	};
+	return cookie !== '' && clientSocket !== undefined ? (
+		<MuiPickersUtilsProvider utils={DateFnsUtils}>
+			<ThemeProvider theme={theme}>
+				<CookieContext.Provider value={cookie}>
+					<AdminsContext.Provider value={require('../../../config.json').admins}>
+						<UsernameContext.Provider value={username}>
+							<BrowserRouter>
+								<Navbar
+									signedIn={signedIn}
+									storesToProducts={storesToProducts.current}
+									propHandleDelete={handleDeleteProduct}
+									notifications={notifications}
+									changeQuantity={changeQuantity}
+									logout={() => {
+										setSignedIn(false);
+										setCookie('');
+										clientSocket.close();
+										initializeSocket();
+									}}
+									propUpdateStores={propUpdateStores}
+								/>
+								<Routes
+									handleDeleteProduct={handleDeleteProduct}
+									setSignedIn={setSignedIn}
+									setUsername={setUsername}
+									signedIn={signedIn}
+									storesToProducts={storesToProducts}
+									changeQuantity={changeQuantity}
+									getPropsCookie={getPropsCookie}
+									propHandleAdd={addProductToPopup}
+									propUpdateStores={propUpdateStores}
+									propsAddProduct={addProductToPopup}
+									initializeNotifications={initializeNotifications}
+									statistics={statistics}
+								/>
+							</BrowserRouter>
+						</UsernameContext.Provider>
+					</AdminsContext.Provider>
+				</CookieContext.Provider>
+			</ThemeProvider>
+		</MuiPickersUtilsProvider>
 	) : (
 		<h1>LOADING</h1>
 	);

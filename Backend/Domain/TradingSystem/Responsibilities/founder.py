@@ -172,6 +172,9 @@ class Founder(Responsibility):
     def get_store_purchase_history(self) -> Response[ParsableList[PurchaseDetails]]:
         return self._store.get_purchase_history()
 
+    def is_founder(self) -> bool:
+        return True
+
     # Offers
     # ======================
 

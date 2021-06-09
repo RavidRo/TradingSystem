@@ -111,7 +111,7 @@ def test_add_product_already_in_bag(shopping_bag: ShoppingBag, product_stub: Pro
     with patch.dict(shopping_bag.get_products_to_quantity(), {"1": (product_stub, 2)}):
         result = shopping_bag.add_product("1", 3)
         assert result.success == True
-        assert shopping_bag.get_products_to_quantity().get("1")[1] == 3
+        assert shopping_bag.get_products_to_quantity().get("1")[1] == 5
 
 
 # * remove product

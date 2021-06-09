@@ -193,6 +193,9 @@ class Manager(Owner):
 
         return self.__create_no_permission_Response(Permission.GET_HISTORY)
 
+    def is_founder(self) -> bool:
+        return False
+
     def _add_permission(self, username: str, permission: Permission) -> bool:
         if self._user_state.get_username().get_obj().get_val() == username:
             self.__permissions[permission] = True

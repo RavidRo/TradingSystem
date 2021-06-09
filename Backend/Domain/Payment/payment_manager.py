@@ -1,8 +1,7 @@
-import sys
-
 from .Adapters.cashing_adapter import CashingAdapter
 from .Adapters.supply_adapter import SupplyAdapter
 from Backend.response import Response
+from Backend.Service.logs import critical
 
 
 class PaymentManager:
@@ -13,7 +12,8 @@ class PaymentManager:
     def pay(self, price, payment_details, product_ids_to_quantity, address):
         try:
             payment_response = self.__cashing_adapter.pay(price, payment_details)
-        except:
+        except Exception as e:
+            critical(e)
             return Response(success=False, msg="Something went wrong with Outside Cashing")
         if payment_response.success:
             try:
@@ -22,7 +22,8 @@ class PaymentManager:
                 if not supply_response.success:
                     self.__rollback(transaction_id)
                 return supply_response
-            except:  # for any error occurs:
+            except Exception as e:
+                critical(e)
                 self.__rollback(transaction_id)
                 return Response(success=False, msg="Something went wrong with Outside Supplyment")
         else:
