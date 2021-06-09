@@ -17,6 +17,7 @@ const Statistics: FC<StatisticsProps> = ({statistics}) => {
     let toDate = "2021-06-07";
     const statisticsObj = useAPI<StatisticsData>('/get_statistics', {}, 'GET');
     const [dataGraph, setDataGraph] = useState<any[]>([]);
+    const [dataPie, setDataPie] = useState<any[]>([]);
 
     useEffect(()=>{
       if(statistics !== undefined){
@@ -31,8 +32,8 @@ const Statistics: FC<StatisticsProps> = ({statistics}) => {
           if (!error && data !== null) {
               let dataGraphResult = setDataToChart(data.data.statistics_per_day, fromDate, toDate);
               setDataGraph(dataGraphResult);
-              console.log(data.data.statistics_per_day);
-              console.log(dataGraphResult);
+              let pieResult = setDataToPie(data.data.statistics_per_day);
+              setDataPie(pieResult);
           }
         })
     }
@@ -44,8 +45,8 @@ const Statistics: FC<StatisticsProps> = ({statistics}) => {
           if (!error && data !== null) {
               let dataGraphResult = setDataToChart(data.data.statistics_per_day, fromDate, toDate);
               setDataGraph(dataGraphResult);
-              console.log(data.data.statistics_per_day);
-              console.log(dataGraphResult);
+              let pieResult = setDataToPie(data.data.statistics_per_day);
+              setDataPie(pieResult);
           }
         })
     }
@@ -64,8 +65,6 @@ const Statistics: FC<StatisticsProps> = ({statistics}) => {
           let small = fromDate.valueOf();
           let big = toDate.valueOf();
           let between = date.valueOf();
-          console.log(small <= between);
-          console.log(between <= big);
           if(small <= between && between <= big){
             let specificDateArr = [];
             specificDateArr.push(date); //first arg - date
@@ -86,7 +85,36 @@ const Statistics: FC<StatisticsProps> = ({statistics}) => {
           return [];
       })
     }
+    const setDataToPie = (dataJson: { [date: string]: StatisticsCount })=>{
+      let usersJson:{ [type: string]: number } = {};
+      Object.keys(dataJson).map((date)=>{
+        
+          let statisticsJson:StatisticsCount = dataJson[date];
+          for(var i=0; i<usersTypes.length; i++){
+            let userType = usersTypes[i];
+            if(statisticsJson.hasOwnProperty(userType)){ // user type is in this date, add it's value
+              let index = Object.keys(statisticsJson).indexOf(userType);
+              let userTypeValue = +Object.values(statisticsJson)[index];
+              if (usersJson.hasOwnProperty(userType)){
+                usersJson[userType] += userTypeValue;
+              }
+              else{
+                usersJson[userType] = userTypeValue;
+              }
+            }
+          }
 
+      })
+      let finalArr = [];
+      for(var i=0; i<Object.keys(usersJson).length; i++){
+        let type = Object.keys(usersJson)[i];
+        let value = Object.values(usersJson)[i];
+        finalArr.push([type, value]);
+      }
+      console.log(usersJson);
+      console.log(finalArr);
+      return finalArr;
+    }
 
 	return (
         <div className="statistics">
@@ -114,26 +142,43 @@ const Statistics: FC<StatisticsProps> = ({statistics}) => {
                     inputProps={{style: {fontSize: 20, marginTop: 20}}} 
                     InputLabelProps={{style: {fontSize: 30}}}
                 />
-                <Chart
-                    width={'2000px'}
-                    height={'600px'}
-                    style={{marginTop: '8%', marginLeft: '5%'}}
-                    chartType="Bar"
-                    loader={<div>Loading Chart</div>}
-                    data={[
-                      ['Statistics', 'guests', 'passive members', 'users', 'managers', 'owners', 'super members'],
-                      ...dataGraph
-                    ]}
-                    options={{
-                      // Material design options
-                      chart: {
-                        title: 'Website Statistics',
-                        subtitle: 'guests, passive members, users, managers, owners, super members',
-                      },
-                    }}
-                    // For tests
-                    rootProps={{ 'data-testid': '2' }}
-                  />
+                <div className="charts">
+                  <Chart
+                      width={'1000px'}
+                      height={'300px'}
+                      style={{marginTop: '3%'}}
+                      chartType="Bar"
+                      loader={<div>Loading Chart</div>}
+                      data={[
+                        ['Statistics', 'guests', 'passive members', 'users', 'managers', 'owners', 'super members'],
+                        ...dataGraph
+                      ]}
+                      options={{
+                        // Material design options
+                        chart: {
+                          title: 'Website Statistics',
+                          subtitle: 'guests, passive members, users, managers, owners, super members',
+                        },
+                      }}
+                      // For tests
+                      rootProps={{ 'data-testid': '2' }}
+                    />
+                    <Chart
+                      width={'500px'}
+                      height={'300px'}
+                      chartType="PieChart"
+                      loader={<div>Loading Chart</div>}
+                      style={{marginTop: '4%', marginLeft: '3%'}}
+                      data={[
+                        ['Users', 'Amount'],
+                        ...dataPie
+                      ]}
+                      options={{
+                        title: 'Users from Total',
+                      }}
+                      rootProps={{ 'data-testid': '1' }}
+                    />
+                  </div>
             </form>
         </div>
 
