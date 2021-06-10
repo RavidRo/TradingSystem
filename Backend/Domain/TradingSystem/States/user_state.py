@@ -5,10 +5,10 @@ from Backend.response import ParsableList, Response
 
 
 class UserState(ABC):
-    def __init__(self, user, notifications=[], cart=None):
+    def __init__(self, user, cart=None):
         if cart is None:
             cart = ShoppingCart()
-        self._notifications: list[str] = notifications
+        self._notifications = []
         self._cart = cart
         self._user = user
 
