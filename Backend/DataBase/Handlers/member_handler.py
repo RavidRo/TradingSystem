@@ -37,9 +37,9 @@ class MemberHandler(IHandler):
 
         mapper_registry.map_imperatively(Member, self.__members, properties={
             '_username': self.__members.c.username,
-            '_Member__responsibilities': relationship(Responsibility, cascade="all, delete-orphan",
-                                                      collection_class=attribute_mapped_collection('_store_id'), overlaps="_store",
-                                                      passive_updates=False),
+            # '_Member__responsibilities': relationship(Responsibility, cascade="all, delete-orphan",
+            #                                           collection_class=attribute_mapped_collection('_store_id'), overlaps="_store",
+            #                                           passive_updates=False),
             '_Member__purchase_details': relationship(PurchaseDetails, cascade="all, delete-orphan"),
             '_Member__offers': relationship(Offer, collection_class=attribute_mapped_collection('_Offer__id'))
 

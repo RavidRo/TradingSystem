@@ -1,7 +1,7 @@
+
 from Backend.Domain.TradingSystem.offer import Offer
 from Backend.Domain.TradingSystem.Interfaces.Subscriber import Subscriber
 import uuid
-
 from Backend.DataBase.database import db_fail_response
 from Backend.Domain.Notifications.Publisher import Publisher
 from Backend.response import PrimitiveParsable, Response, ParsableList, Parsable
@@ -15,9 +15,8 @@ class Store(Parsable, Subscriber):
     from Backend.Domain.TradingSystem.purchase_details import PurchaseDetails
 
     def __init__(self, store_name: str):
-        from Backend.Domain.TradingSystem.TypesPolicies.discount_policy import DefaultDiscountPolicy
         from Backend.Domain.TradingSystem.TypesPolicies.purchase_policy import DefaultPurchasePolicy
-
+        from Backend.Domain.TradingSystem.TypesPolicies.discount_policy import DefaultDiscountPolicy
         """Create a new store with it's specified info"""
         self.__id = self.id_generator()
         self.__name = store_name
@@ -47,14 +46,15 @@ class Store(Parsable, Subscriber):
 
     def init_fields(self):
         from Backend.Domain.TradingSystem.TypesPolicies.discount_policy import DefaultDiscountPolicy
-        from Backend.Domain.TradingSystem.TypesPolicies.purchase_policy import DefaultPurchasePolicy
+        from Backend.Domain.TradingSystem.TypesPolicies.purchase_policy import PurchasePolicy
         from Backend.DataBase.Handlers.store_handler import StoreHandler
         self._products_lock = ReadWriteLock()
         self.__history_lock = ReadWriteLock()
         self.__publisher: Publisher = Publisher()
         self.__discount_policy = DefaultDiscountPolicy()
-        self.__purchase_policy = DefaultPurchasePolicy()
+        self.__purchase_policy = PurchasePolicy()
         self.__store_handler = StoreHandler.get_instance()
+        self.__responsibility = None
 
     def parse(self):
         id_to_quantity = {}
@@ -281,6 +281,7 @@ class Store(Parsable, Subscriber):
 
     def set_responsibility(self, responsibility: Responsibility):
         self.__responsibility = responsibility
+        self.__responsibility_id = responsibility.get_id()
 
     def save(self):
         return self.__store_handler.save(self)

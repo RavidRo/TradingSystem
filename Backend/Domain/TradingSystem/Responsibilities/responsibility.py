@@ -1,5 +1,7 @@
 from __future__ import annotations
 import enum
+import uuid
+
 from Backend.Domain.TradingSystem.offer import Offer
 from Backend.Service.DataObjects.responsibilities_data import ResponsibilitiesData
 from Backend.Domain.TradingSystem.Interfaces.IUser import IUser
@@ -45,7 +47,7 @@ class Responsibility(Parsable):
         from Backend.DataBase.Handlers.responsibilities_handler import ResponsibilitiesHandler
         self._store_id = store.get_id()
         self._user_state = user_state
-        # user_state.add_responsibility(self, store.get_id())
+        user_state.add_responsibility(self, store.get_id())
         self._store = store
         self.__subscriber = subscriber
         if subscriber:
@@ -53,10 +55,12 @@ class Responsibility(Parsable):
             subscriber.notify(
                 f"You have been appointer to {store.get_name()} as {self.__class__.__name__}"
             )
-        self._appointed: list[Responsibility] = []
+        self._appointed = []
 
         self._username = user_state.get_username().get_obj().get_val()
         self._responsibilities_handler = ResponsibilitiesHandler.get_instance()
+        self.__responsibility_dal = None
+
     def get_user_state(self):
         return self._user_state
 
@@ -226,7 +230,8 @@ class Responsibility(Parsable):
         return [per.name for per in Permission]
 
     def save(self):
-        self._responsibilities_handler.save(self)
+        dal_responsibility = self._responsibilities_handler.save_res()
+        self.__responsibility_dal = dal_responsibility
 
     # Offers
     # ======================
@@ -242,3 +247,7 @@ class Responsibility(Parsable):
 
     def reject_user_offer(self, product_id, offer_id) -> Response[None]:
         raise Exception(Responsibility.ERROR_MESSAGE)
+
+    def get_id(self):
+        return self.__id
+

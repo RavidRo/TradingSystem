@@ -1,31 +1,43 @@
-import json
+from threading import Lock
 
-import sqlalchemy
-from sqlalchemy.orm.collections import attribute_mapped_collection
+from sqlalchemy import Column, Integer, Sequence, Index
+from sqlalchemy import func, create_engine
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import relationship, remote, foreign
+from sqlalchemy_utils import LtreeType, Ltree
 
 from Backend.DataBase.IHandler import IHandler
-from threading import Lock
-from Backend.DataBase.database import mapper_registry, session
-from Backend.Domain.TradingSystem.Responsibilities.founder import Founder
-from Backend.Domain.TradingSystem.Responsibilities.manager import Manager
-from Backend.Domain.TradingSystem.Responsibilities.owner import Owner
+from Backend.DataBase.database import engine, session, Base
 from Backend.Domain.TradingSystem.Responsibilities.responsibility import Responsibility
-from Backend.Domain.TradingSystem.States.member import Member
-from Backend.Domain.TradingSystem.store import Store
-from sqlalchemy.types import TypeDecorator
-
-from Backend.response import Response
 from Backend.rw_lock import ReadWriteLock
-from sqlalchemy import Table, Column, String, Boolean, insert, ForeignKey, Date, Float, ARRAY, ForeignKeyConstraint, \
-    join, and_
-from sqlalchemy.orm import mapper, relationship, backref
+
+id_seq = Sequence('nodes_id_seq')
 
 
-# class ManagerPermission:
-#     def __init__(self, username, store_id):
-#         self.username = username
-#         self.store_id =
+class Responsibility_DAL(Base):
+    __tablename__ = 'responsibilities'
 
+    id = Column(Integer, id_seq, primary_key=True)
+    # name = Column(String, nullable=False)
+    path = Column(LtreeType, nullable=False)
+
+    parent = relationship(
+                'Responsibility_DAL',
+                primaryjoin=(remote(path) == foreign(func.subpath(path, 0, -1))),
+                backref='children',
+                viewonly=True
+            )
+
+    __table_args__ = (
+        Index('ix_nodes_path', path, postgresql_using='gist'),)
+
+    def __init__(self, parent=None):
+        _id = engine.execute(id_seq)
+        self.id = _id
+        ltree_id = Ltree(str(_id))
+        self.path = ltree_id if parent is None else parent.path + ltree_id
+
+Base.metadata.create_all(engine)
 
 class ResponsibilitiesHandler(IHandler):
     _lock = Lock()
@@ -34,46 +46,6 @@ class ResponsibilitiesHandler(IHandler):
     def __init__(self):
         super().__init__(ReadWriteLock(), Responsibility)
 
-        self.__responsibilities = Table('responsibilities', mapper_registry.metadata,
-                                        Column('username', String(50), ForeignKey('members.username'),
-                                               primary_key=True),
-                                        Column('store_id', String(50), ForeignKey('stores.store_id'), primary_key=True),
-                                        Column('parent_username', String(50)),
-                                        Column('responsibility_type', String(10)),
-                                        Column('manager_permissions', PermissionType()),
-                                        ForeignKeyConstraint(('parent_username', 'store_id'),
-                                                             ['responsibilities.username',
-                                                              'responsibilities.store_id'], name="fk_self_reference"))
-
-        # self.__manager_permissions = Table('manager_permissions', mapper_registry.metadata,
-        #                                    Column('manager_store_id', String(50), primary_key=True),
-        #                                    Column('manager_username', String(50), primary_key=True),
-        #                                    Column('permissions', PermissionType()),
-        #                                    ForeignKeyConstraint(('manager_username', 'manager_store_id'),
-        #                                                         ['responsibilities.username',
-        #                                                          'responsibilities.store_id']))
-
-        mapper_registry.map_imperatively(Responsibility, self.__responsibilities, properties={
-            '_username': self.__responsibilities.c.username,
-            '_appointed': relationship(Responsibility, cascade="all", overlaps="_store", remote_side=[self.__responsibilities.c.username, self.__responsibilities.c.store_id],
-                                       primaryjoin=(and_(self.__responsibilities.c.username == self.__responsibilities.c.parent_username, self.__responsibilities.c.store_id == self.__responsibilities.c.store_id))),
-            '_Manager__permissions': self.__responsibilities.c.manager_permissions
-
-        }, polymorphic_on=self.__responsibilities.c.responsibility_type, polymorphic_identity='R',
-                                         exclude_properties={'permissions'})
-
-        mapper_registry.map_imperatively(Founder, self.__responsibilities, inherits=Responsibility,
-                                         polymorphic_identity='F', exclude_properties={'permissions'})
-        mapper_registry.map_imperatively(Owner, self.__responsibilities, inherits=Responsibility,
-                                         polymorphic_identity='O', exclude_properties={'permissions'})
-        mapper_registry.map_imperatively(Manager, self.__responsibilities,
-                                         inherits=Responsibility, polymorphic_identity='M',
-                                         # Maybe replace self.__manager_permissions with join(self.__responsibilities, self.__manager_permissions) below
-                                         # properties={
-                                         #     '_Manager__permissions': relationship()
-                                         # }
-                                         )
-
     @staticmethod
     def get_instance():
         with ResponsibilitiesHandler._lock:
@@ -81,42 +53,8 @@ class ResponsibilitiesHandler(IHandler):
                 ResponsibilitiesHandler._instance = ResponsibilitiesHandler()
         return ResponsibilitiesHandler._instance
 
-    def update_child(self, appointer_username, store_id, responsibility):
-        self._rwlock.acquire_write()
-        res = Response(True)
-        try:
-            appointer: Responsibility = session.query(Responsibility).filter_by(username=appointer_username,
-                                                                                store_id=store_id).one()
-            appointer._appointed.append(responsibility)
-            session.commit()
-        except Exception as e:
-            session.rollback()
-            res = Response(False, msg=str(e))
-        finally:
-            self._rwlock.release_write()
-            return res
-
-    def load_all(self):
-        pass
-
-
-class PermissionType(TypeDecorator):
-    def process_literal_param(self, value, dialect):
-        pass
-
-    @property
-    def python_type(self):
-        pass
-
-    impl = sqlalchemy.Text()
-
-    def process_bind_param(self, value, dialect):
-        if value is not None:
-            value = json.dumps(value)
-
-        return value
-
-    def process_result_value(self, value, dialect):
-        if value is not None:
-            value = json.loads(value)
-        return value
+    def save_res(self, parent=None):
+        responsibility_dal = Responsibility_DAL(parent)
+        session.add(responsibility_dal)
+        session.commit()
+        return responsibility_dal

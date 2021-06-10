@@ -27,6 +27,7 @@ def save():
         print("register2: " + res.get_msg())
 
     res2 = trading_system.login(cookie2, "user2", "password2")
+
     store_res = trading_system.create_store(cookie, "The Store")
     if not store_res.succeeded():
         print("open_store: " + store_res.get_msg())

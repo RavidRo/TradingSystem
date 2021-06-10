@@ -53,11 +53,8 @@ class StoreHandler(IHandler):
             "_Store__id": self.__stores.c.store_id,
             "_Store__name": self.__stores.c.store_name,
             "_Store__purchase_history": relationship(PurchaseDetails),
-            # "_products_to_quantities": relationship(Product, uselist=True,
-            #                                         collection_class=MyMap())
             "products": relationship(ProductsOfStores, uselist=True,
-                                     collection_class=attribute_mapped_collection("product_id")),
-            "_Store__responsibility": relationship(Responsibility, uselist=False, overlaps='_appointed', cascade="save-update, delete, delete-orphan", backref=backref("_store", uselist=False))
+                                     collection_class=attribute_mapped_collection("product_id"))
         })
 
         self.__product_handler = ProductHandler.get_instance()
