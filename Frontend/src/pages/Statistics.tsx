@@ -13,10 +13,11 @@ type StatisticsProps = {
 };
 
 const Statistics: FC<StatisticsProps> = ({statistics}) => {
+    let today = new Date().toISOString().slice(0, 10);
     let fromDate = "2021-06-07";
-    let toDate = "2021-06-07";
-    const [from, setFrom] = useState<String>("2021-06-07");
-    const [to, setTo] = useState<String>("2021-06-07");
+    let toDate = today;
+    const [from, setFrom] = useState<string>("2021-06-07");
+    const [to, setTo] = useState<string>(today);
 
     const statisticsObj = useAPI<StatisticsData>('/get_statistics', {}, 'GET');
     const [dataGraph, setDataGraph] = useState<any[]>([]);
@@ -24,10 +25,15 @@ const Statistics: FC<StatisticsProps> = ({statistics}) => {
     const [data,setDate] = useState<{ [date: string]: StatisticsCount }>({})
 
     useEffect(()=>{
-      console.log("haaa?");
-      if(statistics !== undefined){
-        console.log("in here OMG!!!");
-      }
+      statisticsObj.request().then(({ data, error }) => {
+        if (!error && data !== null) {
+            let dataGraphResult = setDataToChart(data.data.statistics_per_day, from, to);
+            setDataGraph(dataGraphResult);
+            let pieResult = setDataToPie(data.data.statistics_per_day);
+            setDataPie(pieResult);
+            setDate(data.data.statistics_per_day);
+        }
+      })
     }, [statistics]);
 
 
@@ -119,6 +125,7 @@ const Statistics: FC<StatisticsProps> = ({statistics}) => {
         }
 
       })
+
       let finalArr = [];
       for(var i=0; i<Object.keys(usersJson).length; i++){
         let type = Object.keys(usersJson)[i];
@@ -136,7 +143,7 @@ const Statistics: FC<StatisticsProps> = ({statistics}) => {
                     id="date"
                     label="From"
                     type="date"
-                    defaultValue="2021-06-07"
+                    defaultValue={from}
                     onChange={(e)=>pickedFrom(e)}
                     style={{width: '10%', marginRight: '5%', marginTop: '5%', marginLeft: '35%'}}
                     inputProps={{style: {fontSize: 20, marginTop: 20}}} 
@@ -148,13 +155,12 @@ const Statistics: FC<StatisticsProps> = ({statistics}) => {
                     id="date"
                     label="To"
                     type="date"
-                    defaultValue="2021-06-07"
+                    defaultValue={to}
                     onChange={(e)=>pickedTo(e)}
                     style={{width: '15%', marginTop: '5%'}}
                     inputProps={{style: {fontSize: 20, marginTop: 20}}} 
                     InputLabelProps={{style: {fontSize: 30}}}
                 />
-                {from === "2021-06-07" && to === "2021-06-07"?null:
                 <div className="charts">
                   <ul className="dataList">
                   {Object.keys(data).map((date)=>{
@@ -198,7 +204,6 @@ const Statistics: FC<StatisticsProps> = ({statistics}) => {
                       rootProps={{ 'data-testid': '1' }}
                     />
                   }
-                  
                     {dataGraph.length === 1 && dataGraph[0].length === 0?
                     null:
                     <Chart
@@ -223,8 +228,6 @@ const Statistics: FC<StatisticsProps> = ({statistics}) => {
                     />
                     }
                   </div>
-              }
-                 
                   
             </form>
         </div>
