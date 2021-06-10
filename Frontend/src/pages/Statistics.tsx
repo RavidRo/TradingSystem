@@ -38,7 +38,8 @@ const Statistics: FC<StatisticsProps> = ({statistics}) => {
 
 
     const pickedFrom = (e:any)=>{
-        let fromDate = e.target.value;
+        let date = e.target.value;
+        fromDate = date;
         setFrom(fromDate);
         statisticsObj.request().then(({ data, error }) => {
           if (!error && data !== null) {
