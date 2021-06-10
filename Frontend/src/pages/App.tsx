@@ -73,6 +73,7 @@ function App() {
 					}
 					else{
 						// notification for statistics
+						console.log("statistics !!!");
 						setStatistics(msg);
 					}
 					// alert('received socket message');

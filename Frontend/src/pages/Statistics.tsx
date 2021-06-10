@@ -15,12 +15,18 @@ type StatisticsProps = {
 const Statistics: FC<StatisticsProps> = ({statistics}) => {
     let fromDate = "2021-06-07";
     let toDate = "2021-06-07";
+    const [from, setFrom] = useState<String>("2021-06-07");
+    const [to, setTo] = useState<String>("2021-06-07");
+
     const statisticsObj = useAPI<StatisticsData>('/get_statistics', {}, 'GET');
     const [dataGraph, setDataGraph] = useState<any[]>([]);
     const [dataPie, setDataPie] = useState<any[]>([]);
+    const [data,setDate] = useState<{ [date: string]: StatisticsCount }>({})
 
     useEffect(()=>{
+      console.log("haaa?");
       if(statistics !== undefined){
+        console.log("in here OMG!!!");
       }
     }, [statistics]);
 
@@ -28,12 +34,14 @@ const Statistics: FC<StatisticsProps> = ({statistics}) => {
     const pickedFrom = (e:any)=>{
         let date = e.target.value;
         fromDate = date;
+        setFrom(fromDate);
         statisticsObj.request().then(({ data, error }) => {
           if (!error && data !== null) {
               let dataGraphResult = setDataToChart(data.data.statistics_per_day, fromDate, toDate);
               setDataGraph(dataGraphResult);
               let pieResult = setDataToPie(data.data.statistics_per_day);
               setDataPie(pieResult);
+              setDate(data.data.statistics_per_day);
           }
         })
     }
@@ -41,12 +49,14 @@ const Statistics: FC<StatisticsProps> = ({statistics}) => {
     const pickedTo = (e:any)=>{
         let date = e.target.value;
         toDate = date;
+        setTo(toDate);
         statisticsObj.request().then(({ data, error }) => {
           if (!error && data !== null) {
               let dataGraphResult = setDataToChart(data.data.statistics_per_day, fromDate, toDate);
               setDataGraph(dataGraphResult);
               let pieResult = setDataToPie(data.data.statistics_per_day);
               setDataPie(pieResult);
+              setDate(data.data.statistics_per_day);
           }
         })
     }
@@ -88,7 +98,10 @@ const Statistics: FC<StatisticsProps> = ({statistics}) => {
     const setDataToPie = (dataJson: { [date: string]: StatisticsCount })=>{
       let usersJson:{ [type: string]: number } = {};
       Object.keys(dataJson).map((date)=>{
-        
+        let small = fromDate.valueOf();
+        let big = toDate.valueOf();
+        let between = date.valueOf();
+        if(small <= between && between <= big){
           let statisticsJson:StatisticsCount = dataJson[date];
           for(var i=0; i<usersTypes.length; i++){
             let userType = usersTypes[i];
@@ -103,6 +116,7 @@ const Statistics: FC<StatisticsProps> = ({statistics}) => {
               }
             }
           }
+        }
 
       })
       let finalArr = [];
@@ -111,8 +125,6 @@ const Statistics: FC<StatisticsProps> = ({statistics}) => {
         let value = Object.values(usersJson)[i];
         finalArr.push([type, value]);
       }
-      console.log(usersJson);
-      console.log(finalArr);
       return finalArr;
     }
 
@@ -138,12 +150,58 @@ const Statistics: FC<StatisticsProps> = ({statistics}) => {
                     type="date"
                     defaultValue="2021-06-07"
                     onChange={(e)=>pickedTo(e)}
-                    style={{width: '10%', marginTop: '5%'}}
+                    style={{width: '15%', marginTop: '5%'}}
                     inputProps={{style: {fontSize: 20, marginTop: 20}}} 
                     InputLabelProps={{style: {fontSize: 30}}}
                 />
+                {from === "2021-06-07" && to === "2021-06-07"?null:
                 <div className="charts">
-                  <Chart
+                  <ul className="dataList">
+                  {Object.keys(data).map((date)=>{
+                    let small = from.valueOf();
+                    let big = to.valueOf();
+                    let between = date.valueOf();
+                    if(small <= between && between <= big){
+
+                      let index = Object.keys(data).indexOf(date);
+                      let jsonStat = Object.values(data)[index];
+                      return (
+                        <li key={index} className="date">
+                          <h2>{date}</h2>
+                          {Object.keys(jsonStat).map((type)=>{
+                            let typeIndex = Object.keys(jsonStat).indexOf(type);
+                            return (
+                              <h3>
+                                {type}  :  {Object.values(jsonStat)[typeIndex]}
+                              </h3>
+                            )
+                          })}
+                        </li>
+                      )
+                    }
+                  })}
+                  </ul>
+                  {dataPie.length === 0? null:
+                    <Chart
+                      width={'500px'}
+                      height={'300px'}
+                      chartType="PieChart"
+                      loader={<div>Loading Chart</div>}
+                      style={{marginTop: '4%', marginLeft: '3%'}}
+                      data={[
+                        ['Users', 'Amount'],
+                        ...dataPie
+                      ]}
+                      options={{
+                        title: 'Users from Total',
+                      }}
+                      rootProps={{ 'data-testid': '1' }}
+                    />
+                  }
+                  
+                    {dataGraph.length === 1 && dataGraph[0].length === 0?
+                    null:
+                    <Chart
                       width={'1000px'}
                       height={'300px'}
                       style={{marginTop: '3%'}}
@@ -163,22 +221,11 @@ const Statistics: FC<StatisticsProps> = ({statistics}) => {
                       // For tests
                       rootProps={{ 'data-testid': '2' }}
                     />
-                    <Chart
-                      width={'500px'}
-                      height={'300px'}
-                      chartType="PieChart"
-                      loader={<div>Loading Chart</div>}
-                      style={{marginTop: '4%', marginLeft: '3%'}}
-                      data={[
-                        ['Users', 'Amount'],
-                        ...dataPie
-                      ]}
-                      options={{
-                        title: 'Users from Total',
-                      }}
-                      rootProps={{ 'data-testid': '1' }}
-                    />
+                    }
                   </div>
+              }
+                 
+                  
             </form>
         </div>
 
