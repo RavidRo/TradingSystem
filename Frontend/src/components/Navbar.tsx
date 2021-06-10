@@ -53,16 +53,12 @@ const Navbar: FC<NavBarProps> = ({
 	const [hoverCart, setHoverCart] = useState<boolean>(false);
 	const [storesToProductsMy, setStoresProducts] =
 		useState<StoreToSearchedProducts>(storesToProducts);
-	const [myNotifications, setNotifications] = useState<notificationTime[]>(notifications);
 	const [accountMenuOpen, setAccountMenuOpen] = useState<boolean>(false);
 	const accountMenuRef = React.useRef<HTMLButtonElement>(null);
 	const history = useHistory();
 	const username = useContext(UsernameContext);
 	const admins = useContext(AdminsContext);
 
-	useEffect(() => {
-		setNotifications(notifications);
-	}, [notifications]);
 	useEffect(() => {
 		setStoresProducts(storesToProducts);
 	}, [storesToProducts]);
@@ -87,6 +83,7 @@ const Navbar: FC<NavBarProps> = ({
 		);
 	};
 
+	
 	return (
 		<div className='navbar'>
 			<nav>
@@ -185,29 +182,14 @@ const Navbar: FC<NavBarProps> = ({
 						to={{
 							pathname: '/Notifications',
 							state: {
-								notifications: myNotifications,
+								notifications: notifications,
+								// update: ()=>console.log("hi Ravid")
 							},
 						}}
 					>
-						{/* <Fade in={openNotifications}>
-						<Paper className="notification-cont">
-							<List component="ul">
-								{notifications.map((notification, index) => (
-									<>
-										<ListItemText
-											primary={notification}
-											className="notification"
-											key={index}
-										/>
-										<Divider key={index} />
-									</>
-								))}
-							</List>
-						</Paper>
-					</Fade> */}
 						<IconButton color={'inherit'}>
-							<Badge badgeContent={myNotifications.length} showZero color='primary'>
-								<NotificationsIcon className='item-icon' />
+							<Badge badgeContent={notifications.length} showZero color='primary'>
+								<NotificationsIcon className='item-icon'/>
 							</Badge>
 						</IconButton>
 					</Link>

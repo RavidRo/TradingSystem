@@ -4,19 +4,22 @@ import Box from '@material-ui/core/Box';
 import {faEnvelopeOpenText} from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import '../styles/Notifications.scss';
-import { NotificationsActive } from '@material-ui/icons';
 import {notificationTime } from '../types';
+import updateNotifications from '../components/Navbar';
+
 
 type NotificationProps = {
     location: any,
+    initializeNotifications: ()=>void,
 };
 
-const Notifications: FC<NotificationProps> = ({location}) => {
+const Notifications: FC<NotificationProps> = ({location, initializeNotifications}) => {
     const [notifications, setNotifications] = useState<notificationTime>(location.state.notifications);
 
     useEffect(()=>{
         setNotifications(location.state.notifications);
-    },[location.state.notifications]);
+        initializeNotifications();
+    },[]);
 
 	return (
         <div className="NotificationsDiv" {...console.log(notifications)}>

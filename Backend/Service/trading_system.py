@@ -69,9 +69,15 @@ class TradingSystem(object):
                     if func == "enter_system":
                         cookies.append(result)
                     elif func == "create_store":
-                        store_ids.append(result)
+                        if not result.succeeded():
+                            raise Exception(f"initializing using state.json failed on function - {func}, args - {new_args}")
+                        store_ids.append(result.get_obj())
                     elif func == "create_product":
-                        product_ids.append(result)
+                        if not result.succeeded():
+                            raise Exception(f"initializing using state.json failed on function - {func}, args - {new_args}")
+                        product_ids.append(result.get_obj())
+                    elif not result.succeeded():
+                        raise Exception(f"initializing using state.json failed on function - {func}, args - {new_args}")
 
     def enter_system(self):
         return TradingSystemManager.enter_system()

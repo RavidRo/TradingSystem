@@ -28,6 +28,8 @@ type RoutesProps = {
 	signedIn: boolean;
 	setSignedIn: (isSignedIn: boolean) => void;
 	setUsername: (username: string) => void;
+
+	initializeNotifications:()=>void,
 };
 
 const Routes: FC<RoutesProps> = ({
@@ -43,6 +45,7 @@ const Routes: FC<RoutesProps> = ({
 	signedIn,
 	setSignedIn,
 	setUsername,
+	initializeNotifications,
 }) => {
 	const username = useContext(UsernameContext);
 	const admins = useContext(AdminsContext);
@@ -77,7 +80,13 @@ const Routes: FC<RoutesProps> = ({
 			</Route>
 
 			<Route path='/sign-up' exact component={SignUp} />
-			<Route path='/Notifications' exact component={Notifications} />
+
+			<Route
+				path='/Notifications'
+				exact
+				render={(props) => <Notifications {...props} initializeNotifications={initializeNotifications} />}
+			/>
+
 			<Route
 				path='/searchPage'
 				exact

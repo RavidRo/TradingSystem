@@ -38,8 +38,15 @@ function App() {
 	const [cookie, setCookie] = useState<string>('');
 	const [notifications, setNotifications] = useState<notificationTime[]>([]);
 	const storesToProducts = useRef<StoreToSearchedProducts>({});
+	const [clientSocket, setClientSocker] = useState<WebSocket>();
+
 
 	useEffect(() => {
+		initializeSocket();
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, []);
+
+	const initializeSocket = ()=>{
 		getCookie().then((cookie) => {
 			if (cookie) {
 				const secured = process.env.NODE_ENV === 'production' ? 'wss' : 'ws';
@@ -47,26 +54,22 @@ function App() {
 					process.env.NODE_ENV === 'production'
 						? 'trading-system-workshop.herokuapp.com'
 						: '127.0.0.1:5000';
-				const client = new WebSocket(`${secured}://${domain}/connect`);
-				client.onopen = () => {
+				let clientTemp = new WebSocket(`${secured}://${domain}/connect`);
+				setClientSocker(clientTemp);
+				clientTemp.onopen = () => {
 					// alert('WebSocket Client Opened');
-					client.send(cookie); // have to be here - else socket.receive in server gets stuck
+					clientTemp.send(cookie); // have to be here - else socket.receive in server gets stuck
 				};
-				client.onmessage = (messageEvent) => {
-					setNotifications((old) => [
-						...old,
-						[messageEvent.data, new Date().toUTCString()],
-					]);
+				clientTemp.onmessage = (messageEvent) => {
+					setNotifications((old)=>[...old, [messageEvent.data, new Date().toUTCString()]]);
 					// alert('received socket message');
 				};
-				client.onclose = () => {
+				clientTemp.onclose = () => {
 					// alert('connection closed!');
 				};
 			}
 		});
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, []);
-
+	}
 	const productObj = useAPI<Product[]>('/save_product_in_cart', {}, 'POST');
 	const productUpdateObj = useAPI<Product[]>('/change_product_quantity_in_cart', {}, 'POST');
 
@@ -228,7 +231,10 @@ function App() {
 	// 	// eslint-disable-next-line react-hooks/exhaustive-deps
 	// }, []);
 
-	return cookie !== '' ? (
+	const initializeNotifications = ()=>{
+		setNotifications([]);
+	}
+	return cookie !== '' &&  clientSocket!==undefined ? (
 		<ThemeProvider theme={theme}>
 			<CookieContext.Provider value={cookie}>
 				<AdminsContext.Provider value={require('../../../config.json').admins}>
@@ -243,7 +249,8 @@ function App() {
 								logout={() => {
 									setSignedIn(false);
 									setCookie('');
-									getCookie();
+									clientSocket.close();
+									initializeSocket();
 								}}
 								propUpdateStores={propUpdateStores}
 							/>
@@ -258,6 +265,7 @@ function App() {
 								propHandleAdd={addProductToPopup}
 								propUpdateStores={propUpdateStores}
 								propsAddProduct={addProductToPopup}
+								initializeNotifications={initializeNotifications}
 							/>
 						</BrowserRouter>
 					</UsernameContext.Provider>
