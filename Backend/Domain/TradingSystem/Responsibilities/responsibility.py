@@ -46,6 +46,7 @@ class Responsibility(Parsable):
         self._user_state = user_state
         user_state.add_responsibility(self, store.get_id())
         self._store = store
+        store.add_owner(user_state.get_username().get_obj().value)
         self.__subscriber = subscriber
         if subscriber:
             self._store.subscribe(subscriber)
@@ -196,6 +197,7 @@ class Responsibility(Parsable):
         if self.__subscriber:
             self.__subscriber.notify(message)
             self._store.unsubscribe(self.__subscriber)
+        self._store.remove_owner(self._user_state.get_username().get_obj().value)
         self._user_state.dismiss_from_store(store_id)
 
     # Parsing the object for user representation

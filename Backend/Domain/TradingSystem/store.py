@@ -441,3 +441,11 @@ class Store(Parsable, Subscriber):
 
     def get_owners_names(self):
         return self.__responsibility.get_owners_names()
+
+    def remove_owner(self, username) -> None:
+        for product_id in self._products_to_quantities:
+            self._products_to_quantities[product_id][0].remove_owner(username)
+
+    def add_owner(self, username) -> None:
+        for product_id in self._products_to_quantities:
+            self._products_to_quantities[product_id][0].add_owner(username)

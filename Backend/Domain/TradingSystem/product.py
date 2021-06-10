@@ -69,6 +69,14 @@ class Product(IProduct):
     def get_offers(self) -> list[Offer]:
         return list(self.__offers.values())
 
+    def remove_owner(self, username) -> None:
+        for offer_id in self.__offers:
+            self.__offers[offer_id].remove_owner(username)
+
+    def add_owner(self, username) -> None:
+        for offer_id in self.__offers:
+            self.__offers[offer_id].add_owner(username)
+
     def suggest_counter_offer(self, offer_id, price) -> Response[None]:
         if offer_id not in self.__offers:
             return Response(False, msg=f"The offer with id {offer_id} does not exist")

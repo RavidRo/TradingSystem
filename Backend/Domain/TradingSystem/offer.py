@@ -30,6 +30,14 @@ class Offer(Parsable):
         for id in owners_names:
             self.__pending_owners_approval[id] = False
 
+    def remove_owner(self, username) -> None:
+        if username in self.__pending_owners_approval:
+            del self.__pending_owners_approval[username]
+
+    def add_owner(self, username) -> None:
+        if username not in self.__pending_owners_approval:
+            self.__pending_owners_approval[username] = False
+
     def declare_price(self, price) -> Response[None]:
         for id in self.__pending_owners_approval:
             self.__pending_owners_approval[id] = False
