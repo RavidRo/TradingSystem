@@ -1,10 +1,36 @@
-import { Button, TextField } from '@material-ui/core';
 import React, { FC, useState, useEffect, useRef } from 'react';
+
+import { useHistory } from 'react-router-dom';
+
+import { DatePicker } from '@material-ui/pickers';
+import { Button, TextField } from '@material-ui/core';
+
 import '../styles/Purchase.scss';
 import Timer from '../components/Timer';
-import useAPI from '../hooks/useAPI';
-import { useHistory } from 'react-router-dom';
-import Swal from 'sweetalert2';
+import { useAPI2 } from '../hooks/useAPI';
+import { cancelPurchase, sendPayment } from '../api';
+import { confirmOnSuccess } from '../decorators';
+
+type MyTextFieldProps = {
+	name: string;
+	setValue: (newValue: string) => void;
+	width?: string;
+	numeric?: boolean;
+};
+const MyTextField: FC<MyTextFieldProps> = ({ name, setValue, width = '20%', numeric = false }) => {
+	return (
+		<TextField
+			required
+			id={name}
+			label={name}
+			defaultValue=''
+			className='text-field'
+			style={{ width }}
+			onChange={(e) => setValue(e.target.value)}
+			{...(numeric ? { inputMode: 'numeric', type: 'number' } : {})}
+		/>
+	);
+};
 
 type PurchaseProps = {
 	location: any;
@@ -14,69 +40,89 @@ const Purchase: FC<PurchaseProps> = ({ location }) => {
 	const totalAmount = useRef<number>(
 		location.state !== undefined ? location.state.totalAmount : 0
 	);
-	const [credit, setCredit] = useState<string>('');
+
+	// address: name, address, city, country, zip
+	// purchase_details: card_number, month, year, holder, ccv, id
+
+	// Address
+	const [name, setName] = useState<string>('');
 	const [address, setAddress] = useState<string>('');
-	// const [age,setAge] = useState<string>("");
+	const [city, setCity] = useState<string>('');
+	const [country, setCountry] = useState<string>('');
+	const [zip, setZip] = useState<string>('');
+
+	// Payment
+	const [cardNumber, setCardNumber] = useState<string>('');
+	const [holderName, setHolderName] = useState<string>('');
+	const [ccv, setCcv] = useState<string>('');
+	const [id, setId] = useState<string>('');
+	const [expiringDate, setExpiringDate] = useState(new Date());
+
 	const history = useHistory();
 
-	const handleUnload = (e: any) => {
-		e.preventDefault();
-	};
-
 	useEffect(() => {
+		const handleUnload = (e: any) => {
+			e.preventDefault();
+		};
 		window.addEventListener('beforeunload', handleUnload);
 		return () => window.removeEventListener('beforeunload', handleUnload);
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [handleUnload]);
+	}, []);
 
-	const purchaseObj = useAPI<number>('/send_payment', {}, 'POST');
-	const handlePurchase = () => {
-		purchaseObj
-			.request({
-				cookie: location.state.cookie,
-				payment_details: { credit },
-				address: address,
-			})
-			.then(({ data, error }) => {
-				if (!error && data !== null) {
-					Swal.fire({
-						icon: 'success',
-						title: 'Congratulations!',
-						text: data.data.toString(),
-					});
-				}
-			});
-	};
-	const cancelObj = useAPI<number>('/cancel_purchase', {}, 'POST');
+	const purchaseAPI = useAPI2(sendPayment);
+	const handlePurchase = confirmOnSuccess(
+		() =>
+			purchaseAPI.request(
+				{
+					card_number: cardNumber,
+					holder: holderName,
+					ccv: ccv,
+					id,
+					month: expiringDate.getMonth(),
+					year: expiringDate.getFullYear(),
+				},
+				{ name, address, city, country, zip }
+			),
+		'Congratulations!'
+	);
+
+	const cancelAPI = useAPI2(cancelPurchase);
 	const handleCancel = () => {
-		cancelObj.request({ cookie: location.state.cookie }).then(({ data, error }) => {
-			if (!error && data !== null) {
-				// go back to cart
-				history.goBack();
-			}
-		});
+		cancelAPI.request().then(() => history.goBack());
 	};
 
 	return (
 		<div className='purchaseDiv'>
 			<form noValidate autoComplete='on'>
-				<div className='formDiv'>
-					<TextField
-						required
-						id='standard-required'
-						label='Credit Number'
-						defaultValue=''
-						style={{ width: '50%' }}
-						onChange={(e) => setCredit(e.target.value)}
-					/>
-					<TextField
-						required
-						id='standard-required'
-						label='Address'
-						defaultValue=''
-						style={{ marginTop: '5%', width: '50%' }}
-						onChange={(e) => setAddress(e.target.value)}
-					/>
+				<div className='formDiv-container'>
+					<div className='formDiv'>
+						<h3 className='section-title'>Shipping Details</h3>
+						<MyTextField name='Name' setValue={setName} width='40%' />
+						<MyTextField name='Address' setValue={setAddress} width='40%' />
+						<MyTextField name='City' setValue={setCity} />
+						<MyTextField name='Country' setValue={setCountry} />
+						<MyTextField name='ZIP' setValue={setZip} width='10%' numeric />
+
+						<h3 className='section-title'>Payment Details</h3>
+						<MyTextField
+							name='Card Number'
+							setValue={setCardNumber}
+							width='30%'
+							numeric
+						/>
+						<MyTextField name='CCV' setValue={setCcv} width='30%' numeric />
+						<DatePicker
+							variant='inline'
+							openTo='year'
+							views={['year', 'month']}
+							label='Expiring Date'
+							value={expiringDate}
+							onChange={(date) => setExpiringDate(date as Date)}
+							className='text-field'
+							style={{ width: '20%' }}
+						/>
+						<MyTextField name='Card holder Name' setValue={setHolderName} />
+						<MyTextField name='Card holder ID' setValue={setId} numeric />
+					</div>
 				</div>
 				<h3 className='totalPurchase'>Total amount : {totalAmount.current}</h3>
 				<div className='buttonsDiv'>
@@ -104,7 +150,7 @@ const Purchase: FC<PurchaseProps> = ({ location }) => {
 							alignSelf: 'center',
 							marginLeft: '5%',
 						}}
-						onClick={() => handlePurchase()}
+						onClick={() => handlePurchase().then(() => history.push('/'))}
 					>
 						Check
 					</Button>

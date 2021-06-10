@@ -1,6 +1,7 @@
 """this class if the gateway from the client to the domain server layer
 all the api calls and data asked from the server goes here
 this class is responsible for calling the right methods in the login classes"""
+import datetime
 from typing import Callable
 from Backend.response import Response
 import asyncio
@@ -15,6 +16,12 @@ pool = concurrent.futures.ThreadPoolExecutor(max_workers=10)
 app = Quart(__name__, static_url_path="", static_folder="Frontend/build")
 
 
+def __toJson(o):
+    if isinstance(o, datetime.datetime):
+        return o.__str__()
+    return o.__dict__
+
+
 def __responseToJson(cookie: str, response: Response, toData: Callable = lambda obj: obj):
     return json.dumps(
         {
@@ -23,7 +30,7 @@ def __responseToJson(cookie: str, response: Response, toData: Callable = lambda 
             "succeeded": response.succeeded(),
             "data": toData(response.get_obj()) if response.succeeded() else None,
         },
-        default=lambda o: o.__dict__,
+        default=__toJson,
     )
 
 
@@ -87,7 +94,7 @@ async def connect():
             while len(queue) > 0:
                 messages = queue.pop()
                 for message in messages:
-                    await websocket.send(message)
+                    await websocket.send_json(message)
             # messages = await queue.get()
             # print("Sending messages to socket", messages)
             # for message in messages:
@@ -882,7 +889,6 @@ async def get_user_offers():
     return __responseToJson(cookie, answer, lambda obj: obj.values)
 
 
-
 @app.route("/get_store_offers", methods=["GET"])
 async def get_store_offers():
     cookie = request.args.get("cookie")
@@ -1038,6 +1044,15 @@ async def cancel_offer():
         return __missing_args(cookie, missing_args)
     offer_id = request_json["offer_id"]
     answer = await __async_call(system.cancel_offer, cookie, offer_id)
+    return __responseToJson(cookie, answer)
+
+
+@app.route("/get_statistics", methods=["GET"])
+async def get_statistics():
+    cookie = request.args.get("cookie")
+    if cookie is None:
+        cookie = await __async_call(system.enter_system)
+    answer = await __async_call(system.get_statistics, cookie)
     return __responseToJson(cookie, answer)
 
 

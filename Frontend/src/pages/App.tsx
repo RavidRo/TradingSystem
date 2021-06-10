@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { BrowserRouter } from 'react-router-dom';
 import { createMuiTheme, ThemeProvider } from '@material-ui/core';
+import DateFnsUtils from '@date-io/date-fns';
 
 import Navbar from '../components/Navbar';
 import Routes from './Routes';
@@ -8,6 +9,7 @@ import Routes from './Routes';
 import { Product, StoreToSearchedProducts, notificationTime } from '../types';
 import useAPI from '../hooks/useAPI';
 import { AdminsContext, CookieContext, UsernameContext } from '../contexts';
+import { MuiPickersUtilsProvider } from '@material-ui/pickers';
 
 const theme = createMuiTheme({
 	typography: {
@@ -38,15 +40,14 @@ function App() {
 	const [cookie, setCookie] = useState<string>('');
 	const [notifications, setNotifications] = useState<notificationTime[]>([]);
 	const storesToProducts = useRef<StoreToSearchedProducts>({});
-	const [clientSocket, setClientSocker] = useState<WebSocket>();
-
+	const [clientSocket, setClientSocket] = useState<WebSocket>();
 
 	useEffect(() => {
 		initializeSocket();
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
 
-	const initializeSocket = ()=>{
+	const initializeSocket = () => {
 		getCookie().then((cookie) => {
 			if (cookie) {
 				const secured = process.env.NODE_ENV === 'production' ? 'wss' : 'ws';
@@ -55,21 +56,25 @@ function App() {
 						? 'trading-system-workshop.herokuapp.com'
 						: '127.0.0.1:5000';
 				let clientTemp = new WebSocket(`${secured}://${domain}/connect`);
-				setClientSocker(clientTemp);
+				setClientSocket(clientTemp);
 				clientTemp.onopen = () => {
 					// alert('WebSocket Client Opened');
 					clientTemp.send(cookie); // have to be here - else socket.receive in server gets stuck
 				};
 				clientTemp.onmessage = (messageEvent) => {
-					setNotifications((old)=>[...old, [messageEvent.data, new Date().toUTCString()]]);
+					console.log(messageEvent.data);
+					setNotifications((old) => [
+						...old,
+						[messageEvent.data, new Date().toUTCString()],
+					]);
 					// alert('received socket message');
 				};
 				clientTemp.onclose = () => {
-					// alert('connection closed!');
+					alert('connection closed!');
 				};
 			}
 		});
-	}
+	};
 	const productObj = useAPI<Product[]>('/save_product_in_cart', {}, 'POST');
 	const productUpdateObj = useAPI<Product[]>('/change_product_quantity_in_cart', {}, 'POST');
 
@@ -231,47 +236,49 @@ function App() {
 	// 	// eslint-disable-next-line react-hooks/exhaustive-deps
 	// }, []);
 
-	const initializeNotifications = ()=>{
+	const initializeNotifications = () => {
 		setNotifications([]);
-	}
-	return cookie !== '' &&  clientSocket!==undefined ? (
-		<ThemeProvider theme={theme}>
-			<CookieContext.Provider value={cookie}>
-				<AdminsContext.Provider value={require('../../../config.json').admins}>
-					<UsernameContext.Provider value={username}>
-						<BrowserRouter>
-							<Navbar
-								signedIn={signedIn}
-								storesToProducts={storesToProducts.current}
-								propHandleDelete={handleDeleteProduct}
-								notifications={notifications}
-								changeQuantity={changeQuantity}
-								logout={() => {
-									setSignedIn(false);
-									setCookie('');
-									clientSocket.close();
-									initializeSocket();
-								}}
-								propUpdateStores={propUpdateStores}
-							/>
-							<Routes
-								handleDeleteProduct={handleDeleteProduct}
-								setSignedIn={setSignedIn}
-								setUsername={setUsername}
-								signedIn={signedIn}
-								storesToProducts={storesToProducts}
-								changeQuantity={changeQuantity}
-								getPropsCookie={getPropsCookie}
-								propHandleAdd={addProductToPopup}
-								propUpdateStores={propUpdateStores}
-								propsAddProduct={addProductToPopup}
-								initializeNotifications={initializeNotifications}
-							/>
-						</BrowserRouter>
-					</UsernameContext.Provider>
-				</AdminsContext.Provider>
-			</CookieContext.Provider>
-		</ThemeProvider>
+	};
+	return cookie !== '' && clientSocket !== undefined ? (
+		<MuiPickersUtilsProvider utils={DateFnsUtils}>
+			<ThemeProvider theme={theme}>
+				<CookieContext.Provider value={cookie}>
+					<AdminsContext.Provider value={require('../../../config.json').admins}>
+						<UsernameContext.Provider value={username}>
+							<BrowserRouter>
+								<Navbar
+									signedIn={signedIn}
+									storesToProducts={storesToProducts.current}
+									propHandleDelete={handleDeleteProduct}
+									notifications={notifications}
+									changeQuantity={changeQuantity}
+									logout={() => {
+										setSignedIn(false);
+										setCookie('');
+										clientSocket.close();
+										initializeSocket();
+									}}
+									propUpdateStores={propUpdateStores}
+								/>
+								<Routes
+									handleDeleteProduct={handleDeleteProduct}
+									setSignedIn={setSignedIn}
+									setUsername={setUsername}
+									signedIn={signedIn}
+									storesToProducts={storesToProducts}
+									changeQuantity={changeQuantity}
+									getPropsCookie={getPropsCookie}
+									propHandleAdd={addProductToPopup}
+									propUpdateStores={propUpdateStores}
+									propsAddProduct={addProductToPopup}
+									initializeNotifications={initializeNotifications}
+								/>
+							</BrowserRouter>
+						</UsernameContext.Provider>
+					</AdminsContext.Provider>
+				</CookieContext.Provider>
+			</ThemeProvider>
+		</MuiPickersUtilsProvider>
 	) : (
 		<h1>LOADING</h1>
 	);
