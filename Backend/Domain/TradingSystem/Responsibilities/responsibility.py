@@ -63,6 +63,7 @@ class Responsibility(Parsable):
         self._responsibility_dal_id = None
 
     def get_user_state(self):
+
         return self._user_state
 
     def get_store_id(self):
@@ -197,9 +198,13 @@ class Responsibility(Parsable):
 
         for appointment in self._appointed:
             if appointment._user_state.get_username().get_obj().get_val() == username:
-                self._appointed.remove(appointment)
-                appointment.__dismiss_from_store(self._store.get_id())
-                return True
+                res = self._responsibilities_handler.remove_res(appointment)
+
+                if res.succeeded():
+                    self._appointed.remove(appointment)
+                    appointment.__dismiss_from_store(self._store.get_id())
+                    res = self._responsibilities_handler.commit_changes()
+                    return True
 
         return any(map(lambda worker: worker._remove_appointment(username), self._appointed))
 
@@ -231,7 +236,8 @@ class Responsibility(Parsable):
         return [per.name for per in Permission]
 
     def save_self(self):
-        dal_responsibility_res = self._responsibilities_handler.save_res()
+        from Backend.DataBase.Handlers.responsibilities_handler import Founder_Responsibility_DAL
+        dal_responsibility_res = self._responsibilities_handler.save_res(Founder_Responsibility_DAL)
         if dal_responsibility_res.succeeded():
             self._responsibility_dal = dal_responsibility_res.get_obj()
             self._responsibility_dal_id = dal_responsibility_res.get_obj().id
@@ -252,7 +258,28 @@ class Responsibility(Parsable):
     def reject_user_offer(self, product_id, offer_id) -> Response[None]:
         raise Exception(Responsibility.ERROR_MESSAGE)
 
-
     def get_dal_responsibility_id(self):
         return self._responsibility_dal_id
 
+    def get_dal_responsibility(self):
+        return self._responsibility_dal
+
+    def set_appointments(self, appointments):
+        self._appointed = appointments
+
+    def set_dal_responsibility_and_id(self, res_root):
+        self._responsibility_dal = res_root
+        self._responsibility_dal_id = res_root.id
+
+    def get_res_if_exists(self, responsibility_ids):
+        if str(self._responsibility_dal_id) in responsibility_ids:
+            return Response(True, obj=self)
+        if self._appointed is None:
+            return Response(False)
+        for child in self._appointed:
+            res = child.get_res_if_exists(responsibility_ids)
+            if res.succeeded():
+                return res
+
+    def set_store(self, store):
+        self._store = store

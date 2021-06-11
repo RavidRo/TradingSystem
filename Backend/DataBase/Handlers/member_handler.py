@@ -1,11 +1,9 @@
 import json
 from threading import Lock
-from sqlalchemy import Table, Column, String, Boolean, insert, ARRAY, ForeignKey, select, TypeDecorator, VARCHAR
-from sqlalchemy.dialects.postgresql import JSON
+from sqlalchemy import Table, Column, String, Boolean, insert, ForeignKey, select, TypeDecorator, VARCHAR
+from sqlalchemy.dialects.postgresql import JSON, ARRAY
 from sqlalchemy.ext.mutable import Mutable, MutableDict
 from sqlalchemy.orm import mapper, relationship, backref, with_polymorphic
-
-from Backend.DataBase.Handlers.shopping_bag_handler import ShoppingBagHandler
 from Backend.DataBase.IHandler import IHandler
 from Backend.DataBase.database import mapper_registry, session
 from Backend.Domain.TradingSystem.Responsibilities.founder import Founder
@@ -19,24 +17,24 @@ from Backend.rw_lock import ReadWriteLock
 from sqlalchemy.orm.collections import attribute_mapped_collection, column_mapped_collection
 
 
-class MutableList(Mutable, list):
-    def append(self, value):
-        list.append(self, value)
-        self.changed()
-
-    def pop(self, index=0):
-        value = list.pop(self, index)
-        self.changed()
-        return value
-
-    @classmethod
-    def coerce(cls, key, value):
-        if not isinstance(value, MutableList):
-            if isinstance(value, list):
-                return MutableList(value)
-            return Mutable.coerce(key, value)
-        else:
-            return value
+# class MutableList(Mutable, list):
+#     def append(self, value):
+#         list.append(self, value)
+#         self.changed()
+#
+#     def pop(self, index=0):
+#         value = list.pop(self, index)
+#         self.changed()
+#         return value
+#
+#     @classmethod
+#     def coerce(cls, key, value):
+#         if not isinstance(value, MutableList):
+#             if isinstance(value, list):
+#                 return MutableList(value)
+#             return Mutable.coerce(key, value)
+#         else:
+#             return value
 
 
 class MemberHandler(IHandler):
@@ -45,6 +43,7 @@ class MemberHandler(IHandler):
 
     def __init__(self):
         from Backend.Domain.TradingSystem.States.admin import Admin
+        from Backend.DataBase.Handlers.shopping_bag_handler import ShoppingBagHandler
         super().__init__(ReadWriteLock(), Member)
         self.__credentials = Table("credentials", mapper_registry.metadata,
                                    Column('username', String(50), primary_key=True),
@@ -157,7 +156,6 @@ class MemberHandler(IHandler):
             return res
 
 
-
     def update_notifications(self, username: str, notifications: list[str]):
         self._rwlock.acquire_write()
         res = Response(True)
@@ -208,4 +206,32 @@ class MemberHandler(IHandler):
             self._rwlock.release_read()
             return res
 
+    def load_user_with_res(self, res_id):
+        self._rwlock.acquire_read()
+        res = Response(True)
+        try:
+            user = session.query(Member).filter(self.__members.c.responsibilities_ids.contains([res_id])).one()
+            res = Response(True, user)
+            session.commit()
+        except Exception as e:
+            session.rollback()
+            res = Response(False, msg=str(e))
+        finally:
+            self._rwlock.release_read()
+            return res
 
+    def load_res_ids(self, username):
+        self._rwlock.acquire_read()
+        res = Response(True)
+        try:
+            stmt = select([self.__members.c.responsibilities_ids]).where(
+                self.__members.c.username == username)
+            res = session.execute(stmt).one()
+            session.commit()
+            res = Response(True, res)
+        except Exception as e:
+            session.rollback()
+            res = Response(False, msg=str(e))
+        finally:
+            self._rwlock.release_read()
+            return res

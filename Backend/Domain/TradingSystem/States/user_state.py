@@ -237,3 +237,7 @@ class UserState(ABC):
     @abstractmethod
     def cancel_offer(self, offer_id) -> Response[None]:
         return Response(False, msg="Abstract Method")
+
+    def has_res_id(self, res_id):
+        pass
+

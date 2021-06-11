@@ -20,7 +20,6 @@ class Member(UserState):
         )
 
     def add_responsibility(self, responsibility, store_id):
-        from sqlalchemy.orm.attributes import flag_modified
         self.__responsibilities[store_id] = responsibility
         self.__responsibilities_ids += [responsibility.get_dal_responsibility_id()]
         self._member_handler.update_responsibilities_ids(self._username, self.__responsibilities_ids)
@@ -41,6 +40,7 @@ class Member(UserState):
         if cart_res.succeeded():
             self._cart = cart_res.get_obj()
         return cart_res
+
 
     def __init__(
             self, user, username, responsibilities=None, purchase_details=None, cart=None
@@ -206,7 +206,12 @@ class Member(UserState):
         return self.__responsibilities[store_id].appoint_owner(new_owner)
 
     def dismiss_from_store(self, store_id):
+        # from Backend.DataBase.Handlers.member_handler import MemberHandler
+        # self.set_responsibility_ids(MemberHandler.get_instance().load_res_ids(self._username).get_obj())
+
+        self.__responsibilities_ids.remove(self.__responsibilities[store_id].get_dal_responsibility_id())
         self.__responsibilities.pop(store_id)
+        self._member_handler.update_responsibilities_ids(self._username, self.__responsibilities_ids)
 
     def appoint_new_store_manager(self, store_id, new_manager):
         if store_id not in self.__responsibilities:
@@ -337,3 +342,16 @@ class Member(UserState):
         if offer_id not in self.__offers:
             return Response(False, msg=f"Offer with offer id {offer_id} does not exist")
         return self.__offers[offer_id].cancel_offer()
+
+    def has_res_id(self, res_id):
+        return res_id in self.__responsibilities_ids
+
+    def set_responsibilities(self, store_id_to_res):
+        self.__responsibilities = store_id_to_res
+        self.__responsibilities_ids = [res.get_dal_responsibility_id() for res in store_id_to_res.values()]
+
+    def set_responsibility_ids(self, responsibility_ids):
+        self.__responsibilities_ids = [element for element in responsibility_ids[0]]
+
+    def get_responsibility_ids(self):
+        return self.__responsibilities_ids

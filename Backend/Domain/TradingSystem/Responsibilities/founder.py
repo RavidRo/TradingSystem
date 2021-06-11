@@ -109,15 +109,16 @@ class Founder(Responsibility):
                 #! (guest does not hae a username)
                 new_responsibility = Owner(user.state, self._store, user)
                 self._appointed.append(new_responsibility)
-                self.save_appointment(new_responsibility)
+                from Backend.DataBase.Handlers.responsibilities_handler import Owner_Responsibility_DAL
+                self.save_appointment(new_responsibility, Owner_Responsibility_DAL)
                 new_responsibility._user_state.add_responsibility(new_responsibility, self._store.get_id())
                 res = self._responsibilities_handler.commit_changes()
                 return res
 
         return result
 
-    def save_appointment(self, new_responsibility):
-        dal_responsibility_res = new_responsibility._responsibilities_handler.save_res(parent=self._responsibility_dal)
+    def save_appointment(self, new_responsibility, class_type):
+        dal_responsibility_res = new_responsibility._responsibilities_handler.save_res(class_type, parent=self._responsibility_dal)
         if dal_responsibility_res.succeeded():
             new_responsibility._responsibility_dal = dal_responsibility_res.get_obj()
             new_responsibility._responsibility_dal_id = dal_responsibility_res.get_obj().id
@@ -144,7 +145,8 @@ class Founder(Responsibility):
                 #! (guest does not hae a username)
                 newResponsibility = Manager(user.state, self._store, user)
                 self._appointed.append(newResponsibility)
-                self.save_appointment(newResponsibility)
+                from Backend.DataBase.Handlers.responsibilities_handler import Manager_Responsibility_DAL
+                self.save_appointment(newResponsibility, Manager_Responsibility_DAL)
                 newResponsibility._user_state.add_responsibility(newResponsibility, self._store.get_id())
                 res = self._responsibilities_handler.commit_changes()
                 result = Response(True)

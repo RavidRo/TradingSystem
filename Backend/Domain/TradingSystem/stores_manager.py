@@ -55,6 +55,13 @@ class StoresManager:
             if store_res.get_obj() is None:
                 return Response(False, msg=f"No store with the ID {store_id} exists")
             return db_fail_response
+
+        store = store_res.get_obj()
+        res_id = store.get_res_id()
+        responsibility = StoresManager.__store_handler.load_res_of_store(res_id, store_res.get_obj())
+        store_res.get_obj().set_responsibility(responsibility)
+        responsibility.set_store(store.get_obj)
+        StoresManager.__stores.append(store_res.get_obj())
         return Response[Store](True, obj=store_res.get_obj())
 
     @staticmethod
@@ -79,3 +86,12 @@ class StoresManager:
             if store.get_id() == store_id:
                 return store.get_purchase_history()
         return Response(False, msg=f"No store with the ID {store_id} exists")
+
+    @staticmethod
+    def get_store_id_to_responsibilities(responsibility_ids):
+        store_id_to_res = dict()
+        for store in StoresManager.__stores:
+            res = store.get_personnel_info().get_obj().get_res_if_exists(responsibility_ids)
+            if res.succeeded():
+                store_id_to_res[store.get_id()] = res.get_obj()
+        return store_id_to_res

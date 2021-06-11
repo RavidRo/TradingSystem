@@ -7,7 +7,6 @@ from Backend.DataBase.database import mapper_registry, session
 from Backend.Domain.TradingSystem.product import Product
 from Backend.Domain.TradingSystem.shopping_bag import ShoppingBag
 from Backend.Domain.TradingSystem.shopping_cart import ShoppingCart
-from Backend.Domain.TradingSystem.stores_manager import StoresManager
 from Backend.response import Response
 
 from Backend.rw_lock import ReadWriteLock
@@ -174,6 +173,7 @@ class ShoppingBagHandler(IHandler):
         pass
 
     def load_cart(self, username):
+        from Backend.Domain.TradingSystem.stores_manager import StoresManager
         res = Response(True)
         try:
             cart = ShoppingCart()

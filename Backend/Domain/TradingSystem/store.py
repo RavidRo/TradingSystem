@@ -22,6 +22,7 @@ class Store(Parsable, Subscriber):
         self.__name = store_name
         self._products_to_quantities: dict[str, tuple[Product, int]] = {}
         self.__responsibility = None
+        self.__responsibility_id = None
         # These fields will be changed in the future versions
         self.__discount_policy = DefaultDiscountPolicy()
         self.__purchase_policy = DefaultPurchasePolicy()
@@ -38,8 +39,6 @@ class Store(Parsable, Subscriber):
     def get_discount_policy(self):
         return self.__discount_policy
 
-    def get_responsibility(self) -> Responsibility:
-        return self.__responsibility
 
     def set_products(self, products_to_quantities: dict[str, tuple[Product, int]]):
         self._products_to_quantities = products_to_quantities
@@ -256,8 +255,21 @@ class Store(Parsable, Subscriber):
         from Backend.Domain.TradingSystem.Responsibilities.responsibility import Responsibility
 
         if self.__responsibility is None:
+
             return Response(False, msg="The store doesn't have assigned personnel")
         return Response[Responsibility](True, self.__responsibility, msg="Personnel info")
+
+    # def get_personnel_info(self) -> Response[Responsibility]:
+    #     from Backend.Domain.TradingSystem.Responsibilities.responsibility import Responsibility
+    #
+    #     if self.__responsibility is None:
+    #         res_id = self.get_res_id()
+    #         res = self.__store_handler.load_store_founder(res_id, self, )
+    #         if res.succeeded():
+    #             self.__responsibility = res.get_obj()
+    #             return Response[Responsibility](True, self.__responsibility, msg="Personnel info")
+    #
+    #     return Response(False, msg="The store doesn't have assigned personnel")
 
     def get_purchase_history(self) -> Response[ParsableList[PurchaseDetails]]:
         self.__history_lock.acquire_read()
@@ -483,3 +495,6 @@ class Store(Parsable, Subscriber):
 
         product = self._products_to_quantities[product_id][0]
         return product.reject_user_offer(offer_id)
+
+    def get_res_id(self):
+        return self.__responsibility_id

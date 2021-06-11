@@ -1,3 +1,4 @@
+from Backend.DataBase.database import db_fail_response
 from Backend.Domain.TradingSystem.offer import Offer
 from typing import Callable
 import uuid
@@ -17,7 +18,7 @@ from Backend.settings import Settings
 
 class UserManager:
     __cookie_user: dict[str, IUser] = {}
-    __username_user: dict[str, IUser] = {}
+    __username_user: dict[str, User] = {}
 
     @staticmethod
     def __deligate_to_user(cookie, func):
@@ -83,7 +84,12 @@ class UserManager:
                         old_user.connect(user.get_communicate())
                         return response
                 res = MemberHandler.get_instance().load(username)
+                ids = MemberHandler.get_instance().load_res_ids(username).get_obj()
+                res.get_obj().set_responsibility_ids(ids)
                 res.get_obj().load_cart()
+                from Backend.Domain.TradingSystem.stores_manager import StoresManager
+                store_id_to_res = StoresManager.get_store_id_to_responsibilities(ids)
+                res.get_obj().set_responsibilities(store_id_to_res)
                 res_commit = MemberHandler.get_instance().commit_changes()
                 if res_commit.succeeded():
                     res.get_obj().set_user(user)
@@ -512,3 +518,15 @@ class UserManager:
         func: Callable[[User], Response] = lambda user: user.cancel_offer(offer_id)
         return UserManager.__deligate_to_user(cookie, func)
 
+    @staticmethod
+    def get_member(res_id):
+        for user in UserManager.__username_user.values():
+            if user.state.has_res_id(res_id):
+                return user.state
+
+        user_res = MemberHandler.get_instance().load_user_with_res(res_id)
+        if user_res.succeeded():
+            user_res.get_obj().load_cart()
+            UserManager.__username_user[user_res.get_obj().get_username().get_obj().get_val()] = user_res.get_obj()
+            return user_res
+        return db_fail_response

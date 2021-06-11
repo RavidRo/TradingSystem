@@ -59,6 +59,8 @@ class StoreHandler(IHandler):
                                      collection_class=attribute_mapped_collection("product_id"))
         })
         self.__product_handler = ProductHandler.get_instance()
+        from Backend.DataBase.Handlers.responsibilities_handler import ResponsibilitiesHandler
+        self.__responsibility_hadnler = ResponsibilitiesHandler.get_instance()
 
     @staticmethod
     def get_instance():
@@ -141,6 +143,7 @@ class StoreHandler(IHandler):
             store.set_products({prod_id: (store_product.product, store_product.quantity) for prod_id, store_product in store.products.items()})
             store.init_fields()
             res.object = store
+            session.commit()
         except DisconnectionError as e:
             session.rollback()
             res = Response(False, PrimitiveParsable(0), msg=str(e))
@@ -150,6 +153,29 @@ class StoreHandler(IHandler):
         finally:
             self._rwlock.release_read()
             return res
+
+    def load_res_of_store(self, res_id, store):
+        res = self.__responsibility_hadnler.load_res_and_appointments(res_id, store)
+        return res.get_obj()
+
+    # def load_store_founder(self, store):
+    #     self._rwlock.acquire_read()
+    #     res = Response(True)
+    #     try:
+    #         store = session.query(Store).get(store_id)
+    #         res_id = store.responsibility_id
+    #         from Backend.DataBase.Handlers.responsibilities_handler import ResponsibilitiesHandler
+    #         ResponsibilitiesHandler.get_instance().load_res(res_id, store_id)
+    #     except DisconnectionError as e:
+    #         session.rollback()
+    #         res = Response(False, PrimitiveParsable(0), msg=str(e))
+    #     except Exception as e:
+    #         session.rollback()
+    #         res = Response(False, msg=str(e))
+    #     finally:
+    #         self._rwlock.release_read()
+    #         return res
+    #
 
     def load_all(self):
         self._rwlock.acquire_read()
