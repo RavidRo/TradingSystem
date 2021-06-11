@@ -34,11 +34,10 @@ export type Offer = {
     username: string;
 }
 export type StatisticsCount = {
-    guests: number;
-	passive_member: number;
+    guest: number;
+	passive_members: number;
     managers: number;
     super_members: number;
-	username: string;
 };
 
 export type StatisticsData = {

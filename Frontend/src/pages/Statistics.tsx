@@ -13,59 +13,81 @@ type StatisticsProps = {
 };
 
 const Statistics: FC<StatisticsProps> = ({statistics}) => {
-    let today = new Date().toISOString().slice(0, 10);
+    // let today = new Date().toISOString().slice(0, 10);
     let fromDate = "2021-06-07";
-    let toDate = today;
+    let toDate = "2021-06-21";
     const [from, setFrom] = useState<string>("2021-06-07");
-    const [to, setTo] = useState<string>(today);
-
+    const [to, setTo] = useState<string>("2021-06-21");
     const statisticsObj = useAPI<StatisticsData>('/get_statistics', {}, 'GET');
     const [dataGraph, setDataGraph] = useState<any[]>([]);
     const [dataPie, setDataPie] = useState<any[]>([]);
-    const [data,setDate] = useState<{ [date: string]: StatisticsCount }>({})
+    const [data,setDate] = useState<{ [date: string]: StatisticsCount }>({});
+    const [isDummy, setIsDummy] = useState<boolean>(true);
+
+    let dummy_json : {[date: string]: StatisticsCount} = {
+      "2021-06-07": {
+        'guest':8,
+        'passive_members':5,
+        'managers':3,
+        'super_members':2,
+      },
+      "2021-06-08": {
+        'guest':6,
+        'passive_members':2,
+        'managers':1,
+        'super_members':2,
+      },
+      "2021-06-12": {
+        'guest':20,
+        'passive_members':15,
+        'managers':3,
+        'super_members':1,
+      },
+    }
+
 
     useEffect(()=>{
-      console.log("in here !!!");
+      setDummy();
+    }, [statistics]);
+
+    const setReal = ()=>{
       statisticsObj.request().then(({ data, error }) => {
         if (!error && data !== null) {
             let dataGraphResult = setDataToChart(data.data.statistics_per_day, from, to);
             setDataGraph(dataGraphResult);
-            let pieResult = setDataToPie(data.data.statistics_per_day);
+            let pieResult = setDataToPie(data.data.statistics_per_day, fromDate, toDate);
             setDataPie(pieResult);
             setDate(data.data.statistics_per_day);
         }
       })
-    }, [statistics]);
+    }
 
+    const setDummy = ()=>{
+      setFrom("2021-06-07");
+      setTo("2021-06-21");
+      fromDate ="2021-06-07";
+      toDate = "2021-06-21";
+      let dataGraphResult = setDataToChart(dummy_json, "2021-06-07", "2021-06-12");
+      console.log(dataGraphResult);
+      setDataGraph(dataGraphResult);
+      let pieResult = setDataToPie(dummy_json,  "2021-06-07", "2021-06-12");
+      console.log(dataGraphResult);
+      setDataPie(pieResult);
+      setDate(dummy_json);
+    }
 
     const pickedFrom = (e:any)=>{
         let date = e.target.value;
         fromDate = date;
         setFrom(fromDate);
-        statisticsObj.request().then(({ data, error }) => {
-          if (!error && data !== null) {
-              let dataGraphResult = setDataToChart(data.data.statistics_per_day, fromDate, toDate);
-              setDataGraph(dataGraphResult);
-              let pieResult = setDataToPie(data.data.statistics_per_day);
-              setDataPie(pieResult);
-              setDate(data.data.statistics_per_day);
-          }
-        })
+        setReal();
     }
 
     const pickedTo = (e:any)=>{
         let date = e.target.value;
         toDate = date;
         setTo(toDate);
-        statisticsObj.request().then(({ data, error }) => {
-          if (!error && data !== null) {
-              let dataGraphResult = setDataToChart(data.data.statistics_per_day, fromDate, toDate);
-              setDataGraph(dataGraphResult);
-              let pieResult = setDataToPie(data.data.statistics_per_day);
-              setDataPie(pieResult);
-              setDate(data.data.statistics_per_day);
-          }
-        })
+        setReal();
     }
 
     // data={[
@@ -102,7 +124,7 @@ const Statistics: FC<StatisticsProps> = ({statistics}) => {
           return [];
       })
     }
-    const setDataToPie = (dataJson: { [date: string]: StatisticsCount })=>{
+    const setDataToPie = (dataJson: { [date: string]: StatisticsCount }, fromDate: string, toDate: string)=>{
       let usersJson:{ [type: string]: number } = {};
       Object.keys(dataJson).map((date)=>{
         let small = fromDate.valueOf();
@@ -136,6 +158,7 @@ const Statistics: FC<StatisticsProps> = ({statistics}) => {
       return finalArr;
     }
 
+
 	return (
         <div className="statistics">
             <form noValidate>
@@ -162,6 +185,10 @@ const Statistics: FC<StatisticsProps> = ({statistics}) => {
                     inputProps={{style: {fontSize: 20, marginTop: 20}}} 
                     InputLabelProps={{style: {fontSize: 30}}}
                 />
+                {/* <button className="dummyBtn" onClick={()=>setIsDummy(!isDummy)}>
+                  Dummy
+                </button> */}
+
                 <div className="charts">
                   <ul className="dataList">
                   {Object.keys(data).map((date)=>{
@@ -169,7 +196,6 @@ const Statistics: FC<StatisticsProps> = ({statistics}) => {
                     let big = to.valueOf();
                     let between = date.valueOf();
                     if(small <= between && between <= big){
-
                       let index = Object.keys(data).indexOf(date);
                       let jsonStat = Object.values(data)[index];
                       return (
@@ -214,7 +240,7 @@ const Statistics: FC<StatisticsProps> = ({statistics}) => {
                       chartType="Bar"
                       loader={<div>Loading Chart</div>}
                       data={[
-                        ['Statistics', 'guests', 'passive members', 'users', 'managers', 'owners', 'super members'],
+                        ['Statistics', 'guest', 'passive members', 'users', 'managers', 'owners', 'super members'],
                         ...dataGraph
                       ]}
                       options={{
