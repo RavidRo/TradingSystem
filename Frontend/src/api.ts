@@ -133,7 +133,7 @@ export function purchaseCart(cookie: string, age: number) {
 	const params = { cookie, age };
 	return post<number>('purchase_cart', params);
 }
-export function sendPayment(cookie: string, paymentDetails: object, address: string) {
+export function sendPayment(cookie: string, paymentDetails: object, address: object) {
 	const params = { cookie, payment_details: paymentDetails, address };
 	return post<void>('send_payment', params);
 }

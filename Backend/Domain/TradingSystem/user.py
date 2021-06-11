@@ -4,6 +4,7 @@ import threading
 from typing import Callable
 
 from Backend.response import Response, ParsableList, PrimitiveParsable
+from Backend.Service.DataObjects.statistics_data import StatisticsData
 
 from Backend.Domain.TradingSystem.offer import Offer
 from Backend.Domain.TradingSystem.Interfaces.IUser import IUser
@@ -19,8 +20,8 @@ class User(IUser):
     def __init__(self):
         self.state: UserState = IUserState.create_guest(self)
         self.appointment_lock = threading.Lock()
-        self.__notifications: list[str] = []
-        self.__communicate: Callable[[list[str]], bool] = lambda _: False
+        self.__notifications: list[object] = []
+        self.__communicate: Callable[[list[object]], bool] = lambda _: False
 
     def __notify_self(self) -> bool:
         answer = self.__communicate(self.__notifications)
@@ -240,6 +241,10 @@ class User(IUser):
     ) -> Response[ParsableList[PurchaseDetails]]:
         return self.state.get_any_store_purchase_history_admin(store_id)
 
+    # 6.5
+    def register_statistics(self) -> None:
+        self.state.register_statistics()
+
     # Inter component functions
     # ====================
 
@@ -258,7 +263,7 @@ class User(IUser):
     def empty_notifications(self):
         return len(self.__notifications) == 0
 
-    def notify(self, message: str) -> bool:
+    def notify(self, message: object) -> bool:
         self.__notifications.append(message)
         return self.__notify_self()
 
@@ -291,3 +296,6 @@ class User(IUser):
 
     def cancel_offer(self, offer_id) -> Response[None]:
         return self.state.cancel_offer(offer_id)
+
+    def get_users_statistics(self) -> Response[StatisticsData]:
+        return self.state.get_users_statistics()

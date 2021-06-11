@@ -39,7 +39,6 @@ def _generate_username() -> str:
     user_lock.acquire()
     username_number += 1
     username = "test_MileStone3Acceptance" + str(username_number)
-    print(username)
     user_lock.release()
     return username
 

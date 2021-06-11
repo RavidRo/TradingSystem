@@ -1,3 +1,5 @@
+from Backend.Service.DataObjects.statistics_data import StatisticsData
+from Backend.Domain.TradingSystem.statistics import Statistics
 from Backend.Domain.TradingSystem.offer import Offer
 from abc import ABC, abstractmethod
 from Backend.Domain.TradingSystem.shopping_cart import ShoppingCart
@@ -10,6 +12,7 @@ class UserState(ABC):
             cart = ShoppingCart()
         self._cart = cart
         self._user = user
+        self._statistics: Statistics = Statistics.getInstance()
 
     def set_user(self, user):
         self._user = user
@@ -197,6 +200,11 @@ class UserState(ABC):
     def get_purchase_policy(self, store_id: str):
         return Response(False, msg="Abstract Method")
 
+    # 6.5
+    @abstractmethod
+    def register_statistics(self) -> None:
+        return Response(False, msg="Abstract Method")
+
     # Offers
     # ==================
     @abstractmethod
@@ -233,4 +241,8 @@ class UserState(ABC):
 
     @abstractmethod
     def cancel_offer(self, offer_id) -> Response[None]:
+        return Response(False, msg="Abstract Method")
+
+    @abstractmethod
+    def get_users_statistics(self) -> Response[StatisticsData]:
         return Response(False, msg="Abstract Method")

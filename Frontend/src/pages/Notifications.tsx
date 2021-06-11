@@ -1,5 +1,5 @@
 import { GridList, GridListTile } from '@material-ui/core';
-import React, { FC, useState, useEffect } from 'react';
+import React, { FC, useEffect } from 'react';
 import Box from '@material-ui/core/Box';
 import { faEnvelopeOpenText } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -12,13 +12,9 @@ type NotificationProps = {
 };
 
 const Notifications: FC<NotificationProps> = ({ location, initializeNotifications }) => {
-	const [notifications, setNotifications] = useState<notificationTime>(
-		location.state.notifications
-	);
-
+	const notifications: notificationTime[] = location.state.notifications;
 	useEffect(() => {
 		initializeNotifications();
-		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
 
 	return (

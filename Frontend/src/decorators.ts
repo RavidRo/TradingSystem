@@ -1,4 +1,4 @@
-import Swal from 'sweetalert2';
+import Swal, { SweetAlertResult } from 'sweetalert2';
 
 export function areYouSure<T extends unknown[], R = unknown>(
 	func: (...args: T) => R,
@@ -22,8 +22,11 @@ export function areYouSure<T extends unknown[], R = unknown>(
 	};
 }
 
-export function confirm(headerText: string = '', text: string = '') {
-	Swal.fire(headerText, text, 'success');
+export function confirm(
+	headerText: string = '',
+	text: string = ''
+): Promise<SweetAlertResult<any>> {
+	return Swal.fire(headerText, text, 'success');
 }
 
 export function confirmOnSuccess<T extends unknown[]>(
@@ -31,9 +34,9 @@ export function confirmOnSuccess<T extends unknown[]>(
 	headerText: string = '',
 	text: string = ''
 ) {
-	return (...params: T): Promise<unknown> => {
+	return (...params: T): Promise<SweetAlertResult<any>> => {
 		return func(...params).then(() => {
-			confirm(headerText, text);
+			return confirm(headerText, text);
 		});
 	};
 }

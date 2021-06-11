@@ -51,7 +51,10 @@ class Responsibility(Parsable):
         if subscriber:
             self._store.subscribe(subscriber)
             subscriber.notify(
-                f"You have been appointer to {store.get_name()} as {self.__class__.__name__}"
+                {
+                    "subject": "message",
+                    "message": f"You have been appointer to {store.get_name()} as {self.__class__.__name__}",
+                }
             )
         self._appointed: list[Responsibility] = []
 
@@ -153,6 +156,9 @@ class Responsibility(Parsable):
 
     # 4.11
     def get_store_purchase_history(self) -> Response[ParsableList[PurchaseDetails]]:
+        raise Exception(Responsibility.ERROR_MESSAGE)
+
+    def is_owner(self) -> bool:
         raise Exception(Responsibility.ERROR_MESSAGE)
 
     def _add_permission(self, username: str, permission: Permission) -> bool:

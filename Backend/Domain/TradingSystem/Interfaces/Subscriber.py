@@ -1,4 +1,4 @@
 class Subscriber:
 
-    def notify(self, message: str) -> bool:
+    def notify(self, message: object) -> bool:
         raise NotImplementedError

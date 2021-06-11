@@ -20,7 +20,7 @@ export type PurchaseDetails = {
 	username: string;
 	store_name: string;
 	product_names: string[];
-	date: Date;
+	date: string;
 	total_price: number;
 };
 export type Offer = {
