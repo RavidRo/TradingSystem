@@ -1,6 +1,8 @@
+import json
 from threading import Lock
-from sqlalchemy import Table, Column, String, Boolean, insert, ARRAY, ForeignKey, select
-from sqlalchemy.exc import DisconnectionError
+from sqlalchemy import Table, Column, String, Boolean, insert, ARRAY, ForeignKey, select, TypeDecorator, VARCHAR
+from sqlalchemy.dialects.postgresql import JSON
+from sqlalchemy.ext.mutable import Mutable, MutableDict
 from sqlalchemy.orm import mapper, relationship, backref, with_polymorphic
 
 from Backend.DataBase.Handlers.shopping_bag_handler import ShoppingBagHandler
@@ -11,11 +13,30 @@ from Backend.Domain.TradingSystem.Responsibilities.responsibility import Respons
 from Backend.Domain.TradingSystem.States.member import Member
 from Backend.Domain.TradingSystem.offer import Offer
 from Backend.Domain.TradingSystem.purchase_details import PurchaseDetails
-from Backend.Domain.TradingSystem.shopping_bag import ShoppingBag
-from Backend.Domain.TradingSystem.shopping_cart import ShoppingCart
+from sqlalchemy_mutable import Mutable, MutableType, MutableModelBase, Query
 from Backend.response import Response, PrimitiveParsable
 from Backend.rw_lock import ReadWriteLock
 from sqlalchemy.orm.collections import attribute_mapped_collection, column_mapped_collection
+
+
+class MutableList(Mutable, list):
+    def append(self, value):
+        list.append(self, value)
+        self.changed()
+
+    def pop(self, index=0):
+        value = list.pop(self, index)
+        self.changed()
+        return value
+
+    @classmethod
+    def coerce(cls, key, value):
+        if not isinstance(value, MutableList):
+            if isinstance(value, list):
+                return MutableList(value)
+            return Mutable.coerce(key, value)
+        else:
+            return value
 
 
 class MemberHandler(IHandler):
@@ -32,14 +53,11 @@ class MemberHandler(IHandler):
         self.__members = Table('members', mapper_registry.metadata,
                                Column('username', String(50), ForeignKey("credentials.username"), primary_key=True),
                                Column('notifications', ARRAY(String(256))),
-                               Column('member_type', String(10), nullable=False)
-                               )
+                               Column('member_type', String(10), nullable=False),
+                               Column('responsibilities_ids', ARRAY(String(256))))
 
         mapper_registry.map_imperatively(Member, self.__members, properties={
             '_username': self.__members.c.username,
-            # '_Member__responsibilities': relationship(Responsibility, cascade="all, delete-orphan",
-            #                                           collection_class=attribute_mapped_collection('_store_id'), overlaps="_store",
-            #                                           passive_updates=False),
             '_Member__purchase_details': relationship(PurchaseDetails, cascade="all, delete-orphan"),
             '_Member__offers': relationship(Offer, collection_class=attribute_mapped_collection('_Offer__id'))
 
@@ -121,6 +139,25 @@ class MemberHandler(IHandler):
     #         self._rwlock.release_write()
     #         return res
 
+
+    def update_responsibilities_ids(self,username: str, responsibilities_ids: list):
+        self._rwlock.acquire_write()
+        res = Response(True)
+        try:
+            member = session.query(Member).filter_by(_username=username).one()
+            member.responsibilities_ids = None
+            session.commit()
+            session.refresh(member)
+            member.responsibilities_ids = responsibilities_ids
+        except Exception as e:
+            session.rollback()
+            res = Response(False, msg=str(e))
+        finally:
+            self._rwlock.release_write()
+            return res
+
+
+
     def update_notifications(self, username: str, notifications: list[str]):
         self._rwlock.acquire_write()
         res = Response(True)
@@ -170,3 +207,5 @@ class MemberHandler(IHandler):
         finally:
             self._rwlock.release_read()
             return res
+
+

@@ -4,7 +4,7 @@ from sqlalchemy.orm import mapper, relationship, backref
 from sqlalchemy.orm.collections import attribute_mapped_collection, collection
 from Backend.DataBase.Handlers.product_handler import ProductHandler
 from Backend.DataBase.IHandler import IHandler
-from Backend.DataBase.database import mapper_registry, session, engine
+from Backend.DataBase.database import mapper_registry, session, engine, Base
 from Backend.Domain.TradingSystem.Responsibilities.founder import Founder
 from Backend.Domain.TradingSystem.Responsibilities.responsibility import Responsibility
 from Backend.Domain.TradingSystem.product import Product
@@ -40,7 +40,8 @@ class StoreHandler(IHandler):
 
         self.__stores = Table("stores", mapper_registry.metadata,
                               Column("store_id", String(50), primary_key=True),
-                              Column("store_name", String(30)))
+                              Column("store_name", String(30)),
+                              Column("responsibility_id", String(30)))
 
         mapper_registry.map_imperatively(ProductsOfStores, self.__products_of_stores, properties={
             "store_id": self.__products_of_stores.c.store_id,
@@ -52,11 +53,11 @@ class StoreHandler(IHandler):
         mapper_registry.map_imperatively(Store, self.__stores, properties={
             "_Store__id": self.__stores.c.store_id,
             "_Store__name": self.__stores.c.store_name,
+            "_Store__responsibility_id": self.__stores.c.responsibility_id,
             "_Store__purchase_history": relationship(PurchaseDetails),
             "products": relationship(ProductsOfStores, uselist=True,
                                      collection_class=attribute_mapped_collection("product_id"))
         })
-
         self.__product_handler = ProductHandler.get_instance()
 
     @staticmethod

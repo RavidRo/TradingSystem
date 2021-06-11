@@ -281,7 +281,7 @@ class Store(Parsable, Subscriber):
 
     def set_responsibility(self, responsibility: Responsibility):
         self.__responsibility = responsibility
-        self.__responsibility_id = responsibility.get_id()
+        self.__responsibility_id = responsibility.get_dal_responsibility_id()
 
     def save(self):
         return self.__store_handler.save(self)

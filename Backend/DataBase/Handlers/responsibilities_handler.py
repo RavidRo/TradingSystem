@@ -1,6 +1,6 @@
 from threading import Lock
 
-from sqlalchemy import Column, Integer, Sequence, Index
+from sqlalchemy import Column, Integer, Sequence, Index, String, ForeignKey
 from sqlalchemy import func, create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship, remote, foreign
@@ -9,6 +9,7 @@ from sqlalchemy_utils import LtreeType, Ltree
 from Backend.DataBase.IHandler import IHandler
 from Backend.DataBase.database import engine, session, Base
 from Backend.Domain.TradingSystem.Responsibilities.responsibility import Responsibility
+from Backend.response import Response, PrimitiveParsable
 from Backend.rw_lock import ReadWriteLock
 
 id_seq = Sequence('nodes_id_seq')
@@ -18,15 +19,13 @@ class Responsibility_DAL(Base):
     __tablename__ = 'responsibilities'
 
     id = Column(Integer, id_seq, primary_key=True)
-    # name = Column(String, nullable=False)
     path = Column(LtreeType, nullable=False)
-
     parent = relationship(
-                'Responsibility_DAL',
-                primaryjoin=(remote(path) == foreign(func.subpath(path, 0, -1))),
-                backref='children',
-                viewonly=True
-            )
+        'Responsibility_DAL',
+        primaryjoin=(remote(path) == foreign(func.subpath(path, 0, -1))),
+        backref='appointed',
+        viewonly=True
+    )
 
     __table_args__ = (
         Index('ix_nodes_path', path, postgresql_using='gist'),)
@@ -54,7 +53,19 @@ class ResponsibilitiesHandler(IHandler):
         return ResponsibilitiesHandler._instance
 
     def save_res(self, parent=None):
-        responsibility_dal = Responsibility_DAL(parent)
-        session.add(responsibility_dal)
-        session.commit()
-        return responsibility_dal
+        self._rwlock.acquire_write()
+        res = Response(True)
+        try:
+            responsibility_dal = Responsibility_DAL(parent)
+            session.add(responsibility_dal)
+            res = Response(True, obj= responsibility_dal)
+        except Exception as e:
+            session.rollback()
+            res = Response(False, msg=str(e))
+        finally:
+            self._rwlock.release_write()
+            return res
+
+
+
+

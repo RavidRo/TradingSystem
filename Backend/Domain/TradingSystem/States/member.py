@@ -1,5 +1,6 @@
 import threading
 from datetime import date
+
 from Backend.DataBase.database import db_fail_response
 from Backend.Domain.TradingSystem.offer import Offer
 from Backend.Domain.TradingSystem.Responsibilities.founder import Founder
@@ -19,7 +20,10 @@ class Member(UserState):
         )
 
     def add_responsibility(self, responsibility, store_id):
+        from sqlalchemy.orm.attributes import flag_modified
         self.__responsibilities[store_id] = responsibility
+        self.__responsibilities_ids += [responsibility.get_dal_responsibility_id()]
+        self._member_handler.update_responsibilities_ids(self._username, self.__responsibilities_ids)
 
     def remove_responsibility(self, store_id):
         del self.__responsibilities[store_id]
@@ -41,6 +45,7 @@ class Member(UserState):
     def __init__(
             self, user, username, responsibilities=None, purchase_details=None, cart=None
     ):
+        from sqlalchemy.dialects.postgresql import JSON
         super().__init__(user, cart)
         if purchase_details is None:
             purchase_details = []
@@ -48,6 +53,11 @@ class Member(UserState):
             responsibilities = dict()
         self._username = username
         self.__responsibilities = responsibilities
+        if responsibilities is None:
+            self.__responsibilities_ids = []
+        else:
+            self.__responsibilities_ids = [res.get_dal_responsibility_id() for res in responsibilities]
+
         self.__purchase_details = purchase_details
         self.__notifications: list[str] = []
         self.notifications_lock = threading.Lock()
@@ -91,16 +101,20 @@ class Member(UserState):
     def open_store(self, store_name) -> Response:
         store = Store(store_name)
         store.save()
-        res = self._member_handler.commit_changes()
         founder = Founder(self, store, self._user)
-        founder.save()
-        # store.set_responsibility(founder)
-        # self.add_responsibility(founder, store.get_id())
+        res_save = founder.save_self()
+        if not res_save.succeeded():
+            return res_save
+        store.set_responsibility(founder)
+        self.add_responsibility(founder, store.get_id())
         res = self._member_handler.commit_changes()
         if not res.succeeded():
             self.remove_responsibility(store.get_id())
             return Response(False, msg="DB Error")
         return Response[Store](True, obj=store, msg="Store opened successfully")
+
+    def get_user_name(self):
+        return self._username
 
     def get_purchase_history(self):
         return Response[ParsableList[PurchaseDetails]](

@@ -1,4 +1,4 @@
-from Backend.DataBase.database import session
+from Backend.DataBase.database import session, db_fail_response
 from Backend.Domain.TradingSystem.offer import Offer
 from Backend.Domain.TradingSystem.Interfaces.IUser import IUser
 from Backend.Domain.TradingSystem.Responsibilities.responsibility import Permission, Responsibility
@@ -108,13 +108,21 @@ class Founder(Responsibility):
                 #! I am guessing that user.state is of type member because at user_manager, with a given username he found a user object
                 #! (guest does not hae a username)
                 new_responsibility = Owner(user.state, self._store, user)
-                founder = session.query(Responsibility).get((self._user_state.get_username().get_obj().get_val(), self.get_store_id()))
-                founder._appointed.append(new_responsibility)
-                # self._appointed.append(new_responsibility)
+                self._appointed.append(new_responsibility)
+                self.save_appointment(new_responsibility)
+                new_responsibility._user_state.add_responsibility(new_responsibility, self._store.get_id())
                 res = self._responsibilities_handler.commit_changes()
                 return res
 
         return result
+
+    def save_appointment(self, new_responsibility):
+        dal_responsibility_res = new_responsibility._responsibilities_handler.save_res(parent=self._responsibility_dal)
+        if dal_responsibility_res.succeeded():
+            new_responsibility._responsibility_dal = dal_responsibility_res.get_obj()
+            new_responsibility._responsibility_dal_id = dal_responsibility_res.get_obj().id
+            return Response(True)
+        return db_fail_response
 
     # 4.5
     def appoint_manager(self, user: User) -> Response[None]:

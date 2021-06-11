@@ -2,6 +2,7 @@ from __future__ import annotations
 import enum
 import uuid
 
+from Backend.DataBase.database import db_fail_response
 from Backend.Domain.TradingSystem.offer import Offer
 from Backend.Service.DataObjects.responsibilities_data import ResponsibilitiesData
 from Backend.Domain.TradingSystem.Interfaces.IUser import IUser
@@ -47,7 +48,6 @@ class Responsibility(Parsable):
         from Backend.DataBase.Handlers.responsibilities_handler import ResponsibilitiesHandler
         self._store_id = store.get_id()
         self._user_state = user_state
-        user_state.add_responsibility(self, store.get_id())
         self._store = store
         self.__subscriber = subscriber
         if subscriber:
@@ -59,7 +59,8 @@ class Responsibility(Parsable):
 
         self._username = user_state.get_username().get_obj().get_val()
         self._responsibilities_handler = ResponsibilitiesHandler.get_instance()
-        self.__responsibility_dal = None
+        self._responsibility_dal = None
+        self._responsibility_dal_id = None
 
     def get_user_state(self):
         return self._user_state
@@ -229,10 +230,13 @@ class Responsibility(Parsable):
     def _permissions(self) -> list[str]:
         return [per.name for per in Permission]
 
-    def save(self):
-        dal_responsibility = self._responsibilities_handler.save_res()
-        self.__responsibility_dal = dal_responsibility
-
+    def save_self(self):
+        dal_responsibility_res = self._responsibilities_handler.save_res()
+        if dal_responsibility_res.succeeded():
+            self._responsibility_dal = dal_responsibility_res.get_obj()
+            self._responsibility_dal_id = dal_responsibility_res.get_obj().id
+            return Response(True)
+        return db_fail_response
     # Offers
     # ======================
 
@@ -248,6 +252,7 @@ class Responsibility(Parsable):
     def reject_user_offer(self, product_id, offer_id) -> Response[None]:
         raise Exception(Responsibility.ERROR_MESSAGE)
 
-    def get_id(self):
-        return self.__id
+
+    def get_dal_responsibility_id(self):
+        return self._responsibility_dal_id
 

@@ -5,7 +5,7 @@ from Backend.DataBase.Handlers.purchase_details_handler import PurchaseDetailsHa
 from Backend.DataBase.Handlers.responsibilities_handler import ResponsibilitiesHandler
 from Backend.DataBase.Handlers.shopping_bag_handler import ShoppingBagHandler
 from Backend.DataBase.Handlers.store_handler import StoreHandler
-from Backend.DataBase.database import mapper_registry, engine
+from Backend.DataBase.database import mapper_registry, engine, Base
 from Backend.Domain.TradingSystem.Responsibilities.responsibility import Responsibility
 from Backend.Domain.TradingSystem.States.member import Member
 from Backend.Domain.TradingSystem.store import Store
@@ -62,12 +62,12 @@ def save():
         print("appoint owner: " + res_appoint_owner.get_msg())
 
 if __name__ == '__main__':
-    shopping_bag_handler = ShoppingBagHandler.get_instance()
     member_handler = MemberHandler.get_instance()
-    product_handler = ProductHandler.get_instance()
-    purchase_details_handler = PurchaseDetailsHandler.get_instance()
     store_handler = StoreHandler.get_instance()
     responsibility_handler = ResponsibilitiesHandler.get_instance()
+    shopping_bag_handler = ShoppingBagHandler.get_instance()
+    product_handler = ProductHandler.get_instance()
+    purchase_details_handler = PurchaseDetailsHandler.get_instance()
     offer_handler = OfferHandler.get_instance()
     save()
 
