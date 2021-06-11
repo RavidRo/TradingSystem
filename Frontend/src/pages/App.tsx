@@ -62,16 +62,13 @@ function App() {
 					clientTemp.send(cookie); // have to be here - else socket.receive in server gets stuck
 				};
 				clientTemp.onmessage = (messageEvent) => {
-					console.log(messageEvent.data);
 					setNotifications((old) => [
 						...old,
 						[messageEvent.data, new Date().toUTCString()],
 					]);
 					// alert('received socket message');
 				};
-				clientTemp.onclose = () => {
-					alert('connection closed!');
-				};
+				clientTemp.onclose = () => {};
 			}
 		});
 	};
