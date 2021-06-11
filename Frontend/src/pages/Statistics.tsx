@@ -22,7 +22,7 @@ const Statistics: FC<StatisticsProps> = ({statistics}) => {
     const [dataGraph, setDataGraph] = useState<any[]>([]);
     const [dataPie, setDataPie] = useState<any[]>([]);
     const [data,setDate] = useState<{ [date: string]: StatisticsCount }>({});
-    const [isDummy, setIsDummy] = useState<boolean>(true);
+
 
     let dummy_json : {[date: string]: StatisticsCount} = {
       "2021-06-07": {
@@ -47,13 +47,17 @@ const Statistics: FC<StatisticsProps> = ({statistics}) => {
 
 
     useEffect(()=>{
-      setDummy();
+      // setDummy(); //uncomment only for checking , if there are new
+      //entries during dummy, the graphs won't update obviously, just after
+      //picking some other real date
+      setReal();
     }, [statistics]);
 
     const setReal = ()=>{
       statisticsObj.request().then(({ data, error }) => {
         if (!error && data !== null) {
-            let dataGraphResult = setDataToChart(data.data.statistics_per_day, from, to);
+            let dataGraphResult = setDataToChart(data.data.statistics_per_day, fromDate, toDate);
+            console.log(dataGraphResult);
             setDataGraph(dataGraphResult);
             let pieResult = setDataToPie(data.data.statistics_per_day, fromDate, toDate);
             setDataPie(pieResult);
@@ -185,9 +189,6 @@ const Statistics: FC<StatisticsProps> = ({statistics}) => {
                     inputProps={{style: {fontSize: 20, marginTop: 20}}} 
                     InputLabelProps={{style: {fontSize: 30}}}
                 />
-                {/* <button className="dummyBtn" onClick={()=>setIsDummy(!isDummy)}>
-                  Dummy
-                </button> */}
 
                 <div className="charts">
                   <ul className="dataList">
