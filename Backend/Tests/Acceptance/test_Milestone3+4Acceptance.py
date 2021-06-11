@@ -34,7 +34,7 @@ def _generate_username() -> str:
     global username_number
     user_lock.acquire()
     username_number += 1
-    username = "test_MileStone3Acceptance" + str(username_number)
+    username = "test_MileStone3+4Acceptance" + str(username_number)
     print(username)
     user_lock.release()
     return username
@@ -44,7 +44,7 @@ def _generate_store_name() -> str:
     global store_number
     store_lock.acquire()
     store_number += 1
-    store = "test_MileStone3Acceptance" + str(store_number)
+    store = "test_MileStone3+4Acceptance" + str(store_number)
     store_lock.release()
     return store
 
@@ -133,7 +133,7 @@ def _generate_product_name() -> str:
     global product_number
     product_lock.acquire()
     product_number += 1
-    product = "test_MileStone3Acceptance" + str(product_number)
+    product = "test_MileStone3+4Acceptance" + str(product_number)
     product_lock.release()
     return product
 
@@ -586,3 +586,73 @@ def test_cancel_offer_cancel_offer_fail():
     system.cancel_offer(buyer_cookie, offer_id)
     result = system.cancel_offer(buyer_cookie, offer_id)
     assert not result.succeeded()
+
+
+# milestone 4 new tests
+
+def test_offer_more_than_one_onwer_approve():
+    cookieF, username, password, store_name, store_id = _initialize_info(_generate_username(), "pass",
+                                                                        _generate_store_name())
+
+    product_id, product_name, category, price, quantity = _create_product(cookieF, store_id, _generate_product_name(),
+                                                                          "cat", 1.2, 10)
+
+    cookieO, owner_username, owner_password, _, _ = _initialize_info(_generate_username(), "pass")
+    system.appoint_owner(cookieF, store_id, owner_username)
+
+    buyer_cookie, buyer_username, buyer_password, _, _ = _initialize_info(_generate_username(), "pass")
+
+    offer_id = system.create_offer(buyer_cookie, store_id, product_id).get_obj()
+
+    system.declare_price(buyer_cookie, offer_id, 1.0)
+    result = system.approve_user_offer(cookieF, store_id, product_id, offer_id)
+    offer = system.get_user_offers(buyer_cookie).get_obj().values[0]
+    assert result.succeeded() and offer.status == "awaiting manager approval"
+
+    result = system.approve_user_offer(cookieF, store_id, product_id, offer_id)
+    offer = system.get_user_offers(buyer_cookie).get_obj().values[0]
+    assert result.succeeded() and offer.status == "approved"
+
+
+def test_offer_more_than_one_founder_cant_approve_himself():
+    cookieF, username, password, store_name, store_id = _initialize_info(_generate_username(), "pass",
+                                                                        _generate_store_name())
+
+    product_id, product_name, category, price, quantity = _create_product(cookieF, store_id, _generate_product_name(),
+                                                                          "cat", 1.2, 10)
+
+    cookieO, owner_username, owner_password, _, _ = _initialize_info(_generate_username(), "pass")
+    system.appoint_owner(cookieF, store_id, owner_username)
+
+    offer_id = system.create_offer(cookieF, store_id, product_id).get_obj()
+
+    system.declare_price(cookieF, offer_id, 1.0)
+    result = system.approve_user_offer(cookieF, store_id, product_id, offer_id)
+    offer = system.get_user_offers(cookieF).get_obj().values[0]
+    assert result.succeeded() and offer.status == "awaiting manager approval"
+
+
+def test_offer_owner_cant_approve_offers_from_other_store():
+    cookieF1, username, password, store_name, store_id = _initialize_info(_generate_username(), "pass",
+                                                                        _generate_store_name())
+
+    product_id, product_name, category, price, quantity = _create_product(cookieF1, store_id, _generate_product_name(),
+                                                                          "cat", 1.2, 10)
+
+    cookieF2, username, password, store_name, store_id = _initialize_info(_generate_username(), "pass",
+                                                                        _generate_store_name())
+
+    offer_id = system.create_offer(cookieF1, store_id, product_id).get_obj()
+    system.declare_price(cookieF1, offer_id, 1.0)
+    result = system.approve_user_offer(cookieF2, store_id, product_id, offer_id)
+    assert not result.succeeded()
+
+
+def test_buy_products_with_approved_offer():
+    cookie, username, password, store_name, store_id = _initialize_info(_generate_username(), "pass",
+                                                                        _generate_store_name())
+
+    product_id, product_name, category, price, quantity = _create_product(cookie, store_id, _generate_product_name(),
+                                                                          "cat", 1.2, 10)
+
+
