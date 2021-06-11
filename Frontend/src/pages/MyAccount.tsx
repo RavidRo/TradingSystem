@@ -5,8 +5,8 @@ import { Container, Paper, Typography } from '@material-ui/core';
 import PurchaseHistoryTable from '../components/Lists/PurchaseHistoryTable';
 import OffersTable from '../components/OffersTable';
 import { UsernameContext } from '../contexts';
-import { useAPI2 } from '../hooks/useAPI';
 import '../styles/MyAccount.scss';
+import { useAPI2 } from '../hooks/useAPI';
 import { getPurchaseHistory } from '../api';
 
 type MyAccountProps = {};
@@ -35,7 +35,7 @@ const MyAccount: FC<MyAccountProps> = () => {
 				<Typography variant='h6' gutterBottom>
 					your offers:
 				</Typography>
-				<OffersTable username={username} isManager={false} store_id={''} />
+				<OffersTable isManager={false} store_id={''} />
 			</Paper>
 		</Container>
 	);

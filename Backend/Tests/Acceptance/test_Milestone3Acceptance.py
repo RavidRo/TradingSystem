@@ -342,7 +342,7 @@ def test_suggest_counter_offer_success():
     system.declare_price(buyer_cookie, offer_id, 1.0)
     result = system.suggest_counter_offer(cookie, store_id, product_id, offer_id, 1.1)
     offer = system.get_user_offers(buyer_cookie)
-    assert result.succeeded() and offer.get_obj().values[0].price == 1.1
+    assert result.succeeded() and offer.get_obj().values[0].price == 1.1, result.get_msg()
 
 
 def test_suggest_counter_offer_wrong_offer_fail():
@@ -448,6 +448,7 @@ def test_approve_manager_offer_success():
         _generate_username(), "pass"
     )
     offer_id = system.create_offer(buyer_cookie, store_id, product_id).get_obj()
+    print(offer_id)
     system.declare_price(buyer_cookie, offer_id, 1.0)
     system.suggest_counter_offer(cookie, store_id, product_id, offer_id, 1.1)
     result = system.approve_manager_offer(buyer_cookie, offer_id)
@@ -487,7 +488,7 @@ def test_approve_user_offer_success():
     system.declare_price(buyer_cookie, offer_id, 1.0)
     result = system.approve_user_offer(cookie, store_id, product_id, offer_id)
     offer = system.get_user_offers(buyer_cookie).get_obj().values[0]
-    assert result.succeeded() and offer.status == "approved"
+    assert result.succeeded() and offer.status == "approved", result.get_msg()
 
 
 def test_approve_user_offer_no_offer_fail():
