@@ -25,6 +25,7 @@ const Statistics: FC<StatisticsProps> = ({statistics}) => {
     const [data,setDate] = useState<{ [date: string]: StatisticsCount }>({})
 
     useEffect(()=>{
+      console.log("in here !!!");
       statisticsObj.request().then(({ data, error }) => {
         if (!error && data !== null) {
             let dataGraphResult = setDataToChart(data.data.statistics_per_day, from, to);

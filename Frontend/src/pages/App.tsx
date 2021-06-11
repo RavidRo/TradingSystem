@@ -72,8 +72,11 @@ function App() {
 						setNotifications((old)=>[...old, [msg, new Date().toUTCString()]]);
 					}
 					else{
+						let msg = messageJson['data'];
 						// notification for statistics
 						console.log("statistics !!!");
+						console.log(msg);
+						console.log(messageEvent.data);
 						setStatistics(msg);
 					}
 					// alert('received socket message');
