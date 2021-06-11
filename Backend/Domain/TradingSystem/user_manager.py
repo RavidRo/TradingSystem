@@ -47,7 +47,7 @@ class UserManager:
     def enter_system(register=True) -> str:
         cookie = UserManager.__create_cookie()
         UserManager.__cookie_user[cookie] = IUser.create_user()
-        if register == True:
+        if register:
             UserManager.__cookie_user[cookie].register_statistics()
         return cookie
 
