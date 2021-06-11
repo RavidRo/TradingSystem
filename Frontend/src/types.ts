@@ -38,6 +38,7 @@ export type Offer = {
 	store_id: string;
 	store_name: string;
     username: string;
+	awaiting_owners: string[];
 }
 export type StatisticsCount = {
     guest: number;
