@@ -4,262 +4,271 @@ import React, { FC, useState, useEffect, useContext } from 'react';
 import { TextField } from '@material-ui/core';
 import '../styles/Statistics.scss';
 import useAPI from '../hooks/useAPI';
-import {StatisticsData, StatisticsCount} from '../types';
-import Chart from "react-google-charts";
-
+import { StatisticsData, StatisticsCount } from '../types';
+import Chart from 'react-google-charts';
 
 type StatisticsProps = {
-  statistics: StatisticsData | undefined
+	statistics: StatisticsData | undefined;
 };
 
-const Statistics: FC<StatisticsProps> = ({statistics}) => {
-    // let today = new Date().toISOString().slice(0, 10);
-    let fromDate = "2021-06-07";
-    let toDate = "2021-06-21";
-    const [from, setFrom] = useState<string>("2021-06-07");
-    const [to, setTo] = useState<string>("2021-06-21");
-    const statisticsObj = useAPI<StatisticsData>('/get_statistics', {}, 'GET');
-    const [dataGraph, setDataGraph] = useState<any[]>([]);
-    const [dataPie, setDataPie] = useState<any[]>([]);
-    const [data,setDate] = useState<{ [date: string]: StatisticsCount }>({});
+const Statistics: FC<StatisticsProps> = ({ statistics }) => {
+	// let today = new Date().toISOString().slice(0, 10);
+	let fromDate = '2021-06-07';
+	let toDate = '2021-06-21';
+	const [from, setFrom] = useState<string>('2021-06-07');
+	const [to, setTo] = useState<string>('2021-06-21');
+	const statisticsObj = useAPI<StatisticsData>('/get_statistics', {}, 'GET');
+	const [dataGraph, setDataGraph] = useState<any[]>([]);
+	const [dataPie, setDataPie] = useState<any[]>([]);
+	const [data, setDate] = useState<{ [date: string]: StatisticsCount }>({});
 
+	let dummy_json: { [date: string]: StatisticsCount } = {
+		'2021-06-07': {
+			guest: 8,
+			passive_members: 5,
+			managers: 3,
+			super_members: 2,
+		},
+		'2021-06-08': {
+			guest: 6,
+			passive_members: 2,
+			managers: 1,
+			super_members: 2,
+		},
+		'2021-06-12': {
+			guest: 20,
+			passive_members: 15,
+			managers: 3,
+			super_members: 1,
+		},
+	};
 
-    let dummy_json : {[date: string]: StatisticsCount} = {
-      "2021-06-07": {
-        'guest':8,
-        'passive_members':5,
-        'managers':3,
-        'super_members':2,
-      },
-      "2021-06-08": {
-        'guest':6,
-        'passive_members':2,
-        'managers':1,
-        'super_members':2,
-      },
-      "2021-06-12": {
-        'guest':20,
-        'passive_members':15,
-        'managers':3,
-        'super_members':1,
-      },
-    }
+	useEffect(() => {
+		// setDummy(); //uncomment only for checking , if there are new
+		//entries during dummy, the graphs won't update obviously, just after
+		//picking some other real date
+		setReal();
+	}, [statistics]);
 
+	const setReal = () => {
+		statisticsObj.request().then(({ data, error }) => {
+			if (!error && data !== null) {
+				let dataGraphResult = setDataToChart(
+					data.data.statistics_per_day,
+					fromDate,
+					toDate
+				);
+				console.log(dataGraphResult);
+				setDataGraph(dataGraphResult);
+				let pieResult = setDataToPie(data.data.statistics_per_day, fromDate, toDate);
+				setDataPie(pieResult);
+				setDate(data.data.statistics_per_day);
+			}
+		});
+	};
 
-    useEffect(()=>{
-      // setDummy(); //uncomment only for checking , if there are new
-      //entries during dummy, the graphs won't update obviously, just after
-      //picking some other real date
-      setReal();
-    }, [statistics]);
+	const setDummy = () => {
+		setFrom('2021-06-07');
+		setTo('2021-06-21');
+		fromDate = '2021-06-07';
+		toDate = '2021-06-21';
+		let dataGraphResult = setDataToChart(dummy_json, '2021-06-07', '2021-06-12');
+		console.log(dataGraphResult);
+		setDataGraph(dataGraphResult);
+		let pieResult = setDataToPie(dummy_json, '2021-06-07', '2021-06-12');
+		console.log(dataGraphResult);
+		setDataPie(pieResult);
+		setDate(dummy_json);
+	};
 
-    const setReal = ()=>{
-      statisticsObj.request().then(({ data, error }) => {
-        if (!error && data !== null) {
-            let dataGraphResult = setDataToChart(data.data.statistics_per_day, fromDate, toDate);
-            console.log(dataGraphResult);
-            setDataGraph(dataGraphResult);
-            let pieResult = setDataToPie(data.data.statistics_per_day, fromDate, toDate);
-            setDataPie(pieResult);
-            setDate(data.data.statistics_per_day);
-        }
-      })
-    }
+	const pickedFrom = (e: any) => {
+		let date = e.target.value;
+		fromDate = date;
+		setFrom(fromDate);
+		setReal();
+	};
 
-    const setDummy = ()=>{
-      setFrom("2021-06-07");
-      setTo("2021-06-21");
-      fromDate ="2021-06-07";
-      toDate = "2021-06-21";
-      let dataGraphResult = setDataToChart(dummy_json, "2021-06-07", "2021-06-12");
-      console.log(dataGraphResult);
-      setDataGraph(dataGraphResult);
-      let pieResult = setDataToPie(dummy_json,  "2021-06-07", "2021-06-12");
-      console.log(dataGraphResult);
-      setDataPie(pieResult);
-      setDate(dummy_json);
-    }
+	const pickedTo = (e: any) => {
+		let date = e.target.value;
+		toDate = date;
+		setTo(toDate);
+		setReal();
+	};
 
-    const pickedFrom = (e:any)=>{
-        let date = e.target.value;
-        fromDate = date;
-        setFrom(fromDate);
-        setReal();
-    }
+	// data={[
+	//   ['Statistics', 'guests', 'passive members', 'users', 'managers', 'owners', 'super members'],
+	//   ['2021-06-09', 1000, 400, 200, 0,0 , 0],
+	//   ['2021-06-10', 1170, 460, 250,0, 0 , 0],
+	//   ['2021-06-08', 660, 1120, 300, 0,0 , 0],
+	//   ['2021-06-07', 1030, 540, 350,0, 0 , 0],
+	// ]}
 
-    const pickedTo = (e:any)=>{
-        let date = e.target.value;
-        toDate = date;
-        setTo(toDate);
-        setReal();
-    }
+	const usersTypes = ['guest', 'passive_members', 'managers', 'owners', 'super_members'];
+	const setDataToChart = (
+		dataJson: { [date: string]: StatisticsCount },
+		fromDate: string,
+		toDate: string
+	) => {
+		return Object.keys(dataJson).map((date) => {
+			let small = fromDate.valueOf();
+			let big = toDate.valueOf();
+			let between = date.valueOf();
+			if (small <= between && between <= big) {
+				let specificDateArr = [];
+				specificDateArr.push(date); //first arg - date
+				let statisticsJson = dataJson[date];
+				for (var i = 0; i < usersTypes.length; i++) {
+					let userType = usersTypes[i];
+					if (statisticsJson.hasOwnProperty(userType)) {
+						// user type is in this date, add it's value
+						let index = Object.keys(statisticsJson).indexOf(userType);
+						let userTypeValue = Object.values(statisticsJson)[index];
+						specificDateArr.push(userTypeValue);
+					} else {
+						//no user type in this date, add 0
+						specificDateArr.push(0);
+					}
+				}
+				return specificDateArr;
+			}
+			return [];
+		});
+	};
+	const setDataToPie = (
+		dataJson: { [date: string]: StatisticsCount },
+		fromDate: string,
+		toDate: string
+	) => {
+		let usersJson: { [type: string]: number } = {};
+		Object.keys(dataJson).map((date) => {
+			let small = fromDate.valueOf();
+			let big = toDate.valueOf();
+			let between = date.valueOf();
+			if (small <= between && between <= big) {
+				let statisticsJson: StatisticsCount = dataJson[date];
+				for (var i = 0; i < usersTypes.length; i++) {
+					let userType = usersTypes[i];
+					if (statisticsJson.hasOwnProperty(userType)) {
+						// user type is in this date, add it's value
+						let index = Object.keys(statisticsJson).indexOf(userType);
+						let userTypeValue = +Object.values(statisticsJson)[index];
+						if (usersJson.hasOwnProperty(userType)) {
+							usersJson[userType] += userTypeValue;
+						} else {
+							usersJson[userType] = userTypeValue;
+						}
+					}
+				}
+			}
+		});
 
-    // data={[
-    //   ['Statistics', 'guests', 'passive members', 'users', 'managers', 'owners', 'super members'],
-    //   ['2021-06-09', 1000, 400, 200, 0,0 , 0],
-    //   ['2021-06-10', 1170, 460, 250,0, 0 , 0],
-    //   ['2021-06-08', 660, 1120, 300, 0,0 , 0],
-    //   ['2021-06-07', 1030, 540, 350,0, 0 , 0],
-    // ]}
-
-    const usersTypes = ['guest', 'passive_members', 'users', 'managers', 'owners', 'super_members'];
-    const setDataToChart = (dataJson: { [date: string]: StatisticsCount }, fromDate: string, toDate: string)=>{
-        return Object.keys(dataJson).map((date)=>{
-          let small = fromDate.valueOf();
-          let big = toDate.valueOf();
-          let between = date.valueOf();
-          if(small <= between && between <= big){
-            let specificDateArr = [];
-            specificDateArr.push(date); //first arg - date
-            let statisticsJson = dataJson[date];
-            for(var i=0; i<usersTypes.length; i++){
-              let userType = usersTypes[i];
-              if(statisticsJson.hasOwnProperty(userType)){ // user type is in this date, add it's value
-                let index = Object.keys(statisticsJson).indexOf(userType);
-                let userTypeValue = Object.values(statisticsJson)[index];
-                specificDateArr.push(userTypeValue);
-              }
-              else{//no user type in this date, add 0
-                specificDateArr.push(0);
-              }
-            }
-            return specificDateArr;
-          }
-          return [];
-      })
-    }
-    const setDataToPie = (dataJson: { [date: string]: StatisticsCount }, fromDate: string, toDate: string)=>{
-      let usersJson:{ [type: string]: number } = {};
-      Object.keys(dataJson).map((date)=>{
-        let small = fromDate.valueOf();
-        let big = toDate.valueOf();
-        let between = date.valueOf();
-        if(small <= between && between <= big){
-          let statisticsJson:StatisticsCount = dataJson[date];
-          for(var i=0; i<usersTypes.length; i++){
-            let userType = usersTypes[i];
-            if(statisticsJson.hasOwnProperty(userType)){ // user type is in this date, add it's value
-              let index = Object.keys(statisticsJson).indexOf(userType);
-              let userTypeValue = +Object.values(statisticsJson)[index];
-              if (usersJson.hasOwnProperty(userType)){
-                usersJson[userType] += userTypeValue;
-              }
-              else{
-                usersJson[userType] = userTypeValue;
-              }
-            }
-          }
-        }
-
-      })
-
-      let finalArr = [];
-      for(var i=0; i<Object.keys(usersJson).length; i++){
-        let type = Object.keys(usersJson)[i];
-        let value = Object.values(usersJson)[i];
-        finalArr.push([type, value]);
-      }
-      return finalArr;
-    }
-
+		let finalArr = [];
+		for (var i = 0; i < Object.keys(usersJson).length; i++) {
+			let type = Object.keys(usersJson)[i];
+			let value = Object.values(usersJson)[i];
+			finalArr.push([type, value]);
+		}
+		return finalArr;
+	};
 
 	return (
-        <div className="statistics">
-            <form noValidate>
-                <TextField
-                    className="fromDate"
-                    id="date"
-                    label="From"
-                    type="date"
-                    defaultValue={from}
-                    onChange={(e)=>pickedFrom(e)}
-                    style={{width: '10%', marginRight: '5%', marginTop: '5%', marginLeft: '35%'}}
-                    inputProps={{style: {fontSize: 20, marginTop: 20}}} 
-                    InputLabelProps={{style: {fontSize: 30}}}
-                   
-                />
-                <TextField
-                    className="toDate"
-                    id="date"
-                    label="To"
-                    type="date"
-                    defaultValue={to}
-                    onChange={(e)=>pickedTo(e)}
-                    style={{width: '15%', marginTop: '5%'}}
-                    inputProps={{style: {fontSize: 20, marginTop: 20}}} 
-                    InputLabelProps={{style: {fontSize: 30}}}
-                />
+		<div className='statistics'>
+			<form noValidate>
+				<TextField
+					className='fromDate'
+					id='date'
+					label='From'
+					type='date'
+					defaultValue={from}
+					onChange={(e) => pickedFrom(e)}
+					style={{ width: '10%', marginRight: '5%', marginTop: '5%', marginLeft: '35%' }}
+					inputProps={{ style: { fontSize: 20, marginTop: 20 } }}
+					InputLabelProps={{ style: { fontSize: 30 } }}
+				/>
+				<TextField
+					className='toDate'
+					id='date'
+					label='To'
+					type='date'
+					defaultValue={to}
+					onChange={(e) => pickedTo(e)}
+					style={{ width: '15%', marginTop: '5%' }}
+					inputProps={{ style: { fontSize: 20, marginTop: 20 } }}
+					InputLabelProps={{ style: { fontSize: 30 } }}
+				/>
 
-                <div className="charts">
-                  <ul className="dataList">
-                  {Object.keys(data).map((date)=>{
-                    let small = from.valueOf();
-                    let big = to.valueOf();
-                    let between = date.valueOf();
-                    if(small <= between && between <= big){
-                      let index = Object.keys(data).indexOf(date);
-                      let jsonStat = Object.values(data)[index];
-                      return (
-                        <li key={index} className="date">
-                          <h2>{date}</h2>
-                          {Object.keys(jsonStat).map((type)=>{
-                            let typeIndex = Object.keys(jsonStat).indexOf(type);
-                            return (
-                              <h3>
-                                {type}  :  {Object.values(jsonStat)[typeIndex]}
-                              </h3>
-                            )
-                          })}
-                        </li>
-                      )
-                    }
-                  })}
-                  </ul>
-                  {dataPie.length === 0? null:
-                    <Chart
-                      width={'500px'}
-                      height={'300px'}
-                      chartType="PieChart"
-                      loader={<div>Loading Chart</div>}
-                      style={{marginTop: '4%', marginLeft: '3%'}}
-                      data={[
-                        ['Users', 'Amount'],
-                        ...dataPie
-                      ]}
-                      options={{
-                        title: 'Users from Total',
-                      }}
-                      rootProps={{ 'data-testid': '1' }}
-                    />
-                  }
-                    {dataGraph.length === 1 && dataGraph[0].length === 0?
-                    null:
-                    <Chart
-                      width={'1000px'}
-                      height={'300px'}
-                      style={{marginTop: '3%'}}
-                      chartType="Bar"
-                      loader={<div>Loading Chart</div>}
-                      data={[
-                        ['Statistics', 'guest', 'passive members', 'users', 'managers', 'owners', 'super members'],
-                        ...dataGraph
-                      ]}
-                      options={{
-                        // Material design options
-                        chart: {
-                          title: 'Website Statistics',
-                          subtitle: 'guests, passive members, users, managers, owners, super members',
-                        },
-                      }}
-                      // For tests
-                      rootProps={{ 'data-testid': '2' }}
-                    />
-                    }
-                  </div>
-                  
-            </form>
-        </div>
-
+				<div className='charts'>
+					<ul className='dataList'>
+						{Object.keys(data).map((date) => {
+							let small = from.valueOf();
+							let big = to.valueOf();
+							let between = date.valueOf();
+							if (small <= between && between <= big) {
+								let index = Object.keys(data).indexOf(date);
+								let jsonStat = Object.values(data)[index];
+								return (
+									<li key={index} className='date'>
+										<h2>{date}</h2>
+										{Object.keys(jsonStat).map((type) => {
+											let typeIndex = Object.keys(jsonStat).indexOf(type);
+											return (
+												<h3>
+													{type} : {Object.values(jsonStat)[typeIndex]}
+												</h3>
+											);
+										})}
+									</li>
+								);
+							}
+						})}
+					</ul>
+					{dataPie.length === 0 ? null : (
+						<Chart
+							width={'500px'}
+							height={'300px'}
+							chartType='PieChart'
+							loader={<div>Loading Chart</div>}
+							style={{ marginTop: '4%', marginLeft: '3%' }}
+							data={[['Users', 'Amount'], ...dataPie]}
+							options={{
+								title: 'Users from Total',
+							}}
+							rootProps={{ 'data-testid': '1' }}
+						/>
+					)}
+					{dataGraph.length === 1 && dataGraph[0].length === 0 ? null : (
+						<Chart
+							width={'1000px'}
+							height={'300px'}
+							style={{ marginTop: '3%' }}
+							chartType='Bar'
+							loader={<div>Loading Chart</div>}
+							data={[
+								[
+									'Statistics',
+									'guest',
+									'passive members',
+									'managers',
+									'owners',
+									'super members',
+								],
+								...dataGraph,
+							]}
+							options={{
+								// Material design options
+								chart: {
+									title: 'Website Statistics',
+									subtitle:
+										'guests, passive members, managers, owners, super members',
+								},
+							}}
+							// For tests
+							rootProps={{ 'data-testid': '2' }}
+						/>
+					)}
+				</div>
+			</form>
+		</div>
 	);
 };
 
