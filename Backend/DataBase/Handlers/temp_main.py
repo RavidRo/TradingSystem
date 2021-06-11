@@ -24,13 +24,24 @@ def save():
     cookie2 = trading_system.enter_system()
     res2 = trading_system.register(cookie2, "user2", "password2")
     if not res2.succeeded():
-        print("register2: " + res.get_msg())
+        print("register2: " + res2.get_msg())
+
+    cookie3 = trading_system.enter_system()
+    res3 = trading_system.register(cookie3, "user3", "password3")
+    if not res3.succeeded():
+        print("register3: " + res3.get_msg())
 
     res2 = trading_system.login(cookie2, "user2", "password2")
+    res3 = trading_system.login(cookie3, "user3", "password3")
+
 
     store_res = trading_system.create_store(cookie, "The Store")
     if not store_res.succeeded():
         print("open_store: " + store_res.get_msg())
+
+    store_res2 = trading_system.create_store(cookie2, "The Store of cookie2")
+    if not store_res2.succeeded():
+        print("open_store: " + store_res2.get_msg())
 
     product_res = trading_system.create_product(cookie, store_res.get_obj(), "The Product", "The Category", 5, 8, ["The Keyword A", "The Keyword B"])
     if not product_res.succeeded():
@@ -60,6 +71,15 @@ def save():
     res_appoint_owner = trading_system.appoint_owner(cookie, store_res.get_obj(), "user2")
     if not res_appoint_owner.succeeded():
         print("appoint owner: " + res_appoint_owner.get_msg())
+
+    res_appoint_owner = trading_system.appoint_owner(cookie2, store_res.get_obj(), "user3")
+    if not res_appoint_owner.succeeded():
+        print("appoint owner: " + res_appoint_owner.get_msg())
+
+    res_appoint_owner = trading_system.appoint_owner(cookie2, store_res2.get_obj(), "user")
+    if not res_appoint_owner.succeeded():
+        print("appoint owner: " + res_appoint_owner.get_msg())
+
 
 if __name__ == '__main__':
     member_handler = MemberHandler.get_instance()

@@ -144,6 +144,9 @@ class Founder(Responsibility):
                 #! (guest does not hae a username)
                 newResponsibility = Manager(user.state, self._store, user)
                 self._appointed.append(newResponsibility)
+                self.save_appointment(newResponsibility)
+                newResponsibility._user_state.add_responsibility(newResponsibility, self._store.get_id())
+                res = self._responsibilities_handler.commit_changes()
                 result = Response(True)
 
         return result

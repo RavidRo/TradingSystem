@@ -14,18 +14,19 @@ from Backend.rw_lock import ReadWriteLock
 
 id_seq = Sequence('nodes_id_seq')
 
-
 class Responsibility_DAL(Base):
     __tablename__ = 'responsibilities'
 
     id = Column(Integer, id_seq, primary_key=True)
     path = Column(LtreeType, nullable=False)
+    responsibility_type = Column('type', String(50))
     parent = relationship(
         'Responsibility_DAL',
         primaryjoin=(remote(path) == foreign(func.subpath(path, 0, -1))),
         backref='appointed',
         viewonly=True
     )
+    __mapper_args__ = {'polymorphic_on': responsibility_type}
 
     __table_args__ = (
         Index('ix_nodes_path', path, postgresql_using='gist'),)
@@ -35,6 +36,18 @@ class Responsibility_DAL(Base):
         self.id = _id
         ltree_id = Ltree(str(_id))
         self.path = ltree_id if parent is None else parent.path + ltree_id
+
+
+class Manager_Responsibility_DAL(Responsibility_DAL):
+    __mapper_args__ = {'polymorphic_identity': 'manager'}
+
+
+class Owner_Responsibility_DAL(Responsibility_DAL):
+    __mapper_args__ = {'polymorphic_identity': 'owner'}
+
+class Founder_Responsibility_DAL(Responsibility_DAL):
+    __mapper_args__ = {'polymorphic_identity': 'founder'}
+
 
 Base.metadata.create_all(engine)
 
