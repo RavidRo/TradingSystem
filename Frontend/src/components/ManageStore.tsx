@@ -1,4 +1,4 @@
-import React, { FC, useContext, useEffect, useState } from 'react';
+import React, { FC, useEffect, useState } from 'react';
 
 import { Appointee, Product, Store, ProductQuantity } from '../types';
 import AppointeeDetails from './DetailsWindows/AppointeeDetails';
@@ -9,7 +9,6 @@ import AppointeesList from './Lists/AppointeesList';
 import DiscountsList from './Lists/DiscountsList';
 import ConditionsList from './Lists/ConditionsList';
 import StorePurchaseHistory from './Lists/StorePurchaseHistory';
-import { UsernameContext } from '../contexts';
 import OffersTable from './OffersTable';
 import '../styles/ManageStore.scss';
 
@@ -22,7 +21,6 @@ type ManageStoreProps = {
 const ManageStore: FC<ManageStoreProps> = ({ storeId, appointment, setAppointment }) => {
 	const [products, setProducts] = useState<ProductQuantity[]>([]);
 	const [store, setStore] = useState<Store | null>(null);
-	const username = useContext(UsernameContext);
 
 	const getProductsByStore = useAPI<Product[]>('/get_products_by_store', {
 		store_id: storeId,
@@ -82,8 +80,8 @@ const ManageStore: FC<ManageStoreProps> = ({ storeId, appointment, setAppointmen
 	};
 
 	return (
-		<div className="my-store-page">
-			<div className="my-store-cont">
+		<div className='my-store-page'>
+			<div className='my-store-cont'>
 				{store && (
 					<>
 						{appointment.permissions.includes('manage products') && (
@@ -128,15 +126,15 @@ const ManageStore: FC<ManageStoreProps> = ({ storeId, appointment, setAppointmen
 						{appointment.permissions.includes('get history') && (
 							<StorePurchaseHistory storeId={store.id} />
 						)}
-						<div className="offersTable">
-							<OffersTable  username={username} isManager={true} store_id={storeId}/>
+						<div className='offersTable'>
+							<OffersTable isManager={true} store_id={storeId} />
 						</div>
 					</>
 				)}
 			</div>
 			<div className={'second-tab' + (open ? ' open' : '')}>
 				{Tab && (
-					<div className="stick-top">
+					<div className='stick-top'>
 						<Tab />
 					</div>
 				)}

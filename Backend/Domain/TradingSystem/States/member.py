@@ -293,7 +293,7 @@ class Member(UserState):
     def approve_user_offer(self, store_id, product_id, offer_id) -> Response[None]:
         if store_id not in self.__responsibilities:
             return Response(False, msg=f"this member do not own/manage store {store_id}")
-        return self.__responsibilities[store_id].approve_user_offer(product_id, offer_id)
+        return self.__responsibilities[store_id].approve_user_offer(product_id, offer_id, self._username)
 
     def reject_user_offer(self, store_id, product_id, offer_id) -> Response[None]:
         if store_id not in self.__responsibilities:

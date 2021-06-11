@@ -26,7 +26,13 @@ export type PurchaseDetails = {
 export type Offer = {
 	id: string;
 	price: number;
-	status: string;
+	status:
+		| 'undeclared'
+		| 'awaiting manager approval'
+		| 'counter offered'
+		| 'approved'
+		| 'rejected'
+		| 'cancled';
 	product_id: string;
 	product_name: string;
 	store_id: string;
