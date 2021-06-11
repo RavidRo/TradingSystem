@@ -62,6 +62,7 @@ class ResponsibilitiesHandler(IHandler):
         super().__init__(ReadWriteLock(), Responsibility)
         from Backend.DataBase.Handlers.member_handler import MemberHandler
         self.__member_handler = MemberHandler.get_instance()
+        self.__responsibilities = dict()
 
     @staticmethod
     def get_instance():
@@ -88,10 +89,13 @@ class ResponsibilitiesHandler(IHandler):
         self._rwlock.acquire_read()
         res = Response(True)
         try:
-            res_root = session.query(Responsibility_DAL).filter(Responsibility_DAL.id == res_id).one()
-            responsibilities = self.create_responsibilities(res_root, store)
-            res = Response(True, obj=responsibilities)
-
+            if self.__responsibilities.get(res_id) is None:
+                res_root = session.query(Responsibility_DAL).filter(Responsibility_DAL.id == res_id).one()
+                responsibility = self.create_responsibilities(res_root, store)
+                self.__responsibilities[res_id] = responsibility
+                res = Response(True, obj=responsibility)
+            else:
+                res = Response(True, obj=self.__responsibilities[res_id])
         except Exception as e:
             session.rollback()
             res = Response(False, msg=str(e))
@@ -114,28 +118,21 @@ class ResponsibilitiesHandler(IHandler):
             return res
 
     def create_responsibilities(self, res_root, store):
-        from Backend.Domain.TradingSystem.user_manager import UserManager
         from Backend.Domain.TradingSystem.States.member import Member
-        from Backend.Domain.TradingSystem.stores_manager import StoresManager
-        member_of_res: Member = UserManager.get_member(res_root.id).get_obj()
-        ids = self.__member_handler.load_res_ids(member_of_res.get_username().get_obj().get_val()).get_obj()
-        member_of_res.set_responsibility_ids(ids)
-        store_id_to_res = StoresManager.get_store_id_to_responsibilities(ids)
-        member_of_res.set_responsibilities(store_id_to_res)
-
-        res = self.__create_responsibility_from_type(res_root.responsibility_type, member_of_res, store)
+        member_of_res: Member = self.__member_handler.load_user_with_res(res_root.id)
+        res = self.__create_responsibility_from_type(res_root.responsibility_type, store)
         res.set_dal_responsibility_and_id(res_root)
+        res.set_username(member_of_res.get_username().get_obj().get_val())
         res.set_appointments([self.create_responsibilities(child, store) for child in res_root.appointed])
         return res
 
-
-    def __create_responsibility_from_type(self, responsibility_type, member_of_res, store):
+    def __create_responsibility_from_type(self, responsibility_type, store):
         if responsibility_type == "founder":
             from Backend.Domain.TradingSystem.Responsibilities.founder import Founder
-            return Founder(member_of_res, store)
+            return Founder(None, store)
         elif responsibility_type == "owner":
             from Backend.Domain.TradingSystem.Responsibilities.owner import Owner
-            return Owner(member_of_res, store)
+            return Owner(None, store)
         else:
             from Backend.Domain.TradingSystem.Responsibilities.manager import Manager
-            return Manager(member_of_res, store)
+            return Manager(None, store)

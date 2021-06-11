@@ -522,11 +522,12 @@ class UserManager:
     def get_member(res_id):
         for user in UserManager.__username_user.values():
             if user.state.has_res_id(res_id):
-                return user.state
+                return Response(True, obj=user.state)
 
         user_res = MemberHandler.get_instance().load_user_with_res(res_id)
         if user_res.succeeded():
             user_res.get_obj().load_cart()
             UserManager.__username_user[user_res.get_obj().get_username().get_obj().get_val()] = user_res.get_obj()
             return user_res
+
         return db_fail_response

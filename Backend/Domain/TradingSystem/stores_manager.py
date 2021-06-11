@@ -87,11 +87,3 @@ class StoresManager:
                 return store.get_purchase_history()
         return Response(False, msg=f"No store with the ID {store_id} exists")
 
-    @staticmethod
-    def get_store_id_to_responsibilities(responsibility_ids):
-        store_id_to_res = dict()
-        for store in StoresManager.__stores:
-            res = store.get_personnel_info().get_obj().get_res_if_exists(responsibility_ids)
-            if res.succeeded():
-                store_id_to_res[store.get_id()] = res.get_obj()
-        return store_id_to_res

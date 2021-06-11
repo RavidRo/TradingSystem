@@ -1,4 +1,5 @@
 import json
+import threading
 from threading import Lock
 from sqlalchemy import Table, Column, String, Boolean, insert, ForeignKey, select, TypeDecorator, VARCHAR
 from sqlalchemy.dialects.postgresql import JSON, ARRAY
@@ -51,14 +52,15 @@ class MemberHandler(IHandler):
 
         self.__members = Table('members', mapper_registry.metadata,
                                Column('username', String(50), ForeignKey("credentials.username"), primary_key=True),
-                               Column('notifications', ARRAY(String(256))),
+                               Column('notifications', ARRAY(String(50))),
                                Column('member_type', String(10), nullable=False),
-                               Column('responsibilities_ids', ARRAY(String(256))))
+                               Column('responsibilities_ids', ARRAY(String(10))))
 
         mapper_registry.map_imperatively(Member, self.__members, properties={
+            "_responsibilities_ids": self.__members.c.responsibilities_ids,
             '_username': self.__members.c.username,
-            '_Member__purchase_details': relationship(PurchaseDetails, cascade="all, delete-orphan"),
-            '_Member__offers': relationship(Offer, collection_class=attribute_mapped_collection('_Offer__id'))
+            '_purchase_details': relationship(PurchaseDetails, cascade="all, delete-orphan"),
+            '_offers': relationship(Offer, collection_class=attribute_mapped_collection('_Offer__id'))
 
         }, polymorphic_on=self.__members.c.member_type, polymorphic_identity='M')
 
@@ -211,6 +213,8 @@ class MemberHandler(IHandler):
         res = Response(True)
         try:
             user = session.query(Member).filter(self.__members.c.responsibilities_ids.contains([res_id])).one()
+            user._responsibilities = dict()
+            user.notifications_lock = threading.Lock()
             res = Response(True, user)
             session.commit()
         except Exception as e:

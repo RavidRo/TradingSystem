@@ -57,17 +57,32 @@ class Responsibility(Parsable):
             )
         self._appointed = []
 
-        self._username = user_state.get_username().get_obj().get_val()
+        if self._user_state is not None:
+            self._username = user_state.get_username().get_obj().get_val()
+        else:
+            self._username = None
         self._responsibilities_handler = ResponsibilitiesHandler.get_instance()
         self._responsibility_dal = None
         self._responsibility_dal_id = None
 
-    def get_user_state(self):
+    def set_user_state(self, user_state):
+        self._user_state = user_state
 
-        return self._user_state
+    def get_user_state(self):
+        if self._user_state is not None:
+            return self._user_state
+        from Backend.Domain.TradingSystem.user_manager import UserManager
+        response_member = UserManager.get_member(self._responsibility_dal_id)
+        if response_member.succeeded():
+            response_member.get_obj().add_responsibility(self, self._store_id)
+            self._user_state = response_member.get_obj()
+        return response_member
 
     def get_store_id(self):
         return self._store.get_id()
+
+    def set_username(self, username):
+        self._username = username
 
     # 4.1
     # Creating a new product a the store
@@ -201,21 +216,39 @@ class Responsibility(Parsable):
                 res = self._responsibilities_handler.remove_res(appointment)
 
                 if res.succeeded():
-                    self._appointed.remove(appointment)
-                    appointment.__dismiss_from_store(self._store.get_id())
-                    res = self._responsibilities_handler.commit_changes()
-                    return True
+                    res = appointment.__dismiss_from_store_db(self._store.get_id())
+                    if res.succeeded():
+                        res_commit = self._responsibilities_handler.commit_changes()
+                        if res_commit.succeeded():
+                            self._appointed.remove(appointment)
+                            appointment.__dismiss_from_store(self._store.get_id())
+
+                        return True
+                    return False
 
         return any(map(lambda worker: worker._remove_appointment(username), self._appointed))
 
     def __dismiss_from_store(self, store_id: str) -> None:
         for appointment in self._appointed:
             appointment.__dismiss_from_store(store_id)
+
         message = f'You have been dismissed from store "{self._store.get_name()}"'
         if self.__subscriber:
             self.__subscriber.notify(message)
             self._store.unsubscribe(self.__subscriber)
+
         self._user_state.dismiss_from_store(store_id)
+
+    def __dismiss_from_store_db(self, store_id: str) -> Response[None]:
+        for appointment in self._appointed:
+            response = appointment.__dismiss_from_store_db(store_id)
+            if not response.succeeded():
+                return response
+
+        member_response = self.get_user_state()
+        if member_response.succeeded():
+            member_response.dismiss_from_store_db(store_id)
+        return member_response
 
     # Parsing the object for user representation
     def parse(self) -> ResponsibilitiesData:
@@ -226,7 +259,7 @@ class Responsibility(Parsable):
             self.__class__.__name__,
             [appointee.parse() for appointee in self._appointed],
             self._permissions(),
-            self._user_state.get_username().object.value,
+            self.get_user_state().get_username().object.value,
         )
 
     def _is_manager(self) -> bool:
