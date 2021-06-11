@@ -252,7 +252,7 @@
         3. <ins>System</ins>: If the type is “immediate purchase”:
             1. <ins>System</ins>: apply discount policy on the product and sum up its price.
             2. <ins>System</ins>: else, move the product to the other product’s section in the bag (for example, bid offer).
-        4. else, add the product's approved offer price to the total sum.
+        4. else if the offered price was approved by every store owner, add the product's approved offer price to the total sum.
     2. <ins>System</ins>: removes all the products that were acquired from the store.
 5. <ins>System</ins>: start timer (10 minutes)
 6. <ins>System</ins>: ask for user the payment information and address.
@@ -898,4 +898,23 @@
 **Tests**:
 
 -   <ins>_Happy Path_</ins>: The user chooses to get a user purchase history and enters a username as the user identifier. The system returns the user purchase history.
--   <ins>_Sad Path_</ins>: The user chooses to get a user purchase history and enters an incorrect username as the store identifier. The requested user does not exist and the system returns an error message “{incorrect username} is not a user in the system”.
+-   <ins>_Sad Path_</ins>: The user chooses to get a user purchase history and enters an incorrect username as the user identifier. The requested user does not exist and the system returns an error message “{incorrect username} is not a user in the system”.
+
+### 6.5. Get user statistics (system manager)
+
+**Actors**: System manager  
+**Parameters**: \_start\_date, \_end\_date  
+**Pre-condition**: None.  
+**Post-condition**: None.  
+**Actions**:
+
+1. <ins>System manager</ins>: chooses get user statistics.
+2. <ins>System</ins>: asks for the start and end date.
+3. <ins>Store owner</ins>: enters \_start\_date and \_end\_date.
+4. <ins>System</ins>: searches for the information in the database.
+5. <ins>System</ins>: shows the information. If the statistics change while the system manager watches, they update accordingly.
+
+**Tests**:
+
+-   <ins>_Happy Path_</ins>: The user chooses to get the user statistics and enters a start date and an end date. The system returns the user statistics.
+-   <ins>_Sad Path_</ins>: A user that is not a system manager chooses to get the user statistics. The system returns an error message “Only system managers can receive user statistics”.
