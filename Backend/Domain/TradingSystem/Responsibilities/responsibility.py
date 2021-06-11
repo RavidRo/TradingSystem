@@ -52,7 +52,7 @@ class Responsibility(Parsable):
             subscriber.notify(
                 {
                     "subject": "message",
-                    "message": f"You have been appointer to {store.get_name()} as {self.__class__.__name__}",
+                    "data": f"You have been appointer to {store.get_name()} as {self.__class__.__name__}",
                 }
             )
         self._appointed: list[Responsibility] = []
