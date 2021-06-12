@@ -511,7 +511,7 @@ class UserManager:
 
 
 def register_admins() -> None:
-    settings = Settings.get_instance()
+    settings = Settings.get_instance(False)
     admins = settings.get_admins()
     if len(admins) <= 0:
         raise Exception(

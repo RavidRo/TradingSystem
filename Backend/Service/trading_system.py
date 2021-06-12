@@ -41,7 +41,13 @@ class TradingSystem(object):
         else:
             TradingSystem.__instance = self
             self.payment_manager = PaymentManager()
-            with open("state.json", "r") as read_file:
+            try:
+                read_file = open("state.json", "r")
+            except:
+                e = FileNotFoundError("state.json file is absent")
+                logs.log_file_errors(e)
+                return
+            with read_file:
                 data = json.load(read_file)
                 actions = data["actions"]
                 for action in actions:

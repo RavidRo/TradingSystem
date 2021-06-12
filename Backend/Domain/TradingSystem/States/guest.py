@@ -9,7 +9,7 @@ from Backend.settings import Settings
 
 
 def is_username_admin(username) -> bool:
-    return username in Settings.get_instance().get_admins()
+    return username in Settings.get_instance(False).get_admins()
 
 
 class Guest(UserState):

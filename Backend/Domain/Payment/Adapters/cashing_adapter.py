@@ -6,7 +6,7 @@ from Backend.Domain.Payment.OutsideSystems.outside_cashing import OutsideCashing
 
 
 class CashingAdapter:
-    use_stub = False
+    use_stub = Settings.get_instance(False).get_payment_system() == ""
 
     def __init__(self):
         self.__outside_cashing = OutsideCashing.getInstance()
@@ -16,7 +16,7 @@ class CashingAdapter:
 
     def __send(self, action_type, paramaters={}):
         return requests.post(
-            Settings.get_instance().get_payment_system(),
+            Settings.get_instance(False).get_payment_system(),
             data=({"action_type": action_type} | paramaters),
             timeout=4,
         )
