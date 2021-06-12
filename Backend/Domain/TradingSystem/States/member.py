@@ -20,9 +20,8 @@ class Member(UserState):
         )
 
     def add_responsibility(self, responsibility, store_id):
-        if store_id not in self._responsibilities:
-            self._responsibilities[store_id] = responsibility
-        if responsibility.get_dal_responsibility_id() not in self._responsibilities_ids:
+        res = self.get_responsibility(store_id)
+        if res.get_obj().get_dal_responsibility_id() not in self._responsibilities_ids:
             self._responsibilities_ids += [responsibility.get_dal_responsibility_id()]
             self._member_handler.update_responsibilities_ids(self._username, self._responsibilities_ids)
 
@@ -102,6 +101,7 @@ class Member(UserState):
 
     def open_store(self, store_name) -> Response:
         store = Store(store_name)
+        store.create_purchase_rules_root()
         store.save()
         founder = Founder(self, store, self._user)
         res_save = founder.save_self()
@@ -119,9 +119,6 @@ class Member(UserState):
         return self._username
 
     def get_responsibility(self, store_id):
-        res = self._responsibilities.get(store_id)
-        if res is not None:
-            return Response(True, res)
         from Backend.DataBase.Handlers.responsibilities_handler import ResponsibilitiesHandler
         from Backend.Domain.TradingSystem.stores_manager import StoresManager
         store_res = StoresManager.get_store(store_id)
@@ -129,10 +126,14 @@ class Member(UserState):
             return store_res
         res = ResponsibilitiesHandler.get_instance().load_res_and_appointments(store_res.get_obj().get_res_id(), store_res.get_obj())
         if res.succeeded():
-            responsibility = res.get_obj()
+            founder_responsibility = res.get_obj()
+            responsibility = self.get_own_responsibility(founder_responsibility, store_res.get_obj().get_id())
+            if responsibility is None:
+                return Response(False)
             self._responsibilities[store_id] = responsibility
-            responsibility.get_user_state()
-        return res
+            # self._responsibilities[store_id].set_user_state(self)
+            # responsibility.get_user_state()
+        return Response(True, obj=responsibility)
 
 
     def get_purchase_history(self):
@@ -313,7 +314,8 @@ class Member(UserState):
         return Response(False, msg="Regular members cannot get any user's purchase history")
 
     def is_appointed(self, store_id):
-        return Response(True, store_id in self._responsibilities)
+        res = self.get_responsibility(store_id)
+        return Response(True, obj=res.succeeded())
 
     # 4.2
     def add_purchase_rule(self, store_id: str, rule_details: dict, rule_type: str, parent_id: str, clause: str = None):
@@ -432,3 +434,13 @@ class Member(UserState):
 
     def get_responsibility_ids(self):
         return self._responsibilities_ids
+
+    def get_own_responsibility(self, root_responsibility, store_id):
+        if root_responsibility.get_dal_responsibility_id() in self._responsibilities_ids:
+            return root_responsibility
+        elif root_responsibility._appointed is None:
+            return None
+        for appointee in root_responsibility._appointed:
+            res = self.get_own_responsibility(appointee, store_id)
+            if res is not None:
+                return res

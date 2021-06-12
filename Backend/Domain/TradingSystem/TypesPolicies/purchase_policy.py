@@ -1,5 +1,7 @@
 import operator
 import threading
+
+from Backend.DataBase.database import db_fail_response
 from Backend.Domain.TradingSystem.TypesPolicies.Purchase_Composites.concrete_composites import AndCompositePurchaseRule, \
     OrCompositePurchaseRule, ConditioningCompositePurchaseRule
 from Backend.Domain.TradingSystem.TypesPolicies.Purchase_Composites.concrete_leaf import ProductLeafPurchaseRule, \
@@ -15,14 +17,14 @@ class PurchasePolicy:
 
 # region data
 
-logic_types = {"or": lambda self: OrCompositePurchaseRule(self.generate_id()),
-               "and": lambda self: AndCompositePurchaseRule(self.generate_id()),
-               "conditional": lambda self: ConditioningCompositePurchaseRule(self.generate_id())}
+logic_types = {"or": lambda self: OrCompositePurchaseRule(),
+               "and": lambda self: AndCompositePurchaseRule(),
+               "conditional": lambda self: ConditioningCompositePurchaseRule()}
 
-leaf_types = {"product": lambda self, leaf_details: ProductLeafPurchaseRule(leaf_details=leaf_details, identifier=self.generate_id()),
-              "bag": lambda self, leaf_details: BagLeafPurchaseRule(leaf_details=leaf_details, identifier=self.generate_id()),
-              "user": lambda self, leaf_details: UserLeafPurchaseRule(leaf_details=leaf_details, identifier=self.generate_id()),
-              "category": lambda self, leaf_details: CategoryLeafPurchaseRule(leaf_details=leaf_details, identifier=self.generate_id()),
+leaf_types = {"product": lambda self, leaf_details: ProductLeafPurchaseRule(leaf_details=leaf_details),
+              "bag": lambda self, leaf_details: BagLeafPurchaseRule(leaf_details=leaf_details),
+              "user": lambda self, leaf_details: UserLeafPurchaseRule(leaf_details=leaf_details),
+              "category": lambda self, leaf_details: CategoryLeafPurchaseRule(leaf_details=leaf_details),
               }
 
 
@@ -40,18 +42,18 @@ ops = {'great-than': operator.gt,
 
 class DefaultPurchasePolicy(PurchasePolicy):
 
-    def __init__(self):
+    def __init__(self, purchase_root_id=None):
+        from Backend.DataBase.Handlers.purchase_rules_handler import PurchaseRulesHandler
         super().__init__()
+        self.__purchase_rules_handler = PurchaseRulesHandler.get_instance()
         self.__id = 0
-        self.auto_id_lock = threading.Lock()
         # the root will be always an AndComposite
-        self.__purchase_rules = AndCompositePurchaseRule(self.generate_id())
+        if purchase_root_id is None:
+            self.__purchase_rules = AndCompositePurchaseRule()
+        else:
+            self.__purchase_rules = self.__purchase_rules_handler.load(purchase_root_id)
+        self.__purchase_rules_lock = None
         self.__purchase_rules_lock = ReadWriteLock()
-
-    def generate_id(self) -> str:
-        with self.auto_id_lock:
-            self.__id += 1
-            return str(self.__id)
 
     """
     rule_details json of relevant details.
@@ -67,6 +69,16 @@ class DefaultPurchasePolicy(PurchasePolicy):
                         }
     clause - only for conditional - valid values: if/then
     """
+
+    def get_purchase_rules(self):
+        if self.__purchase_rules is None:
+            rules_loaded = self.__purchase_rules_handler.load_rules(self.__purchase_rules_root_id)
+            if rules_loaded.succeeded():
+                self.__purchase_rules = rules_loaded.get_obj()
+                return Response(True, obj=self.__purchase_rules)
+            else:
+                return db_fail_response
+        return Response(True, obj=self.__purchase_rules)
 
     def check_keys_in_rule_details(self, keys: list[str], rule_details: dict):
         for key in keys:

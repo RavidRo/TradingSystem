@@ -4,6 +4,10 @@ import copy
 from abc import ABC, abstractmethod
 from typing import List
 
+from sqlalchemy_utils import Ltree
+
+from Backend.DataBase.Handlers.purchase_rules_handler import rules_id_seq
+from Backend.DataBase.database import engine
 from Backend.Domain.TradingSystem.user import User
 from Backend.response import Response
 
@@ -14,8 +18,14 @@ class PurchaseRule(ABC):
     complex objects of a composition.
     """
 
-    def __init__(self, identifier):
-        self.id = identifier
+    def __init__(self, parent=None):
+        _id = engine.execute(rules_id_seq)
+        self._id = _id
+        ltree_id = Ltree(str(_id))
+        self.path = ltree_id if parent is None else parent.path + ltree_id
+
+    def get_id(self):
+        return self._id
 
     @property
     def id(self) -> str:
@@ -66,8 +76,8 @@ class CompositePurchaseRule(PurchaseRule):
     children.
     """
 
-    def __init__(self, identifier: str) -> None:
-        self.id = identifier
+    def __init__(self) -> None:
+        super().__init__()
         self._children: List[PurchaseRule] = []
 
     @property
@@ -93,7 +103,7 @@ class CompositePurchaseRule(PurchaseRule):
         return Response(False, msg=f"Operation couldn't be performed! Wrong parent_id: {id}")
 
     def add(self, component: PurchaseRule, parent_id: str, clause: str = None) -> Response[None]:
-        if self.id == parent_id:
+        if self.get_id() == parent_id:
             self._children.append(component)
             component.parent = self
             return Response(True, msg="Rule was added successfully!")
@@ -103,7 +113,7 @@ class CompositePurchaseRule(PurchaseRule):
             return Response(False, msg=f"Operation couldn't be performed! Wrong parent_id: {id}")
 
     def remove(self, component_id: str) -> Response[None]:
-        if self.id == component_id:
+        if self.get_id() == component_id:
             if self.parent is None:
                 return Response(False, msg="Root can't be removed!")
             self.parent._children.remove(self)
@@ -113,7 +123,7 @@ class CompositePurchaseRule(PurchaseRule):
         return self.children_operation(lambda next_child, relevant_id: next_child.remove(relevant_id), component_id)
 
     def edit_rule(self, rule_id: str, component: PurchaseRule) -> Response[None]:
-        if self.id == rule_id:
+        if self.get_id() == rule_id:
             self.parent.children.remove(self)
             self.parent.children.append(component)
             component.children = copy.deepcopy(self.children)
@@ -122,7 +132,7 @@ class CompositePurchaseRule(PurchaseRule):
         return self.children_operation(lambda child, relevant_id, rule: child.edit_rule(rule, relevant_id), rule_id, component)
 
     def get_rule(self, rule_id: str) -> Response[PurchaseRule]:
-        if self.id == rule_id:
+        if self.get_id() == rule_id:
             return Response(True, obj=self, msg="Here is the rule")
         else:
             for child in self.children:
@@ -135,7 +145,7 @@ class CompositePurchaseRule(PurchaseRule):
         return True
 
     def check_validity(self, new_parent_id: str) -> Response[None]:
-        if self.id == new_parent_id:
+        if self.get_id() == new_parent_id:
             return Response(False, msg="Invalid move operation!")
         for child in self.children:
             response = child.check_validity(new_parent_id)

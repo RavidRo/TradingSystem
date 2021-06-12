@@ -16,7 +16,7 @@ from Backend.Service.trading_system import TradingSystem
 def save():
     # mapper_registry.metadata.drop_all(engine)
     # mapper_registry.metadata.create_all(engine)
-    trading_system = TradingSystem.getInstance()
+    # trading_system = TradingSystem.getInstance()
     # cookie = trading_system.enter_system()
     # res = trading_system.register(cookie, "user", "password")
     # if not res.succeeded():
@@ -89,14 +89,25 @@ def save():
     # res_appoint_manager = trading_system.appoint_manager(cookie, store_res2.get_obj(), "user4")
     # if not res_appoint_manager.succeeded():
     #     print("appoint manager: " + res_appoint_manager.get_msg())
+    #
+    # res_add_perm = trading_system.add_manager_permission(cookie, store_res2.get_obj(), "user4", "appoint manager")
+    # if not res_add_perm.succeeded():
+    #     print("appoint manager: " + res_add_perm.get_msg())
+    #
+    # res_remove_perm = trading_system.remove_manager_permission(cookie, store_res2.get_obj(), "user4", "get appointments")
+    # if not res_remove_perm.succeeded():
+    #     print("appoint manager: " + res_remove_perm.get_msg())
 
-    cookie2 = trading_system.enter_system()
-    res = trading_system.get_store("f9ba0cf9-9375-4ed3-97dc-c14def50306e")
-    trading_system.get_store("a7b43b59-85ba-4fcb-89ea-73e4c47ee7d8")
-    trading_system.login(cookie2, "user2", "password2")
-    res_remove_manager = trading_system.remove_appointment(cookie2, "f9ba0cf9-9375-4ed3-97dc-c14def50306e", "user")
-    if not res_remove_manager.succeeded():
-        print("remove manager: " + res_remove_manager.get_msg())
+    trading_system = TradingSystem.getInstance()
+    cookie4 = trading_system.enter_system()
+    res = trading_system.get_store("0b19deae-9454-4bb5-a600-de860d7fefaa")
+    trading_system.get_store("395eac04-8937-4760-b2b1-228fc2b42ed8")
+    trading_system.login(cookie4, "user4", "password4")
+    res = trading_system.appoint_manager(cookie4,"0b19deae-9454-4bb5-a600-de860d7fefaa", "user3")
+    print(res.get_msg())
+    # res_remove_manager = trading_system.remove_appointment(cookie2, "663fef32-032f-4ef1-8140-60efea48c5f2", "user2")
+    # if not res_remove_manager.succeeded():
+    #     print("remove manager: " + res_remove_manager.get_msg())
 
 
 if __name__ == '__main__':

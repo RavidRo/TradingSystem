@@ -15,7 +15,6 @@ class Store(Parsable, Subscriber):
     from Backend.Domain.TradingSystem.purchase_details import PurchaseDetails
 
     def __init__(self, store_name: str):
-        from Backend.Domain.TradingSystem.TypesPolicies.purchase_policy import DefaultPurchasePolicy
         from Backend.Domain.TradingSystem.TypesPolicies.discount_policy import DefaultDiscountPolicy
         """Create a new store with it's specified info"""
         self.__id = self.id_generator()
@@ -25,7 +24,8 @@ class Store(Parsable, Subscriber):
         self.__responsibility_id = None
         # These fields will be changed in the future versions
         self.__discount_policy = DefaultDiscountPolicy()
-        self.__purchase_policy = DefaultPurchasePolicy()
+        self.__purchase_policy = None
+        self.__purchase_policy_root_id = None
         self.__purchase_history = []
         self._products_lock = ReadWriteLock()
         self.__history_lock = ReadWriteLock()
@@ -39,6 +39,10 @@ class Store(Parsable, Subscriber):
     def get_discount_policy(self):
         return self.__discount_policy
 
+    def create_purchase_rules_root(self):
+        from Backend.Domain.TradingSystem.TypesPolicies.purchase_policy import DefaultPurchasePolicy
+        self.__purchase_policy = DefaultPurchasePolicy()
+        self.__purchase_policy_root_id = self.__purchase_policy.get_root_id()
 
     def set_products(self, products_to_quantities: dict[str, tuple[Product, int]]):
         self._products_to_quantities = products_to_quantities
@@ -498,3 +502,6 @@ class Store(Parsable, Subscriber):
 
     def get_res_id(self):
         return self.__responsibility_id
+
+    def get_name(self):
+        return self.__name

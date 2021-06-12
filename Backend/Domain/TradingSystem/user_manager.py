@@ -38,7 +38,12 @@ class UserManager:
     @staticmethod
     def __get_user_by_username(username) -> IUser or None:
         if username not in UserManager.__username_user:
-            return None
+            user_res = MemberHandler.get_instance().load(username)
+            if not user_res.succeeded():
+                return None
+            user = User()
+            user.change_state(user_res.get_obj())
+            UserManager.__username_user[username] = user
         return UserManager.__username_user[username]
 
     @staticmethod

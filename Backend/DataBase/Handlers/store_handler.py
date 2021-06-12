@@ -41,7 +41,8 @@ class StoreHandler(IHandler):
         self.__stores = Table("stores", mapper_registry.metadata,
                               Column("store_id", String(50), primary_key=True),
                               Column("store_name", String(30)),
-                              Column("responsibility_id", Integer))
+                              Column("responsibility_id", Integer),
+                              Column("purchase_policy_root_id", String(30)))
 
         mapper_registry.map_imperatively(ProductsOfStores, self.__products_of_stores, properties={
             "store_id": self.__products_of_stores.c.store_id,
@@ -51,6 +52,7 @@ class StoreHandler(IHandler):
         })
 
         mapper_registry.map_imperatively(Store, self.__stores, properties={
+            "_Store__purchase_policy_root_id": self.__stores.c.purchase_policy_root_id,
             "_Store__id": self.__stores.c.store_id,
             "_Store__name": self.__stores.c.store_name,
             "_Store__responsibility_id": self.__stores.c.responsibility_id,

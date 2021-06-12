@@ -2,7 +2,6 @@ from Backend.Domain.TradingSystem.TypesPolicies.Purchase_Composites.composite_pu
     CompositePurchaseRule,
     PurchaseRule,
 )
-from Backend.Domain.TradingSystem.user import User
 from Backend.response import Response
 
 
@@ -18,7 +17,7 @@ class OrCompositePurchaseRule(CompositePurchaseRule):
 
     def parse(self):
         return {
-            "id": self.id,
+            "id": self.get_id(),
             "operator": "or",
             "children": [child.parse() for child in self.children],
         }
@@ -33,7 +32,7 @@ class AndCompositePurchaseRule(CompositePurchaseRule):
 
     def parse(self):
         return {
-            "id": self.id,
+            "id": self.get_id(),
             "operator": "and",
             "children": [child.parse() for child in self.children],
         }
@@ -43,12 +42,12 @@ clauses = {"test": 0, "then": 1}
 
 
 class ConditioningCompositePurchaseRule(CompositePurchaseRule):
-    def __init__(self, identifier: str):
-        super(ConditioningCompositePurchaseRule, self).__init__(identifier)
+    def __init__(self):
+        super(ConditioningCompositePurchaseRule, self).__init__()
         self.children = [None, None]
 
     def add(self, component: PurchaseRule, parent_id: str, clause: str = None) -> Response[None]:
-        if self.id == parent_id:
+        if self.get_id() == parent_id:
             if clause == "test":
                 return self.add_to_clause(clauses["test"], component)
             elif clause == "then":
@@ -77,13 +76,13 @@ class ConditioningCompositePurchaseRule(CompositePurchaseRule):
 
     def remove(self, component_id: str) -> Response[None]:
         if self.children[0] is not None:
-            if self.children[0].id == component_id:
-                self.children[0] = AndCompositePurchaseRule(self.children[0].id)
+            if self.children[0].get_id() == component_id:
+                self.children[0] = AndCompositePurchaseRule()
                 return Response(True, msg="Rule was removed successfully!")
 
         if self.children[1] is not None:
-            if self.children[1].id == component_id:
-                self.children[1] = AndCompositePurchaseRule(self.children[1].id)
+            if self.children[1].get_id() == component_id:
+                self.children[1] = AndCompositePurchaseRule()
                 return Response(True, msg="Rule was removed successfully!")
 
         return super().remove(component_id)
@@ -99,7 +98,7 @@ class ConditioningCompositePurchaseRule(CompositePurchaseRule):
 
     def parse(self):
         return {
-            "id": self.id,
+            "id": self.get_id(),
             "operator": "conditional",
             "test": self.children[clauses["test"]].parse()
             if self.children[clauses["test"]] is not None

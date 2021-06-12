@@ -143,11 +143,15 @@ class Founder(Responsibility):
             else:
                 #! I am guessing that user.state is of type member because at user_manager, with a given username he found a user object
                 #! (guest does not hae a username)
+
                 newResponsibility = Manager(user.state, self._store, user)
                 self._appointed.append(newResponsibility)
                 from Backend.DataBase.Handlers.responsibilities_handler import Manager_Responsibility_DAL
                 self.save_appointment(newResponsibility, Manager_Responsibility_DAL)
-                newResponsibility._user_state.add_responsibility(newResponsibility, self._store.get_id())
+                user = newResponsibility.get_user_state()
+                if not user.succeeded():
+                    return db_fail_response
+                user.get_obj().add_responsibility(newResponsibility, self._store.get_id())
                 res = self._responsibilities_handler.commit_changes()
                 result = Response(True)
 
@@ -156,21 +160,11 @@ class Founder(Responsibility):
     # 4.6
     # recursively call children function until the child is found and the permission is added
     def add_manager_permission(self, username: str, permission: Permission) -> Response[None]:
-        if not self._add_permission(username, permission):
-            return Response(
-                False,
-                msg=f"{self._user_state.get_username().get_obj().get_val()} never appointed {username} as a manager",
-            )
-        return Response(True)
+        return self._add_permission(username, permission)
 
     # 4.6
     def remove_manager_permission(self, username: str, permission: Permission) -> Response[None]:
-        if not self._remove_permission(username, permission):
-            return Response(
-                False,
-                msg=f"{self._user_state.get_username().get_obj().get_val()} never appointed {username} as a manager",
-            )
-        return Response(True)
+        return self._remove_permission(username, permission)
 
     # 4.4, 4.7
     def remove_appointment(self, username: str) -> Response[None]:

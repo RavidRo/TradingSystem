@@ -1,18 +1,43 @@
+import enum
 from threading import Lock
 
-from sqlalchemy import Column, Integer, Sequence, Index, String, ForeignKey, Table
+from sqlalchemy import Column, Integer, Sequence, Index, String, Table
 from sqlalchemy import func, create_engine
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import relationship, remote, foreign
+from sqlalchemy import TypeDecorator, cast
+from sqlalchemy.dialects.postgresql import ARRAY, ENUM
+from sqlalchemy.orm import relationship, remote, foreign, column_property
 from sqlalchemy_utils import LtreeType, Ltree
-
+import re
 from Backend.DataBase.IHandler import IHandler
 from Backend.DataBase.database import engine, session, mapper_registry, db_fail_response
-from Backend.Domain.TradingSystem.Responsibilities.responsibility import Responsibility
+from Backend.Domain.TradingSystem.Responsibilities.responsibility import Responsibility, Permission
 from Backend.response import Response, PrimitiveParsable
 from Backend.rw_lock import ReadWriteLock
 
 id_seq = Sequence('nodes_id_seq')
+
+class ArrayOfEnum(TypeDecorator):
+
+    impl = ARRAY
+
+    def bind_expression(self, bindvalue):
+        return cast(bindvalue, self)
+
+    def result_processor(self, dialect, coltype):
+        super_rp = super(ArrayOfEnum, self).result_processor(dialect, coltype)
+
+        def handle_raw_string(value):
+            inner = re.match(r"^{(.*)}$", value).group(1)
+
+            return inner.split(",") if inner else []
+
+        def process(value):
+            if value is None:
+                return None
+
+            return super_rp(handle_raw_string(value))
+
+        return process
 
 
 class Responsibility_DAL:
@@ -22,10 +47,13 @@ class Responsibility_DAL:
         self.id = _id
         ltree_id = Ltree(str(_id))
         self.path = ltree_id if parent is None else parent.path + ltree_id
+        self.permissions = []
 
 
 class Manager_Responsibility_DAL(Responsibility_DAL):
-    pass
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.permissions = [Permission.GET_APPOINTMENTS.value]
 
 
 class Owner_Responsibility_DAL(Responsibility_DAL):
@@ -50,6 +78,7 @@ class ResponsibilitiesHandler(IHandler):
                                               Column('id', Integer, id_seq, primary_key=True),
                                               Column('path', LtreeType, nullable=False),
                                               Column('type', String(10)),
+                                              Column('manager_permissions', ARRAY(Integer)),
                                               Index('ix_nodes_path', 'path', postgresql_using='gist'))
 
         mapper_registry.map_imperatively(Responsibility_DAL, self.__responsibilities_table, properties={
@@ -61,7 +90,8 @@ class ResponsibilitiesHandler(IHandler):
                     func.subpath(self.__responsibilities_table.c.path, 0, -1))),
                 backref='appointed',
                 viewonly=True
-            )
+            ),
+            "permissions": column_property(self.__responsibilities_table.c.manager_permissions),
         }, polymorphic_on=self.__responsibilities_table.c.type)
 
         mapper_registry.map_imperatively(Founder_Responsibility_DAL, self.__responsibilities_table, inherits=Responsibility_DAL,
@@ -70,7 +100,8 @@ class ResponsibilitiesHandler(IHandler):
         mapper_registry.map_imperatively(Owner_Responsibility_DAL, self.__responsibilities_table, inherits=Responsibility_DAL,
                                          polymorphic_identity='owner')
 
-        mapper_registry.map_imperatively(Manager_Responsibility_DAL, self.__responsibilities_table, inherits=Responsibility_DAL,
+        mapper_registry.map_imperatively(Manager_Responsibility_DAL, self.__responsibilities_table,
+                                         inherits=Responsibility_DAL,
                                          polymorphic_identity='manager')
 
     @staticmethod
@@ -118,8 +149,10 @@ class ResponsibilitiesHandler(IHandler):
         res = Response(True)
         try:
             responsibility_dal = responsibility.get_dal_responsibility()
-            # I think this isn't removing the subtree like it suppose to do...
+            whole_subtree = session.query(Responsibility_DAL).filter(Responsibility_DAL.path.descendant_of(responsibility_dal.path)).all()
             session.delete(responsibility_dal)
+            for responsibility in whole_subtree:
+                session.delete(responsibility)
             res = Response(True)
         except Exception as e:
             session.rollback()
@@ -129,25 +162,57 @@ class ResponsibilitiesHandler(IHandler):
             return res
 
     def create_responsibilities(self, res_root, store):
-        member_of_res = self.__member_handler.load_user_with_res(res_root.id)
-        if not member_of_res.succeeded():
-            return member_of_res
-        res = self.__create_responsibility_from_type(res_root.type, store)
+        # member_of_res = self.__member_handler.load_user_with_res(res_root.id)
+        # if not member_of_res.succeeded():
+        #     return member_of_res
+        res = self.__create_responsibility_from_type(res_root, store)
         res.set_dal_responsibility_and_id(res_root)
-        res.set_username(member_of_res.get_obj().get_username().get_obj().get_val())
+        # res.set_username(member_of_res.get_obj().get_username().get_obj().get_val())
         appointments = [self.create_responsibilities(child, store) for child in res_root.appointed]
         if any([not appointment.succeeded() for appointment in appointments]):
             return db_fail_response
         res.set_appointments([appointment.get_obj() for appointment in appointments])
         return Response(True, res)
 
-    def __create_responsibility_from_type(self, responsibility_type, store):
-        if responsibility_type == "founder":
+    def __create_responsibility_from_type(self, responsibility_dal, store):
+        if responsibility_dal.type == "founder":
             from Backend.Domain.TradingSystem.Responsibilities.founder import Founder
             return Founder(None, store)
-        elif responsibility_type == "owner":
+        elif responsibility_dal.type == "owner":
             from Backend.Domain.TradingSystem.Responsibilities.owner import Owner
             return Owner(None, store)
         else:
             from Backend.Domain.TradingSystem.Responsibilities.manager import Manager
-            return Manager(None, store)
+            manager = Manager(None, store)
+            manager.set_permissions(responsibility_dal.permissions)
+            return manager
+
+    def add_permission(self, res_id, permission):
+        self._rwlock.acquire_write()
+        res = Response(True)
+        try:
+            manager_dal = session.query(Responsibility_DAL).filter(Responsibility_DAL.id == res_id).one()
+            perms = manager_dal.permissions
+            manager_dal.manager_permissions = None
+            manager_dal.permissions = perms + [permission.value]
+        except Exception as e:
+            session.rollback()
+            res = Response(False, msg=str(e))
+        finally:
+            self._rwlock.release_write()
+            return res
+
+    def remove_permission(self, res_id, permission):
+        self._rwlock.acquire_write()
+        res = Response(True)
+        try:
+            manager_dal = session.query(Responsibility_DAL).filter(Responsibility_DAL.id == res_id).one()
+            perms = manager_dal.permissions
+            manager_dal.manager_permissions = None
+            manager_dal.permissions = list(set(perms) - {permission.value})
+        except Exception as e:
+            session.rollback()
+            res = Response(False, msg=str(e))
+        finally:
+            self._rwlock.release_write()
+            return res

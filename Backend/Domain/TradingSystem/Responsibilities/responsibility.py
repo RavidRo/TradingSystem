@@ -75,6 +75,7 @@ class Responsibility(Parsable):
             if response_member.succeeded():
                 response_member.get_obj().add_responsibility(self, self._store_id)
                 self._user_state = response_member.get_obj()
+                self._username = self._user_state.get_username()
             else:
                 return response_member
         for appointed in self._appointed:
@@ -189,27 +190,44 @@ class Responsibility(Parsable):
     def get_store_purchase_history(self) -> Response[ParsableList[PurchaseDetails]]:
         raise Exception(Responsibility.ERROR_MESSAGE)
 
-    def _add_permission(self, username: str, permission: Permission) -> bool:
+    def _add_permission(self, username: str, permission: Permission) -> Response[None]:
         if not self._appointed:
             # if self.user never appointed anyone
-            return False
+            return Response(False, msg=f"{self._username} is not appointed to store: {self._store.get_name()}!")
 
         def add_appointee_permission(appointee: Responsibility):
             return appointee._add_permission(username, permission)
 
         # returns true if any one of the children returns true
-        return any(map(add_appointee_permission, self._appointed))
+        for appointee in self._appointed:
+            response = add_appointee_permission(appointee)
+            if response.succeeded():
+                return response
+            elif response.get_obj().parse() == -1:
+                return db_fail_response
 
-    def _remove_permission(self, username: str, permission: Permission) -> bool:
+        return Response(False, msg=f"Didn't find appointee with username: {username}")
+
+        # return any(map(add_appointee_permission, self._appointed))
+
+    def _remove_permission(self, username: str, permission: Permission) -> Response[None]:
         if not self._appointed:
             # if self.user never appointed anyone
-            return False
+            return Response(False, msg=f"{self._username} is not appointed to store: {self._store.get_name()}!")
 
         def remove_appointee_permission(appointee: Responsibility):
             return appointee._remove_permission(username, permission)
 
+        for appointee in self._appointed:
+            response = remove_appointee_permission(appointee)
+            if response.succeeded():
+                return response
+            elif response.get_obj().parse() == -1:
+                return db_fail_response
+
+        return Response(False, msg=f"Didn't find appointee with username: {username}")
         # returns true if any one of the children returns true
-        return any(map(remove_appointee_permission, self._appointed))
+        # return any(map(remove_appointee_permission, self._appointed))
 
     def _remove_appointment(self, username: str) -> bool:
         if not self._appointed:

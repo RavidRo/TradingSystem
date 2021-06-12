@@ -12,8 +12,8 @@ ops = {'great-than': operator.gt,
 
 class UserLeafPurchaseRule(PurchaseLeaf):
 
-    def __init__(self, leaf_details: dict, identifier: str):
-        super().__init__(leaf_details, identifier)
+    def __init__(self, leaf_details: dict):
+        super().__init__(leaf_details)
 
     def operation(self, products_to_quantities: dict, user_age: int):
         if ops[self._comparator](user_age, self._constraint):
@@ -23,8 +23,8 @@ class UserLeafPurchaseRule(PurchaseLeaf):
 
 class ProductLeafPurchaseRule(PurchaseLeaf):
 
-    def __init__(self, leaf_details: dict, identifier: str):
-        super().__init__(leaf_details, identifier)
+    def __init__(self, leaf_details: dict):
+        super().__init__(leaf_details)
 
     def operation(self, products_to_quantities: dict, user_age: int):
         prod_id = self._context['identifier']
@@ -36,8 +36,8 @@ class ProductLeafPurchaseRule(PurchaseLeaf):
 
 class CategoryLeafPurchaseRule(PurchaseLeaf):
 
-    def __init__(self, leaf_details: dict, identifier: str):
-        super().__init__(leaf_details, identifier)
+    def __init__(self, leaf_details: dict):
+        super().__init__(leaf_details)
 
     def operation(self, products_to_quantities: dict, user_age: int):
         category = self._context['identifier']
@@ -53,8 +53,8 @@ class CategoryLeafPurchaseRule(PurchaseLeaf):
 
 class BagLeafPurchaseRule(PurchaseLeaf):
 
-    def __init__(self, leaf_details: dict, identifier: str):
-        super().__init__(leaf_details, identifier)
+    def __init__(self, leaf_details: dict):
+        super().__init__(leaf_details)
 
     def operation(self, products_to_quantities: dict, user_age: int):
         cart_price = 0
