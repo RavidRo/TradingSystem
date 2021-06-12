@@ -1,7 +1,7 @@
 import json
 import threading
 from threading import Lock
-from sqlalchemy import Table, Column, String, Boolean, insert, ForeignKey, select, TypeDecorator, VARCHAR
+from sqlalchemy import Table, Column, String, Boolean, insert, ForeignKey, select, TypeDecorator, VARCHAR, Integer
 from sqlalchemy.dialects.postgresql import JSON, ARRAY
 from sqlalchemy.ext.mutable import Mutable, MutableDict
 from sqlalchemy.orm import mapper, relationship, backref, with_polymorphic
@@ -12,7 +12,6 @@ from Backend.Domain.TradingSystem.Responsibilities.responsibility import Respons
 from Backend.Domain.TradingSystem.States.member import Member
 from Backend.Domain.TradingSystem.offer import Offer
 from Backend.Domain.TradingSystem.purchase_details import PurchaseDetails
-from sqlalchemy_mutable import Mutable, MutableType, MutableModelBase, Query
 from Backend.response import Response, PrimitiveParsable
 from Backend.rw_lock import ReadWriteLock
 from sqlalchemy.orm.collections import attribute_mapped_collection, column_mapped_collection
@@ -54,7 +53,7 @@ class MemberHandler(IHandler):
                                Column('username', String(50), ForeignKey("credentials.username"), primary_key=True),
                                Column('notifications', ARRAY(String(50))),
                                Column('member_type', String(10), nullable=False),
-                               Column('responsibilities_ids', ARRAY(String(10))))
+                               Column('responsibilities_ids', ARRAY(Integer)))
 
         mapper_registry.map_imperatively(Member, self.__members, properties={
             "_responsibilities_ids": self.__members.c.responsibilities_ids,
@@ -123,7 +122,6 @@ class MemberHandler(IHandler):
     #         return res
     #
 
-
     # # TODO: check if append here is on same object as in the domain!
     # def update_responsibility(self, username: str, responsibility: Responsibility):
     #     self._rwlock.acquire_write()
@@ -140,23 +138,19 @@ class MemberHandler(IHandler):
     #         self._rwlock.release_write()
     #         return res
 
-
-    def update_responsibilities_ids(self,username: str, responsibilities_ids: list):
+    def update_responsibilities_ids(self, username: str, responsibilities_ids: list):
         self._rwlock.acquire_write()
         res = Response(True)
         try:
             member = session.query(Member).filter_by(_username=username).one()
             member.responsibilities_ids = None
-            session.commit()
-            session.refresh(member)
-            member.responsibilities_ids = responsibilities_ids
+            member._responsibilities_ids = responsibilities_ids
         except Exception as e:
             session.rollback()
             res = Response(False, msg=str(e))
         finally:
             self._rwlock.release_write()
             return res
-
 
     def update_notifications(self, username: str, notifications: list[str]):
         self._rwlock.acquire_write()
@@ -180,7 +174,8 @@ class MemberHandler(IHandler):
         self._rwlock.acquire_read()
         res = Response(True)
         try:
-            stmt = select([self.__credentials.c.username, self.__credentials.c.password]).where(self.__credentials.c.username == username)
+            stmt = select([self.__credentials.c.username, self.__credentials.c.password]).where(
+                self.__credentials.c.username == username)
             res = session.execute(stmt).one()
             session.commit()
             res = Response(True, res)

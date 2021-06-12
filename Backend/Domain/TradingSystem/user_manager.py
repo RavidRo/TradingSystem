@@ -1,3 +1,5 @@
+import threading
+
 from Backend.DataBase.database import db_fail_response
 from Backend.Domain.TradingSystem.offer import Offer
 from typing import Callable
@@ -83,18 +85,21 @@ class UserManager:
                         UserManager.__cookie_user[cookie] = old_user
                         old_user.connect(user.get_communicate())
                         return response
-                res = MemberHandler.get_instance().load(username)
-                ids = MemberHandler.get_instance().load_res_ids(username).get_obj()
-                res.get_obj().set_responsibility_ids(ids)
-                res.get_obj().load_cart()
-                from Backend.Domain.TradingSystem.stores_manager import StoresManager
-                store_id_to_res = StoresManager.get_store_id_to_responsibilities(ids)
-                res.get_obj().set_responsibilities(store_id_to_res)
-                res_commit = MemberHandler.get_instance().commit_changes()
-                if res_commit.succeeded():
-                    res.get_obj().set_user(user)
-                    user.change_state(res.get_obj())
-                    UserManager.__username_user[username] = user
+                member_res = MemberHandler.get_instance().load(username)
+                if not member_res.succeeded():
+                    return member_res
+                member = member_res.get_obj()
+                res = member.load_cart()
+                if res.succeeded():
+                    member._responsibilities = dict()
+                    member.notifications_lock = threading.Lock()
+                    res_commit = MemberHandler.get_instance().commit_changes()
+                    if res_commit.succeeded():
+                        member.set_user(user)
+                        user.change_state(member)
+                        UserManager.__username_user[username] = user
+                    return res_commit
+                return res
 
 
                 # for user_cookie in UserManager.__cookie_user:
@@ -524,10 +529,13 @@ class UserManager:
             if user.state.has_res_id(res_id):
                 return Response(True, obj=user.state)
 
-        user_res = MemberHandler.get_instance().load_user_with_res(res_id)
-        if user_res.succeeded():
-            user_res.get_obj().load_cart()
-            UserManager.__username_user[user_res.get_obj().get_username().get_obj().get_val()] = user_res.get_obj()
-            return user_res
+        member_res = MemberHandler.get_instance().load_user_with_res(res_id)
+        if member_res.succeeded():
+            member_res.get_obj().load_cart()
+            user = User()
+            user.change_state(member_res.get_obj())
+            member_res.get_obj().set_user(user)
+            UserManager.__username_user[member_res.get_obj().get_username().get_obj().get_val()] = user
+            return member_res
 
         return db_fail_response

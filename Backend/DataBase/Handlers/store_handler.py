@@ -4,7 +4,7 @@ from sqlalchemy.orm import mapper, relationship, backref
 from sqlalchemy.orm.collections import attribute_mapped_collection, collection
 from Backend.DataBase.Handlers.product_handler import ProductHandler
 from Backend.DataBase.IHandler import IHandler
-from Backend.DataBase.database import mapper_registry, session, engine, Base
+from Backend.DataBase.database import mapper_registry, session
 from Backend.Domain.TradingSystem.Responsibilities.founder import Founder
 from Backend.Domain.TradingSystem.Responsibilities.responsibility import Responsibility
 from Backend.Domain.TradingSystem.product import Product
@@ -41,7 +41,7 @@ class StoreHandler(IHandler):
         self.__stores = Table("stores", mapper_registry.metadata,
                               Column("store_id", String(50), primary_key=True),
                               Column("store_name", String(30)),
-                              Column("responsibility_id", String(30)))
+                              Column("responsibility_id", Integer))
 
         mapper_registry.map_imperatively(ProductsOfStores, self.__products_of_stores, properties={
             "store_id": self.__products_of_stores.c.store_id,
@@ -155,8 +155,7 @@ class StoreHandler(IHandler):
             return res
 
     def load_res_of_store(self, res_id, store):
-        res = self.__responsibility_hadnler.load_res_and_appointments(res_id, store)
-        return res.get_obj()
+        return self.__responsibility_hadnler.load_res_and_appointments(res_id, store)
 
     # def load_store_founder(self, store):
     #     self._rwlock.acquire_read()

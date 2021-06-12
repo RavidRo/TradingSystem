@@ -58,11 +58,14 @@ class StoresManager:
 
         store = store_res.get_obj()
         res_id = store.get_res_id()
-        responsibility = StoresManager.__store_handler.load_res_of_store(res_id, store_res.get_obj())
-        store_res.get_obj().set_responsibility(responsibility)
-        responsibility.set_store(store.get_obj)
-        StoresManager.__stores.append(store_res.get_obj())
-        return Response[Store](True, obj=store_res.get_obj())
+        responsibility_res = StoresManager.__store_handler.load_res_of_store(res_id, store)
+        if not responsibility_res.succeeded():
+            return responsibility_res
+        responsibility = responsibility_res.get_obj()
+        store.set_responsibility(responsibility)
+        responsibility.set_store(store)
+        StoresManager.__stores.append(store)
+        return Response[Store](True, obj=store)
 
     @staticmethod
     def get_product(store_id: str, product_id: str) -> Response:

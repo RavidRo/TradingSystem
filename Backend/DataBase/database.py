@@ -14,7 +14,6 @@ SQLAlchemy_DATABASE_URI = 'postgresql://postgres:postgres@localhost:5432/trading
 engine = create_engine(SQLAlchemy_DATABASE_URI)
 # create a configured "Session" class
 Session = scoped_session(sessionmaker(bind=engine, autocommit=False, autoflush=False))
-Base = declarative_base()
 session = Session(expire_on_commit=False)
 mapper_registry = registry()
 db_fail_response = Response(False, msg="DB failed, please try again later")

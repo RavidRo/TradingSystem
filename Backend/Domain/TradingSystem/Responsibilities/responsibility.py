@@ -69,14 +69,19 @@ class Responsibility(Parsable):
         self._user_state = user_state
 
     def get_user_state(self):
-        if self._user_state is not None:
-            return self._user_state
         from Backend.Domain.TradingSystem.user_manager import UserManager
-        response_member = UserManager.get_member(self._responsibility_dal_id)
-        if response_member.succeeded():
-            response_member.get_obj().add_responsibility(self, self._store_id)
-            self._user_state = response_member.get_obj()
-        return response_member
+        if self._user_state is None:
+            response_member = UserManager.get_member(self._responsibility_dal_id)
+            if response_member.succeeded():
+                response_member.get_obj().add_responsibility(self, self._store_id)
+                self._user_state = response_member.get_obj()
+            else:
+                return response_member
+        for appointed in self._appointed:
+            res = appointed.get_user_state()
+            if not res.succeeded():
+                return res
+        return Response(True, self._user_state)
 
     def get_store_id(self):
         return self._store.get_id()
@@ -216,7 +221,7 @@ class Responsibility(Parsable):
                 res = self._responsibilities_handler.remove_res(appointment)
 
                 if res.succeeded():
-                    res = appointment.__dismiss_from_store_db(self._store.get_id())
+                    res = appointment.__dismiss_from_store_db()
                     if res.succeeded():
                         res_commit = self._responsibilities_handler.commit_changes()
                         if res_commit.succeeded():
@@ -239,15 +244,15 @@ class Responsibility(Parsable):
 
         self._user_state.dismiss_from_store(store_id)
 
-    def __dismiss_from_store_db(self, store_id: str) -> Response[None]:
+    def __dismiss_from_store_db(self) -> Response[None]:
         for appointment in self._appointed:
-            response = appointment.__dismiss_from_store_db(store_id)
+            response = appointment.__dismiss_from_store_db()
             if not response.succeeded():
                 return response
 
         member_response = self.get_user_state()
         if member_response.succeeded():
-            member_response.dismiss_from_store_db(store_id)
+            member_response.get_obj().dismiss_from_store_db(self)
         return member_response
 
     # Parsing the object for user representation

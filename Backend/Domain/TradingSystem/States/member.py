@@ -20,9 +20,11 @@ class Member(UserState):
         )
 
     def add_responsibility(self, responsibility, store_id):
-        self._responsibilities[store_id] = responsibility
-        self._responsibilities_ids += [responsibility.get_dal_responsibility_id()]
-        self._member_handler.update_responsibilities_ids(self._username, self._responsibilities_ids)
+        if store_id not in self._responsibilities:
+            self._responsibilities[store_id] = responsibility
+        if responsibility.get_dal_responsibility_id() not in self._responsibilities_ids:
+            self._responsibilities_ids += [responsibility.get_dal_responsibility_id()]
+            self._member_handler.update_responsibilities_ids(self._username, self._responsibilities_ids)
 
     def remove_responsibility(self, store_id):
         self._responsibilities.pop(store_id)
@@ -119,7 +121,7 @@ class Member(UserState):
     def get_responsibility(self, store_id):
         res = self._responsibilities.get(store_id)
         if res is not None:
-            return res
+            return Response(True, res)
         from Backend.DataBase.Handlers.responsibilities_handler import ResponsibilitiesHandler
         from Backend.Domain.TradingSystem.stores_manager import StoresManager
         store_res = StoresManager.get_store(store_id)
@@ -127,10 +129,10 @@ class Member(UserState):
             return store_res
         res = ResponsibilitiesHandler.get_instance().load_res_and_appointments(store_res.get_obj().get_res_id(), store_res.get_obj())
         if res.succeeded():
-            self._responsibilities[store_id] = res.get_obj()
-            res.get_obj().set_user_state(self)
-
-        return db_fail_response
+            responsibility = res.get_obj()
+            self._responsibilities[store_id] = responsibility
+            responsibility.get_user_state()
+        return res
 
 
     def get_purchase_history(self):
@@ -143,7 +145,7 @@ class Member(UserState):
     def add_new_product(
             self, store_id, product_name, category, product_price, quantity, keywords=None
     ):
-        res =self.get_responsibility(store_id)
+        res = self.get_responsibility(store_id)
         if res.succeeded():
             return res.get_obj().add_product(product_name, category, product_price, quantity, keywords)
         # return Response(False, msg=f"this member do not own/manage store {store_id}")
@@ -246,18 +248,18 @@ class Member(UserState):
         # self.set_responsibility_ids(MemberHandler.get_instance().load_res_ids(self._username).get_obj())
         res = self.get_responsibility(store_id)
         if res.succeeded():
-            self._responsibilities_ids.remove(res.get_obj().get_dal_responsibility_id())
+            # self._responsibilities_ids.remove(res.get_obj().get_dal_responsibility_id())
             self._responsibilities.pop(store_id)
         return res
 
-    def dismiss_from_store_db(self, store_id):
-        responsibility_res = self.get_responsibility(store_id)
-        if responsibility_res.succeeded():
-            updated_ids = list(set(self._responsibilities_ids) - set(responsibility_res.get_obj().get_dal_responsibility_id()))
-            res = self._member_handler.update_responsibilities_ids(self._username, updated_ids)
-            if not res.succeeded():
-                return res
-        return responsibility_res
+    def dismiss_from_store_db(self, responsibility):
+        updated_ids = list(set(self._responsibilities_ids) - {responsibility.get_dal_responsibility_id()})
+        # for appointed in responsibility._appointed:
+        #     res = self.dismiss_from_store_db(appointed)
+        #     if not res.succeeded():
+        #         return res
+        res = self._member_handler.update_responsibilities_ids(self._username, updated_ids)
+        return res
 
     def appoint_new_store_manager(self, store_id, new_manager):
         res = self.get_responsibility(store_id)

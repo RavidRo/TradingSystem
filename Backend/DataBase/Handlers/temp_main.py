@@ -5,12 +5,13 @@ from Backend.DataBase.Handlers.purchase_details_handler import PurchaseDetailsHa
 from Backend.DataBase.Handlers.responsibilities_handler import ResponsibilitiesHandler
 from Backend.DataBase.Handlers.shopping_bag_handler import ShoppingBagHandler
 from Backend.DataBase.Handlers.store_handler import StoreHandler
-from Backend.DataBase.database import mapper_registry, engine, Base
+from Backend.DataBase.database import mapper_registry, engine
 from Backend.Domain.TradingSystem.Responsibilities.responsibility import Responsibility
 from Backend.Domain.TradingSystem.States.member import Member
 from Backend.Domain.TradingSystem.store import Store
 from Backend.Domain.TradingSystem.user import User
 from Backend.Service.trading_system import TradingSystem
+
 
 def save():
     # mapper_registry.metadata.drop_all(engine)
@@ -47,12 +48,13 @@ def save():
     # if not store_res2.succeeded():
     #     print("open_store: " + store_res2.get_msg())
     #
-    # product_res = trading_system.create_product(cookie, store_res.get_obj(), "The Product", "The Category", 5, 8, ["The Keyword A", "The Keyword B"])
+    # product_res = trading_system.create_product(cookie, store_res.get_obj(), "The Product", "The Category", 5, 8,
+    #                                             ["The Keyword A", "The Keyword B"])
     # if not product_res.succeeded():
     #     print("add_product: " + product_res.get_msg())
     #
     # product2_res = trading_system.create_product(cookie, store_res.get_obj(), "The Product2", "The Category2", 10, 16,
-    #                                             ["The Keyword A2", "The Keyword B2"])
+    #                                              ["The Keyword A2", "The Keyword B2"])
     # if not product2_res.succeeded():
     #     print("add_product: " + product2_res.get_msg())
     #
@@ -84,15 +86,15 @@ def save():
     # if not res_appoint_owner.succeeded():
     #     print("appoint owner: " + res_appoint_owner.get_msg())
     #
-    # res_appoint_manager = trading_system.appoint_manager(cookie2, store_res2.get_obj(), "user4")
+    # res_appoint_manager = trading_system.appoint_manager(cookie, store_res2.get_obj(), "user4")
     # if not res_appoint_manager.succeeded():
     #     print("appoint manager: " + res_appoint_manager.get_msg())
 
     cookie2 = trading_system.enter_system()
-    trading_system.get_store("194fa520-0c0d-49ab-9562-2beb0887a024")
-    trading_system.get_store("2bedaf74-8f94-4972-9cf4-022af7a48e14")
+    res = trading_system.get_store("f9ba0cf9-9375-4ed3-97dc-c14def50306e")
+    trading_system.get_store("a7b43b59-85ba-4fcb-89ea-73e4c47ee7d8")
     trading_system.login(cookie2, "user2", "password2")
-    res_remove_manager = trading_system.remove_appointment(cookie2, "194fa520-0c0d-49ab-9562-2beb0887a024", "user4")
+    res_remove_manager = trading_system.remove_appointment(cookie2, "f9ba0cf9-9375-4ed3-97dc-c14def50306e", "user")
     if not res_remove_manager.succeeded():
         print("remove manager: " + res_remove_manager.get_msg())
 
@@ -106,8 +108,6 @@ if __name__ == '__main__':
     purchase_details_handler = PurchaseDetailsHandler.get_instance()
     offer_handler = OfferHandler.get_instance()
     save()
-
-
 
     # trading_system = TradingSystem.getInstance()
     # trading_system.get_store("ca16b690-15d3-4923-aef6-9f510b9d37eb")
