@@ -21,7 +21,8 @@ class PaymentManager:
                 supply_response = self.__supply_adapter.deliver(product_ids_to_quantity, address)
                 if not supply_response.success:
                     self.__rollback(transaction_id)
-                return supply_response
+                    return supply_response
+                return Response(True, [payment_response.get_obj(), supply_response.get_obj()])
             except Exception as e:
                 critical(e)
                 self.__rollback(transaction_id)
