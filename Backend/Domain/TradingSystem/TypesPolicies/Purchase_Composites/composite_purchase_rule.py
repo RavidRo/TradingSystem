@@ -8,7 +8,6 @@ from sqlalchemy_utils import Ltree
 
 from Backend.DataBase.database import engine
 from Backend.response import Response
-from Backend.DataBase.Handlers.purchase_rules_handler import rules_id_seq
 
 
 class PurchaseRule(ABC):

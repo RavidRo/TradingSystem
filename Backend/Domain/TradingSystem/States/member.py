@@ -20,9 +20,15 @@ class Member(UserState):
         )
 
     def add_responsibility(self, responsibility, store_id):
-        res = self.get_responsibility(store_id)
-        if res.get_obj().get_dal_responsibility_id() not in self._responsibilities_ids:
-            self._responsibilities_ids += [responsibility.get_dal_responsibility_id()]
+        # res = self.get_responsibility(store_id)
+        #
+        # if res.get_obj().get_dal_responsibility_id() not in self._responsibilities_ids:
+        #     self._responsibilities_ids += [responsibility.get_dal_responsibility_id()]
+        #     self._member_handler.update_responsibilities_ids(self._username, self._responsibilities_ids)
+        if store_id not in self._responsibilities:
+            self._responsibilities[store_id] = responsibility
+        if responsibility.get_dal_responsibility_id() not in self._responsibilities_ids:
+            self._responsibilities_ids.append(responsibility.get_dal_responsibility_id())
             self._member_handler.update_responsibilities_ids(self._username, self._responsibilities_ids)
 
     def remove_responsibility(self, store_id):
@@ -119,6 +125,10 @@ class Member(UserState):
         return self._username
 
     def get_responsibility(self, store_id):
+        if store_id in self._responsibilities:
+            if self._responsibilities[store_id]._user_state is None:
+                self._responsibilities[store_id].set_user_state(self)
+            return self._responsibilities[store_id]
         from Backend.DataBase.Handlers.responsibilities_handler import ResponsibilitiesHandler
         from Backend.Domain.TradingSystem.stores_manager import StoresManager
         store_res = StoresManager.get_store(store_id)
@@ -127,13 +137,14 @@ class Member(UserState):
         res = ResponsibilitiesHandler.get_instance().load_res_and_appointments(store_res.get_obj().get_res_id(), store_res.get_obj())
         if res.succeeded():
             founder_responsibility = res.get_obj()
-            responsibility = self.get_own_responsibility(founder_responsibility, store_res.get_obj().get_id())
+            responsibility = self.get_own_responsibility(founder_responsibility)
             if responsibility is None:
                 return Response(False)
             self._responsibilities[store_id] = responsibility
-            # self._responsibilities[store_id].set_user_state(self)
+            self._responsibilities[store_id].set_user_state(self)
             # responsibility.get_user_state()
-        return Response(True, obj=responsibility)
+            return Response(True, obj=responsibility)
+        return res
 
 
     def get_purchase_history(self):
@@ -435,13 +446,13 @@ class Member(UserState):
     def get_responsibility_ids(self):
         return self._responsibilities_ids
 
-    def get_own_responsibility(self, root_responsibility, store_id):
+    def get_own_responsibility(self, root_responsibility):
         if root_responsibility.get_dal_responsibility_id() in self._responsibilities_ids:
             return root_responsibility
         elif not root_responsibility._appointed:
             return None
         for appointee in root_responsibility._appointed:
-            res = self.get_own_responsibility(appointee, store_id)
+            res = self.get_own_responsibility(appointee)
             if res is not None:
                 return res
         return None

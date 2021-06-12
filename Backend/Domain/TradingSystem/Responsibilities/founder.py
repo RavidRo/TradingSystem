@@ -111,7 +111,7 @@ class Founder(Responsibility):
                 self._appointed.append(new_responsibility)
                 from Backend.DataBase.Handlers.responsibilities_handler import Owner_Responsibility_DAL
                 self.save_appointment(new_responsibility, Owner_Responsibility_DAL)
-                new_responsibility._user_state.add_responsibility(new_responsibility, self._store.get_id())
+                # new_responsibility._user_state.add_responsibility(new_responsibility, self._store.get_id())
                 res = self._responsibilities_handler.commit_changes()
                 return res
 
