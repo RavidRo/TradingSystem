@@ -12,8 +12,8 @@ ops = {'great-than': operator.gt,
 
 class UserLeafPurchaseRule(PurchaseLeaf):
 
-    def __init__(self, leaf_details: dict):
-        super().__init__(leaf_details)
+    def __init__(self, leaf_details: dict, parent=None):
+        super().__init__(leaf_details, parent)
 
     def operation(self, products_to_quantities: dict, user_age: int):
         if ops[self._comparator](user_age, self._constraint):
@@ -23,11 +23,11 @@ class UserLeafPurchaseRule(PurchaseLeaf):
 
 class ProductLeafPurchaseRule(PurchaseLeaf):
 
-    def __init__(self, leaf_details: dict):
-        super().__init__(leaf_details)
+    def __init__(self, leaf_details: dict, parent=None):
+        super().__init__(leaf_details, parent)
 
     def operation(self, products_to_quantities: dict, user_age: int):
-        prod_id = self._context['identifier']
+        prod_id = self._context_id
         amount_of_prod = products_to_quantities.get(prod_id)[1]
         if ops[self._comparator](amount_of_prod, self._constraint):
             return Response(True, msg="Purchase is permitted!")
@@ -36,11 +36,11 @@ class ProductLeafPurchaseRule(PurchaseLeaf):
 
 class CategoryLeafPurchaseRule(PurchaseLeaf):
 
-    def __init__(self, leaf_details: dict):
-        super().__init__(leaf_details)
+    def __init__(self, leaf_details: dict, parent=None):
+        super().__init__(leaf_details, parent)
 
     def operation(self, products_to_quantities: dict, user_age: int):
-        category = self._context['identifier']
+        category = self._context_id
         amount_of_category = 0
         for product_id,(product, quantity) in products_to_quantities.items():
             if product.get_category() == category:
@@ -53,8 +53,8 @@ class CategoryLeafPurchaseRule(PurchaseLeaf):
 
 class BagLeafPurchaseRule(PurchaseLeaf):
 
-    def __init__(self, leaf_details: dict):
-        super().__init__(leaf_details)
+    def __init__(self, leaf_details: dict, parent=None):
+        super().__init__(leaf_details, parent)
 
     def operation(self, products_to_quantities: dict, user_age: int):
         cart_price = 0

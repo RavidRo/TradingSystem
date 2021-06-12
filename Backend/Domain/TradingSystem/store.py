@@ -23,7 +23,7 @@ class Store(Parsable, Subscriber):
         self.__responsibility = None
         self.__responsibility_id = None
         # These fields will be changed in the future versions
-        self.__discount_policy = DefaultDiscountPolicy()
+        self.__discount_policy = None
         self.__purchase_policy = None
         self.__purchase_policy_root_id = None
         self.__purchase_history = []
@@ -40,9 +40,16 @@ class Store(Parsable, Subscriber):
         return self.__discount_policy
 
     def create_purchase_rules_root(self):
+        from Backend.Domain.TradingSystem.TypesPolicies.Purchase_Composites.concrete_composites import \
+            AndCompositePurchaseRule
         from Backend.Domain.TradingSystem.TypesPolicies.purchase_policy import DefaultPurchasePolicy
-        self.__purchase_policy = DefaultPurchasePolicy()
+        root_rule = AndCompositePurchaseRule()
+        res = self.__store_handler.save_purchase_rule(root_rule)
+        if not res.succeeded():
+            return db_fail_response
+        self.__purchase_policy = DefaultPurchasePolicy(root_rule)
         self.__purchase_policy_root_id = self.__purchase_policy.get_root_id()
+        return Response(True)
 
     def set_products(self, products_to_quantities: dict[str, tuple[Product, int]]):
         self._products_to_quantities = products_to_quantities
@@ -61,10 +68,10 @@ class Store(Parsable, Subscriber):
         self._products_lock = ReadWriteLock()
         self.__history_lock = ReadWriteLock()
         self.__publisher: Publisher = Publisher()
-        self.__discount_policy = DefaultDiscountPolicy()
-        self.__purchase_policy = PurchasePolicy()
         self.__store_handler = StoreHandler.get_instance()
         self.__responsibility = None
+        self.__discount_policy = None
+        self.__purchase_policy = None
 
     def parse(self):
         id_to_quantity = {}
@@ -420,14 +427,7 @@ class Store(Parsable, Subscriber):
         self._products_lock.release_read()
         return True
 
-    def add_purchase_rule(
-        self,
-        rule_details: dict,
-        rule_type: str,
-        parent_id: str,
-        clause: str = None,
-        discount_id=None,
-    ):
+    def add_purchase_rule(self, rule_details: dict, rule_type: str, parent_id: str, clause: str = None, discount_id=None,):
         if discount_id is not None:
             discount = self.__discount_policy.get_discount_by_id(discount_id)
             if discount is not None:

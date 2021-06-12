@@ -42,8 +42,8 @@ clauses = {"test": 0, "then": 1}
 
 
 class ConditioningCompositePurchaseRule(CompositePurchaseRule):
-    def __init__(self):
-        super(ConditioningCompositePurchaseRule, self).__init__()
+    def __init__(self, parent):
+        super(ConditioningCompositePurchaseRule, self).__init__(parent)
         self.children = [None, None]
 
     def add(self, component: PurchaseRule, parent_id: str, clause: str = None) -> Response[None]:

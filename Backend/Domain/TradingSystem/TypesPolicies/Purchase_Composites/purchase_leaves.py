@@ -15,9 +15,11 @@ class PurchaseLeaf(PurchaseRule):
          constraint: _
          }"""
 
-    def __init__(self, leaf_details: dict):
-        super().__init__()
-        self._context = leaf_details['context']
+    def __init__(self, leaf_details: dict, parent=None):
+        super().__init__(parent)
+        self._context = json.dumps(leaf_details['context'])
+        self._context_obj = leaf_details['context']['obj']
+        self._context_id = None if leaf_details['context'].get('identifier') is None else leaf_details['context']['identifier']
         self._comparator = leaf_details['operator']
         self._constraint = leaf_details['target']
 
