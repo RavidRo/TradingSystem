@@ -6,7 +6,6 @@ from typing import List
 
 from sqlalchemy_utils import Ltree
 
-from Backend.DataBase.Handlers.purchase_rules_handler import rules_id_seq
 from Backend.DataBase.database import engine
 from Backend.Domain.TradingSystem.user import User
 from Backend.response import Response
@@ -19,6 +18,7 @@ class PurchaseRule(ABC):
     """
 
     def __init__(self, parent=None):
+        from Backend.DataBase.Handlers.purchase_rules_handler import rules_id_seq
         _id = engine.execute(rules_id_seq)
         self._id = _id
         ltree_id = Ltree(str(_id))
