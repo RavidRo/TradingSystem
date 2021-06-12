@@ -438,9 +438,10 @@ class Member(UserState):
     def get_own_responsibility(self, root_responsibility, store_id):
         if root_responsibility.get_dal_responsibility_id() in self._responsibilities_ids:
             return root_responsibility
-        elif root_responsibility._appointed is None:
+        elif not root_responsibility._appointed:
             return None
         for appointee in root_responsibility._appointed:
             res = self.get_own_responsibility(appointee, store_id)
             if res is not None:
                 return res
+        return None

@@ -10,11 +10,6 @@ import re
 from Backend.DataBase.IHandler import IHandler
 from Backend.DataBase.database import engine, session, mapper_registry, db_fail_response
 from Backend.Domain.TradingSystem.Responsibilities.responsibility import Responsibility, Permission
-from Backend.Domain.TradingSystem.TypesPolicies.Purchase_Composites.composite_purchase_rule import PurchaseRule
-from Backend.Domain.TradingSystem.TypesPolicies.Purchase_Composites.concrete_composites import OrCompositePurchaseRule, \
-    AndCompositePurchaseRule, ConditioningCompositePurchaseRule
-from Backend.Domain.TradingSystem.TypesPolicies.Purchase_Composites.concrete_leaf import UserLeafPurchaseRule, \
-    ProductLeafPurchaseRule, CategoryLeafPurchaseRule, BagLeafPurchaseRule
 from Backend.response import Response, PrimitiveParsable
 from Backend.rw_lock import ReadWriteLock
 
@@ -26,6 +21,12 @@ class PurchaseRulesHandler(IHandler):
     _instance = None
 
     def __init__(self):
+        from Backend.Domain.TradingSystem.TypesPolicies.Purchase_Composites.composite_purchase_rule import PurchaseRule
+        from Backend.Domain.TradingSystem.TypesPolicies.Purchase_Composites.concrete_composites import \
+            OrCompositePurchaseRule, \
+            AndCompositePurchaseRule, ConditioningCompositePurchaseRule
+        from Backend.Domain.TradingSystem.TypesPolicies.Purchase_Composites.concrete_leaf import UserLeafPurchaseRule, \
+            ProductLeafPurchaseRule, CategoryLeafPurchaseRule, BagLeafPurchaseRule
         super().__init__(ReadWriteLock(), PurchaseRule)
 
         self.__purchase_rules_table = Table('purchase_rules', mapper_registry.metadata,

@@ -6,10 +6,9 @@ from typing import List
 
 from sqlalchemy_utils import Ltree
 
-from Backend.DataBase.Handlers.purchase_rules_handler import rules_id_seq
 from Backend.DataBase.database import engine
-from Backend.Domain.TradingSystem.user import User
 from Backend.response import Response
+from Backend.DataBase.Handlers.purchase_rules_handler import rules_id_seq
 
 
 class PurchaseRule(ABC):
