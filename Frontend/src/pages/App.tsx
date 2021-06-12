@@ -6,7 +6,7 @@ import DateFnsUtils from '@date-io/date-fns';
 import Navbar from '../components/Navbar';
 import Routes from './Routes';
 
-import { Product, StoreToSearchedProducts, notificationTime } from '../types';
+import { Product, StoreToSearchedProducts, notificationTime, StatisticsData } from '../types';
 import useAPI from '../hooks/useAPI';
 import { AdminsContext, CookieContext, UsernameContext } from '../contexts';
 import { MuiPickersUtilsProvider } from '@material-ui/pickers';
@@ -40,7 +40,8 @@ function App() {
 	const [cookie, setCookie] = useState<string>('');
 	const [notifications, setNotifications] = useState<notificationTime[]>([]);
 	const storesToProducts = useRef<StoreToSearchedProducts>({});
-	const [clientSocket, setClientSocket] = useState<WebSocket>();
+	const [clientSocket, setClientSocker] = useState<WebSocket>();
+	const [statistics, setStatistics] = useState<StatisticsData>();
 
 	useEffect(() => {
 		initializeSocket();
@@ -56,16 +57,24 @@ function App() {
 						? 'trading-system-workshop.herokuapp.com'
 						: '127.0.0.1:5000';
 				let clientTemp = new WebSocket(`${secured}://${domain}/connect`);
-				setClientSocket(clientTemp);
+				setClientSocker(clientTemp);
 				clientTemp.onopen = () => {
 					// alert('WebSocket Client Opened');
 					clientTemp.send(cookie); // have to be here - else socket.receive in server gets stuck
 				};
 				clientTemp.onmessage = (messageEvent) => {
-					setNotifications((old) => [
-						...old,
-						[messageEvent.data, new Date().toUTCString()],
-					]);
+					let messageJson = JSON.parse(messageEvent.data);
+					let subject = messageJson['subject'];
+					let msg = messageJson['message'];
+
+					if (subject === 'message') {
+						// regular notification
+						setNotifications((old) => [...old, [msg, new Date().toUTCString()]]);
+					} else {
+						let msg = messageJson['data'];
+						// notification for statistics
+						setStatistics(msg);
+					}
 					// alert('received socket message');
 				};
 				clientTemp.onclose = () => {};
@@ -269,6 +278,7 @@ function App() {
 									propUpdateStores={propUpdateStores}
 									propsAddProduct={addProductToPopup}
 									initializeNotifications={initializeNotifications}
+									statistics={statistics}
 								/>
 							</BrowserRouter>
 						</UsernameContext.Provider>

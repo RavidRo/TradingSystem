@@ -1,5 +1,4 @@
 from dataclasses import dataclass
-from datetime import date
 
 
 @dataclass
@@ -13,4 +12,4 @@ class StatisticsCounts:
 
 @dataclass
 class StatisticsData:
-    statistics_per_day: dict[date, StatisticsCounts]
+    statistics_per_day: dict[str, StatisticsCounts]

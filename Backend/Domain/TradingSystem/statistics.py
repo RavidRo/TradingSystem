@@ -29,13 +29,13 @@ class Statistics:
             raise Exception("This class is a singleton!")
 
         Statistics.__instance = self
-        self.__statistics_per_day: dict[date, Counter] = {}
+        self.__statistics_per_day: dict[str, Counter] = {}
         self.__admins_publisher = Publisher()
 
     def subscribe(self, subscriber: Subscriber) -> None:
         self.__admins_publisher.subscribe(subscriber)
 
-    def __today(self) -> date:
+    def __today(self) -> str:
         current = date.today().__str__()
         if current not in self.__statistics_per_day:
             self.__statistics_per_day[current] = Counter()

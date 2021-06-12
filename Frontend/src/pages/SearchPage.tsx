@@ -62,7 +62,7 @@ const SearchPage: FC<SearchPageProps> = ({ location, propsAddProduct }) => {
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [searchProduct, category, fromInput, toInput, keyWords]);
 
-	const handleFilter = (from: number, to: number, prodRate: number, storeRate: number) => {
+	const handleFilter = (from: number, to: number) => {
 		setFromInput(from);
 		setToInput(to);
 		// all the set methods make useEffect to re-render and ask for server

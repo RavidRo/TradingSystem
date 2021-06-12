@@ -16,6 +16,7 @@ import {
 import ExitToAppIcon from '@material-ui/icons/ExitToApp';
 import StoreIcon from '@material-ui/icons/Store';
 import SupervisorAccountIcon from '@material-ui/icons/SupervisorAccount';
+import BarChartAdminIcon from '@material-ui/icons/BarChart';
 import PersonIcon from '@material-ui/icons/Person';
 import MoreVertIcon from '@material-ui/icons/MoreVert';
 import SearchIcon from '@material-ui/icons/Search';
@@ -165,6 +166,14 @@ const Navbar: FC<NavBarProps> = ({
 												onClick={() => history.push('/admin')}
 											>
 												<SupervisorAccountIcon />
+											</AccountMenuItem>
+										)}
+										{admins.includes(username) && (
+											<AccountMenuItem
+												text='View Statistics'
+												onClick={() => history.push('/statistics')}
+											>
+												<BarChartAdminIcon />
 											</AccountMenuItem>
 										)}
 										<AccountMenuItem text='Logout' onClick={logout}>
