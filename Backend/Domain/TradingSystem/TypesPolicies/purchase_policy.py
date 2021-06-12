@@ -42,16 +42,16 @@ ops = {'great-than': operator.gt,
 
 class DefaultPurchasePolicy(PurchasePolicy):
 
-    def __init__(self, purchase_root_id=None):
+    def __init__(self,root_rule=None):
         from Backend.DataBase.Handlers.purchase_rules_handler import PurchaseRulesHandler
         super().__init__()
         self.__purchase_rules_handler = PurchaseRulesHandler.get_instance()
         self.__id = 0
         # the root will be always an AndComposite
-        if purchase_root_id is None:
+        if root_rule is None:
             self.__purchase_rules = AndCompositePurchaseRule()
         else:
-            self.__purchase_rules = self.__purchase_rules_handler.load(purchase_root_id)
+            self.__purchase_rules = root_rule
         self.__purchase_rules_lock = None
         self.__purchase_rules_lock = ReadWriteLock()
 
@@ -69,10 +69,9 @@ class DefaultPurchasePolicy(PurchasePolicy):
                         }
     clause - only for conditional - valid values: if/then
     """
-
     def get_purchase_rules(self):
         if self.__purchase_rules is None:
-            rules_loaded = self.__purchase_rules_handler.load_rules(self.__purchase_rules_root_id)
+            rules_loaded = self.__purchase_rules_handler.load()
             if rules_loaded.succeeded():
                 self.__purchase_rules = rules_loaded.get_obj()
                 return Response(True, obj=self.__purchase_rules)
@@ -240,3 +239,6 @@ class DefaultPurchasePolicy(PurchasePolicy):
         parse_result = self.__purchase_rules.parse()
         self.__purchase_rules_lock.release_read()
         return parse_result
+
+    def get_root_id(self):
+        return self.__purchase_rules.get_id()

@@ -58,6 +58,10 @@ class StoresManager:
 
         store = store_res.get_obj()
         res_id = store.get_res_id()
+        root_purchase_rule_res = StoresManager.__store_handler.load_purchase_rules_of_store(store.get_purchase_policy_root_id())
+        if not root_purchase_rule_res.succeeded():
+            return root_purchase_rule_res
+        store.set_root_purchase_rule(root_purchase_rule_res.get_obj())
         responsibility_res = StoresManager.__store_handler.load_res_of_store(res_id, store)
         if not responsibility_res.succeeded():
             return responsibility_res

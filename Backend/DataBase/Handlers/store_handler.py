@@ -3,8 +3,9 @@ from sqlalchemy.exc import DisconnectionError
 from sqlalchemy.orm import mapper, relationship, backref
 from sqlalchemy.orm.collections import attribute_mapped_collection, collection
 from Backend.DataBase.Handlers.product_handler import ProductHandler
+from Backend.DataBase.Handlers.purchase_rules_handler import PurchaseRulesHandler
 from Backend.DataBase.IHandler import IHandler
-from Backend.DataBase.database import mapper_registry, session
+from Backend.DataBase.database import mapper_registry, session, db_fail_response
 from Backend.Domain.TradingSystem.Responsibilities.founder import Founder
 from Backend.Domain.TradingSystem.Responsibilities.responsibility import Responsibility
 from Backend.Domain.TradingSystem.product import Product
@@ -63,6 +64,7 @@ class StoreHandler(IHandler):
         self.__product_handler = ProductHandler.get_instance()
         from Backend.DataBase.Handlers.responsibilities_handler import ResponsibilitiesHandler
         self.__responsibility_hadnler = ResponsibilitiesHandler.get_instance()
+        self.__purchase_rules_handler = PurchaseRulesHandler.get_instance()
 
     @staticmethod
     def get_instance():
@@ -159,6 +161,12 @@ class StoreHandler(IHandler):
     def load_res_of_store(self, res_id, store):
         return self.__responsibility_hadnler.load_res_and_appointments(res_id, store)
 
+    def load_purchase_rules_of_store(self, purchase_policy_root_id):
+        res = self.__purchase_rules_handler.load(purchase_policy_root_id)
+        if res.succeeded():
+            return res
+        else:
+            return db_fail_response
     # def load_store_founder(self, store):
     #     self._rwlock.acquire_read()
     #     res = Response(True)

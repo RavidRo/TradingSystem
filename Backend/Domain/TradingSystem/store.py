@@ -47,6 +47,13 @@ class Store(Parsable, Subscriber):
     def set_products(self, products_to_quantities: dict[str, tuple[Product, int]]):
         self._products_to_quantities = products_to_quantities
 
+    def get_purchase_policy_root_id(self):
+        return self.__purchase_policy_root_id
+
+    def set_root_purchase_rule(self, root_rule):
+        from Backend.Domain.TradingSystem.TypesPolicies.purchase_policy import DefaultPurchasePolicy
+        self.__purchase_policy = DefaultPurchasePolicy(root_rule)
+
     def init_fields(self):
         from Backend.Domain.TradingSystem.TypesPolicies.discount_policy import DefaultDiscountPolicy
         from Backend.Domain.TradingSystem.TypesPolicies.purchase_policy import PurchasePolicy

@@ -18,6 +18,7 @@ class PurchaseRule(ABC):
     """
 
     def __init__(self, parent=None):
+        from Backend.DataBase.Handlers.purchase_rules_handler import rules_id_seq
         _id = engine.execute(rules_id_seq)
         self._id = _id
         ltree_id = Ltree(str(_id))
