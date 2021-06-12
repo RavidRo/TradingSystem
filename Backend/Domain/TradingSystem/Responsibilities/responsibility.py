@@ -46,11 +46,15 @@ class Responsibility(Parsable):
         self._user_state = user_state
         user_state.add_responsibility(self, store.get_id())
         self._store = store
+        store.add_owner(user_state.get_username().get_obj().value)
         self.__subscriber = subscriber
         if subscriber:
             self._store.subscribe(subscriber)
             subscriber.notify(
-                f"You have been appointer to {store.get_name()} as {self.__class__.__name__}"
+                {
+                    "subject": "message",
+                    "data": f"You have been appointer to {store.get_name()} as {self.__class__.__name__}",
+                }
             )
         self._appointed: list[Responsibility] = []
 
@@ -154,6 +158,9 @@ class Responsibility(Parsable):
     def get_store_purchase_history(self) -> Response[ParsableList[PurchaseDetails]]:
         raise Exception(Responsibility.ERROR_MESSAGE)
 
+    def is_owner(self) -> bool:
+        raise Exception(Responsibility.ERROR_MESSAGE)
+
     def _add_permission(self, username: str, permission: Permission) -> bool:
         if not self._appointed:
             # if self.user never appointed anyone
@@ -196,6 +203,7 @@ class Responsibility(Parsable):
         if self.__subscriber:
             self.__subscriber.notify(message)
             self._store.unsubscribe(self.__subscriber)
+        self._store.remove_owner(self._user_state.get_username().get_obj().value)
         self._user_state.dismiss_from_store(store_id)
 
     # Parsing the object for user representation
@@ -225,8 +233,17 @@ class Responsibility(Parsable):
     def suggest_counter_offer(self, product_id, offer_id, price) -> Response[None]:
         raise Exception(Responsibility.ERROR_MESSAGE)
 
-    def approve_user_offer(self, product_id, offer_id) -> Response[None]:
+    def approve_user_offer(self, product_id, offer_id, username) -> Response[None]:
         raise Exception(Responsibility.ERROR_MESSAGE)
 
     def reject_user_offer(self, product_id, offer_id) -> Response[None]:
         raise Exception(Responsibility.ERROR_MESSAGE)
+
+    def get_owners_names(self) -> list[str]:
+
+        import itertools
+
+        my_username = self._user_state.get_username().object.value
+        nested_names = [appointee.get_owners_names() for appointee in self._appointed]
+        List_flat = list(itertools.chain(*nested_names))
+        return List_flat + [my_username]

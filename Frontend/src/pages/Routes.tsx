@@ -2,9 +2,9 @@ import React, { FC, useContext } from 'react';
 
 import { Redirect, Route, Switch } from 'react-router';
 import { AdminsContext, UsernameContext } from '../contexts';
-import { Product, StoreToSearchedProducts } from '../types';
+import { Product, StoreToSearchedProducts, StatisticsData } from '../types';
 import AdminPage from './AdminPage';
-
+import Statistics from './Statistics';
 import Cart from './Cart';
 import Home from './Home';
 import MyAccount from './MyAccount';
@@ -28,6 +28,9 @@ type RoutesProps = {
 	signedIn: boolean;
 	setSignedIn: (isSignedIn: boolean) => void;
 	setUsername: (username: string) => void;
+
+	initializeNotifications:()=>void,
+	statistics: StatisticsData | undefined,
 };
 
 const Routes: FC<RoutesProps> = ({
@@ -43,6 +46,8 @@ const Routes: FC<RoutesProps> = ({
 	signedIn,
 	setSignedIn,
 	setUsername,
+	initializeNotifications,
+	statistics,
 }) => {
 	const username = useContext(UsernameContext);
 	const admins = useContext(AdminsContext);
@@ -77,7 +82,13 @@ const Routes: FC<RoutesProps> = ({
 			</Route>
 
 			<Route path='/sign-up' exact component={SignUp} />
-			<Route path='/Notifications' exact component={Notifications} />
+
+			<Route
+				path='/Notifications'
+				exact
+				render={(props) => <Notifications {...props} initializeNotifications={initializeNotifications} />}
+			/>
+
 			<Route
 				path='/searchPage'
 				exact
@@ -102,6 +113,15 @@ const Routes: FC<RoutesProps> = ({
 			)}
 			{signedIn && admins.includes(username) ? (
 				<Route path='/admin' exact component={AdminPage} />
+			) : (
+				<Redirect to='/' />
+			)}
+			{signedIn && admins.includes(username) ? (
+				<Route
+				path='/statistics'
+				exact
+				render={(props) => <Statistics {...props} statistics={statistics} />}
+			/>
 			) : (
 				<Redirect to='/' />
 			)}

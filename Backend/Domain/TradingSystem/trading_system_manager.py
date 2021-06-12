@@ -1,3 +1,5 @@
+from Backend.Domain.TradingSystem.statistics import Statistics
+from Backend.Service.DataObjects.statistics_data import StatisticsData
 from Backend.Domain.TradingSystem.offer import Offer
 from typing import Callable
 
@@ -386,3 +388,11 @@ class TradingSystemManager:
     @staticmethod
     def cancel_offer(cookie, offer_id) -> Response[None]:
         return UserManager.cancel_offer(cookie, offer_id)
+
+    @staticmethod
+    def get_users_statistics(cookie) -> Response[StatisticsData]:
+        return UserManager.get_users_statistics(cookie)
+
+    @staticmethod
+    def get_users_statistics_admin() -> Response[StatisticsData]:
+        return Response(True, Statistics.getInstance().get_statistics())

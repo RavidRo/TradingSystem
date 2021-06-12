@@ -20,20 +20,37 @@ export type PurchaseDetails = {
 	username: string;
 	store_name: string;
 	product_names: string[];
-	date: Date;
+	date: string;
 	total_price: number;
 };
 export type Offer = {
 	id: string;
-    price: number;
-    status: string;
-    product_id: string;
-    product_name: string;
-	store_id:string;
+	price: number;
+	status:
+		| 'undeclared'
+		| 'awaiting manager approval'
+		| 'counter offered'
+		| 'approved'
+		| 'rejected'
+		| 'cancled';
+	product_id: string;
+	product_name: string;
+	store_id: string;
 	store_name: string;
     username: string;
+	awaiting_owners: string[];
 }
+export type StatisticsCount = {
+    guest: number;
+	passive_members: number;
+    managers: number;
+    super_members: number;
+};
 
+export type StatisticsData = {
+	statistics_per_day: { [date: string]: StatisticsCount };
+
+}
 export type Permission =
 	| 'manage products'
 	| 'get appointments'

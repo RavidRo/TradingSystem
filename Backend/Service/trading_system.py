@@ -10,6 +10,7 @@ from Backend.response import Response
 
 import Backend.Service.logs as log
 from Backend.Service.DataObjects.shopping_cart_data import ShoppingCartData
+from Backend.Service.DataObjects.statistics_data import StatisticsData
 
 from Backend.Domain.Payment.payment_manager import PaymentManager
 from Backend.Domain.TradingSystem.offer import Offer
@@ -69,9 +70,15 @@ class TradingSystem(object):
                     if func == "enter_system":
                         cookies.append(result)
                     elif func == "create_store":
-                        store_ids.append(result)
+                        if not result.succeeded():
+                            raise Exception(f"initializing using state.json failed on function - {func}, args - {new_args}")
+                        store_ids.append(result.get_obj())
                     elif func == "create_product":
-                        product_ids.append(result)
+                        if not result.succeeded():
+                            raise Exception(f"initializing using state.json failed on function - {func}, args - {new_args}")
+                        product_ids.append(result.get_obj())
+                    elif not result.succeeded():
+                        raise Exception(f"initializing using state.json failed on function - {func}, args - {new_args}")
 
     def enter_system(self):
         return TradingSystemManager.enter_system()
@@ -413,3 +420,7 @@ class TradingSystem(object):
     @log.loging(to_hide=[1])
     def cancel_offer(self, cookie, offer_id) -> Response[None]:
         return TradingSystemManager.cancel_offer(cookie, offer_id)
+
+    @log.loging(to_hide=[1])
+    def get_users_statistics(self, cookie) -> Response[StatisticsData]:
+        return TradingSystemManager.get_users_statistics(cookie)

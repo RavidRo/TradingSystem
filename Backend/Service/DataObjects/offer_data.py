@@ -11,3 +11,4 @@ class OfferData:
     product_id: str
     product_name: str
     username: str
+    awaiting_owners: list[str]

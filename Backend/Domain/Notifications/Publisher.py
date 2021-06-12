@@ -12,9 +12,9 @@ class Publisher:
         if subscriber in self.__subscribers:
             self.__subscribers.remove(subscriber)
 
-    def notify_all(self, message):
+    def notify_all(self, data, subject="message"):
         for subscriber in self.__subscribers:
-            subscriber.notify(message)
+            subscriber.notify({"subject": subject, "data": data})
 
     def get_subscribers(self):
         return self.__subscribers

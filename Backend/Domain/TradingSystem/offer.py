@@ -25,8 +25,22 @@ class Offer(Parsable):
         self.__user_publisher.subscribe(user)
         self.__managers_publisher = Publisher()
         self.__managers_publisher.subscribe(store)
+        self.__pending_owners_approval = {}
+        owners_names = store.get_owners_names()
+        for id in owners_names:
+            self.__pending_owners_approval[id] = False
+
+    def remove_owner(self, username) -> None:
+        if username in self.__pending_owners_approval:
+            del self.__pending_owners_approval[username]
+
+    def add_owner(self, username) -> None:
+        if username not in self.__pending_owners_approval:
+            self.__pending_owners_approval[username] = False
 
     def declare_price(self, price) -> Response[None]:
+        for id in self.__pending_owners_approval:
+            self.__pending_owners_approval[id] = False
         response = self.__status.declare_price(price)
         if response.succeeded():
             self.__managers_publisher.notify_all(
@@ -45,13 +59,12 @@ class Offer(Parsable):
     def approve_manager_offer(self) -> Response[None]:
         return self.__status.approve_manager_offer()
 
-    def approve_user_offer(self) -> Response[None]:
-        response = self.__status.approve_user_offer()
-        if response.succeeded():
-            self.__user_publisher.notify_all(
-                f"Your price offer for {self.__product_name} has been approved"
-            )
-        return response
+    def approve_user_offer(self, owner_id) -> Response[None]:
+        self.__pending_owners_approval[owner_id] = True
+        notify = lambda: self.__user_publisher.notify_all(
+            f"Your price offer for {self.__product_name} has been approved"
+        )
+        return self.__status.approve_user_offer(self.__pending_owners_approval, notify)
 
     def reject_user_offer(self) -> Response[None]:
         response = self.__status.reject_user_offer()
@@ -92,6 +105,11 @@ class Offer(Parsable):
         return self.__username
 
     def parse(self):
+        owners = list(self.__pending_owners_approval.keys())
+        awaiting_owners = list(
+            filter(lambda owner: not self.__pending_owners_approval[owner], owners)
+        )
+
         return OfferData(
             self.__id,
             self.__price,
@@ -101,6 +119,7 @@ class Offer(Parsable):
             self.__product_id,
             self.__product_name,
             self.__username,
+            awaiting_owners,
         )
 
 
@@ -126,7 +145,7 @@ class OfferStatus:
             msg=f"Can't approve an offer with {self.get_name()} status",
         )
 
-    def approve_user_offer(self) -> Response[None]:
+    def approve_user_offer(self, pending_owners, notify) -> Response[None]:
         return Response(
             False,
             msg=f"Can't approve an offer with {self.get_name()} status",
@@ -151,7 +170,7 @@ class OfferStatus:
         )
 
     def get_name(self) -> str:
-        raise NotImplementedError
+        raise Exception("Called an abstract method")
 
     def is_approved(self) -> bool:
         return False
@@ -182,8 +201,12 @@ class AwaitingApprovalOffer(OfferStatus):
             return response
         return self.change_status(CounteredOffer)
 
-    def approve_user_offer(self) -> Response[None]:
-        return self.change_status(ApprovedOffer)
+    def approve_user_offer(self, owners_dict, notify) -> Response[None]:
+        if all(owners_dict.values()):
+            notify()
+            return self.change_status(ApprovedOffer)
+        else:
+            return Response(True)
 
     def reject_user_offer(self) -> Response[None]:
         return self.change_status(RejectedOffer)
