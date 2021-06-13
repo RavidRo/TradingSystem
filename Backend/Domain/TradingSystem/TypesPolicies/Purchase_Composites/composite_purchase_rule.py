@@ -102,7 +102,7 @@ class CompositePurchaseRule(PurchaseRule):
         return Response(False, msg=f"Operation couldn't be performed! Wrong parent_id: {id}")
 
     def add(self, component: PurchaseRule, parent_id: str, clause: str = None) -> Response[None]:
-        if str(self.get_id()) == parent_id:
+        if self.get_id() == parent_id:
             self._children.append(component)
             component.parent = self
             return Response(True, msg="Rule was added successfully!")
@@ -112,7 +112,7 @@ class CompositePurchaseRule(PurchaseRule):
             return Response(False, msg=f"Operation couldn't be performed! Wrong parent_id: {id}")
 
     def remove(self, component_id: str) -> Response[None]:
-        if str(self.get_id()) == component_id:
+        if self.get_id() == component_id:
             if self.parent is None:
                 return Response(False, msg="Root can't be removed!")
             self.parent._children.remove(self)

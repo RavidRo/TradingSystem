@@ -197,9 +197,11 @@ class DefaultPurchasePolicy(PurchasePolicy):
         if not check_validity.succeeded():
             self.__purchase_rules_lock.release_write()
             return check_validity
-        rule_to_move.parent.children.remove(rule_to_move, )
+        rule_to_move.parent.children.remove(rule_to_move)
         rule_to_move.parent = new_parent
         new_parent.children.append(rule_to_move)
+        res = self.__purchase_rules_handler.commit_changes()
+
         self.__purchase_rules_lock.release_write()
         return Response(True, msg="Move succeeded!")
 
@@ -222,6 +224,8 @@ class DefaultPurchasePolicy(PurchasePolicy):
             self.__purchase_rules_lock.release_write()
             return res_rule
 
+        parent_rule = res_rule.get_obj().parent
+
         if rule_type == "simple":
             response_validity = self.check_simple_rule_details_validity(rule_details)
             if not response_validity.succeeded():
@@ -229,7 +233,8 @@ class DefaultPurchasePolicy(PurchasePolicy):
                 return response_validity
             leaf_type = rule_details['context']['obj']
             if leaf_type in leaf_types.keys():
-                res_edit = self.__purchase_rules_handler.edit_rule(res_rule.get_obj, rule_details)
+                edited_rule = leaf_types[leaf_type](self, rule_details, parent)
+                # res_edit = self.__purchase_rules_handler.edit_rule(res_rule.get_obj, rule_details)
                 edit_response = self.__purchase_rules.edit_rule(rule_id, edited_rule)
                 self.__purchase_rules_lock.release_write()
                 return edit_response
