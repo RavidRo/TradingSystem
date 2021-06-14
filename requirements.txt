@@ -38,3 +38,4 @@ wsproto==1.0.0
 asgiref~=3.3.4
 psycopg2==2.8.6
 alt-pytest-asyncio==0.5.4
+SQLAlchemy-Utils==0.37.6
