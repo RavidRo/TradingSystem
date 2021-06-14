@@ -175,7 +175,7 @@ class IUser(Subscriber):
     def get_appointment_lock(self):
         raise NotImplementedError
 
-    def notify(self, message: str) -> bool:
+    def notify(self, message: object) -> bool:
         raise NotImplementedError
 
     # Offers

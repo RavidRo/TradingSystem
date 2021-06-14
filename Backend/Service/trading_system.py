@@ -5,11 +5,22 @@ import json
 from typing import Callable
 import threading
 
+import sqlalchemy
+
+from Backend.DataBase.Handlers.member_handler import MemberHandler
+from Backend.DataBase.Handlers.offer_handler import OfferHandler
+from Backend.DataBase.Handlers.product_handler import ProductHandler
+from Backend.DataBase.Handlers.purchase_details_handler import PurchaseDetailsHandler
+from Backend.DataBase.Handlers.responsibilities_handler import ResponsibilitiesHandler
+from Backend.DataBase.Handlers.shopping_bag_handler import ShoppingBagHandler
+from Backend.DataBase.Handlers.store_handler import StoreHandler
+from Backend.DataBase.database import mapper_registry, engine, session
 from Backend.Service import logs
 from Backend.response import Response
 
 import Backend.Service.logs as log
 from Backend.Service.DataObjects.shopping_cart_data import ShoppingCartData
+from Backend.Service.DataObjects.statistics_data import StatisticsData
 
 from Backend.Domain.Payment.payment_manager import PaymentManager
 from Backend.Domain.TradingSystem.offer import Offer
@@ -31,6 +42,22 @@ class TradingSystem(object):
         return TradingSystem.__instance
 
     def __init__(self):
+
+        stmt = sqlalchemy.sql.expression.text("CREATE EXTENSION IF NOT EXISTS ltree;")
+        session.execute(stmt)
+        session.commit()
+
+        MemberHandler.get_instance()
+        StoreHandler.get_instance()
+        ResponsibilitiesHandler.get_instance()
+        ShoppingBagHandler.get_instance()
+        ProductHandler.get_instance()
+        PurchaseDetailsHandler.get_instance()
+        OfferHandler.get_instance()
+
+        mapper_registry.metadata.drop_all(engine)
+        mapper_registry.metadata.create_all(engine)
+
         cookies = []
         store_ids = []
         product_ids = []
@@ -40,8 +67,13 @@ class TradingSystem(object):
         else:
             TradingSystem.__instance = self
             self.payment_manager = PaymentManager()
-            # TODO: change back to state.json
-            with open("empty_state.json", "r") as read_file:
+            try:
+                read_file = open("state.json", "r")
+            except:
+                e = FileNotFoundError("state.json file is absent")
+                logs.log_file_errors(e)
+                return
+            with read_file:
                 data = json.load(read_file)
                 actions = data["actions"]
                 for action in actions:
@@ -65,14 +97,14 @@ class TradingSystem(object):
                         cookies.append(result)
                     elif func == "create_store":
                         if not result.succeeded():
-                            raise Exception(f"initializing using state.json failed on function - {func}, args - {new_args}")
+                            raise Exception(f"initializing using state.json failed on function - {func}, args - {new_args}: {result.get_msg()}")
                         store_ids.append(result.get_obj())
                     elif func == "create_product":
                         if not result.succeeded():
-                            raise Exception(f"initializing using state.json failed on function - {func}, args - {new_args}")
+                            raise Exception(f"initializing using state.json failed on function - {func}, args - {new_args}: {result.get_msg()}")
                         product_ids.append(result.get_obj())
                     elif not result.succeeded():
-                        raise Exception(f"initializing using state.json failed on function - {func}, args - {new_args}")
+                        raise Exception(f"initializing using state.json failed on function - {func}, args - {new_args}: {result.get_msg()}")
 
     def enter_system(self):
         return TradingSystemManager.enter_system()
@@ -165,8 +197,8 @@ class TradingSystem(object):
             TradingSystemManager.release_cart(cookie)
             delete_res = TradingSystemManager.purchase_completed(cookie)
             if not delete_res.succeeded():
-                #TODO: add rollback_all() function
-                self.payment_manager.rollback_all()
+                print(delete_res.get_msg())
+                self.payment_manager.rollback(*res.get_obj())
             return delete_res
         else:
             TradingSystemManager.release_cart(cookie)
@@ -235,6 +267,10 @@ class TradingSystem(object):
     @log.loging()
     def get_product(self, store_id: str, product_id: str, username="Guest"):
         return TradingSystemManager.get_product(store_id, product_id, username)
+
+    @log.loging()
+    def get_product_from_bag(self, cookie: str, store_id: str, product_id: str, username=None):
+        return TradingSystemManager.get_product_from_bag(cookie, store_id, product_id, username)
 
     @log.loging(to_hide=[1])
     def add_discount(
@@ -418,3 +454,7 @@ class TradingSystem(object):
     @log.loging(to_hide=[1])
     def cancel_offer(self, cookie, offer_id) -> Response[None]:
         return TradingSystemManager.cancel_offer(cookie, offer_id)
+
+    @log.loging(to_hide=[1])
+    def get_users_statistics(self, cookie) -> Response[StatisticsData]:
+        return TradingSystemManager.get_users_statistics(cookie)

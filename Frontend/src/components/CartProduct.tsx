@@ -1,5 +1,5 @@
-import React, { FC, useState, useRef } from 'react';
-import { IconButton} from '@material-ui/core';
+import React, { FC, useState } from 'react';
+import { IconButton } from '@material-ui/core';
 import CancelIcon from '@material-ui/icons/Close';
 
 import IncrementField from './IncrementField';
@@ -23,9 +23,6 @@ const CartProduct: FC<CartProductProps> = ({
 }) => {
 	const { id, name, price } = product;
 	const [quantityMy, setQuantity] = useState<number>(quantity);
-
-	const purchaseTypes = useRef<string[]>(['immediate', 'offer']);
-	const [currentType, setCurrentType] = useState<string>('immediate');
 
 	const handleAdd = () => {
 		let me = product;
@@ -53,9 +50,7 @@ const CartProduct: FC<CartProductProps> = ({
 			handleDelete();
 		}
 	};
-	const handleChangeType = (e: any) => {
-		setCurrentType(e.target.value);
-	};
+
 	return quantityMy > 0 ? (
 		<div className='product'>
 			<div className='product-fields'>

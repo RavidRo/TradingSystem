@@ -1,5 +1,6 @@
+from Backend.Service.DataObjects.statistics_data import StatisticsData
 from Backend.Domain.TradingSystem.offer import Offer
-from Backend.DataBase.database import db_fail_response
+from Backend.DataBase.database import db_fail_response, session
 from Backend.Domain.Authentication import authentication
 from Backend.Domain.TradingSystem.States.admin import Admin
 from Backend.Domain.TradingSystem.States.member import Member
@@ -9,7 +10,7 @@ from Backend.settings import Settings
 
 
 def register_admins() -> None:
-    settings = Settings.get_instance()
+    settings = Settings.get_instance(False)
     admins = settings.get_admins()
     if len(admins) <= 0:
         raise Exception(
@@ -21,14 +22,14 @@ def register_admins() -> None:
         if res.succeeded():
             admin = Admin(None, username)
             MemberHandler.get_instance().save(admin)
-    MemberHandler.get_instance().commit_changes()
+            MemberHandler.get_instance().commit_changes()
 
 
 register_admins()
 
 
 def is_username_admin(username) -> bool:
-    return username in Settings.get_instance().get_admins()
+    return username in Settings.get_instance(False).get_admins()
 
 
 class Guest(UserState):
@@ -147,6 +148,10 @@ class Guest(UserState):
     def get_purchase_policy(self, store_id):
         return self.__responsibilities[store_id].get_purchase_policy()
 
+    # 6.5
+    def register_statistics(self) -> None:
+        self._statistics.register_guest()
+
     # Offers
     # ==================
 
@@ -176,3 +181,6 @@ class Guest(UserState):
 
     def cancel_offer(self, offer_id) -> Response[None]:
         return Response(False, msg="Guests cannot have price offers")
+
+    def get_users_statistics(self) -> Response[StatisticsData]:
+        return Response(False, msg="Guests cannot see users' statistics")

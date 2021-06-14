@@ -65,7 +65,7 @@ def test_undeclared_offers_can_be_cancled(offer: Offer):
 
 
 def test_undeclared_offers_cant_get_approved_by_manager(offer: Offer):
-    assert not offer.approve_user_offer().succeeded()
+    assert not offer.approve_user_offer("tali garame").succeeded()
 
 
 def test_undeclared_offers_cant_get_rejected(offer: Offer):
@@ -94,7 +94,7 @@ def test_declared_offers_cant_get_approved_by_user(offer: Offer):
 
 def test_declared_offers_can_get_approved_by_manager(offer: Offer):
     offer.declare_price(0)
-    response = offer.approve_user_offer()
+    response = offer.approve_user_offer("Garame")
     assert response.succeeded(), response.get_msg()
 
 
@@ -154,5 +154,5 @@ def test_counter_offer_cant_be_recountered(offer: Offer):
 def test_counter_offer_cant_be_approved_by_manager(offer: Offer):
     offer.declare_price(0)
     offer.suggest_counter_offer(5)
-    response = offer.approve_user_offer()
+    response = offer.approve_user_offer("Nisim")
     assert not response.succeeded(), response.get_msg()

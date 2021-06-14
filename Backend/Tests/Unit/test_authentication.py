@@ -2,25 +2,22 @@ import pytest
 import json
 
 from Backend.Domain.Authentication import authentication
+from Backend.settings import Settings
+
+
+@pytest.fixture(autouse=True)
+def get_settings():
+    return Settings.get_instance(True)
 
 
 @pytest.fixture
-def config_path():
-    return "config.json"
+def admin_username(get_settings):
+    return get_settings.get_admins()
 
 
 @pytest.fixture
-def admin_username(config_path):
-    with open(config_path, "r") as read_file:
-        data = json.load(read_file)
-        return data["admins"][0]
-
-
-@pytest.fixture
-def admin_password(config_path):
-    with open(config_path, "r") as read_file:
-        data = json.load(read_file)
-        return data["password"]
+def admin_password(get_settings):
+    return get_settings.get_password()
 
 
 def test_login_all_good():

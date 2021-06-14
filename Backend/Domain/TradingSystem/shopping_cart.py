@@ -1,3 +1,4 @@
+from Backend.Domain.TradingSystem.purchase_details import PurchaseDetails
 import threading
 from threading import Timer
 from Backend.DataBase.database import db_fail_response
@@ -21,7 +22,7 @@ class ShoppingCart(IShoppingCart):
         self.__shopping_bag_handler = ShoppingBagHandler.get_instance()
 
     def interval_time(self):
-        settings = Settings.get_instance()
+        settings = Settings.get_instance(False)
         return settings.get_timer_length()
 
     def get_shopping_bags(self):
@@ -88,6 +89,13 @@ class ShoppingCart(IShoppingCart):
 
         return bag.remove_product(product_id, username)
 
+    def get_product_from_bag(self, store_id, product_id, username):
+        bag = self.__shopping_bags.get(store_id)
+        if bag is None:
+            return Response(
+                False, msg="There is no existing bag for store with store id: " + str(store_id)
+            )
+        return bag.get_product_from_bag(product_id, username)
     """checks need to be made:
        ----------------------
        1. bag of store with store_id exists
@@ -166,19 +174,18 @@ class ShoppingCart(IShoppingCart):
             if purchase_detail is None:
                 return db_fail_response
             purchase_cart_details.update({store_id: purchase_detail})
-
-        self.__shopping_bag_handler.remove_bags(user_name)
-        res = self.__shopping_bag_handler.commit_changes()
-        if not res.succeeded():
-            self.__shopping_bag_handler.rollback_changes()
-            return db_fail_response
+        if user_name != "guest":
+            self.__shopping_bag_handler.remove_bags(user_name)
+            res = self.__shopping_bag_handler.commit_changes()
+            if not res.succeeded():
+                return db_fail_response
 
         for store_id in purchase_cart_details:
             self.__shopping_bags[store_id].delete_products_after_purchase(purchase_cart_details[store_id], user_name)
 
         self.__shopping_bags.clear()
-        return Response[ParsableList](
-            True, ParsableList(list(purchase_cart_details.values())), msg="Here are the purchase details!"
+        return Response(
+            True, list(purchase_cart_details.values()), msg="Here are the purchase details!"
         )
 
     """notice: I use a flag that marks the time passed for the purchase"""

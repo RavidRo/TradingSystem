@@ -46,7 +46,7 @@ const Cart: FC<CartProps> = ({
 
 	//loas the cart of user when enters the cart page
 	const cartObj = useAPI<ShoppingCart>('/get_cart_details');
-	const productObj = useAPI<Product>('/get_product');
+	const productObj = useAPI<Product>('/get_product_from_bag');
 	useEffect(() => {
 		cartObj.request().then(({ data, error }) => {
 			if (!error && data !== null) {
@@ -65,9 +65,12 @@ const Cart: FC<CartProps> = ({
 						let promise = productObj
 							.request({ product_id: productID, store_id: storeID, username: username })
 							.then(({ data, error }) => {
-								if (!error && data !== null) {
+								if (!error && data !== null) { // is null in case the product was deleted from store
 									let product = data.data;
-									tuplesArr.push([product, quantity]);
+									console.log(product);
+									if(product !== null){
+										tuplesArr.push([product, quantity]);
+									}
 								}
 							});
 						promises.push(promise);

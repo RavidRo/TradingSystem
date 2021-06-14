@@ -75,7 +75,10 @@ class StoresManager:
     def get_product(store_id: str, product_id: str) -> Response:
         store_res = StoresManager.get_store(store_id)
         if store_res.succeeded():
-            return Response(True, store_res.get_obj().get_product(product_id))
+            prod = store_res.get_obj().get_product(product_id)
+            if prod is None:
+                return Response(False, msg="The product does not exist!")
+            return Response(True, prod)
         return store_res
 
     # used in 4.1

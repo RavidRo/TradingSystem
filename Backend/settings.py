@@ -2,31 +2,59 @@ from __future__ import annotations
 
 import json
 import threading
+import Backend.Service.logs as logs
 
 
 class Settings:
     __instance = None
 
     @staticmethod
-    def get_instance() -> Settings:
+    def get_instance(is_test: bool) -> Settings:
         if Settings.__instance is None:
             with threading.Lock():
                 if Settings.__instance is None:
-                    Settings()
+                    Settings(is_test)
         return Settings.__instance
 
-    def __init__(self):
+    def __init__(self, is_test: bool):
         if Settings.__instance is not None:
             raise Exception("This class is a singleton!")
         Settings.__instance = self
-        with open("config.json", "r") as read_file:
+        try:
+            read_file = open("config_test.json", "r") if is_test else open("config.json", "r")
+        except:
+            e = FileNotFoundError("config.json file is absent")
+            logs.log_file_errors(e)
+            raise e
+        with read_file:
             data = json.load(read_file)
-            self.__admins = data["admins"] if "admins" in data else None
-            self.__password = data["password"] if "password" in data else None
-            self.__timer_length = data["timer_length"] if "timer_length" in data else None
-            self.__payment_system = data["payment_system"] if "payment_system" in data else None
-            self.__supply_system = data["supply_system"] if "supply_system" in data else None
-            self.__DB = data["DB"] if "DB" in data else None
+            missing_args = ""
+            if "admins" in data:
+                self.__admins = data["admins"]
+            else:
+                missing_args += "admins "
+            if "password" in data:
+                self.__password = data["password"]
+            else:
+                missing_args += "password "
+            if "timer_length" in data:
+                self.__timer_length = data["timer_length"]
+            else:
+                missing_args += "timer_length "
+            if "payment_system" in data:
+                self.__payment_system = data["payment_system"]
+            else:
+                missing_args += "payment_system "
+            if "supply_system" in data:
+                self.__supply_system = data["supply_system"]
+            else:
+                missing_args += "supply_system "
+            if "DB" in data:
+                self.__DB = data["DB"]
+            else:
+                missing_args += "DB "
+            if not missing_args == "":
+                raise KeyError("the keys "+missing_args+"are missing from config.json file")
 
     def get_admins(self):
         return self.__admins

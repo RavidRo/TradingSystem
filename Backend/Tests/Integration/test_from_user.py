@@ -4,6 +4,8 @@ import json
 from Backend.Domain.TradingSystem.Responsibilities.responsibility import Permission
 from Backend.Domain.TradingSystem.store import Store
 from Backend.Domain.TradingSystem.user import User
+import Backend.Service.logs as logs
+from Backend.settings import Settings
 
 """
 In this test file were are testing all the requirements from user which includes authentication and responsibility.
@@ -39,30 +41,27 @@ def user_member3():
     return user
 
 
-@pytest.fixture
+@pytest.fixture(autouse=True)
 def user_admin():
+    s = Settings.get_instance(True)
     user = User()
-    with open("config.json", "r") as read_file:
-        data = json.load(read_file)
-        user.login(data["admins"][0], data["password"])
+    user.login(s.get_admins()[0], s.get_password())
     return user
 
 
-@pytest.fixture
+@pytest.fixture(autouse=True)
 def user_admin2():
     user = User()
-    with open("config.json", "r") as read_file:
-        data = json.load(read_file)
-        user.login(data["admins"][1], data["password"])
+    s = Settings.get_instance(True)
+    user.login(s.get_admins()[1], s.get_password())
     return user
 
 
-@pytest.fixture
+@pytest.fixture(autouse=True)
 def user_admin3():
     user = User()
-    with open("config.json", "r") as read_file:
-        data = json.load(read_file)
-        user.login(data["admins"][2], data["password"])
+    s = Settings.get_instance(True)
+    user.login(s.get_admins()[2], s.get_password())
     return user
 
 

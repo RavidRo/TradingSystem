@@ -106,6 +106,13 @@ class ShoppingBag(IShoppingBag):
             self._products_to_quantity.pop(product_id)
         return Response(True, msg="Successfully removed product with id: " + str(product_id))
 
+    def get_product_from_bag(self, product_id, username):
+        product = self.__store.get_product(product_id)
+        if product is None:
+            self.remove_product(product_id, None if username == "Guest" else username)
+            return Response(True, None)
+        return Response(True, self._products_to_quantity[product_id][0].parse_with_price(username))
+
     """checks need to be made:
        ----------------------
        1. check if products exist in the store with specified quantities
@@ -189,10 +196,11 @@ class ShoppingBag(IShoppingBag):
         purchase_details = PurchaseDetails(user_name, self.__store.get_name(), self.__store.get_id(), product_names,
                                            datetime.now(),
                                            self.__pending_price)
-        res = PurchaseDetailsHandler.get_instance().save(purchase_details)
-        if res.succeeded():
-            return purchase_details
-        return None
+        if user_name != "guest":
+            res = PurchaseDetailsHandler.get_instance().save(purchase_details)
+            if not res.succeeded():
+                return None
+        return purchase_details
 
     def delete_products_after_purchase(self, purchase_details,  user_name="guest"):
         # for now this function will only return details, in the future there will be specific deletion

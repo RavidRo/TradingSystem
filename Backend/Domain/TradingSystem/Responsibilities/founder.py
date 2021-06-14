@@ -177,6 +177,9 @@ class Founder(Responsibility):
     def get_store_purchase_history(self) -> Response[ParsableList[PurchaseDetails]]:
         return self._store.get_purchase_history()
 
+    def is_owner(self) -> bool:
+        return True
+
     # Offers
     # ======================
 
@@ -186,8 +189,8 @@ class Founder(Responsibility):
     def suggest_counter_offer(self, product_id, offer_id, price) -> Response[None]:
         return self._store.suggest_counter_offer(product_id, offer_id, price)
 
-    def approve_user_offer(self, product_id, offer_id) -> Response[None]:
-        return self._store.approve_user_offer(product_id, offer_id)
+    def approve_user_offer(self, product_id, offer_id, username) -> Response[None]:
+        return self._store.approve_user_offer(product_id, offer_id, username)
 
     def reject_user_offer(self, product_id, offer_id) -> Response[None]:
         return self._store.reject_user_offer(product_id, offer_id)

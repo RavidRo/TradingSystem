@@ -6,7 +6,7 @@ from Backend.Domain.Payment.OutsideSystems.outside_supplyment import OutsideSupp
 
 
 class SupplyAdapter:
-    use_stub = False
+    use_stub = Settings.get_instance(False).get_supply_system() == ""
 
     def __init__(self):
         self.__outside_supplyment = OutsideSupplyment.getInstance()
@@ -16,15 +16,19 @@ class SupplyAdapter:
 
     def __send(self, action_type, paramaters={}):
         return requests.post(
-            Settings.get_instance().get_supply_system(),
+            Settings.get_instance(False).get_supply_system(),
             data=({"action_type": action_type} | paramaters),
+            timeout=4,
         )
 
     def __send_handshake(self):
         return self.__send("handshake")
 
     def __send_supply(self, name, address, city, country, zip):
-        return self.__send("supply", {name, address, city, country, zip})
+        return self.__send(
+            "supply",
+            {"name": name, "address": address, "city": city, "country": country, "zip": zip},
+        )
 
     def __send_cancel_supply(self, transaction_id):
         return self.__send("cancel_supply", {"transaction_id": transaction_id})
@@ -54,7 +58,7 @@ class SupplyAdapter:
         )
 
         if response.status_code != 200 or response.text == "-1":
-            return Response(False, "Delivery dispatching failed")
+            return Response(False, msg="Delivery dispatching failed")
         return Response(True, response.text)
 
     def cancel_delivery(self, transaction_id) -> Response[None]:
@@ -63,5 +67,5 @@ class SupplyAdapter:
 
         response = self.__send_cancel_supply(transaction_id)
         if response.status_code != 200 or response.text == "-1":
-            return Response(False, "Delivery cancelation has failed")
+            return Response(False, msg="Delivery cancelation has failed")
         return Response(True)
