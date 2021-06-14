@@ -96,7 +96,7 @@ class TradingSystemManager:
     # 2.9
     @staticmethod
     def purchase_completed(cookie: str) -> Response[None]:
-        return UserManager.purchase_completed(cookie)
+        return UserManager.purchase_completed(cookie).parse()
 
     @staticmethod
     def get_cart_price(cookie: str) -> Response[PrimitiveParsable[float]]:
@@ -168,6 +168,7 @@ class TradingSystemManager:
 
     @staticmethod
     def get_product(store_id: str, product_id: str, username: str) -> ProductData:
+        return StoresManager.get_product_with_price(store_id, product_id, username).parse()
         return StoresManager.get_product_with_price(store_id, product_id, username).parse()
 
     @staticmethod
