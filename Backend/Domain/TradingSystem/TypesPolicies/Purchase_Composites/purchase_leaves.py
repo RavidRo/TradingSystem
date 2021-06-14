@@ -1,5 +1,7 @@
 import json
 import operator
+
+from Backend.DataBase.database import db_fail_response
 from Backend.Domain.TradingSystem.TypesPolicies.Purchase_Composites.composite_purchase_rule import PurchaseRule
 from Backend.Domain.TradingSystem.user import User
 from Backend.response import Response
@@ -27,20 +29,37 @@ class PurchaseLeaf(PurchaseRule):
         pass
 
     def edit_rule(self, rule_id: str, component: PurchaseRule):
+        from Backend.DataBase.Handlers.purchase_rules_handler import PurchaseRulesHandler
         if self.get_id() == rule_id:
-            self.parent.children.remove(self)
-            self.parent.children.append(component)
-            return Response(True, msg="rule was edited successfully!")
+            res_remove = PurchaseRulesHandler.get_instance().remove_rule(self)
+            if res_remove.succeeded():
+                res_save = PurchaseRulesHandler.get_instance().save(component)
+                if res_save.succeeded():
+                    res_commit = PurchaseRulesHandler.get_instance().commit_changes()
+                    if res_commit.succeeded():
+                        return Response(True, msg="rule was edited successfully!")
+                    return res_commit
+                return res_save
+            return res_remove
         return Response(False, msg=f"rule couldn't be edited with id:{rule_id}")
 
     def add(self, component: PurchaseRule, parent_id: str, clause: str = None):
         return Response(False, msg="Rule can't be added as a leaf's child!")
 
     def remove(self, component_id: str) -> Response[None]:
+        from Backend.DataBase.Handlers.purchase_rules_handler import PurchaseRulesHandler
         if self.get_id() == component_id:
-            self.parent.children.remove(self)
-            self.parent = None
-            return Response(True, msg="rule was removed successfully!")
+            if self.parent is None:
+                return Response(False, msg="Root can't be removed!")
+            res_remove = PurchaseRulesHandler.get_instance().remove_rule(self)
+            if res_remove.succeeded():
+                res_commit = PurchaseRulesHandler.get_instance().commit_changes()
+                if res_commit.succeeded():
+                    return Response(True, msg="Rule was removed successfully!")
+                else:
+                    return db_fail_response
+            else:
+                return res_remove
         return Response(False, msg=f"rule couldn't be removed with id:{component_id}")
 
     def get_rule(self, rule_id):

@@ -122,18 +122,11 @@ class DefaultPurchasePolicy(PurchasePolicy):
                 return response_validity
             leaf_type = rule_details['context']['obj']
             if leaf_type in leaf_types.keys():
-
                 simple_rule = leaf_types[leaf_type](self, rule_details, parent)
-                res_save = self.__purchase_rules_handler.save(simple_rule)
-                if res_save.succeeded():
-                    res_commit = self.__purchase_rules_handler.commit_changes()
-                    if res_commit.succeeded():
-                        add_response = self.__purchase_rules.add(simple_rule, parent_id, clause)
-                        self.__purchase_rules_lock.release_write()
-                        return add_response
-
+                simple_rule.set_clause(clause)
+                add_response = self.__purchase_rules.add(simple_rule, parent_id)
                 self.__purchase_rules_lock.release_write()
-                return db_fail_response
+                return add_response
             else:
                 self.__purchase_rules_lock.release_write()
                 return Response(False, msg=f"invalid simple rule type: {leaf_type}")
@@ -146,16 +139,10 @@ class DefaultPurchasePolicy(PurchasePolicy):
             logic_type = rule_details['operator']
             if logic_type in logic_types.keys():
                 complex_rule = logic_types[logic_type](parent)
-                res_save = self.__purchase_rules_handler.save(complex_rule)
-                if res_save.succeeded():
-                    res_commit = self.__purchase_rules_handler.commit_changes()
-                    if res_commit.succeeded():
-                        add_response = self.__purchase_rules.add(complex_rule, parent_id, clause)
-                        self.__purchase_rules_lock.release_write()
-                        return add_response
-
+                complex_rule.set_clause(clause)
+                add_response = self.__purchase_rules.add(complex_rule, parent_id)
                 self.__purchase_rules_lock.release_write()
-                return db_fail_response
+                return add_response
             else:
                 self.__purchase_rules_lock.release_write()
                 return Response(False, msg=f"invalid logic type: {logic_type}")
@@ -165,19 +152,9 @@ class DefaultPurchasePolicy(PurchasePolicy):
 
     def remove_purchase_rule(self, rule_id: str):
         self.__purchase_rules_lock.acquire_write()
-        res_rule = self.__purchase_rules.get_rule(rule_id)
-        if not res_rule.succeeded():
-            self.__purchase_rules_lock.release_write()
-            return res_rule
-        res_remove = self.__purchase_rules_handler.remove_rule(res_rule.get_obj())
-        if res_remove.succeeded():
-            res_commit = self.__purchase_rules_handler.commit_changes()
-            if res_commit.succeeded():
-                remove_response = self.__purchase_rules.remove(rule_id)
-                self.__purchase_rules_lock.release_write()
-                return remove_response
+        remove_response = self.__purchase_rules.remove(rule_id)
         self.__purchase_rules_lock.release_write()
-        return db_fail_response
+        return remove_response
 
     def move_purchase_rule(self, rule_id: str, new_parent_id: str) -> Response[None]:
         self.__purchase_rules_lock.acquire_write()
@@ -234,15 +211,8 @@ class DefaultPurchasePolicy(PurchasePolicy):
             leaf_type = rule_details['context']['obj']
             if leaf_type in leaf_types.keys():
                 edited_rule = leaf_types[leaf_type](self, rule_details, parent)
-                # res_edit = self.__purchase_rules_handler.edit_rule(res_rule.get_obj, rule_details)
-                self.__purchase_rules_handler.remove_rule(res_rule.get_obj())
-                self.__purchase_rules_handler.save(edited_rule)
-                self.__purchase_rules_lock.release_write()
-                res_commit = self.__purchase_rules_handler.commit_changes()
-                if not res_commit.succeeded():
-                    return db_fail_response
-
                 edit_response = self.__purchase_rules.edit_rule(rule_id, edited_rule)
+                self.__purchase_rules_lock.release_write()
                 return edit_response
             else:
                 self.__purchase_rules_lock.release_write()
@@ -255,7 +225,6 @@ class DefaultPurchasePolicy(PurchasePolicy):
                 return response_validity
             logic_type = rule_details['operator']
             if logic_type in logic_types.keys():
-
                 edit_response = self.__purchase_rules.edit_rule(rule_id, logic_types[logic_type](parent))
                 self.__purchase_rules_lock.release_write()
                 return edit_response

@@ -107,17 +107,34 @@ def save():
     # if not res.succeeded():
     #     print("appoint manager: " + res.get_msg())
 
+
     trading_system = TradingSystem.getInstance()
     cookie = trading_system.enter_system()
-    rule_details = {"context": {"obj": "product", "identifier": "12"}, "operator": "less-than", "target": 20}
+    rule_details_complex = {"operator": "or"}
+    rule_details_simple = {"context": {"obj": "product", "identifier": "16"}, "operator": "less-than", "target": 17}
     rule_type = "simple"
     parent_id = "1"
     res = trading_system.login(cookie, "user", "password")
-    res = trading_system.get_store("1ace3132-d818-429f-8574-7959545187b4")
-    # res = trading_system.add_purchase_rule(cookie, "1ace3132-d818-429f-8574-7959545187b4", rule_details, rule_type, parent_id)
-    # res = trading_system.remove_purchase_rule(cookie, "4c7d0d66-8c9e-4503-b5cc-78524e6e4c65", "4")
-    res = trading_system.edit_purchase_rule(cookie, "1ace3132-d818-429f-8574-7959545187b4", rule_details, "9", rule_type)
-    print(res.get_msg())
+    res = trading_system.get_store("f8cf6b2c-787d-4c0a-98a8-55176a518032")
+    # res = trading_system.add_purchase_rule(cookie, "f8cf6b2c-787d-4c0a-98a8-55176a518032", rule_details_complex, "complex", parent_id)
+    # res = trading_system.add_purchase_rule(cookie, "f8cf6b2c-787d-4c0a-98a8-55176a518032", rule_details_simple, "simple", "6")
+    # res = trading_system.edit_purchase_rule(cookie, "f8cf6b2c-787d-4c0a-98a8-55176a518032", rule_details_simple, "7", "simple")
+    res = trading_system.edit_purchase_rule(cookie, "f8cf6b2c-787d-4c0a-98a8-55176a518032", rule_details_complex, "6","complex")
+    # res = trading_system.remove_purchase_rule(cookie, "f8cf6b2c-787d-4c0a-98a8-55176a518032", "4")
+
+
+
+    # result_test_clause = trading_system.add_purchase_rule(
+    #     test_clause_details, "simple", test_then_clause_parent_id, clause="test"
+    # )
+    # print(result_test_clause.get_msg())
+
+
+
+    # res = trading_system.add_purchase_rule(cookie, "762f018d-3739-4565-b545-50bcf42b34e2", rule_details, rule_type, parent_id)
+    # # res = trading_system.remove_purchase_rule(cookie, "4c7d0d66-8c9e-4503-b5cc-78524e6e4c65", "4")
+    # # res = trading_system.edit_purchase_rule(cookie, "762f018d-3739-4565-b545-50bcf42b34e2", rule_details, "9", rule_type)
+    # print(res.get_msg())
 
 
 if __name__ == '__main__':

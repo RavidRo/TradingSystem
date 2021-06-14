@@ -34,6 +34,7 @@ class PurchaseRulesHandler(IHandler):
                                               Column('id', Integer, rules_id_seq, primary_key=True),
                                               Column('path', LtreeType, nullable=False),
                                               Column('type', String(50)),
+                                              Column('clause', String(10)),
                                               Column('context', String(50)),
                                               Column('context_obj', String(50)),
                                               Column('context_id', String(50)),
@@ -51,6 +52,7 @@ class PurchaseRulesHandler(IHandler):
                 backref='_children',
                 viewonly=True
             ),
+            "_clause": column_property(self.__purchase_rules_table.c.clause),
             "_context_obj": column_property(self.__purchase_rules_table.c.context_obj),
             "_context_id": column_property(self.__purchase_rules_table.c.context_id),
             "_context": column_property(self.__purchase_rules_table.c.context),
@@ -107,6 +109,18 @@ class PurchaseRulesHandler(IHandler):
         finally:
             self._rwlock.release_write()
             return res
+
+    # def edit_rule(self, old_rule, edited_rule):
+    #     self._rwlock.acquire_write()
+    #     res = Response(True)
+    #     try:
+    #         res = Response(True)
+    #     except Exception as e:
+    #         session.rollback()
+    #         res = Response(False, msg=str(e))
+    #     finally:
+    #         self._rwlock.release_write()
+    #         return res
 
     # def edit_rule(self, old_rule, rule_details):
     #     self._rwlock.acquire_write()
