@@ -10,7 +10,7 @@ class UserState(ABC):
     def __init__(self, user, cart=None):
         if cart is None:
             cart = ShoppingCart()
-        self._notifications = []
+        self._notifications: list[object] = []
         self._cart = cart
         self._user = user
         self._statistics: Statistics = Statistics.getInstance()
