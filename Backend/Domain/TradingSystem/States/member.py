@@ -28,8 +28,7 @@ class Member(UserState):
         if store_id not in self._responsibilities:
             self._responsibilities[store_id] = responsibility
         if responsibility.get_dal_responsibility_id() not in self._responsibilities_ids:
-            self._responsibilities_ids.append(responsibility.get_dal_responsibility_id())
-            self._member_handler.update_responsibilities_ids(self._username, self._responsibilities_ids)
+            self._member_handler.update_responsibilities_ids(self._username, self._responsibilities_ids + [responsibility.get_dal_responsibility_id()])
 
     def remove_responsibility(self, store_id):
         self._responsibilities.pop(store_id)
@@ -142,8 +141,9 @@ class Member(UserState):
             responsibility = self.get_own_responsibility(founder_responsibility)
             if responsibility is None:
                 return Response(False, msg="There is no such responsibility!")
-            self._responsibilities[store_id] = responsibility
+            self.add_responsibility(responsibility, store_id)
             self._responsibilities[store_id].set_user_state(self)
+            self._responsibilities[store_id].set_subscriber(self._user)
             # responsibility.get_user_state()
             return Response(True, obj=responsibility)
         return res
@@ -327,7 +327,6 @@ class Member(UserState):
         return Response(False, msg="Regular members cannot get any user's purchase history")
 
     def is_appointed(self, store_id):
-        # return None here
         res = self.get_responsibility(store_id)
         return Response(True, res.succeeded())
 
