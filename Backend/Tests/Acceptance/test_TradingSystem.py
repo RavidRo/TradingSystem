@@ -784,6 +784,25 @@ def test_send_payment_success():
 
 
 @patch.multiple(ShoppingCart, interval_time=MagicMock(return_value=5))
+def test_send_payment_success_guest():
+    cookie, username, password, store_name, store_id = _initialize_info(
+        _generate_username(), "aaa", _generate_store_name()
+    )
+    product_id, product_name, category, price, quantity = _create_product(
+        cookie, store_id, _generate_product_name(), "A", 5.50, 10
+    )
+
+    cookie_g = system.enter_system()
+    system.save_product_in_cart(cookie_g, store_id, product_id, 1)
+    user_age = 25
+    system.purchase_cart(cookie_g, user_age)
+    response = system.send_payment(cookie_g, "", "")
+    res = system.get_store(store_id)
+    ids_to_quantity = res.object.ids_to_quantities[product_id]
+    assert response.succeeded() and ids_to_quantity == 9, response.get_msg()
+
+
+@patch.multiple(ShoppingCart, interval_time=MagicMock(return_value=5))
 def test_send_payment_success_timer_over():
     cookie, username, password, store_name, store_id = _initialize_info(
         _generate_username(), "aaa", _generate_store_name()

@@ -99,7 +99,7 @@ class Member(UserState):
         response = self._cart.delete_products_after_purchase(self._username)
         if response.succeeded():
             # update data in DB in later milestones
-            self._purchase_details += response.object.values
+            self._purchase_details += response.object
 
         return response
 
