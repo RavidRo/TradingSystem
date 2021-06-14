@@ -65,7 +65,7 @@ const Cart: FC<CartProps> = ({
 						let promise = productObj
 							.request({ product_id: productID, store_id: storeID, username: username })
 							.then(({ data, error }) => {
-								if (!error && data !== null) {
+								if (!error && data !== null) { // is null in case the product was deleted from store
 									let product = data.data;
 									console.log(product);
 									if(product !== null){

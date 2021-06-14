@@ -6,6 +6,7 @@ from typing import Callable
 from Backend.response import Response
 import asyncio
 import concurrent
+import types
 
 from Backend.Service.trading_system import TradingSystem
 from quart import Quart, websocket, request, send_from_directory
@@ -19,6 +20,9 @@ app = Quart(__name__, static_url_path="", static_folder="Frontend/build")
 def __toJson(o):
     if isinstance(o, datetime.datetime):
         return o.__str__()
+    if isinstance(o, types.MappingProxyType):
+        print(o)
+        return o
     return o.__dict__
 
 

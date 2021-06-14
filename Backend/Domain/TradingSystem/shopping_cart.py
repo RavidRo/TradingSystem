@@ -1,3 +1,4 @@
+from Backend.Domain.TradingSystem.purchase_details import PurchaseDetails
 import threading
 from threading import Timer
 from Backend.DataBase.database import db_fail_response
@@ -173,19 +174,20 @@ class ShoppingCart(IShoppingCart):
             if purchase_detail is None:
                 return db_fail_response
             purchase_cart_details.update({store_id: purchase_detail})
-
-        self.__shopping_bag_handler.remove_bags(user_name)
-        res = self.__shopping_bag_handler.commit_changes()
-        if not res.succeeded():
-            self.__shopping_bag_handler.rollback_changes()
-            return db_fail_response
+        if user_name != "guest":
+            self.__shopping_bag_handler.remove_bags(user_name)
+            res = self.__shopping_bag_handler.commit_changes()
+            if not res.succeeded():
+                return db_fail_response
 
         for store_id in purchase_cart_details:
             self.__shopping_bags[store_id].delete_products_after_purchase(purchase_cart_details[store_id], user_name)
 
         self.__shopping_bags.clear()
-        return Response[ParsableList](
-            True, ParsableList(list(purchase_cart_details.values())), msg="Here are the purchase details!"
+        print([list(purchase_cart_details.values())[0]])
+        return Response(
+            # True, ParsableList(list(purchase_cart_details.values())), msg="Here are the purchase details!"
+            True, [list(purchase_cart_details.values())[0]], msg="Here are the purchase details!"
         )
 
     """notice: I use a flag that marks the time passed for the purchase"""
