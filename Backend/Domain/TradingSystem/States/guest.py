@@ -1,6 +1,6 @@
 from Backend.Service.DataObjects.statistics_data import StatisticsData
 from Backend.Domain.TradingSystem.offer import Offer
-from Backend.DataBase.database import db_fail_response
+from Backend.DataBase.database import db_fail_response, session
 from Backend.Domain.Authentication import authentication
 from Backend.Domain.TradingSystem.States.admin import Admin
 from Backend.Domain.TradingSystem.States.member import Member
@@ -22,7 +22,7 @@ def register_admins() -> None:
         if res.succeeded():
             admin = Admin(None, username)
             MemberHandler.get_instance().save(admin)
-    MemberHandler.get_instance().commit_changes()
+            MemberHandler.get_instance().commit_changes()
 
 
 register_admins()

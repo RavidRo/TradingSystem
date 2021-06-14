@@ -5,6 +5,8 @@ import json
 from typing import Callable
 import threading
 
+import sqlalchemy
+
 from Backend.DataBase.Handlers.member_handler import MemberHandler
 from Backend.DataBase.Handlers.offer_handler import OfferHandler
 from Backend.DataBase.Handlers.product_handler import ProductHandler
@@ -12,7 +14,7 @@ from Backend.DataBase.Handlers.purchase_details_handler import PurchaseDetailsHa
 from Backend.DataBase.Handlers.responsibilities_handler import ResponsibilitiesHandler
 from Backend.DataBase.Handlers.shopping_bag_handler import ShoppingBagHandler
 from Backend.DataBase.Handlers.store_handler import StoreHandler
-from Backend.DataBase.database import mapper_registry, engine
+from Backend.DataBase.database import mapper_registry, engine, session
 from Backend.Service import logs
 from Backend.response import Response
 
@@ -40,6 +42,10 @@ class TradingSystem(object):
         return TradingSystem.__instance
 
     def __init__(self):
+
+        stmt = sqlalchemy.sql.expression.text("CREATE EXTENSION IF NOT EXISTS ltree;")
+        session.execute(stmt)
+        session.commit()
 
         MemberHandler.get_instance()
         StoreHandler.get_instance()

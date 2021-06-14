@@ -62,6 +62,7 @@ class MemberHandler(IHandler):
             stmt = insert(self.__credentials).values(username=username,
                                                      password=password)
             session.execute(stmt)
+            session.flush()
         except Exception as e:
             session.rollback()
             res = Response(False, msg=str(e))
