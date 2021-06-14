@@ -38,6 +38,7 @@ class AndCompositePurchaseRule(CompositePurchaseRule):
         }
 
 
+
 class ConditioningCompositePurchaseRule(CompositePurchaseRule):
     def __init__(self, parent):
         super(ConditioningCompositePurchaseRule, self).__init__(parent)

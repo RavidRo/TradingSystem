@@ -170,15 +170,15 @@ class DefaultPurchasePolicy(PurchasePolicy):
             return Response(False, msg=new_parent_response.get_msg())
 
         new_parent = new_parent_response.get_obj()
+
         check_validity = rule_to_move.check_validity(new_parent_id)
         if not check_validity.succeeded():
             self.__purchase_rules_lock.release_write()
             return check_validity
-        rule_to_move.parent.children.remove(rule_to_move)
-        rule_to_move.parent = new_parent
-        new_parent.children.append(rule_to_move)
-        res = self.__purchase_rules_handler.commit_changes()
 
+        from Backend.DataBase.Handlers.purchase_rules_handler import PurchaseRulesHandler
+        PurchaseRulesHandler.get_instance().move_rule(rule_to_move, new_parent)
+        res = self.__purchase_rules_handler.commit_changes()
         self.__purchase_rules_lock.release_write()
         return Response(True, msg="Move succeeded!")
 

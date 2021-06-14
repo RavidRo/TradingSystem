@@ -11,6 +11,7 @@ import re
 from Backend.DataBase.IHandler import IHandler
 from Backend.DataBase.database import engine, session, mapper_registry, db_fail_response
 from Backend.Domain.TradingSystem.Responsibilities.responsibility import Responsibility, Permission
+from Backend.Domain.TradingSystem.TypesPolicies.Purchase_Composites.composite_purchase_rule import PurchaseRule
 from Backend.response import Response, PrimitiveParsable
 from Backend.rw_lock import ReadWriteLock
 
@@ -109,6 +110,18 @@ class PurchaseRulesHandler(IHandler):
         finally:
             self._rwlock.release_write()
             return res
+
+    def move_rule(self, rule: PurchaseRule, new_parent: PurchaseRule):
+        self._rwlock.acquire_write()
+        new_path = new_parent.path + Ltree(str(rule._id))
+        for n in rule._children:
+            n.path = new_path + n.path[len(rule.path):]
+        rule.path = new_path
+        rule.parent.children.remove(rule)
+        rule.parent = new_parent
+        new_parent.children.append(rule)
+        self._rwlock.release_write()
+
 
     # def edit_rule(self, old_rule, edited_rule):
     #     self._rwlock.acquire_write()
