@@ -184,10 +184,8 @@ class ShoppingCart(IShoppingCart):
             self.__shopping_bags[store_id].delete_products_after_purchase(purchase_cart_details[store_id], user_name)
 
         self.__shopping_bags.clear()
-        print([list(purchase_cart_details.values())[0]])
         return Response(
-            # True, ParsableList(list(purchase_cart_details.values())), msg="Here are the purchase details!"
-            True, [list(purchase_cart_details.values())[0]], msg="Here are the purchase details!"
+            True, list(purchase_cart_details.values()), msg="Here are the purchase details!"
         )
 
     """notice: I use a flag that marks the time passed for the purchase"""
