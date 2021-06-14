@@ -188,6 +188,9 @@ class UserState(ABC):
     def remove_purchase_rule(self, store_id: str, rule_id: str):
         return Response(False, msg="Abstract Method")
 
+    def get_product_from_bag(self, store_id, product_id, username):
+        return self._cart.get_product_from_bag(store_id, product_id, username)
+
     # 4.2
     @abstractmethod
     def edit_purchase_rule(self, store_id: str, rule_details: dict, rule_id: str, rule_type: str):

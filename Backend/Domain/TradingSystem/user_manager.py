@@ -245,6 +245,13 @@ class UserManager:
         )
         return UserManager.__deligate_to_user(cookie, func)
 
+    @staticmethod
+    def get_product_from_bag(cookie, store_id, product_id, username):
+        func: Callable[[User], Response] = lambda user: user.get_product_from_bag(
+            store_id, product_id, username
+        )
+        return UserManager.__deligate_to_user(cookie, func)
+
     # 4.1
     @staticmethod
     def change_product_quantity_in_store(

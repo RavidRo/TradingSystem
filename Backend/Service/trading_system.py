@@ -268,6 +268,10 @@ class TradingSystem(object):
     def get_product(self, store_id: str, product_id: str, username="Guest"):
         return TradingSystemManager.get_product(store_id, product_id, username)
 
+    @log.loging()
+    def get_product_from_bag(self, cookie: str, store_id: str, product_id: str, username=None):
+        return TradingSystemManager.get_product_from_bag(cookie, store_id, product_id, username)
+
     @log.loging(to_hide=[1])
     def add_discount(
         self,

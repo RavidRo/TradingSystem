@@ -121,6 +121,9 @@ class User(IUser):
     ) -> Response[PrimitiveParsable[int]]:
         return self.state.remove_product(store_id, product_id)
 
+    def get_product_from_bag(self, store_id, product_id, username):
+        return self.state.get_product_from_bag(store_id, product_id, username)
+
     # 4.1
     def change_product_quantity_in_store(
         self, store_id: str, product_id: str, new_quantity: int

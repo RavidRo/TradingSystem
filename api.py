@@ -455,6 +455,17 @@ async def get_product():
     answer = await __async_call(system.get_product, store_id, product_id, username)
     return __responseToJson(None, answer)
 
+@app.route("/get_product_from_bag", methods=["GET"])
+async def get_product_from_bag():
+    cookie = request.args.get("cookie")
+    if cookie is None:
+        cookie = await __async_call(system.enter_system)
+    store_id = request.args.get("store_id")
+    product_id = request.args.get("product_id")
+    username = request.args.get("username")
+    answer = await __async_call(system.get_product_from_bag, cookie, store_id, product_id, username)
+    return __responseToJson(None, answer)
+
 
 @app.route("/add_discount", methods=["POST"])
 async def add_discount():

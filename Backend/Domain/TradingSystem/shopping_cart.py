@@ -88,6 +88,13 @@ class ShoppingCart(IShoppingCart):
 
         return bag.remove_product(product_id, username)
 
+    def get_product_from_bag(self, store_id, product_id, username):
+        bag = self.__shopping_bags.get(store_id)
+        if bag is None:
+            return Response(
+                False, msg="There is no existing bag for store with store id: " + str(store_id)
+            )
+        return bag.get_product_from_bag(product_id, username)
     """checks need to be made:
        ----------------------
        1. bag of store with store_id exists

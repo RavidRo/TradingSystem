@@ -106,6 +106,13 @@ class ShoppingBag(IShoppingBag):
             self._products_to_quantity.pop(product_id)
         return Response(True, msg="Successfully removed product with id: " + str(product_id))
 
+    def get_product_from_bag(self, product_id, username):
+        product = self.__store.get(product_id)
+        if product is None:
+            self.remove_product(product_id, None if username == "Guest" else username)
+            return Response(True, None)
+        return Response(True, self._products_to_quantity[product_id][0].parse_with_price(username))
+
     """checks need to be made:
        ----------------------
        1. check if products exist in the store with specified quantities
