@@ -31,24 +31,24 @@ const Row: FC<{ row: PurchaseDetails; showUsername: boolean }> = (props) => {
 		<>
 			<TableRow className={classes.root} onClick={() => setOpen(!open)}>
 				<TableCell>
-					<IconButton aria-label="expand row" size="small" onClick={() => setOpen(!open)}>
+					<IconButton aria-label='expand row' size='small' onClick={() => setOpen(!open)}>
 						{open ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
 					</IconButton>
 				</TableCell>
-				<TableCell component="th" scope="row">
-					{row.date.toDateString()}
+				<TableCell component='th' scope='row'>
+					{new Date(row.date).toDateString()}
 				</TableCell>
 				<TableCell>{showUsername ? row.username : row.store_name}</TableCell>
-				<TableCell align="right">{row.total_price}</TableCell>
+				<TableCell align='right'>{row.total_price}</TableCell>
 			</TableRow>
 			<TableRow>
 				<TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={6}>
-					<Collapse in={open} timeout="auto" unmountOnExit>
+					<Collapse in={open} timeout='auto' unmountOnExit>
 						<Box margin={1}>
 							{/* <Typography variant="h6" gutterBottom component="div">
 								Products
 							</Typography> */}
-							<Table size="small" aria-label="purchases">
+							<Table size='small' aria-label='purchases'>
 								<TableHead>
 									<TableRow>
 										<TableCell>Product Name</TableCell>
@@ -57,7 +57,7 @@ const Row: FC<{ row: PurchaseDetails; showUsername: boolean }> = (props) => {
 								<TableBody>
 									{row.product_names.map((product_name) => (
 										<TableRow key={product_name}>
-											<TableCell component="th" scope="row">
+											<TableCell component='th' scope='row'>
 												{product_name}
 											</TableCell>
 										</TableRow>
@@ -78,13 +78,13 @@ const PurchaseHistoryTable: FC<{ history: PurchaseDetails[]; showUsername?: bool
 }) => {
 	return (
 		<TableContainer component={Paper}>
-			<Table aria-label="purchase history table" stickyHeader>
+			<Table aria-label='purchase history table' stickyHeader>
 				<TableHead>
 					<TableRow>
 						<TableCell />
 						<TableCell>Date</TableCell>
 						<TableCell>{`${showUsername ? 'Username' : 'Store'}`}</TableCell>
-						<TableCell align="right">Price</TableCell>
+						<TableCell align='right'>Price</TableCell>
 					</TableRow>
 				</TableHead>
 				<TableBody>

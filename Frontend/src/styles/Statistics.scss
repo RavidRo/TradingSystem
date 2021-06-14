@@ -1,0 +1,23 @@
+.statistics{
+    height: 90%;
+    background-color: antiquewhite;
+}
+.charts{
+    display: flex;
+    flex-direction: row;
+}
+.dataList{
+    margin-top: 5%;
+}
+.date{
+    font-size: large;
+}
+.dummyBtn{
+   margin-top: 6%;
+   margin-left: 5%;
+   align-self: center;
+   height: 50px;
+   background-color: aqua;
+   font-size: large;
+   font-weight: bold;
+}

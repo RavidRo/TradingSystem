@@ -1,3 +1,4 @@
+from Backend.Service.DataObjects.statistics_data import StatisticsData
 from Backend.Domain.TradingSystem.offer import Offer
 from Backend.Domain.TradingSystem.Responsibilities.founder import Founder
 from Backend.Domain.TradingSystem.store import Store
@@ -236,6 +237,18 @@ class Member(UserState):
     def get_purchase_policy(self, store_id):
         return self.__responsibilities[store_id].get_purchase_policy()
 
+    # 6.5
+    def register_statistics(self) -> None:
+        if len(self.__responsibilities) == 0:
+            return self._statistics.register_passive()
+
+        responsibilities = self.__responsibilities.values()
+        isOwner = any([responsibility.is_owner() for responsibility in responsibilities])
+        if isOwner:
+            return self._statistics.register_owner()
+
+        return self._statistics.register_manager()
+
     # Offers
     # ==================
 
@@ -280,7 +293,7 @@ class Member(UserState):
     def approve_user_offer(self, store_id, product_id, offer_id) -> Response[None]:
         if store_id not in self.__responsibilities:
             return Response(False, msg=f"this member do not own/manage store {store_id}")
-        return self.__responsibilities[store_id].approve_user_offer(product_id, offer_id)
+        return self.__responsibilities[store_id].approve_user_offer(product_id, offer_id, self._username)
 
     def reject_user_offer(self, store_id, product_id, offer_id) -> Response[None]:
         if store_id not in self.__responsibilities:
@@ -291,3 +304,6 @@ class Member(UserState):
         if offer_id not in self.__offers:
             return Response(False, msg=f"Offer with offer id {offer_id} does not exist")
         return self.__offers[offer_id].cancel_offer()
+
+    def get_users_statistics(self) -> Response[StatisticsData]:
+        return Response(False, msg="Regular members cannot get statistics")

@@ -14,3 +14,12 @@ class Admin(Member):
         from Backend.Domain.TradingSystem.trading_system_manager import TradingSystemManager
 
         return TradingSystemManager.get_any_user_purchase_history(username)
+
+    def get_users_statistics(self):
+        from Backend.Domain.TradingSystem.trading_system_manager import TradingSystemManager
+
+        return TradingSystemManager.get_users_statistics_admin()
+
+    # 6.5
+    def register_statistics(self) -> None:
+        self._statistics.register_super()

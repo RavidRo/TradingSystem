@@ -10,8 +10,6 @@ const FilterMenu: FC<FilterMenuProps> = ({handleFilter}) => {
  
     const [fromInput, setFromInput] = useState<string>("");
     const [toInput, setToInput] = useState<string>("");
-    const [productRating, setProductRating] = useState<number | null>(null);
-    const [storeRating, setStoreRating] = useState<number | null>(null);
 
     const handleApply = ()=>{
         handleFilter(parseInt(fromInput),parseInt(toInput))

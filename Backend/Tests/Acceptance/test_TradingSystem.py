@@ -1717,7 +1717,7 @@ def test_admin_get_store_purchase_history_success():
     admin_cookie = _get_admin()
     card_number = "1234-1234-1234-1234"
     card_expire = "12/34"
-    card_cvv = "123"
+    card_ccv = "123"
     product_id, product_name, category, price, quantity = _create_product(
         cookie, store_id, _generate_product_name(), "A", 5.50, 10
     )
