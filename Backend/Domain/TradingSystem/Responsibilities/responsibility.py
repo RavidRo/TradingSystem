@@ -53,7 +53,7 @@ class Responsibility(Parsable):
         if subscriber:
             self._store.subscribe(subscriber)
             subscriber.notify(
-                f"You have been appointer to {store.get_name()} as {self.__class__.__name__}"
+                f"You have been appointed to {store.get_name()} as {self.__class__.__name__}"
             )
         self._appointed = []
 
@@ -64,6 +64,9 @@ class Responsibility(Parsable):
         self._responsibilities_handler = ResponsibilitiesHandler.get_instance()
         self._responsibility_dal = None
         self._responsibility_dal_id = None
+
+    def set_subscriber(self, subscriber):
+        self.__subscriber = subscriber
 
     def set_user_state(self, user_state):
         self._user_state = user_state

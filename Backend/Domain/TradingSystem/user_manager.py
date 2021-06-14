@@ -42,14 +42,13 @@ class UserManager:
             if not user_res.succeeded():
                 return None
             member = user_res.get_obj()
+            member.load_cart()
             user = IUser.create_user()
             user.change_state(member)
             member.set_user(user)
             member._responsibilities = dict()
             if store_id is not None:
-                responsibility_res = member.get_responsibility(store_id)
-                if responsibility_res.succeeded():
-                    member._responsibilities = responsibility_res.get_obj()
+                member.get_responsibility(store_id)
             member.notifications_lock = threading.Lock()
             member._member_handler = MemberHandler.get_instance()
             UserManager.__username_user[username] = user
