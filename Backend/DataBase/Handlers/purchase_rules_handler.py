@@ -1,3 +1,4 @@
+import json
 from threading import Lock
 
 from sqlalchemy import Column, Integer, Sequence, Index, String, Table, ForeignKey
@@ -32,12 +33,16 @@ class PurchaseRulesHandler(IHandler):
         self.__purchase_rules_table = Table('purchase_rules', mapper_registry.metadata,
                                               Column('id', Integer, rules_id_seq, primary_key=True),
                                               Column('path', LtreeType, nullable=False),
-                                              Column('type', String(10)),
-                                              Column('store_id', ForeignKey('stores.store_id', ondelete="CASCADE")),
+                                              Column('type', String(50)),
+                                              Column('context', String(50)),
+                                              Column('context_obj', String(50)),
+                                              Column('context_id', String(50)),
+                                              Column('comparator', String(50)),
+                                              Column('constraint', Integer),
                                               Index('ix_rules_path', 'path', postgresql_using='gist'))
 
         mapper_registry.map_imperatively(PurchaseRule, self.__purchase_rules_table, properties={
-            'id': self.__purchase_rules_table.c.id,
+            '_id': self.__purchase_rules_table.c.id,
             'path': self.__purchase_rules_table.c.path,
             'parent': relationship(
                 'PurchaseRule',
@@ -46,6 +51,11 @@ class PurchaseRulesHandler(IHandler):
                 backref='_children',
                 viewonly=True
             ),
+            "_context_obj": column_property(self.__purchase_rules_table.c.context_obj),
+            "_context_id": column_property(self.__purchase_rules_table.c.context_id),
+            "_context": column_property(self.__purchase_rules_table.c.context),
+            "_constraint": column_property(self.__purchase_rules_table.c.constraint),
+            "_comparator": column_property(self.__purchase_rules_table.c.comparator),
         }, polymorphic_on=self.__purchase_rules_table.c.type)
 
         mapper_registry.map_imperatively(OrCompositePurchaseRule, self.__purchase_rules_table, inherits=PurchaseRule,
@@ -80,3 +90,35 @@ class PurchaseRulesHandler(IHandler):
                 PurchaseRulesHandler._instance = PurchaseRulesHandler()
         return PurchaseRulesHandler._instance
 
+    def remove_rule(self, rule):
+        from Backend.Domain.TradingSystem.TypesPolicies.Purchase_Composites.composite_purchase_rule import PurchaseRule
+        self._rwlock.acquire_write()
+        res = Response(True)
+        try:
+            whole_subtree = session.query(PurchaseRule).filter(
+                PurchaseRule.path.descendant_of(rule.path)).all()
+            session.delete(rule)
+            for rule_child in whole_subtree:
+                session.delete(rule_child)
+            res = Response(True)
+        except Exception as e:
+            session.rollback()
+            res = Response(False, msg=str(e))
+        finally:
+            self._rwlock.release_write()
+            return res
+
+    # def edit_rule(self, old_rule, rule_details):
+    #     self._rwlock.acquire_write()
+    #     res = Response(True)
+    #     try:
+    #         old_rule._context = json.dumps(rule_details['context'])
+    #         old_rule._context_obj = rule_details['context']['obj']
+    #         old_rule._context
+    #         res = Response(True)
+    #     except Exception as e:
+    #         session.rollback()
+    #         res = Response(False, msg=str(e))
+    #     finally:
+    #         self._rwlock.release_write()
+    #         return res

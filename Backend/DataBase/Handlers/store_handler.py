@@ -111,6 +111,9 @@ class StoreHandler(IHandler):
                                                                    product_id=product.get_id()).one()
         product_in_bag.quantity = quantity
 
+    def save_purchase_rule(self, root_rule):
+        return self.__purchase_rules_handler.save(root_rule)
+
     def load(self, id):
         self._rwlock.acquire_read()
         res = Response(True)
