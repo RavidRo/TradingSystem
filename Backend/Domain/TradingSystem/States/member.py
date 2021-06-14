@@ -371,10 +371,10 @@ class Member(UserState):
 
     # 6.5
     def register_statistics(self) -> None:
-        if len(self.__responsibilities) == 0:
+        if len(self._responsibilities) == 0:
             return self._statistics.register_passive()
 
-        responsibilities = self.__responsibilities.values()
+        responsibilities = self._responsibilities.values()
         isOwner = any([responsibility.is_owner() for responsibility in responsibilities])
         if isOwner:
             return self._statistics.register_owner()
@@ -399,7 +399,7 @@ class Member(UserState):
 
         response_get_store = StoresManager.get_store(store_id)
         if not response_get_store.succeeded():
-            return response_get_store
+            return Response(False, msg=response_get_store.get_msg())
 
         response_get_product = StoresManager.get_product(store_id, product_id)
         if not response_get_product.succeeded():
