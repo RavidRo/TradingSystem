@@ -293,7 +293,7 @@ class Responsibility(Parsable):
             self.__class__.__name__,
             [appointee.parse() for appointee in self._appointed],
             self._permissions(),
-            self.get_user_state().get_username().object.value,
+            self.get_user_state().get_obj().get_username().object.value,
         )
 
     def _is_manager(self) -> bool:
