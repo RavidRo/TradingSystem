@@ -138,21 +138,3 @@ class PurchaseRulesHandler(IHandler):
         self.remove_rule(old_rule)
         self.save(edited_rule)
         return Response(True)
-
-
-
-
-    # def edit_rule(self, old_rule, rule_details):
-    #     self._rwlock.acquire_write()
-    #     res = Response(True)
-    #     try:
-    #         old_rule._context = json.dumps(rule_details['context'])
-    #         old_rule._context_obj = rule_details['context']['obj']
-    #         old_rule._context
-    #         res = Response(True)
-    #     except Exception as e:
-    #         session.rollback()
-    #         res = Response(False, msg=str(e))
-    #     finally:
-    #         self._rwlock.release_write()
-    #         return res

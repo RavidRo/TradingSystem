@@ -38,7 +38,6 @@ class AndCompositePurchaseRule(CompositePurchaseRule):
         }
 
 
-
 class ConditioningCompositePurchaseRule(CompositePurchaseRule):
     def __init__(self, parent):
         super(ConditioningCompositePurchaseRule, self).__init__(parent)
@@ -58,12 +57,12 @@ class ConditioningCompositePurchaseRule(CompositePurchaseRule):
             else:
                 return Response(False, msg=f"There is no exsiting parent with {parent_id}")
 
-    def can_add_clause(self, clause):
-        if self.children[0] is None and (self.children[1] is None or self.children[1]._clause != clause):
-            return Response(True, obj=0)
-        if self.children[1] is None and (self.children[0] is None or self.children[0]._clause!= clause):
-            return Response(True, obj=1)
-        return Response(False)
+    # def can_add_clause(self, clause):
+    #     if self.children[0] is None and (self.children[1] is None or self.children[1]._clause != clause):
+    #         return Response(True, obj=0)
+    #     if self.children[1] is None and (self.children[0] is None or self.children[0]._clause!= clause):
+    #         return Response(True, obj=1)
+    #     return Response(False)
 
     def add_to_clause(self, component: PurchaseRule) -> Response[None]:
         from Backend.DataBase.Handlers.purchase_rules_handler import PurchaseRulesHandler

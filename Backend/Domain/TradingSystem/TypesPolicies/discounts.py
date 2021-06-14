@@ -6,8 +6,9 @@ from Backend.response import Response
 
 
 class Discounter(ABC):
-    def __init__(self, id, percentage):
-        self._id = id
+    def __init__(self, discount_id, identifier, percentage):
+        self._discount_id = discount_id
+        self._identifier = identifier
         self.multiplier = percentage / 100.0
 
     @abstractmethod
