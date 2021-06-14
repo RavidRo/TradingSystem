@@ -37,5 +37,5 @@ class PaymentManager:
         response = self.__rollback(transaction_id)
         if not response.succeeded():
             return response
-        response2 = self.__supply_adapter(delivery_id)
+        response2 = self.__supply_adapter.cancel_delivery(delivery_id)
         return response2

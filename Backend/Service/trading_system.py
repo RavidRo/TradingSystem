@@ -197,8 +197,8 @@ class TradingSystem(object):
             TradingSystemManager.release_cart(cookie)
             delete_res = TradingSystemManager.purchase_completed(cookie)
             if not delete_res.succeeded():
-                #TODO: add rollback_all() function
-                self.payment_manager.rollback_all()
+                print(delete_res.get_msg())
+                self.payment_manager.rollback(*res.get_obj())
             return delete_res
         else:
             TradingSystemManager.release_cart(cookie)

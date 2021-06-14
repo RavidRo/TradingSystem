@@ -107,7 +107,7 @@ class ShoppingBag(IShoppingBag):
         return Response(True, msg="Successfully removed product with id: " + str(product_id))
 
     def get_product_from_bag(self, product_id, username):
-        product = self.__store.get(product_id)
+        product = self.__store.get_product(product_id)
         if product is None:
             self.remove_product(product_id, None if username == "Guest" else username)
             return Response(True, None)

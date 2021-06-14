@@ -68,7 +68,7 @@ const PopupCart: FC<PopupCartProps> = ({
 	};
 	//load the cart when user enters the website
 	const cartObj = useAPI<ShoppingCart>('/get_cart_details');
-	const productObj = useAPI<Product>('/get_product');
+	const productObj = useAPI<Product>('/get_product_from_bag');
 	useEffect(() => {
 		cartObj.request().then(({ data, error }) => {
 			if (!error && data !== null) {
@@ -89,7 +89,10 @@ const PopupCart: FC<PopupCartProps> = ({
 							.then(({ data, error }) => {
 								if (!error && data !== null) {
 									let product = data.data;
-									tuplesArr.push([product, quantity]);
+									console.log(product);
+									if(product !== null){
+										tuplesArr.push([product, quantity]);
+									}
 								}
 							});
 						promises.push(promise);
