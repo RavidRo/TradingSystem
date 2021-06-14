@@ -110,7 +110,7 @@ def save():
 
     trading_system = TradingSystem.getInstance()
     cookie = trading_system.enter_system()
-    rule_details_complex = {"operator": "or"}
+    rule_details_complex = {"operator": "and"}
     rule_details_simple = {"context": {"obj": "product", "identifier": "16"}, "operator": "less-than", "target": 17}
     rule_simple_2 = {"context": {"obj": "category", "identifier": "milk products"}, "operator": "equals", "target": 9}
     rule_type = "simple"
@@ -118,9 +118,10 @@ def save():
     res = trading_system.login(cookie, "user", "password")
     res = trading_system.get_store("1682ef02-0326-4607-bf7b-f20326e9cf3d")
     # res = trading_system.add_purchase_rule(cookie, "1682ef02-0326-4607-bf7b-f20326e9cf3d", {"operator": "or"}, "complex", "2")
-    # res = trading_system.add_purchase_rule(cookie, "1682ef02-0326-4607-bf7b-f20326e9cf3d", rule_simple_2, "simple", "2")
-    # # res = trading_system.edit_purchase_rule(cookie, "1682ef02-0326-4607-bf7b-f20326e9cf3d", rule_details_simple, "7", "simple")
-    res = trading_system.move_purchase_rule(cookie, "1682ef02-0326-4607-bf7b-f20326e9cf3d", "5", "3")
+    # res = trading_system.add_purchase_rule(cookie, "1682ef02-0326-4607-bf7b-f20326e9cf3d", rule_simple_2, "simple", "12")
+    # res = trading_system.edit_purchase_rule(cookie, "1682ef02-0326-4607-bf7b-f20326e9cf3d", rule_simple_2, "6", "simple")
+    # res = trading_system.move_purchase_rule(cookie, "1682ef02-0326-4607-bf7b-f20326e9cf3d", "6", "3")
+    # res = trading_system.edit_purchase_rule(cookie, "1682ef02-0326-4607-bf7b-f20326e9cf3d", rule_details_complex, "12", "complex")
     print(res.get_msg())
     # print(res.get_msg())
     # res = trading_system.remove_purchase_rule(cookie, "f8cf6b2c-787d-4c0a-98a8-55176a518032", "4")

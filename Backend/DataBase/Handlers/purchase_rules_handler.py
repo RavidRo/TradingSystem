@@ -114,26 +114,33 @@ class PurchaseRulesHandler(IHandler):
     def move_rule(self, rule: PurchaseRule, new_parent: PurchaseRule):
         self._rwlock.acquire_write()
         new_path = new_parent.path + Ltree(str(rule._id))
+        session.flush()
         for n in rule._children:
             n.path = new_path + n.path[len(rule.path):]
+        session.flush()
         rule.path = new_path
-        rule.parent.children.remove(rule)
+        session.flush()
         rule.parent = new_parent
-        new_parent.children.append(rule)
+        session.flush()
+        new_parent._children.append(rule)
+        session.flush()
         self._rwlock.release_write()
 
+    def edit_rule(self, old_rule, edited_rule):
+        self._rwlock.acquire_write()
+        for n in old_rule._children:
+            n.parent = edited_rule
+            n.path = edited_rule.path + n.path[len(old_rule.path):]
+            session.flush()
+            edited_rule._children.append(n)
+            session.flush()
+        self._rwlock.release_write()
+        self.remove_rule(old_rule)
+        self.save(edited_rule)
+        return Response(True)
 
-    # def edit_rule(self, old_rule, edited_rule):
-    #     self._rwlock.acquire_write()
-    #     res = Response(True)
-    #     try:
-    #         res = Response(True)
-    #     except Exception as e:
-    #         session.rollback()
-    #         res = Response(False, msg=str(e))
-    #     finally:
-    #         self._rwlock.release_write()
-    #         return res
+
+
 
     # def edit_rule(self, old_rule, rule_details):
     #     self._rwlock.acquire_write()
