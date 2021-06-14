@@ -404,6 +404,10 @@ class Store(Parsable, Subscriber):
 
     def get_product(self, product_id: str):
         self._products_lock.acquire_read()
+        product_to_quantity = self._products_to_quantities.get(product_id)
+        if product_to_quantity is None:
+            self._products_lock.release_read()
+            return None
         prod = self._products_to_quantities.get(product_id)[0]
         self._products_lock.release_read()
         return prod
