@@ -191,7 +191,7 @@ class MemberHandler(IHandler):
             user._responsibilities = dict()
             user.notifications_lock = threading.Lock()
             res = Response(True, user)
-            session.commit()
+            # session.commit()
         except Exception as e:
             session.rollback()
             res = Response(False, msg=str(e))

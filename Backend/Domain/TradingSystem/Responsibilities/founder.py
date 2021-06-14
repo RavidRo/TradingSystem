@@ -105,13 +105,11 @@ class Founder(Responsibility):
                     msg=f"{user.get_username().get_obj().get_val()} is already appointed to {self._store.get_name()}",
                 )
             else:
-                #! I am guessing that user.state is of type member because at user_manager, with a given username he found a user object
-                #! (guest does not hae a username)
                 new_responsibility = Owner(user.state, self._store, user)
                 self._appointed.append(new_responsibility)
                 from Backend.DataBase.Handlers.responsibilities_handler import Owner_Responsibility_DAL
                 self.save_appointment(new_responsibility, Owner_Responsibility_DAL)
-                # new_responsibility._user_state.add_responsibility(new_responsibility, self._store.get_id())
+                new_responsibility._user_state.add_responsibility(new_responsibility, self._store.get_id())
                 res = self._responsibilities_handler.commit_changes()
                 return res
 
@@ -148,12 +146,8 @@ class Founder(Responsibility):
                 self._appointed.append(newResponsibility)
                 from Backend.DataBase.Handlers.responsibilities_handler import Manager_Responsibility_DAL
                 self.save_appointment(newResponsibility, Manager_Responsibility_DAL)
-                user = newResponsibility.get_user_state()
-                if not user.succeeded():
-                    return db_fail_response
-                user.get_obj().add_responsibility(newResponsibility, self._store.get_id())
-                res = self._responsibilities_handler.commit_changes()
-                result = Response(True)
+                newResponsibility._user_state.add_responsibility(newResponsibility, self._store.get_id())
+                result = self._responsibilities_handler.commit_changes()
 
         return result
 

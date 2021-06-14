@@ -36,13 +36,22 @@ class UserManager:
         return UserManager.__cookie_user[cookie]
 
     @staticmethod
-    def __get_user_by_username(username) -> IUser or None:
+    def __get_user_by_username(username, store_id=None) -> IUser or None:
         if username not in UserManager.__username_user:
             user_res = MemberHandler.get_instance().load(username)
             if not user_res.succeeded():
                 return None
-            user = User()
-            user.change_state(user_res.get_obj())
+            member = user_res.get_obj()
+            user = IUser.create_user()
+            user.change_state(member)
+            member.set_user(user)
+            member._responsibilities = dict()
+            if store_id is not None:
+                responsibility_res = member.get_responsibility(store_id)
+                if responsibility_res.succeeded():
+                    member._responsibilities = responsibility_res.get_obj()
+            member.notifications_lock = threading.Lock()
+            member._member_handler = MemberHandler.get_instance()
             UserManager.__username_user[username] = user
         return UserManager.__username_user[username]
 
@@ -69,7 +78,7 @@ class UserManager:
         def func(user: User):
             response = user.register(username, password)
             if response.succeeded():
-                newUser = User()
+                newUser = IUser.create_user()
                 newUser.change_state(Member(newUser, username))
                 UserManager.__username_user[username] = newUser
             return response
@@ -98,6 +107,7 @@ class UserManager:
                 if res.succeeded():
                     member._responsibilities = dict()
                     member.notifications_lock = threading.Lock()
+                    member._member_handler = MemberHandler.get_instance()
                     res_commit = MemberHandler.get_instance().commit_changes()
                     if res_commit.succeeded():
                         member.set_user(user)
@@ -362,7 +372,7 @@ class UserManager:
     # 4.3
     @staticmethod
     def appoint_owner(cookie: str, store_id: str, username: str) -> Response[None]:
-        to_appoint = UserManager.__get_user_by_username(username)
+        to_appoint = UserManager.__get_user_by_username(username, store_id)
         if not to_appoint:
             return Response(False, msg="Given username does not exists")
         func: Callable[[User], Response] = lambda user: user.appoint_owner(store_id, to_appoint)
@@ -371,7 +381,7 @@ class UserManager:
     # 4.5
     @staticmethod
     def appoint_manager(cookie: str, store_id: str, username: str) -> Response[None]:
-        to_appoint = UserManager.__get_user_by_username(username)
+        to_appoint = UserManager.__get_user_by_username(username, store_id)
         if not to_appoint:
             return Response(False, msg="Given username does not exists")
         func: Callable[[User], Response] = lambda user: user.appoint_manager(store_id, to_appoint)
@@ -537,7 +547,7 @@ class UserManager:
         member_res = MemberHandler.get_instance().load_user_with_res(res_id)
         if member_res.succeeded():
             member_res.get_obj().load_cart()
-            user = User()
+            user = IUser.create_user()
             user.change_state(member_res.get_obj())
             member_res.get_obj().set_user(user)
             UserManager.__username_user[member_res.get_obj().get_username().get_obj().get_val()] = user

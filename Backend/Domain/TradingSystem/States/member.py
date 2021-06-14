@@ -52,7 +52,6 @@ class Member(UserState):
     def __init__(
             self, user, username, responsibilities=None, purchase_details=None, cart=None
     ):
-        from sqlalchemy.dialects.postgresql import JSON
         super().__init__(user, cart)
         if purchase_details is None:
             purchase_details = []
@@ -69,7 +68,6 @@ class Member(UserState):
         self._notifications: list[str] = []
         self.notifications_lock = threading.Lock()
         self._offers: dict[str, Offer] = {}
-        # get cart data from DB
 
     def login(self, username, password):
         return Response(False, msg="Members cannot re-login")
@@ -125,10 +123,12 @@ class Member(UserState):
         return self._username
 
     def get_responsibility(self, store_id):
+        if not self._responsibilities:
+            self._responsibilities = dict()
         if store_id in self._responsibilities:
             if self._responsibilities[store_id]._user_state is None:
                 self._responsibilities[store_id].set_user_state(self)
-            return self._responsibilities[store_id]
+            return Response(True, self._responsibilities[store_id])
         from Backend.DataBase.Handlers.responsibilities_handler import ResponsibilitiesHandler
         from Backend.Domain.TradingSystem.stores_manager import StoresManager
         store_res = StoresManager.get_store(store_id)
@@ -139,7 +139,7 @@ class Member(UserState):
             founder_responsibility = res.get_obj()
             responsibility = self.get_own_responsibility(founder_responsibility)
             if responsibility is None:
-                return Response(False)
+                return Response(False, msg="There is no such responsibility!")
             self._responsibilities[store_id] = responsibility
             self._responsibilities[store_id].set_user_state(self)
             # responsibility.get_user_state()
@@ -325,8 +325,9 @@ class Member(UserState):
         return Response(False, msg="Regular members cannot get any user's purchase history")
 
     def is_appointed(self, store_id):
+        # return None here
         res = self.get_responsibility(store_id)
-        return Response(True, obj=res.succeeded())
+        return Response(True, res.succeeded())
 
     # 4.2
     def add_purchase_rule(self, store_id: str, rule_details: dict, rule_type: str, parent_id: str, clause: str = None):

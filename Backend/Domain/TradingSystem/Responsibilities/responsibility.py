@@ -67,6 +67,7 @@ class Responsibility(Parsable):
 
     def set_user_state(self, user_state):
         self._user_state = user_state
+        self._username = user_state.get_username().get_obj().get_val()
 
     def get_user_state(self):
         from Backend.Domain.TradingSystem.user_manager import UserManager

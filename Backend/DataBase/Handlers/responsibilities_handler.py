@@ -125,6 +125,11 @@ class ResponsibilitiesHandler(IHandler):
             self._rwlock.release_write()
             return res
 
+    def __save_children(self, responsibility):
+        for appointed in responsibility._appointed:
+            # self.__responsibilities[appointed.get_dal_responsibility_id()] = appointed
+            self.__save_children(appointed)
+
     def load_res_and_appointments(self, res_id, store):
         self._rwlock.acquire_read()
         res = Response(True)
@@ -133,7 +138,8 @@ class ResponsibilitiesHandler(IHandler):
                 res_root = session.query(Responsibility_DAL).filter(Responsibility_DAL.id == res_id).one()
                 responsibility_res = self.create_responsibilities(res_root, store)
                 if responsibility_res.succeeded():
-                    self.__responsibilities[res_id] = responsibility_res.get_obj()
+                    # self.__responsibilities[res_id] = responsibility_res.get_obj()
+                    self.__save_children(responsibility_res.get_obj())
                 res = responsibility_res
             else:
                 res = Response(True, obj=self.__responsibilities[res_id])
