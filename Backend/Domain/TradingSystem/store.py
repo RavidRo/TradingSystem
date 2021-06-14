@@ -23,7 +23,7 @@ class Store(Parsable, Subscriber):
         self.__responsibility = None
         self.__responsibility_id = None
         # These fields will be changed in the future versions
-        self.__discount_policy = None
+        self.__discount_policy = DefaultDiscountPolicy()
         self.__purchase_policy = None
         self.__purchase_policy_root_id = None
         self.__purchase_history = []

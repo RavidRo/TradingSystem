@@ -5,6 +5,7 @@ from abc import ABC, abstractmethod
 from Backend.Domain.TradingSystem.TypesPolicies.purchase_policy import DefaultPurchasePolicy
 from Backend.rw_lock import ReadWriteLock
 from Backend.response import Response, Parsable
+from Backend.Domain.TradingSystem.TypesPolicies.Purchase_Composites.concrete_composites import AndCompositePurchaseRule
 
 
 class IDiscount(Parsable, ABC):
@@ -12,7 +13,7 @@ class IDiscount(Parsable, ABC):
     def __init__(self, id):
         self._parent = None
         self._id = id
-        self._conditions_policy = DefaultPurchasePolicy()
+        self._conditions_policy = DefaultPurchasePolicy(AndCompositePurchaseRule())
         self.wrlock = ReadWriteLock()
 
     def get_parent(self) -> IDiscount:
