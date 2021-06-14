@@ -13,9 +13,8 @@ type ProductSearchProps = {
 	quantity: number;
 	category: string;
 	keywords: string[];
-	id:string;
+	id: string;
 	clickAddProduct: () => void;
-
 };
 
 const ProductSearch: FC<ProductSearchProps> = ({
@@ -41,19 +40,22 @@ const ProductSearch: FC<ProductSearchProps> = ({
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [storeID]);
 
-	const createOfferObj = useAPI<void>('/create_offer', {store_id: storeID, product_id: id}, 'POST');
-	const clickCreateOffer = ()=>{
-		createOfferObj.request().then(({data, error})=>{
+	const createOfferObj = useAPI<void>(
+		'/create_offer',
+		{ store_id: storeID, product_id: id },
+		'POST'
+	);
+	const clickCreateOffer = () => {
+		createOfferObj.request().then(({ data, error }) => {
 			if (!error && data !== null) {
 				Swal.fire({
 					icon: 'success',
 					title: 'Congratulations!',
-					text: 'The item added to offers in \"My Account\" ',
+					text: 'The item added to offers in "My Account" ',
 				});
 			}
-		})
-	}
-
+		});
+	};
 
 	return (
 		<div className='ProductSearchCard'>

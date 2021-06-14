@@ -5,6 +5,7 @@ from queue import Queue
 from unittest import mock
 from unittest.mock import patch, MagicMock
 
+from Backend.Service import logs
 from Backend.Service.trading_system import TradingSystem
 from Backend.response import Response
 from Backend.Domain.Payment.Adapters.cashing_adapter import CashingAdapter
@@ -13,6 +14,7 @@ from Backend.Domain.Payment.OutsideSystems.outside_cashing import OutsideCashing
 from Backend.Domain.Payment.OutsideSystems.outside_supplyment import OutsideSupplyment
 from Backend.Domain.TradingSystem.shopping_cart import ShoppingCart
 from Backend.Domain.TradingSystem.store import Store
+from Backend.settings import Settings
 
 system = TradingSystem.getInstance()
 username_number = 0
@@ -30,6 +32,7 @@ def set_up():
     yield
     CashingAdapter.use_stub = False
     SupplyAdapter.use_stub = False
+    Settings.get_instance(True)
 
 
 def _initialize_info(
@@ -1699,12 +1702,10 @@ def test_get_store_purchase_history_no_payment_success():
 
 # # 6.4 https://github.com/SeanPikulin/TradingSystem/blob/main/Documentation/Use%20Cases.md#64-Get-store-purchase-history-system-manager
 
-
 def _get_admin() -> str:
     admin_cookie = system.enter_system()
-    with open("config.json", "r") as read_file:
-        data = json.load(read_file)
-        system.login(admin_cookie, data["admins"][0], data["password"])
+    settings = Settings.get_instance(True)
+    system.login(admin_cookie, settings.get_admins()[0], settings.get_password())
     return admin_cookie
 
 
@@ -1716,7 +1717,7 @@ def test_admin_get_store_purchase_history_success():
     admin_cookie = _get_admin()
     card_number = "1234-1234-1234-1234"
     card_expire = "12/34"
-    card_cvv = "123"
+    card_ccv = "123"
     product_id, product_name, category, price, quantity = _create_product(
         cookie, store_id, _generate_product_name(), "A", 5.50, 10
     )

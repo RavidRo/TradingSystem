@@ -273,7 +273,6 @@ class Store(Parsable, Subscriber):
         from Backend.Domain.TradingSystem.Responsibilities.responsibility import Responsibility
 
         if self.__responsibility is None:
-
             return Response(False, msg="The store doesn't have assigned personnel")
         return Response[Responsibility](True, self.__responsibility, msg="Personnel info")
 
@@ -493,12 +492,12 @@ class Store(Parsable, Subscriber):
         product = self._products_to_quantities[product_id][0]
         return product.suggest_counter_offer(offer_id, price)
 
-    def approve_user_offer(self, product_id, offer_id) -> Response[None]:
+    def approve_user_offer(self, product_id, offer_id, username) -> Response[None]:
         if product_id not in self._products_to_quantities:
             return Response(False, msg=f"The product with id: {product_id} isn't in the inventory!")
 
         product = self._products_to_quantities[product_id][0]
-        return product.approve_user_offer(offer_id)
+        return product.approve_user_offer(offer_id, username)
 
     def reject_user_offer(self, product_id, offer_id) -> Response[None]:
         if product_id not in self._products_to_quantities:
@@ -506,6 +505,18 @@ class Store(Parsable, Subscriber):
 
         product = self._products_to_quantities[product_id][0]
         return product.reject_user_offer(offer_id)
+
+    def get_owners_names(self):
+        return self.__responsibility.get_owners_names()
+
+    def remove_owner(self, username) -> None:
+        for product_id in self._products_to_quantities:
+            self._products_to_quantities[product_id][0].remove_owner(username)
+
+    def add_owner(self, username) -> None:
+        for product_id in self._products_to_quantities:
+            self._products_to_quantities[product_id][0].add_owner(username)
+
 
     def get_res_id(self):
         return self.__responsibility_id

@@ -194,6 +194,9 @@ class Manager(Owner):
 
         return self.__create_no_permission_Response(Permission.GET_HISTORY)
 
+    def is_owner(self) -> bool:
+        return False
+
     def _add_permission(self, username: str, permission: Permission) -> Response[None]:
         if self._user_state.get_username().get_obj().get_val() == username:
             add_response = self._responsibilities_handler.add_permission(self._responsibility_dal_id, permission)

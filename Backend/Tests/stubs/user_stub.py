@@ -191,5 +191,9 @@ class UserStub(IUser):
         self.state = new_state
 
     def notify(self, message: str) -> bool:
-        self.notified = True
+        self._notified = True
         return True
+
+    def register_statistics(self) -> None:
+        self._register_statistics = True
+        return None

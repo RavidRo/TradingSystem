@@ -1,3 +1,5 @@
+from Backend.Domain.TradingSystem.statistics import Statistics
+from Backend.Service.DataObjects.statistics_data import StatisticsData
 import threading
 
 from Backend.DataBase.database import db_fail_response
@@ -36,7 +38,7 @@ class UserManager:
         return UserManager.__cookie_user[cookie]
 
     @staticmethod
-    def __get_user_by_username(username, store_id=None) -> IUser or None:
+    def _get_user_by_username(username, store_id=None) -> IUser or None:
         if username not in UserManager.__username_user:
             user_res = MemberHandler.get_instance().load(username)
             if not user_res.succeeded():
@@ -61,9 +63,11 @@ class UserManager:
     # 2.1
     # returns the guest newly created cookie
     @staticmethod
-    def enter_system() -> str:
+    def enter_system(register=True) -> str:
         cookie = UserManager.__create_cookie()
         UserManager.__cookie_user[cookie] = IUser.create_user()
+        if register:
+            UserManager.__cookie_user[cookie].register_statistics()
         return cookie
 
     @staticmethod
@@ -126,7 +130,7 @@ class UserManager:
                 #         UserManager.__cookie_user[cookie] = old_user
                 #         old_user.connect(user.get_communicate())
             # *This action will delete the current cart but will restore the old one and other user details
-
+            UserManager.__cookie_user[cookie].register_statistics()
             return response
 
         return UserManager.__deligate_to_user(cookie, func)
@@ -371,7 +375,7 @@ class UserManager:
     # 4.3
     @staticmethod
     def appoint_owner(cookie: str, store_id: str, username: str) -> Response[None]:
-        to_appoint = UserManager.__get_user_by_username(username, store_id)
+        to_appoint = UserManager._get_user_by_username(username, store_id)
         if not to_appoint:
             return Response(False, msg="Given username does not exists")
         func: Callable[[User], Response] = lambda user: user.appoint_owner(store_id, to_appoint)
@@ -380,7 +384,7 @@ class UserManager:
     # 4.5
     @staticmethod
     def appoint_manager(cookie: str, store_id: str, username: str) -> Response[None]:
-        to_appoint = UserManager.__get_user_by_username(username, store_id)
+        to_appoint = UserManager._get_user_by_username(username, store_id)
         if not to_appoint:
             return Response(False, msg="Given username does not exists")
         func: Callable[[User], Response] = lambda user: user.appoint_manager(store_id, to_appoint)
@@ -458,7 +462,7 @@ class UserManager:
     # 6.4
     @staticmethod
     def get_any_user_purchase_history(username: str) -> Response[ParsableList[PurchaseDetails]]:
-        user = UserManager.__get_user_by_username(username)
+        user = UserManager._get_user_by_username(username)
         if not user:
             return Response(False, msg="Given username does not exists")
         return user.get_purchase_history()
@@ -538,8 +542,26 @@ class UserManager:
         return UserManager.__deligate_to_user(cookie, func)
 
     @staticmethod
+    def get_users_statistics(cookie) -> Response[StatisticsData]:
+        func: Callable[[User], Response] = lambda user: user.get_users_statistics()
+        return UserManager.__deligate_to_user(cookie, func)
+
+
+def register_admins() -> None:
+    settings = Settings.get_instance(False)
+    admins = settings.get_admins()
+    if len(admins) <= 0:
+        raise Exception(
+            "At least one admin should be at the system. Check config.json to add admins."
+        )
+    for admin in admins:
+        cookie = UserManager.enter_system(False)
+        UserManager.register(admin, settings.get_password(), cookie)
+        Statistics.getInstance().subscribe(UserManager._get_user_by_username(admin))
+
+    @staticmethod
     def get_member(res_id):
-        for user in UserManager.__username_user.values():
+        for user in UserManager._username_user.values():
             if user.state.has_res_id(res_id):
                 return Response(True, obj=user.state)
 
@@ -549,7 +571,7 @@ class UserManager:
             user = IUser.create_user()
             user.change_state(member_res.get_obj())
             member_res.get_obj().set_user(user)
-            UserManager.__username_user[member_res.get_obj().get_username().get_obj().get_val()] = user
+            UserManager._username_user[member_res.get_obj().get_username().get_obj().get_val()] = user
             return member_res
 
         return db_fail_response

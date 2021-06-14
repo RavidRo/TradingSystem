@@ -2,6 +2,7 @@ import threading
 from datetime import date
 
 from Backend.DataBase.database import db_fail_response
+from Backend.Service.DataObjects.statistics_data import StatisticsData
 from Backend.Domain.TradingSystem.offer import Offer
 from Backend.Domain.TradingSystem.Responsibilities.founder import Founder
 from Backend.Domain.TradingSystem.store import Store
@@ -368,6 +369,18 @@ class Member(UserState):
     def add_purchase_rule_history(self, purchase):
         self._purchase_details.append(purchase)
 
+    # 6.5
+    def register_statistics(self) -> None:
+        if len(self.__responsibilities) == 0:
+            return self._statistics.register_passive()
+
+        responsibilities = self.__responsibilities.values()
+        isOwner = any([responsibility.is_owner() for responsibility in responsibilities])
+        if isOwner:
+            return self._statistics.register_owner()
+
+        return self._statistics.register_manager()
+
     # Offers
     # ==================
 
@@ -458,3 +471,6 @@ class Member(UserState):
             if res is not None:
                 return res
         return None
+
+    def get_users_statistics(self) -> Response[StatisticsData]:
+        return Response(False, msg="Regular members cannot get statistics")

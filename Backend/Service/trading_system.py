@@ -10,6 +10,7 @@ from Backend.response import Response
 
 import Backend.Service.logs as log
 from Backend.Service.DataObjects.shopping_cart_data import ShoppingCartData
+from Backend.Service.DataObjects.statistics_data import StatisticsData
 
 from Backend.Domain.Payment.payment_manager import PaymentManager
 from Backend.Domain.TradingSystem.offer import Offer
@@ -40,8 +41,13 @@ class TradingSystem(object):
         else:
             TradingSystem.__instance = self
             self.payment_manager = PaymentManager()
-            # TODO: change back to state.json
-            with open("empty_state.json", "r") as read_file:
+            try:
+                read_file = open("state.json", "r")
+            except:
+                e = FileNotFoundError("state.json file is absent")
+                logs.log_file_errors(e)
+                return
+            with read_file:
                 data = json.load(read_file)
                 actions = data["actions"]
                 for action in actions:
@@ -418,3 +424,7 @@ class TradingSystem(object):
     @log.loging(to_hide=[1])
     def cancel_offer(self, cookie, offer_id) -> Response[None]:
         return TradingSystemManager.cancel_offer(cookie, offer_id)
+
+    @log.loging(to_hide=[1])
+    def get_users_statistics(self, cookie) -> Response[StatisticsData]:
+        return TradingSystemManager.get_users_statistics(cookie)

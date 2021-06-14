@@ -86,3 +86,6 @@ class StoreStub(Store):
 
     def notify(self, message: str) -> bool:
         return True
+
+    def get_owners_names(self):
+        return []

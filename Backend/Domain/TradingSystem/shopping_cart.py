@@ -21,7 +21,7 @@ class ShoppingCart(IShoppingCart):
         self.__shopping_bag_handler = ShoppingBagHandler.get_instance()
 
     def interval_time(self):
-        settings = Settings.get_instance()
+        settings = Settings.get_instance(False)
         return settings.get_timer_length()
 
     def get_shopping_bags(self):
