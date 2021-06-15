@@ -10,9 +10,19 @@ class UserState(ABC):
     def __init__(self, user, cart=None):
         if cart is None:
             cart = ShoppingCart()
+        self._notifications: list[object] = []
         self._cart = cart
         self._user = user
         self._statistics: Statistics = Statistics.getInstance()
+
+    def get_notifications(self):
+        return self._notifications
+
+    def set_notifications(self, notifications):
+        self._notifications = notifications
+
+    def add_notification(self, msg):
+        self._notifications.append(msg)
 
     def set_user(self, user):
         self._user = user
