@@ -108,9 +108,9 @@ const ConditionNode: FC<ConditionNodeProps> = ({
 				onDragOver={onDragOverBasicRule}
 				onDrop={onDrop}
 			>
-				<ListItem button onClick={handleClick} className="condition-node">
+				<ListItem button onClick={handleClick} className='condition-node'>
 					{isConditionComplex(condition) && (
-						<IconButton edge="start" aria-label="delete">
+						<IconButton edge='start' aria-label='delete'>
 							{open ? <ExpandLess /> : <ExpandMore />}
 						</IconButton>
 					)}
@@ -127,12 +127,12 @@ const ConditionNode: FC<ConditionNodeProps> = ({
 				</ListItem>
 			</div>
 			{isConditionComplex(condition) && (
-				<Collapse in={open} timeout="auto">
+				<Collapse in={open} timeout='auto'>
 					{isBasicRule(condition) ? (
 						<GenericList
 							data={condition.children}
 							onCreate={() => onCreate(condition.id)}
-							createTxt="+ Add condition"
+							createTxt='+ Add condition'
 							padRight
 						>
 							{(currentCondition) => (
@@ -148,9 +148,9 @@ const ConditionNode: FC<ConditionNodeProps> = ({
 							)}
 						</GenericList>
 					) : (
-						<div className="list-padding">
+						<div className='list-padding'>
 							<List>
-								<ListSubheader>You can buy...</ListSubheader>
+								<ListSubheader>Check this...</ListSubheader>
 								{condition.then ? (
 									<ConditionNode
 										key={condition.then.id}
@@ -163,7 +163,7 @@ const ConditionNode: FC<ConditionNodeProps> = ({
 									/>
 								) : (
 									<ListItem button onClick={() => onCreate(condition.id, 'then')}>
-										<ListItemText primary="+ Add condition" />
+										<ListItemText primary='+ Add condition' />
 									</ListItem>
 								)}
 								<ListSubheader>Only if...</ListSubheader>
@@ -179,7 +179,7 @@ const ConditionNode: FC<ConditionNodeProps> = ({
 									/>
 								) : (
 									<ListItem button onClick={() => onCreate(condition.id, 'test')}>
-										<ListItemText primary="+ Add condition" />
+										<ListItemText primary='+ Add condition' />
 									</ListItem>
 								)}
 							</List>

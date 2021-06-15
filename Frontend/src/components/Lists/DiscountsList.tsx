@@ -124,7 +124,8 @@ const DiscountsList: FC<DiscountsListProps> = ({ openTab, products, storeId }) =
 	};
 
 	const onMove = confirmOnSuccess(
-		(srcId: string, destId: string) => moveDiscountAPI.request(storeId, srcId, destId),
+		(srcId: string, destId: string) =>
+			moveDiscountAPI.request(storeId, srcId, destId).then(getDiscounts),
 		'Moved!',
 		'Discount was moved successfully <3'
 	);
@@ -141,9 +142,9 @@ const DiscountsList: FC<DiscountsListProps> = ({ openTab, products, storeId }) =
 		rootDiscount && (
 			<GenericList
 				data={(rootDiscount as DiscountComplex).discounts}
-				header="Discounts"
+				header='Discounts'
 				narrow
-				createTxt="+ Add discount"
+				createTxt='+ Add discount'
 				onCreate={() => openDiscountForm(rootDiscount.id)}
 				onDrop={onDrop}
 			>
