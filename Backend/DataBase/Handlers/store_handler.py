@@ -31,9 +31,8 @@ class StoreHandler(IHandler):
         super().__init__(ReadWriteLock(), Store)
 
         self.__products_of_stores = Table("products_of_stores", mapper_registry.metadata,
-                                          Column("store_id", String(50), ForeignKey("stores.store_id"),
-                                                 primary_key=True),
-                                          Column("product_id", String(50),
+                                          Column("store_id", String(100), ForeignKey("stores.store_id"), primary_key=True),
+                                          Column("product_id", String(100),
                                                  ForeignKey("products.product_id", ondelete="CASCADE",
                                                             onupdate="CASCADE"),
                                                  primary_key=True),
