@@ -8,6 +8,8 @@ from sqlalchemy.orm import mapper, relationship, backref, with_polymorphic
 from Backend.DataBase.IHandler import IHandler
 from Backend.DataBase.database import mapper_registry, session
 from Backend.Domain.TradingSystem.Responsibilities.founder import Founder
+from Backend.Domain.TradingSystem.Responsibilities.manager import Manager
+from Backend.Domain.TradingSystem.Responsibilities.owner import Owner
 from Backend.Domain.TradingSystem.Responsibilities.responsibility import Responsibility
 from Backend.Domain.TradingSystem.States.member import Member
 from Backend.Domain.TradingSystem.offer import Offer
@@ -201,18 +203,21 @@ class MemberHandler(IHandler):
             self._rwlock.release_read()
             return res
 
-    def load_res_ids(self, username):
-        self._rwlock.acquire_read()
-        res = Response(True)
-        try:
-            stmt = select([self.__members.c.responsibilities_ids]).where(
-                self.__members.c.username == username)
-            res = session.execute(stmt).one()
-            session.commit()
-            res = Response(True, res)
-        except Exception as e:
-            session.rollback()
-            res = Response(False, msg=str(e))
-        finally:
-            self._rwlock.release_read()
-            return res
+    # def load_res_ids(self, username):
+    #     self._rwlock.acquire_read()
+    #     res = Response(True)
+    #     try:
+    #         stmt = select([self.__members.c.responsibilities_ids]).where(
+    #             self.__members.c.username == username)
+    #         reses = session.execute(stmt).one()
+    #         session.commit()
+    #         res = list([Founder(None, None) if res.type == 'founder'
+    #                      else Owner(None, None) if res.type == 'owner'
+    #                      else Manager(None, None) for res in reses])
+    #         res = Response(True, res)
+    #     except Exception as e:
+    #         session.rollback()
+    #         res = Response(False, msg=str(e))
+    #     finally:
+    #         self._rwlock.release_read()
+    #         return res

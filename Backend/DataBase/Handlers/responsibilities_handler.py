@@ -1,7 +1,7 @@
 import enum
 from threading import Lock
 
-from sqlalchemy import Column, Integer, Sequence, Index, String, Table
+from sqlalchemy import Column, Integer, Sequence, Index, String, Table, select
 from sqlalchemy import func, create_engine
 from sqlalchemy import TypeDecorator, cast
 from sqlalchemy.dialects.postgresql import ARRAY, ENUM
@@ -42,17 +42,19 @@ class ArrayOfEnum(TypeDecorator):
 
 class Responsibility_DAL:
 
-    def __init__(self, parent=None):
+    def __init__(self, username, store_id, parent=None):
         _id = engine.execute(id_seq)
         self.id = _id
         ltree_id = Ltree(str(_id))
         self.path = ltree_id if parent is None else parent.path + ltree_id
         self.permissions = []
+        self.username = username
+        self.store_id = store_id
 
 
 class Manager_Responsibility_DAL(Responsibility_DAL):
-    def __init__(self, parent=None):
-        super().__init__(parent)
+    def __init__(self, username, store_id, parent=None):
+        super().__init__(username, store_id, parent)
         self.permissions = [Permission.GET_APPOINTMENTS.value]
 
 
@@ -79,11 +81,15 @@ class ResponsibilitiesHandler(IHandler):
                                               Column('path', LtreeType, nullable=False),
                                               Column('type', String(10)),
                                               Column('manager_permissions', ARRAY(Integer)),
+                                              Column('username', String(30)),
+                                              Column('store_id', String(50)),
                                               Index('ix_nodes_path', 'path', postgresql_using='gist'))
 
         mapper_registry.map_imperatively(Responsibility_DAL, self.__responsibilities_table, properties={
             'id': self.__responsibilities_table.c.id,
             'path': self.__responsibilities_table.c.path,
+            'username': self.__responsibilities_table.c.username,
+            'store_id': self.__responsibilities_table.c.store_id,
             'parent': relationship(
                 'Responsibility_DAL',
                 primaryjoin=(remote(self.__responsibilities_table.c.path) == foreign(
@@ -111,11 +117,11 @@ class ResponsibilitiesHandler(IHandler):
                 ResponsibilitiesHandler._instance = ResponsibilitiesHandler()
         return ResponsibilitiesHandler._instance
 
-    def save_res(self, class_type, parent=None):
+    def save_res(self, class_type, username, store_id, parent=None):
         self._rwlock.acquire_write()
         res = Response(True)
         try:
-            responsibility_dal = class_type(parent)
+            responsibility_dal = class_type(username, store_id, parent)
             session.add(responsibility_dal)
             res = Response(True, obj=responsibility_dal)
         except Exception as e:
@@ -143,6 +149,32 @@ class ResponsibilitiesHandler(IHandler):
                 res = responsibility_res
             else:
                 res = Response(True, obj=self.__responsibilities[res_id])
+        except Exception as e:
+            session.rollback()
+            res = Response(False, msg=str(e))
+        finally:
+            self._rwlock.release_read()
+            return res
+
+    def load_responsibilities_by_username(self, username):
+        self._rwlock.acquire_read()
+        res = Response(True)
+        try:
+            stmt = select([self.__responsibilities_table]).where(
+                self.__responsibilities_table.c.username == username)
+            reses = session.execute(stmt).all()
+            session.commit()
+            responsibilities = []
+
+            from Backend.Domain.TradingSystem.Responsibilities.founder import Founder
+            from Backend.Domain.TradingSystem.Responsibilities.owner import Owner
+            from Backend.Domain.TradingSystem.Responsibilities.manager import Manager
+            for responsibility_dal in reses:
+                responsibility = Founder(None, None) if responsibility_dal.type == 'founder' else Owner(None, None) if responsibility_dal.type == 'owner' else Manager(None, None)
+                responsibility.set_username(username)
+                responsibility.set_store_id(responsibility_dal.store_id)
+                responsibilities.append(responsibility)
+            res = Response(True, responsibilities)
         except Exception as e:
             session.rollback()
             res = Response(False, msg=str(e))

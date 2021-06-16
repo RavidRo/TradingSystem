@@ -116,7 +116,7 @@ class Founder(Responsibility):
         return result
 
     def save_appointment(self, new_responsibility, class_type):
-        dal_responsibility_res = new_responsibility._responsibilities_handler.save_res(class_type, parent=self._responsibility_dal)
+        dal_responsibility_res = new_responsibility._responsibilities_handler.save_res(class_type, new_responsibility.get_user_state(), new_responsibility.get_store(), parent=self._responsibility_dal)
         if dal_responsibility_res.succeeded():
             new_responsibility._responsibility_dal = dal_responsibility_res.get_obj()
             new_responsibility._responsibility_dal_id = dal_responsibility_res.get_obj().id

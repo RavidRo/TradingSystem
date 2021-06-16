@@ -16,7 +16,7 @@ from Backend.Service.trading_system import TradingSystem
 
 
 def save():
-    mapper_registry.metadata.drop_all(engine)
+    # mapper_registry.metadata.drop_all(engine)
     mapper_registry.metadata.create_all(engine)
     trading_system = TradingSystem.getInstance()
 
@@ -30,9 +30,12 @@ def save():
     if not res.succeeded():
         print("login: " + res.get_msg())
 
-    store_res = trading_system.create_store(cookie, "The Store")
-    if not store_res.succeeded():
-        print("open_store: " + store_res.get_msg())
+    # store_res = trading_system.create_store(cookie, "The Store")
+    # if not store_res.succeeded():
+    #     print("open_store: " + store_res.get_msg())
+
+    get_appointments_res = trading_system.get_my_appointments(cookie)
+    print(get_appointments_res.get_obj().values)
 
     product_res = trading_system.create_product(cookie, store_res.get_obj(), "The Product", "The Category", 5, 8,
                                                 ["The Keyword A", "The Keyword B"])
@@ -51,9 +54,12 @@ def save():
     if not send_payment_res.succeeded():
         print("send payment: " + send_payment_res.get_msg())
 
-    res_create_offer = trading_system.create_offer(cookie, store_res.get_obj(), product_res.get_obj())
-    if not res_create_offer.succeeded():
-        print("create offer: " + res_create_offer.get_msg())
+    get_history = trading_system.get_purchase_history(cookie)
+    print(get_history.get_obj().values)
+
+    # res_create_offer = trading_system.create_offer(cookie, store_res.get_obj(), product_res.get_obj())
+    # if not res_create_offer.succeeded():
+    #     print("create offer: " + res_create_offer.get_msg())
 
 
     # cookie = trading_system.enter_system()

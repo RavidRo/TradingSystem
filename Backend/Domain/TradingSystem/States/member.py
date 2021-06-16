@@ -71,10 +71,14 @@ class Member(UserState):
         self._notifications: list[str] = []
         self.notifications_lock = threading.Lock()
         self._offers: dict[str, Offer] = {}
+        from Backend.DataBase.Handlers.responsibilities_handler import ResponsibilitiesHandler
+        self._responsibilities_handler = ResponsibilitiesHandler.get_instance()
 
     @orm.reconstructor
     def init_on_load(self):
         self._statistics = Statistics.getInstance()
+        from Backend.DataBase.Handlers.responsibilities_handler import ResponsibilitiesHandler
+        self._responsibilities_handler = ResponsibilitiesHandler.get_instance()
 
     def login(self, username, password):
         return Response(False, msg="Members cannot re-login")
@@ -104,9 +108,9 @@ class Member(UserState):
 
     def delete_products_after_purchase(self):
         response = self._cart.delete_products_after_purchase(self._username)
-        if response.succeeded():
-            # update data in DB in later milestones
-            self._purchase_details += response.object
+        # if response.succeeded():
+        #     # update data in DB in later milestones
+        #     self._purchase_details += response.object
 
         return response
 
@@ -117,7 +121,7 @@ class Member(UserState):
             return db_fail_response
         store.save()
         founder = Founder(self, store, self._user)
-        res_save = founder.save_self()
+        res_save = founder.save_self(self._username, store.get_id())
         if not res_save.succeeded():
             return res_save
         store.set_responsibility(founder)
@@ -131,7 +135,7 @@ class Member(UserState):
     def get_user_name(self):
         return self._username
 
-    def get_responsibility(self, store_id):
+    def get_responsibility_by_store(self, store_id):
         if not self._responsibilities:
             self._responsibilities = dict()
         if store_id in self._responsibilities:
@@ -157,6 +161,23 @@ class Member(UserState):
             return Response(True, obj=responsibility)
         return res
 
+    def get_responsibilities_by_username(self):
+        if not self._responsibilities:
+            self._responsibilities = dict()
+
+        responsibilities_res = self._responsibilities_handler.load_responsibilities_by_username(self._username)
+        if not responsibilities_res.succeeded():
+            return db_fail_response
+
+        for responsibility in responsibilities_res.get_obj():
+            responsibility.set_user_state(self)
+            res = responsibility.get_store()
+            if not res.succeeded():
+                return res
+            self.add_responsibility(responsibility, responsibility.get_store_id())
+            self._responsibilities[responsibility.get_store_id()].set_subscriber(self._user)
+        return Response(True)
+
     def get_purchase_history(self):
         return Response[ParsableList[PurchaseDetails]](
             True,
@@ -167,21 +188,21 @@ class Member(UserState):
     def add_new_product(
             self, store_id, product_name, category, product_price, quantity, keywords=None
     ):
-        res = self.get_responsibility(store_id)
+        res = self.get_responsibility_by_store(store_id)
         if res.succeeded():
             return res.get_obj().add_product(product_name, category, product_price, quantity, keywords)
         # return Response(False, msg=f"this member do not own/manage store {store_id}")
         return res
 
     def remove_product(self, store_id, product_id):
-        res = self.get_responsibility(store_id)
+        res = self.get_responsibility_by_store(store_id)
         if not res.succeeded():
             # return Response(False, msg=f"this member do not own/manage store {store_id}")
             return res
         return res.get_obj().remove_product(product_id)
 
     def change_product_quantity_in_store(self, store_id, product_id, new_quantity):
-        res = self.get_responsibility(store_id)
+        res = self.get_responsibility_by_store(store_id)
         if not res.succeeded():
             return res
             # return Response(False, msg=f"this member do not own/manage store {store_id}")
@@ -192,7 +213,7 @@ class Member(UserState):
     def edit_product_details(
             self, store_id, product_id, new_name, new_category, new_price, keywords=None
     ):
-        res = self.get_responsibility(store_id)
+        res = self.get_responsibility_by_store(store_id)
         if not res.succeeded():
             return res
             # return Response(False, msg=f"this member do not own/manage store {store_id}")
@@ -203,7 +224,7 @@ class Member(UserState):
     def add_discount(
             self, store_id: str, discount_data: dict, exist_id: str, condition_type: str = None
     ):
-        res = self.get_responsibility(store_id)
+        res = self.get_responsibility_by_store(store_id)
         if not res.succeeded():
             return res
             # return Response(False, msg=f"this member do not own/manage store {store_id}")
@@ -211,21 +232,21 @@ class Member(UserState):
             discount_data, exist_id, condition_type)
 
     def move_discount(self, store_id: str, src_id: str, dest_id: str):
-        res = self.get_responsibility(store_id)
+        res = self.get_responsibility_by_store(store_id)
         if not res.succeeded():
             return res
             # return Response(False, msg=f"this member do not own/manage store {store_id}")
         return res.get_obj().move_discount(src_id, dest_id)
 
     def get_discounts(self, store_id: str):
-        res = self.get_responsibility(store_id)
+        res = self.get_responsibility_by_store(store_id)
         if not res.succeeded():
             return res
             # return Response(False, msg=f"this member do not own/manage store {store_id}")
         return res.get_obj().get_discounts()
 
     def remove_discount(self, store_id: str, discount_id: str):
-        res = self.get_responsibility(store_id)
+        res = self.get_responsibility_by_store(store_id)
         if not res.succeeded():
             return res
             # return Response(False, msg=f"this member do not own/manage store {store_id}")
@@ -239,7 +260,7 @@ class Member(UserState):
             context: dict = None,
             duration=None,
     ):
-        res = self.get_responsibility(store_id)
+        res = self.get_responsibility_by_store(store_id)
         if not res.succeeded():
             return res
             # return Response(False, msg=f"this member do not own/manage store {store_id}")
@@ -250,7 +271,7 @@ class Member(UserState):
     def edit_complex_discount(
             self, store_id: str, discount_id: str, complex_type: str = None, decision_rule: str = None
     ):
-        res = self.get_responsibility(store_id)
+        res = self.get_responsibility_by_store(store_id)
         if not res.succeeded():
             return res
             # return Response(False, msg=f"this member do not own/manage store {store_id}")
@@ -259,7 +280,7 @@ class Member(UserState):
         )
 
     def appoint_new_store_owner(self, store_id, new_owner):
-        res = self.get_responsibility(store_id)
+        res = self.get_responsibility_by_store(store_id)
         if not res.succeeded():
             return res
             # return Response(False, msg=f"this member do not own/manage store {store_id}")
@@ -268,7 +289,7 @@ class Member(UserState):
     def dismiss_from_store(self, store_id):
         # from Backend.DataBase.Handlers.member_handler import MemberHandler
         # self.set_responsibility_ids(MemberHandler.get_instance().load_res_ids(self._username).get_obj())
-        res = self.get_responsibility(store_id)
+        res = self.get_responsibility_by_store(store_id)
         if res.succeeded():
             # self._responsibilities_ids.remove(res.get_obj().get_dal_responsibility_id())
             self._responsibilities.pop(store_id)
@@ -284,45 +305,48 @@ class Member(UserState):
         return res
 
     def appoint_new_store_manager(self, store_id, new_manager):
-        res = self.get_responsibility(store_id)
+        res = self.get_responsibility_by_store(store_id)
         if not res.succeeded():
             return res
             # return Response(False, msg=f"this member do not own/manage store {store_id}")
         return res.get_obj().appoint_manager(new_manager)
 
     def add_manager_permission(self, store_id, username, permission):
-        res = self.get_responsibility(store_id)
+        res = self.get_responsibility_by_store(store_id)
         if not res.succeeded():
             return res
             # return Response(False, msg=f"this member do not own/manage store {store_id}")
         return res.get_obj().add_manager_permission(username, permission)
 
     def remove_manager_permission(self, store_id, username, permission):
-        res = self.get_responsibility(store_id)
+        res = self.get_responsibility_by_store(store_id)
         if not res.succeeded():
             return res
             # return Response(False, msg=f"this member do not own/manage store {store_id}")
         return res.get_obj().remove_manager_permission(username, permission)
 
     def remove_appointment(self, store_id, username):
-        res = self.get_responsibility(store_id)
+        res = self.get_responsibility_by_store(store_id)
         if not res.succeeded():
             return res
             # return Response(False, msg=f"this member do not own/manage store {store_id}")
         return res.get_obj().remove_appointment(username)
 
     def get_store_personnel_info(self, store_id):
-        res = self.get_responsibility(store_id)
+        res = self.get_responsibility_by_store(store_id)
         if not res.succeeded():
             return res
             # return Response(False, msg=f"this member do not own/manage store {store_id}")
         return res.get_obj().get_store_appointments()
 
     def get_my_appointments(self):
+        res = self.get_responsibilities_by_username()
+        if not res.succeeded():
+            return res
         return Response(True, ParsableList(list(self._responsibilities.values())))
 
     def get_store_purchase_history(self, store_id):
-        res = self.get_responsibility(store_id)
+        res = self.get_responsibility_by_store(store_id)
         if not res.succeeded():
             return res
             # return Response(False, msg=f"this member do not own/manage store {store_id}")
@@ -335,40 +359,40 @@ class Member(UserState):
         return Response(False, msg="Regular members cannot get any user's purchase history")
 
     def is_appointed(self, store_id):
-        res = self.get_responsibility(store_id)
+        res = self.get_responsibility_by_store(store_id)
         return Response(True, res.succeeded())
 
     # 4.2
     def add_purchase_rule(self, store_id: str, rule_details: dict, rule_type: str, parent_id: str, clause: str = None):
-        res = self.get_responsibility(store_id)
+        res = self.get_responsibility_by_store(store_id)
         if not res.succeeded():
             return res
         return res.get_obj().add_purchase_rule(rule_details, rule_type, parent_id, clause)
 
     # 4.2
     def remove_purchase_rule(self, store_id: str, rule_id: str):
-        res = self.get_responsibility(store_id)
+        res = self.get_responsibility_by_store(store_id)
         if not res.succeeded():
             return res
         return res.get_obj().remove_purchase_rule(rule_id)
 
     # 4.2
     def edit_purchase_rule(self, store_id: str, rule_details: dict, rule_id: str, rule_type: str):
-        res = self.get_responsibility(store_id)
+        res = self.get_responsibility_by_store(store_id)
         if not res.succeeded():
             return res
         return res.get_obj().edit_purchase_rule(rule_details, rule_id, rule_type)
 
     # 4.2
     def move_purchase_rule(self, store_id: str, rule_id: str, new_parent_id: str):
-        res = self.get_responsibility(store_id)
+        res = self.get_responsibility_by_store(store_id)
         if not res.succeeded():
             return res
         return res.get_obj().move_purchase_rule(rule_id, new_parent_id)
 
     # 4.2
     def get_purchase_policy(self, store_id):
-        res = self.get_responsibility(store_id)
+        res = self.get_responsibility_by_store(store_id)
         if not res.succeeded():
             return res
         return res.get_obj().get_purchase_policy()
@@ -395,7 +419,7 @@ class Member(UserState):
         return Response(True, ParsableList(list(self._offers.values())))
 
     def get_store_offers(self, store_id) -> Response[ParsableList[Offer]]:
-        res = self.get_responsibility(store_id)
+        res = self.get_responsibility_by_store(store_id)
         if not res.succeeded():
             return res
             # return Response(False, msg=f"this member do not own/manage store {store_id}")
@@ -425,7 +449,7 @@ class Member(UserState):
         return self._offers[offer_id].declare_price(price)
 
     def suggest_counter_offer(self, store_id, product_id, offer_id, price) -> Response[None]:
-        res = self.get_responsibility(store_id)
+        res = self.get_responsibility_by_store(store_id)
         if not res.succeeded():
             return res
             # return Response(False, msg=f"this member do not own/manage store {store_id}")
@@ -437,14 +461,14 @@ class Member(UserState):
         return self._offers[offer_id].approve_manager_offer()
 
     def approve_user_offer(self, store_id, product_id, offer_id) -> Response[None]:
-        res = self.get_responsibility(store_id)
+        res = self.get_responsibility_by_store(store_id)
         if not res.succeeded():
             return res
             # return Response(False, msg=f"this member do not own/manage store {store_id}")
         return res.get_obj().approve_user_offer(product_id, offer_id, self._username)
 
     def reject_user_offer(self, store_id, product_id, offer_id) -> Response[None]:
-        res = self.get_responsibility(store_id)
+        res = self.get_responsibility_by_store(store_id)
         if not res.succeeded():
             return res
             # return Response(False, msg=f"this member do not own/manage store {store_id}")
