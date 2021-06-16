@@ -279,6 +279,7 @@ function App() {
 									propsAddProduct={addProductToPopup}
 									initializeNotifications={initializeNotifications}
 									statistics={statistics}
+									resetCart={() => propUpdateStores({})}
 								/>
 							</BrowserRouter>
 						</UsernameContext.Provider>
