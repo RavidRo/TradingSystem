@@ -36,9 +36,9 @@ class PurchaseRulesHandler(IHandler):
                                               Column('path', LtreeType, nullable=False),
                                               Column('type', String(50)),
                                               Column('clause', String(10)),
-                                              Column('context', String(50)),
-                                              Column('context_obj', String(50)),
-                                              Column('context_id', String(50)),
+                                              Column('context', String(100)),
+                                              Column('context_obj', String(100)),
+                                              Column('context_id', String(70)),
                                               Column('comparator', String(50)),
                                               Column('constraint', Integer),
                                               Index('ix_rules_path', 'path', postgresql_using='gist'))
