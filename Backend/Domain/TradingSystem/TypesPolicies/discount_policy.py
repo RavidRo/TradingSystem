@@ -1,5 +1,6 @@
 import threading
 
+from Backend.DataBase.database import db_fail_response
 from Backend.response import Response
 
 from ..Interfaces.IDiscount import IDiscount
@@ -28,27 +29,27 @@ CONDITION_ROOT_ID = "1"
 
 
 class DefaultDiscountPolicy(DiscountPolicy):
-    def __init__(self):
+    def __init__(self, root_rule):
         super().__init__()
-        self.__discount: IDiscount = AddCompositeDiscount(
-            [], self.generate_id()
-        )  # retrieve from DB in later milestones
+        from Backend.DataBase.Handlers.discounts_handler import DiscountsHandler
+        self.__discounts_rules_handler = DiscountsHandler.get_instance()
+        self.__discount: IDiscount = root_rule
         self.discounts_generator = {
-            "simple": lambda discount_data: SimpleDiscount(discount_data, self.generate_id()),
-            "complex": lambda discount_data: MaximumCompositeDiscount([], self.generate_id())
+            "simple": lambda discount_data, parent=None: SimpleDiscount(discount_data, parent),
+            "complex": lambda discount_data, parent=None: MaximumCompositeDiscount(parent)
             if discount_data["type"] == "max"
-            else AddCompositeDiscount([], self.generate_id())
+            else AddCompositeDiscount(parent)
             if discount_data["type"] == "add"
-            else AndConditionDiscount([], self.generate_id())
+            else AndConditionDiscount(parent)
             if discount_data["type"] == "and"
-            else OrConditionDiscount([], self.generate_id())
+            else OrConditionDiscount(parent)
             if discount_data["type"] == "or"
-            else XorCompositeDiscount(discount_data["decision_rule"], [], self.generate_id())
+            else XorCompositeDiscount(discount_data["decision_rule"], parent)
             if discount_data["type"] == "xor"
             else None,
         }
 
-    def make_discount(self, discount_data):
+    def make_discount(self, discount_data, parent):
         if "discount_type" not in discount_data or discount_data["discount_type"] not in (
             "simple",
             "complex",
@@ -80,7 +81,7 @@ class DefaultDiscountPolicy(DiscountPolicy):
                 and "decision_rule" not in discount_data
             ):
                 return Response(False, msg="Xor discount must have decision_rule")
-        discount = self.discounts_generator[discount_data["discount_type"]](discount_data)
+        discount = self.discounts_generator[discount_data["discount_type"]](discount_data, parent)
         if discount is not None:
             return Response(True, discount)
         return Response(
@@ -90,33 +91,43 @@ class DefaultDiscountPolicy(DiscountPolicy):
     def get_discounts(self) -> Response[IDiscount]:
         return Response[IDiscount](True, self.__discount)
 
-    def add_discount(
-        self, discount_data: dict, exist_id: str, condition_type=None
-    ) -> Response[None]:
-        discount_res = self.make_discount(discount_data)
-        if not discount_res.succeeded():
-            return discount_res
-
-        if "condition" in discount_data:
-            discount_res.get_obj().get_conditions_policy().add_purchase_rule(
-                discount_data["condition"], condition_type, CONDITION_ROOT_ID
-            )
-
+    def add_discount(self, discount_data: dict, exist_id: str, condition_type=None) -> Response[None]:
         exist_discount = self.__discount.get_discount_by_id(exist_id)
 
         if exist_discount is None:
             return Response(False, msg="Couldn't find the existing discount whose id was sent!")
-
-        exist_discount.wrlock.acquire_write()
 
         if not exist_discount.is_composite():
             exist_discount.wrlock.release_write()
             return Response(False, msg="Tries to add child to simple discount! please create the composite discount "
                                        "first!")
 
-        exist_discount.add_child(discount_res.get_obj())
+        discount_res = self.make_discount(discount_data, exist_discount)
+        res_condition = discount_res.get_obj().create_purchase_rules_root()
+        if not res_condition.succeeded():
+            return db_fail_response
+
+        if not discount_res.succeeded():
+            return discount_res
+
+        if "condition" in discount_data:
+            condition_policy_res = discount_res.get_obj().get_conditions_policy()
+            if not condition_policy_res.suceeded():
+                return condition_policy_res
+            res_add = condition_policy_res.get_obj().add_purchase_rule(discount_data["condition"], condition_type, CONDITION_ROOT_ID)
+            if not res_add.succeded():
+                return res_add
+
+        exist_discount.wrlock.acquire_write()
+        from Backend.DataBase.Handlers.discounts_handler import DiscountsHandler
+        res_save = DiscountsHandler.get_instance().save(discount_res.get_obj())
+        if res_save.succeeded():
+            res_commit = DiscountsHandler.get_instance().commit_changes()
+            if res_commit.succeeded():
+                exist_discount.wrlock.release_write()
+                return Response(True, msg="Discount was added successfully!")
         exist_discount.wrlock.release_write()
-        return Response(True)
+        return db_fail_response
 
     def move_discount(self, src_id, dest_id) -> Response[None]:
         if src_id == dest_id:
@@ -143,8 +154,13 @@ class DefaultDiscountPolicy(DiscountPolicy):
             return Response(False, msg="Tries to add child to simple discount! please create the composite discount "
                                        "first!")
 
-        src_discount.get_parent().remove_child(src_discount)
-        dest_discount.add_child(src_discount)
+        from Backend.DataBase.Handlers.discounts_handler import DiscountsHandler
+        DiscountsHandler.get_instance().move_rule(src_discount, dest_discount)
+        res = DiscountsHandler.get_instance().commit_changes()
+        if not res.succeeded():
+            dest_discount.wrlock.release_write()
+            src_discount.wrlock.release_write()
+            return db_fail_response
 
         dest_discount.wrlock.release_write()
         src_discount.wrlock.release_write()
@@ -158,7 +174,7 @@ class DefaultDiscountPolicy(DiscountPolicy):
 
     def edit_complex_discount(self, discount_id, complex_type=None, decision_rule=None):
         return self.__discount.edit_complex_discount(
-            discount_id, self.generate_id(), complex_type, decision_rule
+            discount_id, complex_type, decision_rule
         )
 
     def applyDiscount(self, products_to_quantities: dict, user_age: int, username) -> float:
@@ -166,3 +182,6 @@ class DefaultDiscountPolicy(DiscountPolicy):
 
     def get_discount_by_id(self, discount_id):
         return self.__discount.get_discount_by_id(discount_id)
+
+    def get_root_id(self):
+        return self.__discount._id

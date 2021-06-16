@@ -2,20 +2,30 @@
 from threading import Lock
 from sqlalchemy import Column, Integer, Sequence, Index, String, Table, ForeignKey, ForeignKeyConstraint, Float
 from sqlalchemy.orm import relationship, remote, foreign, column_property
+from sqlalchemy_json import MutableJson
 from sqlalchemy_utils import LtreeType, Ltree
 from Backend.DataBase.IHandler import IHandler
-from Backend.DataBase.database import engine, session, mapper_registry, db_fail_response
+from Backend.DataBase.database import engine, session, mapper_registry
 from Backend.Domain.TradingSystem.Interfaces.IDiscount import IDiscount
 from Backend.Domain.TradingSystem.TypesPolicies.discounts import MaximumCompositeDiscount, AddCompositeDiscount, \
     XorCompositeDiscount, AndConditionDiscount, OrConditionDiscount, SimpleDiscount, Discounter
+from Backend.response import Response
 from Backend.rw_lock import ReadWriteLock
 from sqlalchemy import func
 
 discounts_id_seq = Sequence('rules_id_seq')
 
+
 class DiscountsHandler(IHandler):
     _lock = Lock()
     _instance = None
+
+    @staticmethod
+    def get_instance():
+        with DiscountsHandler._lock:
+            if DiscountsHandler._instance is None:
+                DiscountsHandler._instance = DiscountsHandler()
+        return DiscountsHandler._instance
 
     def __init__(self):
 
@@ -25,36 +35,32 @@ class DiscountsHandler(IHandler):
                                             Column('id', Integer, discounts_id_seq, primary_key=True),
                                             Column('path', LtreeType, nullable=False),
                                             Column('type', String(50)),
-                                            Column('context', String(50)),
-                                            Column('context_obj', String(50)), #TODO: check about those fields
+                                            Column('context', MutableJson),
+                                            Column('context_obj', String(50)),
                                             Column('context_id', String(50)),
                                             Column('condition_id', Integer),
                                             Column('decision_rule', String(10)),
-                                            Index('ix_rules_path', 'path', postgresql_using='gist'),
-                                            ForeignKeyConstraint(('id', 'context_obj'), ['discounters.discount_id', 'discounters.type']))
-
-        self.__discounters_table = Table('discounters', mapper_registry.metadata,
-                                            Column('discount_id', Integer, discounts_id_seq, foreign_key=ForeignKey('discounts.id') ,primary_key=True),
-                                            Column('identifier', String(50)),
-                                            Column('type', String(50), primary_key=True),
-                                            Column('multiplier', Float))
+                                            Column('conditions_policy_root_id', String(10)),
+                                            Column('discounter_data', MutableJson),
+                                            Index('ix_discounts_path', 'path', postgresql_using='gist'))
 
         mapper_registry.map_imperatively(IDiscount, self.__discounts_table, properties={
             '_id': self.__discounts_table.c.id,
             'path': self.__discounts_table.c.path,
             'parent': relationship(
-                'PurchaseRule',
+                'IDiscount',
                 primaryjoin=(remote(self.__discounts_table.c.path) == foreign(
                     func.subpath(self.__discounts_table.c.path, 0, -1))),
                 backref='_children',
                 viewonly=True
             ),
+            "_conditions_policy_root_id": column_property(self.__discounts_table.c.conditions_policy_root_id),
             "_context_obj": column_property(self.__discounts_table.c.context_obj),
             "_context_id": column_property(self.__discounts_table.c.context_id),
             "_context": column_property(self.__discounts_table.c.context),
             "_condition_id": column_property(self.__discounts_table.c.condition_id),
             "_decision_rule": column_property(self.__discounts_table.c.decision_rule),
-            "_discount_strategy": relationship(Discounter, uselist=False)
+            "_discounter_data": self.__discounts_table.c.discounter_data,
         }, polymorphic_on=self.__discounts_table.c.type)
 
         mapper_registry.map_imperatively(MaximumCompositeDiscount, self.__discounts_table, inherits=IDiscount,
@@ -74,3 +80,50 @@ class DiscountsHandler(IHandler):
 
         mapper_registry.map_imperatively(SimpleDiscount, self.__discounts_table, inherits=IDiscount,
                                          polymorphic_identity='SimpleDiscount')
+
+    def remove_rule(self, discount_rule):
+        self._rwlock.acquire_write()
+        res = Response(True)
+        try:
+            whole_subtree = session.query(IDiscount).filter(
+                IDiscount.path.descendant_of(discount_rule.path)).all()
+            session.delete(discount_rule)
+            for rule_child in whole_subtree:
+                session.delete(rule_child)
+            res = Response(True)
+        except Exception as e:
+            session.rollback()
+            res = Response(False, msg=str(e))
+        finally:
+            self._rwlock.release_write()
+            return res
+
+
+    def edit_rule(self, old_rule, edited_rule):
+        self._rwlock.acquire_write()
+        for n in old_rule._children:
+            n.parent = edited_rule
+            n._clause = None
+            n.path = edited_rule.path + n.path[len(old_rule.path):]
+            session.flush()
+            edited_rule._children.append(n)
+            session.flush()
+        self._rwlock.release_write()
+        self.remove_rule(old_rule)
+        self.save(edited_rule)
+        return Response(True)
+
+    def move_rule(self, discount: IDiscount, new_parent: IDiscount):
+        self._rwlock.acquire_write()
+        new_path = new_parent.path + Ltree(str(discount._id))
+        session.flush()
+        for n in discount._children:
+            n.path = new_path + n.path[len(discount.path):]
+        session.flush()
+        discount.path = new_path
+        session.flush()
+        discount.parent = new_parent
+        session.flush()
+        new_parent._children.append(discount)
+        session.flush()
+        self._rwlock.release_write()

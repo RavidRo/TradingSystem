@@ -34,12 +34,12 @@ class PurchaseRulesHandler(IHandler):
         self.__purchase_rules_table = Table('purchase_rules', mapper_registry.metadata,
                                               Column('id', Integer, rules_id_seq, primary_key=True),
                                               Column('path', LtreeType, nullable=False),
-                                              Column('type', String(50)),
-                                              Column('clause', String(10)),
-                                              Column('context', String(50)),
-                                              Column('context_obj', String(50)),
-                                              Column('context_id', String(50)),
-                                              Column('comparator', String(50)),
+                                              Column('type', String(200)),
+                                              Column('clause', String(200)),
+                                              Column('context', String(200)),
+                                              Column('context_obj', String(200)),
+                                              Column('context_id', String(200)),
+                                              Column('comparator', String(200)),
                                               Column('constraint', Integer),
                                               Index('ix_rules_path', 'path', postgresql_using='gist'))
 
@@ -132,6 +132,7 @@ class PurchaseRulesHandler(IHandler):
         edited_rule.set_clause(clause)
         for n in old_rule._children:
             n.parent = edited_rule
+            n._clause = None
             n.path = edited_rule.path + n.path[len(old_rule.path):]
             session.flush()
             edited_rule._children.append(n)

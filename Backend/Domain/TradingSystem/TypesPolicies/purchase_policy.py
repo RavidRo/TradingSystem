@@ -46,7 +46,7 @@ class DefaultPurchasePolicy(PurchasePolicy):
         from Backend.DataBase.Handlers.purchase_rules_handler import PurchaseRulesHandler
         super().__init__()
         self.__purchase_rules_handler = PurchaseRulesHandler.get_instance()
-        self.__id = 0
+        # self.__id = 0
         # the root will be always an AndComposite
         self.__purchase_rules = root_rule
         self.__purchase_rules_lock = None
