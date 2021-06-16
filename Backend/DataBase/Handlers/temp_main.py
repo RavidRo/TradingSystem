@@ -16,44 +16,44 @@ from Backend.Service.trading_system import TradingSystem
 
 
 def save():
-    mapper_registry.metadata.drop_all(engine)
     mapper_registry.metadata.create_all(engine)
     trading_system = TradingSystem.getInstance()
-
     cookie = trading_system.enter_system()
+    trading_system.login(cookie, "tali", "cool-kidz")
+    trading_system.create_store(cookie, "shein")
 
-    # res = trading_system.register(cookie, "me", "passme")
+    # # res = trading_system.register(cookie, "me", "passme")
+    # # if not res.succeeded():
+    # #     print("register: " + res.get_msg())
+    # #
+    # res = trading_system.login(cookie, "tali", "cool-kidz")
     # if not res.succeeded():
-    #     print("register: " + res.get_msg())
+    #     print("login: " + res.get_msg())
     #
-    res = trading_system.login(cookie, "tali", "cool-kidz")
-    if not res.succeeded():
-        print("login: " + res.get_msg())
-
-    store_res = trading_system.create_store(cookie, "The Store")
-    if not store_res.succeeded():
-        print("open_store: " + store_res.get_msg())
-
-    product_res = trading_system.create_product(cookie, store_res.get_obj(), "The Product", "The Category", 5, 8,
-                                                ["The Keyword A", "The Keyword B"])
-    if not product_res.succeeded():
-        print("add_product: " + product_res.get_msg())
-
-    save_cart_res = trading_system.save_product_in_cart(cookie, store_res.get_obj(), product_res.get_obj(), 2)
-    if not save_cart_res.succeeded():
-        print("save in cart: " + save_cart_res.get_msg())
-
-    purchase_cart_res = trading_system.purchase_cart(cookie, 15)
-    if not purchase_cart_res.succeeded():
-        print("purchase cart: " + purchase_cart_res.get_msg())
-
-    send_payment_res = trading_system.send_payment(cookie, "", "")
-    if not send_payment_res.succeeded():
-        print("send payment: " + send_payment_res.get_msg())
-
-    res_create_offer = trading_system.create_offer(cookie, store_res.get_obj(), product_res.get_obj())
-    if not res_create_offer.succeeded():
-        print("create offer: " + res_create_offer.get_msg())
+    # store_res = trading_system.create_store(cookie, "The Store")
+    # if not store_res.succeeded():
+    #     print("open_store: " + store_res.get_msg())
+    #
+    # product_res = trading_system.create_product(cookie, store_res.get_obj(), "The Product", "The Category", 5, 8,
+    #                                             ["The Keyword A", "The Keyword B"])
+    # if not product_res.succeeded():
+    #     print("add_product: " + product_res.get_msg())
+    #
+    # save_cart_res = trading_system.save_product_in_cart(cookie, store_res.get_obj(), product_res.get_obj(), 2)
+    # if not save_cart_res.succeeded():
+    #     print("save in cart: " + save_cart_res.get_msg())
+    #
+    # purchase_cart_res = trading_system.purchase_cart(cookie, 15)
+    # if not purchase_cart_res.succeeded():
+    #     print("purchase cart: " + purchase_cart_res.get_msg())
+    #
+    # send_payment_res = trading_system.send_payment(cookie, "", "")
+    # if not send_payment_res.succeeded():
+    #     print("send payment: " + send_payment_res.get_msg())
+    #
+    # res_create_offer = trading_system.create_offer(cookie, store_res.get_obj(), product_res.get_obj())
+    # if not res_create_offer.succeeded():
+    #     print("create offer: " + res_create_offer.get_msg())
 
 
     # cookie = trading_system.enter_system()
