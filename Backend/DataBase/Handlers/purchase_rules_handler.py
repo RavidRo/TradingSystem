@@ -34,12 +34,12 @@ class PurchaseRulesHandler(IHandler):
         self.__purchase_rules_table = Table('purchase_rules', mapper_registry.metadata,
                                               Column('id', Integer, rules_id_seq, primary_key=True),
                                               Column('path', LtreeType, nullable=False),
-                                              Column('type', String(50)),
-                                              Column('clause', String(10)),
-                                              Column('context', String(100)),
-                                              Column('context_obj', String(100)),
-                                              Column('context_id', String(70)),
-                                              Column('comparator', String(50)),
+                                              Column('type', String(200)),
+                                              Column('clause', String(200)),
+                                              Column('context', String(200)),
+                                              Column('context_obj', String(200)),
+                                              Column('context_id', String(200)),
+                                              Column('comparator', String(200)),
                                               Column('constraint', Integer),
                                               Index('ix_rules_path', 'path', postgresql_using='gist'))
 
