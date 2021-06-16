@@ -22,6 +22,14 @@ class SupplyAdapter:
         )
 
     def __send_handshake(self):
+        if SupplyAdapter.use_stub:
+
+            class Handshake:
+                def __init__(self):
+                    self.status_code = 200
+                    self.text = "OK"
+
+            return Handshake()
         return self.__send("handshake")
 
     def __send_supply(self, name, address, city, country, zip):

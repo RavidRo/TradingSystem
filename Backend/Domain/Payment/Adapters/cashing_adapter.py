@@ -22,6 +22,14 @@ class CashingAdapter:
         )
 
     def __send_handshake(self):
+        if CashingAdapter.use_stub:
+
+            class Handshake:
+                def __init__(self):
+                    self.status_code = 200
+                    self.text = "OK"
+
+            return Handshake()
         return self.__send("handshake")
 
     def __send_pay(self, card_number, month, year, holder, ccv, id):
