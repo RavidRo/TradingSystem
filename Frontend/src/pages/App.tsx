@@ -67,14 +67,13 @@ function App() {
 					let subject = messageJson['subject'];
 					let msg = messageJson['message'];
 
-					if(subject === 'message'){
+					if (subject === 'message') {
 						// regular notification
-						setNotifications((old)=>[...old, [msg, new Date().toUTCString()]]);
-					}
-					else{
+						setNotifications((old) => [...old, [msg, new Date().toUTCString()]]);
+					} else {
 						let msg = messageJson['data'];
 						// notification for statistics
-						console.log("statistics !!!");
+						console.log('statistics !!!');
 						console.log(msg);
 						console.log(messageEvent.data);
 						setStatistics(msg);
@@ -285,6 +284,7 @@ function App() {
 									propsAddProduct={addProductToPopup}
 									initializeNotifications={initializeNotifications}
 									statistics={statistics}
+									resetCart={() => propUpdateStores({})}
 								/>
 							</BrowserRouter>
 						</UsernameContext.Provider>

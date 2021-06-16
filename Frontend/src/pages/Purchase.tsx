@@ -34,9 +34,10 @@ const MyTextField: FC<MyTextFieldProps> = ({ name, setValue, width = '20%', nume
 
 type PurchaseProps = {
 	location: any;
+	resetCart: () => void;
 };
 
-const Purchase: FC<PurchaseProps> = ({ location }) => {
+const Purchase: FC<PurchaseProps> = ({ location, resetCart }) => {
 	const totalAmount = useRef<number>(
 		location.state !== undefined ? location.state.totalAmount : 0
 	);
@@ -82,7 +83,12 @@ const Purchase: FC<PurchaseProps> = ({ location }) => {
 				},
 				{ name, address, city, country, zip }
 			)
-			.then(() => confirm('Congratulations!').then(() => history.push('/')));
+			.then(() =>
+				confirm('Congratulations!').then(() => {
+					resetCart();
+					history.push('/');
+				})
+			);
 		event.preventDefault();
 	};
 
