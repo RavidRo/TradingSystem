@@ -31,6 +31,8 @@ class PurchaseLeaf(PurchaseRule):
     def edit_rule(self, rule_id: str, component: PurchaseRule):
         from Backend.DataBase.Handlers.purchase_rules_handler import PurchaseRulesHandler
         if self.get_id() == rule_id:
+            old_rule_clause = self._clause
+            component.set_clause(old_rule_clause)
             res_remove = PurchaseRulesHandler.get_instance().remove_rule(self)
             if res_remove.succeeded():
                 res_save = PurchaseRulesHandler.get_instance().save(component)

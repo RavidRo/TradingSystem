@@ -44,8 +44,11 @@ class ConditioningCompositePurchaseRule(CompositePurchaseRule):
 
     def add(self, component: PurchaseRule, parent_id: str) -> Response[None]:
         if self.get_id() == parent_id:
-            return self.add_to_clause(component)
-
+            res = self.can_add_clause(component._clause)
+            if res.succeeded():
+                return self.add_to_clause(component)
+            else:
+                return Response(False, msg=f"Can't add another rule with clause: {component._clause}")
         else:
             if self.children[0] is not None:
                 response_test = self.children[0].add(component, parent_id)
@@ -57,57 +60,96 @@ class ConditioningCompositePurchaseRule(CompositePurchaseRule):
             else:
                 return Response(False, msg=f"There is no exsiting parent with {parent_id}")
 
-    # def can_add_clause(self, clause):
-    #     if self.children[0] is None and (self.children[1] is None or self.children[1]._clause != clause):
-    #         return Response(True, obj=0)
-    #     if self.children[1] is None and (self.children[0] is None or self.children[0]._clause!= clause):
-    #         return Response(True, obj=1)
-    #     return Response(False)
+    def can_add_clause(self, clause):
+        if len(self.children) == 0:
+            return Response(True)
+
+        elif len(self.children) == 1:
+            if self.children[0]._clause != clause:
+                return Response(True)
+
+        if self.children[0] == None:
+            if self.children[1]._clause != clause:
+                return Response(True)
+            else:
+                return Response(False)
+        if self.children[0]._clause == clause:
+            return Response(False)
+        if self.children[1] == None:
+            return Response(True)
+        return Response(False)
 
     def add_to_clause(self, component: PurchaseRule) -> Response[None]:
         from Backend.DataBase.Handlers.purchase_rules_handler import PurchaseRulesHandler
 
-        res = self.can_add_clause(component._clause)
-        if res.succeeded():
-            res_save = PurchaseRulesHandler.get_instance().save(component)
-            if res_save.succeeded():
-                res_commit = PurchaseRulesHandler.get_instance().commit_changes()
-                if res_commit.succeeded():
-                    return Response(True, msg="Rule was added successfully!")
+        res_save = PurchaseRulesHandler.get_instance().save(component)
+        if res_save.succeeded():
+            res_commit = PurchaseRulesHandler.get_instance().commit_changes()
+            if res_commit.succeeded():
+                return Response(True, msg="Rule was added successfully!")
         else:
             return Response(False, msg="There is an existing if clause for the condition")
 
     def remove(self, component_id: str) -> Response[None]:
+        from Backend.DataBase.database import db_fail_response
+        from Backend.DataBase.Handlers.purchase_rules_handler import PurchaseRulesHandler
         if self.children[0] is not None:
             if self.children[0].get_id() == component_id:
-                self.children[0] = AndCompositePurchaseRule()
-                return Response(True, msg="Rule was removed successfully!")
+                clause = self.children[0]._clause
+                parent = self.children[0].parent
+                res_remove = PurchaseRulesHandler.get_instance().remove_rule(self.children[0])
+                if res_remove.succeeded():
+                    and_rule = AndCompositePurchaseRule(parent)
+                    and_rule.set_clause(clause)
+                    res_save_and = self.add_to_clause(and_rule)
+                    if res_save_and.succeeded():
+                        return Response(True, msg="Rule was removed successfully!")
+                return db_fail_response
 
         if self.children[1] is not None:
             if self.children[1].get_id() == component_id:
-                self.children[1] = AndCompositePurchaseRule()
-                return Response(True, msg="Rule was removed successfully!")
+                clause = self.children[1]._clause
+                parent = self.children[1].parent
+                res_remove = PurchaseRulesHandler.get_instance().remove_rule(self.children[1])
+                if res_remove.succeeded():
+                    and_rule = AndCompositePurchaseRule(parent)
+                    and_rule.set_clause(clause)
+                    res_save_and = self.add_to_clause(and_rule)
+                    if res_save_and.succeeded():
+                        return Response(True, msg="Rule was removed successfully!")
+                return db_fail_response
 
         return super().remove(component_id)
 
-    # def operation(self, products_to_quantities: dict, user_age: int) -> Response[None]:
-    #     test_clause = self.children[0]
-    #     if (
-    #         not self.children[clauses["test"]]
-    #         .operation(products_to_quantities, user_age)
-    #         .succeeded()
-    #     ):
-    #         return Response(True, msg="Purchase is permitted!")
-    #     return self.children[clauses["then"]].operation(products_to_quantities, user_age)
-    #
-    # def parse(self):
-    #     return {
-    #         "id": self.get_id(),
-    #         "operator": "conditional",
-    #         "test": self.children[clauses["test"]].parse()
-    #         if self.children[clauses["test"]] is not None
-    #         else None,
-    #         "then": self.children[clauses["then"]].parse()
-    #         if self.children[clauses["then"]] is not None
-    #         else None,
-    #     }
+    def operation(self, products_to_quantities: dict, user_age: int) -> Response[None]:
+        test_clause = None
+        then_clause = None
+        if self.children[0]._clause == "test":
+            test_clause = self.children[0]
+            then_clause = self.children[1]
+        else:
+            then_clause = self.children[0]
+            test_clause = self.children[1]
+        if not test_clause.operation(products_to_quantities, user_age).succeeded():
+            return Response(True, msg="Purchase is permitted!")
+        return then_clause.operation(products_to_quantities, user_age)
+
+    def parse(self):
+        test_clause = None
+        then_clause = None
+        if self.children[0]._clause == "test":
+            test_clause = self.children[0]
+            then_clause = self.children[1]
+        else:
+            then_clause = self.children[0]
+            test_clause = self.children[1]
+        return {
+            "id": self.get_id(),
+            "operator": "conditional",
+            "test": test_clause.parse()
+            if test_clause is not None
+            else None,
+            "then": then_clause.parse()
+            if then_clause is not None
+            else None,
+        }
