@@ -154,8 +154,13 @@ class DefaultDiscountPolicy(DiscountPolicy):
             return Response(False, msg="Tries to add child to simple discount! please create the composite discount "
                                        "first!")
 
-        src_discount.parent.remove_child(src_discount)
-        dest_discount.add_child(src_discount)
+        from Backend.DataBase.Handlers.discounts_handler import DiscountsHandler
+        DiscountsHandler.get_instance().move_rule(src_discount, dest_discount)
+        res = DiscountsHandler.get_instance().commit_changes()
+        if not res.succeeded():
+            dest_discount.wrlock.release_write()
+            src_discount.wrlock.release_write()
+            return db_fail_response
 
         dest_discount.wrlock.release_write()
         src_discount.wrlock.release_write()
@@ -169,7 +174,7 @@ class DefaultDiscountPolicy(DiscountPolicy):
 
     def edit_complex_discount(self, discount_id, complex_type=None, decision_rule=None):
         return self.__discount.edit_complex_discount(
-            discount_id, self.generate_id(), complex_type, decision_rule
+            discount_id, complex_type, decision_rule
         )
 
     def applyDiscount(self, products_to_quantities: dict, user_age: int, username) -> float:

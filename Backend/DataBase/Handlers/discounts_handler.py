@@ -97,3 +97,33 @@ class DiscountsHandler(IHandler):
         finally:
             self._rwlock.release_write()
             return res
+
+
+    def edit_rule(self, old_rule, edited_rule):
+        self._rwlock.acquire_write()
+        for n in old_rule._children:
+            n.parent = edited_rule
+            n._clause = None
+            n.path = edited_rule.path + n.path[len(old_rule.path):]
+            session.flush()
+            edited_rule._children.append(n)
+            session.flush()
+        self._rwlock.release_write()
+        self.remove_rule(old_rule)
+        self.save(edited_rule)
+        return Response(True)
+
+    def move_rule(self, discount: IDiscount, new_parent: IDiscount):
+        self._rwlock.acquire_write()
+        new_path = new_parent.path + Ltree(str(discount._id))
+        session.flush()
+        for n in discount._children:
+            n.path = new_path + n.path[len(discount.path):]
+        session.flush()
+        discount.path = new_path
+        session.flush()
+        discount.parent = new_parent
+        session.flush()
+        new_parent._children.append(discount)
+        session.flush()
+        self._rwlock.release_write()

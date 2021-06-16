@@ -93,7 +93,7 @@ class SimpleDiscount(IDiscount):
         self._discount_strategy = SimpleDiscount.strategy_generator[discount_data["context"]["obj"]](discount_data["context"].get("id"), discount_data["percentage"])
         self._discounter_data = {"obj": discount_data["context"]["obj"],
                                  "identifier": discount_data["context"].get("id"),
-                                 "percentage": str(discount_data["percentage"])}
+                                 "percentage": discount_data["percentage"]}
 
     def get_discount_strategy(self):
         if self._discount_strategy is None:
@@ -116,7 +116,7 @@ class SimpleDiscount(IDiscount):
         return discount
 
     def get_discount_by_id(self, exist_id: str):
-        if self._id == exist_id:
+        if self.get_id() == exist_id:
             return self
         return None
 
@@ -132,7 +132,7 @@ class SimpleDiscount(IDiscount):
         discount["discount_type"] = "simple"
         return discount
 
-    def edit_simple_discount(self, discount_id, percentage=None, context=None, duration=None):
+    def edit_simple_discount(self, discount_id, percentage=None, context=None):
         if self.get_id() != discount_id:
             return Response(False, msg="The ID provided is not found!")
 
@@ -156,33 +156,20 @@ class SimpleDiscount(IDiscount):
             return Response(False, msg=msg)
 
         self.wrlock.acquire_write()
-        if percentage is not None:
-            self._multiplier = percentage / 100
-
-        if context is not None:
-            if self._context["obj"] == context["obj"]:
-                self._context["id"] = context.get("id")
-                self.get_discount_strategy().set_id(context.get("id"))
-            else:
-                self._discount_strategy = SimpleDiscount.strategy_generator[context["obj"]](
-                    self._id,
-                    context.get("id"),
-                    percentage
-                    if percentage is not None
-                    else self._discount_strategy.multiplier * 100)
-                self._context = context
-
-        if percentage is not None:
-            self.get_discount_strategy().multiplier = percentage / 100
-
-        if duration is not None:
-            self._duration = duration
-
+        self._context = context
+        self._discounter_data = {"obj": context["obj"],
+                                 "identifier": context.get("id"),
+                                 "percentage": percentage}
+        self._discount_strategy = SimpleDiscount.strategy_generator[context["obj"]](context.get("id"), percentage)
+        from Backend.DataBase.Handlers.discounts_handler import DiscountsHandler
+        res_commit = DiscountsHandler.get_instance().commit_changes()
         self.wrlock.release_write()
+        if not res_commit.succeeded():
+            return db_fail_response
 
         return Response(True)
 
-    def edit_complex_discount(self, discount_id, new_id, complex_type=None, decision_rule=None):
+    def edit_complex_discount(self, discount_id, complex_type=None, decision_rule=None):
         return Response(False, msg="The ID provided does not belong to complex type!")
 
     def remove_discount(self, discount_id: str) -> Response[None]:
@@ -269,8 +256,7 @@ class CompositeDiscount(IDiscount, ABC):
     }
 
     def edit_complex_discount(
-        self, discount_id: str, new_id: str, complex_type: str = None, decision_rule: str = None
-    ):
+        self, discount_id: str, complex_type: str = None, decision_rule: str = None):
 
         if self.get_id() == discount_id:
             msg = ""
@@ -291,19 +277,25 @@ class CompositeDiscount(IDiscount, ABC):
                 return Response(False, msg=msg)
 
             self.wrlock.acquire_write()
-            parent_children = self.parent.get_children()
-            parent_children[
-                parent_children.index(self)
-            ] = CompositeDiscount.complex_type_generator.get(complex_type)(self._children, decision_rule, new_id)
-            self._id = discount_id
+            parent = self.parent
+            edited_discount = CompositeDiscount.complex_type_generator.get(complex_type)(decision_rule, parent)
+            root_id = self._conditions_policy_root_id
+            edited_discount._conditions_policy_root_id = root_id
+            from Backend.DataBase.Handlers.discounts_handler import DiscountsHandler
+            res_edit = DiscountsHandler.get_instance().edit_rule(self, edited_discount)
+            if res_edit.succeeded():
+                res_commit = DiscountsHandler.get_instance().commit_changes()
+                self.wrlock.release_write()
+                if res_commit.succeeded():
+                    self.wrlock.release_write()
+                    return Response(True)
             self.wrlock.release_write()
-            return Response(True)
+            return db_fail_response
+
 
         self.wrlock.acquire_write()
         for child in self._children:
-            if child.edit_complex_discount(
-                discount_id, new_id, complex_type, decision_rule
-            ).succeeded():
+            if child.edit_complex_discount(discount_id,complex_type, decision_rule).succeeded():
                 self.wrlock.release_write()
                 return Response(True)
 

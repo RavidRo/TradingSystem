@@ -48,7 +48,7 @@ def save():
     # store_res2 = trading_system.create_store(cookie2, "The Store of cookie2")
     # if not store_res2.succeeded():
     #     print("open_store: " + store_res2.get_msg())
-    #
+
     # product_res = trading_system.create_product(cookie, store_res.get_obj(), "The Product", "The Category", 5, 8,
     #                                             ["The Keyword A", "The Keyword B"])
     # if not product_res.succeeded():
@@ -141,11 +141,17 @@ def save():
                 'id': '123'
             }}
 
-    or_data = {'discount_type': 'complex',
-            'type': 'or'}
+    max_data = {'discount_type': 'complex',
+            'type': 'max'}
 
-    # res = trading_system.add_discount(cookie, "d77b0d78-628a-45b1-b4e1-a725105f8cc4", discount_data,"5")
-    res = trading_system.remove_discount(cookie, "d77b0d78-628a-45b1-b4e1-a725105f8cc4", "5")
+    res = trading_system.move_discount(cookie, "af67f910-8d53-4971-bd97-54ffb4e9a770", "18", "2")
+
+    # res = trading_system.remove_discount(cookie, "af67f910-8d53-4971-bd97-54ffb4e9a770", "8")
+
+    # trading_system.edit_complex_discount(cookie, "af67f910-8d53-4971-bd97-54ffb4e9a770", "9", complex_type="or")
+
+    # trading_system.remove_discount(cookie, "b8e7dfd4-1c12-4d76-a697-da60bc33fffc", "11")
+    # trading_system.edit_simple_discount(cookie, "b8e7dfd4-1c12-4d76-a697-da60bc33fffc", "7", percentage=55.0, context={"obj": "product", "id": "123"})
     # rule_details_complex = {"operator": "and"}
     # rule_details_simple = {"context": {"obj": "product", "identifier": "16"}, "operator": "less-than", "target": 17}
     # rule_simple_2 = {"context": {"obj": "category", "identifier": "milk products"}, "operator": "equals", "target": 9}

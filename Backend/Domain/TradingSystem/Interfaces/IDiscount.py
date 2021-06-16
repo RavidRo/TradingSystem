@@ -61,14 +61,11 @@ class IDiscount(Parsable, ABC):
 
     @abstractmethod
     def edit_simple_discount(
-        self, discount_id, percentage=None, context=None, duration=None
-    ) -> Response[None]:
+        self, discount_id, percentage=None, context=None) -> Response[None]:
         raise NotImplementedError
 
     @abstractmethod
-    def edit_complex_discount(
-        self, discount_id, new_id, complex_type=None, decision_rule=None
-    ) -> Response[None]:
+    def edit_complex_discount(self, discount_id, complex_type=None, decision_rule=None) -> Response[None]:
         raise NotImplementedError
 
     @abstractmethod
