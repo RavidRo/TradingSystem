@@ -46,9 +46,11 @@ class Responsibility(Parsable):
 
     def __init__(self, user_state, store, subscriber=None) -> None:
         from Backend.DataBase.Handlers.responsibilities_handler import ResponsibilitiesHandler
-        self._store_id = store.get_id()
         self._user_state = user_state
         self._store = store
+        if store:
+            self._store_id = store.get_id()
+
         self.__subscriber = subscriber
         if subscriber:
             self._store.subscribe(subscriber)
@@ -70,6 +72,10 @@ class Responsibility(Parsable):
         self._responsibility_dal_id = None
 
     def set_subscriber(self, subscriber):
+        res = self.get_store()
+        if not res.succeeded():
+            return res
+
         self.__subscriber = subscriber
         self._store.subscribe(subscriber)
 
@@ -78,6 +84,10 @@ class Responsibility(Parsable):
         self._username = user_state.get_username().get_obj().get_val()
 
     def get_user_state(self):
+        res = self.get_store()
+        if not res.succeeded():
+            return res
+
         from Backend.Domain.TradingSystem.user_manager import UserManager
         if self._user_state is None:
             response_member = UserManager.get_member(self._responsibility_dal_id)
@@ -95,11 +105,24 @@ class Responsibility(Parsable):
                 return res
         return Response(True, self._user_state)
 
+    def get_store(self):
+        if not self._store:
+            from Backend.Domain.TradingSystem.stores_manager import StoresManager
+            store_res = StoresManager.get_store(self._store_id)
+            if store_res.succeeded():
+                self._store = store_res.get_obj()
+            else:
+                return store_res
+        return Response(True, self._store)
+
     def get_store_id(self):
-        return self._store.get_id()
+        return self._store_id
 
     def set_username(self, username):
         self._username = username
+
+    def set_store_id(self, store_id):
+        self._store_id = store_id
 
     # 4.1
     # Creating a new product a the store
@@ -205,6 +228,10 @@ class Responsibility(Parsable):
         raise Exception(Responsibility.ERROR_MESSAGE)
 
     def _add_permission(self, username: str, permission: Permission) -> Response[None]:
+        res = self.get_store()
+        if not res.succeeded():
+            return res
+
         if not self._appointed:
             # if self.user never appointed anyone
             return Response(False, msg=f"{self._username} is not appointed to store: {self._store.get_name()}!")
@@ -225,6 +252,10 @@ class Responsibility(Parsable):
         # return any(map(add_appointee_permission, self._appointed))
 
     def _remove_permission(self, username: str, permission: Permission) -> Response[None]:
+        res = self.get_store()
+        if not res.succeeded():
+            return res
+
         if not self._appointed:
             # if self.user never appointed anyone
             return Response(False, msg=f"{self._username} is not appointed to store: {self._store.get_name()}!")
@@ -258,7 +289,7 @@ class Responsibility(Parsable):
                         res_commit = self._responsibilities_handler.commit_changes()
                         if res_commit.succeeded():
                             self._appointed.remove(appointment)
-                            appointment.__dismiss_from_store(self._store.get_id())
+                            appointment.__dismiss_from_store(self._store_id)
 
                         return True
                     return False
@@ -266,6 +297,10 @@ class Responsibility(Parsable):
         return any(map(lambda worker: worker._remove_appointment(username), self._appointed))
 
     def __dismiss_from_store(self, store_id: str) -> None:
+        res = self.get_store()
+        if not res.succeeded():
+            return res
+
         for appointment in self._appointed:
             appointment.__dismiss_from_store(store_id)
 
@@ -290,6 +325,8 @@ class Responsibility(Parsable):
 
     # Parsing the object for user representation
     def parse(self) -> ResponsibilitiesData:
+        self.get_store()
+
         return ResponsibilitiesData(
             self._store.get_id(),
             self._store.get_name(),
@@ -306,9 +343,9 @@ class Responsibility(Parsable):
     def _permissions(self) -> list[str]:
         return [per.name for per in Permission]
 
-    def save_self(self):
+    def save_self(self, username, store_id):
         from Backend.DataBase.Handlers.responsibilities_handler import Founder_Responsibility_DAL
-        dal_responsibility_res = self._responsibilities_handler.save_res(Founder_Responsibility_DAL)
+        dal_responsibility_res = self._responsibilities_handler.save_res(Founder_Responsibility_DAL, username, store_id)
         if dal_responsibility_res.succeeded():
             self._responsibility_dal = dal_responsibility_res.get_obj()
             self._responsibility_dal_id = dal_responsibility_res.get_obj().id
