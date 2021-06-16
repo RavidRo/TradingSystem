@@ -43,7 +43,8 @@ class StoreHandler(IHandler):
                               Column("store_id", String(50), primary_key=True),
                               Column("store_name", String(30)),
                               Column("responsibility_id", Integer),
-                              Column("purchase_policy_root_id", String(30)))
+                              Column("purchase_policy_root_id", String(30)),
+                              Column("discount_policy_root_id", String(30)))
 
         mapper_registry.map_imperatively(ProductsOfStores, self.__products_of_stores, properties={
             "store_id": self.__products_of_stores.c.store_id,
@@ -54,6 +55,7 @@ class StoreHandler(IHandler):
 
         mapper_registry.map_imperatively(Store, self.__stores, properties={
             "_Store__purchase_policy_root_id": self.__stores.c.purchase_policy_root_id,
+            "_Store__discount_policy_root_id": self.__stores.c.discount_policy_root_id,
             "_Store__id": self.__stores.c.store_id,
             "_Store__name": self.__stores.c.store_name,
             "_Store__responsibility_id": self.__stores.c.responsibility_id,
@@ -115,6 +117,9 @@ class StoreHandler(IHandler):
 
     def save_purchase_rule(self, root_rule):
         return self.__purchase_rules_handler.save(root_rule)
+
+    def save_discount_rule(self, root_rule):
+        return self.__discount_rules_handler.save(root_rule)
 
     def load(self, id):
         self._rwlock.acquire_read()
@@ -194,6 +199,7 @@ class StoreHandler(IHandler):
     def load_discounts_rules_of_store(self, discount_policy_root_id):
         res = self.__discount_rules_handler.load(discount_policy_root_id)
         if res.succeeded():
+            self.init_discounts_locks(res.get_obj())
             return res
         else:
             return db_fail_response
@@ -233,6 +239,12 @@ class StoreHandler(IHandler):
         finally:
             self._rwlock.release_read()
             return res
+
+    def init_discounts_locks(self, discount_root):
+        discount_root.wrlock = ReadWriteLock()
+        if discount_root._children is not None:
+            for discount_child in discount_root._children:
+                self.init_discounts_locks(discount_child)
 
 
 if __name__ == "__main__":

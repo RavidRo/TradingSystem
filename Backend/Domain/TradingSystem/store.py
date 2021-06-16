@@ -52,13 +52,13 @@ class Store(Parsable, Subscriber):
         return Response(True)
 
     def create_discounts_rules_root(self):
-        from Backend.Domain.TradingSystem.TypesPolicies.discounts import AddCompositeDiscount
+        from Backend.Domain.TradingSystem.TypesPolicies.discounts import AndConditionDiscount
         from Backend.Domain.TradingSystem.TypesPolicies.discount_policy import DefaultDiscountPolicy
-        root_rule = AddCompositeDiscount()
+        root_rule = AndConditionDiscount()
         res = self.__store_handler.save_discount_rule(root_rule)
         if not res.succeeded():
             return db_fail_response
-        res_condition = root_rule.create_condition_policy()
+        res_condition = root_rule.create_purchase_rules_root()
         if not res_condition.succeeded():
             return db_fail_response
         self.__discount_policy = DefaultDiscountPolicy(root_rule)

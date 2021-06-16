@@ -7,8 +7,7 @@ from Backend.response import Response
 
 
 class Discounter(ABC):
-    def __init__(self, discount_id, identifier, percentage):
-        self._discount_id = discount_id
+    def __init__(self, identifier, percentage):
         self._identifier = identifier
         self.multiplier = percentage / 100.0
 
@@ -21,8 +20,8 @@ class Discounter(ABC):
 
 
 class ProductDiscountStrategy(Discounter):
-    def __init__(self, discount_id, identifier, percentage):
-        super().__init__(discount_id, identifier, percentage)
+    def __init__(self, identifier, percentage):
+        super().__init__(identifier, percentage)
 
     def discount_func(self, products_to_quantities, username):
         return sum(
@@ -36,8 +35,8 @@ class ProductDiscountStrategy(Discounter):
 
 
 class CategoryDiscountStrategy(Discounter):
-    def __init__(self, discount_id, identifier, percentage):
-        super().__init__(discount_id, identifier, percentage)
+    def __init__(self, identifier, percentage):
+        super().__init__(identifier, percentage)
 
     def discount_func(self, products_to_quantities, username):
         return sum(
@@ -51,8 +50,8 @@ class CategoryDiscountStrategy(Discounter):
 
 
 class StoreDiscountStrategy(Discounter):
-    def __init__(self, discount_id, percentage):
-        super().__init__(discount_id, None, percentage)
+    def __init__(self, percentage):
+        super().__init__(None, percentage)
 
     def discount_func(self, products_to_quantities, username):
         return sum(
@@ -65,10 +64,24 @@ class StoreDiscountStrategy(Discounter):
 
 class SimpleDiscount(IDiscount):
     strategy_generator = {
-        "product": lambda discount_id, identifier, percentage: ProductDiscountStrategy(discount_id, identifier, percentage),
-        "category": lambda discount_id, identifier, percentage: CategoryDiscountStrategy(discount_id, identifier, percentage),
-        "store": lambda discount_id, identifier, percentage: StoreDiscountStrategy(discount_id, percentage),
+        "product": lambda identifier, percentage: ProductDiscountStrategy(identifier, percentage),
+        "category": lambda identifier, percentage: CategoryDiscountStrategy(identifier, percentage),
+        "store": lambda identifier, percentage: StoreDiscountStrategy(percentage),
     }
+
+    def create_condition_policy(self):
+        from Backend.Domain.TradingSystem.TypesPolicies.Purchase_Composites.concrete_composites import \
+            AndCompositePurchaseRule
+        from Backend.Domain.TradingSystem.TypesPolicies.purchase_policy import DefaultPurchasePolicy
+        from Backend.DataBase.Handlers.store_handler import StoreHandler
+        root_rule = AndCompositePurchaseRule()
+        res = StoreHandler.get_instance().save_purchase_rule(root_rule)
+        if not res.succeeded():
+            return db_fail_response
+        self._conditions_policy = DefaultPurchasePolicy(root_rule)
+        self._conditions_policy_root_id = self._conditions_policy.get_root_id()
+        return Response(True)
+
 
     def get_context(self):
         return self._context
@@ -77,13 +90,20 @@ class SimpleDiscount(IDiscount):
         super().__init__(parent)
         self._parent = None
         self._context = discount_data["context"]
-        self._discount_strategy = SimpleDiscount.strategy_generator[discount_data["context"]["obj"]](self._id, discount_data["context"].get("id"), discount_data["percentage"])
+        self._discount_strategy = SimpleDiscount.strategy_generator[discount_data["context"]["obj"]](discount_data["context"].get("id"), discount_data["percentage"])
+        self._discounter_data = {"obj": discount_data["context"]["obj"],
+                                 "identifier": discount_data["context"].get("id"),
+                                 "percentage": str(discount_data["percentage"])}
 
+    def get_discount_strategy(self):
+        if self._discount_strategy is None:
+            self._discount_strategy = SimpleDiscount.strategy_generator[self._discounter_data["obj"]](self._discounter_data["identifier"], float(self._discounter_data["percentage"]))
+        return self._discount_strategy
 
     def apply_discount(self, products_to_quantities: dict, user_age: int, username) -> float:
         self.wrlock.acquire_read()
         if self._conditions_policy.checkPolicy(products_to_quantities, user_age).succeeded():
-            discount = self._discount_strategy.discount_func(products_to_quantities, username)
+            discount = self.get_discount_strategy().discount_func(products_to_quantities, username)
         else:
             discount = 0.0
         self.wrlock.release_read()
@@ -106,7 +126,7 @@ class SimpleDiscount(IDiscount):
     def parse(self):
         self.wrlock.acquire_read()
         discount = super().parse()
-        discount["percentage"] = self._discount_strategy.multiplier * 100
+        discount["percentage"] = self.get_discount_strategy().multiplier * 100
         discount["context"] = self._context
         self.wrlock.release_read()
         discount["discount_type"] = "simple"
@@ -142,7 +162,7 @@ class SimpleDiscount(IDiscount):
         if context is not None:
             if self._context["obj"] == context["obj"]:
                 self._context["id"] = context.get("id")
-                self._discount_strategy.set_id(context.get("id"))
+                self.get_discount_strategy().set_id(context.get("id"))
             else:
                 self._discount_strategy = SimpleDiscount.strategy_generator[context["obj"]](
                     self._id,
@@ -153,7 +173,7 @@ class SimpleDiscount(IDiscount):
                 self._context = context
 
         if percentage is not None:
-            self._discount_strategy.multiplier = percentage / 100
+            self.get_discount_strategy().multiplier = percentage / 100
 
         if duration is not None:
             self._duration = duration
@@ -167,12 +187,20 @@ class SimpleDiscount(IDiscount):
 
     def remove_discount(self, discount_id: str) -> Response[None]:
         # assuming it has a parent
-        if self._id == discount_id:
+        if self.get_id() == discount_id:
             self.wrlock.acquire_write()
-            self.get_parent().remove_child(self)
-            self.set_parent(None)  # kinda redundant
+            from Backend.DataBase.Handlers.discounts_handler import DiscountsHandler
+            res_remove = DiscountsHandler.get_instance().remove_rule(self)
+            if res_remove.succeeded():
+                res_commit = DiscountsHandler.get_instance().commit_changes()
+                if res_commit.succeeded():
+                    self.wrlock.release_write()
+                    return Response(True, msg="Discount was removed successfully!")
+                else:
+                    self.wrlock.release_write()
+                    return db_fail_response
             self.wrlock.release_write()
-            return Response(True)
+            return db_fail_response
         return Response(False, msg="discount to remove not found!")
 
     def get_children(self) -> Union[list[IDiscount], None]:
@@ -283,7 +311,7 @@ class CompositeDiscount(IDiscount, ABC):
         return Response(False, msg="The ID provided is not found!")
 
     def get_discount_by_id(self, exist_id: str):
-        if self._id == exist_id:
+        if self.get_id() == exist_id:
             return self
 
         self.wrlock.acquire_read()
@@ -298,14 +326,23 @@ class CompositeDiscount(IDiscount, ABC):
 
     def remove_discount(self, discount_id: str) -> Response[None]:
         self.wrlock.acquire_write()
-        if self._id == discount_id:
+        if self.get_id() == discount_id:
             if self.parent is None:
                 self.wrlock.release_write()
                 return Response(False, msg="Tries to remove hidden root!")
-            self.parent.remove_child(self)
-            self.set_parent(None)  # kinda redundant
+            from Backend.DataBase.Handlers.discounts_handler import DiscountsHandler
+            res_remove = DiscountsHandler.get_instance().remove_rule(self)
+            if res_remove.succeeded():
+                res_commit = DiscountsHandler.get_instance().commit_changes()
+                if res_commit.succeeded():
+                    self.wrlock.release_write()
+                    return Response(True, msg="Rule was removed successfully!")
+                else:
+                    self.wrlock.release_write()
+                    return db_fail_response
             self.wrlock.release_write()
-            return Response(True)
+            return db_fail_response
+
         for child in self._children:
             child_res = child.remove_discount(discount_id)
             if child_res.succeeded():
@@ -384,19 +421,6 @@ class AddCompositeDiscount(CompositeDiscount):
         discounts = super().parse()
         discounts["type"] = "add"
         return discounts
-
-    def create_condition_policy(self):
-        from Backend.Domain.TradingSystem.TypesPolicies.Purchase_Composites.concrete_composites import \
-            AndCompositePurchaseRule
-        from Backend.Domain.TradingSystem.TypesPolicies.purchase_policy import DefaultPurchasePolicy
-        from Backend.DataBase.Handlers.store_handler import StoreHandler
-        root_rule = AndCompositePurchaseRule()
-        res = StoreHandler.get_instance().save_purchase_rule(root_rule)
-        if not res.succeeded():
-            return db_fail_response
-        self._conditions_policy = DefaultPurchasePolicy(root_rule)
-        self._conditions_policy_root_id = self._conditions_policy.get_root_id()
-        return Response(True)
 
 
 class XorCompositeDiscount(CompositeDiscount):

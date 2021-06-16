@@ -22,6 +22,8 @@ class IDiscount(Parsable, ABC):
         self._conditions_policy = None
         self._conditions_policy_root_id = None
         self.wrlock = ReadWriteLock()
+        self._discounter_data = {}
+        self._context = {}
 
     def create_purchase_rules_root(self):
         from Backend.DataBase.Handlers.store_handler import StoreHandler
@@ -36,9 +38,8 @@ class IDiscount(Parsable, ABC):
     def set_root_purchase_rule(self, root_rule):
         self._conditions_policy = DefaultPurchasePolicy(root_rule)
 
-
     def get_id(self):
-        return self._id
+        return str(self._id)
 
     def get_conditions_policy(self):
         from Backend.DataBase.Handlers.store_handler import StoreHandler
@@ -46,7 +47,13 @@ class IDiscount(Parsable, ABC):
             rules_res = StoreHandler.get_instance().load_purchase_rules(self._conditions_policy_root_id)
             if rules_res.succeeded():
                 self._conditions_policy = rules_res.get_obj()
-                return self._conditions_policy
+                self._conditions_policy_root_id = self._conditions_policy.get_root_id()
+            else:
+                response = self.create_purchase_rules_root()
+                if not response.succeeded():
+                    return db_fail_response
+        return Response(True, self._conditions_policy)
+
 
     @abstractmethod
     def is_composite(self) -> bool:

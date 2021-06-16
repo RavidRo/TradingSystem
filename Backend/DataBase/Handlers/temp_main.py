@@ -1,3 +1,4 @@
+from Backend.DataBase.Handlers.discounts_handler import DiscountsHandler
 from Backend.DataBase.Handlers.member_handler import MemberHandler
 from Backend.DataBase.Handlers.offer_handler import OfferHandler
 from Backend.DataBase.Handlers.product_handler import ProductHandler
@@ -43,7 +44,7 @@ def save():
     # store_res = trading_system.create_store(cookie, "The Store")
     # if not store_res.succeeded():
     #     print("open_store: " + store_res.get_msg())
-    #
+
     # store_res2 = trading_system.create_store(cookie2, "The Store of cookie2")
     # if not store_res2.succeeded():
     #     print("open_store: " + store_res2.get_msg())
@@ -132,33 +133,46 @@ def save():
     #
     trading_system = TradingSystem.getInstance()
     cookie = trading_system.enter_system()
-    rule_details_complex = {"operator": "and"}
-    rule_details_simple = {"context": {"obj": "product", "identifier": "16"}, "operator": "less-than", "target": 17}
-    rule_simple_2 = {"context": {"obj": "category", "identifier": "milk products"}, "operator": "equals", "target": 9}
-    rule_type = "simple"
-    parent_id = "1"
+    trading_system.login(cookie, "user", "password")
+    discount_data = {'discount_type': 'simple',
+            'percentage': 75.0,
+            'context': {
+                'obj': 'product',
+                'id': '123'
+            }}
 
-    complex_rule_details = {"operator": "conditional"}
-    test_clause_details = {
-        "context": {"obj": "product", "identifier": "1"},
-        "operator": "less-than",
-        "target": 10,
-    }
-    then_clause_details = {
-        "context": {"obj": "category", "identifier": "milk products"},
-        "operator": "equals",
-        "target": 9,
-    }
-    trading_system = TradingSystem.getInstance()
-    cookie = trading_system.enter_system()
-    res = trading_system.login(cookie, "user", "password")
-    res = trading_system.get_store("123b132f-5493-4e18-9e97-88beef985688")
-    # res = trading_system.remove_purchase_rule(cookie, "123b132f-5493-4e18-9e97-88beef985688", "15")
-    # result_complex = trading_system.add_purchase_rule(cookie, "123b132f-5493-4e18-9e97-88beef985688", complex_rule_details, "complex", "2")
-    # result_test_clause = trading_system.add_purchase_rule(cookie, "123b132f-5493-4e18-9e97-88beef985688", test_clause_details, "simple", "5", clause="test")
-    # result_then_clause = trading_system.add_purchase_rule(cookie, "123b132f-5493-4e18-9e97-88beef985688", then_clause_details, "simple", "5", clause="then")
-    # result_then_clause = trading_system.edit_purchase_rule(cookie, "123b132f-5493-4e18-9e97-88beef985688",
-    #                                                        {"operator": "and"}, "5", "complex")
+    or_data = {'discount_type': 'complex',
+            'type': 'or'}
+
+    # res = trading_system.add_discount(cookie, "d77b0d78-628a-45b1-b4e1-a725105f8cc4", discount_data,"5")
+    res = trading_system.remove_discount(cookie, "d77b0d78-628a-45b1-b4e1-a725105f8cc4", "5")
+    # rule_details_complex = {"operator": "and"}
+    # rule_details_simple = {"context": {"obj": "product", "identifier": "16"}, "operator": "less-than", "target": 17}
+    # rule_simple_2 = {"context": {"obj": "category", "identifier": "milk products"}, "operator": "equals", "target": 9}
+    # rule_type = "simple"
+    # parent_id = "1"
+    #
+    # complex_rule_details = {"operator": "conditional"}
+    # test_clause_details = {
+    #     "context": {"obj": "product", "identifier": "1"},
+    #     "operator": "less-than",
+    #     "target": 10,
+    # }
+    # then_clause_details = {
+    #     "context": {"obj": "category", "identifier": "milk products"},
+    #     "operator": "equals",
+    #     "target": 9,
+    # }
+    # trading_system = TradingSystem.getInstance()
+    # cookie = trading_system.enter_system()
+    # res = trading_system.login(cookie, "user", "password")
+    # res = trading_system.get_store("123b132f-5493-4e18-9e97-88beef985688")
+    # # res = trading_system.remove_purchase_rule(cookie, "123b132f-5493-4e18-9e97-88beef985688", "15")
+    # # result_complex = trading_system.add_purchase_rule(cookie, "123b132f-5493-4e18-9e97-88beef985688", complex_rule_details, "complex", "2")
+    # # result_test_clause = trading_system.add_purchase_rule(cookie, "123b132f-5493-4e18-9e97-88beef985688", test_clause_details, "simple", "5", clause="test")
+    # # result_then_clause = trading_system.add_purchase_rule(cookie, "123b132f-5493-4e18-9e97-88beef985688", then_clause_details, "simple", "5", clause="then")
+    # # result_then_clause = trading_system.edit_purchase_rule(cookie, "123b132f-5493-4e18-9e97-88beef985688",
+    # #                                                        {"operator": "and"}, "5", "complex")
     print("kal")
 
     # res = trading_system.add_purchase_rule(cookie, "62bb60df-c851-485f-a57c-13274e403c39", {"operator": "or"}, "complex", "2")
@@ -190,6 +204,7 @@ if __name__ == '__main__':
     product_handler = ProductHandler.get_instance()
     purchase_details_handler = PurchaseDetailsHandler.get_instance()
     offer_handler = OfferHandler.get_instance()
+    discounts_handler = DiscountsHandler.get_instance()
     save()
 
     # trading_system = TradingSystem.getInstance()
