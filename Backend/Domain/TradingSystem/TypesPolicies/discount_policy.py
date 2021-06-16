@@ -28,22 +28,22 @@ CONDITION_ROOT_ID = "1"
 
 
 class DefaultDiscountPolicy(DiscountPolicy):
-    def __init__(self):
+    def __init__(self, root_rule):
         super().__init__()
-        self.__discount: IDiscount = AddCompositeDiscount(
-            [], self.generate_id()
-        )  # retrieve from DB in later milestones
+        from Backend.DataBase.Handlers.discounts_handler import DiscountsHandler
+        self.__discounts_rules_handler = DiscountsHandler.get_instance()
+        self.__discount: IDiscount = root_rule
         self.discounts_generator = {
-            "simple": lambda discount_data: SimpleDiscount(discount_data, self.generate_id()),
-            "complex": lambda discount_data: MaximumCompositeDiscount([], self.generate_id())
+            "simple": lambda discount_data, parent=None: SimpleDiscount(discount_data, parent),
+            "complex": lambda discount_data, parent=None: MaximumCompositeDiscount(parent)
             if discount_data["type"] == "max"
-            else AddCompositeDiscount([], self.generate_id())
+            else AddCompositeDiscount(parent)
             if discount_data["type"] == "add"
-            else AndConditionDiscount([], self.generate_id())
+            else AndConditionDiscount(parent)
             if discount_data["type"] == "and"
-            else OrConditionDiscount([], self.generate_id())
+            else OrConditionDiscount(parent)
             if discount_data["type"] == "or"
-            else XorCompositeDiscount(discount_data["decision_rule"], [], self.generate_id())
+            else XorCompositeDiscount(discount_data["decision_rule"], parent)
             if discount_data["type"] == "xor"
             else None,
         }
@@ -90,17 +90,13 @@ class DefaultDiscountPolicy(DiscountPolicy):
     def get_discounts(self) -> Response[IDiscount]:
         return Response[IDiscount](True, self.__discount)
 
-    def add_discount(
-        self, discount_data: dict, exist_id: str, condition_type=None
-    ) -> Response[None]:
+    def add_discount(self, discount_data: dict, exist_id: str, condition_type=None) -> Response[None]:
         discount_res = self.make_discount(discount_data)
         if not discount_res.succeeded():
             return discount_res
 
         if "condition" in discount_data:
-            discount_res.get_obj().get_conditions_policy().add_purchase_rule(
-                discount_data["condition"], condition_type, CONDITION_ROOT_ID
-            )
+            discount_res.get_obj().get_conditions_policy().add_purchase_rule(discount_data["condition"], condition_type, CONDITION_ROOT_ID)
 
         exist_discount = self.__discount.get_discount_by_id(exist_id)
 
@@ -113,6 +109,7 @@ class DefaultDiscountPolicy(DiscountPolicy):
             exist_discount.wrlock.release_write()
             return Response(False, msg="Tries to add child to simple discount! please create the composite discount "
                                        "first!")
+
 
         exist_discount.add_child(discount_res.get_obj())
         exist_discount.wrlock.release_write()
@@ -166,3 +163,6 @@ class DefaultDiscountPolicy(DiscountPolicy):
 
     def get_discount_by_id(self, discount_id):
         return self.__discount.get_discount_by_id(discount_id)
+
+    def get_root_id(self):
+        return self.__discount._id

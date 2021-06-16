@@ -22,10 +22,10 @@ class Store(Parsable, Subscriber):
         self._products_to_quantities: dict[str, tuple[Product, int]] = {}
         self.__responsibility = None
         self.__responsibility_id = None
-        # These fields will be changed in the future versions
-        self.__discount_policy = DefaultDiscountPolicy()
+        self.__discount_policy = None
         self.__purchase_policy = None
         self.__purchase_policy_root_id = None
+        self.__discount_policy_root_id = None
         self.__purchase_history = []
         self._products_lock = ReadWriteLock()
         self.__history_lock = ReadWriteLock()
@@ -51,15 +51,36 @@ class Store(Parsable, Subscriber):
         self.__purchase_policy_root_id = self.__purchase_policy.get_root_id()
         return Response(True)
 
+    def create_discounts_rules_root(self):
+        from Backend.Domain.TradingSystem.TypesPolicies.discounts import AddCompositeDiscount
+        from Backend.Domain.TradingSystem.TypesPolicies.discount_policy import DefaultDiscountPolicy
+        root_rule = AddCompositeDiscount()
+        res = self.__store_handler.save_discount_rule(root_rule)
+        if not res.succeeded():
+            return db_fail_response
+        res_condition = root_rule.create_condition_policy()
+        if not res_condition.succeeded():
+            return db_fail_response
+        self.__discount_policy = DefaultDiscountPolicy(root_rule)
+        self.__discount_policy_root_id = self.__discount_policy.get_root_id()
+        return Response(True)
+
+    def set_root_purchase_rule(self, root_rule):
+        from Backend.Domain.TradingSystem.TypesPolicies.purchase_policy import DefaultPurchasePolicy
+        self.__purchase_policy = DefaultPurchasePolicy(root_rule)
+
+    def set_root_discounts_rule(self, root_rule):
+        from Backend.Domain.TradingSystem.TypesPolicies.discount_policy import DefaultDiscountPolicy
+        self.__discount_policy = DefaultDiscountPolicy(root_rule)
+
     def set_products(self, products_to_quantities: dict[str, tuple[Product, int]]):
         self._products_to_quantities = products_to_quantities
 
     def get_purchase_policy_root_id(self):
         return self.__purchase_policy_root_id
 
-    def set_root_purchase_rule(self, root_rule):
-        from Backend.Domain.TradingSystem.TypesPolicies.purchase_policy import DefaultPurchasePolicy
-        self.__purchase_policy = DefaultPurchasePolicy(root_rule)
+    def get_discounts_policy_root_id(self):
+        return self.__discount_policy_root_id
 
     def init_fields(self):
         from Backend.Domain.TradingSystem.TypesPolicies.discount_policy import DefaultDiscountPolicy

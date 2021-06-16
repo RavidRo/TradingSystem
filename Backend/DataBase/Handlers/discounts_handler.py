@@ -17,6 +17,13 @@ class DiscountsHandler(IHandler):
     _lock = Lock()
     _instance = None
 
+    @staticmethod
+    def get_instance():
+        with DiscountsHandler._lock:
+            if DiscountsHandler._instance is None:
+                DiscountsHandler._instance = DiscountsHandler()
+        return DiscountsHandler._instance
+
     def __init__(self):
 
         super().__init__(ReadWriteLock(), IDiscount)
@@ -26,10 +33,11 @@ class DiscountsHandler(IHandler):
                                             Column('path', LtreeType, nullable=False),
                                             Column('type', String(50)),
                                             Column('context', String(50)),
-                                            Column('context_obj', String(50)), #TODO: check about those fields
+                                            Column('context_obj', String(50)),
                                             Column('context_id', String(50)),
                                             Column('condition_id', Integer),
                                             Column('decision_rule', String(10)),
+                                            Column('conditions_policy_root_id', String(10)),
                                             Index('ix_rules_path', 'path', postgresql_using='gist'),
                                             ForeignKeyConstraint(('id', 'context_obj'), ['discounters.discount_id', 'discounters.type']))
 
@@ -49,6 +57,7 @@ class DiscountsHandler(IHandler):
                 backref='_children',
                 viewonly=True
             ),
+            "_conditions_policy_root_id": column_property(self.__discounts_table.c.conditions_policy_root_id),
             "_context_obj": column_property(self.__discounts_table.c.context_obj),
             "_context_id": column_property(self.__discounts_table.c.context_id),
             "_context": column_property(self.__discounts_table.c.context),
@@ -74,3 +83,4 @@ class DiscountsHandler(IHandler):
 
         mapper_registry.map_imperatively(SimpleDiscount, self.__discounts_table, inherits=IDiscount,
                                          polymorphic_identity='SimpleDiscount')
+

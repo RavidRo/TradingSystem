@@ -63,8 +63,10 @@ class StoreHandler(IHandler):
         })
         self.__product_handler = ProductHandler.get_instance()
         from Backend.DataBase.Handlers.responsibilities_handler import ResponsibilitiesHandler
+        from Backend.DataBase.Handlers.discounts_handler import DiscountsHandler
         self.__responsibility_hadnler = ResponsibilitiesHandler.get_instance()
         self.__purchase_rules_handler = PurchaseRulesHandler.get_instance()
+        self.__discount_rules_handler = DiscountsHandler.get_instance()
 
     @staticmethod
     def get_instance():
@@ -164,7 +166,7 @@ class StoreHandler(IHandler):
     def load_res_of_store(self, res_id, store):
         return self.__responsibility_hadnler.load_res_and_appointments(res_id, store)
 
-    def load_purchase_rules_of_store(self, purchase_policy_root_id):
+    def load_purchase_rules(self, purchase_policy_root_id):
         res = self.__purchase_rules_handler.load(purchase_policy_root_id)
         if res.succeeded():
             return res
@@ -188,6 +190,13 @@ class StoreHandler(IHandler):
     #         self._rwlock.release_read()
     #         return res
     #
+
+    def load_discounts_rules_of_store(self, discount_policy_root_id):
+        res = self.__discount_rules_handler.load(discount_policy_root_id)
+        if res.succeeded():
+            return res
+        else:
+            return db_fail_response
 
     def load_all(self):
         self._rwlock.acquire_read()

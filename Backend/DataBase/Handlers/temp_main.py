@@ -57,7 +57,7 @@ def save():
     #                                              ["The Keyword A2", "The Keyword B2"])
     # if not product2_res.succeeded():
     #     print("add_product: " + product2_res.get_msg())
-    #
+
     # res_save_prod = trading_system.save_product_in_cart(cookie2, store_res.get_obj(), product_res.get_obj(), 2)
     # if not res_save_prod.succeeded():
     #     print("save in cart: " + res_save_prod.get_msg())
@@ -87,7 +87,7 @@ def save():
     #                                                       res_create_offer.get_obj())
     # if not res_approve_offer.succeeded():
     #     print("approve offer: " + res_approve_offer.get_msg())
-
+    #
     # res_appoint_owner = trading_system.appoint_owner(cookie, store_res.get_obj(), "user2")
     # if not res_appoint_owner.succeeded():
     #     print("appoint owner: " + res_appoint_owner.get_msg())
@@ -120,7 +120,7 @@ def save():
     # res = trading_system.appoint_owner(cookie2, "ea936e4b-9752-4559-8999-69e111b81aba", "user3")
     # if not res.succeeded():
     #     print("appoint manager: " + res.get_msg())
-
+    #
     # trading_system = TradingSystem.getInstance()
     # cookie2 = trading_system.enter_system()
     # res = trading_system.get_store("ea936e4b-9752-4559-8999-69e111b81aba")
@@ -129,14 +129,14 @@ def save():
     # res = trading_system.appoint_owner(cookie2, "ea936e4b-9752-4559-8999-69e111b81aba", "user3")
     # if not res.succeeded():
     #     print("appoint manager: " + res.get_msg())
-
-    # trading_system = TradingSystem.getInstance()
-    # cookie = trading_system.enter_system()
-    # rule_details_complex = {"operator": "and"}
-    # rule_details_simple = {"context": {"obj": "product", "identifier": "16"}, "operator": "less-than", "target": 17}
-    # rule_simple_2 = {"context": {"obj": "category", "identifier": "milk products"}, "operator": "equals", "target": 9}
-    # rule_type = "simple"
-    # parent_id = "1"
+    #
+    trading_system = TradingSystem.getInstance()
+    cookie = trading_system.enter_system()
+    rule_details_complex = {"operator": "and"}
+    rule_details_simple = {"context": {"obj": "product", "identifier": "16"}, "operator": "less-than", "target": 17}
+    rule_simple_2 = {"context": {"obj": "category", "identifier": "milk products"}, "operator": "equals", "target": 9}
+    rule_type = "simple"
+    parent_id = "1"
 
     complex_rule_details = {"operator": "conditional"}
     test_clause_details = {
@@ -152,13 +152,13 @@ def save():
     trading_system = TradingSystem.getInstance()
     cookie = trading_system.enter_system()
     res = trading_system.login(cookie, "user", "password")
-    res = trading_system.get_store("029d6bdc-dd7c-407d-8a27-9fa616018f70")
-    # res = trading_system.remove_purchase_rule(cookie, "029d6bdc-dd7c-407d-8a27-9fa616018f70", "15")
-    # result_complex = trading_system.add_purchase_rule(cookie, "029d6bdc-dd7c-407d-8a27-9fa616018f70", complex_rule_details, "complex", "2")
-    # result_test_clause = trading_system.add_purchase_rule(cookie, "029d6bdc-dd7c-407d-8a27-9fa616018f70", test_clause_details, "simple", "19", clause="test")
-    # result_then_clause = trading_system.add_purchase_rule(cookie, "029d6bdc-dd7c-407d-8a27-9fa616018f70", then_clause_details, "simple", "19", clause="then")
-    result_then_clause = trading_system.edit_purchase_rule(cookie, "029d6bdc-dd7c-407d-8a27-9fa616018f70",
-                                                           then_clause_details, "27", "simple")
+    res = trading_system.get_store("123b132f-5493-4e18-9e97-88beef985688")
+    # res = trading_system.remove_purchase_rule(cookie, "123b132f-5493-4e18-9e97-88beef985688", "15")
+    # result_complex = trading_system.add_purchase_rule(cookie, "123b132f-5493-4e18-9e97-88beef985688", complex_rule_details, "complex", "2")
+    # result_test_clause = trading_system.add_purchase_rule(cookie, "123b132f-5493-4e18-9e97-88beef985688", test_clause_details, "simple", "5", clause="test")
+    # result_then_clause = trading_system.add_purchase_rule(cookie, "123b132f-5493-4e18-9e97-88beef985688", then_clause_details, "simple", "5", clause="then")
+    # result_then_clause = trading_system.edit_purchase_rule(cookie, "123b132f-5493-4e18-9e97-88beef985688",
+    #                                                        {"operator": "and"}, "5", "complex")
     print("kal")
 
     # res = trading_system.add_purchase_rule(cookie, "62bb60df-c851-485f-a57c-13274e403c39", {"operator": "or"}, "complex", "2")

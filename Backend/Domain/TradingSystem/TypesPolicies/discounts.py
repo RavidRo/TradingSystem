@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
-from typing import Union
+from typing import Union, List
 
+from Backend.DataBase.database import db_fail_response
 from Backend.Domain.TradingSystem.Interfaces.IDiscount import IDiscount
 from Backend.response import Response
 
@@ -20,8 +21,8 @@ class Discounter(ABC):
 
 
 class ProductDiscountStrategy(Discounter):
-    def __init__(self, id, percentage):
-        super().__init__(id, percentage)
+    def __init__(self, discount_id, identifier, percentage):
+        super().__init__(discount_id, identifier, percentage)
 
     def discount_func(self, products_to_quantities, username):
         return sum(
@@ -35,8 +36,8 @@ class ProductDiscountStrategy(Discounter):
 
 
 class CategoryDiscountStrategy(Discounter):
-    def __init__(self, id, percentage):
-        super().__init__(id, percentage)
+    def __init__(self, discount_id, identifier, percentage):
+        super().__init__(discount_id, identifier, percentage)
 
     def discount_func(self, products_to_quantities, username):
         return sum(
@@ -50,8 +51,8 @@ class CategoryDiscountStrategy(Discounter):
 
 
 class StoreDiscountStrategy(Discounter):
-    def __init__(self, percentage):
-        super().__init__(None, percentage)
+    def __init__(self, discount_id, percentage):
+        super().__init__(discount_id, None, percentage)
 
     def discount_func(self, products_to_quantities, username):
         return sum(
@@ -64,22 +65,20 @@ class StoreDiscountStrategy(Discounter):
 
 class SimpleDiscount(IDiscount):
     strategy_generator = {
-        "product": lambda id, percentage: ProductDiscountStrategy(id, percentage),
-        "category": lambda id, percentage: CategoryDiscountStrategy(id, percentage),
-        "store": lambda id, percentage: StoreDiscountStrategy(percentage),
+        "product": lambda discount_id, identifier, percentage: ProductDiscountStrategy(discount_id, identifier, percentage),
+        "category": lambda discount_id, identifier, percentage: CategoryDiscountStrategy(discount_id, identifier, percentage),
+        "store": lambda discount_id, identifier, percentage: StoreDiscountStrategy(discount_id, percentage),
     }
 
     def get_context(self):
         return self._context
 
-    def __init__(self, discount_data, id, duration=None):  # Add duration in later milestones
-        super().__init__(id)
+    def __init__(self, discount_data, parent):  # Add duration in later milestones
+        super().__init__(parent)
         self._parent = None
         self._context = discount_data["context"]
-        self._discount_strategy = SimpleDiscount.strategy_generator[
-            discount_data["context"]["obj"]
-        ](discount_data["context"].get("id"), discount_data["percentage"])
-        self._duration = duration
+        self._discount_strategy = SimpleDiscount.strategy_generator[discount_data["context"]["obj"]](self._id, discount_data["context"].get("id"), discount_data["percentage"])
+
 
     def apply_discount(self, products_to_quantities: dict, user_age: int, username) -> float:
         self.wrlock.acquire_read()
@@ -146,11 +145,11 @@ class SimpleDiscount(IDiscount):
                 self._discount_strategy.set_id(context.get("id"))
             else:
                 self._discount_strategy = SimpleDiscount.strategy_generator[context["obj"]](
+                    self._id,
                     context.get("id"),
                     percentage
                     if percentage is not None
-                    else self._discount_strategy.multiplier * 100,
-                )
+                    else self._discount_strategy.multiplier * 100)
                 self._context = context
 
         if percentage is not None:
@@ -190,18 +189,9 @@ class SimpleDiscount(IDiscount):
 
 
 class CompositeDiscount(IDiscount, ABC):
-    def __init__(self, children: list[IDiscount] = None, id="1"):
-        super().__init__(id)
-        if children is None:
-            children = []
-        self._children = children
-        for child in children:
-            if child.get_parent() is not None:
-                self.set_parent(
-                    child.get_parent()
-                )  # Assuming at most 1 child has parent (when merging with existing discount)
-                break
-        [child.set_parent(self) for child in children]
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self._children: List[IDiscount] = []
 
     def get_context(self):
         return None
@@ -235,20 +225,18 @@ class CompositeDiscount(IDiscount, ABC):
         return Response(False, msg="The ID provided is not found!")
 
     complex_type_generator = {
-        "max": lambda children, decision_rule, new_id: MaximumCompositeDiscount(
-            children=children, new_id=new_id
+        "max": lambda decision_rule, parent: MaximumCompositeDiscount(
+            parent=parent
         ),
-        "add": lambda children, decision_rule, new_id: AddCompositeDiscount(
-            children=children, new_id=new_id
+        "add": lambda decision_rule, parent: AddCompositeDiscount(
+            parent=parent
         ),
-        "xor": lambda children, decision_rule, new_id: XorCompositeDiscount(
-            children=children, decision_rule=decision_rule, new_id=new_id
+        "xor": lambda decision_rule, parent: XorCompositeDiscount( decision_rule=decision_rule, parent=parent),
+        "or": lambda decision_rule, parent: OrConditionDiscount(
+            parent=parent
         ),
-        "or": lambda children, decision_rule, new_id: OrConditionDiscount(
-            children=children, new_id=new_id
-        ),
-        "and": lambda children, decision_rule, new_id: AndConditionDiscount(
-            children=children, new_id=new_id
+        "and": lambda decision_rule, parent: AndConditionDiscount(
+            parent=parent
         ),
     }
 
@@ -262,7 +250,7 @@ class CompositeDiscount(IDiscount, ABC):
                 msg += (
                     "complex_type must be one of the following: 'max', 'add', 'xor', 'and', 'or'\n"
                 )
-            if self.get_parent() is None:
+            if self.parent is None:
                 msg += "Cannot edit root discount!\n"
             if (
                 complex_type == "xor"
@@ -275,12 +263,10 @@ class CompositeDiscount(IDiscount, ABC):
                 return Response(False, msg=msg)
 
             self.wrlock.acquire_write()
-            parent_children = self.get_parent().get_children()
+            parent_children = self.parent.get_children()
             parent_children[
                 parent_children.index(self)
-            ] = CompositeDiscount.complex_type_generator.get(complex_type)(
-                self._children, decision_rule, new_id
-            )
+            ] = CompositeDiscount.complex_type_generator.get(complex_type)(self._children, decision_rule, new_id)
             self._id = discount_id
             self.wrlock.release_write()
             return Response(True)
@@ -313,10 +299,10 @@ class CompositeDiscount(IDiscount, ABC):
     def remove_discount(self, discount_id: str) -> Response[None]:
         self.wrlock.acquire_write()
         if self._id == discount_id:
-            if self.get_parent() is None:
+            if self.parent is None:
                 self.wrlock.release_write()
                 return Response(False, msg="Tries to remove hidden root!")
-            self.get_parent().remove_child(self)
+            self.parent.remove_child(self)
             self.set_parent(None)  # kinda redundant
             self.wrlock.release_write()
             return Response(True)
@@ -339,8 +325,8 @@ class CompositeDiscount(IDiscount, ABC):
 
 
 class MaximumCompositeDiscount(CompositeDiscount):
-    def __init__(self, children: list[IDiscount] = None, new_id="1"):
-        super().__init__(children, new_id)
+    def __init__(self, parent=None):
+        super().__init__(parent)
 
     def apply_discount(self, products_to_quantities: dict, user_age: int, username) -> float:
         self.wrlock.acquire_read()
@@ -375,8 +361,8 @@ class MaximumCompositeDiscount(CompositeDiscount):
 
 class AddCompositeDiscount(CompositeDiscount):
 
-    def __init__(self, children: list[IDiscount] = None, new_id="1"):
-        super().__init__(children, new_id)
+    def __init__(self, parent=None):
+        super().__init__(parent)
 
     def apply_discount(self, products_to_quantities: dict, user_age: int, username) -> float:
         self.wrlock.acquire_read()
@@ -399,6 +385,19 @@ class AddCompositeDiscount(CompositeDiscount):
         discounts["type"] = "add"
         return discounts
 
+    def create_condition_policy(self):
+        from Backend.Domain.TradingSystem.TypesPolicies.Purchase_Composites.concrete_composites import \
+            AndCompositePurchaseRule
+        from Backend.Domain.TradingSystem.TypesPolicies.purchase_policy import DefaultPurchasePolicy
+        from Backend.DataBase.Handlers.store_handler import StoreHandler
+        root_rule = AndCompositePurchaseRule()
+        res = StoreHandler.get_instance().save_purchase_rule(root_rule)
+        if not res.succeeded():
+            return db_fail_response
+        self._conditions_policy = DefaultPurchasePolicy(root_rule)
+        self._conditions_policy_root_id = self._conditions_policy.get_root_id()
+        return Response(True)
+
 
 class XorCompositeDiscount(CompositeDiscount):
     decision_dict = {
@@ -407,8 +406,8 @@ class XorCompositeDiscount(CompositeDiscount):
         "min": lambda prices: min(prices) if len(prices) > 0 else 0.0,
     }
 
-    def __init__(self, decision_rule: str, children: list[IDiscount] = None, new_id="1"):
-        super().__init__(children, new_id)
+    def __init__(self, decision_rule: str, parent=None):
+        super().__init__(parent)
         self.__desicion_rule = decision_rule
 
     def apply_discount(self, products_to_quantities: dict, user_age: int, username) -> float:
@@ -438,8 +437,8 @@ class XorCompositeDiscount(CompositeDiscount):
 
 
 class AndConditionDiscount(CompositeDiscount):
-    def __init__(self, children: list[IDiscount] = None, new_id="1"):
-        super().__init__(children, new_id)
+    def __init__(self, parent=None):
+        super().__init__(parent)
 
     def apply_discount(self, products_to_quantities: dict, user_age: int, username) -> float:
         self.wrlock.acquire_read()
@@ -471,8 +470,8 @@ class AndConditionDiscount(CompositeDiscount):
 
 
 class OrConditionDiscount(CompositeDiscount):
-    def __init__(self, children: list[IDiscount] = None, new_id="1"):
-        super().__init__(children, new_id)
+    def __init__(self, parent=None):
+        super().__init__(parent)
 
     def apply_discount(self, products_to_quantities: dict, user_age: int, username) -> float:
         self.wrlock.acquire_read()

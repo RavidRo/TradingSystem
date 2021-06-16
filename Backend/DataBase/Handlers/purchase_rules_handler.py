@@ -132,6 +132,7 @@ class PurchaseRulesHandler(IHandler):
         edited_rule.set_clause(clause)
         for n in old_rule._children:
             n.parent = edited_rule
+            n._clause = None
             n.path = edited_rule.path + n.path[len(old_rule.path):]
             session.flush()
             edited_rule._children.append(n)

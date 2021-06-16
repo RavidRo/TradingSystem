@@ -105,9 +105,13 @@ class Member(UserState):
 
     def open_store(self, store_name) -> Response:
         store = Store(store_name)
-        res_create_root = store.create_purchase_rules_root()
-        if not res_create_root.succeeded():
+        res_create_purchase_root = store.create_purchase_rules_root()
+        if not res_create_purchase_root.succeeded():
             return db_fail_response
+        res_create_discounts_root = store.create_discounts_rules_root()
+        if not res_create_discounts_root.succeeded():
+            return db_fail_response
+
         store.save()
         founder = Founder(self, store, self._user)
         res_save = founder.save_self()
