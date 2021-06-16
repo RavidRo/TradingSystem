@@ -21,12 +21,12 @@ def save():
     cookie = trading_system.enter_system()
     trading_system.login(cookie, "tali", "cool-kidz")
     rules_dict = {
-        "context": {"obj": "product", "identifier": "shirt"},
+        "context": {"obj": "product", "identifier": "7e1eba93-eae7-46e3-a0b1-b8affb8de026"},
         "operator": "equals",
-        "target": 6,
+        "target": 7,
     }
-    trading_system.add_purchase_rule(cookie, "30a3f083-a34f-4a5d-b17c-08a021f2d724", rules_dict, "simple", "10")
-
+    res = trading_system.add_purchase_rule(cookie, "30a3f083-a34f-4a5d-b17c-08a021f2d724", rules_dict, "simple", "10")
+    print(res.get_msg())
     # # res = trading_system.register(cookie, "me", "passme")
     # # if not res.succeeded():
     # #     print("register: " + res.get_msg())
