@@ -24,13 +24,14 @@ type RoutesProps = {
 	getPropsCookie: () => string;
 	propUpdateStores: (map: StoreToSearchedProducts) => void;
 	propsAddProduct: (product: Product, storeID: string) => Promise<boolean>;
+	resetCart: () => void;
 
 	signedIn: boolean;
 	setSignedIn: (isSignedIn: boolean) => void;
 	setUsername: (username: string) => void;
 
-	initializeNotifications:()=>void,
-	statistics: StatisticsData | undefined,
+	initializeNotifications: () => void;
+	statistics: StatisticsData | undefined;
 };
 
 const Routes: FC<RoutesProps> = ({
@@ -40,6 +41,7 @@ const Routes: FC<RoutesProps> = ({
 	changeQuantity,
 	getPropsCookie,
 	propUpdateStores,
+	resetCart,
 
 	propsAddProduct,
 
@@ -86,7 +88,9 @@ const Routes: FC<RoutesProps> = ({
 			<Route
 				path='/Notifications'
 				exact
-				render={(props) => <Notifications {...props} initializeNotifications={initializeNotifications} />}
+				render={(props) => (
+					<Notifications {...props} initializeNotifications={initializeNotifications} />
+				)}
 			/>
 
 			<Route
@@ -99,7 +103,11 @@ const Routes: FC<RoutesProps> = ({
 				exact
 				render={(props) => <StoresView {...props} propsAddProduct={propsAddProduct} />}
 			/>
-			<Route path='/Purchase' exact component={Purchase} />
+			<Route
+				path='/Purchase'
+				exact
+				render={(props) => <Purchase {...props} resetCart={resetCart} />}
+			/>
 			<Route path='/searchPage' exact component={SearchPage} />
 			{signedIn ? (
 				<Route path='/my-stores' exact component={MyStores} />
@@ -118,10 +126,10 @@ const Routes: FC<RoutesProps> = ({
 			)}
 			{signedIn && admins.includes(username) ? (
 				<Route
-				path='/statistics'
-				exact
-				render={(props) => <Statistics {...props} statistics={statistics} />}
-			/>
+					path='/statistics'
+					exact
+					render={(props) => <Statistics {...props} statistics={statistics} />}
+				/>
 			) : (
 				<Redirect to='/' />
 			)}

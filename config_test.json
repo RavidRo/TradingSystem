@@ -1,8 +1,8 @@
 {
 	"admins": ["tali", "ravid", "inon", "sean", "omer"],
 	"password": "cool-kidz",
-	"timer_length": 10,
-	"payment_system": "",
-	"supply_system": "",
+	"timer_length": 600,
+	"payment_system": "http://localhost:5008/",
+	"supply_system": "http://localhost:5008/",
 	"DB": ""
 }
