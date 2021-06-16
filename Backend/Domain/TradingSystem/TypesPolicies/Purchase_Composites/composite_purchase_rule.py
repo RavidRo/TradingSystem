@@ -106,10 +106,16 @@ class CompositePurchaseRule(PurchaseRule):
 
     def add(self, component: PurchaseRule, parent_id: str) -> Response[None]:
         from Backend.DataBase.Handlers.purchase_rules_handler import PurchaseRulesHandler
+        print(self.get_id())
+        print(parent_id)
         if self.get_id() == parent_id:
             res_save = PurchaseRulesHandler.get_instance().save(component)
+            print(res_save.succeeded())
+            print(res_save.get_msg())
             if res_save.succeeded():
                 res_commit = PurchaseRulesHandler.get_instance().commit_changes()
+                print(res_commit.succeeded())
+                print(res_commit.get_msg())
                 if res_commit.succeeded():
                     return Response(True, msg="Rule was added successfully!")
         if self.is_composite():
