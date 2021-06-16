@@ -2,6 +2,7 @@ from threading import Lock
 
 from sqlalchemy import Column, String, Float, ForeignKey, Table, ForeignKeyConstraint
 from sqlalchemy.orm import relationship, backref
+from sqlalchemy_json import MutableJson
 
 from Backend.DataBase.IHandler import IHandler
 from Backend.DataBase.database import mapper_registry
@@ -53,7 +54,8 @@ class OfferHandler(IHandler):
                               Column('product_name', String(30)),
                               Column('store_id', String(50), ForeignKey("stores.store_id")),
                               Column('store_name', String(50)),
-                              Column('username', String(30), ForeignKey('members.username'))
+                              Column('username', String(30), ForeignKey('members.username')),
+                              Column('pending_owners_approval', MutableJson)
                               )
 
         mapper_registry.map_imperatively(Offer, self.__offers, properties={
@@ -65,7 +67,8 @@ class OfferHandler(IHandler):
             '_Offer__product_name': self.__offers.c.product_name,
             '_Offer__username': self.__offers.c.username,
             '_Offer__status': relationship(OfferStatus, uselist=False, backref=backref("_offer", uselist=False),
-                                           cascade="save-update, merge, delete, delete-orphan")
+                                           cascade="save-update, merge, delete, delete-orphan"),
+            '_Offer__pending_owners_approval': self.__offers.c.pending_owners_approval
         })
 
     @staticmethod

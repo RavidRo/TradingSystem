@@ -82,7 +82,7 @@ class UserManager:
             response = user.register(username, password)
             if response.succeeded():
                 newUser = IUser.create_user()
-                newUser.change_state(Member(newUser, username))
+                newUser.change_state(response.get_obj())
                 UserManager._username_user[username] = newUser
             return response
 

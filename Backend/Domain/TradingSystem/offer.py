@@ -1,5 +1,7 @@
 import uuid
 
+from sqlalchemy import orm
+
 from Backend.DataBase.database import db_fail_response
 from Backend.response import Parsable, Response
 
@@ -34,13 +36,28 @@ class Offer(Parsable):
 
         self.__offer_handler = OfferHandler.get_instance()
 
+    @orm.reconstructor
+    def init_on_load(self):
+        self.__user_publisher = Publisher()
+        from Backend.Domain.TradingSystem.user_manager import UserManager
+        user = UserManager._get_user_by_username(self.__username)
+        self.__user_publisher.subscribe(user)
+
+        self.__managers_publisher = Publisher()
+        from Backend.Domain.TradingSystem.stores_manager import StoresManager
+        store_res = StoresManager.get_store(self.__store_id)
+        self.__managers_publisher.subscribe(store_res.get_obj())
+
+
     def remove_owner(self, username) -> None:
         if username in self.__pending_owners_approval:
             del self.__pending_owners_approval[username]
+            self.__offer_handler.commit_changes()
 
     def add_owner(self, username) -> None:
         if username not in self.__pending_owners_approval:
             self.__pending_owners_approval[username] = False
+            self.__offer_handler.commit_changes()
 
     def declare_price(self, price) -> Response[None]:
         for id in self.__pending_owners_approval:

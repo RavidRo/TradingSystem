@@ -49,10 +49,10 @@ class Guest(UserState):
             member = Member(self._user, username)
             self._member_handler.save(member)
             save_res = self._member_handler.commit_changes()
-            if not save_res.succeeded():
-                authentication.remove_user_credrnials(username)
-                return db_fail_response
-        return res
+            if save_res.succeeded():
+                return Response(True, member)
+            authentication.remove_user_credrnials(username)
+            return db_fail_response
 
     def delete_products_after_purchase(self):
         return self._cart.delete_products_after_purchase("guest")

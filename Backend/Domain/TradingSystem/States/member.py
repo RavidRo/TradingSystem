@@ -434,7 +434,7 @@ class Member(UserState):
         if not res.succeeded():
             return res
             # return Response(False, msg=f"this member do not own/manage store {store_id}")
-        return res.get_obj().approve_user_offer(product_id, offer_id)
+        return res.get_obj().approve_user_offer(product_id, offer_id, self._username)
 
     def reject_user_offer(self, store_id, product_id, offer_id) -> Response[None]:
         res = self.get_responsibility(store_id)

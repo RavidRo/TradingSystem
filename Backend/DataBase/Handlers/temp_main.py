@@ -62,18 +62,32 @@ def save():
     # if not res_save_prod.succeeded():
     #     print("save in cart: " + res_save_prod.get_msg())
     #
-    # res_save_prod2 = trading_system.save_product_in_cart(cookie2, store_res.get_obj(), product2_res.get_obj(), 5)
-    # if not res_save_prod2.succeeded():
-    #     print("save in cart: " + res_save_prod.get_msg())
-    #
     # res_create_offer = trading_system.create_offer(cookie2, store_res.get_obj(), product2_res.get_obj())
     # if not res_create_offer.succeeded():
     #     print("create offer: " + res_create_offer.get_msg())
     #
     # res_declare_price = trading_system.declare_price(cookie2, res_create_offer.get_obj(), 1.0)
     # if not res_declare_price.succeeded():
-    #     print("create offer: " + res_declare_price.get_msg())
+    #     print("declare price: " + res_declare_price.get_msg())
     #
+    # res_appoint_owner = trading_system.appoint_owner(cookie, store_res.get_obj(), "user2")
+    # if not res_appoint_owner.succeeded():
+    #     print("appoint owner: " + res_appoint_owner.get_msg())
+    #
+    # res_approve_offer = trading_system.approve_user_offer(cookie2, store_res.get_obj(), product2_res.get_obj(),
+    #                                                       res_create_offer.get_obj())
+    # if not res_approve_offer.succeeded():
+    #     print("approve offer: " + res_approve_offer.get_msg())
+    #
+    # # res_remove_responsibility = trading_system.remove_appointment(cookie, store_res.get_obj(), "user2")
+    # # if not res_remove_responsibility.succeeded():
+    # #     print("remove owner: " + res_remove_responsibility.get_msg())
+    #
+    # res_approve_offer = trading_system.approve_user_offer(cookie, store_res.get_obj(), product2_res.get_obj(),
+    #                                                       res_create_offer.get_obj())
+    # if not res_approve_offer.succeeded():
+    #     print("approve offer: " + res_approve_offer.get_msg())
+
     # res_appoint_owner = trading_system.appoint_owner(cookie, store_res.get_obj(), "user2")
     # if not res_appoint_owner.succeeded():
     #     print("appoint owner: " + res_appoint_owner.get_msg())
@@ -97,7 +111,7 @@ def save():
     # res_remove_perm = trading_system.remove_manager_permission(cookie, store_res2.get_obj(), "user4", "get appointments")
     # if not res_remove_perm.succeeded():
     #     print("remove permission: " + res_remove_perm.get_msg())
-
+    #
     # trading_system = TradingSystem.getInstance()
     # cookie2 = trading_system.enter_system()
     # res = trading_system.get_store("ea936e4b-9752-4559-8999-69e111b81aba")
@@ -107,33 +121,37 @@ def save():
     # if not res.succeeded():
     #     print("appoint manager: " + res.get_msg())
 
-
     trading_system = TradingSystem.getInstance()
-    cookie = trading_system.enter_system()
-    rule_details_complex = {"operator": "and"}
-    rule_details_simple = {"context": {"obj": "product", "identifier": "16"}, "operator": "less-than", "target": 17}
-    rule_simple_2 = {"context": {"obj": "category", "identifier": "milk products"}, "operator": "equals", "target": 9}
-    rule_type = "simple"
-    parent_id = "1"
-    res = trading_system.login(cookie, "user", "password")
-    res = trading_system.get_store("1682ef02-0326-4607-bf7b-f20326e9cf3d")
-    # res = trading_system.add_purchase_rule(cookie, "1682ef02-0326-4607-bf7b-f20326e9cf3d", {"operator": "or"}, "complex", "2")
-    # res = trading_system.add_purchase_rule(cookie, "1682ef02-0326-4607-bf7b-f20326e9cf3d", rule_simple_2, "simple", "12")
-    # res = trading_system.edit_purchase_rule(cookie, "1682ef02-0326-4607-bf7b-f20326e9cf3d", rule_simple_2, "6", "simple")
-    # res = trading_system.move_purchase_rule(cookie, "1682ef02-0326-4607-bf7b-f20326e9cf3d", "6", "3")
-    # res = trading_system.edit_purchase_rule(cookie, "1682ef02-0326-4607-bf7b-f20326e9cf3d", rule_details_complex, "12", "complex")
-    print(res.get_msg())
+    cookie2 = trading_system.enter_system()
+    res = trading_system.get_store("ea936e4b-9752-4559-8999-69e111b81aba")
+    trading_system.get_store("395eac04-8937-4760-b2b1-228fc2b42ed8")
+    res = trading_system.login(cookie2, "user2", "password2")
+    res = trading_system.appoint_owner(cookie2, "ea936e4b-9752-4559-8999-69e111b81aba", "user3")
+    if not res.succeeded():
+        print("appoint manager: " + res.get_msg())
+
+    # trading_system = TradingSystem.getInstance()
+    # cookie = trading_system.enter_system()
+    # rule_details_complex = {"operator": "and"}
+    # rule_details_simple = {"context": {"obj": "product", "identifier": "16"}, "operator": "less-than", "target": 17}
+    # rule_simple_2 = {"context": {"obj": "category", "identifier": "milk products"}, "operator": "equals", "target": 9}
+    # rule_type = "simple"
+    # parent_id = "1"
+    # res = trading_system.login(cookie, "user", "password")
+    # res = trading_system.get_store("1682ef02-0326-4607-bf7b-f20326e9cf3d")
+    # # res = trading_system.add_purchase_rule(cookie, "1682ef02-0326-4607-bf7b-f20326e9cf3d", {"operator": "or"}, "complex", "2")
+    # # res = trading_system.add_purchase_rule(cookie, "1682ef02-0326-4607-bf7b-f20326e9cf3d", rule_simple_2, "simple", "12")
+    # # res = trading_system.edit_purchase_rule(cookie, "1682ef02-0326-4607-bf7b-f20326e9cf3d", rule_simple_2, "6", "simple")
+    # # res = trading_system.move_purchase_rule(cookie, "1682ef02-0326-4607-bf7b-f20326e9cf3d", "6", "3")
+    # # res = trading_system.edit_purchase_rule(cookie, "1682ef02-0326-4607-bf7b-f20326e9cf3d", rule_details_complex, "12", "complex")
     # print(res.get_msg())
-    # res = trading_system.remove_purchase_rule(cookie, "f8cf6b2c-787d-4c0a-98a8-55176a518032", "4")
-
-
+    # # print(res.get_msg())
+    # # res = trading_system.remove_purchase_rule(cookie, "f8cf6b2c-787d-4c0a-98a8-55176a518032", "4")
 
     # result_test_clause = trading_system.add_purchase_rule(
     #     test_clause_details, "simple", test_then_clause_parent_id, clause="test"
     # )
     # print(result_test_clause.get_msg())
-
-
 
     # res = trading_system.add_purchase_rule(cookie, "762f018d-3739-4565-b545-50bcf42b34e2", rule_details, rule_type, parent_id)
     # # res = trading_system.remove_purchase_rule(cookie, "4c7d0d66-8c9e-4503-b5cc-78524e6e4c65", "4")

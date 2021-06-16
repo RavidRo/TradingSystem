@@ -55,7 +55,7 @@ class TradingSystem(object):
         PurchaseDetailsHandler.get_instance()
         OfferHandler.get_instance()
 
-        mapper_registry.metadata.drop_all(engine)
+        # mapper_registry.metadata.drop_all(engine)
         mapper_registry.metadata.create_all(engine)
 
         cookies = []
@@ -68,7 +68,7 @@ class TradingSystem(object):
             TradingSystem.__instance = self
             self.payment_manager = PaymentManager()
             try:
-                read_file = open("state.json", "r")
+                read_file = open("empty_state.json", "r")
             except:
                 e = FileNotFoundError("state.json file is absent")
                 logs.log_file_errors(e)

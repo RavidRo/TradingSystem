@@ -49,7 +49,6 @@ class Responsibility(Parsable):
         self._store_id = store.get_id()
         self._user_state = user_state
         self._store = store
-        store.add_owner(user_state.get_username().get_obj().value)
         self.__subscriber = subscriber
         if subscriber:
             self._store.subscribe(subscriber)
@@ -63,6 +62,7 @@ class Responsibility(Parsable):
 
         if self._user_state is not None:
             self._username = user_state.get_username().get_obj().get_val()
+            store.add_owner(user_state.get_username().get_obj().value)
         else:
             self._username = None
         self._responsibilities_handler = ResponsibilitiesHandler.get_instance()
@@ -84,6 +84,7 @@ class Responsibility(Parsable):
                 response_member.get_obj().add_responsibility(self, self._store_id)
                 self._user_state = response_member.get_obj()
                 self._username = self._user_state.get_username()
+                self._store.add_owner(self._user_state.get_username().get_obj().value)
             else:
                 return response_member
         for appointed in self._appointed:
