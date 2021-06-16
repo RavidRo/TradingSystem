@@ -36,7 +36,7 @@ class PurchaseRulesHandler(IHandler):
                                               Column('path', LtreeType, nullable=False),
                                               Column('type', String(200)),
                                               Column('clause', String(200)),
-                                              Column('context', String(200)),
+                                              # Column('context', String(400)),
                                               Column('context_obj', String(200)),
                                               Column('context_id', String(200)),
                                               Column('comparator', String(200)),
@@ -56,7 +56,7 @@ class PurchaseRulesHandler(IHandler):
             "_clause": column_property(self.__purchase_rules_table.c.clause),
             "_context_obj": column_property(self.__purchase_rules_table.c.context_obj),
             "_context_id": column_property(self.__purchase_rules_table.c.context_id),
-            "_context": column_property(self.__purchase_rules_table.c.context),
+            # "_context": column_property(self.__purchase_rules_table.c.context),
             "_constraint": column_property(self.__purchase_rules_table.c.constraint),
             "_comparator": column_property(self.__purchase_rules_table.c.comparator),
         }, polymorphic_on=self.__purchase_rules_table.c.type)

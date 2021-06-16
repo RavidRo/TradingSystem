@@ -19,7 +19,6 @@ class PurchaseLeaf(PurchaseRule):
 
     def __init__(self, leaf_details: dict, parent=None):
         super().__init__(parent)
-        self._context = json.dumps(leaf_details['context'])
         self._context_obj = leaf_details['context']['obj']
         self._context_id = leaf_details['context'].get('identifier')
         self._comparator = leaf_details['operator']
@@ -77,6 +76,6 @@ class PurchaseLeaf(PurchaseRule):
 
     def parse(self):
         return {"id": self.get_id(),
-                "context": self._context,
+                "context": {"obj": self._context_obj, "identifier": self._context_id},
                 "operator": self._comparator,
                 "target": self._constraint}
