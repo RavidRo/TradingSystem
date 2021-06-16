@@ -21,8 +21,8 @@ from Backend.settings import Settings
 
 
 class UserManager:
-    __cookie_user: dict[str, IUser] = {}
-    __username_user: dict[str, User] = {}
+    _cookie_user: dict[str, IUser] = {}
+    _username_user: dict[str, User] = {}
 
     @staticmethod
     def __deligate_to_user(cookie, func):
@@ -33,13 +33,13 @@ class UserManager:
 
     @staticmethod
     def __get_user_by_cookie(cookie) -> IUser or None:
-        if cookie not in UserManager.__cookie_user:
+        if cookie not in UserManager._cookie_user:
             return None
-        return UserManager.__cookie_user[cookie]
+        return UserManager._cookie_user[cookie]
 
     @staticmethod
     def _get_user_by_username(username, store_id=None) -> IUser or None:
-        if username not in UserManager.__username_user:
+        if username not in UserManager._username_user:
             user_res = MemberHandler.get_instance().load(username)
             if not user_res.succeeded():
                 return None
@@ -53,8 +53,8 @@ class UserManager:
                 member.get_responsibility(store_id)
             member.notifications_lock = threading.Lock()
             member._member_handler = MemberHandler.get_instance()
-            UserManager.__username_user[username] = user
-        return UserManager.__username_user[username]
+            UserManager._username_user[username] = user
+        return UserManager._username_user[username]
 
     @staticmethod
     def __create_cookie() -> str:
@@ -65,9 +65,9 @@ class UserManager:
     @staticmethod
     def enter_system(register=True) -> str:
         cookie = UserManager.__create_cookie()
-        UserManager.__cookie_user[cookie] = IUser.create_user()
+        UserManager._cookie_user[cookie] = IUser.create_user()
         if register:
-            UserManager.__cookie_user[cookie].register_statistics()
+            UserManager._cookie_user[cookie].register_statistics()
         return cookie
 
     @staticmethod
@@ -83,7 +83,7 @@ class UserManager:
             if response.succeeded():
                 newUser = IUser.create_user()
                 newUser.change_state(Member(newUser, username))
-                UserManager.__username_user[username] = newUser
+                UserManager._username_user[username] = newUser
             return response
 
         return UserManager.__deligate_to_user(cookie, func)
@@ -96,10 +96,10 @@ class UserManager:
 
             # If response succeeded we want to connect the cookie to the username
             if response.succeeded():
-                for old_username in UserManager.__username_user:
+                for old_username in UserManager._username_user:
                     if old_username == username:
-                        old_user = UserManager.__username_user[old_username]
-                        UserManager.__cookie_user[cookie] = old_user
+                        old_user = UserManager._username_user[old_username]
+                        UserManager._cookie_user[cookie] = old_user
                         old_user.connect(user.get_communicate())
                         return response
                 member_res = MemberHandler.get_instance().load(username)
@@ -115,10 +115,9 @@ class UserManager:
                     if res_commit.succeeded():
                         member.set_user(user)
                         user.change_state(member)
-                        UserManager.__username_user[username] = user
+                        UserManager._username_user[username] = user
                     return res_commit
                 return res
-
 
                 # for user_cookie in UserManager.__cookie_user:
                 #     old_user = UserManager.__cookie_user[user_cookie]
@@ -130,7 +129,7 @@ class UserManager:
                 #         UserManager.__cookie_user[cookie] = old_user
                 #         old_user.connect(user.get_communicate())
             # *This action will delete the current cart but will restore the old one and other user details
-            UserManager.__cookie_user[cookie].register_statistics()
+            UserManager._cookie_user[cookie].register_statistics()
             return response
 
         return UserManager.__deligate_to_user(cookie, func)
@@ -160,7 +159,7 @@ class UserManager:
     # 2.8
     @staticmethod
     def change_product_quantity_in_cart(
-        cookie: str, store_id, product_id, new_amount
+            cookie: str, store_id, product_id, new_amount
     ) -> Response[None]:
         func: Callable[[User], Response] = lambda user: user.change_product_quantity_in_cart(
             store_id, product_id, new_amount
@@ -222,13 +221,13 @@ class UserManager:
     # Creating a new product a the store and setting its quantity to 0
     @staticmethod
     def create_product(
-        cookie: str,
-        store_id: str,
-        name: str,
-        category: str,
-        price: float,
-        quantity: int,
-        keywords: list[str] = None,
+            cookie: str,
+            store_id: str,
+            name: str,
+            category: str,
+            price: float,
+            quantity: int,
+            keywords: list[str] = None,
     ) -> Response[str]:
         func: Callable[[User], Response] = lambda user: user.create_product(
             store_id, name, category, price, quantity, keywords
@@ -238,7 +237,7 @@ class UserManager:
     # 4.1
     @staticmethod
     def remove_product_from_store(
-        cookie: str, store_id: str, product_id: str
+            cookie: str, store_id: str, product_id: str
     ) -> Response[PrimitiveParsable[int]]:
         func: Callable[[User], Response] = lambda user: user.remove_product_from_store(
             store_id, product_id
@@ -255,7 +254,7 @@ class UserManager:
     # 4.1
     @staticmethod
     def change_product_quantity_in_store(
-        cookie: str, store_id: str, product_id: str, quantity: int
+            cookie: str, store_id: str, product_id: str, quantity: int
     ) -> Response[None]:
         func: Callable[[User], Response] = lambda user: user.change_product_quantity_in_store(
             store_id, product_id, quantity
@@ -265,13 +264,13 @@ class UserManager:
     # 4.1
     @staticmethod
     def edit_product_details(
-        cookie: str,
-        store_id: str,
-        product_id: str,
-        new_name: str,
-        new_category: str,
-        new_price: float,
-        keywords: list[str] = None,
+            cookie: str,
+            store_id: str,
+            product_id: str,
+            new_name: str,
+            new_category: str,
+            new_price: float,
+            keywords: list[str] = None,
     ) -> Response[None]:
         func: Callable[[User], Response] = lambda user: user.edit_product_details(
             store_id, product_id, new_name, new_category, new_price, keywords
@@ -281,7 +280,7 @@ class UserManager:
     # 4.2
     @staticmethod
     def add_discount(
-        cookie: str, store_id: str, discount_data: dict, exist_id: str, condition_type: str = None
+            cookie: str, store_id: str, discount_data: dict, exist_id: str, condition_type: str = None
     ):
         func: Callable[[User], Response] = lambda user: user.add_discount(
             store_id, discount_data, exist_id, condition_type
@@ -309,12 +308,12 @@ class UserManager:
 
     @staticmethod
     def edit_simple_discount(
-        cookie: str,
-        store_id: str,
-        discount_id: str,
-        percentage: float = None,
-        context: dict = None,
-        duration=None,
+            cookie: str,
+            store_id: str,
+            discount_id: str,
+            percentage: float = None,
+            context: dict = None,
+            duration=None,
     ):
         func: Callable[[User], Response] = lambda user: user.edit_simple_discount(
             store_id, discount_id, percentage, context, duration
@@ -323,11 +322,11 @@ class UserManager:
 
     @staticmethod
     def edit_complex_discount(
-        cookie: str,
-        store_id: str,
-        discount_id: str,
-        complex_type: str = None,
-        decision_rule: str = None,
+            cookie: str,
+            store_id: str,
+            discount_id: str,
+            complex_type: str = None,
+            decision_rule: str = None,
     ):
         func: Callable[[User], Response] = lambda user: user.edit_complex_discount(
             store_id, discount_id, complex_type, decision_rule
@@ -337,12 +336,12 @@ class UserManager:
     # 4.2
     @staticmethod
     def add_purchase_rule(
-        cookie: str,
-        store_id: str,
-        rule_details: dict,
-        rule_type: str,
-        parent_id: str,
-        clause: str = None,
+            cookie: str,
+            store_id: str,
+            rule_details: dict,
+            rule_type: str,
+            parent_id: str,
+            clause: str = None,
     ):
         func: Callable[[User], Response] = lambda user: user.add_purchase_rule(
             store_id, rule_details, rule_type, parent_id, clause
@@ -358,7 +357,7 @@ class UserManager:
     # 4.2
     @staticmethod
     def edit_purchase_rule(
-        cookie: str, store_id: str, rule_details: dict, rule_id: str, rule_type: str
+            cookie: str, store_id: str, rule_details: dict, rule_id: str, rule_type: str
     ):
         func: Callable[[User], Response] = lambda user: user.edit_purchase_rule(
             store_id, rule_details, rule_id, rule_type
@@ -400,7 +399,7 @@ class UserManager:
     # 4.6
     @staticmethod
     def add_manager_permission(
-        cookie: str, store_id: str, username: str, permission: Permission
+            cookie: str, store_id: str, username: str, permission: Permission
     ) -> Response[None]:
         func: Callable[[User], Response] = lambda user: user.add_manager_permission(
             store_id, username, permission
@@ -410,7 +409,7 @@ class UserManager:
     # 4.6
     @staticmethod
     def remove_manager_permission(
-        cookie: str, store_id: str, username: str, permission: Permission
+            cookie: str, store_id: str, username: str, permission: Permission
     ) -> Response[None]:
         func = lambda user: user.remove_manager_permission(store_id, username, permission)
         return UserManager.__deligate_to_user(cookie, func)
@@ -435,7 +434,7 @@ class UserManager:
     # 4.11
     @staticmethod
     def get_store_purchase_history(
-        cookie: str, store_id: str
+            cookie: str, store_id: str
     ) -> Response[ParsableList[PurchaseDetails]]:
         func = lambda user: user.get_store_purchase_history(store_id)
         return UserManager.__deligate_to_user(cookie, func)
@@ -446,7 +445,7 @@ class UserManager:
     # 6.4
     @staticmethod
     def get_any_store_purchase_history_admin(
-        cookie: str, store_id: str
+            cookie: str, store_id: str
     ) -> Response[ParsableList[PurchaseDetails]]:
         func: Callable[[User], Response] = lambda user: user.get_any_store_purchase_history_admin(
             store_id
@@ -456,7 +455,7 @@ class UserManager:
     # 6.4
     @staticmethod
     def get_any_user_purchase_history_admin(
-        cookie: str, username: str
+            cookie: str, username: str
     ) -> Response[ParsableList[PurchaseDetails]]:
         func: Callable[[User], Response] = lambda user: user.get_any_user_purchase_history_admin(
             username
@@ -478,11 +477,11 @@ class UserManager:
     # =====================
     @staticmethod
     def _get_cookie_user():
-        return UserManager.__cookie_user
+        return UserManager._cookie_user
 
     @staticmethod
     def _get_username_user():
-        return UserManager.__username_user
+        return UserManager._username_user
 
     @staticmethod
     def get_user_received_notifications(cookie: str) -> Response[ParsableList[PurchaseDetails]]:
@@ -553,19 +552,6 @@ class UserManager:
         func: Callable[[User], Response] = lambda user: user.get_users_statistics()
         return UserManager.__deligate_to_user(cookie, func)
 
-
-def register_admins() -> None:
-    settings = Settings.get_instance(False)
-    admins = settings.get_admins()
-    if len(admins) <= 0:
-        raise Exception(
-            "At least one admin should be at the system. Check config.json to add admins."
-        )
-    for admin in admins:
-        cookie = UserManager.enter_system(False)
-        UserManager.register(admin, settings.get_password(), cookie)
-        Statistics.getInstance().subscribe(UserManager._get_user_by_username(admin))
-
     @staticmethod
     def get_member(res_id):
         for user in UserManager._username_user.values():
@@ -582,3 +568,16 @@ def register_admins() -> None:
             return member_res
 
         return db_fail_response
+
+
+def register_admins() -> None:
+    settings = Settings.get_instance(False)
+    admins = settings.get_admins()
+    if len(admins) <= 0:
+        raise Exception(
+            "At least one admin should be at the system. Check config.json to add admins."
+        )
+    for admin in admins:
+        cookie = UserManager.enter_system(False)
+        UserManager.register(admin, settings.get_password(), cookie)
+        Statistics.getInstance().subscribe(UserManager._get_user_by_username(admin))
