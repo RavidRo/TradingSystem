@@ -1,3 +1,5 @@
+import sqlalchemy
+
 from Backend.DataBase.Handlers.member_handler import MemberHandler
 from Backend.DataBase.Handlers.offer_handler import OfferHandler
 from Backend.DataBase.Handlers.product_handler import ProductHandler
@@ -5,7 +7,7 @@ from Backend.DataBase.Handlers.purchase_details_handler import PurchaseDetailsHa
 from Backend.DataBase.Handlers.responsibilities_handler import ResponsibilitiesHandler
 from Backend.DataBase.Handlers.shopping_bag_handler import ShoppingBagHandler
 from Backend.DataBase.Handlers.store_handler import StoreHandler
-from Backend.DataBase.database import mapper_registry, engine
+from Backend.DataBase.database import mapper_registry, engine, session
 from Backend.Domain.TradingSystem.Responsibilities.responsibility import Responsibility
 from Backend.Domain.TradingSystem.States.member import Member
 from Backend.Domain.TradingSystem.store import Store
@@ -14,7 +16,7 @@ from Backend.Service.trading_system import TradingSystem
 
 
 def save():
-    # mapper_registry.metadata.drop_all(engine)
+    mapper_registry.metadata.drop_all(engine)
     mapper_registry.metadata.create_all(engine)
     trading_system = TradingSystem.getInstance()
 
@@ -28,13 +30,30 @@ def save():
     if not res.succeeded():
         print("login: " + res.get_msg())
 
-    # store_res = trading_system.create_store(cookie, "The Store")
-    # if not store_res.succeeded():
-    #     print("open_store: " + store_res.get_msg())
+    store_res = trading_system.create_store(cookie, "The Store")
+    if not store_res.succeeded():
+        print("open_store: " + store_res.get_msg())
 
-    get_stores_res = trading_system.get_stores_details()
-    if not get_stores_res.succeeded():
-        print("get_all_stores: " + get_stores_res.get_msg())
+    product_res = trading_system.create_product(cookie, store_res.get_obj(), "The Product", "The Category", 5, 8,
+                                                ["The Keyword A", "The Keyword B"])
+    if not product_res.succeeded():
+        print("add_product: " + product_res.get_msg())
+
+    save_cart_res = trading_system.save_product_in_cart(cookie, store_res.get_obj(), product_res.get_obj(), 2)
+    if not save_cart_res.succeeded():
+        print("save in cart: " + save_cart_res.get_msg())
+
+    purchase_cart_res = trading_system.purchase_cart(cookie, 15)
+    if not purchase_cart_res.succeeded():
+        print("purchase cart: " + purchase_cart_res.get_msg())
+
+    send_payment_res = trading_system.send_payment(cookie, "", "")
+    if not send_payment_res.succeeded():
+        print("send payment: " + send_payment_res.get_msg())
+
+    res_create_offer = trading_system.create_offer(cookie, store_res.get_obj(), product_res.get_obj())
+    if not res_create_offer.succeeded():
+        print("create offer: " + res_create_offer.get_msg())
 
 
     # cookie = trading_system.enter_system()
@@ -203,6 +222,9 @@ def save():
 
 
 if __name__ == '__main__':
+    stmt = sqlalchemy.sql.expression.text("CREATE EXTENSION IF NOT EXISTS ltree;")
+    session.execute(stmt)
+    session.commit()
     member_handler = MemberHandler.get_instance()
     store_handler = StoreHandler.get_instance()
     responsibility_handler = ResponsibilitiesHandler.get_instance()

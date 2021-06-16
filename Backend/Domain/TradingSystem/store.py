@@ -394,11 +394,12 @@ class Store(Parsable, Subscriber):
             prod.get_offered_price(username) * quantity
             for _, (prod, quantity) in product_to_quantity.items()
         ]
-        total_discount = self.__discount_policy.applyDiscount(
-            products_to_quantities=product_to_quantity, user_age=user_age, username=username
-        )
-        final_price = sum(non_discount_prices) - total_discount
-        return final_price if final_price >= 0 else 0
+        # total_discount = self.__discount_policy.applyDiscount(
+        #     products_to_quantities=product_to_quantity, user_age=user_age, username=username
+        # )
+        # final_price = sum(non_discount_prices) - total_discount
+        # return final_price if final_price >= 0 else 0
+        return sum(non_discount_prices)
 
     def clear_offers(self, product_ids: list[str], username):
         for product_id in product_ids:

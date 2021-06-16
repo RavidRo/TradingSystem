@@ -333,6 +333,7 @@ class Responsibility(Parsable):
 
         import itertools
 
+        self.get_user_state()
         my_username = self._user_state.get_username().object.value
         nested_names = [appointee.get_owners_names() for appointee in self._appointed]
         List_flat = list(itertools.chain(*nested_names))
