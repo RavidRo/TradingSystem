@@ -207,6 +207,7 @@ class ShoppingBag(IShoppingBag):
         product_ids = [product_id for product_id in self.__pending_products_to_quantity]
         self.__store.clear_offers(product_ids, user_name)
         self.__store.update_store_history(purchase_details)
+        self.__store.get_founder().get_user_state()
         self.__pending_products_to_quantity.clear()
 
 

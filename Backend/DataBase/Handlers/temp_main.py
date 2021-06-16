@@ -1,4 +1,5 @@
-from Backend.DataBase.Handlers.discounts_handler import DiscountsHandler
+import sqlalchemy
+
 from Backend.DataBase.Handlers.member_handler import MemberHandler
 from Backend.DataBase.Handlers.offer_handler import OfferHandler
 from Backend.DataBase.Handlers.product_handler import ProductHandler
@@ -6,7 +7,7 @@ from Backend.DataBase.Handlers.purchase_details_handler import PurchaseDetailsHa
 from Backend.DataBase.Handlers.responsibilities_handler import ResponsibilitiesHandler
 from Backend.DataBase.Handlers.shopping_bag_handler import ShoppingBagHandler
 from Backend.DataBase.Handlers.store_handler import StoreHandler
-from Backend.DataBase.database import mapper_registry, engine
+from Backend.DataBase.database import mapper_registry, engine, session
 from Backend.Domain.TradingSystem.Responsibilities.responsibility import Responsibility
 from Backend.Domain.TradingSystem.States.member import Member
 from Backend.Domain.TradingSystem.store import Store
@@ -15,9 +16,46 @@ from Backend.Service.trading_system import TradingSystem
 
 
 def save():
-    # mapper_registry.metadata.drop_all(engine)
-    # mapper_registry.metadata.create_all(engine)
-    # trading_system = TradingSystem.getInstance()
+    mapper_registry.metadata.drop_all(engine)
+    mapper_registry.metadata.create_all(engine)
+    trading_system = TradingSystem.getInstance()
+
+    cookie = trading_system.enter_system()
+
+    # res = trading_system.register(cookie, "me", "passme")
+    # if not res.succeeded():
+    #     print("register: " + res.get_msg())
+    #
+    res = trading_system.login(cookie, "tali", "cool-kidz")
+    if not res.succeeded():
+        print("login: " + res.get_msg())
+
+    store_res = trading_system.create_store(cookie, "The Store")
+    if not store_res.succeeded():
+        print("open_store: " + store_res.get_msg())
+
+    product_res = trading_system.create_product(cookie, store_res.get_obj(), "The Product", "The Category", 5, 8,
+                                                ["The Keyword A", "The Keyword B"])
+    if not product_res.succeeded():
+        print("add_product: " + product_res.get_msg())
+
+    save_cart_res = trading_system.save_product_in_cart(cookie, store_res.get_obj(), product_res.get_obj(), 2)
+    if not save_cart_res.succeeded():
+        print("save in cart: " + save_cart_res.get_msg())
+
+    purchase_cart_res = trading_system.purchase_cart(cookie, 15)
+    if not purchase_cart_res.succeeded():
+        print("purchase cart: " + purchase_cart_res.get_msg())
+
+    send_payment_res = trading_system.send_payment(cookie, "", "")
+    if not send_payment_res.succeeded():
+        print("send payment: " + send_payment_res.get_msg())
+
+    res_create_offer = trading_system.create_offer(cookie, store_res.get_obj(), product_res.get_obj())
+    if not res_create_offer.succeeded():
+        print("create offer: " + res_create_offer.get_msg())
+
+
     # cookie = trading_system.enter_system()
     # res = trading_system.register(cookie, "user", "password")
     # if not res.succeeded():
@@ -44,11 +82,11 @@ def save():
     # store_res = trading_system.create_store(cookie, "The Store")
     # if not store_res.succeeded():
     #     print("open_store: " + store_res.get_msg())
-
+    #
     # store_res2 = trading_system.create_store(cookie2, "The Store of cookie2")
     # if not store_res2.succeeded():
     #     print("open_store: " + store_res2.get_msg())
-
+    #
     # product_res = trading_system.create_product(cookie, store_res.get_obj(), "The Product", "The Category", 5, 8,
     #                                             ["The Keyword A", "The Keyword B"])
     # if not product_res.succeeded():
@@ -58,7 +96,7 @@ def save():
     #                                              ["The Keyword A2", "The Keyword B2"])
     # if not product2_res.succeeded():
     #     print("add_product: " + product2_res.get_msg())
-
+    #
     # res_save_prod = trading_system.save_product_in_cart(cookie2, store_res.get_obj(), product_res.get_obj(), 2)
     # if not res_save_prod.succeeded():
     #     print("save in cart: " + res_save_prod.get_msg())
@@ -88,7 +126,7 @@ def save():
     #                                                       res_create_offer.get_obj())
     # if not res_approve_offer.succeeded():
     #     print("approve offer: " + res_approve_offer.get_msg())
-    #
+
     # res_appoint_owner = trading_system.appoint_owner(cookie, store_res.get_obj(), "user2")
     # if not res_appoint_owner.succeeded():
     #     print("appoint owner: " + res_appoint_owner.get_msg())
@@ -121,7 +159,7 @@ def save():
     # res = trading_system.appoint_owner(cookie2, "ea936e4b-9752-4559-8999-69e111b81aba", "user3")
     # if not res.succeeded():
     #     print("appoint manager: " + res.get_msg())
-    #
+
     # trading_system = TradingSystem.getInstance()
     # cookie2 = trading_system.enter_system()
     # res = trading_system.get_store("ea936e4b-9752-4559-8999-69e111b81aba")
@@ -130,34 +168,15 @@ def save():
     # res = trading_system.appoint_owner(cookie2, "ea936e4b-9752-4559-8999-69e111b81aba", "user3")
     # if not res.succeeded():
     #     print("appoint manager: " + res.get_msg())
-    #
-    trading_system = TradingSystem.getInstance()
-    cookie = trading_system.enter_system()
-    trading_system.login(cookie, "user", "password")
-    discount_data = {'discount_type': 'simple',
-            'percentage': 75.0,
-            'context': {
-                'obj': 'product',
-                'id': '123'
-            }}
 
-    max_data = {'discount_type': 'complex',
-            'type': 'max'}
-
-    res = trading_system.move_discount(cookie, "af67f910-8d53-4971-bd97-54ffb4e9a770", "18", "2")
-
-    # res = trading_system.remove_discount(cookie, "af67f910-8d53-4971-bd97-54ffb4e9a770", "8")
-
-    # trading_system.edit_complex_discount(cookie, "af67f910-8d53-4971-bd97-54ffb4e9a770", "9", complex_type="or")
-
-    # trading_system.remove_discount(cookie, "b8e7dfd4-1c12-4d76-a697-da60bc33fffc", "11")
-    # trading_system.edit_simple_discount(cookie, "b8e7dfd4-1c12-4d76-a697-da60bc33fffc", "7", percentage=55.0, context={"obj": "product", "id": "123"})
+    # trading_system = TradingSystem.getInstance()
+    # cookie = trading_system.enter_system()
     # rule_details_complex = {"operator": "and"}
     # rule_details_simple = {"context": {"obj": "product", "identifier": "16"}, "operator": "less-than", "target": 17}
     # rule_simple_2 = {"context": {"obj": "category", "identifier": "milk products"}, "operator": "equals", "target": 9}
     # rule_type = "simple"
     # parent_id = "1"
-    #
+
     # complex_rule_details = {"operator": "conditional"}
     # test_clause_details = {
     #     "context": {"obj": "product", "identifier": "1"},
@@ -172,13 +191,13 @@ def save():
     # trading_system = TradingSystem.getInstance()
     # cookie = trading_system.enter_system()
     # res = trading_system.login(cookie, "user", "password")
-    # res = trading_system.get_store("123b132f-5493-4e18-9e97-88beef985688")
-    # # res = trading_system.remove_purchase_rule(cookie, "123b132f-5493-4e18-9e97-88beef985688", "15")
-    # # result_complex = trading_system.add_purchase_rule(cookie, "123b132f-5493-4e18-9e97-88beef985688", complex_rule_details, "complex", "2")
-    # # result_test_clause = trading_system.add_purchase_rule(cookie, "123b132f-5493-4e18-9e97-88beef985688", test_clause_details, "simple", "5", clause="test")
-    # # result_then_clause = trading_system.add_purchase_rule(cookie, "123b132f-5493-4e18-9e97-88beef985688", then_clause_details, "simple", "5", clause="then")
-    # # result_then_clause = trading_system.edit_purchase_rule(cookie, "123b132f-5493-4e18-9e97-88beef985688",
-    # #                                                        {"operator": "and"}, "5", "complex")
+    # res = trading_system.get_store("029d6bdc-dd7c-407d-8a27-9fa616018f70")
+    # # res = trading_system.remove_purchase_rule(cookie, "029d6bdc-dd7c-407d-8a27-9fa616018f70", "15")
+    # # result_complex = trading_system.add_purchase_rule(cookie, "029d6bdc-dd7c-407d-8a27-9fa616018f70", complex_rule_details, "complex", "2")
+    # # result_test_clause = trading_system.add_purchase_rule(cookie, "029d6bdc-dd7c-407d-8a27-9fa616018f70", test_clause_details, "simple", "19", clause="test")
+    # # result_then_clause = trading_system.add_purchase_rule(cookie, "029d6bdc-dd7c-407d-8a27-9fa616018f70", then_clause_details, "simple", "19", clause="then")
+    # result_then_clause = trading_system.edit_purchase_rule(cookie, "029d6bdc-dd7c-407d-8a27-9fa616018f70",
+    #                                                        then_clause_details, "27", "simple")
     print("kal")
 
     # res = trading_system.add_purchase_rule(cookie, "62bb60df-c851-485f-a57c-13274e403c39", {"operator": "or"}, "complex", "2")
@@ -203,6 +222,9 @@ def save():
 
 
 if __name__ == '__main__':
+    stmt = sqlalchemy.sql.expression.text("CREATE EXTENSION IF NOT EXISTS ltree;")
+    session.execute(stmt)
+    session.commit()
     member_handler = MemberHandler.get_instance()
     store_handler = StoreHandler.get_instance()
     responsibility_handler = ResponsibilitiesHandler.get_instance()
@@ -210,7 +232,6 @@ if __name__ == '__main__':
     product_handler = ProductHandler.get_instance()
     purchase_details_handler = PurchaseDetailsHandler.get_instance()
     offer_handler = OfferHandler.get_instance()
-    discounts_handler = DiscountsHandler.get_instance()
     save()
 
     # trading_system = TradingSystem.getInstance()

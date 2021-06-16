@@ -9,23 +9,15 @@ from Backend.response import ParsableList, Response
 from Backend.settings import Settings
 
 
-def register_admins() -> None:
-    settings = Settings.get_instance(False)
-    admins = settings.get_admins()
-    if len(admins) <= 0:
-        raise Exception(
-            "At least one admin should be at the system. Check config.json to add admins."
-        )
+
+def register_admins(username, password) -> None:
     from Backend.DataBase.Handlers.member_handler import MemberHandler
-    for username in admins:
-        res = authentication.register(username, settings.get_password())
-        if res.succeeded():
-            admin = Admin(None, username)
-            MemberHandler.get_instance().save(admin)
-            MemberHandler.get_instance().commit_changes()
+    res = authentication.register(username, password)
+    if res.succeeded():
+        admin = Admin(None, username)
+        MemberHandler.get_instance().save(admin)
+        MemberHandler.get_instance().commit_changes()
 
-
-register_admins()
 
 
 def is_username_admin(username) -> bool:
@@ -53,6 +45,7 @@ class Guest(UserState):
                 return Response(True, member)
             authentication.remove_user_credrnials(username)
             return db_fail_response
+        return res
 
     def delete_products_after_purchase(self):
         return self._cart.delete_products_after_purchase("guest")

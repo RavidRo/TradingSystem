@@ -4,5 +4,5 @@
 	"timer_length": 600,
 	"payment_system": "https://cs-bgu-wsep.herokuapp.com/",
 	"supply_system": "https://cs-bgu-wsep.herokuapp.com/",
-	"DB": "db"
+	"DB": "postgresql://nklfongbputsdr:780ea33e04aa8fb36400cd72967b97385d186978a31d262416b53791ae93c425@ec2-54-155-35-88.eu-west-1.compute.amazonaws.com:5432/d58n31ogjjv4sj"
 }

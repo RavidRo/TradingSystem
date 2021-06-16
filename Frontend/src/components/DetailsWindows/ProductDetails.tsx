@@ -11,7 +11,7 @@ const ProductDetails: FC<ProductDetailsProps> = ({ product }) => {
 	const details = [
 		{ field: 'Quantity', value: product.quantity.toString() },
 		{ field: 'Price', value: product.price.toFixed(2) },
-		{ field: 'Category', value: 'Some category' },
+		{ field: 'Category', value: product.category },
 	];
 	return (
 		<DetailsWindow header={`${product.name} - ${product.id}`} details={details}>

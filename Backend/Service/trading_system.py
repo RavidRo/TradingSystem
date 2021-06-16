@@ -15,6 +15,7 @@ from Backend.DataBase.Handlers.responsibilities_handler import ResponsibilitiesH
 from Backend.DataBase.Handlers.shopping_bag_handler import ShoppingBagHandler
 from Backend.DataBase.Handlers.store_handler import StoreHandler
 from Backend.DataBase.database import mapper_registry, engine, session
+from Backend.Domain.TradingSystem import trading_system_manager
 from Backend.Service import logs
 from Backend.response import Response
 
@@ -57,6 +58,8 @@ class TradingSystem(object):
 
         # mapper_registry.metadata.drop_all(engine)
         mapper_registry.metadata.create_all(engine)
+
+        TradingSystemManager.register_admins()
 
         cookies = []
         store_ids = []

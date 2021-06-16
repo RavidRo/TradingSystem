@@ -10,9 +10,12 @@ class SupplyAdapter:
 
     def __init__(self):
         self.__outside_supplyment = OutsideSupplyment.getInstance()
-        response = self.__send_handshake()
+        try:
+            response = self.__send_handshake()
+        except:
+            raise "Could not connect properly to outside supply system"
         if response.status_code != 200 or response.text != "OK":
-            raise "Could not connect properly to outside systems"
+            raise "Could not connect properly to outside supply system"
 
     def __send(self, action_type, paramaters={}):
         return requests.post(
@@ -22,6 +25,14 @@ class SupplyAdapter:
         )
 
     def __send_handshake(self):
+        if SupplyAdapter.use_stub:
+
+            class Handshake:
+                def __init__(self):
+                    self.status_code = 200
+                    self.text = "OK"
+
+            return Handshake()
         return self.__send("handshake")
 
     def __send_supply(self, name, address, city, country, zip):

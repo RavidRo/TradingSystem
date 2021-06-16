@@ -14,7 +14,12 @@ class StoresManager:
     # 2.5
     @staticmethod
     def get_stores_details() -> Response[ParsableList[Store]]:
-        return Response(True, ParsableList(StoresManager.__stores))
+        store_ids_res = StoresManager.__store_handler.load_ids()
+        if store_ids_res.succeeded():
+            for id in store_ids_res.get_obj():
+                StoresManager.get_store(id)
+            return Response(True, ParsableList(StoresManager.__stores))
+        return store_ids_res
 
     # 2.5
     @staticmethod

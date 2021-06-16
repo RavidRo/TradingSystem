@@ -1,6 +1,8 @@
 import threading
 from datetime import date
 
+from sqlalchemy import orm
+
 from Backend.DataBase.database import db_fail_response
 from Backend.Service.DataObjects.statistics_data import StatisticsData
 from Backend.Domain.TradingSystem.offer import Offer
@@ -12,6 +14,7 @@ from Backend.response import Response, ParsableList, PrimitiveParsable
 from Backend.Domain.TradingSystem.purchase_details import PurchaseDetails
 
 from .user_state import UserState
+from ..statistics import Statistics
 
 
 class Member(UserState):
@@ -29,7 +32,8 @@ class Member(UserState):
         if store_id not in self._responsibilities:
             self._responsibilities[store_id] = responsibility
         if responsibility.get_dal_responsibility_id() not in self._responsibilities_ids:
-            self._member_handler.update_responsibilities_ids(self._username, self._responsibilities_ids + [responsibility.get_dal_responsibility_id()])
+            self._member_handler.update_responsibilities_ids(self._username, self._responsibilities_ids + [
+                responsibility.get_dal_responsibility_id()])
 
     def remove_responsibility(self, store_id):
         self._responsibilities.pop(store_id)
@@ -47,7 +51,6 @@ class Member(UserState):
         if cart_res.succeeded():
             self._cart = cart_res.get_obj()
         return cart_res
-
 
     def __init__(
             self, user, username, responsibilities=None, purchase_details=None, cart=None
@@ -68,6 +71,10 @@ class Member(UserState):
         self._notifications: list[str] = []
         self.notifications_lock = threading.Lock()
         self._offers: dict[str, Offer] = {}
+
+    @orm.reconstructor
+    def init_on_load(self):
+        self._statistics = Statistics.getInstance()
 
     def login(self, username, password):
         return Response(False, msg="Members cannot re-login")
@@ -140,7 +147,8 @@ class Member(UserState):
         store_res = StoresManager.get_store(store_id)
         if not store_res.succeeded():
             return store_res
-        res = ResponsibilitiesHandler.get_instance().load_res_and_appointments(store_res.get_obj().get_res_id(), store_res.get_obj())
+        res = ResponsibilitiesHandler.get_instance().load_res_and_appointments(store_res.get_obj().get_res_id(),
+                                                                               store_res.get_obj())
         if res.succeeded():
             founder_responsibility = res.get_obj()
             responsibility = self.get_own_responsibility(founder_responsibility)
@@ -152,7 +160,6 @@ class Member(UserState):
             # responsibility.get_user_state()
             return Response(True, obj=responsibility)
         return res
-
 
     def get_purchase_history(self):
         return Response[ParsableList[PurchaseDetails]](

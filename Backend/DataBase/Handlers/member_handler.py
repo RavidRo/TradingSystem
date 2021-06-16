@@ -36,6 +36,7 @@ class MemberHandler(IHandler):
                                Column('responsibilities_ids', ARRAY(Integer)))
 
         mapper_registry.map_imperatively(Member, self.__members, properties={
+            '_notifications': self.__members.c.notifications,
             "_responsibilities_ids": self.__members.c.responsibilities_ids,
             '_username': self.__members.c.username,
             '_purchase_details': relationship(PurchaseDetails, cascade="all, delete-orphan"),

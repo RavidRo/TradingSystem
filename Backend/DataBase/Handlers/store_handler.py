@@ -196,6 +196,21 @@ class StoreHandler(IHandler):
     #         return res
     #
 
+    def load_ids(self):
+        self._rwlock.acquire_read()
+        res = Response(True)
+        try:
+            stmt = select(self.__stores.c.store_id)
+            store_ids = session.execute(stmt).all()
+            store_ids = map(lambda id_tuple: id_tuple[0], store_ids)
+            res.object = store_ids
+        except Exception as e:
+            session.rollback()
+            res = Response(False, msg=str(e))
+        finally:
+            self._rwlock.release_read()
+            return res
+
     def load_discounts_rules_of_store(self, discount_policy_root_id):
         res = self.__discount_rules_handler.load(discount_policy_root_id)
         if res.succeeded():
