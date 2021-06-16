@@ -14,9 +14,25 @@ from Backend.Service.trading_system import TradingSystem
 
 
 def save():
-    # mapper_registry.metadata.drop_all(engine)
-    # mapper_registry.metadata.create_all(engine)
-    # trading_system = TradingSystem.getInstance()
+    mapper_registry.metadata.drop_all(engine)
+    mapper_registry.metadata.create_all(engine)
+    trading_system = TradingSystem.getInstance()
+
+    cookie = trading_system.enter_system()
+
+    # res = trading_system.register(cookie, "me", "passme")
+    # if not res.succeeded():
+    #     print("register: " + res.get_msg())
+    #
+    res = trading_system.login(cookie, "tali", "cool-kidz")
+    if not res.succeeded():
+        print("login: " + res.get_msg())
+
+    store_res = trading_system.create_store(cookie, "The Store")
+    if not store_res.succeeded():
+        print("open_store: " + store_res.get_msg())
+
+
     # cookie = trading_system.enter_system()
     # res = trading_system.register(cookie, "user", "password")
     # if not res.succeeded():
@@ -121,14 +137,14 @@ def save():
     # if not res.succeeded():
     #     print("appoint manager: " + res.get_msg())
 
-    trading_system = TradingSystem.getInstance()
-    cookie2 = trading_system.enter_system()
-    res = trading_system.get_store("ea936e4b-9752-4559-8999-69e111b81aba")
-    trading_system.get_store("395eac04-8937-4760-b2b1-228fc2b42ed8")
-    res = trading_system.login(cookie2, "user2", "password2")
-    res = trading_system.appoint_owner(cookie2, "ea936e4b-9752-4559-8999-69e111b81aba", "user3")
-    if not res.succeeded():
-        print("appoint manager: " + res.get_msg())
+    # trading_system = TradingSystem.getInstance()
+    # cookie2 = trading_system.enter_system()
+    # res = trading_system.get_store("ea936e4b-9752-4559-8999-69e111b81aba")
+    # trading_system.get_store("395eac04-8937-4760-b2b1-228fc2b42ed8")
+    # res = trading_system.login(cookie2, "user2", "password2")
+    # res = trading_system.appoint_owner(cookie2, "ea936e4b-9752-4559-8999-69e111b81aba", "user3")
+    # if not res.succeeded():
+    #     print("appoint manager: " + res.get_msg())
 
     # trading_system = TradingSystem.getInstance()
     # cookie = trading_system.enter_system()

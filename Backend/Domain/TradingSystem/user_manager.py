@@ -57,6 +57,10 @@ class UserManager:
         return UserManager._username_user[username]
 
     @staticmethod
+    def _add_user_to_username(username, user):
+        UserManager._username_user[username] = user
+
+    @staticmethod
     def __create_cookie() -> str:
         return str(uuid.uuid4())
 

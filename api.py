@@ -20,9 +20,6 @@ app = Quart(__name__, static_url_path="", static_folder="Frontend/build")
 def __toJson(o):
     if isinstance(o, datetime.datetime):
         return o.__str__()
-    if isinstance(o, types.MappingProxyType):
-        print(o)
-        return o
     return o.__dict__
 
 
