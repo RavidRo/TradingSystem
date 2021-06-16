@@ -16,17 +16,23 @@ from Backend.Service.trading_system import TradingSystem
 
 
 def save():
+    # mapper_registry.metadata.drop_all(engine)
     mapper_registry.metadata.create_all(engine)
     trading_system = TradingSystem.getInstance()
     cookie = trading_system.enter_system()
     trading_system.login(cookie, "tali", "cool-kidz")
-    rules_dict = {
-        "context": {"obj": "product", "identifier": "shirt"},
-        "operator": "equals",
-        "target": 6,
-    }
-    trading_system.add_purchase_rule(cookie, "30a3f083-a34f-4a5d-b17c-08a021f2d724", rules_dict, "simple", "10")
+    # rules_dict = {
+    #     "context": {"obj": "product", "identifier": "shirt"},
+    #     "operator": "equals",
+    #     "target": 6,
+    # }
+    # trading_system.add_purchase_rule(cookie, "30a3f083-a34f-4a5d-b17c-08a021f2d724", rules_dict, "simple", "10")
 
+    res = trading_system.get_my_appointments(cookie)
+    print(res.get_obj())
+
+    res = trading_system.create_store(cookie, "STORE")
+    print(res.get_obj())
     # # res = trading_system.register(cookie, "me", "passme")
     # # if not res.succeeded():
     # #     print("register: " + res.get_msg())
