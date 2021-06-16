@@ -3,7 +3,7 @@ all the api calls and data asked from the server goes here
 this class is responsible for calling the right methods in the login classes"""
 from Backend.settings import Settings
 
-DEBUG_MODE = True
+DEBUG_MODE = False
 Settings.get_instance(DEBUG_MODE)
 
 import datetime
@@ -23,7 +23,7 @@ app = Quart(__name__, static_url_path="", static_folder="Frontend/build")
 
 
 def __toJson(o):
-    if isinstance(o, datetime.datetime):
+    if isinstance(o, datetime.datetime) or isinstance(o, datetime.date):
         return o.__str__()
     return o.__dict__
 
@@ -96,7 +96,7 @@ async def connect():
     system.connect(cookie, send_messages)
     while True:
         try:
-            await asyncio.sleep(10)
+            await asyncio.sleep(5)
             while len(queue) > 0:
                 messages = queue.pop()
                 for message in messages:

@@ -6,7 +6,6 @@ from Backend.DataBase.database import db_fail_response
 from Backend.Domain.TradingSystem.offer import Offer
 from typing import Callable
 import uuid
-import json
 
 from Backend.DataBase.Handlers.member_handler import MemberHandler
 from Backend.Domain.TradingSystem.States.member import Member
@@ -88,6 +87,7 @@ class UserManager:
                 newUser = IUser.create_user()
                 newUser.change_state(response.get_obj())
                 UserManager._username_user[username] = newUser
+                return Response(True)
             return response
 
         return UserManager.__deligate_to_user(cookie, func)
@@ -105,6 +105,7 @@ class UserManager:
                         old_user = UserManager._username_user[old_username]
                         UserManager._cookie_user[cookie] = old_user
                         old_user.connect(user.get_communicate())
+                        UserManager._cookie_user[cookie].register_statistics()
                         return response
                 member_res = MemberHandler.get_instance().load(username)
                 if not member_res.succeeded():
@@ -120,6 +121,7 @@ class UserManager:
                         member.set_user(user)
                         user.change_state(member)
                         UserManager._username_user[username] = user
+                        UserManager._cookie_user[cookie].register_statistics()
                     return res_commit
                 return res
 
@@ -133,7 +135,6 @@ class UserManager:
                 #         UserManager.__cookie_user[cookie] = old_user
                 #         old_user.connect(user.get_communicate())
             # *This action will delete the current cart but will restore the old one and other user details
-            UserManager._cookie_user[cookie].register_statistics()
             return response
 
         return UserManager.__deligate_to_user(cookie, func)
@@ -573,15 +574,17 @@ class UserManager:
 
         return db_fail_response
 
+    @staticmethod
+    def register_admins() -> None:
+        from Backend.Domain.TradingSystem.States.guest import register_admins
+        settings = Settings.get_instance(False)
+        admins = settings.get_admins()
+        if len(admins) <= 0:
+            raise Exception(
+                "At least one admin should be at the system. Check config.json to add admins."
+            )
+        for admin in admins:
+            # cookie = UserManager.enter_system(False)
+            register_admins(admin, settings.get_password())
+            Statistics.getInstance().subscribe(UserManager._get_user_by_username(admin))
 
-def register_admins() -> None:
-    settings = Settings.get_instance(False)
-    admins = settings.get_admins()
-    if len(admins) <= 0:
-        raise Exception(
-            "At least one admin should be at the system. Check config.json to add admins."
-        )
-    for admin in admins:
-        cookie = UserManager.enter_system(False)
-        UserManager.register(admin, settings.get_password(), cookie)
-        Statistics.getInstance().subscribe(UserManager._get_user_by_username(admin))

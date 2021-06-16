@@ -124,7 +124,7 @@ class TradingSystemManager:
     # 3.7
     @staticmethod
     def get_purchase_history(cookie: str) -> Response[ParsableList[PurchaseDetails]]:
-        return UserManager.get_purchase_history(cookie)
+        return UserManager.get_purchase_history(cookie).parse()
 
     # Owner and manager
     # =======================
@@ -316,7 +316,7 @@ class TradingSystemManager:
     def get_store_purchase_history(
             cookie: str, store_id: str
     ) -> Response[ParsableList[PurchaseDetails]]:
-        return UserManager.get_store_purchase_history(cookie, store_id)
+        return UserManager.get_store_purchase_history(cookie, store_id).parse()
 
     # System Manager
     # ====================
@@ -326,14 +326,14 @@ class TradingSystemManager:
     def get_any_user_purchase_history_admin(
             cookie: str, username: str
     ) -> Response[ParsableList[PurchaseDetails]]:
-        return UserManager.get_any_user_purchase_history_admin(cookie, username)
+        return UserManager.get_any_user_purchase_history_admin(cookie, username).parse()
 
     # 6.4
     @staticmethod
     def get_any_store_purchase_history_admin(
             cookie: str, store_id: str
     ) -> Response[ParsableList[PurchaseDetails]]:
-        return UserManager.get_any_store_purchase_history_admin(cookie, store_id)
+        return UserManager.get_any_store_purchase_history_admin(cookie, store_id).parse()
 
     # Inter component functions
     # ============================
@@ -409,3 +409,7 @@ class TradingSystemManager:
     @staticmethod
     def get_users_statistics_admin() -> Response[StatisticsData]:
         return Response(True, Statistics.getInstance().get_statistics())
+
+    @staticmethod
+    def register_admins():
+        UserManager.register_admins()
