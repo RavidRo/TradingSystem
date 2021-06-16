@@ -39,6 +39,9 @@ class Store(Parsable, Subscriber):
     def get_discount_policy(self):
         return self.__discount_policy
 
+    def get_founder(self):
+        return self.__responsibility
+
     def create_purchase_rules_root(self):
         from Backend.Domain.TradingSystem.TypesPolicies.Purchase_Composites.concrete_composites import \
             AndCompositePurchaseRule

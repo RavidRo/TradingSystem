@@ -55,7 +55,7 @@ class TradingSystem(object):
         PurchaseDetailsHandler.get_instance()
         OfferHandler.get_instance()
 
-        # mapper_registry.metadata.drop_all(engine)
+        mapper_registry.metadata.drop_all(engine)
         mapper_registry.metadata.create_all(engine)
 
         cookies = []

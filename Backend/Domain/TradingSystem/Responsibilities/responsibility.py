@@ -71,6 +71,7 @@ class Responsibility(Parsable):
 
     def set_subscriber(self, subscriber):
         self.__subscriber = subscriber
+        self._store.subscribe(subscriber)
 
     def set_user_state(self, user_state):
         self._user_state = user_state
@@ -85,6 +86,7 @@ class Responsibility(Parsable):
                 self._user_state = response_member.get_obj()
                 self._username = self._user_state.get_username()
                 self._store.add_owner(self._user_state.get_username().get_obj().value)
+                self.set_subscriber(self._user_state._user)
             else:
                 return response_member
         for appointed in self._appointed:
@@ -268,6 +270,7 @@ class Responsibility(Parsable):
             appointment.__dismiss_from_store(store_id)
 
         message = f'You have been dismissed from store "{self._store.get_name()}"'
+        self.get_user_state()
         if self.__subscriber:
             self.__subscriber.notify(message)
             self._store.unsubscribe(self.__subscriber)

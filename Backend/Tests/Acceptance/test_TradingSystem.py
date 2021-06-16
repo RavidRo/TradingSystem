@@ -1377,7 +1377,7 @@ def test_get_history_permission_success():
     system.appoint_manager(cookie, store_id, new_manager_username)
     system.add_manager_permission(cookie, store_id, new_manager_username, "get history")
     res = system.get_store_purchase_history(new_manager_cookie, store_id)
-    assert res.succeeded()
+    assert res.succeeded(), res.get_msg()
 
 
 def test_appoint_manager_permission_success():
@@ -1775,6 +1775,8 @@ _t_responses = []
 def __get_product(cookie: str, thread: int) -> None:
     global _t_responses
     response = system.purchase_cart(cookie, 25)
+    response = system.send_payment(cookie, "", "")
+    print((thread, response.succeeded()))
     _t_responses.append((thread, response.succeeded()))
 
 

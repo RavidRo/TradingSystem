@@ -1,6 +1,8 @@
 import threading
 from datetime import date
 
+from sqlalchemy import orm
+
 from Backend.DataBase.database import db_fail_response
 from Backend.Service.DataObjects.statistics_data import StatisticsData
 from Backend.Domain.TradingSystem.offer import Offer
@@ -12,6 +14,7 @@ from Backend.response import Response, ParsableList, PrimitiveParsable
 from Backend.Domain.TradingSystem.purchase_details import PurchaseDetails
 
 from .user_state import UserState
+from ..statistics import Statistics
 
 
 class Member(UserState):
@@ -68,6 +71,10 @@ class Member(UserState):
         self._notifications: list[str] = []
         self.notifications_lock = threading.Lock()
         self._offers: dict[str, Offer] = {}
+
+    @orm.reconstructor
+    def init_on_load(self):
+        self._statistics = Statistics.getInstance()
 
     def login(self, username, password):
         return Response(False, msg="Members cannot re-login")

@@ -199,12 +199,13 @@ def test_get_users_offers_success():
     buyer_cookie, buyer_username, buyer_password, _, _ = _initialize_info(
         _generate_username(), "pass"
     )
+    result_before = system.get_user_offers(buyer_cookie)
     offer_id = system.create_offer(buyer_cookie, store_id, product_id).get_obj()
-    result = system.get_user_offers(buyer_cookie)
+    result_after = system.get_user_offers(buyer_cookie)
     assert (
-        result.succeeded()
-        and len(result.get_obj().values) == 1
-        and result.get_obj().values[0].id == offer_id
+        result_before.succeeded() and result_after.succeeded()
+        and len(result_after.get_obj().values) - len(result_before.get_obj().values) == 1
+        and result_after.get_obj().values[len(result_after.get_obj().values) - 1].id == offer_id
     )
 
 
@@ -427,10 +428,13 @@ def test_declare_then_counter_offer_twice_success():
     offer_id = system.create_offer(buyer_cookie, store_id, product_id).get_obj()
     system.declare_price(buyer_cookie, offer_id, 1.0)
     system.suggest_counter_offer(cookie, store_id, product_id, offer_id, 9.0)
+
     result1 = system.declare_price(buyer_cookie, offer_id, 4.0)
-    offer1 = system.get_user_offers(buyer_cookie).get_obj().values[0]
+    offers = system.get_user_offers(buyer_cookie).get_obj()
+    offer1 = offers.values[len(offers.values) - 1]
     result2 = system.suggest_counter_offer(cookie, store_id, product_id, offer_id, 5.0)
-    offer2 = system.get_user_offers(buyer_cookie).get_obj().values[0]
+    offers = system.get_user_offers(buyer_cookie).get_obj()
+    offer2 = offers.values[len(offers.values) - 1]
     assert (
         result1.succeeded() and result2.succeeded() and offer1.price == 4.0 and offer2.price == 5.0
     )
@@ -670,7 +674,7 @@ def test_cancel_offer_success():
     system.declare_price(buyer_cookie, offer_id, 1.0)
     result = system.cancel_offer(buyer_cookie, offer_id)
     offer = system.get_user_offers(buyer_cookie).get_obj().values[0]
-    assert result.succeeded() and offer.status == "cancled"
+    assert result.succeeded() and offer.status == "canceled"
 
 
 def test_cancel_offer_declare_price_fail():
