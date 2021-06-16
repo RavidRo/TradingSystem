@@ -9,7 +9,7 @@ import '../styles/Purchase.scss';
 import Timer from '../components/Timer';
 import { useAPI2 } from '../hooks/useAPI';
 import { cancelPurchase, sendPayment } from '../api';
-import { confirmOnSuccess } from '../decorators';
+import { confirm } from '../decorators';
 
 type MyTextFieldProps = {
 	name: string;
@@ -69,9 +69,9 @@ const Purchase: FC<PurchaseProps> = ({ location }) => {
 	}, []);
 
 	const purchaseAPI = useAPI2(sendPayment);
-	const handlePurchase = confirmOnSuccess(
-		() =>
-			purchaseAPI.request(
+	const handlePurchase = (event: any) => {
+		purchaseAPI
+			.request(
 				{
 					card_number: cardNumber,
 					holder: holderName,
@@ -81,9 +81,10 @@ const Purchase: FC<PurchaseProps> = ({ location }) => {
 					year: expiringDate.getFullYear(),
 				},
 				{ name, address, city, country, zip }
-			),
-		'Congratulations!'
-	);
+			)
+			.then(() => confirm('Congratulations!').then(() => history.push('/')));
+		event.preventDefault();
+	};
 
 	const cancelAPI = useAPI2(cancelPurchase);
 	const handleCancel = () => {
@@ -92,7 +93,7 @@ const Purchase: FC<PurchaseProps> = ({ location }) => {
 
 	return (
 		<div className='purchaseDiv'>
-			<form noValidate autoComplete='on'>
+			<form autoComplete='on' onSubmit={handlePurchase}>
 				<div className='formDiv-container'>
 					<div className='formDiv'>
 						<h3 className='section-title'>Shipping Details</h3>
@@ -150,7 +151,7 @@ const Purchase: FC<PurchaseProps> = ({ location }) => {
 							alignSelf: 'center',
 							marginLeft: '5%',
 						}}
-						onClick={() => handlePurchase().then(() => history.push('/'))}
+						type='submit'
 					>
 						Check
 					</Button>
