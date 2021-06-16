@@ -153,10 +153,33 @@ def save():
     # rule_simple_2 = {"context": {"obj": "category", "identifier": "milk products"}, "operator": "equals", "target": 9}
     # rule_type = "simple"
     # parent_id = "1"
-    # res = trading_system.login(cookie, "user", "password")
-    # res = trading_system.get_store("1682ef02-0326-4607-bf7b-f20326e9cf3d")
-    # # res = trading_system.add_purchase_rule(cookie, "1682ef02-0326-4607-bf7b-f20326e9cf3d", {"operator": "or"}, "complex", "2")
-    # # res = trading_system.add_purchase_rule(cookie, "1682ef02-0326-4607-bf7b-f20326e9cf3d", rule_simple_2, "simple", "12")
+
+    complex_rule_details = {"operator": "conditional"}
+    test_clause_details = {
+        "context": {"obj": "product", "identifier": "1"},
+        "operator": "less-than",
+        "target": 10,
+    }
+    then_clause_details = {
+        "context": {"obj": "category", "identifier": "milk products"},
+        "operator": "equals",
+        "target": 9,
+    }
+    trading_system = TradingSystem.getInstance()
+    cookie = trading_system.enter_system()
+    res = trading_system.login(cookie, "user", "password")
+    res = trading_system.get_store("029d6bdc-dd7c-407d-8a27-9fa616018f70")
+    # res = trading_system.remove_purchase_rule(cookie, "029d6bdc-dd7c-407d-8a27-9fa616018f70", "15")
+    # result_complex = trading_system.add_purchase_rule(cookie, "029d6bdc-dd7c-407d-8a27-9fa616018f70", complex_rule_details, "complex", "2")
+    # result_test_clause = trading_system.add_purchase_rule(cookie, "029d6bdc-dd7c-407d-8a27-9fa616018f70", test_clause_details, "simple", "19", clause="test")
+    # result_then_clause = trading_system.add_purchase_rule(cookie, "029d6bdc-dd7c-407d-8a27-9fa616018f70", then_clause_details, "simple", "19", clause="then")
+    result_then_clause = trading_system.edit_purchase_rule(cookie, "029d6bdc-dd7c-407d-8a27-9fa616018f70",
+                                                           then_clause_details, "27", "simple")
+    print("kal")
+
+    # res = trading_system.add_purchase_rule(cookie, "62bb60df-c851-485f-a57c-13274e403c39", {"operator": "or"}, "complex", "2")
+    # res = trading_system.add_purchase_rule(cookie, "62bb60df-c851-485f-a57c-13274e403c39", rule_simple_2, "simple", "2")
+
     # # res = trading_system.edit_purchase_rule(cookie, "1682ef02-0326-4607-bf7b-f20326e9cf3d", rule_simple_2, "6", "simple")
     # # res = trading_system.move_purchase_rule(cookie, "1682ef02-0326-4607-bf7b-f20326e9cf3d", "6", "3")
     # # res = trading_system.edit_purchase_rule(cookie, "1682ef02-0326-4607-bf7b-f20326e9cf3d", rule_details_complex, "12", "complex")

@@ -128,6 +128,8 @@ class PurchaseRulesHandler(IHandler):
 
     def edit_rule(self, old_rule, edited_rule):
         self._rwlock.acquire_write()
+        clause = old_rule._clause
+        edited_rule.set_clause(clause)
         for n in old_rule._children:
             n.parent = edited_rule
             n.path = edited_rule.path + n.path[len(old_rule.path):]
