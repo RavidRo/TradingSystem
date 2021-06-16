@@ -1,6 +1,11 @@
 """this class if the gateway from the client to the domain server layer
 all the api calls and data asked from the server goes here
 this class is responsible for calling the right methods in the login classes"""
+from Backend.settings import Settings
+
+DEBUG_MODE = True
+Settings.get_instance(DEBUG_MODE)
+
 import datetime
 from typing import Callable
 from Backend.response import Response
