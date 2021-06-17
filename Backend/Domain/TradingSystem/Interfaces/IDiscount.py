@@ -31,6 +31,7 @@ class IDiscount(Parsable, ABC):
     def init_on_load(self):
         self._conditions_policy = DefaultPurchasePolicy(AndCompositePurchaseRule())
         self._conditions_policy_root_id = self._conditions_policy.get_root_id()
+        self.wrlock = ReadWriteLock()
 
 
     def create_purchase_rules_root(self):

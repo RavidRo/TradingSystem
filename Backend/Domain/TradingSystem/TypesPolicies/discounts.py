@@ -1,3 +1,4 @@
+from Backend.DataBase.Handlers import discounts_handler
 from abc import ABC, abstractmethod
 from typing import Union, List
 
@@ -118,6 +119,9 @@ class SimpleDiscount(IDiscount):
     def get_discount_by_id(self, exist_id: str):
         if self.get_id() == exist_id:
             return self
+        res = discounts_handler.DiscountsHandler.get_instance().load(exist_id)
+        if res.succeeded():
+            return res.get_obj()
         return None
 
     def is_composite(self) -> bool:
