@@ -90,7 +90,7 @@ class SimpleDiscount(IDiscount):
     def __init__(self, discount_data, parent):  # Add duration in later milestones
         super().__init__(parent)
         self._parent = None
-        self._context = discount_data["context"]
+        # self._context = discount_data["context"]
         self._discount_strategy = SimpleDiscount.strategy_generator[discount_data["context"]["obj"]](discount_data["context"].get("id"), discount_data["percentage"])
         self._discounter_data = {"obj": discount_data["context"]["obj"],
                                  "identifier": discount_data["context"].get("id"),
@@ -130,8 +130,9 @@ class SimpleDiscount(IDiscount):
     def parse(self):
         self.wrlock.acquire_read()
         discount = super().parse()
-        discount["percentage"] = self.get_discount_strategy().multiplier * 100
-        discount["context"] = self._context
+        discount["percentage"] = self._discounter_data["percentage"]
+        # discount["context"] = self._context
+        discount["context"] = {"obj": self._discounter_data["obj"], "id": self._discounter_data["identifier"]}
         self.wrlock.release_read()
         discount["discount_type"] = "simple"
         return discount

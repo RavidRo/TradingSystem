@@ -25,7 +25,7 @@ class IDiscount(Parsable, ABC):
         self._conditions_policy_root_id = None
         self.wrlock = ReadWriteLock()
         self._discounter_data = {}
-        self._context = {}
+        # self._context = {}
 
     @orm.reconstructor
     def init_on_load(self):
