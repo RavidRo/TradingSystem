@@ -8,24 +8,29 @@ from Backend.response import ParsableList, Response
 
 class UserState(ABC):
     def __init__(self, user, cart=None):
+        from Backend.DataBase.Handlers.member_handler import MemberHandler
         if cart is None:
             cart = ShoppingCart()
         self._notifications: list[object] = []
         self._cart = cart
         self._user = user
         self._statistics: Statistics = Statistics.getInstance()
+        self._member_handler = MemberHandler.get_instance()
 
     def get_notifications(self):
         return self._notifications
 
     def set_notifications(self, notifications):
         self._notifications = notifications
+        self._member_handler.commit_changes()
 
     def add_notification(self, msg):
-        self._notifications.append(msg)
+        self._notifications += [msg]
+        self._member_handler.commit_changes()
 
     def set_user(self, user):
         self._user = user
+
 
     @abstractmethod
     def get_username(self):
@@ -195,6 +200,9 @@ class UserState(ABC):
     def remove_purchase_rule(self, store_id: str, rule_id: str):
         return Response(False, msg="Abstract Method")
 
+    def get_product_from_bag(self, store_id, product_id, username):
+        return self._cart.get_product_from_bag(store_id, product_id, username)
+
     # 4.2
     @abstractmethod
     def edit_purchase_rule(self, store_id: str, rule_details: dict, rule_id: str, rule_type: str):
@@ -256,3 +264,7 @@ class UserState(ABC):
     @abstractmethod
     def get_users_statistics(self) -> Response[StatisticsData]:
         return Response(False, msg="Abstract Method")
+
+    def has_res_id(self, res_id):
+        pass
+

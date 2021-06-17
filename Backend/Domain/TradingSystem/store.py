@@ -1,7 +1,8 @@
+
 from Backend.Domain.TradingSystem.offer import Offer
 from Backend.Domain.TradingSystem.Interfaces.Subscriber import Subscriber
 import uuid
-
+from Backend.DataBase.database import db_fail_response
 from Backend.Domain.Notifications.Publisher import Publisher
 from Backend.response import PrimitiveParsable, Response, ParsableList, Parsable
 from Backend.Domain.TradingSystem.product import Product
@@ -12,30 +13,94 @@ from Backend.rw_lock import ReadWriteLock
 class Store(Parsable, Subscriber):
     from Backend.Domain.TradingSystem.Responsibilities.responsibility import Responsibility
     from Backend.Domain.TradingSystem.purchase_details import PurchaseDetails
-    from Backend.Domain.TradingSystem.Interfaces.IUser import IUser
 
     def __init__(self, store_name: str):
         from Backend.Domain.TradingSystem.TypesPolicies.discount_policy import DefaultDiscountPolicy
-        from Backend.Domain.TradingSystem.TypesPolicies.purchase_policy import DefaultPurchasePolicy
-
         """Create a new store with it's specified info"""
         self.__id = self.id_generator()
         self.__name = store_name
         self._products_to_quantities: dict[str, tuple[Product, int]] = {}
         self.__responsibility = None
-        # These fields will be changed in the future versions
-        self.__discount_policy = DefaultDiscountPolicy()
-        self.__purchase_policy = DefaultPurchasePolicy()
+        self.__responsibility_id = None
+        self.__discount_policy = None
+        self.__purchase_policy = None
+        self.__purchase_policy_root_id = None
+        self.__discount_policy_root_id = None
         self.__purchase_history = []
         self._products_lock = ReadWriteLock()
         self.__history_lock = ReadWriteLock()
         self.__publisher: Publisher = Publisher()
+        from Backend.DataBase.Handlers.store_handler import StoreHandler
+        self.__store_handler = StoreHandler.get_instance()
 
     def notify(self, message: str) -> bool:
         return self.__publisher.notify_all(message)
 
     def get_discount_policy(self):
         return self.__discount_policy
+
+    def get_founder(self):
+        if not self.__responsibility:
+            responsibility_res = self.__store_handler.load_res_of_store(self.__responsibility_id, self)
+            if not responsibility_res.succeeded():
+                return responsibility_res
+            responsibility = responsibility_res.get_obj()
+            self.set_responsibility(responsibility)
+            responsibility.set_store(self)
+        return Response(True, self.__responsibility)
+
+    def create_purchase_rules_root(self):
+        from Backend.Domain.TradingSystem.TypesPolicies.Purchase_Composites.concrete_composites import \
+            AndCompositePurchaseRule
+        from Backend.Domain.TradingSystem.TypesPolicies.purchase_policy import DefaultPurchasePolicy
+        root_rule = AndCompositePurchaseRule()
+        res = self.__store_handler.save_purchase_rule(root_rule)
+        if not res.succeeded():
+            return db_fail_response
+        self.__purchase_policy = DefaultPurchasePolicy(root_rule)
+        self.__purchase_policy_root_id = self.__purchase_policy.get_root_id()
+        return Response(True)
+
+    def create_discounts_rules_root(self):
+        from Backend.Domain.TradingSystem.TypesPolicies.discounts import AndConditionDiscount
+        from Backend.Domain.TradingSystem.TypesPolicies.discount_policy import DefaultDiscountPolicy
+        root_rule = AndConditionDiscount()
+        res = self.__store_handler.save_discount_rule(root_rule)
+        if not res.succeeded():
+            return db_fail_response
+        res_condition = root_rule.create_purchase_rules_root()
+        if not res_condition.succeeded():
+            return db_fail_response
+        self.__discount_policy = DefaultDiscountPolicy(root_rule)
+        self.__discount_policy_root_id = self.__discount_policy.get_root_id()
+        return Response(True)
+
+    def set_root_purchase_rule(self, root_rule):
+        from Backend.Domain.TradingSystem.TypesPolicies.purchase_policy import DefaultPurchasePolicy
+        self.__purchase_policy = DefaultPurchasePolicy(root_rule)
+
+    def set_root_discounts_rule(self, root_rule):
+        from Backend.Domain.TradingSystem.TypesPolicies.discount_policy import DefaultDiscountPolicy
+        self.__discount_policy = DefaultDiscountPolicy(root_rule)
+
+    def set_products(self, products_to_quantities: dict[str, tuple[Product, int]]):
+        self._products_to_quantities = products_to_quantities
+
+    def get_purchase_policy_root_id(self):
+        return self.__purchase_policy_root_id
+
+    def get_discounts_policy_root_id(self):
+        return self.__discount_policy_root_id
+
+    def init_fields(self):
+        from Backend.DataBase.Handlers.store_handler import StoreHandler
+        self._products_lock = ReadWriteLock()
+        self.__history_lock = ReadWriteLock()
+        self.__publisher: Publisher = Publisher()
+        self.__store_handler = StoreHandler.get_instance()
+        self.__responsibility = None
+        self.__discount_policy = None
+        self.__purchase_policy = None
 
     def parse(self):
         id_to_quantity = {}
@@ -122,6 +187,14 @@ class Store(Parsable, Subscriber):
             product_name=product_name, category=category, price=price, keywords=keywords
         )
         product_id = product.get_id()
+
+        """database saving"""
+        self.__store_handler.add_product(self, product, quantity)
+        res = self.__store_handler.commit_changes()
+        if not res.succeeded():
+            self._products_lock.release_write()
+            return db_fail_response
+
         self._products_to_quantities[product_id] = (product, quantity)
         self._products_lock.release_write()
         return Response(True, product_id, msg=f"The product {product_name} successfully added")
@@ -132,16 +205,21 @@ class Store(Parsable, Subscriber):
 
     def remove_product(self, product_id: str) -> Response[PrimitiveParsable[int]]:
         self._products_lock.acquire_write()
-        result = self._products_to_quantities.pop(product_id, None)
-        if result is None:
+        value = self._products_to_quantities.get(product_id)
+        if value is None:
             self._products_lock.release_write()
-            return Response(
-                False, msg="The product " + product_id + "is already not in the inventory!"
-            )
+            return Response(False, msg="The product " + product_id + "is already not in the inventory!")
+        """database saving"""
+        self.__store_handler.remove_product(value[0])
+        res = self.__store_handler.commit_changes()
+        if not res.succeeded():
+            self._products_lock.release_write()
+            return db_fail_response
+        self._products_to_quantities.pop(product_id, None)
         self._products_lock.release_write()
         return Response(
             True,
-            obj=PrimitiveParsable(result[1]),
+            obj=PrimitiveParsable(value[1]),
             msg="Successfully removed product with product id: " + str(product_id),
         )
 
@@ -180,6 +258,12 @@ class Store(Parsable, Subscriber):
             self._products_lock.release_write()
             return Response(False, msg="quantity must be positive!")
         if product_id in self._products_to_quantities:
+            """database saving"""
+            self.__store_handler.update_product_quantity(self, self._products_to_quantities[product_id][0], quantity)
+            res = self.__store_handler.commit_changes()
+            if not res.succeeded():
+                self._products_lock.release_write()
+                return db_fail_response
             new_product_quantity = (self._products_to_quantities[product_id][0], quantity)
             self._products_to_quantities[product_id] = new_product_quantity
             prod_name = self._products_to_quantities[product_id][0].get_name()
@@ -195,7 +279,7 @@ class Store(Parsable, Subscriber):
         return self.__discount_policy.move_discount(src_id, dest_id)
 
     def get_discounts(self):
-        return self.__discount_policy.get_discounts()
+        return self.__discount_policy.get_discounts(self.__discount_policy_root_id)
 
     def remove_discount(self, discount_id: str):
         return self.__discount_policy.remove_discount(discount_id)
@@ -216,6 +300,10 @@ class Store(Parsable, Subscriber):
 
     def get_personnel_info(self) -> Response[Responsibility]:
         from Backend.Domain.TradingSystem.Responsibilities.responsibility import Responsibility
+
+        res = self.get_founder()
+        if not res.succeeded():
+            return res
 
         if self.__responsibility is None:
             return Response(False, msg="The store doesn't have assigned personnel")
@@ -243,6 +331,10 @@ class Store(Parsable, Subscriber):
 
     def set_responsibility(self, responsibility: Responsibility):
         self.__responsibility = responsibility
+        self.__responsibility_id = responsibility.get_dal_responsibility_id()
+
+    def save(self):
+        return self.__store_handler.save(self)
 
     def check_existing_product(self, product_name: str):
         for (prod, quantity) in self._products_to_quantities.values():
@@ -258,6 +350,7 @@ class Store(Parsable, Subscriber):
 
     def send_back(self, products_to_quantities: dict):
         self._products_lock.acquire_write()
+        self.__store_handler.rollback_changes()
         for prod_id, (product, quantity) in products_to_quantities.items():
             if self._products_to_quantities.get(prod_id) is None:
                 self._products_to_quantities.update({prod_id: (product, quantity)})
@@ -272,7 +365,7 @@ class Store(Parsable, Subscriber):
     def check_and_acquire_available_products(self, products_to_quantities: dict) -> Response[None]:
         acquired_product_ids_to_quantities = {}
         self._products_lock.acquire_write()
-        for prod_id, (_, quantity) in products_to_quantities.items():
+        for prod_id, (prod, quantity) in products_to_quantities.items():
             prod_to_current_quantity = self._products_to_quantities.get(prod_id)
             if prod_to_current_quantity is None:
                 self.__restore_products(acquired_product_ids_to_quantities)
@@ -292,10 +385,11 @@ class Store(Parsable, Subscriber):
 
             current_quantity = self._products_to_quantities.get(prod_id)[1]
             if current_quantity == quantity:
+                self.__store_handler.remove_product(prod)
                 self._products_to_quantities.pop(prod_id)
             else:
-                product = self._products_to_quantities.get(prod_id)[0]
-                self._products_to_quantities[prod_id] = (product, current_quantity - quantity)
+                self.__store_handler.update_product_quantity(self, prod, current_quantity - quantity)
+                self._products_to_quantities[prod_id] = (prod, current_quantity - quantity)
 
             acquired_product_ids_to_quantities[prod_id] = quantity
 
@@ -303,6 +397,7 @@ class Store(Parsable, Subscriber):
         return Response(True, msg="All products are available")
 
     def __restore_products(self, acquires_product_ids_to_quantities: dict):
+        self.__store_handler.rollback_changes()
         for product_id, quantity in acquires_product_ids_to_quantities.items():
             prod, current_quantity = self._products_to_quantities.get(product_id)
             self._products_to_quantities[product_id] = (prod, current_quantity + quantity)
@@ -317,11 +412,12 @@ class Store(Parsable, Subscriber):
             prod.get_offered_price(username) * quantity
             for _, (prod, quantity) in product_to_quantity.items()
         ]
-        total_discount = self.__discount_policy.applyDiscount(
-            products_to_quantities=product_to_quantity, user_age=user_age, username=username
-        )
-        final_price = sum(non_discount_prices) - total_discount
-        return final_price if final_price >= 0 else 0
+        # total_discount = self.__discount_policy.applyDiscount(
+        #     products_to_quantities=product_to_quantity, user_age=user_age, username=username
+        # )
+        # final_price = sum(non_discount_prices) - total_discount
+        # return final_price if final_price >= 0 else 0
+        return sum(non_discount_prices)
 
     def clear_offers(self, product_ids: list[str], username):
         for product_id in product_ids:
@@ -330,6 +426,10 @@ class Store(Parsable, Subscriber):
 
     def get_product(self, product_id: str):
         self._products_lock.acquire_read()
+        product_to_quantity = self._products_to_quantities.get(product_id)
+        if product_to_quantity is None:
+            self._products_lock.release_read()
+            return None
         prod = self._products_to_quantities.get(product_id)[0]
         self._products_lock.release_read()
         return prod
@@ -352,14 +452,7 @@ class Store(Parsable, Subscriber):
         self._products_lock.release_read()
         return True
 
-    def add_purchase_rule(
-        self,
-        rule_details: dict,
-        rule_type: str,
-        parent_id: str,
-        clause: str = None,
-        discount_id=None,
-    ):
+    def add_purchase_rule(self, rule_details: dict, rule_type: str, parent_id: str, clause: str = None, discount_id=None,):
         if discount_id is not None:
             discount = self.__discount_policy.get_discount_by_id(discount_id)
             if discount is not None:
@@ -402,7 +495,7 @@ class Store(Parsable, Subscriber):
         return self.__purchase_policy.move_purchase_rule(rule_id, new_parent_id)
 
     def get_purchase_policy(self):
-        return self.__purchase_policy.get_purchase_rules()
+        return self.__purchase_policy.get_purchase_rules(self.__purchase_policy_root_id)
 
     def parse_purchase_policy(self):
         return self.__purchase_policy.parse()
@@ -440,6 +533,9 @@ class Store(Parsable, Subscriber):
         return product.reject_user_offer(offer_id)
 
     def get_owners_names(self):
+        res = self.get_founder()
+        if not res.succeeded():
+            return res
         return self.__responsibility.get_owners_names()
 
     def remove_owner(self, username) -> None:
@@ -449,3 +545,10 @@ class Store(Parsable, Subscriber):
     def add_owner(self, username) -> None:
         for product_id in self._products_to_quantities:
             self._products_to_quantities[product_id][0].add_owner(username)
+
+
+    def get_res_id(self):
+        return self.__responsibility_id
+
+    def get_name(self):
+        return self.__name

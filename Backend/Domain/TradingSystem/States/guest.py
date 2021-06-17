@@ -1,11 +1,23 @@
 from Backend.Service.DataObjects.statistics_data import StatisticsData
 from Backend.Domain.TradingSystem.offer import Offer
+from Backend.DataBase.database import db_fail_response, session
 from Backend.Domain.Authentication import authentication
+from Backend.Domain.TradingSystem.States.admin import Admin
+from Backend.Domain.TradingSystem.States.member import Member
 from Backend.Domain.TradingSystem.States.user_state import UserState
 from Backend.response import ParsableList, Response
-import json
-
 from Backend.settings import Settings
+
+
+
+def register_admins(username, password) -> None:
+    from Backend.DataBase.Handlers.member_handler import MemberHandler
+    res = authentication.register(username, password)
+    if res.succeeded():
+        admin = Admin(None, username)
+        MemberHandler.get_instance().save(admin)
+        MemberHandler.get_instance().commit_changes()
+
 
 
 def is_username_admin(username) -> bool:
@@ -20,21 +32,20 @@ class Guest(UserState):
         super().__init__(user, cart)
 
     def login(self, username, password):
-        from Backend.Domain.TradingSystem.States.member import Member
-        from Backend.Domain.TradingSystem.States.admin import Admin
-
         response = authentication.login(username, password)
-        if response.succeeded():
-            if is_username_admin(username):
-                self._user.change_state(
-                    Admin(self._user, username)
-                )  # in later milestones, fetch data from DB
-            else:
-                self._user.change_state(Member(self._user, username))
         return response
 
     def register(self, username, password):
-        return authentication.register(username, password)
+        res = authentication.register(username, password)
+        if res.succeeded():
+            member = Member(self._user, username)
+            self._member_handler.save(member)
+            save_res = self._member_handler.commit_changes()
+            if save_res.succeeded():
+                return Response(True, member)
+            authentication.remove_user_credrnials(username)
+            return db_fail_response
+        return res
 
     def delete_products_after_purchase(self):
         return self._cart.delete_products_after_purchase("guest")
@@ -45,9 +56,7 @@ class Guest(UserState):
     def get_purchase_history(self):
         return Response(False, msg="Guests don't have purchase history")
 
-    def add_new_product(
-        self, store_id, product_name, category, product_price, quantity, keywords=None
-    ):
+    def add_new_product(self, store_id, product_name, category, product_price, quantity, keywords=None):
         return Response(False, msg="Guests cannot add products to stores")
 
     def remove_product(self, store_id, product_id):
@@ -56,14 +65,10 @@ class Guest(UserState):
     def change_product_quantity_in_store(self, store_id, product_id, new_quantity):
         return Response(False, msg="Guests cannot change store product's quantity")
 
-    def edit_product_details(
-        self, store_id, product_id, new_name, new_category, new_price, keywords=None
-    ):
+    def edit_product_details(self, store_id, product_id, new_name, new_category, new_price, keywords=None):
         return Response(False, msg="Guests cannot edit store product's details")
 
-    def add_discount(
-        self, store_id: str, discount_data: dict, exist_id: str, condition_type: str = None
-    ):
+    def add_discount(self, store_id: str, discount_data: dict, exist_id: str, condition_type: str = None):
         return Response(False, msg="Guests cannot add new discount to store")
 
     def move_discount(self, store_id: str, src_id: str, dest_id: str):
@@ -75,19 +80,12 @@ class Guest(UserState):
     def remove_discount(self, store_id: str, discount_id: str):
         return Response(False, msg="Guests cannot remove discount from store's discount tree")
 
-    def edit_simple_discount(
-        self,
-        store_id: str,
-        discount_id: str,
-        percentage: float = None,
-        context: dict = None,
-        duration=None,
-    ):
+    def edit_simple_discount(self, store_id: str, discount_id: str, percentage: float = None,
+                             context: dict = None, duration=None):
         return Response(False, msg="Guests cannot edit discounts")
 
-    def edit_complex_discount(
-        self, store_id: str, discount_id: str, complex_type: str = None, decision_rule: str = None
-    ):
+    def edit_complex_discount(self, store_id: str, discount_id: str, complex_type: str = None,
+                              decision_rule: str = None):
         return Response(False, msg="Guests cannot edit discounts")
 
     def appoint_new_store_owner(self, store_id, new_owner):
@@ -124,9 +122,7 @@ class Guest(UserState):
         return Response(False, msg="Can't appoint guests to stores")
 
     # 4.2
-    def add_purchase_rule(
-        self, store_id: str, rule_details: dict, rule_type: str, parent_id: str, clause: str = None
-    ):
+    def add_purchase_rule(self, store_id: str, rule_details: dict, rule_type: str, parent_id: str, clause: str = None):
         return Response(False, msg="Guests cannot add purchase rules")
 
     # 4.2

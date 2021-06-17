@@ -8,7 +8,6 @@ from Backend.Service.DataObjects.statistics_data import StatisticsData
 
 from Backend.Domain.TradingSystem.offer import Offer
 from Backend.Domain.TradingSystem.Interfaces.IUser import IUser
-from Backend.Domain.TradingSystem.Interfaces.IUserState import IUserState
 from Backend.Domain.TradingSystem.store import Store
 from Backend.Domain.TradingSystem.shopping_cart import ShoppingCart
 from Backend.Domain.TradingSystem.purchase_details import PurchaseDetails
@@ -18,12 +17,14 @@ from Backend.Domain.TradingSystem.Responsibilities.responsibility import Permiss
 
 class User(IUser):
     def __init__(self):
+        from Backend.Domain.TradingSystem.Interfaces.IUserState import IUserState
         self.state: UserState = IUserState.create_guest(self)
         self.appointment_lock = threading.Lock()
         self.__communicate: Callable[[list[object]], bool] = lambda _: False
 
     def __notify_self(self) -> bool:
-        answer = self.__communicate(self.state.get_notifications())
+        notifi = self.state.get_notifications()
+        answer = self.__communicate(notifi)
         if answer:
             self.state.set_notifications([])
         return answer
@@ -117,6 +118,9 @@ class User(IUser):
         self, store_id: str, product_id: str
     ) -> Response[PrimitiveParsable[int]]:
         return self.state.remove_product(store_id, product_id)
+
+    def get_product_from_bag(self, store_id, product_id, username):
+        return self.state.get_product_from_bag(store_id, product_id, username)
 
     # 4.1
     def change_product_quantity_in_store(

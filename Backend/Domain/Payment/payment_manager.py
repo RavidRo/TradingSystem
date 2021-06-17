@@ -32,3 +32,10 @@ class PaymentManager:
 
     def __rollback(self, transaction_id):
         return self.__cashing_adapter.cancel_payment(transaction_id)
+
+    def rollback(self, transaction_id, delivery_id):
+        response = self.__rollback(transaction_id)
+        if not response.succeeded():
+            return response
+        response2 = self.__supply_adapter.cancel_delivery(delivery_id)
+        return response2

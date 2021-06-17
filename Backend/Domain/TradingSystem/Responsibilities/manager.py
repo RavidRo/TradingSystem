@@ -1,3 +1,4 @@
+from Backend.DataBase.database import db_fail_response
 from Backend.Domain.TradingSystem.user import User
 from Backend.response import Response, ParsableList, PrimitiveParsable
 
@@ -196,17 +197,27 @@ class Manager(Owner):
     def is_owner(self) -> bool:
         return False
 
-    def _add_permission(self, username: str, permission: Permission) -> bool:
+    def _add_permission(self, username: str, permission: Permission) -> Response[None]:
         if self._user_state.get_username().get_obj().get_val() == username:
-            self.__permissions[permission] = True
-            return True
+            add_response = self._responsibilities_handler.add_permission(self._responsibility_dal_id, permission)
+            if not add_response.succeeded():
+                return db_fail_response
+            res = self._responsibilities_handler.commit_changes()
+            if res.succeeded():
+                self.__permissions[permission] = True
+            return res
 
         return super()._add_permission(username, permission)
 
-    def _remove_permission(self, username: str, permission: Permission) -> bool:
+    def _remove_permission(self, username: str, permission: Permission) -> Response[None]:
         if self._user_state.get_username().get_obj().get_val() == username:
-            self.__permissions[permission] = False
-            return True
+            remove_response = self._responsibilities_handler.remove_permission(self._responsibility_dal_id, permission)
+            if not remove_response.succeeded():
+                return db_fail_response
+            res = self._responsibilities_handler.commit_changes()
+            if res.succeeded():
+                self.__permissions[permission] = False
+            return res
 
         return super()._remove_permission(username, permission)
 
@@ -216,3 +227,7 @@ class Manager(Owner):
     def _permissions(self) -> list[str]:
         exec = list(filter(lambda per: self.__permissions[per], Permission))
         return [per.name for per in exec]
+
+    def set_permissions(self, permissions):
+        for permission in self.__permissions.keys():
+            self.__permissions[permission] = permission.value in permissions

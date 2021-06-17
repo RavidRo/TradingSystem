@@ -784,6 +784,25 @@ def test_send_payment_success():
 
 
 @patch.multiple(ShoppingCart, interval_time=MagicMock(return_value=5))
+def test_send_payment_success_guest():
+    cookie, username, password, store_name, store_id = _initialize_info(
+        _generate_username(), "aaa", _generate_store_name()
+    )
+    product_id, product_name, category, price, quantity = _create_product(
+        cookie, store_id, _generate_product_name(), "A", 5.50, 10
+    )
+
+    cookie_g = system.enter_system()
+    system.save_product_in_cart(cookie_g, store_id, product_id, 1)
+    user_age = 25
+    system.purchase_cart(cookie_g, user_age)
+    response = system.send_payment(cookie_g, "", "")
+    res = system.get_store(store_id)
+    ids_to_quantity = res.object.ids_to_quantities[product_id]
+    assert response.succeeded() and ids_to_quantity == 9, response.get_msg()
+
+
+@patch.multiple(ShoppingCart, interval_time=MagicMock(return_value=5))
 def test_send_payment_success_timer_over():
     cookie, username, password, store_name, store_id = _initialize_info(
         _generate_username(), "aaa", _generate_store_name()
@@ -797,8 +816,7 @@ def test_send_payment_success_timer_over():
     system.purchase_cart(cookie, user_age)
     response = system.send_payment(cookie, "", "")
     timer = threading.Timer(
-        6, finish_test_send_payment_success_timer_over(store_id, product_id, response)
-    )
+        6, finish_test_send_payment_success_timer_over(store_id, product_id, response))
     timer.start()
 
 
@@ -1359,7 +1377,7 @@ def test_get_history_permission_success():
     system.appoint_manager(cookie, store_id, new_manager_username)
     system.add_manager_permission(cookie, store_id, new_manager_username, "get history")
     res = system.get_store_purchase_history(new_manager_cookie, store_id)
-    assert res.succeeded()
+    assert res.succeeded(), res.get_msg()
 
 
 def test_appoint_manager_permission_success():
@@ -1757,6 +1775,8 @@ _t_responses = []
 def __get_product(cookie: str, thread: int) -> None:
     global _t_responses
     response = system.purchase_cart(cookie, 25)
+    response = system.send_payment(cookie, "", "")
+    print((thread, response.succeeded()))
     _t_responses.append((thread, response.succeeded()))
 
 
@@ -3944,6 +3964,39 @@ def test_purchase_success_with_mocked_policices():
         and cart_res.succeeded()
         and response.object.value == 10
     ), response.get_msg()
+
+
+@patch.multiple(ShoppingCart, interval_time=MagicMock(return_value=2))
+@patch.multiple(
+    Store,
+    check_purchase=MagicMock(return_value=Response(True)),
+    apply_discounts=MagicMock(return_value=10),
+)
+def test_purchase_success_with_mocked_policices_twice():
+    cookie, username, password, store_name, store_id = _initialize_info(
+        _generate_username(), "aaa", _generate_store_name()
+    )
+    product_id, product_name, category, price, quantity = _create_product(
+        cookie, store_id, _generate_product_name(), "A", 5.50, 10
+    )
+    cookie2 = system.enter_system()
+    save_res = system.save_product_in_cart(cookie2, store_id, product_id, 2)
+    user_age = 25
+    response = system.purchase_cart(cookie2, user_age)
+    store_res = system.get_store(store_id)
+    cart_res = system.get_cart_details(cookie2)
+    response_sent = system.send_payment(cookie2, "", "")
+
+    save_res_2 = system.save_product_in_cart(cookie2, store_id, product_id, 1)
+    # response_2 = system.purchase_cart(cookie2, user_age)
+    # store_res_2 = system.get_store(store_id)
+    # cart_res_2 = system.get_cart_details(cookie2)
+    # response_sent_2 = system.send_payment(cookie2, "", "")
+    print(save_res_2.get_msg())
+
+
+
+
 
 
 @patch.multiple(ShoppingCart, interval_time=MagicMock(return_value=2))

@@ -3,7 +3,7 @@ all the api calls and data asked from the server goes here
 this class is responsible for calling the right methods in the login classes"""
 from Backend.settings import Settings
 
-DEBUG_MODE = True
+DEBUG_MODE = False
 Settings.get_instance(DEBUG_MODE)
 
 import datetime
@@ -11,6 +11,7 @@ from typing import Callable
 from Backend.response import Response
 import asyncio
 import concurrent
+import types
 
 from Backend.Service.trading_system import TradingSystem
 from quart import Quart, websocket, request, send_from_directory
@@ -22,7 +23,7 @@ app = Quart(__name__, static_url_path="", static_folder="Frontend/build")
 
 
 def __toJson(o):
-    if isinstance(o, datetime.datetime):
+    if isinstance(o, datetime.datetime) or isinstance(o, datetime.date):
         return o.__str__()
     return o.__dict__
 
@@ -95,7 +96,7 @@ async def connect():
     system.connect(cookie, send_messages)
     while True:
         try:
-            await asyncio.sleep(10)
+            await asyncio.sleep(5)
             while len(queue) > 0:
                 messages = queue.pop()
                 for message in messages:
@@ -458,6 +459,17 @@ async def get_product():
     product_id = request.args.get("product_id")
     username = request.args.get("username")
     answer = await __async_call(system.get_product, store_id, product_id, username)
+    return __responseToJson(None, answer)
+
+@app.route("/get_product_from_bag", methods=["GET"])
+async def get_product_from_bag():
+    cookie = request.args.get("cookie")
+    if cookie is None:
+        cookie = await __async_call(system.enter_system)
+    store_id = request.args.get("store_id")
+    product_id = request.args.get("product_id")
+    username = request.args.get("username")
+    answer = await __async_call(system.get_product_from_bag, cookie, store_id, product_id, username)
     return __responseToJson(None, answer)
 
 

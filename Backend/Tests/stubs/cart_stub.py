@@ -32,4 +32,4 @@ class CartStub(ShoppingCart):
         self.remove_after_purchase = True
         from Backend.Domain.TradingSystem.purchase_details import PurchaseDetails
 
-        return Response(True, obj=ParsableList([PurchaseDetails("a", "a", [], None, 0.0)]))
+        return Response(True, obj=ParsableList([PurchaseDetails("a", "a", "1", [], None, 0.0)]))

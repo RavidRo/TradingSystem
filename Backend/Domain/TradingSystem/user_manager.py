@@ -1,9 +1,14 @@
 from Backend.Domain.TradingSystem.statistics import Statistics
 from Backend.Service.DataObjects.statistics_data import StatisticsData
+import threading
+
+from Backend.DataBase.database import db_fail_response
 from Backend.Domain.TradingSystem.offer import Offer
 from typing import Callable
 import uuid
-import json
+
+from Backend.DataBase.Handlers.member_handler import MemberHandler
+from Backend.Domain.TradingSystem.States.member import Member
 from Backend.response import Response, ParsableList, PrimitiveParsable
 from Backend.Domain.TradingSystem.Interfaces.IUser import IUser
 from Backend.Domain.TradingSystem.store import Store
@@ -15,8 +20,8 @@ from Backend.settings import Settings
 
 
 class UserManager:
-    __cookie_user: dict[str, IUser] = {}
-    __username_user: dict[str, IUser] = {}
+    _cookie_user: dict[str, IUser] = {}
+    _username_user: dict[str, User] = {}
 
     @staticmethod
     def __deligate_to_user(cookie, func):
@@ -27,15 +32,32 @@ class UserManager:
 
     @staticmethod
     def __get_user_by_cookie(cookie) -> IUser or None:
-        if cookie not in UserManager.__cookie_user:
+        if cookie not in UserManager._cookie_user:
             return None
-        return UserManager.__cookie_user[cookie]
+        return UserManager._cookie_user[cookie]
 
     @staticmethod
-    def _get_user_by_username(username) -> IUser or None:
-        if username not in UserManager.__username_user:
-            return None
-        return UserManager.__username_user[username]
+    def _get_user_by_username(username, store_id=None) -> IUser or None:
+        if username not in UserManager._username_user:
+            user_res = MemberHandler.get_instance().load(username)
+            if not user_res.succeeded():
+                return None
+            member = user_res.get_obj()
+            member.load_cart()
+            user = IUser.create_user()
+            user.change_state(member)
+            member.set_user(user)
+            member._responsibilities = dict()
+            if store_id is not None:
+                member.get_responsibility(store_id)
+            member.notifications_lock = threading.Lock()
+            member._member_handler = MemberHandler.get_instance()
+            UserManager._username_user[username] = user
+        return UserManager._username_user[username]
+
+    @staticmethod
+    def _add_user_to_username(username, user):
+        UserManager._username_user[username] = user
 
     @staticmethod
     def __create_cookie() -> str:
@@ -46,9 +68,9 @@ class UserManager:
     @staticmethod
     def enter_system(register=True) -> str:
         cookie = UserManager.__create_cookie()
-        UserManager.__cookie_user[cookie] = IUser.create_user()
+        UserManager._cookie_user[cookie] = IUser.create_user()
         if register:
-            UserManager.__cookie_user[cookie].register_statistics()
+            UserManager._cookie_user[cookie].register_statistics()
         return cookie
 
     @staticmethod
@@ -62,9 +84,10 @@ class UserManager:
         def func(user: User):
             response = user.register(username, password)
             if response.succeeded():
-                newUser = User()
-                newUser.login(username, password)
-                UserManager.__username_user[username] = newUser
+                newUser = IUser.create_user()
+                newUser.change_state(response.get_obj())
+                UserManager._username_user[username] = newUser
+                return Response(True)
             return response
 
         return UserManager.__deligate_to_user(cookie, func)
@@ -77,23 +100,41 @@ class UserManager:
 
             # If response succeeded we want to connect the cookie to the username
             if response.succeeded():
-                for old_username in UserManager.__username_user:
+                for old_username in UserManager._username_user:
                     if old_username == username:
-                        old_user = UserManager.__username_user[old_username]
-                        UserManager.__cookie_user[cookie] = old_user
+                        old_user = UserManager._username_user[old_username]
+                        UserManager._cookie_user[cookie] = old_user
                         old_user.connect(user.get_communicate())
+                        UserManager._cookie_user[cookie].register_statistics()
+                        return response
+                member_res = MemberHandler.get_instance().load(username)
+                if not member_res.succeeded():
+                    return member_res
+                member = member_res.get_obj()
+                res = member.load_cart()
+                if res.succeeded():
+                    member._responsibilities = dict()
+                    member.notifications_lock = threading.Lock()
+                    member._member_handler = MemberHandler.get_instance()
+                    res_commit = MemberHandler.get_instance().commit_changes()
+                    if res_commit.succeeded():
+                        member.set_user(user)
+                        user.change_state(member)
+                        UserManager._username_user[username] = user
+                        UserManager._cookie_user[cookie].register_statistics()
+                    return res_commit
+                return res
+
                 # for user_cookie in UserManager.__cookie_user:
                 #     old_user = UserManager.__cookie_user[user_cookie]
                 #     response_username = old_user.get_username()
                 #     if (
-                #         response_username.succeeded()
-                #         and old_user != user
+                #         response_username.succeeded()i
                 #         and response_username.get_obj().get_val() == username
                 #     ):
                 #         UserManager.__cookie_user[cookie] = old_user
                 #         old_user.connect(user.get_communicate())
             # *This action will delete the current cart but will restore the old one and other user details
-            UserManager.__cookie_user[cookie].register_statistics()
             return response
 
         return UserManager.__deligate_to_user(cookie, func)
@@ -123,7 +164,7 @@ class UserManager:
     # 2.8
     @staticmethod
     def change_product_quantity_in_cart(
-        cookie: str, store_id, product_id, new_amount
+            cookie: str, store_id, product_id, new_amount
     ) -> Response[None]:
         func: Callable[[User], Response] = lambda user: user.change_product_quantity_in_cart(
             store_id, product_id, new_amount
@@ -185,13 +226,13 @@ class UserManager:
     # Creating a new product a the store and setting its quantity to 0
     @staticmethod
     def create_product(
-        cookie: str,
-        store_id: str,
-        name: str,
-        category: str,
-        price: float,
-        quantity: int,
-        keywords: list[str] = None,
+            cookie: str,
+            store_id: str,
+            name: str,
+            category: str,
+            price: float,
+            quantity: int,
+            keywords: list[str] = None,
     ) -> Response[str]:
         func: Callable[[User], Response] = lambda user: user.create_product(
             store_id, name, category, price, quantity, keywords
@@ -201,17 +242,24 @@ class UserManager:
     # 4.1
     @staticmethod
     def remove_product_from_store(
-        cookie: str, store_id: str, product_id: str
+            cookie: str, store_id: str, product_id: str
     ) -> Response[PrimitiveParsable[int]]:
         func: Callable[[User], Response] = lambda user: user.remove_product_from_store(
             store_id, product_id
         )
         return UserManager.__deligate_to_user(cookie, func)
 
+    @staticmethod
+    def get_product_from_bag(cookie, store_id, product_id, username):
+        func: Callable[[User], Response] = lambda user: user.get_product_from_bag(
+            store_id, product_id, username
+        )
+        return UserManager.__deligate_to_user(cookie, func)
+
     # 4.1
     @staticmethod
     def change_product_quantity_in_store(
-        cookie: str, store_id: str, product_id: str, quantity: int
+            cookie: str, store_id: str, product_id: str, quantity: int
     ) -> Response[None]:
         func: Callable[[User], Response] = lambda user: user.change_product_quantity_in_store(
             store_id, product_id, quantity
@@ -221,13 +269,13 @@ class UserManager:
     # 4.1
     @staticmethod
     def edit_product_details(
-        cookie: str,
-        store_id: str,
-        product_id: str,
-        new_name: str,
-        new_category: str,
-        new_price: float,
-        keywords: list[str] = None,
+            cookie: str,
+            store_id: str,
+            product_id: str,
+            new_name: str,
+            new_category: str,
+            new_price: float,
+            keywords: list[str] = None,
     ) -> Response[None]:
         func: Callable[[User], Response] = lambda user: user.edit_product_details(
             store_id, product_id, new_name, new_category, new_price, keywords
@@ -237,7 +285,7 @@ class UserManager:
     # 4.2
     @staticmethod
     def add_discount(
-        cookie: str, store_id: str, discount_data: dict, exist_id: str, condition_type: str = None
+            cookie: str, store_id: str, discount_data: dict, exist_id: str, condition_type: str = None
     ):
         func: Callable[[User], Response] = lambda user: user.add_discount(
             store_id, discount_data, exist_id, condition_type
@@ -265,12 +313,12 @@ class UserManager:
 
     @staticmethod
     def edit_simple_discount(
-        cookie: str,
-        store_id: str,
-        discount_id: str,
-        percentage: float = None,
-        context: dict = None,
-        duration=None,
+            cookie: str,
+            store_id: str,
+            discount_id: str,
+            percentage: float = None,
+            context: dict = None,
+            duration=None,
     ):
         func: Callable[[User], Response] = lambda user: user.edit_simple_discount(
             store_id, discount_id, percentage, context, duration
@@ -279,11 +327,11 @@ class UserManager:
 
     @staticmethod
     def edit_complex_discount(
-        cookie: str,
-        store_id: str,
-        discount_id: str,
-        complex_type: str = None,
-        decision_rule: str = None,
+            cookie: str,
+            store_id: str,
+            discount_id: str,
+            complex_type: str = None,
+            decision_rule: str = None,
     ):
         func: Callable[[User], Response] = lambda user: user.edit_complex_discount(
             store_id, discount_id, complex_type, decision_rule
@@ -293,12 +341,12 @@ class UserManager:
     # 4.2
     @staticmethod
     def add_purchase_rule(
-        cookie: str,
-        store_id: str,
-        rule_details: dict,
-        rule_type: str,
-        parent_id: str,
-        clause: str = None,
+            cookie: str,
+            store_id: str,
+            rule_details: dict,
+            rule_type: str,
+            parent_id: str,
+            clause: str = None,
     ):
         func: Callable[[User], Response] = lambda user: user.add_purchase_rule(
             store_id, rule_details, rule_type, parent_id, clause
@@ -314,7 +362,7 @@ class UserManager:
     # 4.2
     @staticmethod
     def edit_purchase_rule(
-        cookie: str, store_id: str, rule_details: dict, rule_id: str, rule_type: str
+            cookie: str, store_id: str, rule_details: dict, rule_id: str, rule_type: str
     ):
         func: Callable[[User], Response] = lambda user: user.edit_purchase_rule(
             store_id, rule_details, rule_id, rule_type
@@ -338,7 +386,7 @@ class UserManager:
     # 4.3
     @staticmethod
     def appoint_owner(cookie: str, store_id: str, username: str) -> Response[None]:
-        to_appoint = UserManager._get_user_by_username(username)
+        to_appoint = UserManager._get_user_by_username(username, store_id)
         if not to_appoint:
             return Response(False, msg="Given username does not exists")
         func: Callable[[User], Response] = lambda user: user.appoint_owner(store_id, to_appoint)
@@ -347,7 +395,7 @@ class UserManager:
     # 4.5
     @staticmethod
     def appoint_manager(cookie: str, store_id: str, username: str) -> Response[None]:
-        to_appoint = UserManager._get_user_by_username(username)
+        to_appoint = UserManager._get_user_by_username(username, store_id)
         if not to_appoint:
             return Response(False, msg="Given username does not exists")
         func: Callable[[User], Response] = lambda user: user.appoint_manager(store_id, to_appoint)
@@ -356,7 +404,7 @@ class UserManager:
     # 4.6
     @staticmethod
     def add_manager_permission(
-        cookie: str, store_id: str, username: str, permission: Permission
+            cookie: str, store_id: str, username: str, permission: Permission
     ) -> Response[None]:
         func: Callable[[User], Response] = lambda user: user.add_manager_permission(
             store_id, username, permission
@@ -366,7 +414,7 @@ class UserManager:
     # 4.6
     @staticmethod
     def remove_manager_permission(
-        cookie: str, store_id: str, username: str, permission: Permission
+            cookie: str, store_id: str, username: str, permission: Permission
     ) -> Response[None]:
         func = lambda user: user.remove_manager_permission(store_id, username, permission)
         return UserManager.__deligate_to_user(cookie, func)
@@ -391,7 +439,7 @@ class UserManager:
     # 4.11
     @staticmethod
     def get_store_purchase_history(
-        cookie: str, store_id: str
+            cookie: str, store_id: str
     ) -> Response[ParsableList[PurchaseDetails]]:
         func = lambda user: user.get_store_purchase_history(store_id)
         return UserManager.__deligate_to_user(cookie, func)
@@ -402,7 +450,7 @@ class UserManager:
     # 6.4
     @staticmethod
     def get_any_store_purchase_history_admin(
-        cookie: str, store_id: str
+            cookie: str, store_id: str
     ) -> Response[ParsableList[PurchaseDetails]]:
         func: Callable[[User], Response] = lambda user: user.get_any_store_purchase_history_admin(
             store_id
@@ -412,7 +460,7 @@ class UserManager:
     # 6.4
     @staticmethod
     def get_any_user_purchase_history_admin(
-        cookie: str, username: str
+            cookie: str, username: str
     ) -> Response[ParsableList[PurchaseDetails]]:
         func: Callable[[User], Response] = lambda user: user.get_any_user_purchase_history_admin(
             username
@@ -434,11 +482,11 @@ class UserManager:
     # =====================
     @staticmethod
     def _get_cookie_user():
-        return UserManager.__cookie_user
+        return UserManager._cookie_user
 
     @staticmethod
     def _get_username_user():
-        return UserManager.__username_user
+        return UserManager._username_user
 
     @staticmethod
     def get_user_received_notifications(cookie: str) -> Response[ParsableList[PurchaseDetails]]:
@@ -509,18 +557,34 @@ class UserManager:
         func: Callable[[User], Response] = lambda user: user.get_users_statistics()
         return UserManager.__deligate_to_user(cookie, func)
 
+    @staticmethod
+    def get_member(res_id):
+        for user in UserManager._username_user.values():
+            if user.state.has_res_id(res_id):
+                return Response(True, obj=user.state)
 
-def register_admins() -> None:
-    settings = Settings.get_instance(False)
-    admins = settings.get_admins()
-    if len(admins) <= 0:
-        raise Exception(
-            "At least one admin should be at the system. Check config.json to add admins."
-        )
-    for admin in admins:
-        cookie = UserManager.enter_system(False)
-        UserManager.register(admin, settings.get_password(), cookie)
-        Statistics.getInstance().subscribe(UserManager._get_user_by_username(admin))
+        member_res = MemberHandler.get_instance().load_user_with_res(res_id)
+        if member_res.succeeded():
+            member_res.get_obj().load_cart()
+            user = IUser.create_user()
+            user.change_state(member_res.get_obj())
+            member_res.get_obj().set_user(user)
+            UserManager._username_user[member_res.get_obj().get_username().get_obj().get_val()] = user
+            return member_res
 
+        return db_fail_response
 
-register_admins()
+    @staticmethod
+    def register_admins() -> None:
+        from Backend.Domain.TradingSystem.States.guest import register_admins
+        settings = Settings.get_instance(False)
+        admins = settings.get_admins()
+        if len(admins) <= 0:
+            raise Exception(
+                "At least one admin should be at the system. Check config.json to add admins."
+            )
+        for admin in admins:
+            # cookie = UserManager.enter_system(False)
+            register_admins(admin, settings.get_password())
+            Statistics.getInstance().subscribe(UserManager._get_user_by_username(admin))
+

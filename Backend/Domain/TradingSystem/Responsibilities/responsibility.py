@@ -1,6 +1,8 @@
 from __future__ import annotations
 import enum
+import uuid
 
+from Backend.DataBase.database import db_fail_response
 from Backend.Domain.TradingSystem.offer import Offer
 from Backend.Service.DataObjects.responsibilities_data import ResponsibilitiesData
 from Backend.Domain.TradingSystem.Interfaces.IUser import IUser
@@ -43,10 +45,12 @@ class Responsibility(Parsable):
     ERROR_MESSAGE = "Responsibility is an interface, function not implemented"
 
     def __init__(self, user_state, store, subscriber=None) -> None:
+        from Backend.DataBase.Handlers.responsibilities_handler import ResponsibilitiesHandler
         self._user_state = user_state
-        user_state.add_responsibility(self, store.get_id())
         self._store = store
-        store.add_owner(user_state.get_username().get_obj().value)
+        if store:
+            self._store_id = store.get_id()
+
         self.__subscriber = subscriber
         if subscriber:
             self._store.subscribe(subscriber)
@@ -56,7 +60,69 @@ class Responsibility(Parsable):
                     "data": f"You have been appointed to {store.get_name()} as {self.__class__.__name__}",
                 }
             )
-        self._appointed: list[Responsibility] = []
+        self._appointed = []
+
+        if self._user_state is not None:
+            self._username = user_state.get_username().get_obj().get_val()
+            store.add_owner(user_state.get_username().get_obj().value)
+        else:
+            self._username = None
+        self._responsibilities_handler = ResponsibilitiesHandler.get_instance()
+        self._responsibility_dal = None
+        self._responsibility_dal_id = None
+
+    def set_subscriber(self, subscriber):
+        res = self.get_store()
+        if not res.succeeded():
+            return res
+
+        self.__subscriber = subscriber
+        self._store.subscribe(subscriber)
+
+    def set_user_state(self, user_state):
+        self._user_state = user_state
+        self._username = user_state.get_username().get_obj().get_val()
+
+    def get_user_state(self):
+        res = self.get_store()
+        if not res.succeeded():
+            return res
+
+        from Backend.Domain.TradingSystem.user_manager import UserManager
+        if self._user_state is None:
+            response_member = UserManager.get_member(self._responsibility_dal_id)
+            if response_member.succeeded():
+                response_member.get_obj().add_responsibility(self, self._store_id)
+                self._user_state = response_member.get_obj()
+                self._username = self._user_state.get_username()
+                self._store.add_owner(self._user_state.get_username().get_obj().value)
+                self.set_subscriber(self._user_state._user)
+            else:
+                return response_member
+        for appointed in self._appointed:
+            res = appointed.get_user_state()
+            if not res.succeeded():
+                return res
+        return Response(True, self._user_state)
+
+    def get_store(self):
+        if not self._store:
+            from Backend.Domain.TradingSystem.stores_manager import StoresManager
+            store_res = StoresManager.get_store(self._store_id)
+            if store_res.succeeded():
+                self._store = store_res.get_obj()
+            else:
+                return store_res
+        return Response(True, self._store)
+
+    def get_store_id(self):
+        return self._store_id
+
+    def set_username(self, username):
+        self._username = username
+
+    def set_store_id(self, store_id):
+        self._store_id = store_id
 
     # 4.1
     # Creating a new product a the store
@@ -161,27 +227,52 @@ class Responsibility(Parsable):
     def is_owner(self) -> bool:
         raise Exception(Responsibility.ERROR_MESSAGE)
 
-    def _add_permission(self, username: str, permission: Permission) -> bool:
+    def _add_permission(self, username: str, permission: Permission) -> Response[None]:
+        res = self.get_store()
+        if not res.succeeded():
+            return res
+
         if not self._appointed:
             # if self.user never appointed anyone
-            return False
+            return Response(False, msg=f"{self._username} is not appointed to store: {self._store.get_name()}!")
 
         def add_appointee_permission(appointee: Responsibility):
             return appointee._add_permission(username, permission)
 
         # returns true if any one of the children returns true
-        return any(map(add_appointee_permission, self._appointed))
+        for appointee in self._appointed:
+            response = add_appointee_permission(appointee)
+            if response.succeeded():
+                return response
+            elif response.get_obj().parse() == -1:
+                return db_fail_response
 
-    def _remove_permission(self, username: str, permission: Permission) -> bool:
+        return Response(False, msg=f"Didn't find appointee with username: {username}")
+
+        # return any(map(add_appointee_permission, self._appointed))
+
+    def _remove_permission(self, username: str, permission: Permission) -> Response[None]:
+        res = self.get_store()
+        if not res.succeeded():
+            return res
+
         if not self._appointed:
             # if self.user never appointed anyone
-            return False
+            return Response(False, msg=f"{self._username} is not appointed to store: {self._store.get_name()}!")
 
         def remove_appointee_permission(appointee: Responsibility):
             return appointee._remove_permission(username, permission)
 
+        for appointee in self._appointed:
+            response = remove_appointee_permission(appointee)
+            if response.succeeded():
+                return response
+            elif response.get_obj().parse() == -1:
+                return db_fail_response
+
+        return Response(False, msg=f"Didn't find appointee with username: {username}")
         # returns true if any one of the children returns true
-        return any(map(remove_appointee_permission, self._appointed))
+        # return any(map(remove_appointee_permission, self._appointed))
 
     def _remove_appointment(self, username: str) -> bool:
         if not self._appointed:
@@ -190,24 +281,52 @@ class Responsibility(Parsable):
 
         for appointment in self._appointed:
             if appointment._user_state.get_username().get_obj().get_val() == username:
-                self._appointed.remove(appointment)
-                appointment.__dismiss_from_store(self._store.get_id())
-                return True
+                res = self._responsibilities_handler.remove_res(appointment)
+
+                if res.succeeded():
+                    res = appointment.__dismiss_from_store_db()
+                    if res.succeeded():
+                        res_commit = self._responsibilities_handler.commit_changes()
+                        if res_commit.succeeded():
+                            self._appointed.remove(appointment)
+                            appointment.__dismiss_from_store(self._store_id)
+
+                        return True
+                    return False
 
         return any(map(lambda worker: worker._remove_appointment(username), self._appointed))
 
     def __dismiss_from_store(self, store_id: str) -> None:
+        res = self.get_store()
+        if not res.succeeded():
+            return res
+
         for appointment in self._appointed:
             appointment.__dismiss_from_store(store_id)
+
         message = f'You have been dismissed from store "{self._store.get_name()}"'
+        self.get_user_state()
         if self.__subscriber:
             self.__subscriber.notify(message)
             self._store.unsubscribe(self.__subscriber)
         self._store.remove_owner(self._user_state.get_username().get_obj().value)
         self._user_state.dismiss_from_store(store_id)
 
+    def __dismiss_from_store_db(self) -> Response[None]:
+        for appointment in self._appointed:
+            response = appointment.__dismiss_from_store_db()
+            if not response.succeeded():
+                return response
+
+        member_response = self.get_user_state()
+        if member_response.succeeded():
+            member_response.get_obj().dismiss_from_store_db(self)
+        return member_response
+
     # Parsing the object for user representation
     def parse(self) -> ResponsibilitiesData:
+        self.get_store()
+
         return ResponsibilitiesData(
             self._store.get_id(),
             self._store.get_name(),
@@ -215,7 +334,7 @@ class Responsibility(Parsable):
             self.__class__.__name__,
             [appointee.parse() for appointee in self._appointed],
             self._permissions(),
-            self._user_state.get_username().object.value,
+            self.get_user_state().get_obj().get_username().object.value,
         )
 
     def _is_manager(self) -> bool:
@@ -224,6 +343,14 @@ class Responsibility(Parsable):
     def _permissions(self) -> list[str]:
         return [per.name for per in Permission]
 
+    def save_self(self, username, store_id):
+        from Backend.DataBase.Handlers.responsibilities_handler import Founder_Responsibility_DAL
+        dal_responsibility_res = self._responsibilities_handler.save_res(Founder_Responsibility_DAL, username, store_id)
+        if dal_responsibility_res.succeeded():
+            self._responsibility_dal = dal_responsibility_res.get_obj()
+            self._responsibility_dal_id = dal_responsibility_res.get_obj().id
+            return Response(True)
+        return db_fail_response
     # Offers
     # ======================
 
@@ -243,7 +370,34 @@ class Responsibility(Parsable):
 
         import itertools
 
+        self.get_user_state()
         my_username = self._user_state.get_username().object.value
         nested_names = [appointee.get_owners_names() for appointee in self._appointed]
         List_flat = list(itertools.chain(*nested_names))
         return List_flat + [my_username]
+
+    def get_dal_responsibility_id(self):
+        return self._responsibility_dal_id
+
+    def get_dal_responsibility(self):
+        return self._responsibility_dal
+
+    def set_appointments(self, appointments):
+        self._appointed = appointments
+
+    def set_dal_responsibility_and_id(self, res_root):
+        self._responsibility_dal = res_root
+        self._responsibility_dal_id = res_root.id
+
+    def get_res_if_exists(self, responsibility_ids):
+        if str(self._responsibility_dal_id) in responsibility_ids:
+            return Response(True, obj=self)
+        if self._appointed is None:
+            return Response(False)
+        for child in self._appointed:
+            res = child.get_res_if_exists(responsibility_ids)
+            if res.succeeded():
+                return res
+
+    def set_store(self, store):
+        self._store = store

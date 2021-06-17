@@ -1,5 +1,8 @@
+import copy
 import operator
 import threading
+
+from Backend.DataBase.database import db_fail_response
 from Backend.Domain.TradingSystem.TypesPolicies.Purchase_Composites.concrete_composites import AndCompositePurchaseRule, \
     OrCompositePurchaseRule, ConditioningCompositePurchaseRule
 from Backend.Domain.TradingSystem.TypesPolicies.Purchase_Composites.concrete_leaf import ProductLeafPurchaseRule, \
@@ -15,14 +18,14 @@ class PurchasePolicy:
 
 # region data
 
-logic_types = {"or": lambda self: OrCompositePurchaseRule(self.generate_id()),
-               "and": lambda self: AndCompositePurchaseRule(self.generate_id()),
-               "conditional": lambda self: ConditioningCompositePurchaseRule(self.generate_id())}
+logic_types = {"or": lambda parent: OrCompositePurchaseRule(parent),
+               "and": lambda parent: AndCompositePurchaseRule(parent),
+               "conditional": lambda parent: ConditioningCompositePurchaseRule(parent)}
 
-leaf_types = {"product": lambda self, leaf_details: ProductLeafPurchaseRule(leaf_details=leaf_details, identifier=self.generate_id()),
-              "bag": lambda self, leaf_details: BagLeafPurchaseRule(leaf_details=leaf_details, identifier=self.generate_id()),
-              "user": lambda self, leaf_details: UserLeafPurchaseRule(leaf_details=leaf_details, identifier=self.generate_id()),
-              "category": lambda self, leaf_details: CategoryLeafPurchaseRule(leaf_details=leaf_details, identifier=self.generate_id()),
+leaf_types = {"product": lambda self, leaf_details, parent: ProductLeafPurchaseRule(leaf_details=leaf_details, parent=parent),
+              "bag": lambda self, leaf_details, parent: BagLeafPurchaseRule(leaf_details=leaf_details, parent=parent),
+              "user": lambda self, leaf_details, parent: UserLeafPurchaseRule(leaf_details=leaf_details, parent=parent),
+              "category": lambda self, leaf_details, parent: CategoryLeafPurchaseRule(leaf_details=leaf_details, parent=parent),
               }
 
 
@@ -40,18 +43,15 @@ ops = {'great-than': operator.gt,
 
 class DefaultPurchasePolicy(PurchasePolicy):
 
-    def __init__(self):
+    def __init__(self, root_rule):
+        from Backend.DataBase.Handlers.purchase_rules_handler import PurchaseRulesHandler
         super().__init__()
-        self.__id = 0
-        self.auto_id_lock = threading.Lock()
+        self.__purchase_rules_handler = PurchaseRulesHandler.get_instance()
+        # self.__id = 0
         # the root will be always an AndComposite
-        self.__purchase_rules = AndCompositePurchaseRule(self.generate_id())
+        self.__purchase_rules = root_rule
+        self.__purchase_rules_lock = None
         self.__purchase_rules_lock = ReadWriteLock()
-
-    def generate_id(self) -> str:
-        with self.auto_id_lock:
-            self.__id += 1
-            return str(self.__id)
 
     """
     rule_details json of relevant details.
@@ -67,6 +67,15 @@ class DefaultPurchasePolicy(PurchasePolicy):
                         }
     clause - only for conditional - valid values: if/then
     """
+    def get_purchase_rules(self, root_id):
+        if self.__purchase_rules is None:
+            rules_loaded = self.__purchase_rules_handler.load(root_id)
+            if rules_loaded.succeeded():
+                self.__purchase_rules = rules_loaded.get_obj()
+                return Response(True, obj=self.__purchase_rules)
+            else:
+                return db_fail_response
+        return Response(True, obj=self.__purchase_rules)
 
     def check_keys_in_rule_details(self, keys: list[str], rule_details: dict):
         for key in keys:
@@ -102,6 +111,11 @@ class DefaultPurchasePolicy(PurchasePolicy):
 
     def add_purchase_rule(self, rule_details: dict, rule_type: str, parent_id: str, clause: str= None) -> Response[None]:
         self.__purchase_rules_lock.acquire_write()
+        parent_rule_res = self.__purchase_rules.get_rule(parent_id)
+        if not parent_rule_res.succeeded():
+            self.__purchase_rules_lock.release_write()
+            return Response(False, msg=f"invalid parent id: {parent_id}")
+        parent = parent_rule_res.get_obj()
         if rule_type == "simple":
             response_validity = self.check_simple_rule_details_validity(rule_details)
             if not response_validity.succeeded():
@@ -109,8 +123,11 @@ class DefaultPurchasePolicy(PurchasePolicy):
                 return response_validity
             leaf_type = rule_details['context']['obj']
             if leaf_type in leaf_types.keys():
-                simple_rule = leaf_types[leaf_type](self, rule_details)
-                add_response = self.__purchase_rules.add(simple_rule, parent_id, clause)
+                simple_rule = leaf_types[leaf_type](self, rule_details, parent)
+                simple_rule.set_clause(clause)
+                add_response = self.__purchase_rules.add(simple_rule, parent_id)
+                if add_response.succeeded():
+                    parent._children.append(simple_rule)
                 self.__purchase_rules_lock.release_write()
                 return add_response
             else:
@@ -124,7 +141,11 @@ class DefaultPurchasePolicy(PurchasePolicy):
                 return response_validity
             logic_type = rule_details['operator']
             if logic_type in logic_types.keys():
-                add_response = self.__purchase_rules.add(logic_types[logic_type](self), parent_id, clause)
+                complex_rule = logic_types[logic_type](parent)
+                complex_rule.set_clause(clause)
+                add_response = self.__purchase_rules.add(complex_rule, parent_id)
+                if add_response.succeeded():
+                    parent._children.append(complex_rule)
                 self.__purchase_rules_lock.release_write()
                 return add_response
             else:
@@ -154,13 +175,15 @@ class DefaultPurchasePolicy(PurchasePolicy):
             return Response(False, msg=new_parent_response.get_msg())
 
         new_parent = new_parent_response.get_obj()
+
         check_validity = rule_to_move.check_validity(new_parent_id)
         if not check_validity.succeeded():
             self.__purchase_rules_lock.release_write()
             return check_validity
-        rule_to_move.parent.children.remove(rule_to_move)
-        rule_to_move.parent = new_parent
-        new_parent.children.append(rule_to_move)
+
+        from Backend.DataBase.Handlers.purchase_rules_handler import PurchaseRulesHandler
+        PurchaseRulesHandler.get_instance().move_rule(rule_to_move, new_parent)
+        res = self.__purchase_rules_handler.commit_changes()
         self.__purchase_rules_lock.release_write()
         return Response(True, msg="Move succeeded!")
 
@@ -178,6 +201,13 @@ class DefaultPurchasePolicy(PurchasePolicy):
 
     def edit_purchase_rule(self, rule_details: dict, rule_id: str, rule_type: str):
         self.__purchase_rules_lock.acquire_write()
+        res_rule = self.__purchase_rules.get_rule(rule_id)
+        if not res_rule.succeeded():
+            self.__purchase_rules_lock.release_write()
+            return res_rule
+
+        parent = res_rule.get_obj().parent
+
         if rule_type == "simple":
             response_validity = self.check_simple_rule_details_validity(rule_details)
             if not response_validity.succeeded():
@@ -185,7 +215,8 @@ class DefaultPurchasePolicy(PurchasePolicy):
                 return response_validity
             leaf_type = rule_details['context']['obj']
             if leaf_type in leaf_types.keys():
-                edit_response = self.__purchase_rules.edit_rule(rule_id, leaf_types[leaf_type](self, rule_details))
+                edited_rule = leaf_types[leaf_type](self, rule_details, parent)
+                edit_response = self.__purchase_rules.edit_rule(rule_id, edited_rule)
                 self.__purchase_rules_lock.release_write()
                 return edit_response
             else:
@@ -199,7 +230,8 @@ class DefaultPurchasePolicy(PurchasePolicy):
                 return response_validity
             logic_type = rule_details['operator']
             if logic_type in logic_types.keys():
-                edit_response = self.__purchase_rules.edit_rule(rule_id, logic_types[logic_type](self))
+                edit_response = self.__purchase_rules.edit_rule(rule_id, logic_types[logic_type](parent))
+
                 self.__purchase_rules_lock.release_write()
                 return edit_response
 
@@ -211,11 +243,11 @@ class DefaultPurchasePolicy(PurchasePolicy):
             self.__purchase_rules_lock.release_write()
             return Response(False, msg=f"invalid rule type: {rule_type}")
 
-    def get_purchase_rules(self) -> Response[PurchasePolicy]:
-        self.__purchase_rules_lock.acquire_read()
-        reponse = Response(True, obj=self, msg="Here are the purchase rules")
-        self.__purchase_rules_lock.release_read()
-        return reponse
+    # def get_purchase_rules(self) -> Response[PurchasePolicy]:
+    #     self.__purchase_rules_lock.acquire_read()
+    #     reponse = Response(True, obj=self, msg="Here are the purchase rules")
+    #     self.__purchase_rules_lock.release_read()
+    #     return reponse
 
     def checkPolicy(self, products_to_quantities: dict, user_age: int) -> Response[None]:
         self.__purchase_rules_lock.acquire_read()
@@ -228,3 +260,7 @@ class DefaultPurchasePolicy(PurchasePolicy):
         parse_result = self.__purchase_rules.parse()
         self.__purchase_rules_lock.release_read()
         return parse_result
+
+    def get_root_id(self):
+        return self.__purchase_rules._id
+

@@ -56,7 +56,7 @@ class TradingSystemManager:
     # kwargs = You can search for a product by additional key words
     @staticmethod
     def search_products(
-        product_name: str, product_category: str, min_price, max_price, keywords
+            product_name: str, product_category: str, min_price, max_price, keywords
     ) -> Response[dict]:
         return SearchEngine.search_products(
             product_name, product_category, min_price, max_price, keywords
@@ -65,7 +65,7 @@ class TradingSystemManager:
     # 2.7
     @staticmethod
     def save_product_in_cart(
-        cookie: str, store_id: str, product_id: str, quantity
+            cookie: str, store_id: str, product_id: str, quantity
     ) -> Response[None]:
         return UserManager.add_to_cart(cookie, store_id, product_id, quantity)
 
@@ -82,7 +82,7 @@ class TradingSystemManager:
     # 2.8
     @staticmethod
     def change_product_quantity_in_cart(
-        cookie: str, store_id: str, product_id: str, new_quantity: int
+            cookie: str, store_id: str, product_id: str, new_quantity: int
     ) -> Response[None]:
         return UserManager.change_product_quantity_in_cart(
             cookie, store_id, product_id, new_quantity
@@ -95,8 +95,16 @@ class TradingSystemManager:
 
     # 2.9
     @staticmethod
-    def purchase_completed(cookie: str) -> Response[None]:
-        return UserManager.purchase_completed(cookie)
+    def purchase_completed(cookie: str):
+        purchase_details = UserManager.purchase_completed(cookie)
+        if purchase_details.succeeded():
+            return Response(True, [{"username": purchase_detail.username,
+                                    "store_name": purchase_detail.store_name,
+                                    "store_id": purchase_detail.store_id,
+                                    "product_names": purchase_detail.product_names,
+                                    "date": purchase_detail.date,
+                                    "total_price": purchase_detail.total_price} for purchase_detail in purchase_details.get_obj()])
+        return purchase_details
 
     @staticmethod
     def get_cart_price(cookie: str) -> Response[PrimitiveParsable[float]]:
@@ -116,7 +124,7 @@ class TradingSystemManager:
     # 3.7
     @staticmethod
     def get_purchase_history(cookie: str) -> Response[ParsableList[PurchaseDetails]]:
-        return UserManager.get_purchase_history(cookie)
+        return UserManager.get_purchase_history(cookie).parse()
 
     # Owner and manager
     # =======================
@@ -125,13 +133,13 @@ class TradingSystemManager:
     # Creating a new product and returns its id
     @staticmethod
     def create_product(
-        cookie: str,
-        store_id: str,
-        name: str,
-        category: str,
-        price: float,
-        quantity: int,
-        keywords: list[str] = None,
+            cookie: str,
+            store_id: str,
+            name: str,
+            category: str,
+            price: float,
+            quantity: int,
+            keywords: list[str] = None,
     ) -> Response[str]:
         return UserManager.create_product(
             cookie, store_id, name, category, price, quantity, keywords
@@ -140,27 +148,27 @@ class TradingSystemManager:
     # 4.1
     @staticmethod
     def remove_product_from_store(
-        cookie: str, store_id: str, product_id: str
+            cookie: str, store_id: str, product_id: str
     ) -> Response[PrimitiveParsable[int]]:
         return UserManager.remove_product_from_store(cookie, store_id, product_id)
 
     # 4.1
     @staticmethod
     def change_product_quantity_in_store(
-        cookie: str, store_id: str, product_id: str, quantity: int
+            cookie: str, store_id: str, product_id: str, quantity: int
     ) -> Response[None]:
         return UserManager.change_product_quantity_in_store(cookie, store_id, product_id, quantity)
 
     # 4.1
     @staticmethod
     def edit_product_details(
-        cookie: str,
-        store_id: str,
-        product_id: str,
-        new_name: str,
-        new_category,
-        new_price: float,
-        keywords: list[str] = None,
+            cookie: str,
+            store_id: str,
+            product_id: str,
+            new_name: str,
+            new_category,
+            new_price: float,
+            keywords: list[str] = None,
     ) -> Response[None]:
         return UserManager.edit_product_details(
             cookie, store_id, product_id, new_name, new_category, new_price, keywords
@@ -169,11 +177,16 @@ class TradingSystemManager:
     @staticmethod
     def get_product(store_id: str, product_id: str, username: str) -> ProductData:
         return StoresManager.get_product_with_price(store_id, product_id, username).parse()
+        return StoresManager.get_product_with_price(store_id, product_id, username).parse()
+
+    @staticmethod
+    def get_product_from_bag(cookie: str, store_id: str, product_id: str, username: str) -> ProductData:
+        return UserManager.get_product_from_bag(cookie, store_id, product_id, username).parse()
 
     # 4.2
     @staticmethod
     def add_discount(
-        cookie: str, store_id: str, discount_data: dict, exist_id: str, condition_type: str = None
+            cookie: str, store_id: str, discount_data: dict, exist_id: str, condition_type: str = None
     ):
         return UserManager.add_discount(cookie, store_id, discount_data, exist_id, condition_type)
 
@@ -191,12 +204,12 @@ class TradingSystemManager:
 
     @staticmethod
     def edit_simple_discount(
-        cookie: str,
-        store_id: str,
-        discount_id: str,
-        percentage: float = None,
-        context: dict = None,
-        duration=None,
+            cookie: str,
+            store_id: str,
+            discount_id: str,
+            percentage: float = None,
+            context: dict = None,
+            duration=None,
     ):
         return UserManager.edit_simple_discount(
             cookie, store_id, discount_id, percentage, context, duration
@@ -204,11 +217,11 @@ class TradingSystemManager:
 
     @staticmethod
     def edit_complex_discount(
-        cookie: str,
-        store_id: str,
-        discount_id: str,
-        complex_type: str = None,
-        decision_rule: str = None,
+            cookie: str,
+            store_id: str,
+            discount_id: str,
+            complex_type: str = None,
+            decision_rule: str = None,
     ):
         return UserManager.edit_complex_discount(
             cookie, store_id, discount_id, complex_type, decision_rule
@@ -217,12 +230,12 @@ class TradingSystemManager:
     # 4.2
     @staticmethod
     def add_purchase_rule(
-        cookie: str,
-        store_id: str,
-        rule_details: dict,
-        rule_type: str,
-        parent_id: str,
-        clause: str = None,
+            cookie: str,
+            store_id: str,
+            rule_details: dict,
+            rule_type: str,
+            parent_id: str,
+            clause: str = None,
     ) -> Response[None]:
         return UserManager.add_purchase_rule(
             cookie, store_id, rule_details, rule_type, parent_id, clause
@@ -236,14 +249,14 @@ class TradingSystemManager:
     # 4.2
     @staticmethod
     def edit_purchase_rule(
-        cookie: str, store_id: str, rule_details: dict, rule_id: str, rule_type: str
+            cookie: str, store_id: str, rule_details: dict, rule_id: str, rule_type: str
     ) -> Response[None]:
         return UserManager.edit_purchase_rule(cookie, store_id, rule_details, rule_id, rule_type)
 
     # 4.2
     @staticmethod
     def move_purchase_rule(
-        cookie: str, store_id: str, rule_id: str, new_parent_id: str
+            cookie: str, store_id: str, rule_id: str, new_parent_id: str
     ) -> Response[None]:
         return UserManager.move_purchase_rule(cookie, store_id, rule_id, new_parent_id)
 
@@ -265,7 +278,7 @@ class TradingSystemManager:
     # 4.6
     @staticmethod
     def add_manager_permission(
-        cookie: str, store_id: str, username: str, permission: str
+            cookie: str, store_id: str, username: str, permission: str
     ) -> Response[None]:
         if permission not in name_to_permission:
             return Response(False, msg="Invalid permission was given")
@@ -276,7 +289,7 @@ class TradingSystemManager:
     # 4.6
     @staticmethod
     def remove_manager_permission(
-        cookie: str, store_id: str, username: str, permission: str
+            cookie: str, store_id: str, username: str, permission: str
     ) -> Response[None]:
         if permission not in name_to_permission:
             return Response(False, msg="Invalid permission was given")
@@ -301,9 +314,9 @@ class TradingSystemManager:
     # 4.11
     @staticmethod
     def get_store_purchase_history(
-        cookie: str, store_id: str
+            cookie: str, store_id: str
     ) -> Response[ParsableList[PurchaseDetails]]:
-        return UserManager.get_store_purchase_history(cookie, store_id)
+        return UserManager.get_store_purchase_history(cookie, store_id).parse()
 
     # System Manager
     # ====================
@@ -311,16 +324,16 @@ class TradingSystemManager:
     # 6.4
     @staticmethod
     def get_any_user_purchase_history_admin(
-        cookie: str, username: str
+            cookie: str, username: str
     ) -> Response[ParsableList[PurchaseDetails]]:
-        return UserManager.get_any_user_purchase_history_admin(cookie, username)
+        return UserManager.get_any_user_purchase_history_admin(cookie, username).parse()
 
     # 6.4
     @staticmethod
     def get_any_store_purchase_history_admin(
-        cookie: str, store_id: str
+            cookie: str, store_id: str
     ) -> Response[ParsableList[PurchaseDetails]]:
-        return UserManager.get_any_store_purchase_history_admin(cookie, store_id)
+        return UserManager.get_any_store_purchase_history_admin(cookie, store_id).parse()
 
     # Inter component functions
     # ============================
@@ -396,3 +409,7 @@ class TradingSystemManager:
     @staticmethod
     def get_users_statistics_admin() -> Response[StatisticsData]:
         return Response(True, Statistics.getInstance().get_statistics())
+
+    @staticmethod
+    def register_admins():
+        UserManager.register_admins()

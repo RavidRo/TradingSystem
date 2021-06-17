@@ -8,7 +8,7 @@ import {
 	moveDiscount,
 	removeDiscount,
 } from '../../api';
-import { areYouSure, confirmOnSuccess } from '../../decorators';
+import { areYouSure, confirm, confirmOnSuccess } from '../../decorators';
 import { useAPI2 } from '../../hooks/useAPI';
 import {
 	Discount,
@@ -46,7 +46,7 @@ const DiscountsList: FC<DiscountsListProps> = ({ openTab, products, storeId }) =
 
 	const openDiscountForm = (fatherId: string) => {
 		const onAddDiscount = (rule: DiscountSimple | DiscountComplex): void => {
-			addDiscountAPI.request(storeId, rule, fatherId).then(getDiscounts);
+			addDiscountAPI.request(storeId, rule, fatherId).then(()=>confirm("Discount was added successfully! <3")).then(getDiscounts);
 		};
 
 		openTab(() => <CreateDiscountForm onSubmit={onAddDiscount} products={products} />, '');
@@ -124,7 +124,8 @@ const DiscountsList: FC<DiscountsListProps> = ({ openTab, products, storeId }) =
 	};
 
 	const onMove = confirmOnSuccess(
-		(srcId: string, destId: string) => moveDiscountAPI.request(storeId, srcId, destId),
+		(srcId: string, destId: string) =>
+			moveDiscountAPI.request(storeId, srcId, destId).then(getDiscounts),
 		'Moved!',
 		'Discount was moved successfully <3'
 	);
@@ -141,9 +142,9 @@ const DiscountsList: FC<DiscountsListProps> = ({ openTab, products, storeId }) =
 		rootDiscount && (
 			<GenericList
 				data={(rootDiscount as DiscountComplex).discounts}
-				header="Discounts"
+				header='Discounts'
 				narrow
-				createTxt="+ Add discount"
+				createTxt='+ Add discount'
 				onCreate={() => openDiscountForm(rootDiscount.id)}
 				onDrop={onDrop}
 			>

@@ -3,8 +3,8 @@ from __future__ import annotations
 import copy
 from abc import ABC, abstractmethod
 from typing import List
-
-from Backend.Domain.TradingSystem.user import User
+from sqlalchemy_utils import Ltree
+from Backend.DataBase.database import engine, db_fail_response
 from Backend.response import Response
 
 
@@ -14,8 +14,17 @@ class PurchaseRule(ABC):
     complex objects of a composition.
     """
 
-    def __init__(self, identifier):
-        self.id = identifier
+    def __init__(self, parent=None):
+        from Backend.DataBase.Handlers.purchase_rules_handler import PurchaseRulesHandler
+        from Backend.DataBase.Handlers.purchase_rules_handler import rules_id_seq
+        _id = engine.execute(rules_id_seq)
+        self._id = _id
+        ltree_id = Ltree(str(_id))
+        self.path = ltree_id if parent is None else parent.path + ltree_id
+        self._clause = None
+
+    def get_id(self):
+        return str(self._id)
 
     @property
     def id(self) -> str:
@@ -33,7 +42,10 @@ class PurchaseRule(ABC):
     def parent(self, parent: CompositePurchaseRule):
         self._parent = parent
 
-    def add(self, component: PurchaseRule, parent_id: str, clause: str = None) -> Response[None]:
+    def set_clause(self, clause_str):
+        self._clause = clause_str
+
+    def add(self, component: PurchaseRule, parent_id: str) -> Response[None]:
         pass
 
     def remove(self, component_id: str) -> Response[None]:
@@ -66,8 +78,8 @@ class CompositePurchaseRule(PurchaseRule):
     children.
     """
 
-    def __init__(self, identifier: str) -> None:
-        self.id = identifier
+    def __init__(self, parent=None) -> None:
+        super().__init__(parent)
         self._children: List[PurchaseRule] = []
 
     @property
@@ -92,37 +104,59 @@ class CompositePurchaseRule(PurchaseRule):
                     return response
         return Response(False, msg=f"Operation couldn't be performed! Wrong parent_id: {id}")
 
-    def add(self, component: PurchaseRule, parent_id: str, clause: str = None) -> Response[None]:
-        if self.id == parent_id:
-            self._children.append(component)
-            component.parent = self
-            return Response(True, msg="Rule was added successfully!")
+    def add(self, component: PurchaseRule, parent_id: str) -> Response[None]:
+        from Backend.DataBase.Handlers.purchase_rules_handler import PurchaseRulesHandler
+        print(self.get_id())
+        print(parent_id)
+        if self.get_id() == parent_id:
+            res_save = PurchaseRulesHandler.get_instance().save(component)
+            print(res_save.succeeded())
+            print(res_save.get_msg())
+            if res_save.succeeded():
+                res_commit = PurchaseRulesHandler.get_instance().commit_changes()
+                print(res_commit.succeeded())
+                print(res_commit.get_msg())
+                if res_commit.succeeded():
+                    return Response(True, msg="Rule was added successfully!")
         if self.is_composite():
-            return self.children_operation(lambda child, rule, relevant_id, clause=None: child.add(rule, relevant_id, clause), parent_id, component, clause)
+            return self.children_operation(lambda child, rule, relevant_id: child.add(rule, relevant_id), parent_id, component)
         else:
             return Response(False, msg=f"Operation couldn't be performed! Wrong parent_id: {id}")
 
     def remove(self, component_id: str) -> Response[None]:
-        if self.id == component_id:
+        from Backend.DataBase.Handlers.purchase_rules_handler import PurchaseRulesHandler
+        if self.get_id() == component_id:
             if self.parent is None:
                 return Response(False, msg="Root can't be removed!")
-            self.parent._children.remove(self)
-            self.parent = None
-            return Response(True, msg="Rule was removed successfully!")
-
+            res_remove = PurchaseRulesHandler.get_instance().remove_rule(self)
+            if res_remove.succeeded():
+                res_commit = PurchaseRulesHandler.get_instance().commit_changes()
+                if res_commit.succeeded():
+                    self.parent._children.remove(self)
+                    return Response(True, msg="Rule was removed successfully!")
+                else:
+                    return db_fail_response
+            else:
+                return res_remove
         return self.children_operation(lambda next_child, relevant_id: next_child.remove(relevant_id), component_id)
 
     def edit_rule(self, rule_id: str, component: PurchaseRule) -> Response[None]:
-        if self.id == rule_id:
-            self.parent.children.remove(self)
-            self.parent.children.append(component)
-            component.children = copy.deepcopy(self.children)
-            return Response(True, msg="rule was edited successfully!")
-
+        from Backend.DataBase.Handlers.purchase_rules_handler import PurchaseRulesHandler
+        if str(self.get_id()) == rule_id:
+            res_edit = PurchaseRulesHandler.get_instance().edit_rule(self, component)
+            if res_edit.succeeded():
+                res_commit = PurchaseRulesHandler.get_instance().commit_changes()
+                if res_commit.succeeded():
+                    component._children = copy.deepcopy(self._children)
+                    self.parent._children.append(component)
+                    self.parent._children.remove(self)
+                    return Response(True, msg="rule was edited successfully!")
+                return db_fail_response
+            return res_edit
         return self.children_operation(lambda child, relevant_id, rule: child.edit_rule(rule, relevant_id), rule_id, component)
 
     def get_rule(self, rule_id: str) -> Response[PurchaseRule]:
-        if self.id == rule_id:
+        if str(self.get_id()) == rule_id:
             return Response(True, obj=self, msg="Here is the rule")
         else:
             for child in self.children:
@@ -135,7 +169,7 @@ class CompositePurchaseRule(PurchaseRule):
         return True
 
     def check_validity(self, new_parent_id: str) -> Response[None]:
-        if self.id == new_parent_id:
+        if str(self.get_id()) == new_parent_id:
             return Response(False, msg="Invalid move operation!")
         for child in self.children:
             response = child.check_validity(new_parent_id)
