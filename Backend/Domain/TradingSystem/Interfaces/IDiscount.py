@@ -2,6 +2,8 @@ from __future__ import annotations  # for self type annotating
 
 from abc import ABC, abstractmethod
 
+from sqlalchemy import orm
+
 from Backend.DataBase.database import db_fail_response
 from Backend.Domain.TradingSystem.TypesPolicies.purchase_policy import DefaultPurchasePolicy
 from Backend.rw_lock import ReadWriteLock
@@ -24,6 +26,12 @@ class IDiscount(Parsable, ABC):
         self.wrlock = ReadWriteLock()
         self._discounter_data = {}
         self._context = {}
+
+    @orm.reconstructor
+    def init_on_load(self):
+        self._conditions_policy = DefaultPurchasePolicy(AndCompositePurchaseRule())
+        self._conditions_policy_root_id = self._conditions_policy.get_root_id()
+
 
     def create_purchase_rules_root(self):
         from Backend.DataBase.Handlers.store_handler import StoreHandler
