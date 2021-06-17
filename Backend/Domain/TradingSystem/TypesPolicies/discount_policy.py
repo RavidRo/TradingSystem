@@ -130,6 +130,7 @@ class DefaultDiscountPolicy(DiscountPolicy):
         if res_save.succeeded():
             res_commit = DiscountsHandler.get_instance().commit_changes()
             if res_commit.succeeded():
+                exist_discount._children.append(discount_res.get_obj())
                 exist_discount.wrlock.release_write()
                 return Response(True, msg="Discount was added successfully!")
         exist_discount.wrlock.release_write()
