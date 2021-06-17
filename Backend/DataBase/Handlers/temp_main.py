@@ -40,16 +40,13 @@ def save():
     if not res.succeeded():
         print("get appointments: " + res.get_msg())
 
-    store_res = trading_system.get_store("9bc594f8-4cb9-4852-80a1-b238da1c7aae")
-    if not store_res.succeeded():
-        print("get appointments: " + store_res.get_msg())
+    # product_res = trading_system.create_product(cookie, store_res.get_obj().id, "The Product", "The Category", 5, 8,
+    #                                             ["The Keyword A", "The Keyword B"])
+    # if not product_res.succeeded():
+    #     print("add_product: " + product_res.get_msg())
 
-    product_res = trading_system.create_product(cookie, store_res.get_obj().id, "The Product", "The Category", 5, 8,
-                                                ["The Keyword A", "The Keyword B"])
-    if not product_res.succeeded():
-        print("add_product: " + product_res.get_msg())
-
-    add_discount_res = trading_system.add_discount(cookie, '9bc594f8-4cb9-4852-80a1-b238da1c7aae', {'percentage': 20, 'context': {'obj': 'product', 'id': product_res.get_obj()}, 'discount_type': 'simple'}, 2)
+    add_discount_res = trading_system.add_purchase_rule(cookie, '9bc594f8-4cb9-4852-80a1-b238da1c7aae', {"context": {"obj": "category", "identifier": "milk products"}, "operator": "equals", "target": 9},
+                                                        "simple", "1")
     if not add_discount_res.succeeded():
         print("add_product: " + add_discount_res.get_msg())
     #
