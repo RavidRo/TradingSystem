@@ -1,7 +1,7 @@
 {
 	"admins": ["tali", "ravid", "inon", "sean", "omer"],
 	"password": "cool-kidz",
-	"timer_length": 600,
+	"timer_length": 10,
 	"payment_system": "",
 	"supply_system": "",
 	"DB": "postgresql://postgres:postgres@localhost:5432/trading_system_workshop"
