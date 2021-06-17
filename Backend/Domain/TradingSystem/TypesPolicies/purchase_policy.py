@@ -217,8 +217,6 @@ class DefaultPurchasePolicy(PurchasePolicy):
             if leaf_type in leaf_types.keys():
                 edited_rule = leaf_types[leaf_type](self, rule_details, parent)
                 edit_response = self.__purchase_rules.edit_rule(rule_id, edited_rule)
-                parent._children.remove(self)
-                parent._children.append(edited_rule)
                 self.__purchase_rules_lock.release_write()
                 return edit_response
             else:
