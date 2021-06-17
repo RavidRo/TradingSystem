@@ -318,7 +318,13 @@ class CompositeDiscount(IDiscount, ABC):
                 return found_discount
 
         self.wrlock.release_read()
-        return None
+
+        from Backend.DataBase.Handlers.discounts_handler import DiscountsHandler
+        res = DiscountsHandler.get_instance().load(exist_id)
+        if not res.succeeded():
+            return None
+
+        return res.get_obj()
 
     def remove_discount(self, discount_id: str) -> Response[None]:
         self.wrlock.acquire_write()
