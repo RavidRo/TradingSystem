@@ -24,6 +24,7 @@ class StoresManager:
     # 2.5
     @staticmethod
     def get_products_by_store(store_id: str) -> Response[ParsableList[Product]]:
+        StoresManager.get_store(store_id)
         for store in StoresManager.__stores:
             if store.get_id() == store_id:
                 return store.get_products()
@@ -62,7 +63,6 @@ class StoresManager:
             return db_fail_response
 
         store = store_res.get_obj()
-        res_id = store.get_res_id()
         root_purchase_rule_res = StoresManager.__store_handler.load_purchase_rules(store.get_purchase_policy_root_id())
         root_discount_rule_res = StoresManager.__store_handler.load_discounts_rules_of_store(store.get_discounts_policy_root_id())
 
@@ -73,6 +73,8 @@ class StoresManager:
 
         store.set_root_purchase_rule(root_purchase_rule_res.get_obj())
         store.set_root_discounts_rule(root_discount_rule_res.get_obj())
+
+        StoresManager.__stores.append(store)
 
         return Response[Store](True, obj=store)
 
