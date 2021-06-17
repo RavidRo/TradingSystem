@@ -160,9 +160,7 @@ class ResponsibilitiesHandler(IHandler):
         self._rwlock.acquire_read()
         res = Response(True)
         try:
-            stmt = select([self.__responsibilities_table]).where(
-                self.__responsibilities_table.c.username == username)
-            reses = session.execute(stmt).all()
+            reses = session.query(Responsibility_DAL).filter_by(username=username).all()
             session.commit()
             responsibilities = []
 
