@@ -1,3 +1,5 @@
+from sqlalchemy import orm
+
 from Backend.Domain.TradingSystem.offer import Offer
 from Backend.DataBase.database import db_fail_response
 from Backend.response import Response
@@ -19,6 +21,11 @@ class Product(IProduct):
         self.__id = str(self.id_generator())
         self.__keywords = keywords
         self.__offers: dict[str, Offer] = {}
+        self.__product_handler = ProductHandler.get_instance()
+
+    @orm.reconstructor
+    def init_on_load(self):
+        from Backend.DataBase.Handlers.product_handler import ProductHandler
         self.__product_handler = ProductHandler.get_instance()
 
     def parse(self):
