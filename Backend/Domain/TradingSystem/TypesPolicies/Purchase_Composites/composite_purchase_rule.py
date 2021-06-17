@@ -147,6 +147,9 @@ class CompositePurchaseRule(PurchaseRule):
             if res_edit.succeeded():
                 res_commit = PurchaseRulesHandler.get_instance().commit_changes()
                 if res_commit.succeeded():
+                    component._children = copy.deepcopy(self._children)
+                    self.parent._children.append(component)
+                    self.parent._children.remove(self)
                     return Response(True, msg="rule was edited successfully!")
                 return db_fail_response
             return res_edit
