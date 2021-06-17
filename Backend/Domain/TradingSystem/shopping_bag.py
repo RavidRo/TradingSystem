@@ -205,9 +205,10 @@ class ShoppingBag(IShoppingBag):
     def delete_products_after_purchase(self, purchase_details,  user_name="guest"):
         # for now this function will only return details, in the future there will be specific deletion
         product_ids = [product_id for product_id in self.__pending_products_to_quantity]
+        founder_res = self.__store.get_founder()
         self.__store.clear_offers(product_ids, user_name)
         self.__store.update_store_history(purchase_details)
-        self.__store.get_founder().get_user_state()
+        founder_res.get_obj().get_user_state()
         self.__pending_products_to_quantity.clear()
 
 

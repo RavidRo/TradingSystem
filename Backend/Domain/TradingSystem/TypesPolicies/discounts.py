@@ -89,7 +89,6 @@ class SimpleDiscount(IDiscount):
 
     def __init__(self, discount_data, parent):  # Add duration in later milestones
         super().__init__(parent)
-        self._parent = None
         self._context = discount_data["context"]
         self._discount_strategy = SimpleDiscount.strategy_generator[discount_data["context"]["obj"]](discount_data["context"].get("id"), discount_data["percentage"])
         self._discounter_data = {"obj": discount_data["context"]["obj"],
@@ -121,6 +120,7 @@ class SimpleDiscount(IDiscount):
             return self
         res = discounts_handler.DiscountsHandler.get_instance().load(exist_id)
         if res.succeeded():
+            self.parent._children.append(res.get_obj())
             return res.get_obj()
         return None
 
@@ -198,7 +198,7 @@ class SimpleDiscount(IDiscount):
         return None
 
     def get_parent(self) -> IDiscount:
-        return self._parent
+        return self.parent
 
     def add_child(self, child: IDiscount) -> Response[None]:
         return Response(False, msg="Cannot add new discount to simple discount")
@@ -318,7 +318,14 @@ class CompositeDiscount(IDiscount, ABC):
                 return found_discount
 
         self.wrlock.release_read()
-        return None
+
+        from Backend.DataBase.Handlers.discounts_handler import DiscountsHandler
+        res = DiscountsHandler.get_instance().load(exist_id)
+        if not res.succeeded():
+            return None
+
+        self.parent._children.append(res.get_obj())
+        return res.get_obj()
 
     def remove_discount(self, discount_id: str) -> Response[None]:
         self.wrlock.acquire_write()

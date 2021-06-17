@@ -21,7 +21,6 @@ def save():
     trading_system = TradingSystem.getInstance()
     cookie = trading_system.enter_system()
     trading_system.login(cookie, "tali", "cool-kidz")
-    # res = trading_system.get_store_appointments(cookie, "")
     # rules_dict = {
     #     "context": {"obj": "product", "identifier": "shirt"},
     #     "operator": "equals",
@@ -33,26 +32,23 @@ def save():
     # # if not res.succeeded():
     # #     print("register: " + res.get_msg())
     # #
-    # res = trading_system.login(cookie, "inon", "cool-kidz")
-    # if not res.succeeded():
-    #     print("login: " + res.get_msg())
-    #
-    # res = trading_system.get_my_appointments(cookie)
-    # if not res.succeeded():
-    #     print("get appointments: " + res.get_msg())
-    #
-    # store_res = trading_system.get_store("9bc594f8-4cb9-4852-80a1-b238da1c7aae")
-    # if not store_res.succeeded():
-    #     print("get appointments: " + store_res.get_msg())
-    #
+    res = trading_system.login(cookie, "inon", "cool-kidz")
+    if not res.succeeded():
+        print("login: " + res.get_msg())
+
+    res = trading_system.get_my_appointments(cookie)
+    if not res.succeeded():
+        print("get appointments: " + res.get_msg())
+
     # product_res = trading_system.create_product(cookie, store_res.get_obj().id, "The Product", "The Category", 5, 8,
     #                                             ["The Keyword A", "The Keyword B"])
     # if not product_res.succeeded():
     #     print("add_product: " + product_res.get_msg())
-    #
-    # add_discount_res = trading_system.add_discount(cookie, '9bc594f8-4cb9-4852-80a1-b238da1c7aae', {'percentage': 20, 'context': {'obj': 'product', 'id': product_res.get_obj()}, 'discount_type': 'simple'}, 2)
-    # if not add_discount_res.succeeded():
-    #     print("add_product: " + add_discount_res.get_msg())
+
+    add_discount_res = trading_system.add_purchase_rule(cookie, '9bc594f8-4cb9-4852-80a1-b238da1c7aae', {"context": {"obj": "category", "identifier": "milk products"}, "operator": "equals", "target": 9},
+                                                        "simple", "1")
+    if not add_discount_res.succeeded():
+        print("add_product: " + add_discount_res.get_msg())
     #
     # save_cart_res = trading_system.save_product_in_cart(cookie, store_res.get_obj(), product_res.get_obj(), 2)
     # if not save_cart_res.succeeded():

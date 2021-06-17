@@ -47,7 +47,7 @@ class Store(Parsable, Subscriber):
             responsibility = responsibility_res.get_obj()
             self.set_responsibility(responsibility)
             responsibility.set_store(self)
-        return Response(True)
+        return Response(True, self.__responsibility)
 
     def create_purchase_rules_root(self):
         from Backend.Domain.TradingSystem.TypesPolicies.Purchase_Composites.concrete_composites import \
@@ -279,7 +279,7 @@ class Store(Parsable, Subscriber):
         return self.__discount_policy.move_discount(src_id, dest_id)
 
     def get_discounts(self):
-        return self.__discount_policy.get_discounts()
+        return self.__discount_policy.get_discounts(self.__discount_policy_root_id)
 
     def remove_discount(self, discount_id: str):
         return self.__discount_policy.remove_discount(discount_id)

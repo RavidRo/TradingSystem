@@ -1,3 +1,4 @@
+import copy
 import operator
 import threading
 
@@ -125,7 +126,8 @@ class DefaultPurchasePolicy(PurchasePolicy):
                 simple_rule = leaf_types[leaf_type](self, rule_details, parent)
                 simple_rule.set_clause(clause)
                 add_response = self.__purchase_rules.add(simple_rule, parent_id)
-
+                if add_response.succeeded():
+                    parent._children.append(simple_rule)
                 self.__purchase_rules_lock.release_write()
                 return add_response
             else:
@@ -142,6 +144,8 @@ class DefaultPurchasePolicy(PurchasePolicy):
                 complex_rule = logic_types[logic_type](parent)
                 complex_rule.set_clause(clause)
                 add_response = self.__purchase_rules.add(complex_rule, parent_id)
+                if add_response.succeeded():
+                    parent._children.append(complex_rule)
                 self.__purchase_rules_lock.release_write()
                 return add_response
             else:
@@ -227,6 +231,7 @@ class DefaultPurchasePolicy(PurchasePolicy):
             logic_type = rule_details['operator']
             if logic_type in logic_types.keys():
                 edit_response = self.__purchase_rules.edit_rule(rule_id, logic_types[logic_type](parent))
+
                 self.__purchase_rules_lock.release_write()
                 return edit_response
 
