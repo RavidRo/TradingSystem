@@ -180,7 +180,7 @@ class Member(UserState):
                 return res
             self.add_responsibility(responsibility, responsibility.get_store_id())
             self._responsibilities[responsibility.get_store_id()].set_subscriber(self._user)
-            responsibility.get_store().get_founder()
+            res.get_obj().get_founder()
         return Response(True)
 
     def get_purchase_history(self):
