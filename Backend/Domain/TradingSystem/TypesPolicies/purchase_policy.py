@@ -66,9 +66,9 @@ class DefaultPurchasePolicy(PurchasePolicy):
                         }
     clause - only for conditional - valid values: if/then
     """
-    def get_purchase_rules(self):
+    def get_purchase_rules(self, root_id):
         if self.__purchase_rules is None:
-            rules_loaded = self.__purchase_rules_handler.load()
+            rules_loaded = self.__purchase_rules_handler.load(root_id)
             if rules_loaded.succeeded():
                 self.__purchase_rules = rules_loaded.get_obj()
                 return Response(True, obj=self.__purchase_rules)
@@ -238,11 +238,11 @@ class DefaultPurchasePolicy(PurchasePolicy):
             self.__purchase_rules_lock.release_write()
             return Response(False, msg=f"invalid rule type: {rule_type}")
 
-    def get_purchase_rules(self) -> Response[PurchasePolicy]:
-        self.__purchase_rules_lock.acquire_read()
-        reponse = Response(True, obj=self, msg="Here are the purchase rules")
-        self.__purchase_rules_lock.release_read()
-        return reponse
+    # def get_purchase_rules(self) -> Response[PurchasePolicy]:
+    #     self.__purchase_rules_lock.acquire_read()
+    #     reponse = Response(True, obj=self, msg="Here are the purchase rules")
+    #     self.__purchase_rules_lock.release_read()
+    #     return reponse
 
     def checkPolicy(self, products_to_quantities: dict, user_age: int) -> Response[None]:
         self.__purchase_rules_lock.acquire_read()

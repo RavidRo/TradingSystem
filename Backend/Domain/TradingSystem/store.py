@@ -495,7 +495,7 @@ class Store(Parsable, Subscriber):
         return self.__purchase_policy.move_purchase_rule(rule_id, new_parent_id)
 
     def get_purchase_policy(self):
-        return self.__purchase_policy.get_purchase_rules()
+        return self.__purchase_policy.get_purchase_rules(self.__purchase_policy_root_id)
 
     def parse_purchase_policy(self):
         return self.__purchase_policy.parse()
