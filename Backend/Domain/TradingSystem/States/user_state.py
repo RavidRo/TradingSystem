@@ -22,9 +22,11 @@ class UserState(ABC):
 
     def set_notifications(self, notifications):
         self._notifications = notifications
+        self._member_handler.commit_changes()
 
     def add_notification(self, msg):
-        self._notifications.append(msg)
+        self._notifications += [msg]
+        self._member_handler.commit_changes()
 
     def set_user(self, user):
         self._user = user

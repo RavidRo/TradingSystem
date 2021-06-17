@@ -5,6 +5,7 @@ from sqlalchemy import Table, Column, String, Boolean, insert, ForeignKey, selec
 from sqlalchemy.dialects.postgresql import JSON, ARRAY
 from sqlalchemy.ext.mutable import Mutable, MutableDict
 from sqlalchemy.orm import mapper, relationship, backref, with_polymorphic
+from sqlalchemy_json import MutableJson
 from Backend.DataBase.IHandler import IHandler
 from Backend.DataBase.database import mapper_registry, session
 from Backend.Domain.TradingSystem.Responsibilities.founder import Founder
@@ -33,7 +34,7 @@ class MemberHandler(IHandler):
 
         self.__members = Table('members', mapper_registry.metadata,
                                Column('username', String(50), ForeignKey("credentials.username"), primary_key=True),
-                               Column('notifications', ARRAY(String(50))),
+                               Column('notifications', ARRAY(MutableJson)),
                                Column('member_type', String(10), nullable=False),
                                Column('responsibilities_ids', ARRAY(Integer)))
 

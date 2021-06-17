@@ -172,12 +172,15 @@ class ShoppingCart(IShoppingCart):
         for store_id in self.__shopping_bags:
             purchase_detail = self.__shopping_bags[store_id].create_purchase_details_after_purchase(user_name)
             if purchase_detail is None:
+                print("if 1")
                 return db_fail_response
             purchase_cart_details.update({store_id: purchase_detail})
         if user_name != "guest":
             self.__shopping_bag_handler.remove_bags(user_name)
             res = self.__shopping_bag_handler.commit_changes()
             if not res.succeeded():
+                print("here 2")
+                print(res.get_msg())
                 return db_fail_response
 
         for store_id in purchase_cart_details:

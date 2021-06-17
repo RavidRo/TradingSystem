@@ -174,6 +174,7 @@ class ResponsibilitiesHandler(IHandler):
                 responsibilities.append(responsibility)
             res = Response(True, responsibilities)
         except Exception as e:
+            print(e)
             session.rollback()
             res = Response(False, msg=str(e))
         finally:

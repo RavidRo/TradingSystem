@@ -71,6 +71,7 @@ class StoresManager:
         if not root_discount_rule_res.succeeded():
             return root_discount_rule_res
 
+        
         store.set_root_purchase_rule(root_purchase_rule_res.get_obj())
         store.set_root_discounts_rule(root_discount_rule_res.get_obj())
 

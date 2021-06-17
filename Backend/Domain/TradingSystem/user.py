@@ -23,7 +23,8 @@ class User(IUser):
         self.__communicate: Callable[[list[object]], bool] = lambda _: False
 
     def __notify_self(self) -> bool:
-        answer = self.__communicate(self.state.get_notifications())
+        notifi = self.state.get_notifications()
+        answer = self.__communicate(notifi)
         if answer:
             self.state.set_notifications([])
         return answer
