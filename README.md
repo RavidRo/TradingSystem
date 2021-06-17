@@ -19,6 +19,7 @@
 # Documentation
 
 ### Config file format:
+There are both config.json and config_test.json. Config is used during regular runs, config_test is used during test runs.
 ```javascript
 {
 	"admins": <list-of-admin-usernames (list[str])>,
