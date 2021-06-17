@@ -28,11 +28,7 @@ def save():
     # }
     # trading_system.add_purchase_rule(cookie, "30a3f083-a34f-4a5d-b17c-08a021f2d724", rules_dict, "simple", "10")
 
-    res = trading_system.get_my_appointments(cookie)
-    print(res.get_obj())
-
-    res = trading_system.create_store(cookie, "STORE")
-    print(res.get_obj())
+    res = trading_system.get_store("f26d11e9-2ade-4418-8d2a-e1901412d726")
     # # res = trading_system.register(cookie, "me", "passme")
     # # if not res.succeeded():
     # #     print("register: " + res.get_msg())

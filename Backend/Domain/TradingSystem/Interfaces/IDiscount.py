@@ -107,9 +107,9 @@ class IDiscount(Parsable, ABC):
     def parse(self):
         discount = dict()
         discount['id'] = self._id
-        condition_parse = self.get_conditions_policy().get_obj().parse()
-        if len(condition_parse['children']) > 0:
-            discount['condition'] = condition_parse
+        # condition_parse = self.get_conditions_policy().get_obj().parse()
+        # if len(condition_parse['children']) > 0:
+        #     discount['condition'] = condition_parse
         return discount
 
     def set_parent(self, parent):

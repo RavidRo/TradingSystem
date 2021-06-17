@@ -125,6 +125,7 @@ class DefaultPurchasePolicy(PurchasePolicy):
                 simple_rule = leaf_types[leaf_type](self, rule_details, parent)
                 simple_rule.set_clause(clause)
                 add_response = self.__purchase_rules.add(simple_rule, parent_id)
+
                 self.__purchase_rules_lock.release_write()
                 return add_response
             else:
