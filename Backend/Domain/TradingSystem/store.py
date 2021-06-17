@@ -279,7 +279,7 @@ class Store(Parsable, Subscriber):
         return self.__discount_policy.move_discount(src_id, dest_id)
 
     def get_discounts(self):
-        return self.__discount_policy.get_discounts()
+        return self.__discount_policy.get_discounts(self.__discount_policy_root_id)
 
     def remove_discount(self, discount_id: str):
         return self.__discount_policy.remove_discount(discount_id)
