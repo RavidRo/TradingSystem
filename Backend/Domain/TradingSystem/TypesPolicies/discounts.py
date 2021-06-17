@@ -121,6 +121,7 @@ class SimpleDiscount(IDiscount):
             return self
         res = discounts_handler.DiscountsHandler.get_instance().load(exist_id)
         if res.succeeded():
+            self.parent._children.append(res.get_obj())
             return res.get_obj()
         return None
 
@@ -324,6 +325,7 @@ class CompositeDiscount(IDiscount, ABC):
         if not res.succeeded():
             return None
 
+        self.parent._children.append(res.get_obj())
         return res.get_obj()
 
     def remove_discount(self, discount_id: str) -> Response[None]:
