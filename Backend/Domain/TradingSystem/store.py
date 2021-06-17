@@ -40,7 +40,14 @@ class Store(Parsable, Subscriber):
         return self.__discount_policy
 
     def get_founder(self):
-        return self.__responsibility
+        if not self.__responsibility:
+            responsibility_res = self.__store_handler.load_res_of_store(self.__responsibility_id, self)
+            if not responsibility_res.succeeded():
+                return responsibility_res
+            responsibility = responsibility_res.get_obj()
+            self.set_responsibility(responsibility)
+            responsibility.set_store(self)
+        return Response(True)
 
     def create_purchase_rules_root(self):
         from Backend.Domain.TradingSystem.TypesPolicies.Purchase_Composites.concrete_composites import \
@@ -294,21 +301,13 @@ class Store(Parsable, Subscriber):
     def get_personnel_info(self) -> Response[Responsibility]:
         from Backend.Domain.TradingSystem.Responsibilities.responsibility import Responsibility
 
+        res = self.get_founder()
+        if not res.succeeded():
+            return res
+
         if self.__responsibility is None:
             return Response(False, msg="The store doesn't have assigned personnel")
         return Response[Responsibility](True, self.__responsibility, msg="Personnel info")
-
-    # def get_personnel_info(self) -> Response[Responsibility]:
-    #     from Backend.Domain.TradingSystem.Responsibilities.responsibility import Responsibility
-    #
-    #     if self.__responsibility is None:
-    #         res_id = self.get_res_id()
-    #         res = self.__store_handler.load_store_founder(res_id, self, )
-    #         if res.succeeded():
-    #             self.__responsibility = res.get_obj()
-    #             return Response[Responsibility](True, self.__responsibility, msg="Personnel info")
-    #
-    #     return Response(False, msg="The store doesn't have assigned personnel")
 
     def get_purchase_history(self) -> Response[ParsableList[PurchaseDetails]]:
         self.__history_lock.acquire_read()
@@ -534,6 +533,9 @@ class Store(Parsable, Subscriber):
         return product.reject_user_offer(offer_id)
 
     def get_owners_names(self):
+        res = self.get_founder()
+        if not res.succeeded():
+            return res
         return self.__responsibility.get_owners_names()
 
     def remove_owner(self, username) -> None:
