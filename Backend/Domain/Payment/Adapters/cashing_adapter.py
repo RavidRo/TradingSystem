@@ -10,9 +10,12 @@ class CashingAdapter:
 
     def __init__(self):
         self.__outside_cashing = OutsideCashing.getInstance()
-        response = self.__send_handshake()
+        try:
+            response = self.__send_handshake()
+        except:
+            raise "Could not connect properly to outside cashing system"
         if response.status_code != 200 or response.text != "OK":
-            raise "Could not connect properly to outside systems"
+            raise "Could not connect properly to outside cashing system"
 
     def __send(self, action_type, paramaters={}):
         return requests.post(
@@ -22,6 +25,14 @@ class CashingAdapter:
         )
 
     def __send_handshake(self):
+        if CashingAdapter.use_stub:
+
+            class Handshake:
+                def __init__(self):
+                    self.status_code = 200
+                    self.text = "OK"
+
+            return Handshake()
         return self.__send("handshake")
 
     def __send_pay(self, card_number, month, year, holder, ccv, id):
@@ -65,7 +76,8 @@ class CashingAdapter:
             payment_details["ccv"],
             payment_details["id"],
         )
-        if response.status_code != 200 or response.text == "-1":
+        if response.status_code != 200 or response.text == "-1" or not response.text.isnumeric():
+            print(response)
             return Response(False, msg="Transaction has failed")
         return Response(True, response.text)
 

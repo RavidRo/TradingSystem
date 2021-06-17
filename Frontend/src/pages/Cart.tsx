@@ -41,9 +41,6 @@ const Cart: FC<CartProps> = ({
 	const history = useHistory();
 	const username = useContext(UsernameContext);
 
-
-	
-
 	//loas the cart of user when enters the cart page
 	const cartObj = useAPI<ShoppingCart>('/get_cart_details');
 	const productObj = useAPI<Product>('/get_product');
@@ -63,7 +60,11 @@ const Cart: FC<CartProps> = ({
 						let quantity: number = Object.values(productQuantitiesMap)[j];
 
 						let promise = productObj
-							.request({ product_id: productID, store_id: storeID, username: username })
+							.request({
+								product_id: productID,
+								store_id: storeID,
+								username: username,
+							})
 							.then(({ data, error }) => {
 								if (!error && data !== null) {
 									let product = data.data;
@@ -175,11 +176,10 @@ const Cart: FC<CartProps> = ({
 				if (data.data < prevCost) {
 					alert('Congratulations! You got discount of: ' + (prevCost - data.data));
 					setTotalAmount(data.data);
-					setLink(true);
 				} else {
 					alert('No discount for you :(');
-					setLink(true);
 				}
+				setLink(true);
 			}
 		});
 		setOpen(false);
