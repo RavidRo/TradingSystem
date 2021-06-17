@@ -38,6 +38,8 @@ class PurchaseLeaf(PurchaseRule):
                 if res_save.succeeded():
                     res_commit = PurchaseRulesHandler.get_instance().commit_changes()
                     if res_commit.succeeded():
+                        self.parent._children.remove(self)
+                        self.parent._children.append(component)
                         return Response(True, msg="rule was edited successfully!")
                     return res_commit
                 return res_save
