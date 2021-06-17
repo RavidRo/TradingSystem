@@ -86,8 +86,6 @@ class Store(Parsable, Subscriber):
         return self.__discount_policy_root_id
 
     def init_fields(self):
-        from Backend.Domain.TradingSystem.TypesPolicies.discount_policy import DefaultDiscountPolicy
-        from Backend.Domain.TradingSystem.TypesPolicies.purchase_policy import PurchasePolicy
         from Backend.DataBase.Handlers.store_handler import StoreHandler
         self._products_lock = ReadWriteLock()
         self.__history_lock = ReadWriteLock()
