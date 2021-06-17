@@ -88,7 +88,13 @@ class DefaultDiscountPolicy(DiscountPolicy):
             False, msg="Complex discount type should be 'max', 'add', 'and', 'or', or 'xor'!"
         )
 
-    def get_discounts(self) -> Response[IDiscount]:
+    def get_discounts(self, root_id) -> Response[IDiscount]:
+        if self.__discount is None:
+            from Backend.DataBase.Handlers.discounts_handler import DiscountsHandler
+            res = DiscountsHandler.get_instance().load(root_id)
+            if not res.succeeded():
+                return res
+            self.__discount = res.get_obj()
         return Response[IDiscount](True, self.__discount)
 
     def add_discount(self, discount_data: dict, exist_id: str, condition_type=None) -> Response[None]:
