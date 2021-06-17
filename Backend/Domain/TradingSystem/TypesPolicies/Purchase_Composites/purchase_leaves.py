@@ -56,6 +56,7 @@ class PurchaseLeaf(PurchaseRule):
             if res_remove.succeeded():
                 res_commit = PurchaseRulesHandler.get_instance().commit_changes()
                 if res_commit.succeeded():
+                    self.parent._children.remove(self)
                     return Response(True, msg="Rule was removed successfully!")
                 else:
                     return db_fail_response
