@@ -74,13 +74,6 @@ class StoresManager:
         store.set_root_purchase_rule(root_purchase_rule_res.get_obj())
         store.set_root_discounts_rule(root_discount_rule_res.get_obj())
 
-        responsibility_res = StoresManager.__store_handler.load_res_of_store(res_id, store)
-        if not responsibility_res.succeeded():
-            return responsibility_res
-        responsibility = responsibility_res.get_obj()
-        store.set_responsibility(responsibility)
-        responsibility.set_store(store)
-        StoresManager.__stores.append(store)
         return Response[Store](True, obj=store)
 
     @staticmethod
